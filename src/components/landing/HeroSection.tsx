@@ -1,8 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Video, Shield, Clock, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       {/* Background decoration */}
@@ -36,11 +39,11 @@ const HeroSection = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 mb-10">
-              <Button size="lg" className="bg-gradient-hero hover:opacity-90 transition-opacity text-base px-8">
+              <Button size="lg" className="bg-gradient-hero hover:opacity-90 transition-opacity text-base px-8" onClick={() => navigate("/auth")}>
                 Agendar Consulta
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <Button size="lg" variant="outline" className="text-base">
+              <Button size="lg" variant="outline" className="text-base" onClick={() => navigate("/auth?role=doctor")}>
                 Sou Médico
               </Button>
             </div>

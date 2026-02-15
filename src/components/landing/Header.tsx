@@ -2,8 +2,10 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navLinks = [
@@ -42,10 +44,10 @@ const Header = () => {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" onClick={() => navigate("/auth")}>
             Entrar
           </Button>
-          <Button size="sm" className="bg-gradient-hero hover:opacity-90 transition-opacity">
+          <Button size="sm" className="bg-gradient-hero hover:opacity-90 transition-opacity" onClick={() => navigate("/auth")}>
             Cadastre-se
           </Button>
         </div>
@@ -80,8 +82,8 @@ const Header = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-2 border-t border-border">
-                <Button variant="outline" size="sm">Entrar</Button>
-                <Button size="sm" className="bg-gradient-hero">Cadastre-se</Button>
+                <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/auth"); }}>Entrar</Button>
+                <Button size="sm" className="bg-gradient-hero" onClick={() => { setMobileOpen(false); navigate("/auth"); }}>Cadastre-se</Button>
               </div>
             </nav>
           </motion.div>

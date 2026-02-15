@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const plans = [
   {
@@ -34,6 +35,7 @@ const plans = [
 ];
 
 const PlansSection = () => {
+  const navigate = useNavigate();
   return (
     <section id="planos" className="py-24 bg-muted/50">
       <div className="container mx-auto px-4">
@@ -102,6 +104,7 @@ const PlansSection = () => {
                     : "bg-gradient-hero text-primary-foreground hover:opacity-90"
                 }`}
                 size="lg"
+                onClick={() => navigate("/auth")}
               >
                 Começar agora
               </Button>
