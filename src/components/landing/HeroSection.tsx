@@ -39,11 +39,11 @@ const HeroSection = () => {
             </p>
 
             <div className="flex flex-wrap gap-4 mb-10">
-              <Button size="lg" className="bg-gradient-hero hover:opacity-90 transition-opacity text-base px-8" onClick={() => navigate("/auth")}>
+              <Button size="lg" className="bg-gradient-hero hover:opacity-90 transition-opacity text-base px-8" onClick={() => navigate("/paciente")}>
                 Agendar Consulta
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <Button size="lg" variant="outline" className="text-base" onClick={() => navigate("/auth?role=doctor")}>
+              <Button size="lg" variant="outline" className="text-base" onClick={() => navigate("/medico")}>
                 Sou Médico
               </Button>
             </div>
