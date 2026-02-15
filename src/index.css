@@ -124,4 +124,8 @@
   .shadow-elevated {
     box-shadow: var(--shadow-elevated);
   }
+
+  .safe-area-pb {
+    padding-bottom: env(safe-area-inset-bottom, 8px);
+  }
 }
