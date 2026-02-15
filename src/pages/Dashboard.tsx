@@ -10,6 +10,9 @@ import BookAppointment from "@/components/patient/BookAppointment";
 import DoctorAvailability from "@/components/doctor/DoctorAvailability";
 import DoctorPatients from "@/components/doctor/DoctorPatients";
 import DoctorPrescriptions from "@/components/doctor/DoctorPrescriptions";
+import VideoRoom from "@/components/consultation/VideoRoom";
+import PrescriptionForm from "@/components/consultation/PrescriptionForm";
+import ClinicDoctorsManagement from "@/components/clinic/ClinicDoctorsManagement";
 import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
@@ -25,7 +28,6 @@ const Dashboard = () => {
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  // Determine primary role
   const primaryRole = roles.includes("admin")
     ? "admin"
     : roles.includes("doctor")
@@ -46,6 +48,13 @@ const Dashboard = () => {
       <Route path="availability" element={<DoctorAvailability />} />
       <Route path="patients" element={<DoctorPatients />} />
       <Route path="prescriptions" element={<DoctorPrescriptions />} />
+
+      {/* Consultation routes */}
+      <Route path="consultation/:appointmentId" element={<VideoRoom />} />
+      <Route path="prescribe/:appointmentId" element={<PrescriptionForm />} />
+
+      {/* Clinic routes */}
+      <Route path="clinic/doctors" element={<ClinicDoctorsManagement />} />
 
       {/* Default: role-based dashboard */}
       <Route
