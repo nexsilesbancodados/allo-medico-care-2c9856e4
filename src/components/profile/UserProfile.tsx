@@ -1,0 +1,165 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useToast } from "@/hooks/use-toast";
+import { Camera, Save, User } from "lucide-react";
+
+const UserProfile = () => {
+  const { user, profile, roles } = useAuth();
+  const { toast } = useToast();
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  // Doctor fields
+  const [bio, setBio] = useState("");
+  const [education, setEducation] = useState("");
+  const [experienceYears, setExperienceYears] = useState(0);
+  const [consultationPrice, setConsultationPrice] = useState(89);
+  const isDoctor = roles.includes("doctor");
+
+  useEffect(() => {
+    if (profile) {
+      setFirstName(profile.first_name || "");
+      setLastName(profile.last_name || "");
+      setPhone(profile.phone || "");
+      setCpf(profile.cpf || "");
+      setDateOfBirth(profile.date_of_birth || "");
+      setAvatarUrl(profile.avatar_url);
+    }
+    if (isDoctor && user) fetchDoctorProfile();
+  }, [profile, user]);
+
+  const fetchDoctorProfile = async () => {
+    const { data } = await supabase.from("doctor_profiles").select("bio, education, experience_years, consultation_price").eq("user_id", user!.id).single();
+    if (data) {
+      setBio(data.bio || "");
+      setEducation(data.education || "");
+      setExperienceYears(data.experience_years || 0);
+      setConsultationPrice(Number(data.consultation_price) || 89);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploading(true);
+    const ext = file.name.split(".").pop();
+    const path = `${user.id}/avatar.${ext}`;
+    const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (error) {
+      toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+      setUploading(false);
+      return;
+    }
+    const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+    setAvatarUrl(publicUrl);
+    await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
+    toast({ title: "Foto atualizada!" });
+    setUploading(false);
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    const { error } = await supabase.from("profiles").update({
+      first_name: firstName, last_name: lastName, phone, cpf, date_of_birth: dateOfBirth || null,
+    }).eq("user_id", user.id);
+
+    if (isDoctor) {
+      await supabase.from("doctor_profiles").update({
+        bio, education, experience_years: experienceYears, consultation_price: consultationPrice,
+      }).eq("user_id", user.id);
+    }
+
+    setSaving(false);
+    if (error) {
+      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Perfil atualizado!" });
+    }
+  };
+
+  const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
+
+  return (
+    <DashboardLayout title="Perfil" nav={[]}>
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-2xl font-bold text-foreground mb-6">Meu Perfil</h1>
+
+        {/* Avatar */}
+        <Card className="border-border mb-6">
+          <CardContent className="pt-6 flex items-center gap-6">
+            <div className="relative">
+              <Avatar className="w-20 h-20">
+                <AvatarImage src={avatarUrl ?? undefined} />
+                <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
+              </Avatar>
+              <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer hover:opacity-90 transition">
+                <Camera className="w-4 h-4" />
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploading} />
+              </label>
+            </div>
+            <div>
+              <p className="font-semibold text-foreground">{firstName} {lastName}</p>
+              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              {uploading && <p className="text-xs text-primary mt-1">Enviando foto...</p>}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Personal info */}
+        <Card className="border-border mb-6">
+          <CardHeader><CardTitle className="text-lg">Dados Pessoais</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} className="mt-1" /></div>
+              <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} className="mt-1" /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div><Label>Telefone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" className="mt-1" /></div>
+              <div><Label>CPF</Label><Input value={cpf} onChange={e => setCpf(e.target.value)} placeholder="000.000.000-00" className="mt-1" /></div>
+            </div>
+            <div>
+              <Label>Data de Nascimento</Label>
+              <Input type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} className="mt-1" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Doctor-specific */}
+        {isDoctor && (
+          <Card className="border-border mb-6">
+            <CardHeader><CardTitle className="text-lg">Perfil Profissional</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div><Label>Bio / Descrição</Label><textarea value={bio} onChange={e => setBio(e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" rows={3} placeholder="Conte sobre sua experiência..." /></div>
+              <div><Label>Formação</Label><Input value={education} onChange={e => setEducation(e.target.value)} placeholder="Ex: USP, Residência em Cardiologia" className="mt-1" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Anos de Experiência</Label><Input type="number" value={experienceYears} onChange={e => setExperienceYears(Number(e.target.value))} className="mt-1" min={0} /></div>
+                <div><Label>Preço da Consulta (R$)</Label><Input type="number" value={consultationPrice} onChange={e => setConsultationPrice(Number(e.target.value))} className="mt-1" min={0} step={0.01} /></div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        <Button onClick={handleSave} disabled={saving} className="bg-gradient-hero text-primary-foreground" size="lg">
+          <Save className="w-4 h-4 mr-2" />
+          {saving ? "Salvando..." : "Salvar Alterações"}
+        </Button>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default UserProfile;

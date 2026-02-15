@@ -1,0 +1,149 @@
+import { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Calendar, FileText, Download, Star } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import jsPDF from "jspdf";
+
+const patientNav = [
+  { label: "Início", href: "/dashboard", icon: <Calendar className="w-4 h-4" /> },
+  { label: "Histórico Médico", href: "/dashboard/history", icon: <FileText className="w-4 h-4" />, active: true },
+];
+
+const MedicalHistory = () => {
+  const { user } = useAuth();
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { if (user) fetchHistory(); }, [user]);
+
+  const fetchHistory = async () => {
+    const { data: appts } = await supabase
+      .from("appointments")
+      .select("id, scheduled_at, status, doctor_id, notes, duration_minutes")
+      .eq("patient_id", user!.id)
+      .eq("status", "completed")
+      .order("scheduled_at", { ascending: false });
+
+    if (!appts || appts.length === 0) { setLoading(false); return; }
+
+    const doctorIds = [...new Set(appts.map(a => a.doctor_id))];
+    const [docsRes, prescRes, notesRes] = await Promise.all([
+      supabase.from("doctor_profiles").select("id, user_id, crm, crm_state").in("id", doctorIds),
+      supabase.from("prescriptions").select("id, appointment_id, diagnosis, medications, observations, created_at").eq("patient_id", user!.id),
+      supabase.from("consultation_notes").select("id, appointment_id, content").in("doctor_id", doctorIds),
+    ]);
+
+    const docUserIds = docsRes.data?.map(d => d.user_id) ?? [];
+    const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", docUserIds);
+
+    const docMap = new Map<string, any>();
+    docsRes.data?.forEach(d => {
+      const p = profiles?.find(pr => pr.user_id === d.user_id);
+      docMap.set(d.id, { ...d, name: p ? `Dr(a). ${p.first_name} ${p.last_name}` : "Médico" });
+    });
+
+    const prescMap = new Map<string, any[]>();
+    prescRes.data?.forEach(p => {
+      const list = prescMap.get(p.appointment_id) ?? [];
+      list.push(p);
+      prescMap.set(p.appointment_id, list);
+    });
+
+    const notesMap = new Map<string, string>();
+    notesRes.data?.forEach(n => notesMap.set(n.appointment_id, n.content));
+
+    setAppointments(appts.map(a => ({
+      ...a,
+      doctor: docMap.get(a.doctor_id),
+      prescriptions: prescMap.get(a.id) ?? [],
+      consultation_notes: notesMap.get(a.id) ?? null,
+    })));
+    setLoading(false);
+  };
+
+  const downloadPrescription = (prescription: any, doctorName: string) => {
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Receita Médica Digital", 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Médico: ${doctorName}`, 20, 35);
+    doc.text(`Data: ${format(new Date(prescription.created_at), "dd/MM/yyyy", { locale: ptBR })}`, 20, 42);
+    if (prescription.diagnosis) {
+      doc.text(`Diagnóstico: ${prescription.diagnosis}`, 20, 55);
+    }
+    doc.text("Medicamentos:", 20, 68);
+    const meds = Array.isArray(prescription.medications) ? prescription.medications : [];
+    meds.forEach((med: any, i: number) => {
+      const text = typeof med === "string" ? med : `${med.name || med.medication || "—"} - ${med.dosage || ""} - ${med.instructions || ""}`;
+      doc.text(`${i + 1}. ${text}`, 25, 78 + i * 8);
+    });
+    if (prescription.observations) {
+      doc.text(`Observações: ${prescription.observations}`, 20, 90 + meds.length * 8);
+    }
+    doc.save(`receita-${prescription.id.slice(0, 8)}.pdf`);
+  };
+
+  return (
+    <DashboardLayout title="Paciente" nav={patientNav}>
+      <div className="max-w-3xl">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Histórico Médico</h1>
+        <p className="text-muted-foreground mb-6">Consultas realizadas, receitas e prontuários</p>
+
+        {loading ? <p className="text-muted-foreground">Carregando...</p> :
+        appointments.length === 0 ? (
+          <Card className="border-border"><CardContent className="py-12 text-center text-muted-foreground">Nenhuma consulta realizada ainda.</CardContent></Card>
+        ) : (
+          <div className="space-y-4">
+            {appointments.map(a => (
+              <Card key={a.id} className="border-border">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-base">{a.doctor?.name ?? "Médico"}</CardTitle>
+                      <p className="text-xs text-muted-foreground">
+                        CRM {a.doctor?.crm}/{a.doctor?.crm_state} · {format(new Date(a.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      </p>
+                    </div>
+                    <Badge variant="default">Concluída</Badge>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {a.consultation_notes && (
+                    <div className="p-3 bg-muted rounded-lg">
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Notas da Consulta</p>
+                      <p className="text-sm text-foreground">{a.consultation_notes}</p>
+                    </div>
+                  )}
+                  {a.prescriptions.length > 0 && (
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-2">Receitas</p>
+                      {a.prescriptions.map((p: any) => (
+                        <div key={p.id} className="flex items-center justify-between p-2 border border-border rounded-lg mb-1">
+                          <div>
+                            <p className="text-sm text-foreground">{p.diagnosis || "Receita médica"}</p>
+                            <p className="text-xs text-muted-foreground">{format(new Date(p.created_at), "dd/MM/yyyy", { locale: ptBR })}</p>
+                          </div>
+                          <Button size="sm" variant="outline" onClick={() => downloadPrescription(p, a.doctor?.name ?? "Médico")}>
+                            <Download className="w-3 h-3 mr-1" /> PDF
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default MedicalHistory;

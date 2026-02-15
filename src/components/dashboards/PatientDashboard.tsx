@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "./DashboardLayout";
-import { Calendar, CreditCard } from "lucide-react";
+import { Calendar, CreditCard, FileText, History, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +13,10 @@ import { ptBR } from "date-fns/locale";
 const nav = [
   { label: "Meus Agendamentos", href: "/dashboard", icon: <Calendar className="w-4 h-4" />, active: true },
   { label: "Agendar Consulta", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" /> },
+  { label: "Histórico Médico", href: "/dashboard/history", icon: <FileText className="w-4 h-4" /> },
   { label: "Pagamento", href: "/dashboard/plans", icon: <CreditCard className="w-4 h-4" /> },
+  { label: "Pagamentos Anteriores", href: "/dashboard/payment-history", icon: <History className="w-4 h-4" /> },
+  { label: "Meu Perfil", href: "/dashboard/profile", icon: <User className="w-4 h-4" /> },
 ];
 
 const statusLabel: Record<string, string> = {
