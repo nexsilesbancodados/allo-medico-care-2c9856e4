@@ -15,6 +15,8 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import GuestCheckout from "./pages/GuestCheckout";
+import GuestConsultation from "./pages/GuestConsultation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/consulta-avulsa" element={<GuestCheckout />} />
+            <Route path="/consulta" element={<GuestConsultation />} />
             <Route
               path="/dashboard/*"
               element={
