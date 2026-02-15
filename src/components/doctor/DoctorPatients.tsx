@@ -1,0 +1,126 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Calendar, Clock, Users, FileText, Settings } from "lucide-react";
+
+const doctorNav = [
+  { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
+  { label: "Agenda", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" /> },
+  { label: "Pacientes", href: "/dashboard/patients", icon: <Users className="w-4 h-4" />, active: true },
+  { label: "Receitas", href: "/dashboard/prescriptions", icon: <FileText className="w-4 h-4" /> },
+  { label: "Disponibilidade", href: "/dashboard/availability", icon: <Settings className="w-4 h-4" /> },
+];
+
+interface Patient {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  total_appointments: number;
+  last_appointment: string;
+}
+
+const DoctorPatients = () => {
+  const { user } = useAuth();
+  const [patients, setPatients] = useState<Patient[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { if (user) fetchPatients(); }, [user]);
+
+  const fetchPatients = async () => {
+    // Get doctor profile
+    const { data: doc } = await supabase
+      .from("doctor_profiles")
+      .select("id")
+      .eq("user_id", user!.id)
+      .single();
+
+    if (!doc) { setLoading(false); return; }
+
+    // Get all appointments
+    const { data: appts } = await supabase
+      .from("appointments")
+      .select("patient_id, scheduled_at")
+      .eq("doctor_id", doc.id)
+      .order("scheduled_at", { ascending: false });
+
+    if (!appts || appts.length === 0) { setLoading(false); return; }
+
+    // Aggregate by patient
+    const patientMap = new Map<string, { count: number; lastDate: string }>();
+    appts.forEach(a => {
+      const existing = patientMap.get(a.patient_id);
+      if (!existing) {
+        patientMap.set(a.patient_id, { count: 1, lastDate: a.scheduled_at });
+      } else {
+        existing.count++;
+      }
+    });
+
+    // Fetch profiles
+    const patientIds = [...patientMap.keys()];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, first_name, last_name")
+      .in("user_id", patientIds);
+
+    const results: Patient[] = patientIds.map(pid => {
+      const profile = profiles?.find(p => p.user_id === pid);
+      const info = patientMap.get(pid)!;
+      return {
+        user_id: pid,
+        first_name: profile?.first_name ?? "",
+        last_name: profile?.last_name ?? "",
+        total_appointments: info.count,
+        last_appointment: info.lastDate,
+      };
+    });
+
+    setPatients(results);
+    setLoading(false);
+  };
+
+  return (
+    <DashboardLayout title="Médico" nav={doctorNav}>
+      <div className="max-w-3xl">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Meus Pacientes</h1>
+        <p className="text-muted-foreground mb-6">Pacientes que você já atendeu</p>
+
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : patients.length === 0 ? (
+          <Card className="border-border">
+            <CardContent className="py-8 text-center">
+              <Users className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
+              <p className="text-muted-foreground">Nenhum paciente atendido ainda.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {patients.map(p => (
+              <Card key={p.user_id} className="border-border">
+                <CardContent className="p-4 flex items-center gap-4">
+                  <Avatar>
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {p.first_name[0]}{p.last_name[0]}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1">
+                    <p className="font-semibold text-foreground">{p.first_name} {p.last_name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.total_appointments} consulta(s)
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default DoctorPatients;
