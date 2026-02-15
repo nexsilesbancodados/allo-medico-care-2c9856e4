@@ -75,7 +75,7 @@ const DashboardLayout = ({ children, title, nav }: DashboardLayoutProps) => {
       </header>
 
       <div className="flex">
-        {/* Sidebar nav */}
+        {/* Sidebar nav — desktop */}
         {nav && nav.length > 0 && (
           <aside className="hidden md:flex w-60 border-r border-border bg-card min-h-[calc(100vh-4rem)] p-4 flex-col gap-1">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 px-3">
@@ -99,8 +99,28 @@ const DashboardLayout = ({ children, title, nav }: DashboardLayoutProps) => {
         )}
 
         {/* Main content */}
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 pb-20 md:pb-6">{children}</main>
       </div>
+
+      {/* Mobile bottom nav */}
+      {nav && nav.length > 0 && (
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex items-center justify-around py-2 px-1 safe-area-pb">
+          {nav.slice(0, 5).map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] transition-colors ${
+                item.active
+                  ? "text-primary font-medium"
+                  : "text-muted-foreground"
+              }`}
+            >
+              {item.icon}
+              <span className="truncate max-w-[60px]">{item.label}</span>
+            </Link>
+          ))}
+        </nav>
+      )}
     </div>
   );
 };
