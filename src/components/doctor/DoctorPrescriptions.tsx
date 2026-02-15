@@ -1,0 +1,115 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Clock, Users, FileText, Settings } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+const doctorNav = [
+  { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
+  { label: "Agenda", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" /> },
+  { label: "Pacientes", href: "/dashboard/patients", icon: <Users className="w-4 h-4" /> },
+  { label: "Receitas", href: "/dashboard/prescriptions", icon: <FileText className="w-4 h-4" />, active: true },
+  { label: "Disponibilidade", href: "/dashboard/availability", icon: <Settings className="w-4 h-4" /> },
+];
+
+interface Prescription {
+  id: string;
+  created_at: string;
+  medications: any[];
+  diagnosis: string | null;
+  patient_name: string;
+}
+
+const DoctorPrescriptions = () => {
+  const { user } = useAuth();
+  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => { if (user) fetchPrescriptions(); }, [user]);
+
+  const fetchPrescriptions = async () => {
+    const { data: doc } = await supabase
+      .from("doctor_profiles")
+      .select("id")
+      .eq("user_id", user!.id)
+      .single();
+
+    if (!doc) { setLoading(false); return; }
+
+    const { data } = await supabase
+      .from("prescriptions")
+      .select("id, created_at, medications, diagnosis, patient_id")
+      .eq("doctor_id", doc.id)
+      .order("created_at", { ascending: false });
+
+    if (!data || data.length === 0) { setLoading(false); return; }
+
+    const patientIds = [...new Set(data.map(p => p.patient_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, first_name, last_name")
+      .in("user_id", patientIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.user_id, `${p.first_name} ${p.last_name}`]) ?? []);
+
+    setPrescriptions(data.map(p => ({
+      id: p.id,
+      created_at: p.created_at,
+      medications: Array.isArray(p.medications) ? p.medications : [],
+      diagnosis: p.diagnosis,
+      patient_name: profileMap.get(p.patient_id) ?? "Paciente",
+    })));
+    setLoading(false);
+  };
+
+  return (
+    <DashboardLayout title="Médico" nav={doctorNav}>
+      <div className="max-w-3xl">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Receitas Emitidas</h1>
+        <p className="text-muted-foreground mb-6">Histórico de prescrições</p>
+
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Carregando...</p>
+        ) : prescriptions.length === 0 ? (
+          <Card className="border-border">
+            <CardContent className="py-8 text-center">
+              <FileText className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
+              <p className="text-muted-foreground">Nenhuma receita emitida.</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {prescriptions.map(p => (
+              <Card key={p.id} className="border-border">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-foreground">{p.patient_name}</p>
+                      {p.diagnosis && <p className="text-sm text-muted-foreground">{p.diagnosis}</p>}
+                      <div className="flex gap-1 mt-1">
+                        {p.medications.map((m: any, i: number) => (
+                          <Badge key={i} variant="secondary" className="text-xs">
+                            {typeof m === "string" ? m : m.name ?? "Medicamento"}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {format(new Date(p.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default DoctorPrescriptions;
