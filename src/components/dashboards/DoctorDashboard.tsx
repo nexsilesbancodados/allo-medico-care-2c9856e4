@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "./DashboardLayout";
-import { Calendar, FileText, Settings } from "lucide-react";
+import { Calendar, FileText, Settings, DollarSign, FileBadge, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,10 @@ const nav = [
   { label: "Agenda", href: "/dashboard", icon: <Calendar className="w-4 h-4" />, active: true },
   { label: "Prontuários", href: "/dashboard/patients", icon: <FileText className="w-4 h-4" /> },
   { label: "Receitas", href: "/dashboard/prescriptions", icon: <FileText className="w-4 h-4" /> },
+  { label: "Atestados", href: "/dashboard/certificates", icon: <FileBadge className="w-4 h-4" /> },
+  { label: "Ganhos", href: "/dashboard/earnings", icon: <DollarSign className="w-4 h-4" /> },
   { label: "Disponibilidade", href: "/dashboard/availability", icon: <Settings className="w-4 h-4" /> },
+  { label: "Meu Perfil", href: "/dashboard/profile", icon: <User className="w-4 h-4" /> },
 ];
 
 const statusLabel: Record<string, string> = {

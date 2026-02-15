@@ -84,6 +84,9 @@ const AuthAdmin = () => {
             <Button type="submit" className="w-full bg-foreground text-background hover:bg-foreground/90" size="lg" disabled={loading}>
               {loading ? "Entrando..." : "Entrar como Admin"}
             </Button>
+            <p className="text-center text-sm text-muted-foreground">
+              <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
+            </p>
           </form>
         </motion.div>
       </div>

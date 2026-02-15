@@ -225,6 +225,9 @@ const AuthMedico = () => {
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
               <p className="text-center text-sm text-muted-foreground">
+                <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
+              </p>
+              <p className="text-center text-sm text-muted-foreground">
                 Não tem conta? <button type="button" onClick={() => setStep("code")} className="text-primary font-semibold hover:underline">Cadastre-se</button>
               </p>
             </form>
