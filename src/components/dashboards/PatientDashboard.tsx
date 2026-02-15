@@ -1,5 +1,5 @@
 import DashboardLayout from "./DashboardLayout";
-import { Calendar, Clock, FileText, Users, Search } from "lucide-react";
+import { Calendar, Clock, FileText, Users, Search, CreditCard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,6 +9,7 @@ const nav = [
   { label: "Agendar Consulta", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" /> },
   { label: "Buscar Médicos", href: "/dashboard/doctors", icon: <Search className="w-4 h-4" /> },
   { label: "Minhas Consultas", href: "/dashboard/appointments", icon: <FileText className="w-4 h-4" /> },
+  { label: "Meu Plano", href: "/dashboard/plans", icon: <CreditCard className="w-4 h-4" /> },
   { label: "Dependentes", href: "/dashboard/dependents", icon: <Users className="w-4 h-4" /> },
 ];
 

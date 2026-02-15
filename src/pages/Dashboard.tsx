@@ -7,12 +7,18 @@ import AdminDashboard from "@/components/dashboards/AdminDashboard";
 import DoctorSearch from "@/components/patient/DoctorSearch";
 import AppointmentsList from "@/components/patient/AppointmentsList";
 import BookAppointment from "@/components/patient/BookAppointment";
+import PlansCheckout from "@/components/patient/PlansCheckout";
 import DoctorAvailability from "@/components/doctor/DoctorAvailability";
 import DoctorPatients from "@/components/doctor/DoctorPatients";
 import DoctorPrescriptions from "@/components/doctor/DoctorPrescriptions";
 import VideoRoom from "@/components/consultation/VideoRoom";
 import PrescriptionForm from "@/components/consultation/PrescriptionForm";
 import ClinicDoctorsManagement from "@/components/clinic/ClinicDoctorsManagement";
+import AdminDoctors from "@/components/admin/AdminDoctors";
+import AdminPatients from "@/components/admin/AdminPatients";
+import AdminClinics from "@/components/admin/AdminClinics";
+import AdminAppointments from "@/components/admin/AdminAppointments";
+import AdminSpecialties from "@/components/admin/AdminSpecialties";
 import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
@@ -43,6 +49,7 @@ const Dashboard = () => {
       <Route path="appointments" element={<AppointmentsList />} />
       <Route path="schedule" element={<DoctorSearch />} />
       <Route path="schedule/:doctorId" element={<BookAppointment />} />
+      <Route path="plans" element={<PlansCheckout />} />
 
       {/* Doctor routes */}
       <Route path="availability" element={<DoctorAvailability />} />
@@ -55,6 +62,13 @@ const Dashboard = () => {
 
       {/* Clinic routes */}
       <Route path="clinic/doctors" element={<ClinicDoctorsManagement />} />
+
+      {/* Admin routes */}
+      <Route path="admin/doctors" element={<AdminDoctors />} />
+      <Route path="admin/patients" element={<AdminPatients />} />
+      <Route path="admin/clinics" element={<AdminClinics />} />
+      <Route path="admin/appointments" element={<AdminAppointments />} />
+      <Route path="admin/specialties" element={<AdminSpecialties />} />
 
       {/* Default: role-based dashboard */}
       <Route
