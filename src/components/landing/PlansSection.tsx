@@ -104,7 +104,7 @@ const PlansSection = () => {
                     : "bg-gradient-hero text-primary-foreground hover:opacity-90"
                 }`}
                 size="lg"
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/paciente")}
               >
                 Começar agora
               </Button>

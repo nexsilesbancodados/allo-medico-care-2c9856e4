@@ -6,6 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import AuthPaciente from "./pages/AuthPaciente";
+import AuthMedico from "./pages/AuthMedico";
+import AuthAdmin from "./pages/AuthAdmin";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import NotFound from "./pages/NotFound";
@@ -22,6 +25,9 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/paciente" element={<AuthPaciente />} />
+            <Route path="/medico" element={<AuthMedico />} />
+            <Route path="/admin" element={<AuthAdmin />} />
             <Route
               path="/dashboard/*"
               element={
