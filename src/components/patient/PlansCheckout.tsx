@@ -216,12 +216,12 @@ const PlansCheckout = () => {
   };
 
   const handleSelectPlan = (planId: string) => {
-    setSelectedPlan(planId);
     if (planId === "avulsa") {
-      setStep("specialty");
-    } else {
-      setStep("checkout");
+      navigate("/consulta-avulsa");
+      return;
     }
+    setSelectedPlan(planId);
+    setStep("checkout");
   };
 
   const handleSelectSpecialty = (specId: string) => {

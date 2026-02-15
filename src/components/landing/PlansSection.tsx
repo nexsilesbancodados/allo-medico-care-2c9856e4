@@ -104,7 +104,7 @@ const PlansSection = () => {
                     : "bg-gradient-hero text-primary-foreground hover:opacity-90"
                 }`}
                 size="lg"
-                onClick={() => navigate(`/paciente?plan=${plan.highlighted ? "mensal" : "avulsa"}`)}
+                onClick={() => navigate(plan.highlighted ? `/paciente?plan=mensal` : `/consulta-avulsa`)}
               >
                 Começar agora
               </Button>
