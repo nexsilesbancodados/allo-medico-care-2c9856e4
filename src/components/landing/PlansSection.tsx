@@ -31,20 +31,6 @@ const plans = [
     ],
     highlighted: true,
   },
-  {
-    name: "Plano Clínica",
-    price: "499",
-    period: "por mês",
-    description: "Para clínicas que querem oferecer telemedicina.",
-    features: [
-      "Até 10 médicos vinculados",
-      "Painel administrativo completo",
-      "Relatórios de atendimento",
-      "Marca personalizada",
-      "Suporte prioritário",
-    ],
-    highlighted: false,
-  },
 ];
 
 const PlansSection = () => {
