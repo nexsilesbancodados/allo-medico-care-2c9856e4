@@ -49,42 +49,48 @@ export type Database = {
       }
       appointments: {
         Row: {
+          access_token: string | null
           cancel_reason: string | null
           cancelled_by: string | null
           created_at: string
           doctor_id: string
           duration_minutes: number | null
+          guest_patient_id: string | null
           id: string
           notes: string | null
-          patient_id: string
+          patient_id: string | null
           scheduled_at: string
           status: string
           updated_at: string
           video_room_url: string | null
         }
         Insert: {
+          access_token?: string | null
           cancel_reason?: string | null
           cancelled_by?: string | null
           created_at?: string
           doctor_id: string
           duration_minutes?: number | null
+          guest_patient_id?: string | null
           id?: string
           notes?: string | null
-          patient_id: string
+          patient_id?: string | null
           scheduled_at: string
           status?: string
           updated_at?: string
           video_room_url?: string | null
         }
         Update: {
+          access_token?: string | null
           cancel_reason?: string | null
           cancelled_by?: string | null
           created_at?: string
           doctor_id?: string
           duration_minutes?: number | null
+          guest_patient_id?: string | null
           id?: string
           notes?: string | null
-          patient_id?: string
+          patient_id?: string | null
           scheduled_at?: string
           status?: string
           updated_at?: string
@@ -96,6 +102,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_guest_patient_id_fkey"
+            columns: ["guest_patient_id"]
+            isOneToOne: false
+            referencedRelation: "guest_patients"
             referencedColumns: ["id"]
           },
         ]
@@ -401,6 +414,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      guest_patients: {
+        Row: {
+          cpf: string
+          created_at: string
+          date_of_birth: string | null
+          email: string
+          full_name: string
+          id: string
+          phone: string
+        }
+        Insert: {
+          cpf: string
+          created_at?: string
+          date_of_birth?: string | null
+          email: string
+          full_name: string
+          id?: string
+          phone: string
+        }
+        Update: {
+          cpf?: string
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string
+        }
+        Relationships: []
       }
       plans: {
         Row: {

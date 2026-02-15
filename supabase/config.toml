@@ -5,3 +5,9 @@ verify_jwt = false
 
 [functions.send-email]
 verify_jwt = false
+
+[functions.guest-checkout]
+verify_jwt = false
+
+[functions.guest-consultation]
+verify_jwt = false
