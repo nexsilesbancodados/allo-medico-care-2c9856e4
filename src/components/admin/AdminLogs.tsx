@@ -1,0 +1,114 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getAdminNav } from "./adminNav";
+import { Search } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+
+const AdminLogs = () => {
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState("all");
+
+  useEffect(() => { fetchLogs(); }, []);
+
+  const fetchLogs = async () => {
+    const { data } = await supabase.from("activity_logs")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    setLogs(data ?? []);
+    setLoading(false);
+  };
+
+  const filtered = logs.filter(l => {
+    const matchSearch = `${l.action} ${l.entity_type}`.toLowerCase().includes(search.toLowerCase());
+    const matchType = filterType === "all" || l.entity_type === filterType;
+    return matchSearch && matchType;
+  });
+
+  const entityColor: Record<string, string> = {
+    patient: "bg-primary/10 text-primary",
+    doctor: "bg-secondary/10 text-secondary",
+    clinic: "bg-accent text-accent-foreground",
+    appointment: "bg-destructive/10 text-destructive",
+    plan: "bg-primary/10 text-primary",
+    subscription: "bg-secondary/10 text-secondary",
+  };
+
+  return (
+    <DashboardLayout title="Administração" nav={getAdminNav("logs")}>
+      <div className="max-w-5xl">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Histórico de Atividades</h1>
+        <p className="text-muted-foreground text-sm mb-4">Logs de ações realizadas na plataforma</p>
+
+        <div className="flex gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input placeholder="Buscar ação..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+          </div>
+          <Select value={filterType} onValueChange={setFilterType}>
+            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="patient">Paciente</SelectItem>
+              <SelectItem value="doctor">Médico</SelectItem>
+              <SelectItem value="clinic">Clínica</SelectItem>
+              <SelectItem value="appointment">Consulta</SelectItem>
+              <SelectItem value="plan">Plano</SelectItem>
+              <SelectItem value="subscription">Assinatura</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
+          <div className="rounded-lg border border-border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Data</TableHead>
+                  <TableHead>Ação</TableHead>
+                  <TableHead>Tipo</TableHead>
+                  <TableHead>Detalhes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map(l => (
+                  <TableRow key={l.id}>
+                    <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
+                      {format(new Date(l.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
+                    </TableCell>
+                    <TableCell className="font-medium text-foreground">{l.action}</TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className={entityColor[l.entity_type] ?? ""}>
+                        {l.entity_type}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
+                      {l.details ? JSON.stringify(l.details) : "—"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filtered.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
+                      Nenhum log registrado. As atividades aparecerão aqui conforme são realizadas.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default AdminLogs;

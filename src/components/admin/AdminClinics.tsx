@@ -1,79 +1,135 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3 } from "lucide-react";
-
-const nav = [
-  { label: "Visão Geral", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" /> },
-  { label: "Médicos", href: "/dashboard/admin/doctors", icon: <Stethoscope className="w-4 h-4" /> },
-  { label: "Pacientes", href: "/dashboard/admin/patients", icon: <Users className="w-4 h-4" /> },
-  { label: "Clínicas", href: "/dashboard/admin/clinics", icon: <Building2 className="w-4 h-4" />, active: true },
-  { label: "Consultas", href: "/dashboard/admin/appointments", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Especialidades", href: "/dashboard/admin/specialties", icon: <Shield className="w-4 h-4" /> },
-];
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import { getAdminNav } from "./adminNav";
+import { Search, Eye, Edit } from "lucide-react";
 
 const AdminClinics = () => {
+  const { toast } = useToast();
   const [clinics, setClinics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<any>(null);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ name: "", cnpj: "", phone: "", address: "" });
 
   useEffect(() => { fetchClinics(); }, []);
 
   const fetchClinics = async () => {
     const { data } = await supabase.from("clinic_profiles")
-      .select("id, user_id, name, cnpj, is_approved, created_at")
+      .select("id, user_id, name, cnpj, phone, address, is_approved, created_at")
       .order("created_at", { ascending: false });
-
     setClinics(data ?? []);
     setLoading(false);
   };
 
   const toggleApproval = async (id: string, current: boolean) => {
     await supabase.from("clinic_profiles").update({ is_approved: !current }).eq("id", id);
+    toast({ title: current ? "Clínica desativada" : "Clínica aprovada!" });
     fetchClinics();
   };
 
-  return (
-    <DashboardLayout title="Administração" nav={nav}>
-      <div className="max-w-4xl">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Clínicas</h1>
-        <p className="text-muted-foreground mb-6">Gerencie as clínicas cadastradas</p>
+  const openDetail = (c: any) => {
+    setSelected(c);
+    setEditForm({ name: c.name, cnpj: c.cnpj || "", phone: c.phone || "", address: c.address || "" });
+  };
 
-        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : clinics.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhuma clínica cadastrada.</p>
-        ) : (
-          <div className="space-y-3">
-            {clinics.map(c => (
-              <Card key={c.id} className="border-border">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <Avatar>
-                    <AvatarFallback className="bg-accent text-accent-foreground">
-                      {c.name?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-semibold text-foreground">{c.name}</p>
-                    <p className="text-xs text-muted-foreground">{c.cnpj || "Sem CNPJ"}</p>
-                  </div>
-                  <Badge variant={c.is_approved ? "default" : "outline"}>
-                    {c.is_approved ? "Aprovada" : "Pendente"}
-                  </Badge>
-                  <button
-                    onClick={() => toggleApproval(c.id, c.is_approved)}
-                    className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
-                      c.is_approved ? "bg-destructive/10 text-destructive hover:bg-destructive/20" : "bg-secondary/10 text-secondary hover:bg-secondary/20"
-                    }`}
-                  >
-                    {c.is_approved ? "Desativar" : "Aprovar"}
-                  </button>
-                </CardContent>
-              </Card>
-            ))}
+  const saveEdit = async () => {
+    if (!selected) return;
+    const { error } = await supabase.from("clinic_profiles").update({
+      name: editForm.name, cnpj: editForm.cnpj || null, phone: editForm.phone || null, address: editForm.address || null,
+    }).eq("id", selected.id);
+    if (error) toast({ title: "Erro", description: error.message, variant: "destructive" });
+    else { toast({ title: "Clínica atualizada!" }); setEditing(false); setSelected(null); fetchClinics(); }
+  };
+
+  const filtered = clinics.filter(c => `${c.name} ${c.cnpj || ""}`.toLowerCase().includes(search.toLowerCase()));
+
+  return (
+    <DashboardLayout title="Administração" nav={getAdminNav("clinics")}>
+      <div className="max-w-5xl">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Clínicas</h1>
+        <p className="text-muted-foreground text-sm mb-4">{filtered.length} clínica(s)</p>
+
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input placeholder="Buscar por nome ou CNPJ..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+        </div>
+
+        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
+          <div className="rounded-lg border border-border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Clínica</TableHead>
+                  <TableHead>CNPJ</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map(c => (
+                  <TableRow key={c.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8"><AvatarFallback className="bg-accent text-accent-foreground text-xs">{c.name?.[0]}</AvatarFallback></Avatar>
+                        <span className="font-medium text-foreground">{c.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{c.cnpj || "—"}</TableCell>
+                    <TableCell className="text-muted-foreground">{c.phone || "—"}</TableCell>
+                    <TableCell><Badge variant={c.is_approved ? "default" : "outline"}>{c.is_approved ? "Aprovada" : "Pendente"}</Badge></TableCell>
+                    <TableCell className="text-right space-x-1">
+                      <Button size="sm" variant="ghost" onClick={() => openDetail(c)}><Eye className="w-4 h-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => toggleApproval(c.id, c.is_approved)}>
+                        <span className={`text-xs font-medium ${c.is_approved ? "text-destructive" : "text-secondary"}`}>{c.is_approved ? "Desativar" : "Aprovar"}</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filtered.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhuma clínica.</TableCell></TableRow>}
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>
+
+      <Dialog open={!!selected} onOpenChange={() => { setSelected(null); setEditing(false); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{editing ? "Editar Clínica" : "Detalhes da Clínica"}</DialogTitle></DialogHeader>
+          {selected && !editing && (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <div><span className="text-muted-foreground">Nome:</span><p className="font-medium text-foreground">{selected.name}</p></div>
+                <div><span className="text-muted-foreground">CNPJ:</span><p className="font-medium text-foreground">{selected.cnpj || "—"}</p></div>
+                <div><span className="text-muted-foreground">Telefone:</span><p className="font-medium text-foreground">{selected.phone || "—"}</p></div>
+                <div><span className="text-muted-foreground">Endereço:</span><p className="font-medium text-foreground">{selected.address || "—"}</p></div>
+              </div>
+              <Button size="sm" variant="outline" onClick={() => setEditing(true)}><Edit className="w-4 h-4 mr-1" /> Editar</Button>
+            </div>
+          )}
+          {selected && editing && (
+            <div className="space-y-3">
+              <Input placeholder="Nome" value={editForm.name} onChange={e => setEditForm({ ...editForm, name: e.target.value })} />
+              <Input placeholder="CNPJ" value={editForm.cnpj} onChange={e => setEditForm({ ...editForm, cnpj: e.target.value })} />
+              <Input placeholder="Telefone" value={editForm.phone} onChange={e => setEditForm({ ...editForm, phone: e.target.value })} />
+              <Input placeholder="Endereço" value={editForm.address} onChange={e => setEditForm({ ...editForm, address: e.target.value })} />
+              <div className="flex gap-2">
+                <Button onClick={saveEdit} className="bg-gradient-hero text-primary-foreground">Salvar</Button>
+                <Button variant="outline" onClick={() => setEditing(false)}>Cancelar</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };

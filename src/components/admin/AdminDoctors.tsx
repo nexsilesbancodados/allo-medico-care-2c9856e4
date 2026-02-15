@@ -1,45 +1,38 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, Check, X } from "lucide-react";
-
-const nav = [
-  { label: "Visão Geral", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" /> },
-  { label: "Médicos", href: "/dashboard/admin/doctors", icon: <Stethoscope className="w-4 h-4" />, active: true },
-  { label: "Pacientes", href: "/dashboard/admin/patients", icon: <Users className="w-4 h-4" /> },
-  { label: "Clínicas", href: "/dashboard/admin/clinics", icon: <Building2 className="w-4 h-4" /> },
-  { label: "Consultas", href: "/dashboard/admin/appointments", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Especialidades", href: "/dashboard/admin/specialties", icon: <Shield className="w-4 h-4" /> },
-];
+import { getAdminNav } from "./adminNav";
+import { Search, Eye, Edit, Check, X } from "lucide-react";
 
 const AdminDoctors = () => {
   const { toast } = useToast();
   const [doctors, setDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [selected, setSelected] = useState<any>(null);
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState({ crm: "", crm_state: "", bio: "", consultation_price: "" });
 
   useEffect(() => { fetchDoctors(); }, []);
 
   const fetchDoctors = async () => {
     const { data } = await supabase.from("doctor_profiles")
-      .select("id, user_id, crm, crm_state, is_approved, created_at")
+      .select("id, user_id, crm, crm_state, is_approved, bio, consultation_price, experience_years, education, rating, total_reviews, created_at")
       .order("created_at", { ascending: false });
-
     if (!data) { setLoading(false); return; }
-
     const userIds = data.map(d => d.user_id);
-    const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds);
-    const profileMap = new Map(profiles?.map(p => [p.user_id, p]) ?? []);
-
-    setDoctors(data.map(d => ({
-      ...d,
-      first_name: profileMap.get(d.user_id)?.first_name ?? "",
-      last_name: profileMap.get(d.user_id)?.last_name ?? "",
-    })));
+    const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name, phone").in("user_id", userIds);
+    const pMap = new Map(profiles?.map(p => [p.user_id, p]) ?? []);
+    setDoctors(data.map(d => ({ ...d, ...pMap.get(d.user_id) })));
     setLoading(false);
   };
 
@@ -49,39 +42,128 @@ const AdminDoctors = () => {
     fetchDoctors();
   };
 
+  const openDetail = (doc: any) => {
+    setSelected(doc);
+    setEditForm({ crm: doc.crm, crm_state: doc.crm_state, bio: doc.bio || "", consultation_price: String(doc.consultation_price || "") });
+  };
+
+  const saveEdit = async () => {
+    if (!selected) return;
+    const { error } = await supabase.from("doctor_profiles").update({
+      crm: editForm.crm,
+      crm_state: editForm.crm_state,
+      bio: editForm.bio || null,
+      consultation_price: parseFloat(editForm.consultation_price) || null,
+    }).eq("id", selected.id);
+    if (error) {
+      toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Médico atualizado!" });
+      setEditing(false); setSelected(null); fetchDoctors();
+    }
+  };
+
+  const filtered = doctors.filter(d => {
+    const matchSearch = `${d.first_name} ${d.last_name} ${d.crm}`.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = filterStatus === "all" || (filterStatus === "approved" && d.is_approved) || (filterStatus === "pending" && !d.is_approved);
+    return matchSearch && matchStatus;
+  });
+
   return (
-    <DashboardLayout title="Administração" nav={nav}>
-      <div className="max-w-4xl">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Gestão de Médicos</h1>
-        <p className="text-muted-foreground mb-6">Aprove e gerencie os médicos da plataforma</p>
+    <DashboardLayout title="Administração" nav={getAdminNav("doctors")}>
+      <div className="max-w-5xl">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Médicos</h1>
+        <p className="text-muted-foreground text-sm mb-4">{filtered.length} médico(s)</p>
+
+        <div className="flex gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input placeholder="Buscar por nome ou CRM..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+          </div>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="approved">Aprovados</SelectItem>
+              <SelectItem value="pending">Pendentes</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
         {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
-          <div className="space-y-3">
-            {doctors.map(doc => (
-              <Card key={doc.id} className="border-border">
-                <CardContent className="p-4 flex items-center gap-4">
-                  <Avatar>
-                    <AvatarFallback className="bg-primary/10 text-primary">
-                      {doc.first_name[0]}{doc.last_name[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <p className="font-semibold text-foreground">Dr(a). {doc.first_name} {doc.last_name}</p>
-                    <p className="text-xs text-muted-foreground">CRM {doc.crm}/{doc.crm_state}</p>
-                  </div>
-                  <Badge variant={doc.is_approved ? "default" : "outline"}>
-                    {doc.is_approved ? "Aprovado" : "Pendente"}
-                  </Badge>
-                  <Button size="sm" variant="ghost" onClick={() => toggleApproval(doc.id, doc.is_approved)}>
-                    {doc.is_approved ? <X className="w-4 h-4 text-destructive" /> : <Check className="w-4 h-4 text-secondary" />}
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-            {doctors.length === 0 && <p className="text-sm text-muted-foreground">Nenhum médico cadastrado.</p>}
+          <div className="rounded-lg border border-border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Médico</TableHead>
+                  <TableHead>CRM</TableHead>
+                  <TableHead>Preço</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map(doc => (
+                  <TableRow key={doc.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs">{doc.first_name?.[0]}{doc.last_name?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-foreground">Dr(a). {doc.first_name} {doc.last_name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{doc.crm}/{doc.crm_state}</TableCell>
+                    <TableCell className="text-muted-foreground">R$ {doc.consultation_price || "—"}</TableCell>
+                    <TableCell>
+                      <Badge variant={doc.is_approved ? "default" : "outline"}>{doc.is_approved ? "Aprovado" : "Pendente"}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right space-x-1">
+                      <Button size="sm" variant="ghost" onClick={() => openDetail(doc)}><Eye className="w-4 h-4" /></Button>
+                      <Button size="sm" variant="ghost" onClick={() => toggleApproval(doc.id, doc.is_approved)}>
+                        {doc.is_approved ? <X className="w-4 h-4 text-destructive" /> : <Check className="w-4 h-4 text-secondary" />}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filtered.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhum médico encontrado.</TableCell></TableRow>}
+              </TableBody>
+            </Table>
           </div>
         )}
       </div>
+
+      <Dialog open={!!selected} onOpenChange={() => { setSelected(null); setEditing(false); }}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>{editing ? "Editar Médico" : "Detalhes do Médico"}</DialogTitle></DialogHeader>
+          {selected && !editing && (
+            <div className="space-y-3 text-sm">
+              <div className="grid grid-cols-2 gap-3">
+                <div><span className="text-muted-foreground">Nome:</span><p className="font-medium text-foreground">Dr(a). {selected.first_name} {selected.last_name}</p></div>
+                <div><span className="text-muted-foreground">CRM:</span><p className="font-medium text-foreground">{selected.crm}/{selected.crm_state}</p></div>
+                <div><span className="text-muted-foreground">Preço:</span><p className="font-medium text-foreground">R$ {selected.consultation_price || "—"}</p></div>
+                <div><span className="text-muted-foreground">Experiência:</span><p className="font-medium text-foreground">{selected.experience_years || 0} anos</p></div>
+                <div><span className="text-muted-foreground">Avaliação:</span><p className="font-medium text-foreground">{selected.rating ?? "—"} ({selected.total_reviews} avaliações)</p></div>
+                <div><span className="text-muted-foreground">Formação:</span><p className="font-medium text-foreground">{selected.education || "—"}</p></div>
+              </div>
+              {selected.bio && <div><span className="text-muted-foreground">Bio:</span><p className="text-foreground">{selected.bio}</p></div>}
+              <Button size="sm" variant="outline" onClick={() => setEditing(true)}><Edit className="w-4 h-4 mr-1" /> Editar</Button>
+            </div>
+          )}
+          {selected && editing && (
+            <div className="space-y-3">
+              <Input placeholder="CRM" value={editForm.crm} onChange={e => setEditForm({ ...editForm, crm: e.target.value })} />
+              <Input placeholder="Estado CRM" value={editForm.crm_state} onChange={e => setEditForm({ ...editForm, crm_state: e.target.value })} />
+              <Input placeholder="Preço consulta" type="number" value={editForm.consultation_price} onChange={e => setEditForm({ ...editForm, consultation_price: e.target.value })} />
+              <Input placeholder="Bio" value={editForm.bio} onChange={e => setEditForm({ ...editForm, bio: e.target.value })} />
+              <div className="flex gap-2">
+                <Button onClick={saveEdit} className="bg-gradient-hero text-primary-foreground">Salvar</Button>
+                <Button variant="outline" onClick={() => setEditing(false)}>Cancelar</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
