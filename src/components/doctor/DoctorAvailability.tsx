@@ -6,16 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Clock, Users, FileText, Settings, Plus, Trash2 } from "lucide-react";
+import { getDoctorNav } from "./doctorNav";
+import { Plus, Trash2, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-const doctorNav = [
-  { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
-  { label: "Agenda", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Pacientes", href: "/dashboard/patients", icon: <Users className="w-4 h-4" /> },
-  { label: "Receitas", href: "/dashboard/prescriptions", icon: <FileText className="w-4 h-4" /> },
-  { label: "Disponibilidade", href: "/dashboard/availability", icon: <Settings className="w-4 h-4" />, active: true },
-];
 
 const daysOfWeek = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 const timeOptions = Array.from({ length: 28 }, (_, i) => {
@@ -99,7 +92,7 @@ const DoctorAvailability = () => {
   }));
 
   return (
-    <DashboardLayout title="Médico" nav={doctorNav}>
+    <DashboardLayout title="Médico" nav={getDoctorNav("availability")}>
       <div className="max-w-3xl">
         <h1 className="text-2xl font-bold text-foreground mb-1">Disponibilidade</h1>
         <p className="text-muted-foreground mb-6">Configure os horários em que você atende</p>

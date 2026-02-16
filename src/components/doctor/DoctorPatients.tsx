@@ -4,15 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, Clock, Users, FileText, Settings } from "lucide-react";
-
-const doctorNav = [
-  { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
-  { label: "Agenda", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Pacientes", href: "/dashboard/patients", icon: <Users className="w-4 h-4" />, active: true },
-  { label: "Receitas", href: "/dashboard/prescriptions", icon: <FileText className="w-4 h-4" /> },
-  { label: "Disponibilidade", href: "/dashboard/availability", icon: <Settings className="w-4 h-4" /> },
-];
+import { getDoctorNav } from "./doctorNav";
+import { Users } from "lucide-react";
 
 interface Patient {
   user_id: string;
@@ -83,7 +76,7 @@ const DoctorPatients = () => {
   };
 
   return (
-    <DashboardLayout title="Médico" nav={doctorNav}>
+    <DashboardLayout title="Médico" nav={getDoctorNav("patients")}>
       <div className="max-w-3xl">
         <h1 className="text-2xl font-bold text-foreground mb-1">Meus Pacientes</h1>
         <p className="text-muted-foreground mb-6">Pacientes que você já atendeu</p>
