@@ -1,22 +1,30 @@
 import { motion } from "framer-motion";
-import specCardiology from "@/assets/spec-cardiology.png";
-import specNeurology from "@/assets/spec-neurology.png";
-import specOphthalmology from "@/assets/spec-ophthalmology.png";
-import specOrthopedics from "@/assets/spec-orthopedics.png";
-import specPediatrics from "@/assets/spec-pediatrics.png";
-import specGeneral from "@/assets/spec-general.png";
-import specDermatology from "@/assets/spec-dermatology.png";
-import specEndocrinology from "@/assets/spec-endocrinology.png";
+import cardSpecialties from "@/assets/card-specialties.png";
+import cardMultidisciplinary from "@/assets/card-multidisciplinary.png";
+import cardAi from "@/assets/card-ai.png";
+import cardTrained from "@/assets/card-trained.png";
 
-const specialties = [
-  { image: specCardiology, name: "Cardiologia", doctors: 24 },
-  { image: specNeurology, name: "Neurologia", doctors: 18 },
-  { image: specOphthalmology, name: "Oftalmologia", doctors: 15 },
-  { image: specOrthopedics, name: "Ortopedia", doctors: 21 },
-  { image: specPediatrics, name: "Pediatria", doctors: 30 },
-  { image: specGeneral, name: "Clínico Geral", doctors: 45 },
-  { image: specDermatology, name: "Dermatologia", doctors: 19 },
-  { image: specEndocrinology, name: "Endocrinologia", doctors: 12 },
+const highlights = [
+  {
+    badge: "Cuidado completo",
+    title: "Mais de 8 especialidades médicas disponíveis",
+    image: cardSpecialties,
+  },
+  {
+    badge: "Cuidado multidisciplinar",
+    title: "Nutricionistas, psicólogos, enfermeiros e mais.",
+    image: cardMultidisciplinary,
+  },
+  {
+    badge: "Inteligência artificial",
+    title: "O Pingo facilita sua utilização e garante a melhor experiência",
+    image: cardAi,
+  },
+  {
+    badge: "Equipe capacitada",
+    title: "Especialistas selecionados e treinados para atendimento online",
+    image: cardTrained,
+  },
 ];
 
 const SpecialtiesSection = () => {
@@ -37,23 +45,38 @@ const SpecialtiesSection = () => {
           </p>
         </motion.div>
 
-        {/* Auto-scrolling carousel */}
+        {/* Auto-scrolling highlight cards */}
         <div className="overflow-hidden">
           <motion.div
-            className="flex gap-4"
+            className="flex gap-5"
             animate={{ x: ["0%", "-50%"] }}
-            transition={{ x: { duration: 30, repeat: Infinity, ease: "linear" } }}
+            transition={{ x: { duration: 35, repeat: Infinity, ease: "linear" } }}
           >
-            {[...specialties, ...specialties].map((spec, i) => (
+            {[...highlights, ...highlights].map((item, i) => (
               <div
                 key={i}
-                className="group flex-shrink-0 w-48 p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-card transition-all cursor-pointer"
+                className="relative flex-shrink-0 w-72 md:w-80 h-[420px] rounded-3xl overflow-hidden group cursor-pointer"
               >
-                <div className="w-12 h-12 rounded-xl overflow-hidden mb-4">
-                  <img src={spec.image} alt={spec.name} className="w-full h-full object-cover" />
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                {/* Badge */}
+                <div className="absolute top-4 left-4">
+                  <span className="px-3 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs font-semibold text-foreground">
+                    {item.badge}
+                  </span>
                 </div>
-                <h3 className="font-bold text-foreground mb-1">{spec.name}</h3>
-                <p className="text-sm text-muted-foreground">{spec.doctors} médicos</p>
+
+                {/* Title */}
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <h3 className="text-xl md:text-2xl font-extrabold text-white leading-tight">
+                    {item.title}
+                  </h3>
+                </div>
               </div>
             ))}
           </motion.div>
