@@ -6,30 +6,10 @@ import howItWorksConsultation from "@/assets/how-it-works-consultation.png";
 import howItWorksPrescription from "@/assets/how-it-works-prescription.png";
 
 const steps = [
-  {
-    icon: UserPlus,
-    title: "Cadastre-se",
-    description: "Crie sua conta em menos de 2 minutos com dados básicos.",
-    image: howItWorksSignup,
-  },
-  {
-    icon: Search,
-    title: "Encontre seu médico",
-    description: "Busque por especialidade, avaliação ou disponibilidade.",
-    image: howItWorksBooking,
-  },
-  {
-    icon: Video,
-    title: "Consulta por vídeo",
-    description: "Conecte-se com seu médico em videochamada segura e em HD.",
-    image: howItWorksConsultation,
-  },
-  {
-    icon: FileText,
-    title: "Receba sua receita",
-    description: "Receita digital válida enviada diretamente para você.",
-    image: howItWorksPrescription,
-  },
+  { icon: UserPlus, title: "Cadastre-se", description: "Crie sua conta em menos de 2 minutos com dados básicos.", image: howItWorksSignup },
+  { icon: Search, title: "Encontre seu médico", description: "Busque por especialidade, avaliação ou disponibilidade.", image: howItWorksBooking },
+  { icon: Video, title: "Consulta por vídeo", description: "Conecte-se com seu médico em videochamada segura e em HD.", image: howItWorksConsultation },
+  { icon: FileText, title: "Receba sua receita", description: "Receita digital válida enviada diretamente para você.", image: howItWorksPrescription },
 ];
 
 const HowItWorksSection = () => {
@@ -54,18 +34,19 @@ const HowItWorksSection = () => {
           {steps.map((step, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="relative text-center"
+              transition={{ delay: i * 0.15, duration: 0.5, type: "spring", stiffness: 80 }}
+              whileHover={{ y: -8, transition: { duration: 0.25 } }}
+              className="relative text-center group cursor-default"
             >
               {/* Connector line */}
               {i < steps.length - 1 && (
                 <div className="hidden lg:block absolute top-10 left-[60%] w-[80%] h-px border-t-2 border-dashed border-border" />
               )}
 
-              <div className="w-20 h-20 rounded-2xl bg-gradient-hero flex items-center justify-center mx-auto mb-5 shadow-card overflow-hidden">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-hero flex items-center justify-center mx-auto mb-5 shadow-card overflow-hidden transition-all duration-300 group-hover:shadow-elevated group-hover:scale-105">
                 {step.image ? (
                   <img src={step.image} alt={step.title} className="w-full h-full object-cover" />
                 ) : (
@@ -73,9 +54,16 @@ const HowItWorksSection = () => {
                 )}
               </div>
 
-              <div className="text-xs font-bold text-primary mb-2">PASSO {i + 1}</div>
-              <h3 className="text-lg font-bold text-foreground mb-2">{step.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 + 0.3 }}
+              >
+                <div className="text-xs font-bold text-primary mb-2">PASSO {i + 1}</div>
+                <h3 className="text-lg font-bold text-foreground mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+              </motion.div>
             </motion.div>
           ))}
         </div>
