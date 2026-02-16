@@ -20,6 +20,7 @@ import GuestCheckout from "./pages/GuestCheckout";
 import GuestConsultation from "./pages/GuestConsultation";
 import AuthParceiro from "./pages/AuthParceiro";
 import AuthAfiliado from "./pages/AuthAfiliado";
+import AuthClinica from "./pages/AuthClinica";
 import NotFound from "./pages/NotFound";
 import PingoChatbot from "./components/PingoChatbot";
 import AccessibilityToggle from "./components/AccessibilityToggle";
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/consulta" element={<GuestConsultation />} />
             <Route path="/parceiro" element={<AuthParceiro />} />
             <Route path="/afiliado" element={<AuthAfiliado />} />
+            <Route path="/clinica" element={<AuthClinica />} />
             <Route
               path="/dashboard/*"
               element={
