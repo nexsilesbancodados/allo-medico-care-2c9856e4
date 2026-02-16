@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Settings, Phone } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
+import ThemeToggle from "@/components/ThemeToggle";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -48,6 +49,7 @@ const DashboardLayout = ({ children, title, nav }: DashboardLayoutProps) => {
             <span className="text-sm text-muted-foreground hidden sm:block">
               {profile?.first_name} {profile?.last_name}
             </span>
+            <ThemeToggle />
             <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
