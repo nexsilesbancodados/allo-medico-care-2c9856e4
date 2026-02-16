@@ -28,7 +28,7 @@ const DoctorPremiumSection = () => {
                 transition={{ delay: 0.1 }}
                 className="inline-block px-4 py-1.5 rounded-full border border-primary/30 text-primary text-sm font-semibold mb-6"
               >
-                Alô Médico Premium
+                AloClinica Premium
               </motion.span>
 
               <motion.h2
@@ -52,7 +52,7 @@ const DoctorPremiumSection = () => {
                 transition={{ delay: 0.3 }}
                 className="text-muted-foreground text-lg max-w-md mb-8 leading-relaxed"
               >
-                Um <strong className="text-foreground">formato exclusivo para médicos</strong> conectarem suas carreiras a novas possibilidades com o Alô Médico.
+                Um <strong className="text-foreground">formato exclusivo para médicos</strong> conectarem suas carreiras a novas possibilidades com a AloClinica.
               </motion.p>
 
               <motion.div

@@ -14,7 +14,7 @@ interface EmailRequest {
 
 const templates: Record<string, (data: Record<string, string>) => { subject: string; html: string }> = {
   appointment_confirmation: (d) => ({
-    subject: "✅ Consulta Confirmada — Alô Médico",
+    subject: "✅ Consulta Confirmada — AloClinica",
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
         <h2 style="color:#1a6fc4;">Consulta Confirmada!</h2>
@@ -26,12 +26,12 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
           <p><strong>🩺 Especialidade:</strong> ${d.specialty || "Clínica Geral"}</p>
         </div>
         <p>Acesse a plataforma 5 minutos antes para entrar na sala de espera virtual.</p>
-        <p style="color:#666;font-size:12px;">Alô Médico — Telemedicina</p>
+        <p style="color:#666;font-size:12px;">AloClinica — Telemedicina</p>
       </div>
     `,
   }),
   appointment_reminder: (d) => ({
-    subject: `⏰ Lembrete: Consulta em ${d.time_until} — Alô Médico`,
+    subject: `⏰ Lembrete: Consulta em ${d.time_until} — AloClinica`,
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
         <h2 style="color:#1a6fc4;">Lembrete de Consulta</h2>
@@ -42,27 +42,27 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
           <p><strong>⏰ Horário:</strong> ${d.time}</p>
         </div>
         <p>Prepare-se para acessar a plataforma no horário agendado.</p>
-        <p style="color:#666;font-size:12px;">Alô Médico — Telemedicina</p>
+        <p style="color:#666;font-size:12px;">AloClinica — Telemedicina</p>
       </div>
     `,
   }),
   prescription_sent: (d) => ({
-    subject: "💊 Nova Receita Médica — Alô Médico",
+    subject: "💊 Nova Receita Médica — AloClinica",
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
         <h2 style="color:#1a6fc4;">Nova Receita Médica</h2>
         <p>Olá <strong>${d.patient_name}</strong>,</p>
         <p>O(a) <strong>${d.doctor_name}</strong> emitiu uma nova receita para você.</p>
         <p>Acesse a plataforma para visualizar e baixar sua receita em PDF.</p>
-        <p style="color:#666;font-size:12px;">Alô Médico — Telemedicina</p>
+        <p style="color:#666;font-size:12px;">AloClinica — Telemedicina</p>
       </div>
     `,
   }),
   welcome: (d) => ({
-    subject: "🎉 Bem-vindo(a) ao Alô Médico!",
+    subject: "🎉 Bem-vindo(a) à AloClinica!",
     html: `
       <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
-        <h2 style="color:#1a6fc4;">Bem-vindo(a) ao Alô Médico!</h2>
+        <h2 style="color:#1a6fc4;">Bem-vindo(a) à AloClinica!</h2>
         <p>Olá <strong>${d.name}</strong>,</p>
         <p>Sua conta foi criada com sucesso. Agora você pode:</p>
         <ul>
@@ -71,7 +71,7 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
           <li>Receber receitas e atestados digitais</li>
         </ul>
         <p>Acesse a plataforma e comece agora!</p>
-        <p style="color:#666;font-size:12px;">Alô Médico — Telemedicina</p>
+        <p style="color:#666;font-size:12px;">AloClinica — Telemedicina</p>
       </div>
     `,
   }),
@@ -114,7 +114,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: Deno.env.get("EMAIL_FROM") || "Alô Médico <noreply@alomedico.com>",
+        from: Deno.env.get("EMAIL_FROM") || "AloClinica <noreply@aloclinica.com>",
         to: [to],
         subject,
         html,

@@ -43,7 +43,7 @@ const ForgotPassword = () => {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-foreground">Recuperar Senha</h2>
-            <p className="text-sm text-muted-foreground">Alô Médico</p>
+            <p className="text-sm text-muted-foreground">AloClinica</p>
           </div>
         </div>
 

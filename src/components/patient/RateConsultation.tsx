@@ -76,7 +76,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
         <div className="space-y-5">
           {/* NPS */}
           <div>
-            <p className="text-sm font-medium text-foreground mb-2">De 0 a 10, o quanto você recomendaria o Alô Médico?</p>
+            <p className="text-sm font-medium text-foreground mb-2">De 0 a 10, o quanto você recomendaria a AloClinica?</p>
             <div className="flex gap-1 flex-wrap">
               {Array.from({ length: 11 }, (_, i) => (
                 <button

@@ -71,7 +71,7 @@ const AuthAdmin = () => {
               <Label>Email</Label>
               <div className="relative mt-1">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@alomedico.com" className="pl-10" required />
+                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="admin@aloclinica.com" className="pl-10" required />
               </div>
             </div>
             <div>

@@ -51,7 +51,7 @@ const MultiPlatformSection = () => {
                 transition={{ delay: 0.3 }}
                 className="text-primary-foreground/80 text-lg max-w-md mb-8 leading-relaxed"
               >
-                O Alô Médico é um app progressivo (PWA) — funciona direto do navegador sem precisar baixar nada. Acesse de qualquer lugar, em qualquer plataforma.
+                A AloClinica é um app progressivo (PWA) — funciona direto do navegador sem precisar baixar nada. Acesse de qualquer lugar, em qualquer plataforma.
               </motion.p>
 
               {/* Rating */}
@@ -113,7 +113,7 @@ const MultiPlatformSection = () => {
               <div className="relative w-full max-w-md">
                 <img
                   src={devicesImg}
-                  alt="Alô Médico em notebook, celular e tablet"
+                  alt="AloClinica em notebook, celular e tablet"
                   className="w-full rounded-2xl drop-shadow-2xl"
                 />
                 {/* Mascot floating on corner */}

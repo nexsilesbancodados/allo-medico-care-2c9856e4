@@ -5,7 +5,7 @@ import clinicPatientChat from "@/assets/clinic-patient-chat.png";
 import logoImg from "@/assets/logo.png";
 
 const steps = [
-  { title: "Porta de entrada", desc: "Acesso pelo WhatsApp, app ou site do Alô Médico, 24h por dia, 7 dias por semana." },
+  { title: "Porta de entrada", desc: "Acesso pelo WhatsApp, app ou site da AloClinica, 24h por dia, 7 dias por semana." },
   { title: "Acolhimento", desc: "Triagem humanizada com profissionais qualificados para entender sua necessidade." },
   { title: "Atendimento", desc: "Consulta presencial ou por vídeo com médicos especialistas na própria clínica." },
   { title: "Encaminhamento", desc: "Exames, receitas digitais e acompanhamento contínuo do seu tratamento." },
@@ -13,7 +13,7 @@ const steps = [
 
 const chatMessages = [
   { type: "sent", text: "Oi! Boa tarde!", time: "13:47" },
-  { type: "received", text: "Olá! Boa tarde. Tudo bem com você? Bem-vinda à Clínica Alô Médico.", time: "13:47" },
+  { type: "received", text: "Olá! Boa tarde. Tudo bem com você? Bem-vinda à AloClinica.", time: "13:47" },
   { type: "received", text: "Aqui você vai encontrar um espaço para cuidar da sua saúde de um jeito fácil e completo.", time: "13:47" },
   { type: "received", text: "Para começar, me conta: você gostaria de agendar uma consulta presencial? Temos diversas especialidades disponíveis.", time: "13:48" },
 ];
@@ -45,7 +45,7 @@ const ClinicPresentialSection = () => {
               >
                 <Building2 className="w-10 h-10 text-primary" />
                 <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold">
-                  Clínica <span className="text-primary">Alô Médico</span>
+                  Clínica <span className="text-primary">AloClinica</span>
                 </h2>
               </motion.div>
 

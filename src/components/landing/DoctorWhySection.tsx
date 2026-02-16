@@ -42,7 +42,7 @@ const DoctorWhySection = () => {
             </h2>
 
             <p className="text-muted-foreground text-lg max-w-md mb-6 leading-relaxed">
-              Confira as oportunidades disponíveis para todas as especialidades médicas na plataforma Alô Médico, ou acesse o cadastro específico para sua categoria.
+              Confira as oportunidades disponíveis para todas as especialidades médicas na plataforma AloClinica, ou acesse o cadastro específico para sua categoria.
             </p>
 
             <p className="text-sm text-muted-foreground/70">

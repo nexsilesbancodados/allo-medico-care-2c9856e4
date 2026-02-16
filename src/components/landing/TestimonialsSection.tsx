@@ -22,7 +22,7 @@ const TestimonialsSection = () => {
         >
           <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4">
             O que dizem sobre a{" "}
-            <span className="text-gradient">Alô Médico</span>
+            <span className="text-gradient">AloClinica</span>
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Milhares de pacientes e médicos já confiam na nossa plataforma.

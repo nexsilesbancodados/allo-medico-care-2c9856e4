@@ -42,7 +42,7 @@ const DashboardLayout = ({ children, title, nav }: DashboardLayoutProps) => {
             <div className="w-8 h-8 rounded-lg bg-gradient-hero flex items-center justify-center">
               <Phone className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-bold text-foreground">Alô Médico</span>
+            <span className="font-bold text-foreground">AloClinica</span>
           </Link>
 
           <div className="flex items-center gap-2">
