@@ -38,7 +38,7 @@ const PushNotificationToggle = () => {
       const reg = await navigator.serviceWorker.ready;
       const sub = await (reg as any).pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: undefined,
+        applicationServerKey: "BFvbFqkrOeDEtpXSkK87rSdhOVxNcrT5u8M3j1c42pWVyGXeOVFad_uOKiBGmVZ9za1y5sZz1g7qPbM2FP1b7cc",
       });
 
       const json = sub.toJSON();
