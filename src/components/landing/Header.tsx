@@ -112,6 +112,25 @@ const Header = () => {
         )}
       </AnimatePresence>
     </header>
+
+    {/* Rain effect that fades out at the bottom of the header */}
+    <div className="fixed top-[30px] left-0 right-0 z-40 h-24 pointer-events-none overflow-hidden" style={{ maskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)' }}>
+      {Array.from({ length: 40 }).map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-[1px] bg-primary/20 dark:bg-primary/30 rounded-full"
+          style={{
+            left: `${(i / 40) * 100 + Math.random() * 2}%`,
+            height: `${8 + Math.random() * 14}px`,
+            animationName: 'rain-drop',
+            animationDuration: `${0.5 + Math.random() * 0.7}s`,
+            animationDelay: `${Math.random() * 2}s`,
+            animationIterationCount: 'infinite',
+            animationTimingFunction: 'linear',
+          }}
+        />
+      ))}
+    </div>
     </>
   );
 };
