@@ -60,6 +60,9 @@ export type Database = {
           id: string
           notes: string | null
           patient_id: string | null
+          payment_confirmed_at: string | null
+          payment_confirmed_by: string | null
+          payment_status: string | null
           scheduled_at: string
           status: string
           updated_at: string
@@ -77,6 +80,9 @@ export type Database = {
           id?: string
           notes?: string | null
           patient_id?: string | null
+          payment_confirmed_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_status?: string | null
           scheduled_at: string
           status?: string
           updated_at?: string
@@ -94,6 +100,9 @@ export type Database = {
           id?: string
           notes?: string | null
           patient_id?: string | null
+          payment_confirmed_at?: string | null
+          payment_confirmed_by?: string | null
+          payment_status?: string | null
           scheduled_at?: string
           status?: string
           updated_at?: string
@@ -805,7 +814,10 @@ export type Database = {
       }
       profiles: {
         Row: {
+          allergies: string[] | null
           avatar_url: string | null
+          blood_type: string | null
+          chronic_conditions: string[] | null
           cpf: string | null
           created_at: string
           date_of_birth: string | null
@@ -817,7 +829,10 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          allergies?: string[] | null
           avatar_url?: string | null
+          blood_type?: string | null
+          chronic_conditions?: string[] | null
           cpf?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -829,7 +844,10 @@ export type Database = {
           user_id: string
         }
         Update: {
+          allergies?: string[] | null
           avatar_url?: string | null
+          blood_type?: string | null
+          chronic_conditions?: string[] | null
           cpf?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -964,6 +982,7 @@ export type Database = {
       }
       specialties: {
         Row: {
+          consultation_price: number | null
           created_at: string
           description: string | null
           icon: string | null
@@ -971,6 +990,7 @@ export type Database = {
           name: string
         }
         Insert: {
+          consultation_price?: number | null
           created_at?: string
           description?: string | null
           icon?: string | null
@@ -978,6 +998,7 @@ export type Database = {
           name: string
         }
         Update: {
+          consultation_price?: number | null
           created_at?: string
           description?: string | null
           icon?: string | null

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, CheckCircle, XCircle, Clock, Video } from "lucide-react";
+import { Search, CheckCircle, XCircle, Clock, Video, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -33,7 +33,7 @@ const ReceptionCheckin = () => {
     endOfDay.setDate(endOfDay.getDate() + 1);
 
     const { data } = await supabase.from("appointments")
-      .select("id, scheduled_at, status, patient_id, doctor_id, appointment_type")
+      .select("id, scheduled_at, status, patient_id, doctor_id, appointment_type, payment_status")
       .gte("scheduled_at", now.toISOString())
       .lt("scheduled_at", endOfDay.toISOString())
       .in("status", ["scheduled", "waiting", "in_progress"])
@@ -80,6 +80,16 @@ const ReceptionCheckin = () => {
     toast.info("Paciente marcado como ausente.");
   };
 
+  const confirmPayment = async (id: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    await supabase.from("appointments").update({
+      payment_status: "confirmed",
+      payment_confirmed_by: user?.id,
+      payment_confirmed_at: new Date().toISOString(),
+    } as any).eq("id", id);
+    toast.success("Pagamento confirmado!");
+  };
+
   const filtered = appointments.filter(a =>
     `${a.patient_name} ${a.doctor_name}`.toLowerCase().includes(search.toLowerCase())
   );
@@ -121,6 +131,14 @@ const ReceptionCheckin = () => {
                       <Badge variant={a.status === "waiting" ? "secondary" : a.status === "in_progress" ? "default" : "outline"}>
                         {a.status === "scheduled" ? "Aguardando" : a.status === "waiting" ? "Na sala" : "Em consulta"}
                       </Badge>
+                      {a.payment_status !== "confirmed" && a.status !== "in_progress" && (
+                        <Button size="sm" variant="outline" onClick={() => confirmPayment(a.id)} className="text-green-600 border-green-300 hover:bg-green-50">
+                          <DollarSign className="w-3 h-3 mr-1" /> Confirmar Pgto
+                        </Button>
+                      )}
+                      {a.payment_status === "confirmed" && (
+                        <Badge variant="outline" className="text-green-600 border-green-300 text-[10px]">Pago ✓</Badge>
+                      )}
                       {a.status === "scheduled" && (
                         <>
                           <Button size="sm" onClick={() => doCheckin(a.id)}>

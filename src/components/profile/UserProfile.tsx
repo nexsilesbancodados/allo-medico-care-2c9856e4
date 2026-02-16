@@ -21,6 +21,9 @@ const UserProfile = () => {
   const [cpf, setCpf] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [allergies, setAllergies] = useState("");
+  const [bloodType, setBloodType] = useState("");
+  const [chronicConditions, setChronicConditions] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -39,6 +42,9 @@ const UserProfile = () => {
       setCpf(profile.cpf || "");
       setDateOfBirth(profile.date_of_birth || "");
       setAvatarUrl(profile.avatar_url);
+      setAllergies(((profile as any).allergies ?? []).join(", "));
+      setBloodType((profile as any).blood_type ?? "");
+      setChronicConditions(((profile as any).chronic_conditions ?? []).join(", "));
     }
     if (isDoctor && user) fetchDoctorProfile();
   }, [profile, user]);
@@ -75,9 +81,12 @@ const UserProfile = () => {
   const handleSave = async () => {
     if (!user) return;
     setSaving(true);
+    const allergyArr = allergies.split(",").map(s => s.trim()).filter(Boolean);
+    const conditionArr = chronicConditions.split(",").map(s => s.trim()).filter(Boolean);
     const { error } = await supabase.from("profiles").update({
       first_name: firstName, last_name: lastName, phone, cpf, date_of_birth: dateOfBirth || null,
-    }).eq("user_id", user.id);
+      allergies: allergyArr, blood_type: bloodType || null, chronic_conditions: conditionArr,
+    } as any).eq("user_id", user.id);
 
     if (isDoctor) {
       await supabase.from("doctor_profiles").update({
@@ -139,6 +148,32 @@ const UserProfile = () => {
             <div>
               <Label>Data de Nascimento</Label>
               <Input type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} className="mt-1" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Health info */}
+        <Card className="border-border mb-6">
+          <CardHeader><CardTitle className="text-lg">Dados de Saúde</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Tipo Sanguíneo</Label>
+                <select value={bloodType} onChange={e => setBloodType(e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                  <option value="">Selecione</option>
+                  {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label>Alergias</Label>
+                <Input value={allergies} onChange={e => setAllergies(e.target.value)} placeholder="Ex: Dipirona, Penicilina" className="mt-1" />
+                <p className="text-[10px] text-muted-foreground mt-0.5">Separe por vírgula</p>
+              </div>
+            </div>
+            <div>
+              <Label>Condições Crônicas</Label>
+              <Input value={chronicConditions} onChange={e => setChronicConditions(e.target.value)} placeholder="Ex: Diabetes, Hipertensão" className="mt-1" />
+              <p className="text-[10px] text-muted-foreground mt-0.5">Separe por vírgula</p>
             </div>
           </CardContent>
         </Card>

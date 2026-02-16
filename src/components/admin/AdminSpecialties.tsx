@@ -14,6 +14,7 @@ const AdminSpecialties = () => {
   const [specialties, setSpecialties] = useState<any[]>([]);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
+  const [newPrice, setNewPrice] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { fetchSpecialties(); }, []);
@@ -26,14 +27,20 @@ const AdminSpecialties = () => {
 
   const addSpecialty = async () => {
     if (!newName.trim()) return;
-    const { error } = await supabase.from("specialties").insert({ name: newName.trim(), description: newDesc.trim() || null } as any);
+    const { error } = await supabase.from("specialties").insert({ name: newName.trim(), description: newDesc.trim() || null, consultation_price: newPrice ? Number(newPrice) : null } as any);
     if (error) toast({ title: "Erro", description: error.message, variant: "destructive" });
-    else { setNewName(""); setNewDesc(""); fetchSpecialties(); toast({ title: "Especialidade adicionada!" }); }
+    else { setNewName(""); setNewDesc(""); setNewPrice(""); fetchSpecialties(); toast({ title: "Especialidade adicionada!" }); }
   };
 
   const removeSpecialty = async (id: string) => {
     await supabase.from("specialties").delete().eq("id", id);
     fetchSpecialties();
+  };
+
+  const updatePrice = async (id: string, price: string) => {
+    await supabase.from("specialties").update({ consultation_price: price ? Number(price) : null } as any).eq("id", id);
+    fetchSpecialties();
+    toast({ title: "Preço atualizado!" });
   };
 
   return (
@@ -48,6 +55,7 @@ const AdminSpecialties = () => {
             <div className="flex gap-2">
               <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Nome" className="flex-1" onKeyDown={e => e.key === "Enter" && addSpecialty()} />
               <Input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Descrição (opcional)" className="flex-1" />
+              <Input value={newPrice} onChange={e => setNewPrice(e.target.value)} placeholder="Preço (R$)" className="w-28" type="number" min={0} step={0.01} />
               <Button onClick={addSpecialty} className="bg-gradient-hero text-primary-foreground"><Plus className="w-4 h-4 mr-1" /> Adicionar</Button>
             </div>
           </CardContent>
@@ -59,6 +67,7 @@ const AdminSpecialties = () => {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Descrição</TableHead>
+                <TableHead>Preço (R$)</TableHead>
                 <TableHead className="text-right">Ações</TableHead>
               </TableRow>
             </TableHeader>
@@ -67,6 +76,14 @@ const AdminSpecialties = () => {
                 <TableRow key={s.id}>
                   <TableCell className="font-medium text-foreground">{s.name}</TableCell>
                   <TableCell className="text-muted-foreground">{s.description || "—"}</TableCell>
+                  <TableCell>
+                    <Input
+                      type="number" min={0} step={0.01} className="w-24"
+                      defaultValue={s.consultation_price ?? ""}
+                      placeholder="—"
+                      onBlur={e => updatePrice(s.id, e.target.value)}
+                    />
+                  </TableCell>
                   <TableCell className="text-right">
                     <Button size="sm" variant="ghost" onClick={() => removeSpecialty(s.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                   </TableCell>

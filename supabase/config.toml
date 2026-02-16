@@ -26,3 +26,9 @@ verify_jwt = false
 
 [functions.assign-role]
 verify_jwt = false
+
+[functions.send-whatsapp]
+verify_jwt = false
+
+[functions.appointment-confirmed]
+verify_jwt = false

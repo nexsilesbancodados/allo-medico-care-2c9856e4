@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { triggerAppointmentConfirmed } from "@/lib/whatsapp";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -138,33 +139,21 @@ const BookAppointment = () => {
     const [h, m] = selectedTime.split(":").map(Number);
     const scheduledAt = setMinutes(setHours(new Date(selectedDate), h), m);
 
-    const { error } = await supabase.from("appointments").insert({
+    const { data: insertedAppt, error } = await supabase.from("appointments").insert({
       patient_id: user.id,
       doctor_id: doctor.id,
       scheduled_at: scheduledAt.toISOString(),
       status: "scheduled",
       appointment_type: appointmentType,
-    });
+    }).select("id").single();
 
     setBooking(false);
 
-    if (error) {
+    if (error || !insertedAppt) {
       toast({ title: "Erro", description: "Não foi possível agendar. Tente novamente.", variant: "destructive" });
     } else {
-      // Send confirmation email
-      supabase.functions.invoke("send-email", {
-        body: {
-          type: "appointment_confirmation",
-          to: user.email!,
-          data: {
-            patient_name: user.user_metadata?.first_name || "Paciente",
-            doctor_name: `Dr(a). ${doctor.first_name} ${doctor.last_name}`,
-            date: format(scheduledAt, "dd/MM/yyyy", { locale: ptBR }),
-            time: format(scheduledAt, "HH:mm"),
-            specialty: doctor.specialties[0] || "Clínica Geral",
-          },
-        },
-      }).catch(console.error);
+      // Trigger auto-confirmation (sends email + WhatsApp + notification)
+      triggerAppointmentConfirmed(insertedAppt.id).catch(console.error);
 
       toast({ title: "Consulta agendada! ✅", description: `${format(scheduledAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} com Dr(a). ${doctor.first_name}` });
       navigate("/dashboard/appointments");
