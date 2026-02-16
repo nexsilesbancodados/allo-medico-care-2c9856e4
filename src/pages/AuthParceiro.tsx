@@ -74,7 +74,7 @@ const AuthParceiro = () => {
           </div>
           <h1 className="text-4xl font-extrabold mb-4">Portal do Parceiro</h1>
           <p className="text-lg opacity-90">
-            Farmácias e laboratórios podem validar receitas digitais e pedidos de exames da plataforma Alô Médico.
+            Farmácias e laboratórios podem validar receitas digitais e pedidos de exames da plataforma AloClinica.
           </p>
           <div className="mt-8 space-y-3 opacity-80 text-sm">
             <p>✓ Validação de receitas digitais</p>

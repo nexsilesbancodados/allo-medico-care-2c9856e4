@@ -1,6 +1,6 @@
 // Push notification service worker (separate from PWA workbox SW)
 self.addEventListener("push", (event) => {
-  let data = { title: "Alô Médico", body: "Nova notificação", url: "/" };
+  let data = { title: "AloClinica", body: "Nova notificação", url: "/" };
   
   try {
     if (event.data) {
@@ -18,7 +18,7 @@ self.addEventListener("push", (event) => {
     icon: "/pwa-192x192.png",
     badge: "/pwa-192x192.png",
     vibrate: [200, 100, 200],
-    tag: "alo-medico-notification",
+    tag: "aloclinica-notification",
     renotify: true,
     data: { url: data.url || "/" },
     actions: [

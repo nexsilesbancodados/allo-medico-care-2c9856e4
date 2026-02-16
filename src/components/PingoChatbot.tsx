@@ -94,7 +94,7 @@ const PingoChatbot = () => {
         ...prev,
         {
           role: "assistant",
-          content: "🎧 Para falar com o suporte ao vivo, envie um e-mail para contato@alomedico.com.br ou ligue para (11) 99999-0000. Nossa equipe responde em até 30 minutos durante o horário comercial (seg-sex, 8h-18h).",
+          content: "🎧 Para falar com o suporte ao vivo, envie um e-mail para contato@aloclinica.com.br ou ligue para (11) 99999-0000. Nossa equipe responde em até 30 minutos durante o horário comercial (seg-sex, 8h-18h).",
         },
       ]);
     }

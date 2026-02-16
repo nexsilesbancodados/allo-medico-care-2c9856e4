@@ -40,9 +40,9 @@ const Header = () => {
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2">
-          <img src={logo} alt="Alô Médico" className="w-9 h-9 rounded-xl object-contain" />
+          <img src={logo} alt="AloClinica" className="w-9 h-9 rounded-xl object-contain" />
           <span className="text-xl font-bold text-foreground">
-            Alô <span className="text-gradient">Médico</span>
+            Alo<span className="text-gradient">Clinica</span>
           </span>
         </a>
 

@@ -601,7 +601,7 @@ const GuestCheckout = () => {
                         </div>
                         <div className="bg-muted p-3 rounded-lg">
                           <p className="text-xs text-muted-foreground mb-1">Chave PIX (copia e cola):</p>
-                          <p className="text-sm font-mono text-foreground break-all">00020126580014br.gov.bcb.pix0136alomedico-simulado</p>
+                          <p className="text-sm font-mono text-foreground break-all">00020126580014br.gov.bcb.pix0136aloclinica-simulado</p>
                         </div>
                         <p className="text-xs text-muted-foreground">Após o pagamento, a confirmação será automática.</p>
                       </div>

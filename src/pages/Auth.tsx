@@ -102,7 +102,7 @@ const Auth = () => {
             <ArrowLeft className="w-4 h-4" />
             Voltar ao início
           </Link>
-          <h1 className="text-4xl font-extrabold mb-4">Alô Médico</h1>
+          <h1 className="text-4xl font-extrabold mb-4">AloClinica</h1>
           <p className="text-lg opacity-90">
             Sua plataforma completa de telemedicina. Consultas por vídeo com médicos
             qualificados, receitas digitais e muito mais.

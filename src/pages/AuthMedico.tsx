@@ -161,7 +161,7 @@ const AuthMedico = () => {
                   variant="ghost"
                   className="w-full"
                   size="lg"
-                  onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma Alô Médico.", "_blank")}
+                  onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma AloClinica.", "_blank")}
                 >
                   <MessageCircle className="w-4 h-4 mr-2" />
                   Contactar suporte para cadastro

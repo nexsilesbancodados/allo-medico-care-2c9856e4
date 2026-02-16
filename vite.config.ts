@@ -25,8 +25,8 @@ export default defineConfig(({ mode }) => ({
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
       },
       manifest: {
-        name: "Alô Médico - Telemedicina",
-        short_name: "Alô Médico",
+        name: "AloClinica - Telemedicina",
+        short_name: "AloClinica",
         description: "Plataforma completa de telemedicina com videochamadas, agendamento e receitas digitais",
         theme_color: "#1a6fc4",
         background_color: "#f8fafc",

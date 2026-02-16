@@ -12,10 +12,10 @@ const Terms = () => (
         <p className="text-foreground font-medium">Última atualização: Fevereiro de 2026</p>
 
         <h2 className="text-xl font-bold text-foreground mt-8">1. Aceitação dos Termos</h2>
-        <p>Ao acessar e utilizar a plataforma Alô Médico, você concorda com estes Termos de Uso. Caso não concorde, não utilize a plataforma.</p>
+        <p>Ao acessar e utilizar a plataforma AloClinica, você concorda com estes Termos de Uso. Caso não concorde, não utilize a plataforma.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">2. Descrição do Serviço</h2>
-        <p>A Alô Médico é uma plataforma de telemedicina que conecta pacientes a médicos para consultas por videochamada. Não substituímos atendimento presencial de emergência.</p>
+        <p>A AloClinica é uma plataforma de telemedicina que conecta pacientes a médicos para consultas por videochamada. Não substituímos atendimento presencial de emergência.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">3. Cadastro e Conta</h2>
         <p>O usuário é responsável por manter a confidencialidade de suas credenciais. Informações falsas ou incompletas podem resultar no cancelamento da conta.</p>
@@ -33,7 +33,7 @@ const Terms = () => (
         <p>A plataforma não se responsabiliza por diagnósticos médicos. A relação médico-paciente é de responsabilidade das partes envolvidas.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">8. Contato</h2>
-        <p>Dúvidas sobre estes termos podem ser enviadas para contato@alomedico.com.br.</p>
+        <p>Dúvidas sobre estes termos podem ser enviadas para contato@aloclinica.com.br.</p>
       </div>
     </div>
   </div>

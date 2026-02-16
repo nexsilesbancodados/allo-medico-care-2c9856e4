@@ -15,8 +15,8 @@ const Footer = () => {
               viewport={{ once: true }}
               className="flex items-center gap-2 mb-4"
             >
-              <img src={logo} alt="Alô Médico" className="w-8 h-8 rounded-lg object-contain" />
-              <span className="text-lg font-bold">Alô Médico</span>
+              <img src={logo} alt="AloClinica" className="w-8 h-8 rounded-lg object-contain" />
+              <span className="text-lg font-bold">AloClinica</span>
             </motion.div>
             <p className="text-sm opacity-60 leading-relaxed">
               Plataforma completa de telemedicina. Conectando pacientes e médicos
@@ -73,7 +73,7 @@ const Footer = () => {
           >
             <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-80">Contato</h4>
             <ul className="space-y-3 text-sm opacity-60">
-              <li className="flex items-center gap-2"><Mail className="w-4 h-4" /> contato@alomedico.com.br</li>
+              <li className="flex items-center gap-2"><Mail className="w-4 h-4" /> contato@aloclinica.com.br</li>
               <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> 0800 123 4567</li>
               <li className="flex items-center gap-2"><MapPin className="w-4 h-4" /> São Paulo, SP</li>
             </ul>
@@ -81,7 +81,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-background/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs opacity-40">© 2026 Alô Médico. Todos os direitos reservados.</p>
+          <p className="text-xs opacity-40">© 2026 AloClinica. Todos os direitos reservados.</p>
           <div className="flex gap-6 text-xs opacity-40">
             <Link to="/terms" className="hover:opacity-100 transition-opacity duration-200">Termos de Uso</Link>
             <Link to="/privacy" className="hover:opacity-100 transition-opacity duration-200">Política de Privacidade</Link>

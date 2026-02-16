@@ -29,7 +29,7 @@ const poseContent = [
   },
   {
     title: "Bem-vindo ao",
-    highlight: "Alô Médico",
+    highlight: "AloClinica",
     description: "Cuidamos de você e da sua família com carinho e tecnologia. Atendimento humanizado na palma da sua mão.",
   },
   {
@@ -177,7 +177,7 @@ const HeroSection = () => {
                   <motion.img
                     key={poseIndex}
                     src={mascotPoses[poseIndex]}
-                    alt="Pingo - Mascote do Alô Médico"
+                    alt="Pingo - Mascote do AloClinica"
                     className="w-full h-auto drop-shadow-2xl"
                     initial={{ opacity: 0, scale: 0.85, filter: "blur(8px)" }}
                     animate={{

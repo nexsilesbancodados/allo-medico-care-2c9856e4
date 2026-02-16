@@ -66,7 +66,7 @@ const AuthAfiliado = () => {
           </div>
           <h1 className="text-4xl font-extrabold mb-4">Programa de Afiliados</h1>
           <p className="text-lg opacity-90">
-            Indique pacientes para a Alô Médico e ganhe comissões por cada conversão.
+            Indique pacientes para a AloClinica e ganhe comissões por cada conversão.
           </p>
           <div className="mt-8 space-y-3 opacity-80 text-sm">
             <p>✓ Link de indicação exclusivo</p>

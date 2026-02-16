@@ -30,7 +30,7 @@ const Privacy = () => (
         <p>Prontuários médicos são mantidos pelo prazo legal de 20 anos conforme CFM. Demais dados são mantidos enquanto a conta estiver ativa.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">7. Direitos do Titular</h2>
-        <p>Você pode solicitar acesso, correção, exclusão ou portabilidade de seus dados através do e-mail privacidade@alomedico.com.br.</p>
+        <p>Você pode solicitar acesso, correção, exclusão ou portabilidade de seus dados através do e-mail privacidade@aloclinica.com.br.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">8. Cookies</h2>
         <p>Utilizamos cookies essenciais para o funcionamento da plataforma e cookies analíticos para melhorar a experiência.</p>
