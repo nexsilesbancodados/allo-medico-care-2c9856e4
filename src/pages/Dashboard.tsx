@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route, useSearchParams } from "react-router-dom";
 import PatientDashboard from "@/components/dashboards/PatientDashboard";
 import DoctorDashboard from "@/components/dashboards/DoctorDashboard";
 import ClinicDashboard from "@/components/dashboards/ClinicDashboard";
@@ -35,6 +35,8 @@ import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
   const { user, roles, loading } = useAuth();
+  const [searchParams] = useSearchParams();
+  const forceRole = searchParams.get("role");
 
   if (loading) {
     return (
@@ -46,7 +48,10 @@ const Dashboard = () => {
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  const primaryRole = roles.includes("admin")
+  // Allow forcing a specific dashboard via ?role=doctor etc.
+  const primaryRole = forceRole && roles.includes(forceRole as any)
+    ? forceRole
+    : roles.includes("admin")
     ? "admin"
     : roles.includes("doctor")
     ? "doctor"
