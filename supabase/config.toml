@@ -11,3 +11,6 @@ verify_jwt = false
 
 [functions.guest-consultation]
 verify_jwt = false
+
+[functions.pingo-chat]
+verify_jwt = false
