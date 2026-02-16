@@ -5,6 +5,21 @@ import { useNavigate } from "react-router-dom";
 
 const plans = [
   {
+    name: "Consulta Avulsa",
+    price: "89",
+    period: "por consulta",
+    description: "Ideal para quem precisa de atendimento pontual.",
+    features: [
+      "1 consulta por videochamada",
+      "Receita digital inclusa",
+      "Chat pós-consulta (48h)",
+      "Escolha de especialidade",
+    ],
+    highlighted: false,
+    route: "/consulta-avulsa",
+    buttonText: "Comprar Consulta",
+  },
+  {
     name: "Plano Mensal",
     price: "149",
     period: "por mês",
@@ -18,6 +33,8 @@ const plans = [
       "Acesso para até 4 dependentes",
     ],
     highlighted: true,
+    route: "/paciente?plan=mensal",
+    buttonText: "Assinar Plano",
   },
 ];
 
@@ -41,7 +58,7 @@ const PlansSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-1 gap-8 max-w-md mx-auto">
+        <div className="grid md:grid-cols-2 gap-8 max-w-3xl mx-auto">
           {plans.map((plan, i) => (
             <motion.div
               key={i}
@@ -91,9 +108,9 @@ const PlansSection = () => {
                     : "bg-gradient-hero text-primary-foreground hover:opacity-90"
                 }`}
                 size="lg"
-                onClick={() => navigate(plan.highlighted ? `/paciente?plan=mensal` : `/consulta-avulsa`)}
+                onClick={() => navigate(plan.route)}
               >
-                Começar agora
+                {plan.buttonText}
               </Button>
             </motion.div>
           ))}

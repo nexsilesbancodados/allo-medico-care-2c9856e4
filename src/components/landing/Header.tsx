@@ -63,6 +63,9 @@ const Header = () => {
           <Button variant="ghost" size="sm" onClick={() => navigate("/medico")}>
             Sou Médico
           </Button>
+          <Button variant="outline" size="sm" onClick={() => navigate("/consulta-avulsa")}>
+            Comprar Consulta
+          </Button>
           <Button size="sm" className="bg-gradient-hero hover:opacity-90 transition-opacity" onClick={() => navigate("/paciente")}>
             Sou Paciente
           </Button>
