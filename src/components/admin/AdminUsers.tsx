@@ -1,0 +1,215 @@
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { getAdminNav } from "./adminNav";
+import { Search, Shield, Eye } from "lucide-react";
+
+const ROLE_LABELS: Record<string, string> = {
+  patient: "Paciente",
+  doctor: "Médico",
+  clinic: "Clínica",
+  admin: "Admin",
+};
+
+const ROLE_COLORS: Record<string, string> = {
+  admin: "bg-destructive/10 text-destructive",
+  doctor: "bg-secondary/10 text-secondary",
+  clinic: "bg-accent text-accent-foreground",
+  patient: "bg-primary/10 text-primary",
+};
+
+const AdminUsers = () => {
+  const { toast } = useToast();
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<any>(null);
+  const [userRoles, setUserRoles] = useState<string[]>([]);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => { fetchUsers(); }, []);
+
+  const fetchUsers = async () => {
+    // Get all profiles
+    const { data: profiles } = await supabase.from("profiles")
+      .select("user_id, first_name, last_name, phone, cpf, created_at")
+      .order("created_at", { ascending: false });
+
+    // Get all roles
+    const { data: roles } = await supabase.from("user_roles").select("user_id, role");
+
+    const roleMap = new Map<string, string[]>();
+    (roles ?? []).forEach(r => {
+      const arr = roleMap.get(r.user_id) ?? [];
+      arr.push(r.role);
+      roleMap.set(r.user_id, arr);
+    });
+
+    setUsers((profiles ?? []).map(p => ({
+      ...p,
+      roles: roleMap.get(p.user_id) ?? [],
+    })));
+    setLoading(false);
+  };
+
+  const openDetail = (u: any) => {
+    setSelected(u);
+    setUserRoles([...u.roles]);
+  };
+
+  const toggleRole = (role: string) => {
+    setUserRoles(prev =>
+      prev.includes(role) ? prev.filter(r => r !== role) : [...prev, role]
+    );
+  };
+
+  const saveRoles = async () => {
+    if (!selected) return;
+    setSaving(true);
+
+    const currentRoles = selected.roles as string[];
+    const toAdd = userRoles.filter(r => !currentRoles.includes(r));
+    const toRemove = currentRoles.filter(r => !userRoles.includes(r));
+
+    for (const role of toAdd) {
+      await supabase.from("user_roles").insert({ user_id: selected.user_id, role } as any);
+    }
+    for (const role of toRemove) {
+      await supabase.from("user_roles").delete().eq("user_id", selected.user_id).eq("role", role as any);
+    }
+
+    toast({ title: "Roles atualizadas! ✅" });
+    setSaving(false);
+    setSelected(null);
+    fetchUsers();
+  };
+
+  const filtered = users.filter(u =>
+    `${u.first_name} ${u.last_name} ${u.cpf || ""}`.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <DashboardLayout title="Administração" nav={getAdminNav("users")}>
+      <div className="max-w-5xl">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <Shield className="w-6 h-6" /> Usuários & Permissões
+            </h1>
+            <p className="text-muted-foreground text-sm">{filtered.length} usuário(s)</p>
+          </div>
+        </div>
+
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input placeholder="Buscar por nome ou CPF..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+        </div>
+
+        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
+          <div className="rounded-lg border border-border overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Usuário</TableHead>
+                  <TableHead>Telefone</TableHead>
+                  <TableHead>Roles</TableHead>
+                  <TableHead>Cadastro</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map(u => (
+                  <TableRow key={u.user_id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                            {u.first_name?.[0]}{u.last_name?.[0]}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-foreground">{u.first_name} {u.last_name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{u.phone || "—"}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {u.roles.map((r: string) => (
+                          <Badge key={r} variant="outline" className={`text-xs ${ROLE_COLORS[r] ?? ""}`}>
+                            {ROLE_LABELS[r] ?? r}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">{new Date(u.created_at).toLocaleDateString("pt-BR")}</TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="ghost" onClick={() => openDetail(u)}>
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {filtered.length === 0 && (
+                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhum usuário encontrado.</TableCell></TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </div>
+
+      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Gerenciar Permissões</DialogTitle>
+          </DialogHeader>
+          {selected && (
+            <div className="space-y-4">
+              <div className="text-sm">
+                <p className="font-medium text-foreground">{selected.first_name} {selected.last_name}</p>
+                <p className="text-muted-foreground">{selected.phone || "Sem telefone"} · {selected.cpf || "Sem CPF"}</p>
+              </div>
+
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-foreground">Roles do usuário:</p>
+                {(["patient", "doctor", "clinic", "admin"] as const).map(role => (
+                  <label key={role} className="flex items-center gap-3 p-2 rounded-lg border border-border hover:bg-muted/50 cursor-pointer">
+                    <Checkbox
+                      checked={userRoles.includes(role)}
+                      onCheckedChange={() => toggleRole(role)}
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-foreground">{ROLE_LABELS[role]}</span>
+                      <p className="text-xs text-muted-foreground">
+                        {role === "admin" && "Acesso total à plataforma"}
+                        {role === "doctor" && "Pode atender consultas e prescrever"}
+                        {role === "clinic" && "Pode gerenciar médicos vinculados"}
+                        {role === "patient" && "Pode agendar e participar de consultas"}
+                      </p>
+                    </div>
+                  </label>
+                ))}
+              </div>
+
+              <div className="flex gap-2">
+                <Button onClick={saveRoles} disabled={saving} className="bg-gradient-hero text-primary-foreground">
+                  {saving ? "Salvando..." : "Salvar Roles"}
+                </Button>
+                <Button variant="outline" onClick={() => setSelected(null)}>Cancelar</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </DashboardLayout>
+  );
+};
+
+export default AdminUsers;

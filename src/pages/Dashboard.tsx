@@ -29,6 +29,7 @@ import AdminSubscriptions from "@/components/admin/AdminSubscriptions";
 import AdminLogs from "@/components/admin/AdminLogs";
 import AdminInviteCodes from "@/components/admin/AdminInviteCodes";
 import AdminReports from "@/components/admin/AdminReports";
+import AdminUsers from "@/components/admin/AdminUsers";
 import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
@@ -82,6 +83,7 @@ const Dashboard = () => {
 
       {/* Admin routes */}
       <Route path="admin/doctors" element={<AdminDoctors />} />
+      <Route path="admin/users" element={<AdminUsers />} />
       <Route path="admin/patients" element={<AdminPatients />} />
       <Route path="admin/clinics" element={<AdminClinics />} />
       <Route path="admin/appointments" element={<AdminAppointments />} />

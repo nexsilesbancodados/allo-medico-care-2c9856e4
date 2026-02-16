@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { getAdminNav } from "./adminNav";
-import { Plus, Search, Edit } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -24,7 +24,9 @@ const AdminSubscriptions = () => {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ user_email: "", plan_id: "", status: "active", notes: "" });
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [form, setForm] = useState({ user_id: "", plan_id: "", status: "active", notes: "" });
+  const [userSearch, setUserSearch] = useState("");
 
   useEffect(() => { fetchData(); }, []);
 
@@ -47,11 +49,40 @@ const AdminSubscriptions = () => {
     setLoading(false);
   };
 
+  const openCreateForm = async () => {
+    const { data } = await supabase.from("profiles").select("user_id, first_name, last_name").order("first_name");
+    setAllUsers(data ?? []);
+    setForm({ user_id: "", plan_id: "", status: "active", notes: "" });
+    setUserSearch("");
+    setShowForm(true);
+  };
+
   const createSubscription = async () => {
-    if (!form.plan_id) { toast({ title: "Selecione um plano", variant: "destructive" }); return; }
-    // For now, admin creates subscriptions by user_id directly; in production, look up by email
-    toast({ title: "Funcionalidade em desenvolvimento", description: "Use o painel para gerenciar assinaturas existentes." });
-    setShowForm(false);
+    if (!form.plan_id || !form.user_id) {
+      toast({ title: "Selecione um usuário e um plano", variant: "destructive" });
+      return;
+    }
+    const plan = plans.find(p => p.id === form.plan_id);
+    const expiresAt = new Date();
+    if (plan?.interval === "monthly") expiresAt.setMonth(expiresAt.getMonth() + 1);
+    else if (plan?.interval === "yearly") expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+    else expiresAt.setMonth(expiresAt.getMonth() + 1);
+
+    const { error } = await supabase.from("subscriptions").insert({
+      user_id: form.user_id,
+      plan_id: form.plan_id,
+      status: form.status,
+      notes: form.notes || null,
+      starts_at: new Date().toISOString(),
+      expires_at: expiresAt.toISOString(),
+    });
+    if (error) {
+      toast({ title: "Erro ao criar assinatura", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Assinatura criada com sucesso! ✅" });
+      setShowForm(false);
+      fetchData();
+    }
   };
 
   const updateStatus = async (id: string, newStatus: string) => {
@@ -62,11 +93,21 @@ const AdminSubscriptions = () => {
     fetchData();
   };
 
+  const deleteSub = async (id: string) => {
+    await supabase.from("subscriptions").delete().eq("id", id);
+    toast({ title: "Assinatura removida" });
+    fetchData();
+  };
+
   const filtered = subs.filter(s => {
     const matchSearch = `${s.user_name} ${s.plan_name}`.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterStatus === "all" || s.status === filterStatus;
     return matchSearch && matchStatus;
   });
+
+  const filteredUsers = allUsers.filter(u =>
+    `${u.first_name} ${u.last_name}`.toLowerCase().includes(userSearch.toLowerCase())
+  );
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("subscriptions")}>
@@ -76,6 +117,9 @@ const AdminSubscriptions = () => {
             <h1 className="text-2xl font-bold text-foreground">Assinaturas</h1>
             <p className="text-muted-foreground text-sm">{filtered.length} assinatura(s)</p>
           </div>
+          <Button onClick={openCreateForm} className="bg-gradient-hero text-primary-foreground">
+            <Plus className="w-4 h-4 mr-1" /> Nova Assinatura
+          </Button>
         </div>
 
         <div className="flex gap-3 mb-4">
@@ -116,7 +160,7 @@ const AdminSubscriptions = () => {
                     <TableCell className="text-muted-foreground">{format(new Date(s.starts_at), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                     <TableCell className="text-muted-foreground">{s.expires_at ? format(new Date(s.expires_at), "dd/MM/yyyy", { locale: ptBR }) : "—"}</TableCell>
                     <TableCell><Badge variant={statusVariant[s.status] ?? "outline"}>{statusLabel[s.status] ?? s.status}</Badge></TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right flex items-center justify-end gap-1">
                       <Select value={s.status} onValueChange={v => updateStatus(s.id, v)}>
                         <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -126,6 +170,7 @@ const AdminSubscriptions = () => {
                           <SelectItem value="expired">Expirada</SelectItem>
                         </SelectContent>
                       </Select>
+                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteSub(s.id)}>✕</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -135,6 +180,46 @@ const AdminSubscriptions = () => {
           </div>
         )}
       </div>
+
+      <Dialog open={showForm} onOpenChange={() => setShowForm(false)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Nova Assinatura</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1 block">Usuário</label>
+              <Input placeholder="Buscar usuário..." value={userSearch} onChange={e => setUserSearch(e.target.value)} className="mb-2" />
+              <div className="max-h-32 overflow-y-auto border border-border rounded-lg">
+                {filteredUsers.slice(0, 20).map(u => (
+                  <button
+                    key={u.user_id}
+                    onClick={() => { setForm({ ...form, user_id: u.user_id }); setUserSearch(`${u.first_name} ${u.last_name}`); }}
+                    className={`w-full text-left px-3 py-2 text-sm hover:bg-muted transition-colors ${form.user_id === u.user_id ? "bg-primary/10 text-primary font-medium" : "text-foreground"}`}
+                  >
+                    {u.first_name} {u.last_name}
+                  </button>
+                ))}
+                {filteredUsers.length === 0 && <p className="text-xs text-muted-foreground p-3">Nenhum usuário encontrado.</p>}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1 block">Plano</label>
+              <Select value={form.plan_id} onValueChange={v => setForm({ ...form, plan_id: v })}>
+                <SelectTrigger><SelectValue placeholder="Selecione um plano" /></SelectTrigger>
+                <SelectContent>
+                  {plans.map(p => (
+                    <SelectItem key={p.id} value={p.id}>{p.name} — R$ {Number(p.price).toFixed(2)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <Input placeholder="Observações (opcional)" value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} />
+            <div className="flex gap-2">
+              <Button onClick={createSubscription} className="bg-gradient-hero text-primary-foreground">Criar Assinatura</Button>
+              <Button variant="outline" onClick={() => setShowForm(false)}>Cancelar</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
