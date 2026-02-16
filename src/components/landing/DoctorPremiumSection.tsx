@@ -72,7 +72,7 @@ const DoctorPremiumSection = () => {
             </div>
 
             {/* Images */}
-            <div className="relative hidden lg:flex justify-center items-center min-h-[400px]">
+            <div className="relative flex justify-center items-center min-h-[300px] lg:min-h-[400px]">
               <motion.div
                 initial={{ opacity: 0, x: 20, rotate: -3 }}
                 whileInView={{ opacity: 1, x: 0, rotate: -3 }}

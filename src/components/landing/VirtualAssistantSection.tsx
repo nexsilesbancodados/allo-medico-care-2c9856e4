@@ -15,16 +15,16 @@ const VirtualAssistantSection = () => {
           transition={{ duration: 0.6 }}
           className="relative overflow-hidden rounded-3xl bg-muted/60 dark:bg-muted/30 p-10 md:p-16"
         >
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Image */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="relative hidden lg:block"
+              className="relative"
             >
-              <div className="relative rounded-2xl overflow-hidden shadow-elevated max-w-md mx-auto">
+              <div className="relative rounded-2xl overflow-hidden shadow-elevated max-w-sm mx-auto">
                 <img
                   src={patientImg}
                   alt="Paciente usando o assistente virtual"
