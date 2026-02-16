@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Phone, Mail, Lock, User, ArrowLeft, Heart, Check, Star, CreditCard, Shield } from "lucide-react";
+import patientPortalBg from "@/assets/patient-portal-bg.png";
 
 const plans = [
   {
@@ -119,7 +120,9 @@ const AuthPaciente = () => {
   const [mode, setMode] = useState<"register" | "login">("register");
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative">
+      <img src={patientPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover -z-10" />
+      <div className="absolute inset-0 bg-background/70 -z-10" />
       {/* Header */}
       <div className="border-b border-border bg-card/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
