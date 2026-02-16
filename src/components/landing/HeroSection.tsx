@@ -11,6 +11,34 @@ import mascotWelcome from "@/assets/mascot-welcome.png";
 
 const mascotPoses = [heroDoctor, mascotWave, mascotThumbsup, mascotWelcome, mascotReading];
 
+const poseContent = [
+  {
+    title: "Sua saúde a um",
+    highlight: "clique de distância",
+    description: "Conecte-se com médicos especialistas de qualquer lugar. Consultas por vídeo, receitas digitais e acompanhamento completo.",
+  },
+  {
+    title: "Olá! O Pingo está",
+    highlight: "aqui para ajudar",
+    description: "Tire dúvidas, agende consultas e receba orientações com o nosso assistente virtual sempre disponível.",
+  },
+  {
+    title: "Médicos aprovados com",
+    highlight: "nota máxima",
+    description: "Todos os profissionais são verificados e avaliados pelos pacientes. Qualidade garantida em cada consulta.",
+  },
+  {
+    title: "Bem-vindo ao",
+    highlight: "Alô Médico",
+    description: "Cuidamos de você e da sua família com carinho e tecnologia. Atendimento humanizado na palma da sua mão.",
+  },
+  {
+    title: "Receitas e laudos",
+    highlight: "100% digitais",
+    description: "Receba prescrições, atestados e laudos médicos direto no seu celular. Tudo organizado e acessível.",
+  },
+];
+
 const HeroSection = () => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -69,16 +97,24 @@ const HeroSection = () => {
               Consultas por videochamada
             </div>
 
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground mb-6">
-              Sua saúde a um{" "}
-              <span className="text-gradient">clique de distância</span>
-            </h1>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={poseIndex}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.5 }}
+              >
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground mb-6">
+                  {poseContent[poseIndex].title}{" "}
+                  <span className="text-gradient">{poseContent[poseIndex].highlight}</span>
+                </h1>
 
-            <p className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
-              Conecte-se com médicos especialistas de qualquer lugar. Consultas por
-              vídeo, receitas digitais e acompanhamento completo — tudo na palma da
-              sua mão.
-            </p>
+                <p className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
+                  {poseContent[poseIndex].description}
+                </p>
+              </motion.div>
+            </AnimatePresence>
 
             <div className="flex flex-wrap gap-4 mb-10">
               <Button size="lg" className="bg-gradient-hero hover:opacity-90 transition-opacity text-base px-8" onClick={() => navigate("/paciente")}>
