@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Video, Shield, Clock, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import heroDoctor from "@/assets/hero-doctor.png";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -73,17 +74,12 @@ const HeroSection = () => {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="relative hidden lg:block"
           >
-            <div className="relative w-full aspect-square max-w-lg mx-auto">
-              {/* Main card */}
-              <div className="absolute inset-8 rounded-3xl bg-gradient-hero shadow-elevated flex items-center justify-center">
-                <div className="text-center text-primary-foreground">
-                  <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
-                    <Video className="w-10 h-10" />
-                  </div>
-                  <p className="text-xl font-bold">Consulta ao Vivo</p>
-                  <p className="text-sm opacity-80 mt-1">Dr. Ana Santos — Cardiologista</p>
-                </div>
-              </div>
+            <div className="relative w-full max-w-lg mx-auto">
+              <img
+                src={heroDoctor}
+                alt="Médica realizando teleconsulta pelo tablet"
+                className="w-full h-auto rounded-3xl shadow-elevated"
+              />
 
               {/* Floating card 1 */}
               <motion.div

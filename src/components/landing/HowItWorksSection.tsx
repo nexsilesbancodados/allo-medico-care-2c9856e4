@@ -1,26 +1,33 @@
 import { motion } from "framer-motion";
 import { UserPlus, Search, Video, FileText } from "lucide-react";
+import howItWorksBooking from "@/assets/how-it-works-booking.png";
+import howItWorksConsultation from "@/assets/how-it-works-consultation.png";
+import howItWorksPrescription from "@/assets/how-it-works-prescription.png";
 
 const steps = [
   {
     icon: UserPlus,
     title: "Cadastre-se",
     description: "Crie sua conta em menos de 2 minutos com dados básicos.",
+    image: null,
   },
   {
     icon: Search,
     title: "Encontre seu médico",
     description: "Busque por especialidade, avaliação ou disponibilidade.",
+    image: howItWorksBooking,
   },
   {
     icon: Video,
     title: "Consulta por vídeo",
     description: "Conecte-se com seu médico em videochamada segura e em HD.",
+    image: howItWorksConsultation,
   },
   {
     icon: FileText,
     title: "Receba sua receita",
     description: "Receita digital válida enviada diretamente para você.",
+    image: howItWorksPrescription,
   },
 ];
 
@@ -57,8 +64,12 @@ const HowItWorksSection = () => {
                 <div className="hidden lg:block absolute top-10 left-[60%] w-[80%] h-px border-t-2 border-dashed border-border" />
               )}
 
-              <div className="w-20 h-20 rounded-2xl bg-gradient-hero flex items-center justify-center mx-auto mb-5 shadow-card">
-                <step.icon className="w-9 h-9 text-primary-foreground" />
+              <div className="w-20 h-20 rounded-2xl bg-gradient-hero flex items-center justify-center mx-auto mb-5 shadow-card overflow-hidden">
+                {step.image ? (
+                  <img src={step.image} alt={step.title} className="w-full h-full object-cover" />
+                ) : (
+                  <step.icon className="w-9 h-9 text-primary-foreground" />
+                )}
               </div>
 
               <div className="text-xs font-bold text-primary mb-2">PASSO {i + 1}</div>
