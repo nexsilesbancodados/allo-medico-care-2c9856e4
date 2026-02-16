@@ -31,14 +31,16 @@ const Index = () => {
       <MultiPlatformSection />
       <ClinicPresentialSection />
 
-      {/* 4. Prova social + Preços */}
-      <TestimonialsSection />
+      {/* 4. Preços */}
       <PlansSection />
 
       {/* 5. Para médicos */}
       <DoctorPremiumSection />
 
-      {/* 6. Conversão final */}
+      {/* 6. Prova social */}
+      <TestimonialsSection />
+
+      {/* 7. Conversão final */}
       <CTABanner />
       <FAQSection />
       <SupportSection />
