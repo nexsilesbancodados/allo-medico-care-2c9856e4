@@ -41,6 +41,7 @@ import AdminInviteCodes from "@/components/admin/AdminInviteCodes";
 import AdminReports from "@/components/admin/AdminReports";
 import AdminUsers from "@/components/admin/AdminUsers";
 import AdminApprovals from "@/components/admin/AdminApprovals";
+import AdminSwitchPanel from "@/components/admin/AdminSwitchPanel";
 import ReceptionSchedules from "@/components/reception/ReceptionSchedules";
 import ReceptionCheckin from "@/components/reception/ReceptionCheckin";
 import ReceptionBilling from "@/components/reception/ReceptionBilling";
@@ -129,6 +130,7 @@ const Dashboard = () => {
       <Route path="admin/invite-codes" element={<AdminInviteCodes />} />
       <Route path="admin/reports" element={<AdminReports />} />
       <Route path="admin/approvals" element={<AdminApprovals />} />
+      <Route path="admin/switch-panel" element={<AdminSwitchPanel />} />
       <Route path="admin/nps" element={<AdminNPS />} />
 
       {/* Default: role-based dashboard */}

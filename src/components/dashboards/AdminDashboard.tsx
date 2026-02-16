@@ -7,10 +7,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAdminNav } from "@/components/admin/adminNav";
-import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, UserX, Video, Star } from "lucide-react";
+import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, UserX, Video, Star, LayoutGrid } from "lucide-react";
 import AdminAnalyticsCharts from "./AdminAnalyticsCharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+const panelOptions = [
+  { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
+  { label: "Médico", role: "doctor", icon: "🩺", description: "Ver como médico" },
+  { label: "Recepção", role: "receptionist", icon: "🏥", description: "Ver como recepcionista" },
+  { label: "Suporte", role: "support", icon: "🎧", description: "Ver como suporte" },
+  { label: "Clínica", role: "clinic", icon: "🏢", description: "Ver como clínica" },
+  { label: "Parceiro", role: "partner", icon: "🤝", description: "Ver como parceiro" },
+  { label: "Afiliado", role: "affiliate", icon: "📣", description: "Ver como afiliado" },
+];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -184,7 +194,12 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("overview")}>
       <div className="max-w-6xl">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Painel de Controle</h1>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-2xl font-bold text-foreground">Painel de Controle</h1>
+          <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/admin/switch-panel")} className="gap-2">
+            <LayoutGrid className="w-4 h-4" /> Trocar Painel
+          </Button>
+        </div>
         <p className="text-muted-foreground mb-6">Monitoramento em tempo real, finanças e operações</p>
 
         {/* Real-time Operations Banner */}
