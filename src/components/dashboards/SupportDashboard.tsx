@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Shield, Activity, Users, AlertTriangle, Eye, History, UserCog } from "lucide-react";
+import { Search, Shield, Activity, Users, AlertTriangle, Eye, History, UserCog, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import SupportChat from "@/components/support/SupportChat";
 
 const supportNav = [
   { label: "Visão Geral", href: "/dashboard", icon: <Activity className="w-4 h-4" />, active: true },
@@ -68,12 +69,17 @@ const SupportDashboard = () => {
         <h1 className="text-2xl font-bold text-foreground mb-1">Helpdesk</h1>
         <p className="text-muted-foreground mb-6">Monitoramento de logs, usuários e acessos</p>
 
-        <Tabs defaultValue="logs">
+        <Tabs defaultValue="chat">
           <TabsList>
-            <TabsTrigger value="logs"><History className="w-4 h-4 mr-1" /> Logs de Atividade</TabsTrigger>
+            <TabsTrigger value="chat"><MessageCircle className="w-4 h-4 mr-1" /> Chat</TabsTrigger>
+            <TabsTrigger value="logs"><History className="w-4 h-4 mr-1" /> Logs</TabsTrigger>
             <TabsTrigger value="users"><Users className="w-4 h-4 mr-1" /> Usuários</TabsTrigger>
             {viewAs && <TabsTrigger value="impersonate"><Eye className="w-4 h-4 mr-1" /> Visão do Usuário</TabsTrigger>}
           </TabsList>
+
+          <TabsContent value="chat" className="mt-4">
+            <SupportChat />
+          </TabsContent>
 
           <TabsContent value="logs" className="mt-4">
             <div className="relative mb-4">
