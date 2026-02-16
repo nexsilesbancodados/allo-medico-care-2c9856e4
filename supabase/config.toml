@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.appointment-reminders]
 verify_jwt = false
+
+[functions.send-push-notification]
+verify_jwt = false
