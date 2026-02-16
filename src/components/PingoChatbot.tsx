@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, MessageCircle } from "lucide-react";
+import { X, Send, MessageCircle, Headphones } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import mascotImg from "@/assets/mascot.png";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -72,12 +74,31 @@ async function streamChat({
 }
 
 const PingoChatbot = () => {
+  const navigate = useNavigate();
+  const { user, roles } = useAuth();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showLiveSupport, setShowLiveSupport] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleLiveSupport = () => {
+    if (user && (roles.includes("support") || roles.includes("admin"))) {
+      setOpen(false);
+      navigate("/dashboard?role=support");
+    } else {
+      setShowLiveSupport(true);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "🎧 Para falar com o suporte ao vivo, envie um e-mail para contato@alomedico.com.br ou ligue para (11) 99999-0000. Nossa equipe responde em até 30 minutos durante o horário comercial (seg-sex, 8h-18h).",
+        },
+      ]);
+    }
+  };
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -176,21 +197,27 @@ const PingoChatbot = () => {
                   <img src={mascotImg} alt="Pingo" className="w-20 h-20 mx-auto mb-3 opacity-80" />
                   <p className="text-sm font-semibold text-foreground">Olá! Eu sou o Pingo! 🐧</p>
                   <p className="text-xs text-muted-foreground mt-1">Como posso te ajudar hoje?</p>
-                  <div className="flex flex-wrap gap-2 mt-4 justify-center">
-                    {["Como funciona?", "Quais especialidades?", "Quanto custa?"].map((q) => (
-                      <button
-                        key={q}
-                        onClick={() => { setInput(q); }}
-                        className="text-xs px-3 py-1.5 rounded-full bg-medical-blue-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-                      >
-                        {q}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                   <div className="flex flex-wrap gap-2 mt-4 justify-center">
+                     {["Como funciona?", "Quais especialidades?", "Quanto custa?"].map((q) => (
+                       <button
+                         key={q}
+                         onClick={() => { setInput(q); }}
+                         className="text-xs px-3 py-1.5 rounded-full bg-medical-blue-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
+                       >
+                         {q}
+                       </button>
+                     ))}
+                   </div>
+                   <button
+                     onClick={handleLiveSupport}
+                     className="mt-3 inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-full border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-medium"
+                   >
+                     <Headphones className="w-3.5 h-3.5" /> Falar com suporte ao vivo
+                   </button>
+                 </div>
+               )}
 
-              {messages.map((msg, i) => (
+               {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
                     className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
@@ -218,7 +245,15 @@ const PingoChatbot = () => {
             </div>
 
             {/* Input */}
-            <div className="p-3 border-t border-border">
+            <div className="p-3 border-t border-border space-y-2">
+              {messages.length > 0 && !showLiveSupport && (
+                <button
+                  onClick={handleLiveSupport}
+                  className="w-full inline-flex items-center justify-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-primary/20 text-primary hover:bg-primary/5 transition-colors"
+                >
+                  <Headphones className="w-3.5 h-3.5" /> Falar com suporte ao vivo
+                </button>
+              )}
               <form
                 onSubmit={(e) => { e.preventDefault(); send(); }}
                 className="flex gap-2"
