@@ -60,6 +60,7 @@ const GuestCheckout = () => {
   const [guestDob, setGuestDob] = useState("");
 
   // Checkout
+  const [paymentMethod, setPaymentMethod] = useState<"credit" | "pix" | "boleto">("credit");
   const [cardName, setCardName] = useState("");
   const [cardNumber, setCardNumber] = useState("");
   const [cardExpiry, setCardExpiry] = useState("");
@@ -210,8 +211,8 @@ const GuestCheckout = () => {
   };
 
   const handleCheckout = async () => {
-    if (!cardName || !cardNumber || !cardExpiry || !cardCvv) {
-      toast({ title: "Preencha todos os dados de pagamento", variant: "destructive" });
+    if (paymentMethod === "credit" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
+      toast({ title: "Preencha todos os dados do cartão", variant: "destructive" });
       return;
     }
     if (!selectedDoctor || !selectedDate || !selectedTime) return;
@@ -232,6 +233,7 @@ const GuestCheckout = () => {
           doctor_id: selectedDoctor.id,
           scheduled_at: scheduledAt.toISOString(),
           specialty_name: selectedSpecialtyName,
+          payment_method: paymentMethod,
         },
       });
 
@@ -542,32 +544,95 @@ const GuestCheckout = () => {
 
                 <Card className="border-border">
                   <CardContent className="p-6">
-                    <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-                      <CreditCard className="w-5 h-5" /> Dados de Pagamento
-                    </h3>
-                    <div className="space-y-4">
-                      <div>
-                        <Label className="text-xs">Nome no cartão</Label>
-                        <Input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Nome completo" className="mt-1" />
-                      </div>
-                      <div>
-                        <Label className="text-xs">Número do cartão</Label>
-                        <Input value={cardNumber} onChange={e => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" className="mt-1 font-mono" maxLength={19} />
-                      </div>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <Label className="text-xs">Validade</Label>
-                          <Input value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" className="mt-1 font-mono" maxLength={5} />
-                        </div>
-                        <div>
-                          <Label className="text-xs">CVV</Label>
-                          <Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" className="mt-1 font-mono" maxLength={4} type="password" />
-                        </div>
-                      </div>
-                      <Button className="w-full bg-gradient-hero text-primary-foreground mt-2" size="lg" onClick={handleCheckout} disabled={processing}>
-                        {processing ? "Processando..." : `Pagar R$${totalPrice}`}
-                      </Button>
+                    <h3 className="font-bold text-foreground mb-4">Forma de Pagamento</h3>
+
+                    {/* Payment method tabs */}
+                    <div className="flex gap-2 mb-6">
+                      {([
+                        { key: "credit" as const, label: "Cartão", icon: CreditCard },
+                        { key: "pix" as const, label: "PIX", icon: Shield },
+                        { key: "boleto" as const, label: "Boleto", icon: FileText },
+                      ]).map(({ key, label, icon: Icon }) => (
+                        <Button
+                          key={key}
+                          variant={paymentMethod === key ? "default" : "outline"}
+                          size="sm"
+                          className={`flex-1 gap-1.5 ${paymentMethod === key ? "bg-gradient-hero text-primary-foreground" : ""}`}
+                          onClick={() => setPaymentMethod(key)}
+                        >
+                          <Icon className="w-4 h-4" /> {label}
+                        </Button>
+                      ))}
                     </div>
+
+                    {/* Credit Card */}
+                    {paymentMethod === "credit" && (
+                      <div className="space-y-4">
+                        <div>
+                          <Label className="text-xs">Nome no cartão</Label>
+                          <Input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Nome completo" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Número do cartão</Label>
+                          <Input value={cardNumber} onChange={e => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" className="mt-1 font-mono" maxLength={19} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-xs">Validade</Label>
+                            <Input value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" className="mt-1 font-mono" maxLength={5} />
+                          </div>
+                          <div>
+                            <Label className="text-xs">CVV</Label>
+                            <Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" className="mt-1 font-mono" maxLength={4} type="password" />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* PIX */}
+                    {paymentMethod === "pix" && (
+                      <div className="text-center space-y-4">
+                        <div className="w-48 h-48 mx-auto bg-muted rounded-xl flex items-center justify-center border-2 border-dashed border-border">
+                          <div className="text-center">
+                            <Shield className="w-12 h-12 text-muted-foreground/50 mx-auto mb-2" />
+                            <p className="text-xs text-muted-foreground">QR Code PIX</p>
+                            <p className="text-xs text-muted-foreground">(simulado)</p>
+                          </div>
+                        </div>
+                        <div className="bg-muted p-3 rounded-lg">
+                          <p className="text-xs text-muted-foreground mb-1">Chave PIX (copia e cola):</p>
+                          <p className="text-sm font-mono text-foreground break-all">00020126580014br.gov.bcb.pix0136alomedico-simulado</p>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Após o pagamento, a confirmação será automática.</p>
+                      </div>
+                    )}
+
+                    {/* Boleto */}
+                    {paymentMethod === "boleto" && (
+                      <div className="text-center space-y-4">
+                        <div className="w-full bg-muted rounded-xl p-6 border-2 border-dashed border-border">
+                          <FileText className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
+                          <p className="text-sm text-muted-foreground mb-2">Boleto Bancário (simulado)</p>
+                          <div className="bg-background p-3 rounded-lg">
+                            <p className="text-xs font-mono text-foreground break-all">23793.38128 60000.000003 00000.000400 1 84340000008900</p>
+                          </div>
+                        </div>
+                        <p className="text-xs text-muted-foreground">O boleto vence em 3 dias úteis. Após confirmação do pagamento, você receberá o link da consulta por email.</p>
+                      </div>
+                    )}
+
+                    <Button
+                      className="w-full bg-gradient-hero text-primary-foreground mt-6"
+                      size="lg"
+                      onClick={handleCheckout}
+                      disabled={processing}
+                    >
+                      {processing ? "Processando..." : paymentMethod === "credit"
+                        ? `Pagar R$${totalPrice}`
+                        : paymentMethod === "pix"
+                        ? `Confirmar PIX — R$${totalPrice}`
+                        : `Gerar Boleto — R$${totalPrice}`}
+                    </Button>
                   </CardContent>
                 </Card>
               </div>

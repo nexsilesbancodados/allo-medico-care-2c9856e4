@@ -43,6 +43,9 @@ const HeroSection = () => {
                 Agendar Consulta
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
+              <Button size="lg" variant="secondary" className="text-base px-8" onClick={() => navigate("/consulta-avulsa")}>
+                Consulta Avulsa
+              </Button>
               <Button size="lg" variant="outline" className="text-base" onClick={() => navigate("/medico")}>
                 Sou Médico
               </Button>
