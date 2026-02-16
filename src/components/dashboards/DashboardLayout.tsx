@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LogOut, User, Settings, Phone } from "lucide-react";
+import NotificationBell from "@/components/notifications/NotificationBell";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -43,10 +44,11 @@ const DashboardLayout = ({ children, title, nav }: DashboardLayoutProps) => {
             <span className="font-bold text-foreground">Alô Médico</span>
           </Link>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground hidden sm:block">
               {profile?.first_name} {profile?.last_name}
             </span>
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-9 w-9 rounded-full">
