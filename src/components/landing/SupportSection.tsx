@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { HelpCircle, Headphones, MessageCircle } from "lucide-react";
-import supportImage from "@/assets/support-section.png";
+import supportImage from "@/assets/mascot-thumbsup.png";
 
 const SupportSection = () => {
   return (
