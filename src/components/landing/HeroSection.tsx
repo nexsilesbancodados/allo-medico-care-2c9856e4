@@ -191,23 +191,6 @@ const HeroSection = () => {
                 </div>
               </motion.div>
 
-              {/* Floating card 2 */}
-              <motion.div
-                animate={{ y: [0, 8, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-4 left-0 bg-card rounded-2xl shadow-card p-4 border border-border"
-                whileHover={{ scale: 1.1 }}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-medical-blue-light flex items-center justify-center">
-                    <Clock className="w-5 h-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Próxima consulta</p>
-                    <p className="text-xs text-muted-foreground">Hoje, 14:30</p>
-                  </div>
-                </div>
-              </motion.div>
 
               {/* Speech bubble on hover */}
               <motion.div
