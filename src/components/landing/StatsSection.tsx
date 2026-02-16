@@ -49,14 +49,15 @@ const StatsSection = () => {
           {stats.map((stat, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className="text-center"
+              transition={{ delay: i * 0.12, duration: 0.5, type: "spring", stiffness: 100 }}
+              whileHover={{ y: -6, transition: { duration: 0.25 } }}
+              className="text-center group cursor-default"
             >
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <stat.icon className="w-7 h-7 text-primary" />
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:bg-primary/20 group-hover:shadow-lg group-hover:shadow-primary/10 group-hover:scale-110">
+                <stat.icon className="w-7 h-7 text-primary transition-transform duration-300 group-hover:scale-110" />
               </div>
               <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mb-1">
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
