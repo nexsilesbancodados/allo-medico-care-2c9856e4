@@ -37,23 +37,26 @@ const SpecialtiesSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {specialties.map((spec, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
-              className="group p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-card transition-all cursor-pointer"
-            >
-              <div className="w-12 h-12 rounded-xl overflow-hidden mb-4">
-                <img src={spec.image} alt={spec.name} className="w-full h-full object-cover" />
+        {/* Auto-scrolling carousel */}
+        <div className="overflow-hidden">
+          <motion.div
+            className="flex gap-4"
+            animate={{ x: ["0%", "-50%"] }}
+            transition={{ x: { duration: 30, repeat: Infinity, ease: "linear" } }}
+          >
+            {[...specialties, ...specialties].map((spec, i) => (
+              <div
+                key={i}
+                className="group flex-shrink-0 w-48 p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-card transition-all cursor-pointer"
+              >
+                <div className="w-12 h-12 rounded-xl overflow-hidden mb-4">
+                  <img src={spec.image} alt={spec.name} className="w-full h-full object-cover" />
+                </div>
+                <h3 className="font-bold text-foreground mb-1">{spec.name}</h3>
+                <p className="text-sm text-muted-foreground">{spec.doctors} médicos</p>
               </div>
-              <h3 className="font-bold text-foreground mb-1">{spec.name}</h3>
-              <p className="text-sm text-muted-foreground">{spec.doctors} médicos</p>
-            </motion.div>
-          ))}
+            ))}
+          </motion.div>
         </div>
       </div>
     </section>
