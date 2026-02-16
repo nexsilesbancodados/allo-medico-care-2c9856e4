@@ -76,18 +76,13 @@ const AuthMedico = () => {
       return;
     }
     if (data.user) {
-      // Create doctor profile and role
-      await supabase.from("doctor_profiles").insert({ user_id: data.user.id, crm, crm_state: crmState });
-      await supabase.from("user_roles").insert({ user_id: data.user.id, role: "doctor" });
-
-      // Mark invite code as used
-      if (validatedCodeId) {
-        await supabase.from("doctor_invite_codes").update({
-          is_used: true,
-          used_by: data.user.id,
-          used_at: new Date().toISOString(),
-        }).eq("id", validatedCodeId);
-      }
+      await supabase.functions.invoke("assign-role", {
+        body: {
+          user_id: data.user.id,
+          role: "doctor",
+          profile_data: { crm, crm_state: crmState, invite_code_id: validatedCodeId },
+        },
+      });
     }
     setLoading(false);
     toast({ title: "Cadastro realizado!", description: "Aguarde a aprovação do seu CRM." });

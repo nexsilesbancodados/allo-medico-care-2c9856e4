@@ -49,13 +49,13 @@ const AuthParceiro = () => {
       return;
     }
     if (data.user) {
-      await supabase.from("partner_profiles").insert({
-        user_id: data.user.id,
-        business_name: businessName,
-        cnpj,
-        partner_type: partnerType,
+      await supabase.functions.invoke("assign-role", {
+        body: {
+          user_id: data.user.id,
+          role: "partner",
+          profile_data: { business_name: businessName, cnpj, partner_type: partnerType },
+        },
       });
-      await supabase.from("user_roles").insert({ user_id: data.user.id, role: "partner" } as any);
     }
     setLoading(false);
     toast({ title: "Cadastro realizado!", description: "Aguarde a aprovação do administrador." });

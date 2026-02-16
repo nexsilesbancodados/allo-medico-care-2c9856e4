@@ -45,7 +45,9 @@ const AuthAfiliado = () => {
       return;
     }
     if (data.user) {
-      await supabase.from("user_roles").insert({ user_id: data.user.id, role: "affiliate" } as any);
+      await supabase.functions.invoke("assign-role", {
+        body: { user_id: data.user.id, role: "affiliate" },
+      });
     }
     setLoading(false);
     toast({ title: "Cadastro realizado!", description: "Você já pode gerar seu link de indicação." });
