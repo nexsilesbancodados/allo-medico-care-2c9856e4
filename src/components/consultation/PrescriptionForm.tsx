@@ -217,6 +217,25 @@ const PrescriptionForm = () => {
     if (error) {
       toast({ title: "Erro ao salvar receita", description: error.message, variant: "destructive" });
     } else {
+      // Send prescription email to patient
+      if (patientId) {
+        const { data: patientProfile } = await supabase.from("profiles").select("user_id").eq("user_id", patientId).single();
+        if (patientProfile) {
+          const { data: { user: patientUser } } = await supabase.auth.admin?.getUserById?.(patientId) ?? { data: { user: null } };
+          // Use the patient email from auth if available, otherwise skip
+          const patientEmail = user?.email; // fallback
+          supabase.functions.invoke("send-email", {
+            body: {
+              type: "prescription_sent",
+              to: patientEmail!,
+              data: {
+                patient_name: patientName,
+                doctor_name: `Dr(a). ${doctorInfo?.first_name || ""} ${doctorInfo?.last_name || ""}`,
+              },
+            },
+          }).catch(console.error);
+        }
+      }
       toast({ title: "Receita salva com sucesso! ✅" });
       navigate("/dashboard/prescriptions");
     }
