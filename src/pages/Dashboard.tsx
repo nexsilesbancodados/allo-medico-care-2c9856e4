@@ -17,6 +17,9 @@ import DoctorPrescriptions from "@/components/doctor/DoctorPrescriptions";
 import DoctorEarnings from "@/components/doctor/DoctorEarnings";
 import MedicalCertificate from "@/components/doctor/MedicalCertificate";
 import DoctorConsultations from "@/components/doctor/DoctorConsultations";
+import DoctorCalendar from "@/components/doctor/DoctorCalendar";
+import DoctorWaitingRoom from "@/components/doctor/DoctorWaitingRoom";
+import PatientDocuments from "@/components/doctor/PatientDocuments";
 import VideoRoom from "@/components/consultation/VideoRoom";
 import PrescriptionForm from "@/components/consultation/PrescriptionForm";
 import ClinicDoctorsManagement from "@/components/clinic/ClinicDoctorsManagement";
@@ -81,6 +84,9 @@ const Dashboard = () => {
       <Route path="earnings" element={<DoctorEarnings />} />
       <Route path="certificates" element={<MedicalCertificate />} />
       <Route path="doctor/consultations" element={<DoctorConsultations />} />
+      <Route path="doctor/calendar" element={<DoctorCalendar />} />
+      <Route path="doctor/waiting-room" element={<DoctorWaitingRoom />} />
+      <Route path="doctor/documents" element={<PatientDocuments />} />
 
       {/* Consultation routes */}
       <Route path="consultation/:appointmentId" element={<VideoRoom />} />
