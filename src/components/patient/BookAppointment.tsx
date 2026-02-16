@@ -151,6 +151,21 @@ const BookAppointment = () => {
     if (error) {
       toast({ title: "Erro", description: "Não foi possível agendar. Tente novamente.", variant: "destructive" });
     } else {
+      // Send confirmation email
+      supabase.functions.invoke("send-email", {
+        body: {
+          type: "appointment_confirmation",
+          to: user.email!,
+          data: {
+            patient_name: user.user_metadata?.first_name || "Paciente",
+            doctor_name: `Dr(a). ${doctor.first_name} ${doctor.last_name}`,
+            date: format(scheduledAt, "dd/MM/yyyy", { locale: ptBR }),
+            time: format(scheduledAt, "HH:mm"),
+            specialty: doctor.specialties[0] || "Clínica Geral",
+          },
+        },
+      }).catch(console.error);
+
       toast({ title: "Consulta agendada! ✅", description: `${format(scheduledAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} com Dr(a). ${doctor.first_name}` });
       navigate("/dashboard/appointments");
     }
