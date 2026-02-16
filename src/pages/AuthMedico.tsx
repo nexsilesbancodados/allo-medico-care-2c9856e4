@@ -59,7 +59,7 @@ const AuthMedico = () => {
     if (error) {
       toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
     } else {
-      navigate("/dashboard");
+      navigate("/dashboard?role=doctor");
     }
   };
 
@@ -91,7 +91,7 @@ const AuthMedico = () => {
     }
     setLoading(false);
     toast({ title: "Cadastro realizado!", description: "Aguarde a aprovação do seu CRM." });
-    navigate("/dashboard");
+    navigate("/dashboard?role=doctor");
   };
 
   return (
