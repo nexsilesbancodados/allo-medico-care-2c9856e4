@@ -78,7 +78,7 @@ const HeroSection = () => {
               <img
                 src={heroDoctor}
                 alt="Médica realizando teleconsulta pelo tablet"
-                className="w-full h-auto rounded-3xl shadow-elevated"
+                className="w-full h-auto"
               />
 
               {/* Floating card 1 */}
