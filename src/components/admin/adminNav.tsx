@@ -1,8 +1,9 @@
-import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck } from "lucide-react";
+import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star } from "lucide-react";
 
 export const getAdminNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview" },
   { label: "Relatórios", href: "/dashboard/admin/reports", icon: <TrendingUp className="w-4 h-4" />, active: active === "reports" },
+  { label: "NPS", href: "/dashboard/admin/nps", icon: <Star className="w-4 h-4" />, active: active === "nps" },
   { label: "Aprovações", href: "/dashboard/admin/approvals", icon: <UserCheck className="w-4 h-4" />, active: active === "approvals" },
   { label: "Usuários", href: "/dashboard/admin/users", icon: <UserCog className="w-4 h-4" />, active: active === "users" },
   { label: "Pacientes", href: "/dashboard/admin/patients", icon: <Users className="w-4 h-4" />, active: active === "patients" },

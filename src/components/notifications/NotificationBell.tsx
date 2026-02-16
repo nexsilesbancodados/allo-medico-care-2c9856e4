@@ -8,6 +8,7 @@ import { Bell, Check, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import PushNotificationToggle from "./PushNotificationToggle";
 
 interface Notification {
   id: string;
@@ -135,6 +136,9 @@ const NotificationBell = () => {
             ))
           )}
         </ScrollArea>
+        <div className="px-4 py-2 border-t border-border flex justify-center">
+          <PushNotificationToggle />
+        </div>
       </PopoverContent>
     </Popover>
   );

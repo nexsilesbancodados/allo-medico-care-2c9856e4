@@ -448,6 +448,72 @@ export type Database = {
         }
         Relationships: []
       }
+      medical_records: {
+        Row: {
+          appointment_id: string | null
+          cid_code: string | null
+          created_at: string
+          description: string | null
+          doctor_id: string | null
+          end_date: string | null
+          id: string
+          is_active: boolean
+          patient_id: string
+          record_type: string
+          severity: string | null
+          start_date: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          cid_code?: string | null
+          created_at?: string
+          description?: string | null
+          doctor_id?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          patient_id: string
+          record_type: string
+          severity?: string | null
+          start_date?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          cid_code?: string | null
+          created_at?: string
+          description?: string | null
+          doctor_id?: string | null
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          patient_id?: string
+          record_type?: string
+          severity?: string | null
+          start_date?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_records_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_records_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           appointment_id: string
@@ -776,6 +842,33 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           commission_paid: boolean | null
@@ -814,6 +907,60 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      satisfaction_surveys: {
+        Row: {
+          appointment_id: string
+          comment: string | null
+          created_at: string
+          doctor_id: string
+          ease_score: number | null
+          id: string
+          nps_score: number
+          patient_id: string
+          quality_score: number | null
+          would_recommend: boolean | null
+        }
+        Insert: {
+          appointment_id: string
+          comment?: string | null
+          created_at?: string
+          doctor_id: string
+          ease_score?: number | null
+          id?: string
+          nps_score: number
+          patient_id: string
+          quality_score?: number | null
+          would_recommend?: boolean | null
+        }
+        Update: {
+          appointment_id?: string
+          comment?: string | null
+          created_at?: string
+          doctor_id?: string
+          ease_score?: number | null
+          id?: string
+          nps_score?: number
+          patient_id?: string
+          quality_score?: number | null
+          would_recommend?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "satisfaction_surveys_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "satisfaction_surveys_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       specialties: {
         Row: {
