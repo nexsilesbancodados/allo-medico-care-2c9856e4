@@ -44,6 +44,7 @@ import AdminApprovals from "@/components/admin/AdminApprovals";
 import ReceptionSchedules from "@/components/reception/ReceptionSchedules";
 import ReceptionCheckin from "@/components/reception/ReceptionCheckin";
 import ReceptionBilling from "@/components/reception/ReceptionBilling";
+import ChatPage from "@/components/chat/ChatPage";
 import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
@@ -87,6 +88,7 @@ const Dashboard = () => {
       <Route path="payment-history" element={<PaymentHistory />} />
       <Route path="patient/documents" element={<PatientExamUpload />} />
       <Route path="patient/health" element={<PatientHealth />} />
+      <Route path="chat" element={<ChatPage />} />
 
       {/* Doctor routes */}
       <Route path="availability" element={<DoctorAvailability />} />
