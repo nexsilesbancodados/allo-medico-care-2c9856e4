@@ -17,15 +17,26 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      {/* 1. Impacto inicial */}
       <HeroSection />
       <StatsSection />
+
+      {/* 2. Entendimento do serviço */}
       <HowItWorksSection />
       <SpecialtiesSection />
+
+      {/* 3. Diferenciais */}
       <VirtualAssistantSection />
-      <PlansSection />
-      <TestimonialsSection />
-      <DoctorPremiumSection />
       <MultiPlatformSection />
+
+      {/* 4. Prova social + Preços */}
+      <TestimonialsSection />
+      <PlansSection />
+
+      {/* 5. Para médicos */}
+      <DoctorPremiumSection />
+
+      {/* 6. Conversão final */}
       <CTABanner />
       <FAQSection />
       <SupportSection />
