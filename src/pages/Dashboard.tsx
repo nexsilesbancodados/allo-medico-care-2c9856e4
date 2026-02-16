@@ -49,6 +49,14 @@ import ChatPage from "@/components/chat/ChatPage";
 import AdminNPS from "@/components/admin/AdminNPS";
 import MedicalRecords from "@/components/medical/MedicalRecords";
 import { Loader2 } from "lucide-react";
+import { ReactNode } from "react";
+
+const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: string[]; children: ReactNode }) => {
+  const isAdmin = roles.includes("admin");
+  if (isAdmin) return <>{children}</>;
+  if (allowed.some(r => roles.includes(r))) return <>{children}</>;
+  return <Navigate to="/dashboard" replace />;
+};
 
 const Dashboard = () => {
   const { user, roles, loading } = useAuth();
@@ -84,57 +92,57 @@ const Dashboard = () => {
       {/* Shared routes */}
       <Route path="profile" element={<UserProfile />} />
 
-      {/* Patient routes */}
-      <Route path="doctors" element={<DoctorSearch />} />
-      <Route path="appointments" element={<AppointmentsList />} />
-      <Route path="schedule" element={<DoctorSearch />} />
-      <Route path="schedule/:doctorId" element={<BookAppointment />} />
-      <Route path="plans" element={<PlansCheckout />} />
-      <Route path="history" element={<MedicalHistory />} />
-      <Route path="payment-history" element={<PaymentHistory />} />
-      <Route path="patient/documents" element={<PatientExamUpload />} />
-      <Route path="patient/health" element={<PatientHealth />} />
-      <Route path="chat" element={<ChatPage />} />
-      <Route path="medical-records" element={<MedicalRecords />} />
+      {/* Patient routes — patients + admin */}
+      <Route path="doctors" element={<RoleGuard allowed={["patient"]} roles={roles}><DoctorSearch /></RoleGuard>} />
+      <Route path="appointments" element={<RoleGuard allowed={["patient"]} roles={roles}><AppointmentsList /></RoleGuard>} />
+      <Route path="schedule" element={<RoleGuard allowed={["patient"]} roles={roles}><DoctorSearch /></RoleGuard>} />
+      <Route path="schedule/:doctorId" element={<RoleGuard allowed={["patient"]} roles={roles}><BookAppointment /></RoleGuard>} />
+      <Route path="plans" element={<RoleGuard allowed={["patient"]} roles={roles}><PlansCheckout /></RoleGuard>} />
+      <Route path="history" element={<RoleGuard allowed={["patient"]} roles={roles}><MedicalHistory /></RoleGuard>} />
+      <Route path="payment-history" element={<RoleGuard allowed={["patient"]} roles={roles}><PaymentHistory /></RoleGuard>} />
+      <Route path="patient/documents" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientExamUpload /></RoleGuard>} />
+      <Route path="patient/health" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientHealth /></RoleGuard>} />
+      <Route path="chat" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><ChatPage /></RoleGuard>} />
+      <Route path="medical-records" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><MedicalRecords /></RoleGuard>} />
 
-      {/* Doctor routes */}
-      <Route path="availability" element={<DoctorAvailability />} />
-      <Route path="patients" element={<DoctorPatients />} />
-      <Route path="prescriptions" element={<DoctorPrescriptions />} />
-      <Route path="earnings" element={<DoctorEarnings />} />
-      <Route path="certificates" element={<MedicalCertificate />} />
-      <Route path="doctor/consultations" element={<DoctorConsultations />} />
-      <Route path="doctor/calendar" element={<DoctorCalendar />} />
-      <Route path="doctor/waiting-room" element={<DoctorWaitingRoom />} />
-      <Route path="doctor/documents" element={<PatientDocuments />} />
+      {/* Doctor routes — doctors + admin */}
+      <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />
+      <Route path="patients" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorPatients /></RoleGuard>} />
+      <Route path="prescriptions" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorPrescriptions /></RoleGuard>} />
+      <Route path="earnings" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorEarnings /></RoleGuard>} />
+      <Route path="certificates" element={<RoleGuard allowed={["doctor"]} roles={roles}><MedicalCertificate /></RoleGuard>} />
+      <Route path="doctor/consultations" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorConsultations /></RoleGuard>} />
+      <Route path="doctor/calendar" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorCalendar /></RoleGuard>} />
+      <Route path="doctor/waiting-room" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorWaitingRoom /></RoleGuard>} />
+      <Route path="doctor/documents" element={<RoleGuard allowed={["doctor"]} roles={roles}><PatientDocuments /></RoleGuard>} />
 
-      {/* Consultation routes */}
-      <Route path="consultation/:appointmentId" element={<VideoRoom />} />
-      <Route path="prescribe/:appointmentId" element={<PrescriptionForm />} />
+      {/* Consultation routes — doctor + patient + admin */}
+      <Route path="consultation/:appointmentId" element={<RoleGuard allowed={["doctor", "patient"]} roles={roles}><VideoRoom /></RoleGuard>} />
+      <Route path="prescribe/:appointmentId" element={<RoleGuard allowed={["doctor"]} roles={roles}><PrescriptionForm /></RoleGuard>} />
 
-      {/* Clinic routes */}
-      <Route path="clinic/doctors" element={<ClinicDoctorsManagement />} />
+      {/* Clinic routes — clinic + admin */}
+      <Route path="clinic/doctors" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDoctorsManagement /></RoleGuard>} />
 
-      {/* Reception routes */}
-      <Route path="reception/schedules" element={<ReceptionSchedules />} />
-      <Route path="reception/checkin" element={<ReceptionCheckin />} />
-      <Route path="reception/billing" element={<ReceptionBilling />} />
+      {/* Reception routes — receptionist + admin */}
+      <Route path="reception/schedules" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionSchedules /></RoleGuard>} />
+      <Route path="reception/checkin" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionCheckin /></RoleGuard>} />
+      <Route path="reception/billing" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionBilling /></RoleGuard>} />
 
-      {/* Admin routes */}
-      <Route path="admin/doctors" element={<AdminDoctors />} />
-      <Route path="admin/users" element={<AdminUsers />} />
-      <Route path="admin/patients" element={<AdminPatients />} />
-      <Route path="admin/clinics" element={<AdminClinics />} />
-      <Route path="admin/appointments" element={<AdminAppointments />} />
-      <Route path="admin/specialties" element={<AdminSpecialties />} />
-      <Route path="admin/plans" element={<AdminPlans />} />
-      <Route path="admin/subscriptions" element={<AdminSubscriptions />} />
-      <Route path="admin/logs" element={<AdminLogs />} />
-      <Route path="admin/invite-codes" element={<AdminInviteCodes />} />
-      <Route path="admin/reports" element={<AdminReports />} />
-      <Route path="admin/approvals" element={<AdminApprovals />} />
-      <Route path="admin/switch-panel" element={<AdminSwitchPanel />} />
-      <Route path="admin/nps" element={<AdminNPS />} />
+      {/* Admin routes — admin only */}
+      <Route path="admin/doctors" element={<RoleGuard allowed={[]} roles={roles}><AdminDoctors /></RoleGuard>} />
+      <Route path="admin/users" element={<RoleGuard allowed={[]} roles={roles}><AdminUsers /></RoleGuard>} />
+      <Route path="admin/patients" element={<RoleGuard allowed={[]} roles={roles}><AdminPatients /></RoleGuard>} />
+      <Route path="admin/clinics" element={<RoleGuard allowed={[]} roles={roles}><AdminClinics /></RoleGuard>} />
+      <Route path="admin/appointments" element={<RoleGuard allowed={[]} roles={roles}><AdminAppointments /></RoleGuard>} />
+      <Route path="admin/specialties" element={<RoleGuard allowed={[]} roles={roles}><AdminSpecialties /></RoleGuard>} />
+      <Route path="admin/plans" element={<RoleGuard allowed={[]} roles={roles}><AdminPlans /></RoleGuard>} />
+      <Route path="admin/subscriptions" element={<RoleGuard allowed={[]} roles={roles}><AdminSubscriptions /></RoleGuard>} />
+      <Route path="admin/logs" element={<RoleGuard allowed={[]} roles={roles}><AdminLogs /></RoleGuard>} />
+      <Route path="admin/invite-codes" element={<RoleGuard allowed={[]} roles={roles}><AdminInviteCodes /></RoleGuard>} />
+      <Route path="admin/reports" element={<RoleGuard allowed={[]} roles={roles}><AdminReports /></RoleGuard>} />
+      <Route path="admin/approvals" element={<RoleGuard allowed={[]} roles={roles}><AdminApprovals /></RoleGuard>} />
+      <Route path="admin/switch-panel" element={<RoleGuard allowed={[]} roles={roles}><AdminSwitchPanel /></RoleGuard>} />
+      <Route path="admin/nps" element={<RoleGuard allowed={[]} roles={roles}><AdminNPS /></RoleGuard>} />
 
       {/* Default: role-based dashboard */}
       <Route
