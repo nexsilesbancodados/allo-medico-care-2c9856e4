@@ -5,15 +5,11 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, FileText, Download, Star } from "lucide-react";
+import { FileText, Download } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import jsPDF from "jspdf";
-
-const patientNav = [
-  { label: "Início", href: "/dashboard", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Histórico Médico", href: "/dashboard/history", icon: <FileText className="w-4 h-4" />, active: true },
-];
+import { getPatientNav } from "./patientNav";
 
 const MedicalHistory = () => {
   const { user } = useAuth();
@@ -90,7 +86,7 @@ const MedicalHistory = () => {
   };
 
   return (
-    <DashboardLayout title="Paciente" nav={patientNav}>
+    <DashboardLayout title="Paciente" nav={getPatientNav("health")}>
       <div className="max-w-3xl">
         <h1 className="text-2xl font-bold text-foreground mb-1">Histórico Médico</h1>
         <p className="text-muted-foreground mb-6">Consultas realizadas, receitas e prontuários</p>

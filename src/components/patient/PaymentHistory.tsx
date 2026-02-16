@@ -4,14 +4,10 @@ import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, Calendar } from "lucide-react";
+import { CreditCard } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-const nav = [
-  { label: "Início", href: "/dashboard", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Histórico de Pagamentos", href: "/dashboard/payment-history", icon: <CreditCard className="w-4 h-4" />, active: true },
-];
+import { getPatientNav } from "./patientNav";
 
 const statusLabel: Record<string, string> = { active: "Ativa", cancelled: "Cancelada", expired: "Vencida" };
 const statusVariant: Record<string, "default" | "destructive" | "outline"> = { active: "default", cancelled: "destructive", expired: "outline" };
@@ -45,7 +41,7 @@ const PaymentHistory = () => {
   };
 
   return (
-    <DashboardLayout title="Paciente" nav={nav}>
+    <DashboardLayout title="Paciente" nav={getPatientNav("payments")}>
       <div className="max-w-3xl">
         <h1 className="text-2xl font-bold text-foreground mb-1">Histórico de Pagamentos</h1>
         <p className="text-muted-foreground mb-6">Suas assinaturas e pagamentos realizados</p>

@@ -6,18 +6,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, Clock, FileText, Users, Search, Video, X } from "lucide-react";
+import { Calendar, Clock, FileText, Video, X } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-const patientNav = [
-  { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
-  { label: "Agendar Consulta", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Buscar Médicos", href: "/dashboard/doctors", icon: <Search className="w-4 h-4" /> },
-  { label: "Minhas Consultas", href: "/dashboard/appointments", icon: <FileText className="w-4 h-4" />, active: true },
-  { label: "Dependentes", href: "/dashboard/dependents", icon: <Users className="w-4 h-4" /> },
-];
+import { getPatientNav } from "./patientNav";
 
 interface Appointment {
   id: string;
@@ -157,7 +150,7 @@ const AppointmentsList = () => {
   );
 
   return (
-    <DashboardLayout title="Paciente" nav={patientNav}>
+    <DashboardLayout title="Paciente" nav={getPatientNav("appointments")}>
       <div className="max-w-3xl">
         <h1 className="text-2xl font-bold text-foreground mb-1">Minhas Consultas</h1>
         <p className="text-muted-foreground mb-6">Acompanhe suas consultas agendadas e histórico</p>
