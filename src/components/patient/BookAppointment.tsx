@@ -9,7 +9,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, Star, Check, Calendar as CalIcon, FileText, Users, Search } from "lucide-react";
+import { ArrowLeft, Clock, Star, Check, Calendar as CalIcon, FileText, Users, Search, UserPlus, UserCheck, AlertTriangle } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -44,6 +45,7 @@ const BookAppointment = () => {
   const [doctor, setDoctor] = useState<DoctorInfo | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [appointmentType, setAppointmentType] = useState<string>("first_visit");
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
@@ -146,6 +148,7 @@ const BookAppointment = () => {
       doctor_id: doctor.id,
       scheduled_at: scheduledAt.toISOString(),
       status: "scheduled",
+      appointment_type: appointmentType,
     });
 
     setBooking(false);
@@ -251,6 +254,17 @@ const BookAppointment = () => {
               <Card className="border-border mt-4">
                 <CardContent className="p-5">
                   <h3 className="font-semibold text-foreground mb-3">Confirmar Agendamento</h3>
+                  <div className="mb-3">
+                    <p className="text-xs text-muted-foreground mb-1">Tipo de Consulta</p>
+                    <Select value={appointmentType} onValueChange={setAppointmentType}>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="first_visit"><span className="flex items-center gap-2"><UserPlus className="w-3 h-3" /> 1ª Consulta</span></SelectItem>
+                        <SelectItem value="return"><span className="flex items-center gap-2"><UserCheck className="w-3 h-3" /> Retorno</span></SelectItem>
+                        <SelectItem value="urgency"><span className="flex items-center gap-2"><AlertTriangle className="w-3 h-3" /> Urgência</span></SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-2 text-sm text-muted-foreground mb-4">
                     <p className="flex items-center gap-2">
                       <Check className="w-4 h-4 text-secondary" />

@@ -50,6 +50,7 @@ export type Database = {
       appointments: {
         Row: {
           access_token: string | null
+          appointment_type: string | null
           cancel_reason: string | null
           cancelled_by: string | null
           created_at: string
@@ -66,6 +67,7 @@ export type Database = {
         }
         Insert: {
           access_token?: string | null
+          appointment_type?: string | null
           cancel_reason?: string | null
           cancelled_by?: string | null
           created_at?: string
@@ -82,6 +84,7 @@ export type Database = {
         }
         Update: {
           access_token?: string | null
+          appointment_type?: string | null
           cancel_reason?: string | null
           cancelled_by?: string | null
           created_at?: string
@@ -444,6 +447,53 @@ export type Database = {
           phone?: string
         }
         Relationships: []
+      }
+      patient_documents: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          description: string | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          patient_id: string
+          uploaded_by: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          patient_id: string
+          uploaded_by: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          description?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          patient_id?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_documents_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       plans: {
         Row: {
