@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   Mic, MicOff, Video, VideoOff, Phone, MessageSquare,
-  FileText, Clock, Send, X, Monitor, MonitorOff
+  FileText, Clock, Send, X, Monitor, MonitorOff, PhoneCall
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,6 +19,13 @@ interface ChatMessage {
   time: string;
 }
 
+const ICE_SERVERS: RTCConfiguration = {
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+  ],
+};
+
 const VideoRoom = () => {
   const { appointmentId } = useParams();
   const { user, roles } = useAuth();
@@ -29,12 +36,15 @@ const VideoRoom = () => {
   const [otherPartyName, setOtherPartyName] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Media
+  // Media refs
   const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // Controls
+  // State
   const [micOn, setMicOn] = useState(true);
   const [camOn, setCamOn] = useState(true);
   const [screenSharing, setScreenSharing] = useState(false);
@@ -43,18 +53,19 @@ const VideoRoom = () => {
   const [showNotes, setShowNotes] = useState(false);
   const [mediaReady, setMediaReady] = useState(false);
   const [mediaError, setMediaError] = useState("");
+  const [connected, setConnected] = useState(false);
+  const [remoteConnected, setRemoteConnected] = useState(false);
 
-  // Chat
+  // Chat & Notes
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
-
-  // Notes (doctor only)
   const [notes, setNotes] = useState("");
 
   const isDoctor = roles.includes("doctor") || roles.includes("admin");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
 
-  // Initialize media
+  // ─── Initialize local media ───
   useEffect(() => {
     const initMedia = async () => {
       try {
@@ -63,9 +74,7 @@ const VideoRoom = () => {
           audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         });
         localStreamRef.current = stream;
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
+        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
         setMediaReady(true);
       } catch (err: any) {
         console.error("Media error:", err);
@@ -76,7 +85,6 @@ const VideoRoom = () => {
         );
       }
     };
-
     initMedia();
     return () => {
       localStreamRef.current?.getTracks().forEach((t) => t.stop());
@@ -84,22 +92,144 @@ const VideoRoom = () => {
     };
   }, []);
 
+  // ─── Fetch appointment ───
   useEffect(() => {
     if (appointmentId) fetchAppointment();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [appointmentId]);
 
+  // ─── Timer ───
   useEffect(() => {
     timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
+  // ─── WebRTC Signaling via Supabase Realtime ───
+  useEffect(() => {
+    if (!appointmentId || !user || !mediaReady) return;
+
+    const roomChannel = supabase.channel(`video-room-${appointmentId}`, {
+      config: { broadcast: { self: false } },
+    });
+
+    channelRef.current = roomChannel;
+
+    roomChannel
+      .on("broadcast", { event: "offer" }, async ({ payload }) => {
+        console.log("[WebRTC] Received offer");
+        const pc = getOrCreatePeerConnection();
+        await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        roomChannel.send({ type: "broadcast", event: "answer", payload: { sdp: answer, from: user.id } });
+        // Apply pending candidates
+        for (const c of pendingCandidatesRef.current) {
+          await pc.addIceCandidate(new RTCIceCandidate(c));
+        }
+        pendingCandidatesRef.current = [];
+      })
+      .on("broadcast", { event: "answer" }, async ({ payload }) => {
+        console.log("[WebRTC] Received answer");
+        const pc = peerConnectionRef.current;
+        if (pc) {
+          await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+          for (const c of pendingCandidatesRef.current) {
+            await pc.addIceCandidate(new RTCIceCandidate(c));
+          }
+          pendingCandidatesRef.current = [];
+        }
+      })
+      .on("broadcast", { event: "ice-candidate" }, async ({ payload }) => {
+        const pc = peerConnectionRef.current;
+        if (pc && pc.remoteDescription) {
+          await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+        } else {
+          pendingCandidatesRef.current.push(payload.candidate);
+        }
+      })
+      .on("broadcast", { event: "peer-joined" }, () => {
+        setRemoteConnected(true);
+        // If doctor, initiate the call
+        if (isDoctor) startCall();
+      })
+      .on("broadcast", { event: "peer-left" }, () => {
+        setRemoteConnected(false);
+        setConnected(false);
+        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+      })
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          // Announce presence
+          roomChannel.send({ type: "broadcast", event: "peer-joined", payload: { userId: user.id, role: isDoctor ? "doctor" : "patient" } });
+        }
+      });
+
+    return () => {
+      roomChannel.send({ type: "broadcast", event: "peer-left", payload: { userId: user.id } });
+      supabase.removeChannel(roomChannel);
+      peerConnectionRef.current?.close();
+      peerConnectionRef.current = null;
+    };
+  }, [appointmentId, user, mediaReady]);
+
+  const getOrCreatePeerConnection = useCallback(() => {
+    if (peerConnectionRef.current) return peerConnectionRef.current;
+
+    const pc = new RTCPeerConnection(ICE_SERVERS);
+    peerConnectionRef.current = pc;
+
+    // Add local tracks
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((track) => {
+        pc.addTrack(track, localStreamRef.current!);
+      });
+    }
+
+    // Handle remote stream
+    pc.ontrack = (event) => {
+      console.log("[WebRTC] Remote track received");
+      if (remoteVideoRef.current && event.streams[0]) {
+        remoteVideoRef.current.srcObject = event.streams[0];
+        setConnected(true);
+      }
+    };
+
+    // Handle ICE candidates
+    pc.onicecandidate = (event) => {
+      if (event.candidate && channelRef.current) {
+        channelRef.current.send({
+          type: "broadcast",
+          event: "ice-candidate",
+          payload: { candidate: event.candidate.toJSON(), from: user!.id },
+        });
+      }
+    };
+
+    pc.onconnectionstatechange = () => {
+      console.log("[WebRTC] Connection state:", pc.connectionState);
+      if (pc.connectionState === "connected") setConnected(true);
+      if (pc.connectionState === "disconnected" || pc.connectionState === "failed") {
+        setConnected(false);
+      }
+    };
+
+    return pc;
+  }, [user]);
+
+  const startCall = useCallback(async () => {
+    const pc = getOrCreatePeerConnection();
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "offer",
+      payload: { sdp: offer, from: user!.id },
+    });
+  }, [getOrCreatePeerConnection, user]);
+
   const fetchAppointment = async () => {
     const { data } = await supabase
-      .from("appointments")
-      .select("*")
-      .eq("id", appointmentId)
-      .single();
+      .from("appointments").select("*").eq("id", appointmentId).single();
 
     if (!data) { setLoading(false); return; }
     setAppointment(data);
@@ -132,56 +262,54 @@ const VideoRoom = () => {
     setLoading(false);
   };
 
+  // ─── Controls ───
   const toggleMic = useCallback(() => {
-    const stream = localStreamRef.current;
-    if (stream) {
-      stream.getAudioTracks().forEach((t) => { t.enabled = !t.enabled; });
-      setMicOn((prev) => !prev);
-    }
+    localStreamRef.current?.getAudioTracks().forEach((t) => { t.enabled = !t.enabled; });
+    setMicOn((p) => !p);
   }, []);
 
   const toggleCam = useCallback(() => {
-    const stream = localStreamRef.current;
-    if (stream) {
-      stream.getVideoTracks().forEach((t) => { t.enabled = !t.enabled; });
-      setCamOn((prev) => !prev);
-    }
+    localStreamRef.current?.getVideoTracks().forEach((t) => { t.enabled = !t.enabled; });
+    setCamOn((p) => !p);
   }, []);
 
   const toggleScreenShare = useCallback(async () => {
     if (screenSharing) {
       screenStreamRef.current?.getTracks().forEach((t) => t.stop());
       screenStreamRef.current = null;
-      // Restore camera
-      if (localVideoRef.current && localStreamRef.current) {
-        localVideoRef.current.srcObject = localStreamRef.current;
+      // Replace track back to camera
+      const camTrack = localStreamRef.current?.getVideoTracks()[0];
+      if (camTrack) {
+        const sender = peerConnectionRef.current?.getSenders().find((s) => s.track?.kind === "video");
+        sender?.replaceTrack(camTrack);
       }
+      if (localVideoRef.current && localStreamRef.current) localVideoRef.current.srcObject = localStreamRef.current;
       setScreenSharing(false);
     } else {
       try {
         const screen = await navigator.mediaDevices.getDisplayMedia({ video: true });
         screenStreamRef.current = screen;
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = screen;
-        }
-        screen.getVideoTracks()[0].onended = () => {
-          if (localVideoRef.current && localStreamRef.current) {
-            localVideoRef.current.srcObject = localStreamRef.current;
-          }
+        const screenTrack = screen.getVideoTracks()[0];
+        // Replace video track in peer connection
+        const sender = peerConnectionRef.current?.getSenders().find((s) => s.track?.kind === "video");
+        sender?.replaceTrack(screenTrack);
+        if (localVideoRef.current) localVideoRef.current.srcObject = screen;
+        screenTrack.onended = () => {
+          const camTrack = localStreamRef.current?.getVideoTracks()[0];
+          if (camTrack) sender?.replaceTrack(camTrack);
+          if (localVideoRef.current && localStreamRef.current) localVideoRef.current.srcObject = localStreamRef.current;
           setScreenSharing(false);
         };
         setScreenSharing(true);
-      } catch (err) {
-        console.error("Screen share error:", err);
-      }
+      } catch (err) { console.error("Screen share error:", err); }
     }
   }, [screenSharing]);
 
-  const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return `${h > 0 ? `${h}:` : ""}${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  const formatTime = (s: number) => {
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return `${h > 0 ? `${h}:` : ""}${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
   const sendMessage = () => {
@@ -193,8 +321,19 @@ const VideoRoom = () => {
       time: format(new Date(), "HH:mm"),
     };
     setMessages((prev) => [...prev, msg]);
+    // Broadcast chat via realtime
+    channelRef.current?.send({ type: "broadcast", event: "chat-message", payload: msg });
     setChatInput("");
   };
+
+  // Listen for chat messages from remote
+  useEffect(() => {
+    if (!channelRef.current) return;
+    const handler = channelRef.current.on("broadcast", { event: "chat-message" }, ({ payload }) => {
+      setMessages((prev) => [...prev, payload as ChatMessage]);
+    });
+    return () => { /* cleanup handled by channel removal */ };
+  }, [channelRef.current]);
 
   const saveNotes = async () => {
     if (!appointmentId || !appointment) return;
@@ -216,6 +355,7 @@ const VideoRoom = () => {
   };
 
   const endCall = async () => {
+    peerConnectionRef.current?.close();
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     screenStreamRef.current?.getTracks().forEach((t) => t.stop());
 
@@ -224,11 +364,8 @@ const VideoRoom = () => {
     await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId);
     toast({ title: "Consulta encerrada" });
 
-    if (isDoctor) {
-      navigate(`/dashboard/prescribe/${appointmentId}`);
-    } else {
-      navigate("/dashboard/appointments");
-    }
+    if (isDoctor) navigate(`/dashboard/prescribe/${appointmentId}`);
+    else navigate("/dashboard/appointments");
   };
 
   if (loading) {
@@ -240,67 +377,85 @@ const VideoRoom = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[hsl(var(--foreground)/0.97)] flex flex-col">
+    <div className="min-h-screen bg-[hsl(210,50%,4%)] flex flex-col">
       {/* Top bar */}
-      <div className="flex items-center justify-between px-4 py-2 bg-card/10 border-b border-border/20 backdrop-blur-sm">
+      <div className="flex items-center justify-between px-4 py-2.5 bg-[hsl(210,50%,7%)] border-b border-border/15">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-gradient-hero flex items-center justify-center shadow-lg">
             <Video className="w-4 h-4 text-primary-foreground" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-primary-foreground">{otherPartyName || "Consulta"}</p>
-            <p className="text-xs text-primary-foreground/50">Telemedicina • Alô Médico</p>
+            <p className="text-sm font-semibold text-[hsl(210,20%,95%)]">{otherPartyName || "Consulta"}</p>
+            <div className="flex items-center gap-2">
+              <div className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-[hsl(var(--secondary))]" : "bg-[hsl(var(--muted-foreground))]"} animate-pulse`} />
+              <p className="text-xs text-[hsl(210,15%,55%)]">
+                {connected ? "Conectado" : remoteConnected ? "Conectando..." : "Aguardando participante"}
+              </p>
+            </div>
           </div>
         </div>
 
-        <motion.div
-          animate={{ opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 2, repeat: Infinity }}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/20 text-destructive border border-destructive/30"
-        >
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
           <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
           <Clock className="w-3.5 h-3.5" />
           <span className="text-sm font-mono font-semibold">{formatTime(elapsed)}</span>
-        </motion.div>
+        </div>
       </div>
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Video area */}
-        <div className="flex-1 relative flex items-center justify-center p-4">
-          {/* Main video / Waiting */}
-          <div className="w-full max-w-4xl aspect-video rounded-2xl bg-[hsl(210,50%,8%)] border border-border/20 flex items-center justify-center overflow-hidden shadow-2xl">
-            {mediaError ? (
-              <div className="text-center p-8">
-                <VideoOff className="w-16 h-16 text-destructive/60 mx-auto mb-4" />
-                <p className="text-primary-foreground/70 text-sm max-w-sm">{mediaError}</p>
-              </div>
-            ) : (
-              <div className="text-center">
-                <motion.div
-                  animate={{ scale: [1, 1.05, 1] }}
-                  transition={{ duration: 3, repeat: Infinity }}
-                  className="w-28 h-28 rounded-full bg-gradient-hero mx-auto flex items-center justify-center mb-4 shadow-xl"
-                >
-                  <span className="text-4xl font-bold text-primary-foreground">
-                    {otherPartyName?.[0] ?? "?"}
-                  </span>
-                </motion.div>
-                <p className="text-primary-foreground/60 text-sm font-medium">
-                  Aguardando {otherPartyName || "participante"}...
-                </p>
-                <p className="text-primary-foreground/30 text-xs mt-2">
-                  A videochamada iniciará quando ambos estiverem conectados
-                </p>
+        <div className="flex-1 relative flex items-center justify-center p-3 md:p-6">
+          {/* Remote video / Waiting screen */}
+          <div className="w-full max-w-5xl aspect-video rounded-2xl bg-[hsl(210,50%,7%)] border border-border/10 overflow-hidden shadow-2xl relative">
+            <video
+              ref={remoteVideoRef}
+              autoPlay
+              playsInline
+              className={`w-full h-full object-cover ${!connected ? "hidden" : ""}`}
+            />
+            {!connected && (
+              <div className="absolute inset-0 flex items-center justify-center">
+                {mediaError ? (
+                  <div className="text-center p-8">
+                    <VideoOff className="w-16 h-16 text-destructive/50 mx-auto mb-4" />
+                    <p className="text-[hsl(210,20%,70%)] text-sm max-w-sm">{mediaError}</p>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <motion.div
+                      animate={{ scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] }}
+                      transition={{ duration: 2.5, repeat: Infinity }}
+                      className="w-28 h-28 rounded-full bg-gradient-hero mx-auto flex items-center justify-center mb-5 shadow-xl"
+                    >
+                      <PhoneCall className="w-10 h-10 text-primary-foreground" />
+                    </motion.div>
+                    <p className="text-[hsl(210,20%,75%)] text-sm font-medium">
+                      Aguardando {otherPartyName || "participante"}...
+                    </p>
+                    <p className="text-[hsl(210,15%,40%)] text-xs mt-2 max-w-xs mx-auto">
+                      A videochamada iniciará automaticamente quando ambos estiverem na sala
+                    </p>
+                    {!remoteConnected && (
+                      <div className="mt-6 flex items-center justify-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                        <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+                        <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
 
           {/* Self video (PiP) */}
           <motion.div
+            drag
+            dragConstraints={{ left: -400, right: 0, top: -300, bottom: 0 }}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="absolute bottom-6 right-6 w-44 h-32 rounded-xl overflow-hidden shadow-2xl border-2 border-primary/30"
+            className="absolute bottom-6 right-6 w-40 md:w-48 h-28 md:h-36 rounded-xl overflow-hidden shadow-2xl border-2 border-primary/30 cursor-grab active:cursor-grabbing z-10"
           >
             <video
               ref={localVideoRef}
@@ -310,20 +465,16 @@ const VideoRoom = () => {
               className={`w-full h-full object-cover ${!camOn ? "hidden" : ""}`}
             />
             {!camOn && (
-              <div className="w-full h-full bg-[hsl(210,50%,12%)] flex items-center justify-center">
-                <div className="text-center">
-                  <VideoOff className="w-6 h-6 text-primary-foreground/40 mx-auto" />
-                  <p className="text-primary-foreground/40 text-[10px] mt-1">Câmera desligada</p>
-                </div>
+              <div className="w-full h-full bg-[hsl(210,50%,10%)] flex items-center justify-center">
+                <VideoOff className="w-6 h-6 text-[hsl(210,15%,45%)]" />
               </div>
             )}
-            {/* Mic indicator */}
             <div className={`absolute bottom-2 left-2 w-6 h-6 rounded-full flex items-center justify-center ${micOn ? "bg-primary/80" : "bg-destructive/80"}`}>
               {micOn ? <Mic className="w-3 h-3 text-primary-foreground" /> : <MicOff className="w-3 h-3 text-destructive-foreground" />}
             </div>
             {screenSharing && (
-              <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-secondary/80 text-secondary-foreground text-[10px] font-semibold">
-                Compartilhando tela
+              <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-[hsl(var(--secondary))]/80 text-secondary-foreground text-[10px] font-semibold">
+                Tela
               </div>
             )}
           </motion.div>
@@ -337,14 +488,14 @@ const VideoRoom = () => {
               animate={{ width: 320, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="border-l border-border/20 bg-card/5 backdrop-blur-sm flex flex-col overflow-hidden"
+              className="border-l border-border/15 bg-[hsl(210,50%,6%)] flex flex-col overflow-hidden"
             >
-              <div className="p-3 border-b border-border/20 flex items-center justify-between shrink-0">
-                <p className="text-sm font-semibold text-primary-foreground">
+              <div className="p-3 border-b border-border/15 flex items-center justify-between shrink-0">
+                <p className="text-sm font-semibold text-[hsl(210,20%,90%)]">
                   {showChat ? "💬 Chat" : "📝 Anotações"}
                 </p>
                 <button onClick={() => { setShowChat(false); setShowNotes(false); }}>
-                  <X className="w-4 h-4 text-primary-foreground/50 hover:text-primary-foreground" />
+                  <X className="w-4 h-4 text-[hsl(210,15%,50%)] hover:text-[hsl(210,20%,80%)]" />
                 </button>
               </div>
 
@@ -353,8 +504,8 @@ const VideoRoom = () => {
                   <div className="flex-1 overflow-y-auto p-3 space-y-3">
                     {messages.length === 0 && (
                       <div className="text-center mt-12">
-                        <MessageSquare className="w-8 h-8 text-primary-foreground/20 mx-auto mb-2" />
-                        <p className="text-xs text-primary-foreground/30">Nenhuma mensagem ainda</p>
+                        <MessageSquare className="w-8 h-8 text-[hsl(210,15%,25%)] mx-auto mb-2" />
+                        <p className="text-xs text-[hsl(210,15%,35%)]">Nenhuma mensagem</p>
                       </div>
                     )}
                     {messages.map((msg) => (
@@ -367,7 +518,7 @@ const VideoRoom = () => {
                         <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
                           msg.sender === (isDoctor ? "doctor" : "patient")
                             ? "bg-primary text-primary-foreground rounded-br-sm"
-                            : "bg-card/20 text-primary-foreground/90 rounded-bl-sm"
+                            : "bg-[hsl(210,30%,15%)] text-[hsl(210,20%,90%)] rounded-bl-sm"
                         }`}>
                           <p>{msg.text}</p>
                           <p className="text-[10px] opacity-50 mt-1">{msg.time}</p>
@@ -375,13 +526,13 @@ const VideoRoom = () => {
                       </motion.div>
                     ))}
                   </div>
-                  <div className="p-3 border-t border-border/20 flex gap-2 shrink-0">
+                  <div className="p-3 border-t border-border/15 flex gap-2 shrink-0">
                     <input
                       value={chatInput}
                       onChange={(e) => setChatInput(e.target.value)}
                       onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                      placeholder="Digite sua mensagem..."
-                      className="flex-1 bg-card/10 border border-border/20 rounded-xl px-3 py-2 text-sm text-primary-foreground placeholder:text-primary-foreground/30 outline-none focus:border-primary/50 transition-colors"
+                      placeholder="Digite..."
+                      className="flex-1 bg-[hsl(210,30%,10%)] border border-border/20 rounded-xl px-3 py-2 text-sm text-[hsl(210,20%,90%)] placeholder:text-[hsl(210,15%,35%)] outline-none focus:border-primary/50 transition-colors"
                     />
                     <Button size="icon" variant="ghost" onClick={sendMessage} className="text-primary hover:bg-primary/20 rounded-xl">
                       <Send className="w-4 h-4" />
@@ -396,7 +547,7 @@ const VideoRoom = () => {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="Anotações da consulta..."
-                    className="flex-1 bg-card/10 border-border/20 text-primary-foreground placeholder:text-primary-foreground/30 resize-none rounded-xl"
+                    className="flex-1 bg-[hsl(210,30%,10%)] border-border/20 text-[hsl(210,20%,90%)] placeholder:text-[hsl(210,15%,35%)] resize-none rounded-xl"
                   />
                   <Button onClick={saveNotes} size="sm" className="bg-gradient-hero text-primary-foreground rounded-xl">
                     Salvar Anotações
@@ -409,63 +560,47 @@ const VideoRoom = () => {
       </div>
 
       {/* Bottom controls */}
-      <div className="flex items-center justify-center gap-2 md:gap-3 py-4 bg-card/5 border-t border-border/20 backdrop-blur-sm">
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`rounded-full w-12 h-12 transition-all ${micOn ? "bg-card/15 text-primary-foreground hover:bg-card/25" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"}`}
-          onClick={toggleMic}
-          title={micOn ? "Desligar microfone" : "Ligar microfone"}
+      <div className="flex items-center justify-center gap-2 md:gap-3 py-4 bg-[hsl(210,50%,6%)] border-t border-border/15">
+        <Button variant="ghost" size="icon"
+          className={`rounded-full w-12 h-12 transition-all ${micOn ? "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]" : "bg-destructive text-destructive-foreground"}`}
+          onClick={toggleMic} title={micOn ? "Desligar microfone" : "Ligar microfone"}
         >
           {micOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
         </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`rounded-full w-12 h-12 transition-all ${camOn ? "bg-card/15 text-primary-foreground hover:bg-card/25" : "bg-destructive text-destructive-foreground hover:bg-destructive/90"}`}
-          onClick={toggleCam}
-          title={camOn ? "Desligar câmera" : "Ligar câmera"}
+        <Button variant="ghost" size="icon"
+          className={`rounded-full w-12 h-12 transition-all ${camOn ? "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]" : "bg-destructive text-destructive-foreground"}`}
+          onClick={toggleCam} title={camOn ? "Desligar câmera" : "Ligar câmera"}
         >
           {camOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
         </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`rounded-full w-12 h-12 transition-all ${screenSharing ? "bg-secondary text-secondary-foreground" : "bg-card/15 text-primary-foreground hover:bg-card/25"}`}
-          onClick={toggleScreenShare}
-          title={screenSharing ? "Parar compartilhamento" : "Compartilhar tela"}
+        <Button variant="ghost" size="icon"
+          className={`rounded-full w-12 h-12 transition-all ${screenSharing ? "bg-[hsl(var(--secondary))] text-secondary-foreground" : "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]"}`}
+          onClick={toggleScreenShare} title={screenSharing ? "Parar compartilhamento" : "Compartilhar tela"}
         >
           {screenSharing ? <MonitorOff className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
         </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          className={`rounded-full w-12 h-12 transition-all ${showChat ? "bg-primary text-primary-foreground" : "bg-card/15 text-primary-foreground hover:bg-card/25"}`}
-          onClick={() => { setShowChat(!showChat); setShowNotes(false); }}
-          title="Chat"
+        <Button variant="ghost" size="icon"
+          className={`rounded-full w-12 h-12 transition-all ${showChat ? "bg-primary text-primary-foreground" : "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]"}`}
+          onClick={() => { setShowChat(!showChat); setShowNotes(false); }} title="Chat"
         >
           <MessageSquare className="w-5 h-5" />
         </Button>
 
         {isDoctor && (
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`rounded-full w-12 h-12 transition-all ${showNotes ? "bg-primary text-primary-foreground" : "bg-card/15 text-primary-foreground hover:bg-card/25"}`}
-            onClick={() => { setShowNotes(!showNotes); setShowChat(false); }}
-            title="Anotações"
+          <Button variant="ghost" size="icon"
+            className={`rounded-full w-12 h-12 transition-all ${showNotes ? "bg-primary text-primary-foreground" : "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]"}`}
+            onClick={() => { setShowNotes(!showNotes); setShowChat(false); }} title="Anotações"
           >
             <FileText className="w-5 h-5" />
           </Button>
         )}
 
-        <div className="w-px h-8 bg-border/20 mx-1" />
+        <div className="w-px h-8 bg-border/15 mx-1" />
 
-        <Button
-          onClick={endCall}
+        <Button onClick={endCall}
           className="rounded-full w-14 h-14 bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-lg transition-transform hover:scale-105"
           title="Encerrar consulta"
         >
