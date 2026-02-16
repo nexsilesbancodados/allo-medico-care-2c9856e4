@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check, MessageCircle, LogIn } from "lucide-react";
 import doctorPortalBg from "@/assets/doctor-portal-bg.png";
+import DoctorWhySection from "@/components/landing/DoctorWhySection";
 
 type Step = "welcome" | "code" | "register" | "login";
 
@@ -90,183 +91,188 @@ const AuthMedico = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
-      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden">
-        <img src={doctorPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary/80 to-primary/80" />
-        <div className="relative text-primary-foreground max-w-md">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8 opacity-80 hover:opacity-100 transition">
-            <ArrowLeft className="w-4 h-4" /> Voltar ao início
-          </Link>
-          <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
-            <Stethoscope className="w-8 h-8" />
+    <div className="min-h-screen bg-background">
+      <div className="flex min-h-screen">
+        <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden">
+          <img src={doctorPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary/80 to-primary/80" />
+          <div className="relative text-primary-foreground max-w-md">
+            <Link to="/" className="inline-flex items-center gap-2 mb-8 opacity-80 hover:opacity-100 transition">
+              <ArrowLeft className="w-4 h-4" /> Voltar ao início
+            </Link>
+            <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
+              <Stethoscope className="w-8 h-8" />
+            </div>
+            <h1 className="text-4xl font-extrabold mb-4">Portal do Médico</h1>
+            <p className="text-lg opacity-90">
+              Atenda seus pacientes por videochamada, emita receitas digitais e gerencie sua agenda online.
+            </p>
+            <div className="mt-8 space-y-3 opacity-80 text-sm">
+              <p>✓ Agenda online flexível</p>
+              <p>✓ Videochamadas com qualidade</p>
+              <p>✓ Receitas e prontuários digitais</p>
+              <p>✓ Gestão completa de pacientes</p>
+            </div>
           </div>
-          <h1 className="text-4xl font-extrabold mb-4">Portal do Médico</h1>
-          <p className="text-lg opacity-90">
-            Atenda seus pacientes por videochamada, emita receitas digitais e gerencie sua agenda online.
-          </p>
-          <div className="mt-8 space-y-3 opacity-80 text-sm">
-            <p>✓ Agenda online flexível</p>
-            <p>✓ Videochamadas com qualidade</p>
-            <p>✓ Receitas e prontuários digitais</p>
-            <p>✓ Gestão completa de pacientes</p>
-          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center p-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
+            <Link to="/" className="lg:hidden inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition">
+              <ArrowLeft className="w-4 h-4" /> Voltar
+            </Link>
+
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center">
+                <Stethoscope className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {step === "welcome" ? "Portal do Médico" : step === "code" ? "Código de Acesso" : step === "login" ? "Entrar" : "Cadastro Médico"}
+                </h2>
+                <p className="text-sm text-muted-foreground">Portal do Médico</p>
+              </div>
+            </div>
+
+            {/* Welcome step */}
+            {step === "welcome" && (
+              <div className="space-y-4">
+                <p className="text-muted-foreground text-sm mb-2">
+                  Bem-vindo ao portal exclusivo para médicos. Escolha uma opção abaixo:
+                </p>
+                <Button
+                  className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground"
+                  size="lg"
+                  onClick={() => setStep("login")}
+                >
+                  <LogIn className="w-4 h-4 mr-2" />
+                  Entrar na minha conta
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => setStep("code")}
+                >
+                  <KeyRound className="w-4 h-4 mr-2" />
+                  Tenho um código de convite
+                </Button>
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma Alô Médico.", "_blank")}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Contactar suporte para cadastro
+                </Button>
+              </div>
+            )}
+
+            {/* Step 1: Validate invite code */}
+            {step === "code" && (
+              <form onSubmit={handleValidateCode} className="space-y-4">
+                <div className="p-4 rounded-lg bg-muted/50 border border-border mb-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                    <KeyRound className="w-4 h-4" />
+                    <span className="font-medium">Cadastro por convite</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Para se cadastrar como médico, você precisa de um código de autenticação fornecido pelo administrador da plataforma.
+                  </p>
+                </div>
+                <div>
+                  <Label>Código de Convite</Label>
+                  <Input
+                    value={inviteCode}
+                    onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                    placeholder="Ex: MED-XXXX-XXXX"
+                    required
+                    className="mt-1 font-mono text-center text-lg tracking-widest"
+                    maxLength={20}
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={validating}>
+                  {validating ? "Validando..." : "Validar Código"}
+                </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                </p>
+              </form>
+            )}
+
+            {/* Step 2: Register (only after valid code) */}
+            {step === "register" && (
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/10 text-secondary text-sm mb-2">
+                  <Check className="w-4 h-4" />
+                  <span>Código validado com sucesso</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1" /></div>
+                  <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1" /></div>
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
+                  </div>
+                </div>
+                <div>
+                  <Label>Senha</Label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="pl-10" required minLength={6} />
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1" /></div>
+                  <div><Label>UF</Label><Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1" maxLength={2} /></div>
+                </div>
+                <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={loading}>
+                  {loading ? "Criando conta..." : "Cadastrar como Médico"}
+                </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  Já tem conta? <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Entrar</button>
+                </p>
+              </form>
+            )}
+
+            {/* Login */}
+            {step === "login" && (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <Label>Email</Label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
+                  </div>
+                </div>
+                <div>
+                  <Label>Senha</Label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-10" required />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={loading}>
+                  {loading ? "Entrando..." : "Entrar"}
+                </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
+                </p>
+                <p className="text-center text-sm text-muted-foreground">
+                  <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                </p>
+              </form>
+            )}
+          </motion.div>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-          <Link to="/" className="lg:hidden inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition">
-            <ArrowLeft className="w-4 h-4" /> Voltar
-          </Link>
-
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center">
-              <Stethoscope className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">
-                {step === "welcome" ? "Portal do Médico" : step === "code" ? "Código de Acesso" : step === "login" ? "Entrar" : "Cadastro Médico"}
-              </h2>
-              <p className="text-sm text-muted-foreground">Portal do Médico</p>
-            </div>
-          </div>
-
-          {/* Welcome step */}
-          {step === "welcome" && (
-            <div className="space-y-4">
-              <p className="text-muted-foreground text-sm mb-2">
-                Bem-vindo ao portal exclusivo para médicos. Escolha uma opção abaixo:
-              </p>
-              <Button
-                className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground"
-                size="lg"
-                onClick={() => setStep("login")}
-              >
-                <LogIn className="w-4 h-4 mr-2" />
-                Entrar na minha conta
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full"
-                size="lg"
-                onClick={() => setStep("code")}
-              >
-                <KeyRound className="w-4 h-4 mr-2" />
-                Tenho um código de convite
-              </Button>
-              <Button
-                variant="ghost"
-                className="w-full"
-                size="lg"
-                onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma Alô Médico.", "_blank")}
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Contactar suporte para cadastro
-              </Button>
-            </div>
-          )}
-
-          {/* Step 1: Validate invite code */}
-          {step === "code" && (
-            <form onSubmit={handleValidateCode} className="space-y-4">
-              <div className="p-4 rounded-lg bg-muted/50 border border-border mb-2">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                  <KeyRound className="w-4 h-4" />
-                  <span className="font-medium">Cadastro por convite</span>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Para se cadastrar como médico, você precisa de um código de autenticação fornecido pelo administrador da plataforma.
-                </p>
-              </div>
-              <div>
-                <Label>Código de Convite</Label>
-                <Input
-                  value={inviteCode}
-                  onChange={e => setInviteCode(e.target.value.toUpperCase())}
-                  placeholder="Ex: MED-XXXX-XXXX"
-                  required
-                  className="mt-1 font-mono text-center text-lg tracking-widest"
-                  maxLength={20}
-                />
-              </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={validating}>
-                {validating ? "Validando..." : "Validar Código"}
-              </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
-              </p>
-            </form>
-          )}
-
-          {/* Step 2: Register (only after valid code) */}
-          {step === "register" && (
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/10 text-secondary text-sm mb-2">
-                <Check className="w-4 h-4" />
-                <span>Código validado com sucesso</span>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1" /></div>
-                <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1" /></div>
-              </div>
-              <div>
-                <Label>Email</Label>
-                <div className="relative mt-1">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
-                </div>
-              </div>
-              <div>
-                <Label>Senha</Label>
-                <div className="relative mt-1">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="pl-10" required minLength={6} />
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1" /></div>
-                <div><Label>UF</Label><Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1" maxLength={2} /></div>
-              </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={loading}>
-                {loading ? "Criando conta..." : "Cadastrar como Médico"}
-              </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                Já tem conta? <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Entrar</button>
-              </p>
-            </form>
-          )}
-
-          {/* Login */}
-          {step === "login" && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label>Email</Label>
-                <div className="relative mt-1">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
-                </div>
-              </div>
-              <div>
-                <Label>Senha</Label>
-                <div className="relative mt-1">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-10" required />
-                </div>
-              </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={loading}>
-                {loading ? "Entrando..." : "Entrar"}
-              </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
-              </p>
-              <p className="text-center text-sm text-muted-foreground">
-                <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
-              </p>
-            </form>
-          )}
-        </motion.div>
-      </div>
+      {/* Why section */}
+      <DoctorWhySection />
     </div>
   );
 };
