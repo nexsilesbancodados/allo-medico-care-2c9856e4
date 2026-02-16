@@ -5,19 +5,6 @@ import { useNavigate } from "react-router-dom";
 
 const plans = [
   {
-    name: "Consulta Avulsa",
-    price: "89",
-    period: "por consulta",
-    description: "Ideal para quem precisa de atendimento pontual.",
-    features: [
-      "1 consulta por videochamada",
-      "Receita digital inclusa",
-      "Chat pós-consulta (48h)",
-      "Escolha de especialidade",
-    ],
-    highlighted: false,
-  },
-  {
     name: "Plano Mensal",
     price: "149",
     period: "por mês",
@@ -54,7 +41,7 @@ const PlansSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-1 gap-8 max-w-md mx-auto">
           {plans.map((plan, i) => (
             <motion.div
               key={i}
