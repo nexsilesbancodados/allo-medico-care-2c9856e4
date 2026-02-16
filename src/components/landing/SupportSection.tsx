@@ -75,7 +75,7 @@ const SupportSection = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="hidden lg:flex justify-center"
+              className="flex justify-center"
             >
               <motion.img
                 whileHover={{ scale: 1.05, rotate: 2 }}

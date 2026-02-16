@@ -66,7 +66,7 @@ const ClinicPresentialSection = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="hidden lg:block"
+              className="hidden md:block"
             >
               <div className="rounded-2xl overflow-hidden shadow-2xl">
                 <img
@@ -111,7 +111,7 @@ const ClinicPresentialSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4, duration: 0.6 }}
-              className="relative hidden lg:block"
+              className="relative hidden md:block"
             >
               <div className="flex gap-4">
                 {/* Patient image */}

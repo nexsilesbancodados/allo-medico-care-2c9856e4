@@ -107,7 +107,7 @@ const MultiPlatformSection = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="hidden lg:flex flex-col items-center gap-6"
+              className="flex flex-col items-center gap-6"
             >
               {/* Devices image with mascot overlay */}
               <div className="relative w-full max-w-md">
