@@ -157,13 +157,13 @@ const HeroSection = () => {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="relative hidden md:block cursor-pointer"
+            className="relative cursor-pointer"
             onMouseMove={handleMouseMove}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={handleMouseLeave}
             style={{ perspective: 800 }}
           >
-            <div className="relative w-full max-w-lg mx-auto">
+            <div className="relative w-full max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-lg mx-auto">
               {/* Mascot with 3D tilt + pose transitions */}
               <motion.div
                 style={{
@@ -196,7 +196,7 @@ const HeroSection = () => {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-4 right-0 bg-card rounded-2xl shadow-card p-4 border border-border"
+                className="absolute top-4 right-0 bg-card rounded-2xl shadow-card p-4 border border-border hidden md:flex"
                 whileHover={{ scale: 1.1 }}
               >
                 <div className="flex items-center gap-3">
