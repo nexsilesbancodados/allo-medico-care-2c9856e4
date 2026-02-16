@@ -7,6 +7,7 @@ import PlansSection from "@/components/landing/PlansSection";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import CTABanner from "@/components/landing/CTABanner";
 import DoctorPremiumSection from "@/components/landing/DoctorPremiumSection";
+import VirtualAssistantSection from "@/components/landing/VirtualAssistantSection";
 import FAQSection from "@/components/landing/FAQSection";
 import SupportSection from "@/components/landing/SupportSection";
 import Footer from "@/components/landing/Footer";
@@ -19,6 +20,7 @@ const Index = () => {
       <StatsSection />
       <HowItWorksSection />
       <SpecialtiesSection />
+      <VirtualAssistantSection />
       <PlansSection />
       <TestimonialsSection />
       <DoctorPremiumSection />
