@@ -30,6 +30,7 @@ import AdminLogs from "@/components/admin/AdminLogs";
 import AdminInviteCodes from "@/components/admin/AdminInviteCodes";
 import AdminReports from "@/components/admin/AdminReports";
 import AdminUsers from "@/components/admin/AdminUsers";
+import AdminApprovals from "@/components/admin/AdminApprovals";
 import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
@@ -93,6 +94,7 @@ const Dashboard = () => {
       <Route path="admin/logs" element={<AdminLogs />} />
       <Route path="admin/invite-codes" element={<AdminInviteCodes />} />
       <Route path="admin/reports" element={<AdminReports />} />
+      <Route path="admin/approvals" element={<AdminApprovals />} />
 
       {/* Default: role-based dashboard */}
       <Route
