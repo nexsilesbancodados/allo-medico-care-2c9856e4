@@ -117,6 +117,25 @@ const HeroSection = () => {
             </AnimatePresence>
 
 
+            {/* CTA Buttons */}
+            <div className="flex flex-wrap gap-3 mb-6">
+              <Button
+                size="lg"
+                className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-6"
+                onClick={() => navigate("/paciente")}
+              >
+                Começar Agora <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full px-6"
+                onClick={() => navigate("/consulta-avulsa")}
+              >
+                Consulta Avulsa
+              </Button>
+            </div>
+
             {/* Trust indicators */}
             <div className="flex flex-wrap gap-6">
               {[
