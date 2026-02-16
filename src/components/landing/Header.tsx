@@ -102,7 +102,8 @@ const Header = () => {
               ))}
               <div className="flex flex-col gap-2 pt-2 border-t border-border">
                 <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/medico"); }}>Sou Médico</Button>
-                <Button size="sm" className="bg-gradient-hero" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>Sou Paciente</Button>
+                <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/consulta-avulsa"); }}>Comprar Consulta</Button>
+                <Button size="sm" className="bg-gradient-hero text-primary-foreground" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>Sou Paciente</Button>
               </div>
             </nav>
           </motion.div>
