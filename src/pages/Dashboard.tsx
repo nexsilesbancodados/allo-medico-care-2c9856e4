@@ -43,6 +43,7 @@ import AdminUsers from "@/components/admin/AdminUsers";
 import AdminApprovals from "@/components/admin/AdminApprovals";
 import ReceptionSchedules from "@/components/reception/ReceptionSchedules";
 import ReceptionCheckin from "@/components/reception/ReceptionCheckin";
+import ReceptionBilling from "@/components/reception/ReceptionBilling";
 import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
@@ -108,6 +109,7 @@ const Dashboard = () => {
       {/* Reception routes */}
       <Route path="reception/schedules" element={<ReceptionSchedules />} />
       <Route path="reception/checkin" element={<ReceptionCheckin />} />
+      <Route path="reception/billing" element={<ReceptionBilling />} />
 
       {/* Admin routes */}
       <Route path="admin/doctors" element={<AdminDoctors />} />

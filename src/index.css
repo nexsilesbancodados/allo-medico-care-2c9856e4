@@ -129,3 +129,49 @@
     padding-bottom: env(safe-area-inset-bottom, 8px);
   }
 }
+
+/* Accessibility Mode */
+.accessibility-mode {
+  font-size: 1.15em;
+}
+
+.accessibility-mode button,
+.accessibility-mode a,
+.accessibility-mode input,
+.accessibility-mode select,
+.accessibility-mode textarea {
+  min-height: 48px;
+  font-size: 1.05em;
+}
+
+.accessibility-mode .text-xs {
+  font-size: 0.85rem;
+}
+
+.accessibility-mode .text-sm {
+  font-size: 1rem;
+}
+
+.accessibility-mode :focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* High contrast mode */
+.high-contrast {
+  --foreground: 0 0% 0%;
+  --background: 0 0% 100%;
+  --muted-foreground: 0 0% 20%;
+  --border: 0 0% 30%;
+  --primary: 210 100% 30%;
+  --secondary: 160 80% 30%;
+}
+
+.dark.high-contrast {
+  --foreground: 0 0% 100%;
+  --background: 0 0% 0%;
+  --muted-foreground: 0 0% 85%;
+  --border: 0 0% 70%;
+  --primary: 210 100% 70%;
+  --secondary: 160 80% 65%;
+}
