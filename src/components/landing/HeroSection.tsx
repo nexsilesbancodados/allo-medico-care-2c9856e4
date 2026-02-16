@@ -4,6 +4,7 @@ import { Video, Shield, Clock, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState } from "react";
 import heroDoctor from "@/assets/hero-doctor.png";
+import mascotVideo from "@/assets/mascot-animated.mp4";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -115,9 +116,13 @@ const HeroSection = () => {
                   y: translateY,
                 }}
               >
-                <motion.img
-                  src={heroDoctor}
-                  alt="Mascote pinguim médico do Alô Médico"
+                <motion.video
+                  src={mascotVideo}
+                  poster={heroDoctor}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
                   className="w-full h-auto drop-shadow-2xl"
                   animate={isHovered ? { scale: 1.05 } : { scale: 1 }}
                   transition={{ type: "spring", stiffness: 300, damping: 15 }}
