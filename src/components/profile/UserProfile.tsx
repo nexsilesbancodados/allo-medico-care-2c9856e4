@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, Save, User } from "lucide-react";
+import { ArrowLeft, Camera, Save, User } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const UserProfile = () => {
   const { user, profile, roles } = useAuth();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -96,6 +98,9 @@ const UserProfile = () => {
   return (
     <DashboardLayout title="Perfil" nav={[]}>
       <div className="max-w-2xl mx-auto">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </button>
         <h1 className="text-2xl font-bold text-foreground mb-6">Meu Perfil</h1>
 
         {/* Avatar */}
