@@ -18,6 +18,8 @@ import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import GuestCheckout from "./pages/GuestCheckout";
 import GuestConsultation from "./pages/GuestConsultation";
+import AuthParceiro from "./pages/AuthParceiro";
+import AuthAfiliado from "./pages/AuthAfiliado";
 import NotFound from "./pages/NotFound";
 import PingoChatbot from "./components/PingoChatbot";
 import AccessibilityToggle from "./components/AccessibilityToggle";
@@ -44,6 +46,8 @@ const App = () => (
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/consulta-avulsa" element={<GuestCheckout />} />
             <Route path="/consulta" element={<GuestConsultation />} />
+            <Route path="/parceiro" element={<AuthParceiro />} />
+            <Route path="/afiliado" element={<AuthAfiliado />} />
             <Route
               path="/dashboard/*"
               element={
