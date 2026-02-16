@@ -1,11 +1,37 @@
 import { Button } from "@/components/ui/button";
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
 import { Video, Shield, Clock, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useRef, useState } from "react";
 import heroDoctor from "@/assets/hero-doctor.png";
 
 const HeroSection = () => {
   const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const rotateX = useSpring(useTransform(mouseY, [-300, 300], [8, -8]), { stiffness: 150, damping: 20 });
+  const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-8, 8]), { stiffness: 150, damping: 20 });
+  const translateX = useSpring(useTransform(mouseX, [-300, 300], [-10, 10]), { stiffness: 150, damping: 20 });
+  const translateY = useSpring(useTransform(mouseY, [-300, 300], [-10, 10]), { stiffness: 150, damping: 20 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    mouseX.set(e.clientX - centerX);
+    mouseY.set(e.clientY - centerY);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+    setIsHovered(false);
+  };
 
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
@@ -67,25 +93,44 @@ const HeroSection = () => {
             </div>
           </motion.div>
 
-          {/* Visual */}
+          {/* Interactive Mascot */}
           <motion.div
+            ref={containerRef}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="relative hidden lg:block"
+            className="relative hidden lg:block cursor-pointer"
+            onMouseMove={handleMouseMove}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={handleMouseLeave}
+            style={{ perspective: 800 }}
           >
             <div className="relative w-full max-w-lg mx-auto">
-              <img
-                src={heroDoctor}
-                alt="Médica realizando teleconsulta pelo tablet"
-                className="w-full h-auto"
-              />
+              {/* Mascot with 3D tilt + follow cursor */}
+              <motion.div
+                style={{
+                  rotateX,
+                  rotateY,
+                  x: translateX,
+                  y: translateY,
+                }}
+              >
+                <motion.img
+                  src={heroDoctor}
+                  alt="Mascote pinguim médico do Alô Médico"
+                  className="w-full h-auto drop-shadow-2xl"
+                  animate={isHovered ? { scale: 1.05 } : { scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                  whileTap={{ scale: 0.95, rotate: -5 }}
+                />
+              </motion.div>
 
               {/* Floating card 1 */}
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute top-4 right-0 bg-card rounded-2xl shadow-card p-4 border border-border"
+                whileHover={{ scale: 1.1 }}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-medical-green-light flex items-center justify-center">
@@ -103,6 +148,7 @@ const HeroSection = () => {
                 animate={{ y: [0, 8, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute bottom-4 left-0 bg-card rounded-2xl shadow-card p-4 border border-border"
+                whileHover={{ scale: 1.1 }}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-medical-blue-light flex items-center justify-center">
@@ -113,6 +159,17 @@ const HeroSection = () => {
                     <p className="text-xs text-muted-foreground">Hoje, 14:30</p>
                   </div>
                 </div>
+              </motion.div>
+
+              {/* Speech bubble on hover */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                animate={isHovered ? { opacity: 1, scale: 1, y: 0 } : { opacity: 0, scale: 0.8, y: 10 }}
+                transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                className="absolute -top-8 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap shadow-lg"
+              >
+                Olá! Como posso ajudar? 👋
+                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rotate-45" />
               </motion.div>
             </div>
           </motion.div>
