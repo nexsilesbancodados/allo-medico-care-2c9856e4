@@ -1,15 +1,21 @@
 import { Button } from "@/components/ui/button";
-import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import { Video, Shield, Clock, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import heroDoctor from "@/assets/hero-doctor.png";
-import mascotVideo from "@/assets/mascot-animated.mp4";
+import mascotWave from "@/assets/mascot-wave.png";
+import mascotThumbsup from "@/assets/mascot-thumbsup.png";
+import mascotReading from "@/assets/mascot-reading.png";
+import mascotWelcome from "@/assets/mascot-welcome.png";
+
+const mascotPoses = [heroDoctor, mascotWave, mascotThumbsup, mascotWelcome, mascotReading];
 
 const HeroSection = () => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [poseIndex, setPoseIndex] = useState(0);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -18,6 +24,14 @@ const HeroSection = () => {
   const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-8, 8]), { stiffness: 150, damping: 20 });
   const translateX = useSpring(useTransform(mouseX, [-300, 300], [-10, 10]), { stiffness: 150, damping: 20 });
   const translateY = useSpring(useTransform(mouseY, [-300, 300], [-10, 10]), { stiffness: 150, damping: 20 });
+
+  // Auto-cycle poses
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPoseIndex((prev) => (prev + 1) % mascotPoses.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -94,7 +108,7 @@ const HeroSection = () => {
             </div>
           </motion.div>
 
-          {/* Interactive Mascot */}
+          {/* Interactive Mascot with pose cycling */}
           <motion.div
             ref={containerRef}
             initial={{ opacity: 0, scale: 0.9 }}
@@ -107,7 +121,7 @@ const HeroSection = () => {
             style={{ perspective: 800 }}
           >
             <div className="relative w-full max-w-lg mx-auto">
-              {/* Mascot with 3D tilt + follow cursor */}
+              {/* Mascot with 3D tilt + pose transitions */}
               <motion.div
                 style={{
                   rotateX,
@@ -116,18 +130,23 @@ const HeroSection = () => {
                   y: translateY,
                 }}
               >
-                <motion.video
-                  src={mascotVideo}
-                  poster={heroDoctor}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-auto drop-shadow-2xl"
-                  animate={isHovered ? { scale: 1.05 } : { scale: 1 }}
-                  transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                  whileTap={{ scale: 0.95, rotate: -5 }}
-                />
+                <AnimatePresence mode="wait">
+                  <motion.img
+                    key={poseIndex}
+                    src={mascotPoses[poseIndex]}
+                    alt="Pingo - Mascote do Alô Médico"
+                    className="w-full h-auto drop-shadow-2xl"
+                    initial={{ opacity: 0, scale: 0.9, rotate: -3 }}
+                    animate={{
+                      opacity: 1,
+                      scale: isHovered ? 1.05 : 1,
+                      rotate: 0,
+                    }}
+                    exit={{ opacity: 0, scale: 0.9, rotate: 3 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    whileTap={{ scale: 0.95, rotate: -5 }}
+                  />
+                </AnimatePresence>
               </motion.div>
 
               {/* Floating card 1 */}
