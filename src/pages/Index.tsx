@@ -9,6 +9,7 @@ import CTABanner from "@/components/landing/CTABanner";
 import DoctorPremiumSection from "@/components/landing/DoctorPremiumSection";
 import VirtualAssistantSection from "@/components/landing/VirtualAssistantSection";
 import MultiPlatformSection from "@/components/landing/MultiPlatformSection";
+import ClinicPresentialSection from "@/components/landing/ClinicPresentialSection";
 import FAQSection from "@/components/landing/FAQSection";
 import SupportSection from "@/components/landing/SupportSection";
 import Footer from "@/components/landing/Footer";
@@ -28,6 +29,7 @@ const Index = () => {
       {/* 3. Diferenciais */}
       <VirtualAssistantSection />
       <MultiPlatformSection />
+      <ClinicPresentialSection />
 
       {/* 4. Prova social + Preços */}
       <TestimonialsSection />
