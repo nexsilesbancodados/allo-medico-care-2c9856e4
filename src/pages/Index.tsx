@@ -16,7 +16,7 @@ import Footer from "@/components/landing/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={{ background: 'var(--landing-bg)' }}>
       <Header />
       {/* 1. Impacto inicial */}
       <HeroSection />

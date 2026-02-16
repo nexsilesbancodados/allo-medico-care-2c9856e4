@@ -43,7 +43,7 @@ const AnimatedCounter = ({ value, suffix, decimals = 0 }: { value: number; suffi
 const StatsSection = () => {
   return (
     <section className="py-16 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-hero opacity-5" />
+      <div className="absolute inset-0 bg-gradient-hero opacity-[0.03]" />
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
           {stats.map((stat, i) => (

@@ -54,6 +54,20 @@
     --gradient-hero: linear-gradient(135deg, hsl(210 90% 45%) 0%, hsl(160 55% 45%) 100%);
     --shadow-card: 0 4px 24px -4px hsl(210 90% 45% / 0.08);
     --shadow-elevated: 0 12px 40px -8px hsl(210 90% 45% / 0.15);
+
+    /* Continuous background */
+    --landing-bg: linear-gradient(
+      180deg,
+      hsl(210 33% 99%) 0%,
+      hsl(210 40% 97%) 8%,
+      hsl(210 35% 98%) 18%,
+      hsl(210 40% 96%) 30%,
+      hsl(210 33% 99%) 45%,
+      hsl(210 40% 97%) 60%,
+      hsl(210 35% 98%) 75%,
+      hsl(210 40% 96%) 88%,
+      hsl(210 33% 99%) 100%
+    );
   }
 
   .dark {
@@ -89,6 +103,18 @@
     --medical-green: 160 50% 50%;
     --medical-green-light: 160 40% 12%;
     --medical-navy: 210 40% 90%;
+    --landing-bg: linear-gradient(
+      180deg,
+      hsl(210 50% 5%) 0%,
+      hsl(210 45% 6%) 8%,
+      hsl(210 50% 5.5%) 18%,
+      hsl(210 45% 7%) 30%,
+      hsl(210 50% 5%) 45%,
+      hsl(210 45% 6%) 60%,
+      hsl(210 50% 5.5%) 75%,
+      hsl(210 45% 7%) 88%,
+      hsl(210 50% 5%) 100%
+    );
   }
 }
 

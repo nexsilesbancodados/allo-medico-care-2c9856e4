@@ -23,7 +23,7 @@ const DoctorWhySection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-20 px-4 bg-muted/40 dark:bg-muted/20">
+    <section className="py-20 px-4">
       <div className="container mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Text */}
