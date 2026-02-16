@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Phone, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import logo from "@/assets/logo.png";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -21,9 +22,7 @@ const Header = () => {
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-hero flex items-center justify-center">
-            <Phone className="w-5 h-5 text-primary-foreground" />
-          </div>
+          <img src={logo} alt="Alô Médico" className="w-9 h-9 rounded-xl object-contain" />
           <span className="text-xl font-bold text-foreground">
             Alô <span className="text-gradient">Médico</span>
           </span>

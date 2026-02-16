@@ -1,5 +1,8 @@
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
+import avatarMaria from "@/assets/avatar-maria.png";
+import avatarCarlos from "@/assets/avatar-carlos.png";
+import avatarAna from "@/assets/avatar-ana.png";
 
 const testimonials = [
   {
@@ -7,18 +10,21 @@ const testimonials = [
     role: "Paciente",
     text: "Consegui uma consulta com cardiologista em menos de 1 hora. A receita chegou digital na hora. Incrível!",
     rating: 5,
+    avatar: avatarMaria,
   },
   {
     name: "Dr. Carlos Mendes",
     role: "Clínico Geral",
     text: "A plataforma facilitou muito meu dia a dia. Atendo de casa com a mesma qualidade do consultório.",
     rating: 5,
+    avatar: avatarCarlos,
   },
   {
     name: "Ana Costa",
     role: "Paciente",
     text: "Com o plano mensal, cuido da saúde de toda minha família sem sair de casa. Vale cada centavo.",
     rating: 5,
+    avatar: avatarAna,
   },
 ];
 
@@ -62,9 +68,11 @@ const TestimonialsSection = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-hero flex items-center justify-center text-primary-foreground font-bold text-sm">
-                  {t.name.charAt(0)}
-                </div>
+                <img
+                  src={t.avatar}
+                  alt={t.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
                 <div>
                   <p className="text-sm font-bold text-foreground">{t.name}</p>
                   <p className="text-xs text-muted-foreground">{t.role}</p>

@@ -1,15 +1,22 @@
 import { motion } from "framer-motion";
-import { Heart, Brain, Eye, Bone, Baby, Stethoscope, Pill, Activity } from "lucide-react";
+import specCardiology from "@/assets/spec-cardiology.png";
+import specNeurology from "@/assets/spec-neurology.png";
+import specOphthalmology from "@/assets/spec-ophthalmology.png";
+import specOrthopedics from "@/assets/spec-orthopedics.png";
+import specPediatrics from "@/assets/spec-pediatrics.png";
+import specGeneral from "@/assets/spec-general.png";
+import specDermatology from "@/assets/spec-dermatology.png";
+import specEndocrinology from "@/assets/spec-endocrinology.png";
 
 const specialties = [
-  { icon: Heart, name: "Cardiologia", doctors: 24 },
-  { icon: Brain, name: "Neurologia", doctors: 18 },
-  { icon: Eye, name: "Oftalmologia", doctors: 15 },
-  { icon: Bone, name: "Ortopedia", doctors: 21 },
-  { icon: Baby, name: "Pediatria", doctors: 30 },
-  { icon: Stethoscope, name: "Clínico Geral", doctors: 45 },
-  { icon: Pill, name: "Dermatologia", doctors: 19 },
-  { icon: Activity, name: "Endocrinologia", doctors: 12 },
+  { image: specCardiology, name: "Cardiologia", doctors: 24 },
+  { image: specNeurology, name: "Neurologia", doctors: 18 },
+  { image: specOphthalmology, name: "Oftalmologia", doctors: 15 },
+  { image: specOrthopedics, name: "Ortopedia", doctors: 21 },
+  { image: specPediatrics, name: "Pediatria", doctors: 30 },
+  { image: specGeneral, name: "Clínico Geral", doctors: 45 },
+  { image: specDermatology, name: "Dermatologia", doctors: 19 },
+  { image: specEndocrinology, name: "Endocrinologia", doctors: 12 },
 ];
 
 const SpecialtiesSection = () => {
@@ -40,8 +47,8 @@ const SpecialtiesSection = () => {
               transition={{ delay: i * 0.05 }}
               className="group p-6 rounded-2xl bg-card border border-border hover:border-primary/30 hover:shadow-card transition-all cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-medical-blue-light group-hover:bg-gradient-hero flex items-center justify-center mb-4 transition-all">
-                <spec.icon className="w-6 h-6 text-primary group-hover:text-primary-foreground transition-colors" />
+              <div className="w-12 h-12 rounded-xl overflow-hidden mb-4">
+                <img src={spec.image} alt={spec.name} className="w-full h-full object-cover" />
               </div>
               <h3 className="font-bold text-foreground mb-1">{spec.name}</h3>
               <p className="text-sm text-muted-foreground">{spec.doctors} médicos</p>
