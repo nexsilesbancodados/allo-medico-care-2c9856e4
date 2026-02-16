@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAdminNav } from "@/components/admin/adminNav";
 import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, UserX, Video, Star } from "lucide-react";
+import AdminAnalyticsCharts from "./AdminAnalyticsCharts";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -325,6 +326,9 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Analytics Charts */}
+        <AdminAnalyticsCharts />
 
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
           {/* Overdue / Inadimplência */}

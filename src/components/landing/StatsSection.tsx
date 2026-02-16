@@ -45,7 +45,7 @@ const StatsSection = () => {
     <section className="py-16 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-hero opacity-5" />
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
           {stats.map((stat, i) => (
             <motion.div
               key={i}
@@ -58,7 +58,7 @@ const StatsSection = () => {
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <stat.icon className="w-7 h-7 text-primary" />
               </div>
-              <p className="text-3xl md:text-4xl font-extrabold text-foreground mb-1">
+              <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mb-1">
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
               </p>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
