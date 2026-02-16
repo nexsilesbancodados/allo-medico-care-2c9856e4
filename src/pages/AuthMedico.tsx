@@ -6,12 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check, MessageCircle, LogIn } from "lucide-react";
 
-type Step = "code" | "register" | "login";
+type Step = "welcome" | "code" | "register" | "login";
 
 const AuthMedico = () => {
-  const [step, setStep] = useState<Step>("code");
+  const [step, setStep] = useState<Step>("welcome");
   const [inviteCode, setInviteCode] = useState("");
   const [validatedCodeId, setValidatedCodeId] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
@@ -128,11 +128,46 @@ const AuthMedico = () => {
             </div>
             <div>
               <h2 className="text-2xl font-bold text-foreground">
-                {step === "code" ? "Código de Acesso" : step === "login" ? "Entrar" : "Cadastro Médico"}
+                {step === "welcome" ? "Portal do Médico" : step === "code" ? "Código de Acesso" : step === "login" ? "Entrar" : "Cadastro Médico"}
               </h2>
               <p className="text-sm text-muted-foreground">Portal do Médico</p>
             </div>
           </div>
+
+          {/* Welcome step */}
+          {step === "welcome" && (
+            <div className="space-y-4">
+              <p className="text-muted-foreground text-sm mb-2">
+                Bem-vindo ao portal exclusivo para médicos. Escolha uma opção abaixo:
+              </p>
+              <Button
+                className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground"
+                size="lg"
+                onClick={() => setStep("login")}
+              >
+                <LogIn className="w-4 h-4 mr-2" />
+                Entrar na minha conta
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full"
+                size="lg"
+                onClick={() => setStep("code")}
+              >
+                <KeyRound className="w-4 h-4 mr-2" />
+                Tenho um código de convite
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full"
+                size="lg"
+                onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma Alô Médico.", "_blank")}
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Contactar suporte para cadastro
+              </Button>
+            </div>
+          )}
 
           {/* Step 1: Validate invite code */}
           {step === "code" && (
@@ -161,7 +196,7 @@ const AuthMedico = () => {
                 {validating ? "Validando..." : "Validar Código"}
               </Button>
               <p className="text-center text-sm text-muted-foreground">
-                Já tem conta? <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Entrar</button>
+                <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
               </p>
             </form>
           )}
@@ -228,7 +263,7 @@ const AuthMedico = () => {
                 <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
               </p>
               <p className="text-center text-sm text-muted-foreground">
-                Não tem conta? <button type="button" onClick={() => setStep("code")} className="text-primary font-semibold hover:underline">Cadastre-se</button>
+                <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
               </p>
             </form>
           )}
