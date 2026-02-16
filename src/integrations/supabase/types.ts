@@ -448,6 +448,45 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_profiles: {
+        Row: {
+          address: string | null
+          business_name: string
+          cnpj: string | null
+          created_at: string
+          id: string
+          is_approved: boolean | null
+          partner_type: string
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          address?: string | null
+          business_name: string
+          cnpj?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          partner_type?: string
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          address?: string | null
+          business_name?: string
+          cnpj?: string | null
+          created_at?: string
+          id?: string
+          is_approved?: boolean | null
+          partner_type?: string
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       patient_documents: {
         Row: {
           appointment_id: string | null
@@ -533,6 +572,51 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      prescription_validations: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          partner_id: string | null
+          prescription_id: string
+          status: string
+          validated_by: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          partner_id?: string | null
+          prescription_id: string
+          status?: string
+          validated_by: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          partner_id?: string | null
+          prescription_id?: string
+          status?: string
+          validated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_validations_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partner_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescription_validations_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prescriptions: {
         Row: {
@@ -621,6 +705,45 @@ export type Database = {
           phone?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      referrals: {
+        Row: {
+          commission_paid: boolean | null
+          commission_percent: number | null
+          converted_at: string | null
+          created_at: string
+          id: string
+          referral_code: string
+          referred_user_id: string | null
+          referrer_id: string
+          source: string | null
+          status: string
+        }
+        Insert: {
+          commission_paid?: boolean | null
+          commission_percent?: number | null
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_user_id?: string | null
+          referrer_id: string
+          source?: string | null
+          status?: string
+        }
+        Update: {
+          commission_paid?: boolean | null
+          commission_percent?: number | null
+          converted_at?: string | null
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_user_id?: string | null
+          referrer_id?: string
+          source?: string | null
+          status?: string
         }
         Relationships: []
       }
@@ -734,9 +857,20 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: never; Returns: boolean }
+      is_partner: { Args: never; Returns: boolean }
+      is_receptionist: { Args: never; Returns: boolean }
+      is_support: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "patient" | "doctor" | "clinic" | "admin"
+      app_role:
+        | "patient"
+        | "doctor"
+        | "clinic"
+        | "admin"
+        | "receptionist"
+        | "support"
+        | "partner"
+        | "affiliate"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -864,7 +998,16 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["patient", "doctor", "clinic", "admin"],
+      app_role: [
+        "patient",
+        "doctor",
+        "clinic",
+        "admin",
+        "receptionist",
+        "support",
+        "partner",
+        "affiliate",
+      ],
     },
   },
 } as const

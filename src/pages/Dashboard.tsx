@@ -4,6 +4,10 @@ import PatientDashboard from "@/components/dashboards/PatientDashboard";
 import DoctorDashboard from "@/components/dashboards/DoctorDashboard";
 import ClinicDashboard from "@/components/dashboards/ClinicDashboard";
 import AdminDashboard from "@/components/dashboards/AdminDashboard";
+import ReceptionDashboard from "@/components/dashboards/ReceptionDashboard";
+import SupportDashboard from "@/components/dashboards/SupportDashboard";
+import PartnerDashboard from "@/components/dashboards/PartnerDashboard";
+import AffiliateDashboard from "@/components/dashboards/AffiliateDashboard";
 import DoctorSearch from "@/components/patient/DoctorSearch";
 import AppointmentsList from "@/components/patient/AppointmentsList";
 import BookAppointment from "@/components/patient/BookAppointment";
@@ -37,6 +41,8 @@ import AdminInviteCodes from "@/components/admin/AdminInviteCodes";
 import AdminReports from "@/components/admin/AdminReports";
 import AdminUsers from "@/components/admin/AdminUsers";
 import AdminApprovals from "@/components/admin/AdminApprovals";
+import ReceptionSchedules from "@/components/reception/ReceptionSchedules";
+import ReceptionCheckin from "@/components/reception/ReceptionCheckin";
 import { Loader2 } from "lucide-react";
 
 const Dashboard = () => {
@@ -54,15 +60,15 @@ const Dashboard = () => {
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  // Allow forcing a specific dashboard via ?role=doctor etc.
   const primaryRole = forceRole && roles.includes(forceRole as any)
     ? forceRole
-    : roles.includes("admin")
-    ? "admin"
-    : roles.includes("doctor")
-    ? "doctor"
-    : roles.includes("clinic")
-    ? "clinic"
+    : roles.includes("admin") ? "admin"
+    : roles.includes("doctor") ? "doctor"
+    : roles.includes("receptionist") ? "receptionist"
+    : roles.includes("support") ? "support"
+    : roles.includes("clinic") ? "clinic"
+    : roles.includes("partner") ? "partner"
+    : roles.includes("affiliate") ? "affiliate"
     : "patient";
 
   return (
@@ -99,6 +105,10 @@ const Dashboard = () => {
       {/* Clinic routes */}
       <Route path="clinic/doctors" element={<ClinicDoctorsManagement />} />
 
+      {/* Reception routes */}
+      <Route path="reception/schedules" element={<ReceptionSchedules />} />
+      <Route path="reception/checkin" element={<ReceptionCheckin />} />
+
       {/* Admin routes */}
       <Route path="admin/doctors" element={<AdminDoctors />} />
       <Route path="admin/users" element={<AdminUsers />} />
@@ -119,7 +129,11 @@ const Dashboard = () => {
         element={
           primaryRole === "admin" ? <AdminDashboard /> :
           primaryRole === "doctor" ? <DoctorDashboard /> :
+          primaryRole === "receptionist" ? <ReceptionDashboard /> :
+          primaryRole === "support" ? <SupportDashboard /> :
           primaryRole === "clinic" ? <ClinicDashboard /> :
+          primaryRole === "partner" ? <PartnerDashboard /> :
+          primaryRole === "affiliate" ? <AffiliateDashboard /> :
           <PatientDashboard />
         }
       />
