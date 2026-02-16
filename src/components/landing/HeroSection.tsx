@@ -130,21 +130,21 @@ const HeroSection = () => {
                   y: translateY,
                 }}
               >
-                <AnimatePresence mode="wait">
+              <AnimatePresence mode="popLayout">
                   <motion.img
                     key={poseIndex}
                     src={mascotPoses[poseIndex]}
                     alt="Pingo - Mascote do Alô Médico"
                     className="w-full h-auto drop-shadow-2xl"
-                    initial={{ opacity: 0, scale: 0.9, rotate: -3 }}
+                    initial={{ opacity: 0, scale: 0.85, filter: "blur(8px)" }}
                     animate={{
                       opacity: 1,
                       scale: isHovered ? 1.05 : 1,
-                      rotate: 0,
+                      filter: "blur(0px)",
                     }}
-                    exit={{ opacity: 0, scale: 0.9, rotate: 3 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                    whileTap={{ scale: 0.95, rotate: -5 }}
+                    exit={{ opacity: 0, scale: 0.85, filter: "blur(8px)" }}
+                    transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
+                    whileTap={{ scale: 0.95 }}
                   />
                 </AnimatePresence>
               </motion.div>
