@@ -7,76 +7,164 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { getAdminNav } from "./adminNav";
-import { Check, X, Eye, Clock, UserCheck } from "lucide-react";
+import { Check, X, Clock, UserCheck, Building2, Handshake } from "lucide-react";
 
 const AdminApprovals = () => {
   const { toast } = useToast();
-  const [pending, setPending] = useState<any[]>([]);
-  const [approved, setApproved] = useState<any[]>([]);
-  const [rejected, setRejected] = useState<any[]>([]);
+  // Doctors
+  const [pendingDoctors, setPendingDoctors] = useState<any[]>([]);
+  const [approvedDoctors, setApprovedDoctors] = useState<any[]>([]);
+  // Clinics
+  const [pendingClinics, setPendingClinics] = useState<any[]>([]);
+  const [approvedClinics, setApprovedClinics] = useState<any[]>([]);
+  // Partners
+  const [pendingPartners, setPendingPartners] = useState<any[]>([]);
+  const [approvedPartners, setApprovedPartners] = useState<any[]>([]);
+
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<any>(null);
   const [rejectReason, setRejectReason] = useState("");
   const [showReject, setShowReject] = useState(false);
-  const [tab, setTab] = useState<"pending" | "approved" | "rejected">("pending");
+  const [rejectTarget, setRejectTarget] = useState<{ id: string; type: "doctor" | "clinic" | "partner"; name: string } | null>(null);
 
   useEffect(() => { fetchAll(); }, []);
 
   const fetchAll = async () => {
+    await Promise.all([fetchDoctors(), fetchClinics(), fetchPartners()]);
+    setLoading(false);
+  };
+
+  const fetchDoctors = async () => {
     const { data } = await supabase.from("doctor_profiles")
       .select("id, user_id, crm, crm_state, is_approved, bio, consultation_price, experience_years, education, created_at")
       .order("created_at", { ascending: false });
-    if (!data) { setLoading(false); return; }
-
+    if (!data) return;
     const userIds = data.map(d => d.user_id);
     const [profilesRes, specsRes] = await Promise.all([
       supabase.from("profiles").select("user_id, first_name, last_name, phone, cpf").in("user_id", userIds),
       supabase.from("doctor_specialties").select("doctor_id, specialty_id").in("doctor_id", data.map(d => d.id)),
     ]);
-
-    const specDoctorIds = [...new Set((specsRes.data ?? []).map(s => s.specialty_id))];
-    const { data: specNames } = await supabase.from("specialties").select("id, name").in("id", specDoctorIds.length > 0 ? specDoctorIds : ["none"]);
-    const specMap = new Map(specNames?.map(s => [s.id, s.name]) ?? []);
-
-    const pMap = new Map(profilesRes.data?.map(p => [p.user_id, p]) ?? []);
-
+    const specIds = [...new Set((specsRes.data ?? []).map(s => s.specialty_id))];
+    const { data: specNames } = specIds.length > 0 ? await supabase.from("specialties").select("id, name").in("id", specIds) : { data: [] };
+    const specMap = new Map((specNames ?? []).map(s => [s.id, s.name] as const));
+    const pMap = new Map(profilesRes.data?.map(p => [p.user_id, p] as const) ?? []);
     const enriched = data.map(d => {
       const profile = pMap.get(d.user_id);
       const doctorSpecs = (specsRes.data ?? []).filter(s => s.doctor_id === d.id).map(s => specMap.get(s.specialty_id) ?? "—");
-      return {
-        ...d,
-        first_name: profile?.first_name ?? "",
-        last_name: profile?.last_name ?? "",
-        phone: profile?.phone ?? "",
-        cpf: profile?.cpf ?? "",
-        specialties: doctorSpecs,
-      };
+      return { ...d, first_name: profile?.first_name ?? "", last_name: profile?.last_name ?? "", phone: profile?.phone ?? "", cpf: profile?.cpf ?? "", specialties: doctorSpecs };
     });
-
-    setPending(enriched.filter(d => !d.is_approved));
-    setApproved(enriched.filter(d => d.is_approved));
-    setLoading(false);
+    setPendingDoctors(enriched.filter(d => !d.is_approved));
+    setApprovedDoctors(enriched.filter(d => d.is_approved));
   };
 
-  const approveDoctor = async (id: string) => {
-    await supabase.from("doctor_profiles").update({ is_approved: true }).eq("id", id);
-    toast({ title: "Médico aprovado! ✅" });
+  const fetchClinics = async () => {
+    const { data } = await supabase.from("clinic_profiles").select("*").order("created_at", { ascending: false });
+    if (!data) return;
+    const userIds = data.map(c => c.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds);
+    const pMap = new Map(profiles?.map(p => [p.user_id, p] as const) ?? []);
+    const enriched = data.map(c => ({ ...c, owner_name: pMap.has(c.user_id) ? `${pMap.get(c.user_id)!.first_name} ${pMap.get(c.user_id)!.last_name}` : "—" }));
+    setPendingClinics(enriched.filter(c => !c.is_approved));
+    setApprovedClinics(enriched.filter(c => c.is_approved));
+  };
+
+  const fetchPartners = async () => {
+    const { data } = await supabase.from("partner_profiles").select("*").order("created_at", { ascending: false });
+    if (!data) return;
+    const userIds = data.map(p => p.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds);
+    const pMap = new Map(profiles?.map(p => [p.user_id, p] as const) ?? []);
+    const enriched = data.map(p => ({ ...p, owner_name: pMap.has(p.user_id) ? `${pMap.get(p.user_id)!.first_name} ${pMap.get(p.user_id)!.last_name}` : "—" }));
+    setPendingPartners(enriched.filter(p => !p.is_approved));
+    setApprovedPartners(enriched.filter(p => p.is_approved));
+  };
+
+  const approve = async (id: string, type: "doctor" | "clinic" | "partner") => {
+    const table = type === "doctor" ? "doctor_profiles" : type === "clinic" ? "clinic_profiles" : "partner_profiles";
+    await supabase.from(table).update({ is_approved: true }).eq("id", id);
+    toast({ title: `${type === "doctor" ? "Médico" : type === "clinic" ? "Clínica" : "Parceiro"} aprovado! ✅` });
     fetchAll();
   };
 
-  const rejectDoctor = async (id: string) => {
-    // For now, just keep as not approved. Could delete or flag.
-    await supabase.from("doctor_profiles").update({ is_approved: false }).eq("id", id);
+  const reject = async () => {
+    if (!rejectTarget) return;
+    const table = rejectTarget.type === "doctor" ? "doctor_profiles" : rejectTarget.type === "clinic" ? "clinic_profiles" : "partner_profiles";
+    await supabase.from(table).update({ is_approved: false }).eq("id", rejectTarget.id);
     toast({ title: "Cadastro rejeitado", description: rejectReason || undefined });
     setShowReject(false);
     setRejectReason("");
-    setSelected(null);
+    setRejectTarget(null);
     fetchAll();
   };
 
-  const currentList = tab === "pending" ? pending : approved;
+  const totalPending = pendingDoctors.length + pendingClinics.length + pendingPartners.length;
+  const partnerTypeLabel: Record<string, string> = { pharmacy: "Farmácia", laboratory: "Laboratório", clinic: "Clínica", other: "Outro" };
+
+  const renderApprovalCard = (item: any, type: "doctor" | "clinic" | "partner", isApproved: boolean) => (
+    <Card key={item.id} className="border-border hover:shadow-md transition-shadow">
+      <CardContent className="p-4">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <Avatar className="h-12 w-12 mt-1">
+              <AvatarFallback className="bg-primary/10 text-primary">
+                {type === "doctor" ? `${item.first_name?.[0] ?? ""}${item.last_name?.[0] ?? ""}` :
+                  type === "clinic" ? item.name?.[0] ?? "C" : item.business_name?.[0] ?? "P"}
+              </AvatarFallback>
+            </Avatar>
+            <div className="space-y-1">
+              {type === "doctor" && (
+                <>
+                  <p className="font-semibold text-foreground text-lg">Dr(a). {item.first_name} {item.last_name}</p>
+                  <p className="text-sm text-muted-foreground">CRM: <strong className="text-foreground">{item.crm}/{item.crm_state}</strong> · Tel: {item.phone || "—"}</p>
+                  {item.specialties?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {item.specialties.map((s: string, i: number) => <Badge key={i} variant="outline" className="text-xs bg-secondary/10 text-secondary">{s}</Badge>)}
+                    </div>
+                  )}
+                  {item.education && <p className="text-xs text-muted-foreground">Formação: {item.education}</p>}
+                </>
+              )}
+              {type === "clinic" && (
+                <>
+                  <p className="font-semibold text-foreground text-lg">{item.name}</p>
+                  <p className="text-sm text-muted-foreground">CNPJ: {item.cnpj || "—"} · Responsável: {item.owner_name}</p>
+                  {item.address && <p className="text-xs text-muted-foreground">Endereço: {item.address}</p>}
+                </>
+              )}
+              {type === "partner" && (
+                <>
+                  <p className="font-semibold text-foreground text-lg">{item.business_name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Tipo: <Badge variant="outline" className="text-xs">{partnerTypeLabel[item.partner_type] ?? item.partner_type}</Badge>
+                    {" · "}CNPJ: {item.cnpj || "—"} · Responsável: {item.owner_name}
+                  </p>
+                </>
+              )}
+              <p className="text-xs text-muted-foreground">Cadastro: {new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
+            </div>
+          </div>
+          <div className="flex flex-col gap-2 shrink-0">
+            {!isApproved ? (
+              <>
+                <Button size="sm" onClick={() => approve(item.id, type)} className="bg-secondary text-secondary-foreground">
+                  <Check className="w-4 h-4 mr-1" /> Aprovar
+                </Button>
+                <Button size="sm" variant="outline" className="text-destructive border-destructive/30" onClick={() => { setRejectTarget({ id: item.id, type, name: type === "doctor" ? `${item.first_name} ${item.last_name}` : item.name || item.business_name }); setShowReject(true); }}>
+                  <X className="w-4 h-4 mr-1" /> Rejeitar
+                </Button>
+              </>
+            ) : (
+              <Badge variant="default" className="bg-secondary text-secondary-foreground">
+                <Check className="w-3 h-3 mr-1" /> Aprovado
+              </Badge>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("approvals")}>
@@ -84,145 +172,102 @@ const AdminApprovals = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <UserCheck className="w-6 h-6" /> Aprovações de Médicos
+              <UserCheck className="w-6 h-6" /> Aprovações
             </h1>
-            <p className="text-muted-foreground text-sm">
-              {pending.length} pedido(s) pendente(s)
-            </p>
+            <p className="text-muted-foreground text-sm">{totalPending} pedido(s) pendente(s)</p>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <Button
-            variant={tab === "pending" ? "default" : "outline"}
-            onClick={() => setTab("pending")}
-            className={tab === "pending" ? "bg-gradient-hero text-primary-foreground" : ""}
-          >
-            <Clock className="w-4 h-4 mr-1" /> Pendentes
-            {pending.length > 0 && (
-              <Badge variant="destructive" className="ml-2 text-xs">{pending.length}</Badge>
-            )}
-          </Button>
-          <Button
-            variant={tab === "approved" ? "default" : "outline"}
-            onClick={() => setTab("approved")}
-          >
-            <Check className="w-4 h-4 mr-1" /> Aprovados ({approved.length})
-          </Button>
-        </div>
+        <Tabs defaultValue="doctors">
+          <TabsList>
+            <TabsTrigger value="doctors" className="gap-1">
+              🩺 Médicos
+              {pendingDoctors.length > 0 && <Badge variant="destructive" className="ml-1 text-xs h-5 w-5 p-0 flex items-center justify-center">{pendingDoctors.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="clinics" className="gap-1">
+              <Building2 className="w-4 h-4 mr-1" /> Clínicas
+              {pendingClinics.length > 0 && <Badge variant="destructive" className="ml-1 text-xs h-5 w-5 p-0 flex items-center justify-center">{pendingClinics.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="partners" className="gap-1">
+              <Handshake className="w-4 h-4 mr-1" /> Parceiros
+              {pendingPartners.length > 0 && <Badge variant="destructive" className="ml-1 text-xs h-5 w-5 p-0 flex items-center justify-center">{pendingPartners.length}</Badge>}
+            </TabsTrigger>
+          </TabsList>
 
-        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
-          <>
-            {currentList.length === 0 ? (
-              <Card className="border-border">
-                <CardContent className="py-12 text-center">
-                  <p className="text-muted-foreground">
-                    {tab === "pending" ? "Nenhum pedido pendente. 🎉" : "Nenhum médico aprovado ainda."}
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-4">
-                {currentList.map(doc => (
-                  <Card key={doc.id} className="border-border hover:shadow-md transition-shadow">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-4">
-                          <Avatar className="h-12 w-12 mt-1">
-                            <AvatarFallback className="bg-primary/10 text-primary">
-                              {doc.first_name?.[0]}{doc.last_name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="space-y-1">
-                            <p className="font-semibold text-foreground text-lg">
-                              Dr(a). {doc.first_name} {doc.last_name}
-                            </p>
-                            <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                              <span>CRM: <strong className="text-foreground">{doc.crm}/{doc.crm_state}</strong></span>
-                              <span>·</span>
-                              <span>Telefone: {doc.phone || "—"}</span>
-                              <span>·</span>
-                              <span>CPF: {doc.cpf || "—"}</span>
-                            </div>
-                            <div className="flex flex-wrap gap-2 text-sm text-muted-foreground">
-                              <span>Experiência: {doc.experience_years || 0} anos</span>
-                              <span>·</span>
-                              <span>Preço: R$ {doc.consultation_price || "—"}</span>
-                            </div>
-                            {doc.specialties.length > 0 && (
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {doc.specialties.map((s: string, i: number) => (
-                                  <Badge key={i} variant="outline" className="text-xs bg-secondary/10 text-secondary">
-                                    {s}
-                                  </Badge>
-                                ))
-                                }
-                              </div>
-                            )}
-                            {doc.education && (
-                              <p className="text-xs text-muted-foreground mt-1">Formação: {doc.education}</p>
-                            )}
-                            {doc.bio && (
-                              <p className="text-xs text-muted-foreground mt-1 line-clamp-2">Bio: {doc.bio}</p>
-                            )}
-                            <p className="text-xs text-muted-foreground">
-                              Cadastro: {new Date(doc.created_at).toLocaleDateString("pt-BR")}
-                            </p>
-                          </div>
-                        </div>
+          {loading ? <p className="text-sm text-muted-foreground mt-4">Carregando...</p> : (
+            <>
+              <TabsContent value="doctors" className="mt-4 space-y-4">
+                {pendingDoctors.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1"><Clock className="w-4 h-4" /> Pendentes</h3>
+                    {pendingDoctors.map(d => renderApprovalCard(d, "doctor", false))}
+                  </>
+                )}
+                {approvedDoctors.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1 mt-6"><Check className="w-4 h-4" /> Aprovados ({approvedDoctors.length})</h3>
+                    {approvedDoctors.map(d => renderApprovalCard(d, "doctor", true))}
+                  </>
+                )}
+                {pendingDoctors.length === 0 && approvedDoctors.length === 0 && (
+                  <p className="text-muted-foreground text-center py-8">Nenhum médico cadastrado.</p>
+                )}
+              </TabsContent>
 
-                        <div className="flex flex-col gap-2 shrink-0">
-                          {tab === "pending" ? (
-                            <>
-                              <Button size="sm" onClick={() => approveDoctor(doc.id)} className="bg-secondary text-secondary-foreground">
-                                <Check className="w-4 h-4 mr-1" /> Aprovar
-                              </Button>
-                              <Button size="sm" variant="outline" className="text-destructive border-destructive/30" onClick={() => { setSelected(doc); setShowReject(true); }}>
-                                <X className="w-4 h-4 mr-1" /> Rejeitar
-                              </Button>
-                            </>
-                          ) : (
-                            <Badge variant="default" className="bg-secondary text-secondary-foreground">
-                              <Check className="w-3 h-3 mr-1" /> Aprovado
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-                }
-              </div>
-            )}
-          </>
-        )}
+              <TabsContent value="clinics" className="mt-4 space-y-4">
+                {pendingClinics.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1"><Clock className="w-4 h-4" /> Pendentes</h3>
+                    {pendingClinics.map(c => renderApprovalCard(c, "clinic", false))}
+                  </>
+                )}
+                {approvedClinics.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1 mt-6"><Check className="w-4 h-4" /> Aprovadas ({approvedClinics.length})</h3>
+                    {approvedClinics.map(c => renderApprovalCard(c, "clinic", true))}
+                  </>
+                )}
+                {pendingClinics.length === 0 && approvedClinics.length === 0 && (
+                  <p className="text-muted-foreground text-center py-8">Nenhuma clínica cadastrada.</p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="partners" className="mt-4 space-y-4">
+                {pendingPartners.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1"><Clock className="w-4 h-4" /> Pendentes</h3>
+                    {pendingPartners.map(p => renderApprovalCard(p, "partner", false))}
+                  </>
+                )}
+                {approvedPartners.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1 mt-6"><Check className="w-4 h-4" /> Aprovados ({approvedPartners.length})</h3>
+                    {approvedPartners.map(p => renderApprovalCard(p, "partner", true))}
+                  </>
+                )}
+                {pendingPartners.length === 0 && approvedPartners.length === 0 && (
+                  <p className="text-muted-foreground text-center py-8">Nenhum parceiro cadastrado.</p>
+                )}
+              </TabsContent>
+            </>
+          )}
+        </Tabs>
       </div>
 
-      {/* Reject dialog */}
-      <Dialog open={showReject} onOpenChange={() => { setShowReject(false); setSelected(null); }}>
+      <Dialog open={showReject} onOpenChange={() => { setShowReject(false); setRejectTarget(null); }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Rejeitar Cadastro</DialogTitle>
           </DialogHeader>
-          {selected && (
+          {rejectTarget && (
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Rejeitar o cadastro de <strong className="text-foreground">Dr(a). {selected.first_name} {selected.last_name}</strong> (CRM {selected.crm}/{selected.crm_state})?
+                Rejeitar o cadastro de <strong className="text-foreground">{rejectTarget.name}</strong>?
               </p>
-              <Textarea
-                placeholder="Motivo da rejeição (opcional)..."
-                value={rejectReason}
-                onChange={e => setRejectReason(e.target.value)}
-                rows={3}
-              />
+              <Textarea placeholder="Motivo da rejeição (opcional)..." value={rejectReason} onChange={e => setRejectReason(e.target.value)} rows={3} />
               <div className="flex gap-2">
-                <Button variant="destructive" onClick={() => rejectDoctor(selected.id)}>
-                  Confirmar Rejeição
-                </Button>
-                <Button variant="outline" onClick={() => { setShowReject(false); setSelected(null); }}>
-                  Cancelar
-                </Button>
+                <Button variant="destructive" onClick={reject}>Confirmar Rejeição</Button>
+                <Button variant="outline" onClick={() => { setShowReject(false); setRejectTarget(null); }}>Cancelar</Button>
               </div>
             </div>
           )}
