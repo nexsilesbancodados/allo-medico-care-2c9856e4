@@ -65,9 +65,12 @@ const Dashboard = () => {
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  const primaryRole = forceRole && roles.includes(forceRole as any)
+  // Admins can force any role panel; others can only switch to their own roles
+  const isAdmin = roles.includes("admin");
+  const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "affiliate", "admin"];
+  const primaryRole = forceRole && (isAdmin || roles.includes(forceRole as any)) && validForceRoles.includes(forceRole)
     ? forceRole
-    : roles.includes("admin") ? "admin"
+    : isAdmin ? "admin"
     : roles.includes("doctor") ? "doctor"
     : roles.includes("receptionist") ? "receptionist"
     : roles.includes("support") ? "support"
