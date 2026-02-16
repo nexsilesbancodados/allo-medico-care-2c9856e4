@@ -19,6 +19,7 @@ import GuestCheckout from "./pages/GuestCheckout";
 import GuestConsultation from "./pages/GuestConsultation";
 import NotFound from "./pages/NotFound";
 import PingoChatbot from "./components/PingoChatbot";
+import AccessibilityToggle from "./components/AccessibilityToggle";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
           <PingoChatbot />
+          <AccessibilityToggle />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
