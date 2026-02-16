@@ -1,0 +1,131 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { appointment_id } = await req.json();
+    if (!appointment_id) {
+      return new Response(JSON.stringify({ error: "appointment_id required" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, serviceKey);
+
+    // Get appointment details
+    const { data: appt, error: apptErr } = await supabase
+      .from("appointments")
+      .select("id, scheduled_at, patient_id, doctor_id, status")
+      .eq("id", appointment_id)
+      .single();
+
+    if (apptErr || !appt) {
+      return new Response(JSON.stringify({ error: "Appointment not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Get patient profile
+    const { data: patient } = appt.patient_id
+      ? await supabase.from("profiles").select("first_name, last_name, phone, user_id").eq("user_id", appt.patient_id).single()
+      : { data: null };
+
+    // Get doctor profile
+    const { data: doctorProfile } = await supabase
+      .from("doctor_profiles").select("user_id").eq("id", appt.doctor_id).single();
+
+    const { data: doctorName } = doctorProfile
+      ? await supabase.from("profiles").select("first_name, last_name, phone").eq("user_id", doctorProfile.user_id).single()
+      : { data: null };
+
+    // Get patient email
+    let patientEmail = "";
+    if (appt.patient_id) {
+      const { data: authUser } = await supabase.auth.admin.getUserById(appt.patient_id);
+      patientEmail = authUser?.user?.email ?? "";
+    }
+
+    const scheduledDate = new Date(appt.scheduled_at);
+    const dateStr = scheduledDate.toLocaleDateString("pt-BR");
+    const timeStr = scheduledDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
+    const drName = doctorName ? `Dr(a). ${doctorName.first_name} ${doctorName.last_name}` : "Médico";
+
+    const results: string[] = [];
+
+    // 1. Send email via Resend
+    if (patientEmail) {
+      try {
+        const emailRes = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+          },
+          body: JSON.stringify({
+            type: "appointment_confirmation",
+            to: patientEmail,
+            data: { patient_name: patientName, doctor_name: drName, date: dateStr, time: timeStr },
+          }),
+        });
+        results.push(`email: ${emailRes.ok ? "sent" : "failed"}`);
+      } catch (e) {
+        results.push(`email: error - ${e.message}`);
+      }
+    }
+
+    // 2. Send WhatsApp via Evolution API
+    if (patient?.phone) {
+      try {
+        const msg = `✅ *Consulta Confirmada!*\n\nOlá ${patientName},\nSua consulta com ${drName} foi confirmada.\n\n📅 Data: ${dateStr}\n⏰ Horário: ${timeStr}\n\nAcesse a plataforma 5 min antes. 🏥`;
+        const waRes = await fetch(`${supabaseUrl}/functions/v1/send-whatsapp`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${Deno.env.get("SUPABASE_ANON_KEY")}`,
+          },
+          body: JSON.stringify({ phone: patient.phone, message: msg }),
+        });
+        results.push(`whatsapp: ${waRes.ok ? "sent" : "failed"}`);
+      } catch (e) {
+        results.push(`whatsapp: error - ${e.message}`);
+      }
+    }
+
+    // 3. Create in-app notification
+    if (appt.patient_id) {
+      await supabase.from("notifications").insert({
+        user_id: appt.patient_id,
+        title: "Consulta Confirmada",
+        message: `Sua consulta com ${drName} em ${dateStr} às ${timeStr} foi confirmada.`,
+        type: "appointment",
+        link: "/dashboard",
+      });
+      results.push("notification: created");
+    }
+
+    return new Response(JSON.stringify({ success: true, results }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
