@@ -19,7 +19,7 @@ interface ChatMessage {
   time: string;
 }
 
-const ICE_SERVERS: RTCConfiguration = {
+const FALLBACK_ICE: RTCConfiguration = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
@@ -55,6 +55,7 @@ const VideoRoom = () => {
   const [mediaError, setMediaError] = useState("");
   const [connected, setConnected] = useState(false);
   const [remoteConnected, setRemoteConnected] = useState(false);
+  const [iceConfig, setIceConfig] = useState<RTCConfiguration>(FALLBACK_ICE);
 
   // Chat & Notes
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -92,7 +93,25 @@ const VideoRoom = () => {
     };
   }, []);
 
-  // ─── Fetch appointment ───
+  // ─── Fetch TURN credentials from Metered ───
+  useEffect(() => {
+    const fetchTurnCredentials = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session) return;
+        const res = await supabase.functions.invoke("turn-credentials");
+        if (res.data?.iceServers && Array.isArray(res.data.iceServers)) {
+          setIceConfig({ iceServers: res.data.iceServers });
+          console.log("[TURN] Metered ICE servers loaded");
+        }
+      } catch (err) {
+        console.warn("[TURN] Failed to fetch, using STUN fallback:", err);
+      }
+    };
+    fetchTurnCredentials();
+  }, []);
+
+
   useEffect(() => {
     if (appointmentId) fetchAppointment();
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
@@ -175,7 +194,7 @@ const VideoRoom = () => {
   const getOrCreatePeerConnection = useCallback(() => {
     if (peerConnectionRef.current) return peerConnectionRef.current;
 
-    const pc = new RTCPeerConnection(ICE_SERVERS);
+    const pc = new RTCPeerConnection(iceConfig);
     peerConnectionRef.current = pc;
 
     // Add local tracks
