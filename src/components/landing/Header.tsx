@@ -19,7 +19,23 @@ const Header = () => {
 
   return (
     <>
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
+      {/* Marquee ticker */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-secondary overflow-hidden">
+        <div className="animate-marquee whitespace-nowrap py-1.5 text-sm font-medium text-primary-foreground flex">
+          {[...Array(2)].map((_, i) => (
+            <span key={i} className="inline-flex shrink-0">
+              <span className="mx-8">🩺 Consultas por vídeo 24h</span>
+              <span className="mx-8">💊 Receitas digitais válidas</span>
+              <span className="mx-8">⭐ Médicos com nota máxima</span>
+              <span className="mx-8">🔒 100% seguro e criptografado</span>
+              <span className="mx-8">📱 Atendimento na palma da mão</span>
+              <span className="mx-8">❤️ Cuidando de você e sua família</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+    <header className="fixed top-9 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
       <div className="container mx-auto flex items-center justify-between h-16 px-4">
         {/* Logo */}
         <a href="/" className="flex items-center gap-2">
@@ -90,22 +106,6 @@ const Header = () => {
         )}
       </AnimatePresence>
     </header>
-
-      {/* Marquee ticker */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-gradient-to-r from-primary to-secondary overflow-hidden">
-        <div className="animate-marquee whitespace-nowrap py-1.5 text-sm font-medium text-primary-foreground flex">
-          {[...Array(2)].map((_, i) => (
-            <span key={i} className="inline-flex shrink-0">
-              <span className="mx-8">🩺 Consultas por vídeo 24h</span>
-              <span className="mx-8">💊 Receitas digitais válidas</span>
-              <span className="mx-8">⭐ Médicos com nota máxima</span>
-              <span className="mx-8">🔒 100% seguro e criptografado</span>
-              <span className="mx-8">📱 Atendimento na palma da mão</span>
-              <span className="mx-8">❤️ Cuidando de você e sua família</span>
-            </span>
-          ))}
-        </div>
-      </div>
     </>
   );
 };
