@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check, MessageCircle, LogIn } from "lucide-react";
+import doctorPortalBg from "@/assets/doctor-portal-bg.png";
 
 type Step = "welcome" | "code" | "register" | "login";
 
@@ -95,8 +96,10 @@ const AuthMedico = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-secondary to-primary items-center justify-center p-12">
-        <div className="text-primary-foreground max-w-md">
+      <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden">
+        <img src={doctorPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-br from-secondary/80 to-primary/80" />
+        <div className="relative text-primary-foreground max-w-md">
           <Link to="/" className="inline-flex items-center gap-2 mb-8 opacity-80 hover:opacity-100 transition">
             <ArrowLeft className="w-4 h-4" /> Voltar ao início
           </Link>
