@@ -14,13 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-const patientNav = [
-  { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
-  { label: "Agendar Consulta", href: "/dashboard/schedule", icon: <CalIcon className="w-4 h-4" />, active: true },
-  { label: "Buscar Médicos", href: "/dashboard/doctors", icon: <Search className="w-4 h-4" /> },
-  { label: "Minhas Consultas", href: "/dashboard/appointments", icon: <FileText className="w-4 h-4" /> },
-  { label: "Dependentes", href: "/dashboard/dependents", icon: <Users className="w-4 h-4" /> },
-];
+import { getPatientNav } from "./patientNav";
+const patientNav = getPatientNav("schedule");
 
 interface DoctorInfo {
   id: string;

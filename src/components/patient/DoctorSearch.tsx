@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search, Star, Calendar, Clock, FileText, Users, MapPin } from "lucide-react";
+import { Search, Star, Calendar, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { getPatientNav } from "./patientNav";
 
 interface DoctorResult {
   id: string;
@@ -22,14 +23,6 @@ interface DoctorResult {
   profile: { first_name: string; last_name: string; avatar_url: string | null } | null;
   specialties: string[];
 }
-
-const patientNav = [
-  { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
-  { label: "Agendar Consulta", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Buscar Médicos", href: "/dashboard/doctors", icon: <Search className="w-4 h-4" />, active: true },
-  { label: "Minhas Consultas", href: "/dashboard/appointments", icon: <FileText className="w-4 h-4" /> },
-  { label: "Dependentes", href: "/dashboard/dependents", icon: <Users className="w-4 h-4" /> },
-];
 
 const DoctorSearch = () => {
   const [doctors, setDoctors] = useState<DoctorResult[]>([]);
@@ -97,7 +90,7 @@ const DoctorSearch = () => {
   });
 
   return (
-    <DashboardLayout title="Paciente" nav={patientNav}>
+    <DashboardLayout title="Paciente" nav={getPatientNav("doctors")}>
       <div className="max-w-4xl">
         <h1 className="text-2xl font-bold text-foreground mb-1">Buscar Médicos</h1>
         <p className="text-muted-foreground mb-6">Encontre o especialista ideal para você</p>

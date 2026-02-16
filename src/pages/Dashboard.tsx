@@ -10,6 +10,8 @@ import BookAppointment from "@/components/patient/BookAppointment";
 import PlansCheckout from "@/components/patient/PlansCheckout";
 import MedicalHistory from "@/components/patient/MedicalHistory";
 import PaymentHistory from "@/components/patient/PaymentHistory";
+import PatientExamUpload from "@/components/patient/PatientExamUpload";
+import PatientHealth from "@/components/patient/PatientHealth";
 import UserProfile from "@/components/profile/UserProfile";
 import DoctorAvailability from "@/components/doctor/DoctorAvailability";
 import DoctorPatients from "@/components/doctor/DoctorPatients";
@@ -76,6 +78,8 @@ const Dashboard = () => {
       <Route path="plans" element={<PlansCheckout />} />
       <Route path="history" element={<MedicalHistory />} />
       <Route path="payment-history" element={<PaymentHistory />} />
+      <Route path="patient/documents" element={<PatientExamUpload />} />
+      <Route path="patient/health" element={<PatientHealth />} />
 
       {/* Doctor routes */}
       <Route path="availability" element={<DoctorAvailability />} />
