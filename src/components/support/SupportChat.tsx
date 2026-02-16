@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,17 +10,48 @@ import { Send, Bot, User, Loader2 } from "lucide-react";
 
 type Message = { role: "user" | "assistant"; content: string };
 
+const WELCOME_MSG = "Olá! 🐧 Sou o Pingo, assistente virtual da Alô Médico. Como posso ajudar a equipe de suporte hoje?";
+
 const SupportChat = () => {
+  const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
-    { role: "assistant", content: "Olá! 🐧 Sou o Pingo, assistente virtual da Alô Médico. Como posso ajudar a equipe de suporte hoje?" },
+    { role: "assistant", content: WELCOME_MSG },
   ]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  // Load chat history from DB
+  useEffect(() => {
+    if (!user) return;
+    const loadHistory = async () => {
+      const { data } = await supabase
+        .from("support_chat_messages")
+        .select("role, content")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: true })
+        .limit(100);
+      if (data && data.length > 0) {
+        setMessages(data.map(m => ({ role: m.role as "user" | "assistant", content: m.content })));
+      }
+      setHistoryLoaded(true);
+    };
+    loadHistory();
+  }, [user]);
+
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages]);
+
+  const persistMessage = async (role: "user" | "assistant", content: string) => {
+    if (!user) return;
+    await supabase.from("support_chat_messages").insert({
+      user_id: user.id,
+      role,
+      content,
+    });
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || isLoading) return;
@@ -29,6 +61,9 @@ const SupportChat = () => {
     setMessages(allMessages);
     setInput("");
     setIsLoading(true);
+
+    // Persist user message
+    persistMessage("user", userMsg.content);
 
     try {
       const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pingo-chat`;
@@ -92,8 +127,12 @@ const SupportChat = () => {
         }
       }
 
-      if (!assistantContent) {
-        setMessages((prev) => [...prev, { role: "assistant", content: "Desculpe, não consegui processar sua mensagem. Tente novamente." }]);
+      if (assistantContent) {
+        persistMessage("assistant", assistantContent);
+      } else {
+        const fallback = "Desculpe, não consegui processar sua mensagem. Tente novamente.";
+        setMessages((prev) => [...prev, { role: "assistant", content: fallback }]);
+        persistMessage("assistant", fallback);
       }
     } catch (error: any) {
       console.error("Support chat error:", error);

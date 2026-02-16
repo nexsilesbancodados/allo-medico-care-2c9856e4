@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search, Star, Calendar, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Search, Star, Calendar, Clock, Zap, AlertTriangle } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { getPatientNav } from "./patientNav";
 
 interface DoctorResult {
@@ -25,7 +25,10 @@ interface DoctorResult {
 }
 
 const DoctorSearch = () => {
+  const [searchParams] = useSearchParams();
+  const isUrgency = searchParams.get("urgency") === "true";
   const [doctors, setDoctors] = useState<DoctorResult[]>([]);
+  const [availableNowIds, setAvailableNowIds] = useState<Set<string>>(new Set());
   const [specialties, setSpecialties] = useState<{ id: string; name: string }[]>([]);
   const [search, setSearch] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
@@ -52,14 +55,26 @@ const DoctorSearch = () => {
 
     if (!doctorData) { setLoading(false); return; }
 
-    // Fetch profiles and specialties for each doctor
     const doctorIds = doctorData.map(d => d.id);
     const userIds = doctorData.map(d => d.user_id);
 
-    const [profilesRes, specRes] = await Promise.all([
+    const [profilesRes, specRes, slotsRes] = await Promise.all([
       supabase.from("profiles").select("user_id, first_name, last_name, avatar_url").in("user_id", userIds),
       supabase.from("doctor_specialties").select("doctor_id, specialty_id, specialties(name)").in("doctor_id", doctorIds),
+      supabase.from("availability_slots").select("doctor_id, day_of_week, start_time, end_time").eq("is_active", true).in("doctor_id", doctorIds),
     ]);
+
+    // Check which doctors are available RIGHT NOW
+    const now = new Date();
+    const currentDay = now.getDay();
+    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const availableNow = new Set<string>();
+    slotsRes.data?.forEach(slot => {
+      if (slot.day_of_week === currentDay && slot.start_time <= currentTime && slot.end_time > currentTime) {
+        availableNow.add(slot.doctor_id);
+      }
+    });
+    setAvailableNowIds(availableNow);
 
     const profilesMap = new Map(profilesRes.data?.map(p => [p.user_id, p]) ?? []);
     const specsMap = new Map<string, string[]>();
@@ -86,14 +101,31 @@ const DoctorSearch = () => {
       `${d.profile?.first_name} ${d.profile?.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
       d.crm.includes(search);
     const specMatch = !selectedSpecialty || d.specialties.some(s => s === selectedSpecialty);
-    return nameMatch && specMatch;
+    const urgencyMatch = !isUrgency || availableNowIds.has(d.id);
+    return nameMatch && specMatch && urgencyMatch;
   });
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("doctors")}>
       <div className="max-w-4xl">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Buscar Médicos</h1>
-        <p className="text-muted-foreground mb-6">Encontre o especialista ideal para você</p>
+        {isUrgency && (
+          <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-center gap-2">
+            <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-foreground">Modo Urgência</p>
+              <p className="text-xs text-muted-foreground">Mostrando apenas médicos com disponibilidade agora. Selecione um para agendar imediatamente.</p>
+            </div>
+            <Button size="sm" variant="outline" className="ml-auto flex-shrink-0" onClick={() => navigate("/dashboard/schedule")}>
+              Ver todos
+            </Button>
+          </div>
+        )}
+        <h1 className="text-2xl font-bold text-foreground mb-1">
+          {isUrgency ? "⚡ Consulta de Urgência" : "Buscar Médicos"}
+        </h1>
+        <p className="text-muted-foreground mb-6">
+          {isUrgency ? "Médicos disponíveis agora para atendimento imediato" : "Encontre o especialista ideal para você"}
+        </p>
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
