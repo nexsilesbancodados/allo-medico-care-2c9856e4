@@ -10,6 +10,7 @@ import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, FileText, Users, DollarSign, Clock } from "lucide-react";
+import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada", in_progress: "Em andamento", waiting: "Esperando",
@@ -144,6 +145,9 @@ const DoctorDashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Analytics Charts */}
+        <DoctorAnalyticsCharts />
 
         {/* Today's schedule */}
         <Card className="border-border mb-6">

@@ -77,7 +77,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
+    <section className="relative min-h-screen flex items-center pt-24 sm:pt-20 overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-20 right-0 w-[500px] h-[500px] rounded-full bg-medical-blue-light opacity-60 blur-3xl" />
@@ -105,12 +105,12 @@ const HeroSection = () => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.5 }}
               >
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground mb-6">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground mb-4 sm:mb-6">
                   {poseContent[poseIndex].title}{" "}
                   <span className="text-gradient">{poseContent[poseIndex].highlight}</span>
                 </h1>
 
-                <p className="text-lg text-muted-foreground max-w-lg mb-8 leading-relaxed">
+                <p className="text-base sm:text-lg text-muted-foreground max-w-lg mb-6 sm:mb-8 leading-relaxed">
                   {poseContent[poseIndex].description}
                 </p>
               </motion.div>
@@ -118,7 +118,7 @@ const HeroSection = () => {
 
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <Button
                 size="lg"
                 className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-6"

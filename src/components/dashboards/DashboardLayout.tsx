@@ -106,19 +106,19 @@ const DashboardLayout = ({ children, title, nav }: DashboardLayoutProps) => {
 
       {/* Mobile bottom nav */}
       {nav && nav.length > 0 && (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border flex items-center justify-around py-2 px-1 safe-area-pb">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-lg border-t border-border flex items-center justify-around py-1.5 px-1" style={{ paddingBottom: "env(safe-area-inset-bottom, 8px)" }}>
           {nav.slice(0, 5).map((item) => (
             <Link
               key={item.href}
               to={item.href}
-              className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] transition-colors ${
+              className={`flex flex-col items-center gap-0.5 px-1.5 py-1 rounded-lg text-[10px] transition-colors min-w-0 ${
                 item.active
                   ? "text-primary font-medium"
                   : "text-muted-foreground"
               }`}
             >
               {item.icon}
-              <span className="truncate max-w-[60px]">{item.label}</span>
+              <span className="truncate max-w-[56px] text-center">{item.label}</span>
             </Link>
           ))}
         </nav>
