@@ -18,6 +18,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import GuestCheckout from "./pages/GuestCheckout";
 import GuestConsultation from "./pages/GuestConsultation";
 import NotFound from "./pages/NotFound";
+import PingoChatbot from "./components/PingoChatbot";
 
 const queryClient = new QueryClient();
 
@@ -50,6 +51,7 @@ const App = () => (
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <PingoChatbot />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
