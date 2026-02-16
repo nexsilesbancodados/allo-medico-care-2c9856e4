@@ -78,7 +78,7 @@ const DoctorPremiumSection = () => {
                 whileInView={{ opacity: 1, x: 0, rotate: -3 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3, duration: 0.6 }}
-                className="absolute top-0 left-8 w-64 h-80 rounded-2xl overflow-hidden shadow-elevated z-10"
+                className="absolute top-0 left-2 sm:left-8 w-40 sm:w-52 lg:w-64 h-56 sm:h-72 lg:h-80 rounded-2xl overflow-hidden shadow-elevated z-10"
               >
                 <img
                   src={doctorImg1}
@@ -92,7 +92,7 @@ const DoctorPremiumSection = () => {
                 whileInView={{ opacity: 1, x: 0, rotate: 3 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.5, duration: 0.6 }}
-                className="absolute bottom-0 right-8 w-56 h-72 rounded-2xl overflow-hidden shadow-elevated z-20"
+                className="absolute bottom-0 right-2 sm:right-8 w-36 sm:w-48 lg:w-56 h-52 sm:h-64 lg:h-72 rounded-2xl overflow-hidden shadow-elevated z-20"
               >
                 <img
                   src={doctorImg2}

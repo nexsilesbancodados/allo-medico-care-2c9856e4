@@ -66,13 +66,13 @@ const ClinicPresentialSection = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="hidden md:block"
+              className=""
             >
               <div className="rounded-2xl overflow-hidden shadow-2xl">
                 <img
                   src={clinicReceptionist}
                   alt="Recepcionista da clínica Alô Médico"
-                  className="w-full h-80 object-cover"
+                  className="w-full h-48 sm:h-64 md:h-80 object-cover"
                 />
               </div>
             </motion.div>
@@ -111,11 +111,11 @@ const ClinicPresentialSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4, duration: 0.6 }}
-              className="relative hidden md:block"
+              className="relative"
             >
-              <div className="flex gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
                 {/* Patient image */}
-                <div className="w-48 flex-shrink-0 rounded-2xl overflow-hidden shadow-xl">
+                <div className="w-full sm:w-48 flex-shrink-0 rounded-2xl overflow-hidden shadow-xl">
                   <img
                     src={clinicPatientChat}
                     alt="Paciente agendando consulta"
