@@ -20,16 +20,16 @@ const Header = () => {
   return (
     <>
       {/* Marquee ticker */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary to-secondary overflow-hidden">
-        <div className="animate-marquee whitespace-nowrap py-1.5 text-sm font-medium text-primary-foreground flex">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary via-secondary to-primary overflow-hidden shadow-sm">
+        <div className="animate-marquee whitespace-nowrap py-2 text-xs font-semibold text-primary-foreground tracking-wide uppercase flex">
           {[...Array(2)].map((_, i) => (
-            <span key={i} className="inline-flex shrink-0">
-              <span className="mx-8">🩺 Consultas por vídeo 24h</span>
-              <span className="mx-8">💊 Receitas digitais válidas</span>
-              <span className="mx-8">⭐ Médicos com nota máxima</span>
-              <span className="mx-8">🔒 100% seguro e criptografado</span>
-              <span className="mx-8">📱 Atendimento na palma da mão</span>
-              <span className="mx-8">❤️ Cuidando de você e sua família</span>
+            <span key={i} className="inline-flex shrink-0 items-center">
+              <span className="mx-6 flex items-center gap-1.5">✦ Consultas por vídeo 24h</span>
+              <span className="mx-6 flex items-center gap-1.5">✦ Receitas digitais válidas</span>
+              <span className="mx-6 flex items-center gap-1.5">✦ Médicos com nota máxima</span>
+              <span className="mx-6 flex items-center gap-1.5">✦ 100% seguro e criptografado</span>
+              <span className="mx-6 flex items-center gap-1.5">✦ Atendimento na palma da mão</span>
+              <span className="mx-6 flex items-center gap-1.5">✦ Cuidando de você e sua família</span>
             </span>
           ))}
         </div>
