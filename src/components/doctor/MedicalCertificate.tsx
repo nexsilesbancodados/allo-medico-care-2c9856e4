@@ -7,17 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, FileText, Settings, FileBadge } from "lucide-react";
+import { getDoctorNav } from "./doctorNav";
+import { FileBadge } from "lucide-react";
 import jsPDF from "jspdf";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-
-const nav = [
-  { label: "Agenda", href: "/dashboard", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Atestados", href: "/dashboard/certificates", icon: <FileBadge className="w-4 h-4" />, active: true },
-  { label: "Prontuários", href: "/dashboard/patients", icon: <FileText className="w-4 h-4" /> },
-  { label: "Disponibilidade", href: "/dashboard/availability", icon: <Settings className="w-4 h-4" /> },
-];
 
 const MedicalCertificate = () => {
   const { profile, user } = useAuth();
@@ -70,7 +64,7 @@ const MedicalCertificate = () => {
   };
 
   return (
-    <DashboardLayout title="Médico" nav={nav}>
+    <DashboardLayout title="Médico" nav={getDoctorNav("certificates")}>
       <div className="max-w-2xl">
         <h1 className="text-2xl font-bold text-foreground mb-1">Atestados Médicos</h1>
         <p className="text-muted-foreground mb-6">Gere atestados e declarações em PDF</p>

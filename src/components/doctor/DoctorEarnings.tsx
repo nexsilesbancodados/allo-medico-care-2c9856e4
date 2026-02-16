@@ -3,17 +3,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, FileText, Settings, DollarSign, TrendingUp } from "lucide-react";
+import { getDoctorNav } from "./doctorNav";
+import { TrendingUp } from "lucide-react";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-
-const nav = [
-  { label: "Agenda", href: "/dashboard", icon: <Calendar className="w-4 h-4" /> },
-  { label: "Ganhos", href: "/dashboard/earnings", icon: <DollarSign className="w-4 h-4" />, active: true },
-  { label: "Prontuários", href: "/dashboard/patients", icon: <FileText className="w-4 h-4" /> },
-  { label: "Disponibilidade", href: "/dashboard/availability", icon: <Settings className="w-4 h-4" /> },
-];
 
 const DoctorEarnings = () => {
   const { user } = useAuth();
@@ -68,7 +62,7 @@ const DoctorEarnings = () => {
   };
 
   return (
-    <DashboardLayout title="Médico" nav={nav}>
+    <DashboardLayout title="Médico" nav={getDoctorNav("earnings")}>
       <div className="max-w-4xl">
         <h1 className="text-2xl font-bold text-foreground mb-1">Meus Ganhos</h1>
         <p className="text-muted-foreground mb-6">Resumo financeiro das consultas realizadas</p>
