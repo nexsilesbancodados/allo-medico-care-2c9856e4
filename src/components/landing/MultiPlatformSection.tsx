@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Monitor, Smartphone, Tablet, Apple, Chrome } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import devicesImg from "@/assets/devices-mascot.png";
+import mascotImg from "@/assets/mascot-thumbsup.png";
 
 const platforms = [
   { icon: Smartphone, label: "Android" },
@@ -99,15 +101,33 @@ const MultiPlatformSection = () => {
               </motion.div>
             </div>
 
-            {/* Platform grid */}
+            {/* Right side: Devices + mascot + platform icons */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="hidden lg:block"
+              className="hidden lg:flex flex-col items-center gap-6"
             >
-              <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
+              {/* Devices image with mascot overlay */}
+              <div className="relative w-full max-w-md">
+                <img
+                  src={devicesImg}
+                  alt="Alô Médico em notebook, celular e tablet"
+                  className="w-full rounded-2xl drop-shadow-2xl"
+                />
+                {/* Mascot floating on corner */}
+                <motion.img
+                  src={mascotImg}
+                  alt="Mascote Pingo"
+                  className="absolute -bottom-6 -right-4 w-28 h-28 object-contain drop-shadow-lg"
+                  animate={{ y: [0, -8, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </div>
+
+              {/* Platform grid below */}
+              <div className="grid grid-cols-3 gap-3 w-full max-w-sm mt-4">
                 {platforms.map((platform, i) => (
                   <motion.div
                     key={platform.label}
@@ -116,23 +136,17 @@ const MultiPlatformSection = () => {
                     viewport={{ once: true }}
                     transition={{ delay: 0.4 + i * 0.1 }}
                     whileHover={{ scale: 1.08, y: -4 }}
-                    className="flex flex-col items-center gap-2 bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/10 hover:bg-white/15 transition-colors cursor-default"
+                    className="flex flex-col items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10 hover:bg-white/15 transition-colors cursor-default"
                   >
-                    <platform.icon className="w-8 h-8" />
-                    <span className="text-sm font-medium">{platform.label}</span>
+                    <platform.icon className="w-6 h-6" />
+                    <span className="text-xs font-medium">{platform.label}</span>
                   </motion.div>
                 ))}
               </div>
 
-              <motion.p
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ delay: 1 }}
-                className="text-center text-primary-foreground/60 text-xs mt-4"
-              >
+              <p className="text-center text-primary-foreground/60 text-xs">
                 Compatível com qualquer navegador moderno
-              </motion.p>
+              </p>
             </motion.div>
           </div>
         </motion.div>
