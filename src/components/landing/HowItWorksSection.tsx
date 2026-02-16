@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { UserPlus, Search, Video, FileText } from "lucide-react";
+import howItWorksSignup from "@/assets/how-it-works-signup.png";
 import howItWorksBooking from "@/assets/how-it-works-booking.png";
 import howItWorksConsultation from "@/assets/how-it-works-consultation.png";
 import howItWorksPrescription from "@/assets/how-it-works-prescription.png";
@@ -9,7 +10,7 @@ const steps = [
     icon: UserPlus,
     title: "Cadastre-se",
     description: "Crie sua conta em menos de 2 minutos com dados básicos.",
-    image: null,
+    image: howItWorksSignup,
   },
   {
     icon: Search,
