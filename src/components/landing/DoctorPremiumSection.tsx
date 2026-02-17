@@ -9,7 +9,7 @@ const DoctorPremiumSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-20 px-4">
+    <section className="py-10 md:py-20 px-4">
       <div className="container mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
