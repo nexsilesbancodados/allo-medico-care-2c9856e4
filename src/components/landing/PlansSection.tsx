@@ -29,7 +29,7 @@ const plans = [
 const PlansSection = () => {
   const navigate = useNavigate();
   return (
-    <section id="planos" className="py-24">
+    <section id="planos" className="py-12 md:py-24">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
