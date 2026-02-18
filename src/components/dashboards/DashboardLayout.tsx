@@ -1,4 +1,5 @@
 import { ReactNode, useState } from "react";
+import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -11,17 +12,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, User, Settings, Phone, MoreHorizontal, Menu } from "lucide-react";
+import { LogOut, User, Settings, Phone, MoreHorizontal, Search } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
+import GlobalCommand from "@/components/GlobalCommand";
 
 interface DashboardLayoutProps {
   children: ReactNode;
   title: string;
   nav?: { label: string; href: string; icon: ReactNode; active?: boolean }[];
+  role?: string;
 }
 
-const DashboardLayout = ({ children, title, nav }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLayoutProps) => {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
@@ -52,9 +55,19 @@ const DashboardLayout = ({ children, title, nav }: DashboardLayoutProps) => {
           </Link>
 
           <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground hidden sm:block">
-              {profile?.first_name} {profile?.last_name}
-            </span>
+            {/* ⌘K hint — desktop only */}
+            <button
+              onClick={() => {
+                const e = new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true });
+                window.dispatchEvent(e);
+              }}
+              className="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-border bg-muted/50 text-xs text-muted-foreground hover:bg-muted transition-colors"
+              title="Busca rápida (⌘K)"
+            >
+              <Search className="w-3 h-3" />
+              <span className="hidden md:inline">Buscar</span>
+              <kbd className="hidden md:inline text-[10px] bg-background border border-border rounded px-1 py-0.5 font-mono">⌘K</kbd>
+            </button>
             <ThemeToggle />
             <NotificationBell />
             <DropdownMenu>
@@ -109,8 +122,19 @@ const DashboardLayout = ({ children, title, nav }: DashboardLayoutProps) => {
         )}
 
         {/* Main content */}
-        <main className="flex-1 p-4 sm:p-6 pb-24 md:pb-6">{children}</main>
+        <main className="flex-1 p-4 sm:p-6 pb-24 md:pb-6">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          >
+            {children}
+          </motion.div>
+        </main>
       </div>
+
+      {/* Global Command Palette ⌘K */}
+      <GlobalCommand role={role} />
 
       {/* Mobile bottom nav */}
       {nav && nav.length > 0 && (
