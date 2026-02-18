@@ -234,7 +234,7 @@ const AdminDashboard = () => {
               </div>
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1">
-                  <Star className="w-4 h-4 text-yellow-500" />
+                  <Star className="w-4 h-4 text-warning" />
                   <span className="text-2xl font-bold text-foreground">{stats.avg_rating.toFixed(1)}</span>
                 </div>
                 <p className="text-xs text-muted-foreground">NPS Médicos</p>
@@ -248,7 +248,7 @@ const AdminDashboard = () => {
           <Card className="border-border mb-6">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
                 Consultas Ativas ({liveAppts.length})
               </CardTitle>
             </CardHeader>
@@ -277,69 +277,87 @@ const AdminDashboard = () => {
 
         {/* Financial KPIs */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          <Card className="border-border bg-gradient-to-br from-primary/5 to-transparent">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Receita Recorrente</p>
-                  <p className="text-2xl font-bold text-foreground">R$ {stats.total_revenue.toFixed(2)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
-                  <CreditCard className="w-6 h-6 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Assinaturas Ativas</p>
-                  <p className="text-2xl font-bold text-foreground">{stats.active_subs}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-destructive" />
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">Inadimplentes</p>
-                  <p className="text-2xl font-bold text-foreground">{stats.overdue_subs}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/admin/patients")}>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Users className="w-5 h-5 text-primary" /></div>
-                <div><p className="text-xs text-muted-foreground">Pacientes</p><p className="text-xl font-bold text-foreground">{stats.total_patients}</p></div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/admin/doctors")}>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center"><FileText className="w-5 h-5 text-secondary" /></div>
-                <div><p className="text-xs text-muted-foreground">Médicos</p><p className="text-xl font-bold text-foreground">{stats.total_doctors}</p></div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/admin/appointments")}>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center"><TrendingUp className="w-5 h-5 text-accent-foreground" /></div>
-                <div><p className="text-xs text-muted-foreground">Consultas no Mês</p><p className="text-xl font-bold text-foreground">{stats.monthly_appts}</p></div>
-              </div>
-            </CardContent>
-          </Card>
+          {loading ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <Card key={i} className="border-border">
+                <CardContent className="pt-6 animate-pulse">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-muted" />
+                    <div className="space-y-2">
+                      <div className="h-3 w-24 bg-muted rounded" />
+                      <div className="h-6 w-20 bg-muted rounded" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <>
+              <Card className="border-border bg-gradient-to-br from-primary/5 to-transparent">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <DollarSign className="w-6 h-6 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Receita Recorrente</p>
+                      <p className="text-2xl font-bold text-foreground">R$ {stats.total_revenue.toFixed(2)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
+                      <CreditCard className="w-6 h-6 text-secondary" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Assinaturas Ativas</p>
+                      <p className="text-2xl font-bold text-foreground">{stats.active_subs}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
+                      <AlertTriangle className="w-6 h-6 text-destructive" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-muted-foreground">Inadimplentes</p>
+                      <p className="text-2xl font-bold text-foreground">{stats.overdue_subs}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/admin/patients")}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Users className="w-5 h-5 text-primary" /></div>
+                    <div><p className="text-xs text-muted-foreground">Pacientes</p><p className="text-xl font-bold text-foreground">{stats.total_patients}</p></div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/admin/doctors")}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center"><FileText className="w-5 h-5 text-secondary" /></div>
+                    <div><p className="text-xs text-muted-foreground">Médicos</p><p className="text-xl font-bold text-foreground">{stats.total_doctors}</p></div>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/admin/appointments")}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center"><TrendingUp className="w-5 h-5 text-accent-foreground" /></div>
+                    <div><p className="text-xs text-muted-foreground">Consultas no Mês</p><p className="text-xl font-bold text-foreground">{stats.monthly_appts}</p></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* Analytics Charts */}

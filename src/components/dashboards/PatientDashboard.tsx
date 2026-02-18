@@ -158,7 +158,7 @@ const PatientDashboard = () => {
               <p className="text-xs text-muted-foreground">Consulta</p>
             </CardContent>
           </Card>
-          <Card className="border-border hover:shadow-card transition-shadow cursor-pointer border-red-200 bg-red-50/50 dark:bg-red-950/10" onClick={() => navigate("/dashboard/schedule?urgency=true")}>
+          <Card className="border-border hover:shadow-card transition-shadow cursor-pointer border-destructive/20 bg-destructive/5" onClick={() => navigate("/dashboard/schedule?urgency=true")}>
             <CardContent className="pt-5 pb-4 text-center">
               <div className="w-12 h-12 mx-auto rounded-xl bg-destructive/10 flex items-center justify-center mb-2">
                 <Zap className="w-6 h-6 text-destructive" />
@@ -203,7 +203,19 @@ const PatientDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
+        {loading ? (
+              <div className="space-y-3">
+                {[1,2].map(i => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border animate-pulse">
+                    <div className="space-y-2">
+                      <div className="h-4 w-32 bg-muted rounded" />
+                      <div className="h-3 w-24 bg-muted rounded" />
+                    </div>
+                    <div className="h-6 w-16 bg-muted rounded-full" />
+                  </div>
+                ))}
+              </div>
+            ) :
             upcoming.length === 0 ? (
               <div className="text-center py-6">
                 <Calendar className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
