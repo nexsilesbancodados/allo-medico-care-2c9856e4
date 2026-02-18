@@ -193,7 +193,7 @@ const PatientDashboard = () => {
         })()}
 
         {/* Quick actions */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3 stagger-children">
           {[
             { label: "Agendar", sub: "Consulta", icon: Calendar, color: "bg-primary/10", iconColor: "text-primary", path: "/dashboard/schedule" },
             { label: "Urgência", sub: "Falar agora", icon: Zap, color: "bg-destructive/10", iconColor: "text-destructive", path: "/dashboard/schedule?urgency=true", urgent: true },

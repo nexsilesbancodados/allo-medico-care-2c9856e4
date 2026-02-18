@@ -179,6 +179,38 @@
   100% { transform: translateX(-50%); }
 }
 
+/* ── Smooth scrollbar ── */
+* { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
+*::-webkit-scrollbar { width: 5px; height: 5px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background-color: hsl(var(--border)); border-radius: 999px; }
+
+/* ── Dashboard card interactive hover ── */
+.card-interactive {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+  cursor: pointer;
+}
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
+}
+
+/* ── Stagger fade-in for list children ── */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.stagger-children > * { animation: fade-in-up 0.35s ease-out both; }
+.stagger-children > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-children > *:nth-child(2) { animation-delay: 55ms; }
+.stagger-children > *:nth-child(3) { animation-delay: 110ms; }
+.stagger-children > *:nth-child(4) { animation-delay: 165ms; }
+.stagger-children > *:nth-child(5) { animation-delay: 220ms; }
+.stagger-children > *:nth-child(6) { animation-delay: 275ms; }
+.stagger-children > *:nth-child(7) { animation-delay: 330ms; }
+.stagger-children > *:nth-child(8) { animation-delay: 385ms; }
+
+
 @keyframes rain-drop {
   0% { transform: translateY(-20px); opacity: 0; }
   20% { opacity: 1; }

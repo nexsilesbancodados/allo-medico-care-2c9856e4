@@ -118,7 +118,7 @@ const DoctorDashboard = () => {
         </div>
 
         {/* KPI cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => (
               <Card key={i} className="border-border">
