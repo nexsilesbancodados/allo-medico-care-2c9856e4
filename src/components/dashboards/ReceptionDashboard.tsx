@@ -3,14 +3,18 @@ import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "./DashboardLayout";
 import { getReceptionNav } from "@/components/reception/receptionNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { Calendar, Clock, CheckCircle, Video, Search, Download, RefreshCw } from "lucide-react";
-import { format } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComp } from "@/components/ui/calendar";
+import { Calendar, Clock, CheckCircle, Video, Search, Download, RefreshCw, Filter, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { format, addDays, subDays, startOfDay, endOfDay, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import jsPDF from "jspdf";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", waiting: "Na sala", in_progress: "Em consulta",
@@ -29,11 +33,14 @@ const statusColor: Record<string, string> = {
 const ReceptionDashboard = () => {
   const [todayAppts, setTodayAppts] = useState<any[]>([]);
   const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [stats, setStats] = useState({ total: 0, waiting: 0, inProgress: 0, completed: 0 });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => { fetchToday(); }, []);
+  useEffect(() => { fetchToday(); }, [selectedDate]);
 
   useEffect(() => {
     const channel = supabase
@@ -45,16 +52,14 @@ const ReceptionDashboard = () => {
 
   const fetchToday = async (showRefreshing = false) => {
     if (showRefreshing) setRefreshing(true);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    const dayStart = startOfDay(selectedDate);
+    const dayEnd = endOfDay(selectedDate);
 
     const { data } = await supabase
       .from("appointments")
       .select("id, scheduled_at, status, patient_id, doctor_id, duration_minutes, appointment_type, notes")
-      .gte("scheduled_at", today.toISOString())
-      .lt("scheduled_at", tomorrow.toISOString())
+      .gte("scheduled_at", dayStart.toISOString())
+      .lte("scheduled_at", dayEnd.toISOString())
       .order("scheduled_at", { ascending: true });
 
     if (!data) { setLoading(false); setRefreshing(false); return; }
@@ -125,40 +130,69 @@ const ReceptionDashboard = () => {
     toast.success("Agenda exportada em CSV!");
   };
 
-  const filteredAppts = todayAppts.filter(a =>
-    !search ||
-    a.patient_name.toLowerCase().includes(search.toLowerCase()) ||
-    a.doctor_name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredAppts = todayAppts.filter(a => {
+    const matchSearch = !search || a.patient_name.toLowerCase().includes(search.toLowerCase()) || a.doctor_name.toLowerCase().includes(search.toLowerCase());
+    const matchStatus = filterStatus === "all" || a.status === filterStatus;
+    return matchSearch && matchStatus;
+  });
 
   const kpis = [
-    { label: "Consultas Hoje", value: stats.total, icon: Calendar, color: "text-primary", bg: "bg-primary/10" },
-    { label: "Na Sala de Espera", value: stats.waiting, icon: Clock, color: "text-warning", bg: "bg-warning/10" },
+    { label: "Consultas", value: stats.total, icon: Calendar, color: "text-primary", bg: "bg-primary/10" },
+    { label: "Na Espera", value: stats.waiting, icon: Clock, color: "text-warning", bg: "bg-warning/10" },
     { label: "Em Andamento", value: stats.inProgress, icon: Video, color: "text-success", bg: "bg-success/10" },
     { label: "Concluídas", value: stats.completed, icon: CheckCircle, color: "text-muted-foreground", bg: "bg-muted" },
   ];
 
+  const isToday = isSameDay(selectedDate, new Date());
+
   return (
     <DashboardLayout title="Recepção" nav={getReceptionNav("overview")}>
-      <div className="max-w-5xl space-y-6">
+      <div className="max-w-5xl space-y-5">
 
         {/* Header */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Painel da Recepção</h1>
-            <p className="text-sm text-muted-foreground mt-0.5 capitalize">
-              {format(new Date(), "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-            </p>
+            {/* Date navigator */}
+            <div className="flex items-center gap-2 mt-1">
+              <button onClick={() => setSelectedDate(d => subDays(d, 1))} className="w-7 h-7 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors">
+                <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+              </button>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <button className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1.5">
+                    <Calendar className="w-3.5 h-3.5" />
+                    {isToday ? "Hoje" : format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComp
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={d => { if (d) { setSelectedDate(d); setCalendarOpen(false); } }}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+              <button onClick={() => setSelectedDate(d => addDays(d, 1))} className="w-7 h-7 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors">
+                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              </button>
+              {!isToday && (
+                <button onClick={() => setSelectedDate(new Date())} className="text-xs text-primary hover:underline">Hoje</button>
+              )}
+            </div>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-2 shrink-0 flex-wrap">
             <Button size="sm" variant="outline" onClick={() => fetchToday(true)} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
             <Button size="sm" variant="outline" onClick={exportCSV} disabled={loading || todayAppts.length === 0}>
-              <Download className="w-4 h-4 mr-1.5" /> CSV
+              <Download className="w-4 h-4 mr-1" /> CSV
             </Button>
           </div>
         </div>
+
 
         {/* KPI cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -190,16 +224,29 @@ const ReceptionDashboard = () => {
         {/* Agenda */}
         <Card className="border-border">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <CardTitle className="text-base font-semibold">Agenda do Dia — Todos os Médicos</CardTitle>
-              <div className="relative w-full sm:w-56">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar paciente ou médico..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="pl-8 h-8 text-sm"
-                />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <CardTitle className="text-base font-semibold">
+                Agenda — {filteredAppts.length} consulta(s)
+              </CardTitle>
+              <div className="flex gap-2 flex-wrap">
+                <div className="relative w-full sm:w-44">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-8 text-sm" />
+                </div>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="h-8 w-full sm:w-36 text-xs">
+                    <Filter className="w-3 h-3 mr-1 text-muted-foreground" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="scheduled">Agendada</SelectItem>
+                    <SelectItem value="waiting">Na espera</SelectItem>
+                    <SelectItem value="in_progress">Em andamento</SelectItem>
+                    <SelectItem value="completed">Concluída</SelectItem>
+                    <SelectItem value="no_show">Faltou</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </CardHeader>
