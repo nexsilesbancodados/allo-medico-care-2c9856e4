@@ -5,12 +5,15 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getAdminNav } from "@/components/admin/adminNav";
-import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, UserX, Video, Star, LayoutGrid } from "lucide-react";
+import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, Video, Star, LayoutGrid, Download, RefreshCw } from "lucide-react";
 import AdminAnalyticsCharts from "./AdminAnalyticsCharts";
-import { format } from "date-fns";
+import { format, startOfMonth, subMonths, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import jsPDF from "jspdf";
+import { toast } from "sonner";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -22,8 +25,17 @@ const panelOptions = [
   { label: "Afiliado", role: "affiliate", icon: "📣", description: "Ver como afiliado" },
 ];
 
+const PERIOD_OPTIONS = [
+  { value: "month", label: "Este mês" },
+  { value: "last3", label: "Últimos 3 meses" },
+  { value: "last6", label: "Últimos 6 meses" },
+  { value: "all", label: "Todo período" },
+];
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [periodFilter, setPeriodFilter] = useState("month");
+  const [refreshing, setRefreshing] = useState(false);
   const [stats, setStats] = useState({
     total_revenue: 0, active_subs: 0, overdue_subs: 0, total_patients: 0,
     total_doctors: 0, monthly_appts: 0,
@@ -35,7 +47,7 @@ const AdminDashboard = () => {
   const [liveAppts, setLiveAppts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [periodFilter]);
 
   // Realtime for live consultation monitoring
   useEffect(() => {
@@ -88,8 +100,14 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchAll = async () => {
-    const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0, 0, 0, 0);
+  const fetchAll = async (showRefreshing = false) => {
+    if (showRefreshing) setRefreshing(true);
+    const now = new Date();
+    let periodStart: Date;
+    if (periodFilter === "month") { periodStart = startOfMonth(now); }
+    else if (periodFilter === "last3") { periodStart = startOfMonth(subMonths(now, 2)); }
+    else if (periodFilter === "last6") { periodStart = startOfMonth(subMonths(now, 5)); }
+    else { periodStart = new Date("2020-01-01"); }
 
     const [patientsRes, doctorsRes, activeSubsRes, expiredSubsRes, monthApptsRes, pendingRes, allSubsRes, cancelledRes, noShowRes, totalMonthRes, ratingsRes] = await Promise.all([
       supabase.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "patient"),
@@ -99,37 +117,28 @@ const AdminDashboard = () => {
         .in("status", ["expired", "cancelled"])
         .order("expires_at", { ascending: false }).limit(10),
       supabase.from("appointments").select("id", { count: "exact", head: true })
-        .gte("scheduled_at", monthStart.toISOString()),
+        .gte("scheduled_at", periodStart.toISOString()),
       supabase.from("doctor_profiles").select("id, user_id, crm, crm_state").eq("is_approved", false).limit(5),
       supabase.from("subscriptions").select("id, user_id, plan_id, status, starts_at, expires_at, created_at")
         .order("created_at", { ascending: false }).limit(10),
-      // Cancellation metrics
       supabase.from("appointments").select("id", { count: "exact", head: true })
-        .eq("status", "cancelled")
-        .gte("scheduled_at", monthStart.toISOString()),
+        .eq("status", "cancelled").gte("scheduled_at", periodStart.toISOString()),
       supabase.from("appointments").select("id", { count: "exact", head: true })
-        .eq("status", "no_show")
-        .gte("scheduled_at", monthStart.toISOString()),
+        .eq("status", "no_show").gte("scheduled_at", periodStart.toISOString()),
       supabase.from("appointments").select("id", { count: "exact", head: true })
-        .gte("scheduled_at", monthStart.toISOString()),
-      // Average doctor rating
+        .gte("scheduled_at", periodStart.toISOString()),
       supabase.from("doctor_profiles").select("rating").gt("rating", 0),
     ]);
 
-    // Rates
     const totalMonth = totalMonthRes.count ?? 0;
     const cancelRate = totalMonth > 0 ? ((cancelledRes.count ?? 0) / totalMonth) * 100 : 0;
     const noShowRate = totalMonth > 0 ? ((noShowRes.count ?? 0) / totalMonth) * 100 : 0;
-
-    // Average rating
     const ratings = (ratingsRes.data ?? []).map(d => Number(d.rating)).filter(r => r > 0);
     const avgRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
 
-    // Revenue
     const activePlansRes = await supabase.from("subscriptions").select("plan_id").eq("status", "active");
     let totalRevenue = 0;
     if (activePlansRes.data && activePlansRes.data.length > 0) {
-      const planIds = [...new Set(activePlansRes.data.map(s => s.plan_id))];
       const { data: plans } = await supabase.from("plans").select("id, price");
       const planPriceMap = new Map(plans?.map(p => [p.id, Number(p.price)]) ?? []);
       activePlansRes.data.forEach(s => { totalRevenue += planPriceMap.get(s.plan_id) ?? 0; });
@@ -148,13 +157,12 @@ const AdminDashboard = () => {
       avg_rating: avgRating,
     });
 
-    // Enrich subs
     const allSubs = [...(allSubsRes.data ?? []), ...(expiredSubsRes.data ?? [])];
     const userIds = [...new Set(allSubs.map(s => s.user_id))];
-    const planIds = [...new Set(allSubs.map(s => s.plan_id))];
+    const planIds2 = [...new Set(allSubs.map(s => s.plan_id))];
     const [profilesRes, plansRes2] = await Promise.all([
       userIds.length > 0 ? supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds) : { data: [] },
-      planIds.length > 0 ? supabase.from("plans").select("id, name, price") : { data: [] },
+      planIds2.length > 0 ? supabase.from("plans").select("id, name, price") : { data: [] },
     ]);
     const pMap = new Map((profilesRes.data ?? []).map((p: any) => [p.user_id, `${p.first_name} ${p.last_name}`] as const));
     const planMap = new Map((plansRes2.data ?? []).map((p: any) => [p.id, p] as const));
@@ -167,7 +175,6 @@ const AdminDashboard = () => {
     setRecentSubs((allSubsRes.data ?? []).map(enrichSub));
     setOverdueSubs((expiredSubsRes.data ?? []).map(enrichSub));
 
-    // Pending doctors
     if (pendingRes.data && pendingRes.data.length > 0) {
       const docUserIds = pendingRes.data.map(d => d.user_id);
       const { data: docProfiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", docUserIds);
@@ -178,7 +185,61 @@ const AdminDashboard = () => {
     }
 
     setLoading(false);
+    setRefreshing(false);
     fetchLiveStats();
+  };
+
+  const exportAdminPDF = () => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text("Relatório Administrativo — AloClínica", 14, 20);
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy HH:mm")}`, 14, 28);
+    doc.text(`Período: ${PERIOD_OPTIONS.find(p => p.value === periodFilter)?.label ?? periodFilter}`, 14, 35);
+    const metrics = [
+      ["Receita Recorrente", `R$ ${stats.total_revenue.toFixed(2)}`],
+      ["Assinaturas Ativas", String(stats.active_subs)],
+      ["Inadimplentes", String(stats.overdue_subs)],
+      ["Total de Pacientes", String(stats.total_patients)],
+      ["Total de Médicos", String(stats.total_doctors)],
+      ["Consultas no Período", String(stats.monthly_appts)],
+      ["Cancelamentos %", `${stats.cancel_rate.toFixed(1)}%`],
+      ["Absenteísmo %", `${stats.no_show_rate.toFixed(1)}%`],
+      ["NPS Médio", stats.avg_rating.toFixed(1)],
+    ];
+    let y = 48;
+    doc.setFontSize(12);
+    doc.text("Métricas Gerais", 14, y); y += 10;
+    metrics.forEach(([label, value]) => {
+      doc.setFontSize(10);
+      doc.text(`${label}: ${value}`, 14, y);
+      y += 8;
+    });
+    doc.save(`relatorio-admin-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+    toast.success("Relatório PDF exportado!");
+  };
+
+  const exportAdminCSV = () => {
+    const rows = [
+      ["Métrica", "Valor"],
+      ["Receita Recorrente", `R$ ${stats.total_revenue.toFixed(2)}`],
+      ["Assinaturas Ativas", String(stats.active_subs)],
+      ["Inadimplentes", String(stats.overdue_subs)],
+      ["Total Pacientes", String(stats.total_patients)],
+      ["Total Médicos", String(stats.total_doctors)],
+      ["Consultas no Período", String(stats.monthly_appts)],
+      ["Cancelamentos %", `${stats.cancel_rate.toFixed(1)}%`],
+      ["Absenteísmo %", `${stats.no_show_rate.toFixed(1)}%`],
+    ];
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const el = document.createElement("a");
+    el.href = url;
+    el.download = `relatorio-admin-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    el.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exportado!");
   };
 
   const approveDoctor = async (id: string) => {
@@ -194,13 +255,35 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("overview")}>
       <div className="max-w-6xl">
-        <div className="flex items-center justify-between mb-1">
-          <h1 className="text-2xl font-bold text-foreground">Painel de Controle</h1>
-          <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/admin/switch-panel")} className="gap-2">
-            <LayoutGrid className="w-4 h-4" /> Trocar Painel
-          </Button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Painel de Controle</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Monitoramento em tempo real, finanças e operações</p>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Select value={periodFilter} onValueChange={setPeriodFilter}>
+              <SelectTrigger className="w-40 h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            <Button size="sm" variant="outline" className="h-9" onClick={() => fetchAll(true)} disabled={refreshing}>
+              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+            </Button>
+            <Button size="sm" variant="outline" className="h-9" onClick={exportAdminCSV} disabled={loading}>
+              <Download className="w-4 h-4 mr-1" /> CSV
+            </Button>
+            <Button size="sm" variant="outline" className="h-9" onClick={exportAdminPDF} disabled={loading}>
+              <FileText className="w-4 h-4 mr-1" /> PDF
+            </Button>
+            <Button variant="outline" size="sm" className="h-9" onClick={() => navigate("/dashboard/admin/switch-panel")}>
+              <LayoutGrid className="w-4 h-4 mr-1" /> Trocar Painel
+            </Button>
+          </div>
         </div>
-        <p className="text-muted-foreground mb-6">Monitoramento em tempo real, finanças e operações</p>
+
 
         {/* Real-time Operations Banner */}
         <Card className="border-primary/30 bg-primary/5 mb-6">
