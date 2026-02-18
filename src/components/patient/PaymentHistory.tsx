@@ -1,70 +1,290 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard } from "lucide-react";
-import { format } from "date-fns";
+import { Button } from "@/components/ui/button";
+import { CreditCard, CheckCircle2, Clock, XCircle, ChevronLeft, Star, Zap, Shield } from "lucide-react";
+import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getPatientNav } from "./patientNav";
 
-const statusLabel: Record<string, string> = { active: "Ativa", cancelled: "Cancelada", expired: "Vencida" };
-const statusVariant: Record<string, "default" | "destructive" | "outline"> = { active: "default", cancelled: "destructive", expired: "outline" };
+const statusConfig: Record<string, { label: string; icon: React.ReactNode; className: string }> = {
+  active: {
+    label: "Ativa",
+    icon: <CheckCircle2 className="w-3.5 h-3.5" />,
+    className: "bg-success/10 text-success border-success/20",
+  },
+  cancelled: {
+    label: "Cancelada",
+    icon: <XCircle className="w-3.5 h-3.5" />,
+    className: "bg-destructive/10 text-destructive border-destructive/20",
+  },
+  expired: {
+    label: "Vencida",
+    icon: <Clock className="w-3.5 h-3.5" />,
+    className: "bg-muted text-muted-foreground border-border",
+  },
+};
 
 const PaymentHistory = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [subs, setSubs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { if (user) fetchPayments(); }, [user]);
+  useEffect(() => {
+    if (user) fetchPayments();
+  }, [user]);
 
   const fetchPayments = async () => {
     const { data: subsData } = await supabase
       .from("subscriptions")
-      .select("id, plan_id, status, starts_at, expires_at, created_at, payment_method")
+      .select("id, plan_id, status, starts_at, expires_at, created_at, payment_method, notes")
       .eq("user_id", user!.id)
       .order("created_at", { ascending: false });
 
-    if (!subsData || subsData.length === 0) { setLoading(false); return; }
+    if (!subsData || subsData.length === 0) {
+      setLoading(false);
+      return;
+    }
 
-    const planIds = [...new Set(subsData.map(s => s.plan_id))];
-    const { data: plans } = await supabase.from("plans").select("id, name, price").in("id", planIds);
-    const planMap = new Map(plans?.map(p => [p.id, p]) ?? []);
+    const planIds = [...new Set(subsData.map((s) => s.plan_id))];
+    const { data: plans } = await supabase
+      .from("plans")
+      .select("id, name, price, description, features, interval")
+      .in("id", planIds);
+    const planMap = new Map(plans?.map((p) => [p.id, p]) ?? []);
 
-    setSubs(subsData.map(s => ({
-      ...s,
-      plan_name: planMap.get(s.plan_id)?.name ?? "—",
-      plan_price: planMap.get(s.plan_id)?.price ?? 0,
-    })));
+    setSubs(
+      subsData.map((s) => ({
+        ...s,
+        plan_name: planMap.get(s.plan_id)?.name ?? "—",
+        plan_price: planMap.get(s.plan_id)?.price ?? 0,
+        plan_description: planMap.get(s.plan_id)?.description ?? "",
+        plan_interval: planMap.get(s.plan_id)?.interval ?? "monthly",
+        plan_features: planMap.get(s.plan_id)?.features ?? [],
+      }))
+    );
     setLoading(false);
   };
 
+  const activeSub = subs.find((s) => s.status === "active");
+  const totalSpent = subs
+    .filter((s) => s.status !== "cancelled")
+    .reduce((acc, s) => acc + Number(s.plan_price), 0);
+
+  const daysLeft = activeSub?.expires_at
+    ? differenceInDays(new Date(activeSub.expires_at), new Date())
+    : null;
+
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("payments")}>
-      <div className="max-w-3xl">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Histórico de Pagamentos</h1>
-        <p className="text-muted-foreground mb-6">Suas assinaturas e pagamentos realizados</p>
+      <div className="max-w-3xl space-y-6">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard?role=patient")}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+          Voltar ao painel
+        </button>
 
-        {loading ? <p className="text-muted-foreground">Carregando...</p> :
-        subs.length === 0 ? (
-          <Card className="border-border"><CardContent className="py-12 text-center text-muted-foreground">Nenhum pagamento encontrado.</CardContent></Card>
-        ) : (
-          <div className="space-y-3">
-            {subs.map(s => (
-              <Card key={s.id} className="border-border">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-foreground">{s.plan_name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(s.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                        {s.expires_at && ` · Expira: ${format(new Date(s.expires_at), "dd/MM/yyyy", { locale: ptBR })}`}
-                      </p>
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Histórico de Pagamentos</h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Suas assinaturas e pagamentos realizados</p>
+        </div>
+
+        {/* Summary KPIs */}
+        {!loading && (
+          <div className="grid grid-cols-3 gap-3">
+            {[
+              {
+                label: "Total investido",
+                value: `R$ ${totalSpent.toFixed(2)}`,
+                icon: CreditCard,
+                color: "text-primary",
+                bg: "bg-primary/10",
+              },
+              {
+                label: "Assinaturas",
+                value: subs.length,
+                icon: Star,
+                color: "text-secondary",
+                bg: "bg-secondary/10",
+              },
+              {
+                label: daysLeft !== null && daysLeft >= 0 ? "Dias restantes" : "Status",
+                value: daysLeft !== null && daysLeft >= 0 ? daysLeft : activeSub ? "Ativo" : "—",
+                icon: Shield,
+                color: "text-success",
+                bg: "bg-success/10",
+              },
+            ].map((k) => (
+              <Card key={k.label} className="border-border">
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-start justify-between mb-1.5">
+                    <p className="text-xs text-muted-foreground">{k.label}</p>
+                    <div className={`w-7 h-7 rounded-lg ${k.bg} flex items-center justify-center`}>
+                      <k.icon className={`w-4 h-4 ${k.color}`} />
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-foreground">R$ {Number(s.plan_price).toFixed(2)}</p>
-                      <Badge variant={statusVariant[s.status] ?? "outline"}>{statusLabel[s.status] ?? s.status}</Badge>
+                  </div>
+                  <p className="text-xl font-bold text-foreground">{k.value}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Active plan highlight */}
+        {!loading && activeSub && (
+          <Card className="border-primary/30 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                  <Zap className="w-4 h-4 text-primary" />
+                  Plano Ativo
+                </CardTitle>
+                <span className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border bg-success/10 text-success border-success/20">
+                  <CheckCircle2 className="w-3.5 h-3.5" /> Ativo
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-start justify-between gap-4 flex-col sm:flex-row">
+                <div>
+                  <p className="text-xl font-bold text-foreground">{activeSub.plan_name}</p>
+                  {activeSub.plan_description && (
+                    <p className="text-sm text-muted-foreground mt-0.5">{activeSub.plan_description}</p>
+                  )}
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                    {activeSub.starts_at && (
+                      <span>Início: {format(new Date(activeSub.starts_at), "dd/MM/yyyy", { locale: ptBR })}</span>
+                    )}
+                    {activeSub.expires_at && (
+                      <span>· Expira: {format(new Date(activeSub.expires_at), "dd/MM/yyyy", { locale: ptBR })}</span>
+                    )}
+                  </div>
+                  {daysLeft !== null && daysLeft <= 15 && daysLeft >= 0 && (
+                    <p className="mt-2 text-xs font-medium text-warning bg-warning/10 border border-warning/20 px-2.5 py-1 rounded-lg inline-block">
+                      ⚠️ Expira em {daysLeft} dia{daysLeft !== 1 ? "s" : ""}
+                    </p>
+                  )}
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-2xl font-bold text-foreground">
+                    R$ {Number(activeSub.plan_price).toFixed(2)}
+                  </p>
+                  <p className="text-xs text-muted-foreground capitalize">
+                    /{activeSub.plan_interval === "monthly" ? "mês" : activeSub.plan_interval === "yearly" ? "ano" : activeSub.plan_interval}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-2 text-xs"
+                    onClick={() => navigate("/dashboard/plans")}
+                  >
+                    Trocar plano
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* No active plan CTA */}
+        {!loading && !activeSub && subs.length === 0 && (
+          <Card className="border-border">
+            <CardContent className="py-12 text-center">
+              <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                <CreditCard className="w-8 h-8 text-muted-foreground/40" />
+              </div>
+              <p className="font-medium text-foreground mb-1">Nenhum plano ativo</p>
+              <p className="text-sm text-muted-foreground mb-4">Assine um plano para ter acesso a consultas ilimitadas</p>
+              <Button className="bg-gradient-hero text-primary-foreground" onClick={() => navigate("/dashboard/plans")}>
+                Ver planos disponíveis
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Payment history list */}
+        {!loading && subs.length > 0 && (
+          <div>
+            <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" /> Histórico completo
+            </h2>
+            <div className="space-y-3">
+              {subs.map((s) => {
+                const cfg = statusConfig[s.status] ?? statusConfig.expired;
+                return (
+                  <Card key={s.id} className="border-border hover:shadow-sm transition-shadow">
+                    <CardContent className="pt-4 pb-4">
+                      <div className="flex items-start justify-between gap-3 flex-col sm:flex-row">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <CreditCard className="w-5 h-5 text-primary" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-semibold text-foreground text-sm">{s.plan_name}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {format(new Date(s.created_at), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                            </p>
+                            {s.payment_method && (
+                              <p className="text-xs text-muted-foreground capitalize mt-0.5">
+                                {s.payment_method === "credit_card"
+                                  ? "💳 Cartão de crédito"
+                                  : s.payment_method === "pix"
+                                  ? "⚡ PIX"
+                                  : s.payment_method === "boleto"
+                                  ? "📄 Boleto"
+                                  : s.payment_method}
+                              </p>
+                            )}
+                            {s.expires_at && (
+                              <p className="text-xs text-muted-foreground">
+                                Expira: {format(new Date(s.expires_at), "dd/MM/yyyy", { locale: ptBR })}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex sm:flex-col items-center sm:items-end gap-2 shrink-0">
+                          <p className="font-bold text-foreground text-base">
+                            R$ {Number(s.plan_price).toFixed(2)}
+                          </p>
+                          <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${cfg.className}`}>
+                            {cfg.icon} {cfg.label}
+                          </span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Loading skeleton */}
+        {loading && (
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="border-border">
+                <CardContent className="pt-4 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
+                      <div className="space-y-2">
+                        <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+                        <div className="h-3 w-24 bg-muted rounded animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-right">
+                      <div className="h-5 w-20 bg-muted rounded animate-pulse" />
+                      <div className="h-5 w-16 bg-muted rounded-full animate-pulse" />
                     </div>
                   </div>
                 </CardContent>
