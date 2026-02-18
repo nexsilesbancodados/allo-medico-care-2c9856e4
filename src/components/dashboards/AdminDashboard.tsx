@@ -363,26 +363,36 @@ const AdminDashboard = () => {
         {/* Analytics Charts */}
         <AdminAnalyticsCharts />
 
-        <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid lg:grid-cols-2 gap-4 mb-6">
           {/* Overdue / Inadimplência */}
           <Card className="border-border">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <AlertTriangle className="w-5 h-5 text-destructive" /> Inadimplentes
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-destructive" /> Inadimplentes
+                {overdueSubs.length > 0 && (
+                  <span className="ml-auto text-xs font-normal text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
+                    {overdueSubs.length}
+                  </span>
+                )}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0">
               {overdueSubs.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum inadimplente no momento. 🎉</p>
+                <div className="text-center py-6">
+                  <p className="text-2xl mb-1">🎉</p>
+                  <p className="text-sm text-muted-foreground">Nenhum inadimplente!</p>
+                </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {overdueSubs.map(s => (
-                    <div key={s.id} className="flex items-center justify-between p-2 rounded border border-destructive/20 bg-destructive/5">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{s.user_name}</p>
+                    <div key={s.id} className="flex items-center justify-between p-3 rounded-xl border border-destructive/20 bg-destructive/5 hover:bg-destructive/8 transition-colors">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{s.user_name}</p>
                         <p className="text-xs text-muted-foreground">{s.plan_name} · R$ {Number(s.plan_price).toFixed(2)}</p>
                       </div>
-                      <Badge variant="destructive">{statusLabel[s.status] ?? s.status}</Badge>
+                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full border bg-destructive/10 text-destructive border-destructive/20 shrink-0 ml-2">
+                        {statusLabel[s.status] ?? s.status}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -392,19 +402,33 @@ const AdminDashboard = () => {
 
           {/* Pending doctors */}
           <Card className="border-border">
-            <CardHeader><CardTitle className="text-lg">Médicos Pendentes</CardTitle></CardHeader>
-            <CardContent>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                Médicos Pendentes
+                {pendingDoctors.length > 0 && (
+                  <span className="ml-auto text-xs font-normal text-warning bg-warning/10 px-2 py-0.5 rounded-full">
+                    {pendingDoctors.length}
+                  </span>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
               {pendingDoctors.length === 0 ? (
-                <p className="text-sm text-muted-foreground">Nenhum pendente.</p>
+                <div className="text-center py-6">
+                  <p className="text-2xl mb-1">✅</p>
+                  <p className="text-sm text-muted-foreground">Nenhum pendente de aprovação</p>
+                </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {pendingDoctors.map(d => (
-                    <div key={d.id} className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{d.name}</p>
+                    <div key={d.id} className="flex items-center justify-between p-3 rounded-xl border border-warning/20 bg-warning/5">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
                         <p className="text-xs text-muted-foreground">CRM {d.crm}/{d.crm_state}</p>
                       </div>
-                      <Button size="sm" variant="outline" onClick={() => approveDoctor(d.id)}>Aprovar</Button>
+                      <Button size="sm" className="bg-success/10 text-success border border-success/30 hover:bg-success/20 text-xs h-7 shrink-0 ml-2" onClick={() => approveDoctor(d.id)}>
+                        Aprovar
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -415,33 +439,43 @@ const AdminDashboard = () => {
 
         {/* Recent subscriptions */}
         <Card className="border-border">
-          <CardHeader>
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Assinaturas Recentes</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => navigate("/dashboard/admin/subscriptions")}>Ver Todas</Button>
+              <CardTitle className="text-base font-semibold">Assinaturas Recentes</CardTitle>
+              <Button size="sm" variant="ghost" className="text-xs text-primary" onClick={() => navigate("/dashboard/admin/subscriptions")}>
+                Ver todas →
+              </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0">
             {recentSubs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhuma assinatura registrada.</p>
+              <p className="text-sm text-muted-foreground text-center py-4">Nenhuma assinatura registrada.</p>
             ) : (
-              <div className="overflow-auto">
+              <div className="overflow-auto rounded-lg border border-border">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Usuário</TableHead>
-                      <TableHead>Plano</TableHead>
-                      <TableHead>Valor</TableHead>
-                      <TableHead>Status</TableHead>
+                    <TableRow className="bg-muted/40">
+                      <TableHead className="text-xs">Usuário</TableHead>
+                      <TableHead className="text-xs">Plano</TableHead>
+                      <TableHead className="text-xs">Valor</TableHead>
+                      <TableHead className="text-xs">Status</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {recentSubs.map(s => (
-                      <TableRow key={s.id}>
-                        <TableCell className="font-medium text-foreground">{s.user_name}</TableCell>
-                        <TableCell className="text-muted-foreground">{s.plan_name}</TableCell>
-                        <TableCell className="text-foreground">R$ {Number(s.plan_price).toFixed(2)}</TableCell>
-                        <TableCell><Badge variant={statusVariant[s.status] ?? "outline"}>{statusLabel[s.status] ?? s.status}</Badge></TableCell>
+                      <TableRow key={s.id} className="hover:bg-muted/30">
+                        <TableCell className="font-medium text-foreground text-sm">{s.user_name}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{s.plan_name}</TableCell>
+                        <TableCell className="text-foreground text-sm">R$ {Number(s.plan_price).toFixed(2)}</TableCell>
+                        <TableCell>
+                          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${
+                            s.status === "active" ? "bg-success/10 text-success border-success/20"
+                            : s.status === "cancelled" ? "bg-destructive/10 text-destructive border-destructive/20"
+                            : "bg-muted text-muted-foreground border-border"
+                          }`}>
+                            {statusLabel[s.status] ?? s.status}
+                          </span>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

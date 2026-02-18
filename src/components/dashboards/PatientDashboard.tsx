@@ -4,16 +4,30 @@ import DashboardLayout from "../dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getPatientNav } from "@/components/patient/patientNav";
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, CreditCard, FileText, Heart, Video, Clock, Zap, Upload, Search, AlertTriangle, Bell } from "lucide-react";
+import { Calendar, CreditCard, FileText, Heart, Video, Clock, Zap, Upload, Star } from "lucide-react";
 
 const statusLabel: Record<string, string> = {
-  scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
-  in_progress: "Em andamento", waiting: "Na sala de espera", no_show: "Ausente",
+  scheduled: "Agendada",
+  completed: "Concluída",
+  cancelled: "Cancelada",
+  in_progress: "Em andamento",
+  waiting: "Na espera",
+  no_show: "Ausente",
+};
+
+const statusColor: Record<string, string> = {
+  scheduled: "bg-primary/10 text-primary border-primary/20",
+  waiting: "bg-warning/10 text-warning border-warning/20",
+  in_progress: "bg-success/10 text-success border-success/20",
+  completed: "bg-muted text-muted-foreground border-border",
+  cancelled: "bg-destructive/10 text-destructive border-destructive/20",
+  no_show: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
 const PatientDashboard = () => {
@@ -26,15 +40,12 @@ const PatientDashboard = () => {
 
   useEffect(() => { if (user) fetchData(); }, [user]);
 
-  // Realtime for waiting room status
   useEffect(() => {
     if (!user) return;
     const channel = supabase
       .channel("patient-updates")
       .on("postgres_changes", {
-        event: "UPDATE",
-        schema: "public",
-        table: "appointments",
+        event: "UPDATE", schema: "public", table: "appointments",
         filter: `patient_id=eq.${user.id}`,
       }, () => { fetchData(); })
       .subscribe();
@@ -43,40 +54,26 @@ const PatientDashboard = () => {
 
   const fetchData = async () => {
     const now = new Date().toISOString();
-
     const [upRes, completedRes, prescRes, docsRes, waitRes] = await Promise.all([
       supabase.from("appointments")
         .select("id, scheduled_at, status, doctor_id, duration_minutes, appointment_type")
-        .eq("patient_id", user!.id)
-        .gte("scheduled_at", now)
+        .eq("patient_id", user!.id).gte("scheduled_at", now)
         .in("status", ["scheduled", "waiting", "in_progress"])
-        .order("scheduled_at", { ascending: true })
-        .limit(5),
-      supabase.from("appointments")
-        .select("id", { count: "exact", head: true })
-        .eq("patient_id", user!.id)
-        .eq("status", "completed"),
-      supabase.from("prescriptions")
-        .select("id", { count: "exact", head: true })
+        .order("scheduled_at", { ascending: true }).limit(5),
+      supabase.from("appointments").select("id", { count: "exact", head: true })
+        .eq("patient_id", user!.id).eq("status", "completed"),
+      supabase.from("prescriptions").select("id", { count: "exact", head: true })
         .eq("patient_id", user!.id),
-      supabase.from("patient_documents")
-        .select("id", { count: "exact", head: true })
+      supabase.from("patient_documents").select("id", { count: "exact", head: true })
         .eq("patient_id", user!.id),
       supabase.from("appointments")
         .select("id, scheduled_at, status, doctor_id")
-        .eq("patient_id", user!.id)
-        .in("status", ["waiting", "in_progress"])
-        .limit(1)
-        .single(),
+        .eq("patient_id", user!.id).in("status", ["waiting", "in_progress"])
+        .limit(1).single(),
     ]);
 
-    setStats({
-      total: completedRes.count ?? 0,
-      prescriptions: prescRes.count ?? 0,
-      documents: docsRes.count ?? 0,
-    });
+    setStats({ total: completedRes.count ?? 0, prescriptions: prescRes.count ?? 0, documents: docsRes.count ?? 0 });
 
-    // Enrich with doctor names
     const allAppts = upRes.data ?? [];
     if (allAppts.length > 0) {
       const doctorIds = [...new Set(allAppts.map(a => a.doctor_id))];
@@ -106,7 +103,6 @@ const PatientDashboard = () => {
     } else {
       setWaitingAppt(null);
     }
-
     setLoading(false);
   };
 
@@ -115,31 +111,42 @@ const PatientDashboard = () => {
     navigate(`/dashboard/consultation/${appointmentId}`);
   };
 
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Bom dia";
+    if (h < 18) return "Boa tarde";
+    return "Boa noite";
+  };
+
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("home")}>
-      <div className="max-w-3xl">
-        <h1 className="text-2xl font-bold text-foreground mb-1">
-          Olá, {profile?.first_name || "Paciente"}! 👋
-        </h1>
-        <p className="text-muted-foreground mb-6">Cuide da sua saúde com facilidade</p>
+      <div className="max-w-3xl space-y-6">
+
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">
+            {greeting()}, {profile?.first_name || "Paciente"}! 👋
+          </h1>
+          <p className="text-muted-foreground text-sm mt-0.5">Cuide da sua saúde com facilidade</p>
+        </div>
 
         {/* Active waiting room alert */}
         {waitingAppt && (
-          <Card className="border-primary bg-primary/5 mb-6 animate-pulse">
+          <Card className="border-primary/30 bg-gradient-to-r from-primary/5 to-success/5">
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
                     <Video className="w-5 h-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">
-                      {waitingAppt.status === "in_progress" ? "Consulta em andamento" : "Você está na sala de espera"}
+                    <p className="font-semibold text-foreground text-sm">
+                      {waitingAppt.status === "in_progress" ? "🔴 Consulta em andamento" : "⏳ Você está na sala de espera"}
                     </p>
-                    <p className="text-sm text-muted-foreground">{waitingAppt.doctor_name}</p>
+                    <p className="text-xs text-muted-foreground">{waitingAppt.doctor_name}</p>
                   </div>
                 </div>
-                <Button className="bg-gradient-hero text-primary-foreground" onClick={() => navigate(`/dashboard/consultation/${waitingAppt.id}`)}>
+                <Button size="sm" className="bg-gradient-hero text-primary-foreground shrink-0" onClick={() => navigate(`/dashboard/consultation/${waitingAppt.id}`)}>
                   <Video className="w-4 h-4 mr-1" /> Entrar
                 </Button>
               </div>
@@ -147,104 +154,115 @@ const PatientDashboard = () => {
           </Card>
         )}
 
-        {/* Quick actions - 3 columns */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <Card className="border-border hover:shadow-card transition-shadow cursor-pointer" onClick={() => navigate("/dashboard/schedule")}>
-            <CardContent className="pt-5 pb-4 text-center">
-              <div className="w-12 h-12 mx-auto rounded-xl bg-primary/10 flex items-center justify-center mb-2">
-                <Calendar className="w-6 h-6 text-primary" />
-              </div>
-              <p className="text-sm font-medium text-foreground">Agendar</p>
-              <p className="text-xs text-muted-foreground">Consulta</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border hover:shadow-card transition-shadow cursor-pointer border-destructive/20 bg-destructive/5" onClick={() => navigate("/dashboard/schedule?urgency=true")}>
-            <CardContent className="pt-5 pb-4 text-center">
-              <div className="w-12 h-12 mx-auto rounded-xl bg-destructive/10 flex items-center justify-center mb-2">
-                <Zap className="w-6 h-6 text-destructive" />
-              </div>
-              <p className="text-sm font-medium text-foreground">Urgência</p>
-              <p className="text-xs text-muted-foreground">Falar agora</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border hover:shadow-card transition-shadow cursor-pointer" onClick={() => navigate("/dashboard/patient/documents")}>
-            <CardContent className="pt-5 pb-4 text-center">
-              <div className="w-12 h-12 mx-auto rounded-xl bg-accent flex items-center justify-center mb-2">
-                <Upload className="w-6 h-6 text-accent-foreground" />
-              </div>
-              <p className="text-sm font-medium text-foreground">Enviar</p>
-              <p className="text-xs text-muted-foreground">Exames</p>
-            </CardContent>
-          </Card>
+        {/* Quick actions */}
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: "Agendar", sub: "Consulta", icon: Calendar, color: "bg-primary/10", iconColor: "text-primary", path: "/dashboard/schedule" },
+            { label: "Urgência", sub: "Falar agora", icon: Zap, color: "bg-destructive/10", iconColor: "text-destructive", path: "/dashboard/schedule?urgency=true", urgent: true },
+            { label: "Enviar", sub: "Exames", icon: Upload, color: "bg-secondary/10", iconColor: "text-secondary", path: "/dashboard/patient/documents" },
+          ].map(item => (
+            <Card
+              key={item.label}
+              className={`border-border hover:shadow-card transition-all duration-200 cursor-pointer hover:-translate-y-0.5 ${item.urgent ? "border-destructive/20 bg-destructive/3" : ""}`}
+              onClick={() => navigate(item.path)}
+            >
+              <CardContent className="pt-5 pb-4 text-center">
+                <div className={`w-12 h-12 mx-auto rounded-xl ${item.color} flex items-center justify-center mb-2`}>
+                  <item.icon className={`w-6 h-6 ${item.iconColor}`} />
+                </div>
+                <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                <p className="text-xs text-muted-foreground">{item.sub}</p>
+              </CardContent>
+            </Card>
+          ))}
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="text-center p-3 rounded-lg bg-muted/50">
-            <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-            <p className="text-xs text-muted-foreground">Consultas</p>
-          </div>
-          <div className="text-center p-3 rounded-lg bg-muted/50">
-            <p className="text-2xl font-bold text-foreground">{stats.prescriptions}</p>
-            <p className="text-xs text-muted-foreground">Receitas</p>
-          </div>
-          <div className="text-center p-3 rounded-lg bg-muted/50">
-            <p className="text-2xl font-bold text-foreground">{stats.documents}</p>
-            <p className="text-xs text-muted-foreground">Documentos</p>
-          </div>
+        <div className="grid grid-cols-3 gap-3">
+          {loading ? (
+            [1, 2, 3].map(i => (
+              <div key={i} className="text-center p-4 rounded-xl bg-muted/40 space-y-2">
+                <Skeleton className="h-7 w-10 mx-auto" />
+                <Skeleton className="h-3 w-16 mx-auto" />
+              </div>
+            ))
+          ) : (
+            [
+              { value: stats.total, label: "Consultas", icon: "🩺" },
+              { value: stats.prescriptions, label: "Receitas", icon: "💊" },
+              { value: stats.documents, label: "Documentos", icon: "📄" },
+            ].map(s => (
+              <div key={s.label} className="text-center p-4 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors">
+                <p className="text-xs mb-1">{s.icon}</p>
+                <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+              </div>
+            ))
+          )}
         </div>
 
         {/* Upcoming appointments */}
-        <Card className="border-border mb-6">
-          <CardHeader>
+        <Card className="border-border">
+          <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">📅 Próximos Agendamentos</CardTitle>
-              <Button size="sm" variant="outline" onClick={() => navigate("/dashboard/appointments")}>Ver todos</Button>
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary" /> Próximos Agendamentos
+              </CardTitle>
+              <Button size="sm" variant="ghost" className="text-xs text-primary" onClick={() => navigate("/dashboard/appointments")}>
+                Ver todos →
+              </Button>
             </div>
           </CardHeader>
-          <CardContent>
-        {loading ? (
+          <CardContent className="pt-0">
+            {loading ? (
               <div className="space-y-3">
-                {[1,2].map(i => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border animate-pulse">
-                    <div className="space-y-2">
-                      <div className="h-4 w-32 bg-muted rounded" />
-                      <div className="h-3 w-24 bg-muted rounded" />
+                {[1, 2].map(i => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border">
+                    <div className="space-y-2 flex-1">
+                      <Skeleton className="h-4 w-36" />
+                      <Skeleton className="h-3 w-24" />
                     </div>
-                    <div className="h-6 w-16 bg-muted rounded-full" />
+                    <Skeleton className="h-6 w-20 rounded-full" />
                   </div>
                 ))}
               </div>
-            ) :
-            upcoming.length === 0 ? (
-              <div className="text-center py-6">
-                <Calendar className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
-                <p className="text-sm text-muted-foreground mb-3">Nenhuma consulta agendada.</p>
+            ) : upcoming.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-3">
+                  <Calendar className="w-8 h-8 text-muted-foreground/40" />
+                </div>
+                <p className="text-sm font-medium text-foreground mb-1">Nenhuma consulta agendada</p>
+                <p className="text-xs text-muted-foreground mb-4">Agende uma consulta com um médico de sua escolha</p>
                 <Button size="sm" className="bg-gradient-hero text-primary-foreground" onClick={() => navigate("/dashboard/schedule")}>
                   Agendar agora
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {upcoming.map(a => (
-                  <div key={a.id} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{a.doctor_name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(a.scheduled_at), "dd/MM 'às' HH:mm", { locale: ptBR })} · {a.duration_minutes || 30}min
-                      </p>
+                  <div key={a.id} className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-muted/30 transition-colors">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Video className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground truncate">{a.doctor_name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(a.scheduled_at), "dd/MM 'às' HH:mm", { locale: ptBR })} · {a.duration_minutes || 30}min
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={a.status === "waiting" ? "secondary" : "outline"}>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${statusColor[a.status] ?? "bg-muted text-muted-foreground border-border"}`}>
                         {statusLabel[a.status] ?? a.status}
-                      </Badge>
+                      </span>
                       {a.status === "scheduled" && (
-                        <Button size="sm" variant="outline" className="text-xs" onClick={() => enterWaitingRoom(a.id)}>
+                        <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => enterWaitingRoom(a.id)}>
                           <Clock className="w-3 h-3 mr-1" /> Entrar
                         </Button>
                       )}
                       {(a.status === "waiting" || a.status === "in_progress") && (
-                        <Button size="sm" className="bg-gradient-hero text-primary-foreground text-xs" onClick={() => navigate(`/dashboard/consultation/${a.id}`)}>
+                        <Button size="sm" className="bg-gradient-hero text-primary-foreground text-xs h-7" onClick={() => navigate(`/dashboard/consultation/${a.id}`)}>
                           <Video className="w-3 h-3 mr-1" /> Sala
                         </Button>
                       )}
@@ -257,29 +275,23 @@ const PatientDashboard = () => {
         </Card>
 
         {/* Quick links */}
-        <div className="grid sm:grid-cols-2 gap-4">
-          <Card className="border-border hover:shadow-card transition-shadow cursor-pointer" onClick={() => navigate("/dashboard/patient/health")}>
-            <CardContent className="pt-6 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Heart className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">Minha Saúde</p>
-                <p className="text-sm text-muted-foreground">Receitas, atestados e histórico</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border hover:shadow-card transition-shadow cursor-pointer" onClick={() => navigate("/dashboard/payment-history")}>
-            <CardContent className="pt-6 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-secondary" />
-              </div>
-              <div>
-                <p className="font-semibold text-foreground">Pagamentos</p>
-                <p className="text-sm text-muted-foreground">Plano e histórico financeiro</p>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid sm:grid-cols-2 gap-3">
+          {[
+            { label: "Minha Saúde", sub: "Receitas, atestados e histórico", icon: Heart, color: "bg-primary/10", iconColor: "text-primary", path: "/dashboard/patient/health" },
+            { label: "Pagamentos", sub: "Plano e histórico financeiro", icon: CreditCard, color: "bg-secondary/10", iconColor: "text-secondary", path: "/dashboard/payment-history" },
+          ].map(item => (
+            <Card key={item.label} className="border-border hover:shadow-card transition-all duration-200 cursor-pointer hover:-translate-y-0.5" onClick={() => navigate(item.path)}>
+              <CardContent className="pt-5 pb-4 flex items-center gap-4">
+                <div className={`w-11 h-11 rounded-xl ${item.color} flex items-center justify-center shrink-0`}>
+                  <item.icon className={`w-5 h-5 ${item.iconColor}`} />
+                </div>
+                <div>
+                  <p className="font-semibold text-foreground text-sm">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.sub}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </div>
     </DashboardLayout>
