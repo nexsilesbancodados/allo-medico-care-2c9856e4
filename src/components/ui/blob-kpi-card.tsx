@@ -2,11 +2,11 @@ import { ReactNode } from "react";
 import { motion } from "framer-motion";
 
 /**
- * Card KPI com forma orgânica blob e efeito glassmorphism.
- * Inspirado no estilo watercolor/frosted glass da referência.
+ * Card KPI com forma orgânica blob — estilo aquarela vibrante.
+ * Ícone + valor + label em branco sobre blob colorido.
  */
 
-export type BlobColor = "primary" | "secondary" | "success" | "warning" | "destructive" | "accent";
+export type BlobColor = "primary" | "secondary" | "success" | "warning" | "destructive" | "accent" | "purple" | "teal";
 
 interface BlobKPICardProps {
   label: string;
@@ -21,80 +21,142 @@ interface BlobKPICardProps {
 
 // 5 formas orgânicas distintas usando border-radius composto
 const BLOB_SHAPES = [
-  "63% 37% 54% 46% / 55% 48% 52% 45%",
-  "40% 60% 70% 30% / 40% 50% 60% 50%",
-  "54% 46% 38% 62% / 49% 70% 30% 51%",
-  "70% 30% 46% 54% / 30% 52% 48% 70%",
-  "45% 55% 65% 35% / 58% 40% 60% 42%",
+  "60% 40% 54% 46% / 48% 55% 45% 52%",
+  "42% 58% 65% 35% / 45% 52% 48% 55%",
+  "55% 45% 40% 60% / 52% 45% 55% 48%",
+  "68% 32% 48% 52% / 38% 58% 42% 62%",
+  "48% 52% 62% 38% / 55% 42% 58% 45%",
 ];
 
-// Mapeamento de cores para variáveis CSS semânticas
-const COLOR_MAP: Record<BlobColor, { bg: string; glow: string; icon: string }> = {
-  primary:     { bg: "hsla(var(--primary) / 0.25)",     glow: "hsla(var(--primary) / 0.15)",     icon: "hsl(var(--primary))" },
-  secondary:   { bg: "hsla(var(--secondary) / 0.28)",   glow: "hsla(var(--secondary) / 0.12)",   icon: "hsl(var(--secondary))" },
-  success:     { bg: "hsla(var(--success) / 0.25)",     glow: "hsla(var(--success) / 0.12)",     icon: "hsl(var(--success))" },
-  warning:     { bg: "hsla(var(--warning) / 0.28)",     glow: "hsla(var(--warning) / 0.12)",     icon: "hsl(var(--warning))" },
-  destructive: { bg: "hsla(var(--destructive) / 0.22)", glow: "hsla(var(--destructive) / 0.10)", icon: "hsl(var(--destructive))" },
-  accent:      { bg: "hsla(var(--accent) / 0.30)",      glow: "hsla(var(--accent) / 0.15)",      icon: "hsl(var(--accent-foreground))" },
+// Paleta aquarela vibrante — cores sólidas com variação de luz para efeito paint
+const COLOR_MAP: Record<BlobColor, { from: string; to: string; shadow: string; shimmer: string }> = {
+  primary:     {
+    from:    "hsl(210 85% 58%)",
+    to:      "hsl(220 75% 48%)",
+    shadow:  "hsl(210 85% 50% / 0.45)",
+    shimmer: "hsl(210 100% 80% / 0.30)",
+  },
+  secondary:   {
+    from:    "hsl(160 55% 52%)",
+    to:      "hsl(170 60% 40%)",
+    shadow:  "hsl(160 55% 45% / 0.45)",
+    shimmer: "hsl(160 80% 80% / 0.30)",
+  },
+  success:     {
+    from:    "hsl(145 65% 50%)",
+    to:      "hsl(155 70% 38%)",
+    shadow:  "hsl(145 65% 42% / 0.45)",
+    shimmer: "hsl(145 80% 80% / 0.30)",
+  },
+  warning:     {
+    from:    "hsl(35 90% 58%)",
+    to:      "hsl(25 85% 48%)",
+    shadow:  "hsl(35 90% 50% / 0.45)",
+    shimmer: "hsl(40 100% 80% / 0.30)",
+  },
+  destructive: {
+    from:    "hsl(0 80% 62%)",
+    to:      "hsl(10 75% 50%)",
+    shadow:  "hsl(0 80% 55% / 0.45)",
+    shimmer: "hsl(0 100% 80% / 0.30)",
+  },
+  accent:      {
+    from:    "hsl(280 65% 65%)",
+    to:      "hsl(265 60% 52%)",
+    shadow:  "hsl(280 65% 55% / 0.45)",
+    shimmer: "hsl(280 80% 85% / 0.30)",
+  },
+  purple:      {
+    from:    "hsl(270 70% 65%)",
+    to:      "hsl(255 65% 52%)",
+    shadow:  "hsl(270 70% 55% / 0.45)",
+    shimmer: "hsl(270 80% 85% / 0.30)",
+  },
+  teal:        {
+    from:    "hsl(185 65% 52%)",
+    to:      "hsl(195 70% 40%)",
+    shadow:  "hsl(185 65% 44% / 0.45)",
+    shimmer: "hsl(185 80% 80% / 0.30)",
+  },
 };
 
 const BlobKPICard = ({
   label, value, icon, color = "primary", delay = 0, onClick, variant = 0,
 }: BlobKPICardProps) => {
   const shape = BLOB_SHAPES[variant % BLOB_SHAPES.length];
-  const colors = COLOR_MAP[color];
+  const c = COLOR_MAP[color];
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.7, y: 20 }}
+      initial={{ opacity: 0, scale: 0.75, y: 18 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
-      whileHover={{ scale: 1.08, y: -6 }}
+      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ scale: 1.09, y: -6, transition: { duration: 0.25 } }}
       whileTap={{ scale: 0.95 }}
       className="flex flex-col items-center justify-center cursor-pointer select-none"
       onClick={onClick}
     >
       {/* Blob shape */}
       <div
-        className="relative flex flex-col items-center justify-center w-full aspect-square backdrop-blur-sm"
+        className="relative flex flex-col items-center justify-center w-full aspect-square"
         style={{
           borderRadius: shape,
-          background: `radial-gradient(ellipse at 40% 35%, ${colors.glow} 0%, ${colors.bg} 100%)`,
-          boxShadow: `0 8px 32px ${colors.glow}, 0 2px 8px rgba(0,0,0,0.06)`,
-          border: `1.5px solid ${colors.bg}`,
-          minWidth: 80,
-          maxWidth: 160,
+          background: `
+            radial-gradient(ellipse at 35% 28%, ${c.shimmer} 0%, transparent 55%),
+            radial-gradient(ellipse at 70% 75%, rgba(0,0,0,0.08) 0%, transparent 50%),
+            linear-gradient(145deg, ${c.from} 0%, ${c.to} 100%)
+          `,
+          boxShadow: `0 12px 40px -8px ${c.shadow}, 0 4px 12px rgba(0,0,0,0.10)`,
+          minWidth: 90,
+          maxWidth: 170,
         }}
       >
-        {/* Specular highlight */}
+        {/* Highlight specular superior */}
         <div
-          className="absolute inset-0 pointer-events-none"
+          className="absolute pointer-events-none"
           style={{
-            borderRadius: shape,
-            background: "radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.35) 0%, transparent 60%)",
+            top: "12%",
+            left: "18%",
+            width: "45%",
+            height: "28%",
+            borderRadius: "50%",
+            background: "radial-gradient(ellipse, rgba(255,255,255,0.38) 0%, transparent 70%)",
+            filter: "blur(4px)",
           }}
         />
 
-        {/* Icon */}
-        <div className="mb-1" style={{ color: colors.icon, opacity: 0.85, fontSize: "1.3rem" }}>
-          {icon}
+        {/* Conteúdo */}
+        <div className="relative z-10 flex flex-col items-center justify-center gap-1 px-3">
+          {/* Ícone */}
+          <div style={{ color: "rgba(255,255,255,0.92)", fontSize: "1.4rem", lineHeight: 1 }}>
+            {icon}
+          </div>
+
+          {/* Valor */}
+          <span
+            className="font-extrabold leading-none"
+            style={{
+              color: "#ffffff",
+              fontSize: "clamp(1.15rem, 4.5vw, 1.75rem)",
+              textShadow: "0 1px 6px rgba(0,0,0,0.18)",
+            }}
+          >
+            {value}
+          </span>
+
+          {/* Label */}
+          <span
+            className="text-center font-semibold leading-tight px-1"
+            style={{
+              color: "rgba(255,255,255,0.88)",
+              fontSize: "clamp(0.58rem, 1.8vw, 0.7rem)",
+              textShadow: "0 1px 4px rgba(0,0,0,0.15)",
+              marginTop: 1,
+            }}
+          >
+            {label}
+          </span>
         </div>
-
-        {/* Value */}
-        <span
-          className="font-extrabold leading-none text-foreground"
-          style={{ fontSize: "clamp(1.1rem, 4vw, 1.6rem)" }}
-        >
-          {value}
-        </span>
-
-        {/* Label */}
-        <span
-          className="text-center font-medium leading-tight text-foreground/70 px-2"
-          style={{ fontSize: "clamp(0.58rem, 1.8vw, 0.7rem)", marginTop: 2 }}
-        >
-          {label}
-        </span>
       </div>
     </motion.div>
   );
