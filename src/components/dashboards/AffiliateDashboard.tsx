@@ -13,6 +13,8 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
+import BlobKPICard from "@/components/ui/blob-kpi-card";
+
 const affiliateNav = [
   { label: "Indicações", href: "/dashboard", icon: <Link2 className="w-4 h-4" />, active: true },
   { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" /> },
@@ -118,28 +120,11 @@ const AffiliateDashboard = () => {
         </Card>
 
         {/* KPIs */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <Card className="border-border">
-            <CardContent className="pt-6 text-center">
-              <Users className="w-6 h-6 mx-auto mb-1 text-primary" />
-              <p className="text-2xl font-bold text-foreground">{stats.total}</p>
-              <p className="text-xs text-muted-foreground">Total Indicações</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardContent className="pt-6 text-center">
-              <TrendingUp className="w-6 h-6 mx-auto mb-1 text-secondary" />
-              <p className="text-2xl font-bold text-foreground">{stats.converted}</p>
-              <p className="text-xs text-muted-foreground">Convertidos</p>
-            </CardContent>
-          </Card>
-          <Card className="border-border">
-            <CardContent className="pt-6 text-center">
-              <DollarSign className="w-6 h-6 mx-auto mb-1 text-primary" />
-              <p className="text-2xl font-bold text-foreground">{stats.pendingCommission}%</p>
-              <p className="text-xs text-muted-foreground">Comissão Pendente</p>
-            </CardContent>
-          </Card>
+        {/* BLOB KPI Cards — Afiliado */}
+        <div className="grid grid-cols-3 gap-4 mb-6 py-2">
+          <BlobKPICard variant={0} label="Total Indicações" value={stats.total} icon={<Users className="w-5 h-5" />} color="primary" delay={0} />
+          <BlobKPICard variant={1} label="Convertidos" value={stats.converted} icon={<TrendingUp className="w-5 h-5" />} color="success" delay={0.08} />
+          <BlobKPICard variant={2} label="Comissão" value={`${stats.pendingCommission}%`} icon={<DollarSign className="w-5 h-5" />} color="warning" delay={0.16} />
         </div>
 
         {/* Conversion chart */}
