@@ -14,37 +14,70 @@ import FAQSection from "@/components/landing/FAQSection";
 import SupportSection from "@/components/landing/SupportSection";
 import Footer from "@/components/landing/Footer";
 import PingoChatbot from "@/components/PingoChatbot";
+import AnimateSection from "@/components/ui/animate-section";
 
 const Index = () => {
   return (
     <div className="min-h-screen bg-background" style={{ background: 'var(--landing-bg)' }}>
       <Header />
-      {/* 1. Impacto inicial */}
+
+      {/* 1. Impacto inicial — sem animação (above the fold) */}
       <HeroSection />
-      <StatsSection />
+
+      <AnimateSection delay={0.05}>
+        <StatsSection />
+      </AnimateSection>
 
       {/* 2. Entendimento do serviço */}
-      <HowItWorksSection />
-      <SpecialtiesSection />
+      <AnimateSection delay={0.0}>
+        <HowItWorksSection />
+      </AnimateSection>
+
+      <AnimateSection delay={0.0} direction="up">
+        <SpecialtiesSection />
+      </AnimateSection>
 
       {/* 3. Diferenciais */}
-      <VirtualAssistantSection />
-      <MultiPlatformSection />
-      <ClinicPresentialSection />
+      <AnimateSection direction="left">
+        <VirtualAssistantSection />
+      </AnimateSection>
+
+      <AnimateSection direction="right">
+        <MultiPlatformSection />
+      </AnimateSection>
+
+      <AnimateSection direction="left">
+        <ClinicPresentialSection />
+      </AnimateSection>
 
       {/* 4. Preços */}
-      <PlansSection />
+      <AnimateSection direction="scale">
+        <PlansSection />
+      </AnimateSection>
 
       {/* 5. Para médicos */}
-      <DoctorPremiumSection />
+      <AnimateSection direction="right">
+        <DoctorPremiumSection />
+      </AnimateSection>
 
       {/* 6. Prova social */}
-      <TestimonialsSection />
+      <AnimateSection direction="up">
+        <TestimonialsSection />
+      </AnimateSection>
 
       {/* 7. Conversão final */}
-      <CTABanner />
-      <FAQSection />
-      <SupportSection />
+      <AnimateSection direction="scale">
+        <CTABanner />
+      </AnimateSection>
+
+      <AnimateSection direction="up">
+        <FAQSection />
+      </AnimateSection>
+
+      <AnimateSection direction="up" delay={0.05}>
+        <SupportSection />
+      </AnimateSection>
+
       <Footer />
       <PingoChatbot />
     </div>
