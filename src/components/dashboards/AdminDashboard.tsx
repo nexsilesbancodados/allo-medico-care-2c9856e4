@@ -14,6 +14,7 @@ import { format, startOfMonth, subMonths, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
+import GeoKPICard from "@/components/ui/geo-kpi-card";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -358,87 +359,20 @@ const AdminDashboard = () => {
           </Card>
         )}
 
-        {/* Financial KPIs */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+        {/* GEO KPI Cards — Losango (painel admin) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8 py-2">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className="border-border">
-                <CardContent className="pt-6 animate-pulse">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-muted" />
-                    <div className="space-y-2">
-                      <div className="h-3 w-24 bg-muted rounded" />
-                      <div className="h-6 w-20 bg-muted rounded" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <div key={i} className="aspect-square animate-pulse bg-muted/50 rotate-45 rounded" />
             ))
           ) : (
             <>
-              <Card className="border-border bg-gradient-to-br from-primary/5 to-transparent">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <DollarSign className="w-6 h-6 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Receita Recorrente</p>
-                      <p className="text-2xl font-bold text-foreground">R$ {stats.total_revenue.toFixed(2)}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-border">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center">
-                      <CreditCard className="w-6 h-6 text-secondary" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Assinaturas Ativas</p>
-                      <p className="text-2xl font-bold text-foreground">{stats.active_subs}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-border">
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center">
-                      <AlertTriangle className="w-6 h-6 text-destructive" />
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">Inadimplentes</p>
-                      <p className="text-2xl font-bold text-foreground">{stats.overdue_subs}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/admin/patients")}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center"><Users className="w-5 h-5 text-primary" /></div>
-                    <div><p className="text-xs text-muted-foreground">Pacientes</p><p className="text-xl font-bold text-foreground">{stats.total_patients}</p></div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/admin/doctors")}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center"><FileText className="w-5 h-5 text-secondary" /></div>
-                    <div><p className="text-xs text-muted-foreground">Médicos</p><p className="text-xl font-bold text-foreground">{stats.total_doctors}</p></div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/admin/appointments")}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center"><TrendingUp className="w-5 h-5 text-accent-foreground" /></div>
-                    <div><p className="text-xs text-muted-foreground">Consultas no Mês</p><p className="text-xl font-bold text-foreground">{stats.monthly_appts}</p></div>
-                  </div>
-                </CardContent>
-              </Card>
+              <GeoKPICard shape="diamond" label="Receita (MRR)" value={`R$${stats.total_revenue.toFixed(0)}`} icon={<DollarSign />} color="bg-success" delay={0} />
+              <GeoKPICard shape="diamond" label="Assinaturas" value={stats.active_subs} icon={<CreditCard />} color="bg-primary" delay={0.07} onClick={() => navigate("/dashboard/admin/subscriptions")} />
+              <GeoKPICard shape="diamond" label="Inadimplentes" value={stats.overdue_subs} icon={<AlertTriangle />} color="bg-destructive" delay={0.14} />
+              <GeoKPICard shape="diamond" label="Pacientes" value={stats.total_patients} icon={<Users />} color="bg-secondary" delay={0.21} onClick={() => navigate("/dashboard/admin/patients")} />
+              <GeoKPICard shape="diamond" label="Médicos" value={stats.total_doctors} icon={<FileText />} color="bg-warning" delay={0.28} onClick={() => navigate("/dashboard/admin/doctors")} />
+              <GeoKPICard shape="diamond" label="Consultas" value={stats.monthly_appts} icon={<TrendingUp />} color="bg-primary" delay={0.35} onClick={() => navigate("/dashboard/admin/appointments")} />
             </>
           )}
         </div>

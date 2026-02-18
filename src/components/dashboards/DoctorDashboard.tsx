@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
-import KPICard from "@/components/ui/kpi-card";
+import GeoKPICard from "@/components/ui/geo-kpi-card";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -155,66 +155,47 @@ const DoctorDashboard = () => {
           {/* ══ Visão Geral ══ */}
           <TabsContent value="overview" className="mt-5 space-y-5">
 
-            {/* KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            {/* GEO KPI Cards — Hexágono (painel médico) */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-2">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
-                  <Card key={i} className="border-border/60 overflow-hidden">
-                    <CardContent className="pt-4 pb-3 px-4 space-y-2">
-                      <Skeleton className="h-3 w-16" />
-                      <Skeleton className="h-8 w-14" />
-                      <Skeleton className="h-12 w-full" />
-                    </CardContent>
-                  </Card>
+                  <div key={i} className="aspect-square animate-pulse bg-muted/60 rounded-full" />
                 ))
               ) : (
                 <>
-                  <KPICard
+                  <GeoKPICard
+                    shape="hexagon"
                     label="Hoje"
                     value={stats.today}
-                    compareLabel="consulta(s) hoje"
-                    icon={<Calendar className="w-3.5 h-3.5" />}
-                    iconBg="bg-primary/10"
-                    iconColor="text-primary"
-                    numColor="text-primary"
-                    sparkData={sparklines.today}
-                    sparkColor="hsl(var(--primary))"
-                    isNew={stats.today > 0}
+                    icon={<Calendar />}
+                    color="bg-primary"
+                    delay={0}
                   />
-                  <KPICard
+                  <GeoKPICard
+                    shape="hexagon"
                     label="Pacientes"
                     value={stats.total_patients}
-                    compareLabel="atendidos"
-                    icon={<Users className="w-3.5 h-3.5" />}
-                    iconBg="bg-secondary/10"
-                    iconColor="text-secondary"
-                    numColor="text-secondary"
-                    sparkData={sparklines.patients}
-                    sparkColor="hsl(var(--secondary))"
+                    icon={<Users />}
+                    color="bg-secondary"
+                    delay={0.07}
                     onClick={() => navigate("/dashboard/patients")}
                   />
-                  <KPICard
+                  <GeoKPICard
+                    shape="hexagon"
                     label="Receitas"
                     value={stats.prescriptions}
-                    compareLabel="emitidas"
-                    icon={<FileText className="w-3.5 h-3.5" />}
-                    iconBg="bg-warning/10"
-                    iconColor="text-warning"
-                    numColor="text-warning"
-                    sparkData={sparklines.prescriptions}
-                    sparkColor="hsl(var(--warning))"
+                    icon={<FileText />}
+                    color="bg-warning"
+                    delay={0.14}
                     onClick={() => navigate("/dashboard/prescriptions")}
                   />
-                  <KPICard
+                  <GeoKPICard
+                    shape="hexagon"
                     label="Ganhos"
                     value={`R$ ${stats.totalEarnings.toFixed(0)}`}
-                    compareLabel="acumulado"
-                    icon={<DollarSign className="w-3.5 h-3.5" />}
-                    iconBg="bg-success/10"
-                    iconColor="text-success"
-                    numColor="text-success"
-                    sparkData={sparklines.earnings}
-                    sparkColor="hsl(var(--success))"
+                    icon={<DollarSign />}
+                    color="bg-success"
+                    delay={0.21}
                     onClick={() => navigate("/dashboard/earnings")}
                   />
                 </>

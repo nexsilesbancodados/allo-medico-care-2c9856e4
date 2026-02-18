@@ -1,20 +1,21 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import DashboardLayout from "./DashboardLayout";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Activity, Users, AlertTriangle, Eye, History, UserCog, MessageCircle, Download, CheckCircle2, Clock, ShieldAlert, Filter, RefreshCw } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw } from "lucide-react";
 import SupportChat from "@/components/support/SupportChat";
 import { toast } from "sonner";
-
+import GeoKPICard from "@/components/ui/geo-kpi-card";
 const supportNav = [
   { label: "Visão Geral", href: "/dashboard", icon: <Activity className="w-4 h-4" />, active: true },
   { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" /> },
@@ -204,7 +205,15 @@ const SupportDashboard = () => {
           </Button>
         </div>
 
-        {/* Stats strip */}
+        {/* GEO KPI Cards — Triângulo (painel suporte) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-2">
+          <GeoKPICard shape="triangle" label="Usuários" value={users.length} icon={<Users />} color="bg-primary" delay={0} />
+          <GeoKPICard shape="triangle" label="Logs Hoje" value={logs.length} icon={<Activity />} color="bg-secondary" delay={0.08} />
+          <GeoKPICard shape="triangle" label="Erros Críticos" value={logs.filter(l => getLogSeverity(l.action) === "error").length} icon={<AlertTriangle />} color="bg-destructive" delay={0.16} />
+          <GeoKPICard shape="triangle" label="Alertas" value={logs.filter(l => getLogSeverity(l.action) === "warn").length} icon={<ShieldAlert />} color="bg-warning" delay={0.24} />
+        </div>
+
+        {/* Stats strip original */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {loading ? (
             [1, 2, 3, 4].map(i => (
