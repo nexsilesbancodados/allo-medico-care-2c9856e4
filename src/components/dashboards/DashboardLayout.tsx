@@ -1,5 +1,5 @@
-import { ReactNode, useState } from "react";
-import { motion } from "framer-motion";
+import { ReactNode, useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -14,12 +14,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  LogOut, User, Settings, Phone, MoreHorizontal, Search,
-  ChevronRight, Wifi, Bell
+  LogOut, User, Settings, MoreHorizontal, Search, ChevronRight, Menu, X
 } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
 import GlobalCommand from "@/components/GlobalCommand";
+import logoImg from "@/assets/logo.png";
 
 interface NavItem {
   label: string;
@@ -35,21 +35,22 @@ interface DashboardLayoutProps {
   role?: string;
 }
 
-const ROLE_COLORS: Record<string, string> = {
-  patient: "bg-primary/15 text-primary",
-  doctor: "bg-secondary/15 text-secondary",
-  admin: "bg-destructive/15 text-destructive",
-  receptionist: "bg-warning/15 text-warning",
-  support: "bg-warning/15 text-warning",
-  clinic: "bg-accent-foreground/10 text-accent-foreground",
-  partner: "bg-success/15 text-success",
-  affiliate: "bg-muted text-muted-foreground",
+const ROLE_BADGE: Record<string, { bg: string; text: string; dot: string }> = {
+  patient:      { bg: "bg-primary/10",     text: "text-primary",          dot: "bg-primary" },
+  doctor:       { bg: "bg-secondary/10",   text: "text-secondary",        dot: "bg-secondary" },
+  admin:        { bg: "bg-destructive/10", text: "text-destructive",      dot: "bg-destructive" },
+  receptionist: { bg: "bg-warning/10",     text: "text-warning",          dot: "bg-warning" },
+  support:      { bg: "bg-warning/10",     text: "text-warning",          dot: "bg-warning" },
+  clinic:       { bg: "bg-primary/10",     text: "text-primary",          dot: "bg-primary" },
+  partner:      { bg: "bg-success/10",     text: "text-success",          dot: "bg-success" },
+  affiliate:    { bg: "bg-muted",          text: "text-muted-foreground", dot: "bg-muted-foreground" },
 };
 
 const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLayoutProps) => {
   const { profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const initials = profile
     ? `${profile.first_name?.[0] ?? ""}${profile.last_name?.[0] ?? ""}`.toUpperCase()
@@ -64,19 +65,107 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
     navigate("/");
   };
 
+  const roleBadge = ROLE_BADGE[role] ?? ROLE_BADGE.patient;
+
   const bottomNav = nav?.slice(0, 4) ?? [];
   const moreNav = nav && nav.length > 4 ? nav.slice(4) : [];
 
+  // Sidebar content shared between mobile sheet and desktop
+  const SidebarContent = () => (
+    <>
+      {/* Logo */}
+      <div className="flex items-center gap-3 px-4 h-14 border-b border-border/40 shrink-0">
+        <img src={logoImg} alt="AloClinica" className="w-8 h-8 object-contain" />
+        <span className="font-bold text-sm text-foreground hidden sm:block md:block">AloClínica</span>
+      </div>
+
+      {/* Role badge */}
+      <div className="px-3 pt-3 pb-1 shrink-0">
+        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${roleBadge.bg} ${roleBadge.text}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${roleBadge.dot}`} />
+          {title}
+        </div>
+      </div>
+
+      {/* Nav items */}
+      {nav && nav.length > 0 && (
+        <nav className="flex flex-col gap-0.5 px-2 flex-1 py-1 overflow-y-auto">
+          {nav.map((item) => (
+            <Link
+              key={item.href}
+              to={item.href}
+              onClick={() => setSidebarOpen(false)}
+              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${
+                item.active
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              }`}
+            >
+              {/* Active indicator bar */}
+              {item.active && (
+                <motion.span
+                  layoutId="sidebar-active-bar"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-primary rounded-r-full"
+                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                />
+              )}
+              <span className={`shrink-0 transition-all duration-150 ${item.active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}>
+                {item.icon}
+              </span>
+              <span className="flex-1 truncate">{item.label}</span>
+              {item.active && <ChevronRight className="w-3 h-3 text-primary/40 shrink-0" />}
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      {/* Bottom user card */}
+      <div className="p-3 border-t border-border/40 mt-auto shrink-0">
+        <button
+          onClick={() => { navigate("/dashboard/profile"); setSidebarOpen(false); }}
+          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-muted/60 transition-colors text-left"
+        >
+          <Avatar className="h-7 w-7 shrink-0">
+            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white text-[10px] font-bold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-semibold text-foreground truncate">{fullName}</p>
+            <p className="text-[10px] text-muted-foreground truncate">{title}</p>
+          </div>
+          <span className="w-2 h-2 rounded-full bg-success shrink-0 animate-pulse" />
+        </button>
+      </div>
+    </>
+  );
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
+
       {/* ══ Header ══ */}
-      <header className="sticky top-0 z-50 h-14 border-b border-border/50 bg-card/90 backdrop-blur-xl flex items-center px-4 gap-3 shadow-sm">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-hero flex items-center justify-center shadow-sm">
-            <Phone className="w-4 h-4 text-white" />
-          </div>
-          <span className="font-bold text-foreground text-sm hidden sm:block">AloClinica</span>
+      <header className="sticky top-0 z-50 h-14 border-b border-border/50 bg-card/95 backdrop-blur-xl flex items-center px-3 gap-2 shadow-sm">
+
+        {/* Mobile hamburger */}
+        {nav && nav.length > 0 && (
+          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden h-8 w-8">
+                <Menu className="w-4 h-4" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-64 flex flex-col border-border/50">
+              <SidebarContent />
+            </SheetContent>
+          </Sheet>
+        )}
+
+        {/* Logo – hidden on desktop (shown in sidebar) */}
+        <Link to="/" className="flex items-center gap-2 shrink-0 md:hidden">
+          <img src={logoImg} alt="AloClinica" className="w-7 h-7 object-contain" />
+        </Link>
+        <Link to="/" className="hidden md:flex items-center gap-2 shrink-0">
+          <span className="font-bold text-foreground text-sm">AloClínica</span>
         </Link>
 
         {/* ⌘K search bar */}
@@ -84,19 +173,19 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           onClick={() => {
             window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }));
           }}
-          className="hidden sm:flex flex-1 max-w-sm items-center gap-2 px-3 py-1.5 rounded-xl border border-border bg-muted/40 hover:bg-muted/70 text-xs text-muted-foreground transition-all duration-200 group"
+          className="flex flex-1 max-w-xs items-center gap-2 px-3 py-1.5 rounded-xl border border-border/60 bg-muted/40 hover:bg-muted/70 text-xs text-muted-foreground transition-all duration-200 group"
         >
           <Search className="w-3.5 h-3.5 group-hover:text-foreground transition-colors shrink-0" />
-          <span className="flex-1 text-left hidden md:block">Buscar...</span>
-          <kbd className="hidden md:inline font-mono text-[10px] bg-background border border-border rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
+          <span className="flex-1 text-left hidden sm:block">Buscar...</span>
+          <kbd className="hidden sm:inline font-mono text-[10px] bg-card border border-border/60 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
         </button>
 
         <div className="flex-1" />
 
         {/* Right side */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           {/* Online pill */}
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-success/30 bg-success/10 text-success text-[11px] font-medium">
+          <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-full border border-success/25 bg-success/8 text-success text-[11px] font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
             Online
           </div>
@@ -107,9 +196,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-9 gap-2 px-2 rounded-xl hover:bg-muted/60 transition-all">
+              <Button variant="ghost" size="sm" className="h-8 gap-2 px-2 rounded-xl hover:bg-muted/60 transition-all">
                 <Avatar className="h-7 w-7">
-                  <AvatarFallback className="bg-gradient-hero text-white text-[10px] font-bold">
+                  <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white text-[10px] font-bold">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -118,7 +207,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                 </span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-52 rounded-xl border-border/60 shadow-elevated p-1.5">
+            <DropdownMenuContent align="end" className="w-52 rounded-xl border-border/60 shadow-lg p-1.5">
               <DropdownMenuLabel className="pb-1.5">
                 <p className="text-sm font-semibold text-foreground">{fullName}</p>
                 <p className="text-xs text-muted-foreground font-normal">{title}</p>
@@ -144,70 +233,18 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
         {/* ── Sidebar desktop ── */}
         {nav && nav.length > 0 && (
-          <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-border/50 bg-card sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
-            {/* Section label */}
-            <div className="px-4 pt-4 pb-2">
-              <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2 py-0.5 rounded-full ${ROLE_COLORS[role] ?? "bg-muted text-muted-foreground"}`}>
-                {title}
-              </span>
-            </div>
-
-            {/* Nav items */}
-            <nav className="flex flex-col gap-0.5 px-2 flex-1">
-              {nav.map((item) => (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  className={`relative flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-150 group ${
-                    item.active
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
-                  }`}
-                >
-                  {/* Active left bar */}
-                  {item.active && (
-                    <motion.span
-                      layoutId="sidebar-pill"
-                      className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full"
-                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                    />
-                  )}
-                  <span className={`shrink-0 transition-all duration-150 ${item.active ? "text-primary" : "text-muted-foreground group-hover:text-foreground group-hover:scale-110"}`}>
-                    {item.icon}
-                  </span>
-                  <span className="flex-1 truncate">{item.label}</span>
-                  {item.active && <ChevronRight className="w-3 h-3 text-primary/50 shrink-0" />}
-                </Link>
-              ))}
-            </nav>
-
-            {/* Bottom user card */}
-            <div className="p-3 border-t border-border/50 mt-auto">
-              <button
-                onClick={() => navigate("/dashboard/profile")}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left"
-              >
-                <Avatar className="h-7 w-7 shrink-0">
-                  <AvatarFallback className="bg-gradient-hero text-white text-[10px] font-bold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-foreground truncate">{fullName}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{title}</p>
-                </div>
-                <span className="w-2 h-2 rounded-full bg-success shrink-0" />
-              </button>
-            </div>
+          <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-border/40 bg-card sticky top-14 h-[calc(100vh-3.5rem)]">
+            <SidebarContent />
           </aside>
         )}
 
         {/* ── Main content ── */}
-        <main className="flex-1 min-w-0 p-4 sm:p-6 pb-28 md:pb-8 overflow-auto">
+        <main className="flex-1 min-w-0 overflow-auto pb-24 md:pb-8">
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            className="p-4 sm:p-6"
           >
             {children}
           </motion.div>
@@ -220,7 +257,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {/* ══ Mobile bottom nav ══ */}
       {nav && nav.length > 0 && (
         <nav
-          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/96 backdrop-blur-xl border-t border-border/60"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/96 backdrop-blur-xl border-t border-border/50"
           style={{ paddingBottom: "env(safe-area-inset-bottom, 4px)" }}
         >
           <div className="flex items-stretch h-14">
@@ -234,7 +271,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
               >
                 {item.active && (
                   <motion.span
-                    layoutId="mobile-active"
+                    layoutId="mobile-active-top"
                     className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-primary rounded-b-full"
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
@@ -254,7 +291,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                     <span>Mais</span>
                   </button>
                 </SheetTrigger>
-                <SheetContent side="bottom" className="rounded-t-2xl border-border/60">
+                <SheetContent side="bottom" className="rounded-t-2xl border-border/50">
                   <div className="pt-1 pb-6">
                     <div className="w-10 h-1 bg-muted-foreground/20 rounded-full mx-auto mb-4" />
                     <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-4 px-2">{title}</p>
