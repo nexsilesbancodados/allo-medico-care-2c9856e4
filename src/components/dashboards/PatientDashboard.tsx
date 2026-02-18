@@ -14,6 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star, BarChart2, Activity, RefreshCw } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import GeoKPICard from "@/components/ui/geo-kpi-card";
+import Sparkline from "@/components/ui/sparkline";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
