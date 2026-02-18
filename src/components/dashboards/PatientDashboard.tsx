@@ -10,8 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, CreditCard, FileText, Heart, Video, Clock, Zap, Upload, Star, TrendingUp, Bell, CheckCircle2, AlertCircle } from "lucide-react";
+import { Calendar, CreditCard, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star } from "lucide-react";
 import { differenceInDays } from "date-fns";
+import Sparkline from "@/components/ui/sparkline";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada",
@@ -215,26 +216,33 @@ const PatientDashboard = () => {
           ))}
         </div>
 
-        {/* Stats */}
+        {/* Stats with sparklines */}
         <div className="grid grid-cols-3 gap-3">
           {loading ? (
             [1, 2, 3].map(i => (
-              <div key={i} className="text-center p-4 rounded-xl bg-muted/40 space-y-2">
-                <Skeleton className="h-7 w-10 mx-auto" />
-                <Skeleton className="h-3 w-16 mx-auto" />
-              </div>
+              <Card key={i} className="border-border overflow-hidden">
+                <CardContent className="pt-3 pb-0 px-3 space-y-1">
+                  <Skeleton className="h-3 w-14" />
+                  <Skeleton className="h-7 w-10" />
+                  <Skeleton className="h-10 w-full" />
+                </CardContent>
+              </Card>
             ))
           ) : (
             [
-              { value: stats.total, label: "Consultas", icon: "🩺" },
-              { value: stats.prescriptions, label: "Receitas", icon: "💊" },
-              { value: stats.documents, label: "Documentos", icon: "📄" },
+              { value: stats.total, label: "Consultas", numColor: "text-primary", sparkColor: "hsl(var(--primary))", data: [1,2,1,3,2,4,stats.total] },
+              { value: stats.prescriptions, label: "Receitas", numColor: "text-warning", sparkColor: "hsl(var(--warning))", data: [0,1,0,2,1,1,stats.prescriptions] },
+              { value: stats.documents, label: "Documentos", numColor: "text-secondary", sparkColor: "hsl(var(--secondary))", data: [0,0,1,1,2,1,stats.documents] },
             ].map(s => (
-              <div key={s.label} className="text-center p-4 rounded-xl bg-muted/40 hover:bg-muted/60 transition-colors">
-                <p className="text-xs mb-1">{s.icon}</p>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                <p className="text-xs text-muted-foreground">{s.label}</p>
-              </div>
+              <Card key={s.label} className="border-border overflow-hidden">
+                <CardContent className="pt-3 pb-0 px-3">
+                  <p className="text-[11px] text-muted-foreground font-medium mb-0.5">{s.label}</p>
+                  <p className={`text-2xl font-extrabold tracking-tight ${s.numColor}`}>{s.value}</p>
+                </CardContent>
+                <div className="-mb-[1px]">
+                  <Sparkline data={s.data} color={s.sparkColor} height={40} />
+                </div>
+              </Card>
             ))
           )}
         </div>
