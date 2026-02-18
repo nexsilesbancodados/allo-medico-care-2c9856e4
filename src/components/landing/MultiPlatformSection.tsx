@@ -36,7 +36,7 @@ const MultiPlatformSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-4"
+                className="text-2xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-4"
               >
                 Sua saúde ainda mais conectada em{" "}
                 <span className="text-white/90 underline decoration-white/30 underline-offset-4">
@@ -49,7 +49,7 @@ const MultiPlatformSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
-                className="text-primary-foreground/80 text-lg max-w-md mb-8 leading-relaxed"
+                className="text-primary-foreground/80 text-base md:text-lg max-w-md mb-8 leading-relaxed"
               >
                 A AloClinica é um app progressivo (PWA) — funciona direto do navegador sem precisar baixar nada. Acesse de qualquer lugar, em qualquer plataforma.
               </motion.p>
