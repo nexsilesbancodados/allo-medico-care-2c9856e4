@@ -10,8 +10,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, Star } from "lucide-react";
+import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2 } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
+import Sparkline from "@/components/ui/sparkline";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -32,6 +33,12 @@ const DoctorDashboard = () => {
   const [todayAppts, setTodayAppts] = useState<any[]>([]);
   const [upcomingAppts, setUpcomingAppts] = useState<any[]>([]);
   const [stats, setStats] = useState({ today: 0, total_patients: 0, prescriptions: 0, totalEarnings: 0 });
+  const [sparklines, setSparklines] = useState<Record<string, number[]>>({
+    today: [0, 1, 0, 2, 1, 3, 0],
+    patients: [4, 5, 3, 6, 5, 4, 7],
+    prescriptions: [1, 0, 2, 1, 3, 2, 1],
+    earnings: [100, 200, 150, 300, 250, 200, 350],
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { if (user) fetchData(); }, [user]);
@@ -117,40 +124,60 @@ const DoctorDashboard = () => {
           )}
         </div>
 
-        {/* KPI cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
+        {/* KPI cards with sparklines */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger-children">
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <Card key={i} className="border-border">
-                <CardContent className="pt-5 pb-4 space-y-2">
+              <Card key={i} className="border-border overflow-hidden">
+                <CardContent className="pt-4 pb-3 space-y-2">
                   <Skeleton className="h-3 w-16" />
                   <Skeleton className="h-8 w-12" />
-                  <Skeleton className="h-3 w-20" />
+                  <Skeleton className="h-10 w-full" />
                 </CardContent>
               </Card>
             ))
           ) : (
             [
-              { label: "Hoje", value: stats.today, sub: "consulta(s)", icon: Calendar, color: "text-primary", bg: "bg-primary/10", path: null },
-              { label: "Pacientes", value: stats.total_patients, sub: "atendidos", icon: Users, color: "text-secondary", bg: "bg-secondary/10", path: "/dashboard/patients" },
-              { label: "Receitas", value: stats.prescriptions, sub: "emitidas", icon: FileText, color: "text-accent-foreground", bg: "bg-accent", path: "/dashboard/prescriptions" },
-              { label: "Ganhos", value: `R$ ${stats.totalEarnings.toFixed(0)}`, sub: "total acumulado", icon: DollarSign, color: "text-success", bg: "bg-success/10", path: "/dashboard/earnings" },
+              {
+                label: "Hoje", value: stats.today, sub: "consulta(s)", icon: Calendar,
+                numColor: "text-primary", bg: "bg-primary/10", iconColor: "text-primary",
+                sparkColor: "hsl(var(--primary))", sparkKey: "today", path: null,
+              },
+              {
+                label: "Pacientes", value: stats.total_patients, sub: "atendidos", icon: Users,
+                numColor: "text-secondary", bg: "bg-secondary/10", iconColor: "text-secondary",
+                sparkColor: "hsl(var(--secondary))", sparkKey: "patients", path: "/dashboard/patients",
+              },
+              {
+                label: "Receitas", value: stats.prescriptions, sub: "emitidas", icon: FileText,
+                numColor: "text-warning", bg: "bg-warning/10", iconColor: "text-warning",
+                sparkColor: "hsl(var(--warning))", sparkKey: "prescriptions", path: "/dashboard/prescriptions",
+              },
+              {
+                label: "Ganhos", value: `R$ ${stats.totalEarnings.toFixed(0)}`, sub: "acumulado", icon: DollarSign,
+                numColor: "text-success", bg: "bg-success/10", iconColor: "text-success",
+                sparkColor: "hsl(var(--success))", sparkKey: "earnings", path: "/dashboard/earnings",
+              },
             ].map(k => (
               <Card
                 key={k.label}
-                className={`border-border transition-all duration-200 ${k.path ? "cursor-pointer hover:shadow-card hover:-translate-y-0.5" : ""}`}
+                className={`border-border overflow-hidden transition-all duration-200 ${k.path ? "cursor-pointer hover:shadow-card hover:-translate-y-0.5" : ""}`}
                 onClick={() => k.path && navigate(k.path)}
               >
-                <CardContent className="pt-5 pb-4">
-                  <div className="flex items-start justify-between mb-2">
+                <CardContent className="pt-4 pb-0 px-4">
+                  <div className="flex items-start justify-between mb-1">
                     <p className="text-xs text-muted-foreground font-medium">{k.label}</p>
-                    <div className={`w-7 h-7 rounded-lg ${k.bg} flex items-center justify-center`}>
-                      <k.icon className={`w-4 h-4 ${k.color}`} />
+                    <div className={`w-6 h-6 rounded-lg ${k.bg} flex items-center justify-center`}>
+                      <k.icon className={`w-3.5 h-3.5 ${k.iconColor}`} />
                     </div>
                   </div>
-                  <p className="text-2xl font-bold text-foreground">{k.value}</p>
-                  <p className="text-xs text-muted-foreground">{k.sub}</p>
+                  <p className={`text-2xl font-extrabold tracking-tight ${k.numColor}`}>{k.value}</p>
+                  <p className="text-[11px] text-muted-foreground mb-1">{k.sub}</p>
                 </CardContent>
+                {/* Mini sparkline at bottom */}
+                <div className="px-0 pb-0 -mb-[1px]">
+                  <Sparkline data={sparklines[k.sparkKey] ?? [0, 1, 2]} color={k.sparkColor} height={44} showTooltip />
+                </div>
               </Card>
             ))
           )}
