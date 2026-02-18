@@ -96,54 +96,73 @@ const DoctorDashboard = () => {
 
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <Card className="border-border bg-gradient-to-br from-primary/5 to-transparent">
-            <CardContent className="pt-5 pb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Hoje</p>
-                  <p className="text-2xl font-bold text-foreground">{stats.today}</p>
-                  <p className="text-xs text-muted-foreground">consulta(s)</p>
-                </div>
-                <Calendar className="w-7 h-7 text-primary/30" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/patients")}>
-            <CardContent className="pt-5 pb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Pacientes</p>
-                  <p className="text-2xl font-bold text-foreground">{stats.total_patients}</p>
-                  <p className="text-xs text-muted-foreground">atendidos</p>
-                </div>
-                <Users className="w-7 h-7 text-muted-foreground/30" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/prescriptions")}>
-            <CardContent className="pt-5 pb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Receitas</p>
-                  <p className="text-2xl font-bold text-foreground">{stats.prescriptions}</p>
-                  <p className="text-xs text-muted-foreground">emitidas</p>
-                </div>
-                <FileText className="w-7 h-7 text-muted-foreground/30" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/earnings")}>
-            <CardContent className="pt-5 pb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground">Ganhos</p>
-                  <p className="text-2xl font-bold text-foreground">R$ {stats.totalEarnings.toFixed(0)}</p>
-                  <p className="text-xs text-muted-foreground">total</p>
-                </div>
-                <DollarSign className="w-7 h-7 text-muted-foreground/30" />
-              </div>
-            </CardContent>
-          </Card>
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <Card key={i} className="border-border">
+                <CardContent className="pt-5 pb-4 animate-pulse">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-2">
+                      <div className="h-3 w-12 bg-muted rounded" />
+                      <div className="h-7 w-10 bg-muted rounded" />
+                      <div className="h-3 w-16 bg-muted rounded" />
+                    </div>
+                    <div className="w-7 h-7 bg-muted rounded" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <>
+              <Card className="border-border bg-gradient-to-br from-primary/5 to-transparent">
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Hoje</p>
+                      <p className="text-2xl font-bold text-foreground">{stats.today}</p>
+                      <p className="text-xs text-muted-foreground">consulta(s)</p>
+                    </div>
+                    <Calendar className="w-7 h-7 text-primary/30" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/patients")}>
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Pacientes</p>
+                      <p className="text-2xl font-bold text-foreground">{stats.total_patients}</p>
+                      <p className="text-xs text-muted-foreground">atendidos</p>
+                    </div>
+                    <Users className="w-7 h-7 text-muted-foreground/30" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/prescriptions")}>
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Receitas</p>
+                      <p className="text-2xl font-bold text-foreground">{stats.prescriptions}</p>
+                      <p className="text-xs text-muted-foreground">emitidas</p>
+                    </div>
+                    <FileText className="w-7 h-7 text-muted-foreground/30" />
+                  </div>
+                </CardContent>
+              </Card>
+              <Card className="border-border cursor-pointer" onClick={() => navigate("/dashboard/earnings")}>
+                <CardContent className="pt-5 pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-muted-foreground">Ganhos</p>
+                      <p className="text-2xl font-bold text-foreground">R$ {stats.totalEarnings.toFixed(0)}</p>
+                      <p className="text-xs text-muted-foreground">total</p>
+                    </div>
+                    <DollarSign className="w-7 h-7 text-muted-foreground/30" />
+                  </div>
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* Analytics Charts */}
@@ -160,7 +179,19 @@ const DoctorDashboard = () => {
             </div>
           </CardHeader>
           <CardContent>
-            {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> :
+        {loading ? (
+              <div className="space-y-3">
+                {[1,2,3].map(i => (
+                  <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-border animate-pulse">
+                    <div className="space-y-2">
+                      <div className="h-4 w-28 bg-muted rounded" />
+                      <div className="h-3 w-20 bg-muted rounded" />
+                    </div>
+                    <div className="h-6 w-16 bg-muted rounded-full" />
+                  </div>
+                ))}
+              </div>
+            ) :
             todayAppts.length === 0 ? (
               <p className="text-sm text-muted-foreground">Nenhuma consulta agendada para hoje. 🎉</p>
             ) : (

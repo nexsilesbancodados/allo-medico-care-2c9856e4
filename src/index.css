@@ -45,6 +45,12 @@
     --sidebar-border: 210 25% 90%;
     --sidebar-ring: 210 90% 45%;
 
+    /* Semantic utility tokens */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
     /* Custom tokens */
     --medical-blue: 210 90% 45%;
     --medical-blue-light: 210 80% 95%;
@@ -98,6 +104,10 @@
     --sidebar-accent-foreground: 210 20% 90%;
     --sidebar-border: 210 30% 18%;
     --sidebar-ring: 210 80% 55%;
+    --warning: 38 92% 55%;
+    --warning-foreground: 0 0% 100%;
+    --success: 142 65% 50%;
+    --success-foreground: 0 0% 100%;
     --medical-blue: 210 80% 55%;
     --medical-blue-light: 210 50% 12%;
     --medical-green: 160 50% 50%;
