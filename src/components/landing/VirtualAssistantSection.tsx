@@ -70,7 +70,7 @@ const VirtualAssistantSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground leading-tight mb-4"
+                className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-foreground leading-tight mb-4"
               >
                 Pingo <span className="text-primary">24h</span>
               </motion.h2>
@@ -80,7 +80,7 @@ const VirtualAssistantSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
-                className="text-muted-foreground text-lg max-w-md mb-8 leading-relaxed"
+                className="text-muted-foreground text-base md:text-lg max-w-md mb-8 leading-relaxed"
               >
                 Seu atendente virtual está sempre disponível. Tire dúvidas, agende consultas e receba orientações — tudo direto pelo chat, sem complicação.
               </motion.p>

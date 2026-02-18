@@ -45,7 +45,7 @@ const CTABanner = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3 }}
-              className="text-3xl md:text-5xl font-extrabold text-primary-foreground mb-4 leading-tight max-w-2xl mx-auto"
+              className="text-2xl md:text-5xl font-extrabold text-primary-foreground mb-4 leading-tight max-w-2xl mx-auto"
             >
               Comece a cuidar da sua saúde hoje mesmo
             </motion.h2>
@@ -54,7 +54,7 @@ const CTABanner = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.4 }}
-              className="text-primary-foreground/80 text-lg max-w-lg mx-auto mb-8"
+              className="text-primary-foreground/80 text-base md:text-lg max-w-lg mx-auto mb-8"
             >
               Cadastre-se gratuitamente e agende sua primeira consulta com um especialista em minutos.
             </motion.p>

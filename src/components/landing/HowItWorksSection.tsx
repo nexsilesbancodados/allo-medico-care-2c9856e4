@@ -20,12 +20,12 @@ const HowItWorksSection = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-10 md:mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-extrabold text-foreground mb-4">
+          <h2 className="text-2xl md:text-4xl font-extrabold text-foreground mb-3">
             Como <span className="text-gradient">funciona</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
             Em 4 passos simples, você tem acesso a médicos especialistas sem sair de casa.
           </p>
         </motion.div>
