@@ -14,7 +14,7 @@ import { format, startOfMonth, subMonths, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
-import GeoKPICard from "@/components/ui/geo-kpi-card";
+import BlobKPICard from "@/components/ui/blob-kpi-card";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -359,20 +359,20 @@ const AdminDashboard = () => {
           </Card>
         )}
 
-        {/* GEO KPI Cards — Losango (painel admin) */}
+        {/* BLOB KPI Cards — Admin */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8 py-2">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="aspect-square animate-pulse bg-muted/50 rotate-45 rounded" />
+              <div key={i} className="aspect-square animate-pulse bg-muted/50 rounded-full" />
             ))
           ) : (
             <>
-              <GeoKPICard shape="diamond" label="Receita (MRR)" value={`R$${stats.total_revenue.toFixed(0)}`} icon={<DollarSign />} color="bg-success" delay={0} />
-              <GeoKPICard shape="diamond" label="Assinaturas" value={stats.active_subs} icon={<CreditCard />} color="bg-primary" delay={0.07} onClick={() => navigate("/dashboard/admin/subscriptions")} />
-              <GeoKPICard shape="diamond" label="Inadimplentes" value={stats.overdue_subs} icon={<AlertTriangle />} color="bg-destructive" delay={0.14} />
-              <GeoKPICard shape="diamond" label="Pacientes" value={stats.total_patients} icon={<Users />} color="bg-secondary" delay={0.21} onClick={() => navigate("/dashboard/admin/patients")} />
-              <GeoKPICard shape="diamond" label="Médicos" value={stats.total_doctors} icon={<FileText />} color="bg-warning" delay={0.28} onClick={() => navigate("/dashboard/admin/doctors")} />
-              <GeoKPICard shape="diamond" label="Consultas" value={stats.monthly_appts} icon={<TrendingUp />} color="bg-primary" delay={0.35} onClick={() => navigate("/dashboard/admin/appointments")} />
+              <BlobKPICard variant={0} label="Receita (MRR)" value={`R$${stats.total_revenue.toFixed(0)}`} icon={<DollarSign className="w-5 h-5" />} color="success" delay={0} />
+              <BlobKPICard variant={1} label="Assinaturas" value={stats.active_subs} icon={<CreditCard className="w-5 h-5" />} color="primary" delay={0.07} onClick={() => navigate("/dashboard/admin/subscriptions")} />
+              <BlobKPICard variant={2} label="Inadimplentes" value={stats.overdue_subs} icon={<AlertTriangle className="w-5 h-5" />} color="destructive" delay={0.14} />
+              <BlobKPICard variant={3} label="Pacientes" value={stats.total_patients} icon={<Users className="w-5 h-5" />} color="secondary" delay={0.21} onClick={() => navigate("/dashboard/admin/patients")} />
+              <BlobKPICard variant={4} label="Médicos" value={stats.total_doctors} icon={<FileText className="w-5 h-5" />} color="warning" delay={0.28} onClick={() => navigate("/dashboard/admin/doctors")} />
+              <BlobKPICard variant={0} label="Consultas" value={stats.monthly_appts} icon={<TrendingUp className="w-5 h-5" />} color="primary" delay={0.35} onClick={() => navigate("/dashboard/admin/appointments")} />
             </>
           )}
         </div>

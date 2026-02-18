@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star, BarChart2, Activity, RefreshCw } from "lucide-react";
 import { differenceInDays } from "date-fns";
-import GeoKPICard from "@/components/ui/geo-kpi-card";
+import BlobKPICard from "@/components/ui/blob-kpi-card";
 import Sparkline from "@/components/ui/sparkline";
 
 const statusLabel: Record<string, string> = {
@@ -186,41 +186,15 @@ const PatientDashboard = () => {
           {/* ══ Visão Geral ══ */}
           <TabsContent value="overview" className="mt-5 space-y-5">
 
-            {/* GEO KPI Cards — Círculo (painel paciente) */}
+            {/* BLOB KPI Cards — Paciente */}
             <div className="grid grid-cols-3 gap-4 py-2">
               {loading ? (
-                [1, 2, 3].map(i => (
-                  <div key={i} className="aspect-square animate-pulse bg-muted/60 rounded-full" />
-                ))
+                [1,2,3].map(i => <div key={i} className="aspect-square animate-pulse bg-muted/50 rounded-full" />)
               ) : (
                 <>
-                  <GeoKPICard
-                    shape="circle"
-                    label="Consultas"
-                    value={stats.total}
-                    icon={<Calendar />}
-                    color="bg-primary"
-                    delay={0}
-                    onClick={() => navigate("/dashboard/appointments")}
-                  />
-                  <GeoKPICard
-                    shape="circle"
-                    label="Receitas"
-                    value={stats.prescriptions}
-                    icon={<FileText />}
-                    color="bg-warning"
-                    delay={0.08}
-                    onClick={() => navigate("/dashboard/patient/health")}
-                  />
-                  <GeoKPICard
-                    shape="circle"
-                    label="Documentos"
-                    value={stats.documents}
-                    icon={<Upload />}
-                    color="bg-secondary"
-                    delay={0.16}
-                    onClick={() => navigate("/dashboard/patient/documents")}
-                  />
+                  <BlobKPICard variant={0} label="Consultas" value={stats.total} icon={<Calendar className="w-5 h-5" />} color="primary" delay={0} onClick={() => navigate("/dashboard/appointments")} />
+                  <BlobKPICard variant={1} label="Receitas" value={stats.prescriptions} icon={<FileText className="w-5 h-5" />} color="warning" delay={0.08} onClick={() => navigate("/dashboard/patient/health")} />
+                  <BlobKPICard variant={2} label="Documentos" value={stats.documents} icon={<Upload className="w-5 h-5" />} color="secondary" delay={0.16} onClick={() => navigate("/dashboard/patient/documents")} />
                 </>
               )}
             </div>

@@ -15,7 +15,7 @@ import { ptBR } from "date-fns/locale";
 import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw } from "lucide-react";
 import SupportChat from "@/components/support/SupportChat";
 import { toast } from "sonner";
-import GeoKPICard from "@/components/ui/geo-kpi-card";
+import BlobKPICard from "@/components/ui/blob-kpi-card";
 const supportNav = [
   { label: "Visão Geral", href: "/dashboard", icon: <Activity className="w-4 h-4" />, active: true },
   { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" /> },
@@ -205,12 +205,12 @@ const SupportDashboard = () => {
           </Button>
         </div>
 
-        {/* GEO KPI Cards — Triângulo (painel suporte) */}
+        {/* BLOB KPI Cards — Suporte */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-2">
-          <GeoKPICard shape="triangle" label="Usuários" value={users.length} icon={<Users />} color="bg-primary" delay={0} />
-          <GeoKPICard shape="triangle" label="Logs Hoje" value={logs.length} icon={<Activity />} color="bg-secondary" delay={0.08} />
-          <GeoKPICard shape="triangle" label="Erros Críticos" value={logs.filter(l => getLogSeverity(l.action) === "error").length} icon={<AlertTriangle />} color="bg-destructive" delay={0.16} />
-          <GeoKPICard shape="triangle" label="Alertas" value={logs.filter(l => getLogSeverity(l.action) === "warn").length} icon={<ShieldAlert />} color="bg-warning" delay={0.24} />
+          <BlobKPICard variant={0} label="Usuários" value={users.length} icon={<Users className="w-5 h-5" />} color="primary" delay={0} />
+          <BlobKPICard variant={1} label="Logs Hoje" value={logs.length} icon={<Activity className="w-5 h-5" />} color="secondary" delay={0.08} />
+          <BlobKPICard variant={2} label="Erros Críticos" value={logs.filter(l => getLogSeverity(l.action) === "error").length} icon={<AlertTriangle className="w-5 h-5" />} color="destructive" delay={0.16} />
+          <BlobKPICard variant={3} label="Alertas" value={logs.filter(l => getLogSeverity(l.action) === "warn").length} icon={<ShieldAlert className="w-5 h-5" />} color="warning" delay={0.24} />
         </div>
 
         {/* Stats strip original */}

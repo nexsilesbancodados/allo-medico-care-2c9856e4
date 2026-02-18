@@ -13,6 +13,7 @@ import { Users, Calendar, BarChart3, User, Plus, Check, Clock, Download } from "
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import BlobKPICard from "@/components/ui/blob-kpi-card";
 
 const getClinicNav = (active: string) => [
   { label: "Início", href: "/dashboard?role=clinic", icon: <BarChart3 className="w-4 h-4" />, active: active === "home" },
@@ -172,53 +173,12 @@ const ClinicDashboard = () => {
         </div>
 
         {/* KPI cards */}
-        <div className="grid sm:grid-cols-3 gap-4">
-          {loading ? (
-            [1, 2, 3].map(i => (
-              <Card key={i} className="border-border">
-                <CardContent className="pt-6 space-y-2">
-                  <Skeleton className="h-3 w-28" />
-                  <Skeleton className="h-9 w-12" />
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <>
-              <Card className="border-border bg-gradient-to-br from-primary/5 to-transparent">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Médicos Vinculados</p>
-                      <p className="text-3xl font-bold text-foreground">{doctors.length}</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                      <Users className="w-5 h-5 text-primary" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-border">
-                <CardContent className="pt-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Consultas do Mês</p>
-                      <p className="text-3xl font-bold text-foreground">{monthAppts}</p>
-                    </div>
-                    <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
-                      <Calendar className="w-5 h-5 text-secondary" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-border">
-                <CardContent className="pt-6">
-                  <p className="text-sm text-muted-foreground mb-1">Taxa de Ocupação</p>
-                  <p className="text-3xl font-bold text-foreground mb-2">{occupancy}%</p>
-                  <Progress value={occupancy} className="h-1.5" />
-                </CardContent>
-              </Card>
-            </>
-          )}
+        {/* BLOB KPI Cards — Clínica */}
+        <div className="grid grid-cols-3 gap-3 py-2">
+          <BlobKPICard variant={0} label="Médicos Vinculados" value={loading ? "…" : doctors.length} icon={<Users className="w-5 h-5" />} color="primary" delay={0} />
+          <BlobKPICard variant={1} label="Consultas do Mês" value={loading ? "…" : monthAppts} icon={<Calendar className="w-5 h-5" />} color="secondary" delay={0.08} />
+          <BlobKPICard variant={2} label="Ocupação" value={loading ? "…" : `${occupancy}%`} icon={<BarChart3 className="w-5 h-5" />} color="success" delay={0.16} />
+        </div>
         </div>
 
         {/* Today's appointments */}
@@ -347,10 +307,10 @@ const ClinicDashboard = () => {
                   </div>
                 ))}
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </CardContent>
+          </Card>
+
+        </div>
     </DashboardLayout>
   );
 };

@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
-import GeoKPICard from "@/components/ui/geo-kpi-card";
+import BlobKPICard from "@/components/ui/blob-kpi-card";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -155,49 +155,18 @@ const DoctorDashboard = () => {
           {/* ══ Visão Geral ══ */}
           <TabsContent value="overview" className="mt-5 space-y-5">
 
-            {/* GEO KPI Cards — Hexágono (painel médico) */}
+            {/* BLOB KPI Cards — Médico */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 py-2">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="aspect-square animate-pulse bg-muted/60 rounded-full" />
+                  <div key={i} className="aspect-square animate-pulse bg-muted/50 rounded-full" />
                 ))
               ) : (
                 <>
-                  <GeoKPICard
-                    shape="hexagon"
-                    label="Hoje"
-                    value={stats.today}
-                    icon={<Calendar />}
-                    color="bg-primary"
-                    delay={0}
-                  />
-                  <GeoKPICard
-                    shape="hexagon"
-                    label="Pacientes"
-                    value={stats.total_patients}
-                    icon={<Users />}
-                    color="bg-secondary"
-                    delay={0.07}
-                    onClick={() => navigate("/dashboard/patients")}
-                  />
-                  <GeoKPICard
-                    shape="hexagon"
-                    label="Receitas"
-                    value={stats.prescriptions}
-                    icon={<FileText />}
-                    color="bg-warning"
-                    delay={0.14}
-                    onClick={() => navigate("/dashboard/prescriptions")}
-                  />
-                  <GeoKPICard
-                    shape="hexagon"
-                    label="Ganhos"
-                    value={`R$ ${stats.totalEarnings.toFixed(0)}`}
-                    icon={<DollarSign />}
-                    color="bg-success"
-                    delay={0.21}
-                    onClick={() => navigate("/dashboard/earnings")}
-                  />
+                  <BlobKPICard variant={0} label="Hoje" value={stats.today} icon={<Calendar className="w-5 h-5" />} color="primary" delay={0} />
+                  <BlobKPICard variant={1} label="Pacientes" value={stats.total_patients} icon={<Users className="w-5 h-5" />} color="secondary" delay={0.07} onClick={() => navigate("/dashboard/patients")} />
+                  <BlobKPICard variant={2} label="Receitas" value={stats.prescriptions} icon={<FileText className="w-5 h-5" />} color="warning" delay={0.14} onClick={() => navigate("/dashboard/prescriptions")} />
+                  <BlobKPICard variant={3} label="Ganhos" value={`R$${stats.totalEarnings.toFixed(0)}`} icon={<DollarSign className="w-5 h-5" />} color="success" delay={0.21} onClick={() => navigate("/dashboard/earnings")} />
                 </>
               )}
             </div>

@@ -193,30 +193,21 @@ const ReceptionDashboard = () => {
           </div>
         </div>
 
-
-        {/* KPI cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {/* BLOB KPI Cards — Recepção */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-2">
           {loading ? (
-            [1, 2, 3, 4].map(i => (
-              <Card key={i} className="border-border">
-                <CardContent className="p-4 space-y-2">
-                  <Skeleton className="h-8 w-8 rounded-lg" />
-                  <Skeleton className="h-7 w-10" />
-                  <Skeleton className="h-3 w-20" />
-                </CardContent>
-              </Card>
-            ))
+            [1,2,3,4].map(i => <div key={i} className="aspect-square animate-pulse bg-muted/50 rounded-full" />)
           ) : (
-            kpis.map(s => (
-              <Card key={s.label} className="border-border">
-                <CardContent className="p-4">
-                  <div className={`w-8 h-8 rounded-lg ${s.bg} flex items-center justify-center mb-2`}>
-                    <s.icon className={`w-4 h-4 ${s.color}`} />
-                  </div>
-                  <p className="text-2xl font-bold text-foreground">{s.value}</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
-                </CardContent>
-              </Card>
+            kpis.map((s, i) => (
+              <BlobKPICard
+                key={s.label}
+                variant={i as 0|1|2|3}
+                label={s.label}
+                value={s.value}
+                icon={<s.icon className="w-5 h-5" />}
+                color={["primary","warning","success","secondary"][i] as any}
+                delay={i * 0.08}
+              />
             ))
           )}
         </div>
