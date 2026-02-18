@@ -273,6 +273,14 @@ const AppointmentsList = () => {
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("appointments")}>
       <div className="max-w-3xl space-y-5">
+        {/* Back button */}
+        <button
+          onClick={() => navigate("/dashboard?role=patient")}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+          Voltar ao painel
+        </button>
         {/* Header */}
         <div className="flex items-start justify-between gap-3">
           <div>
