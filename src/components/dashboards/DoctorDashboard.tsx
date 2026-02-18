@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight } from "lucide-react";
+import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, Star } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
 
 const statusLabel: Record<string, string> = {
@@ -155,6 +155,48 @@ const DoctorDashboard = () => {
             ))
           )}
         </div>
+
+        {/* Today's performance bar */}
+        {!loading && todayAppts.length > 0 && (() => {
+          const done = todayAppts.filter(a => a.status === "completed").length;
+          const inProg = todayAppts.filter(a => a.status === "in_progress").length;
+          const waiting = todayAppts.filter(a => a.status === "waiting").length;
+          const pct = Math.round((done / todayAppts.length) * 100);
+          return (
+            <Card className="border-border">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="w-4 h-4 text-primary" />
+                    <p className="text-sm font-medium text-foreground">Progresso de hoje</p>
+                  </div>
+                  <span className="text-sm font-bold text-foreground">{pct}%</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-muted overflow-hidden mb-3">
+                  <div
+                    className="h-full bg-gradient-to-r from-primary to-success rounded-full transition-all duration-700"
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                <div className="flex gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3 text-success" /> {done} concluída{done !== 1 ? "s" : ""}
+                  </span>
+                  {inProg > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Video className="w-3 h-3 text-primary" /> {inProg} em andamento
+                    </span>
+                  )}
+                  {waiting > 0 && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-warning" /> {waiting} aguardando
+                    </span>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* Analytics */}
         <DoctorAnalyticsCharts />

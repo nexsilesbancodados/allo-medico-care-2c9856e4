@@ -10,7 +10,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, CreditCard, FileText, Heart, Video, Clock, Zap, Upload, Star } from "lucide-react";
+import { Calendar, CreditCard, FileText, Heart, Video, Clock, Zap, Upload, Star, TrendingUp, Bell, CheckCircle2, AlertCircle } from "lucide-react";
+import { differenceInDays } from "date-fns";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada",
@@ -36,6 +37,7 @@ const PatientDashboard = () => {
   const [upcoming, setUpcoming] = useState<any[]>([]);
   const [waitingAppt, setWaitingAppt] = useState<any | null>(null);
   const [stats, setStats] = useState({ total: 0, prescriptions: 0, documents: 0 });
+  const [activeSub, setActiveSub] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { if (user) fetchData(); }, [user]);
@@ -54,7 +56,7 @@ const PatientDashboard = () => {
 
   const fetchData = async () => {
     const now = new Date().toISOString();
-    const [upRes, completedRes, prescRes, docsRes, waitRes] = await Promise.all([
+    const [upRes, completedRes, prescRes, docsRes, waitRes, subRes] = await Promise.all([
       supabase.from("appointments")
         .select("id, scheduled_at, status, doctor_id, duration_minutes, appointment_type")
         .eq("patient_id", user!.id).gte("scheduled_at", now)
@@ -70,9 +72,14 @@ const PatientDashboard = () => {
         .select("id, scheduled_at, status, doctor_id")
         .eq("patient_id", user!.id).in("status", ["waiting", "in_progress"])
         .limit(1).single(),
+      supabase.from("subscriptions")
+        .select("*, plans(name, price)")
+        .eq("user_id", user!.id).eq("status", "active")
+        .order("created_at", { ascending: false }).limit(1).single(),
     ]);
 
     setStats({ total: completedRes.count ?? 0, prescriptions: prescRes.count ?? 0, documents: docsRes.count ?? 0 });
+    if (subRes.data) setActiveSub(subRes.data);
 
     const allAppts = upRes.data ?? [];
     if (allAppts.length > 0) {
@@ -154,6 +161,37 @@ const PatientDashboard = () => {
           </Card>
         )}
 
+        {/* Active subscription banner */}
+        {activeSub && (() => {
+          const daysLeft = activeSub.expires_at ? differenceInDays(new Date(activeSub.expires_at), new Date()) : null;
+          const isExpiringSoon = daysLeft !== null && daysLeft <= 7;
+          return (
+            <div
+              className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                isExpiringSoon
+                  ? "border-warning/30 bg-warning/5 hover:bg-warning/10"
+                  : "border-success/30 bg-success/5 hover:bg-success/10"
+              }`}
+              onClick={() => navigate("/dashboard/payment-history")}
+            >
+              {isExpiringSoon
+                ? <AlertCircle className="w-5 h-5 text-warning shrink-0" />
+                : <CheckCircle2 className="w-5 h-5 text-success shrink-0" />
+              }
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium ${isExpiringSoon ? "text-warning" : "text-success"}`}>
+                  {isExpiringSoon ? `⚠️ Plano expira em ${daysLeft} dia${daysLeft !== 1 ? "s" : ""}` : `✅ Plano ativo`}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {(activeSub.plans as any)?.name ?? "Assinatura"} ·{" "}
+                  {activeSub.expires_at ? `Válido até ${format(new Date(activeSub.expires_at), "dd/MM/yyyy")}` : "Sem expiração"}
+                </p>
+              </div>
+              <Star className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+            </div>
+          );
+        })()}
+
         {/* Quick actions */}
         <div className="grid grid-cols-3 gap-3">
           {[
@@ -200,6 +238,34 @@ const PatientDashboard = () => {
             ))
           )}
         </div>
+
+        {/* Next appointment countdown */}
+        {!loading && upcoming.length > 0 && (() => {
+          const next = upcoming[0];
+          const daysUntil = differenceInDays(new Date(next.scheduled_at), new Date());
+          const hoursUntil = Math.max(0, Math.round((new Date(next.scheduled_at).getTime() - Date.now()) / 3600000));
+          const isToday = daysUntil === 0;
+          return (
+            <div className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer ${isToday ? "border-primary/30 bg-primary/5" : "border-border bg-muted/20"}`} onClick={() => navigate("/dashboard/appointments")}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${isToday ? "bg-primary/20" : "bg-muted/60"}`}>
+                <Bell className={`w-5 h-5 ${isToday ? "text-primary" : "text-muted-foreground"}`} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground">
+                  {isToday ? `⏰ Consulta hoje em ${hoursUntil}h` : `📅 Próxima consulta em ${daysUntil} dia${daysUntil !== 1 ? "s" : ""}`}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {next.doctor_name} · {format(new Date(next.scheduled_at), "dd/MM 'às' HH:mm", { locale: ptBR })}
+                </p>
+              </div>
+              {isToday && (
+                <Button size="sm" className="bg-gradient-hero text-primary-foreground text-xs h-7 shrink-0" onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/consultation/${next.id}`); }}>
+                  Entrar
+                </Button>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Upcoming appointments */}
         <Card className="border-border">
