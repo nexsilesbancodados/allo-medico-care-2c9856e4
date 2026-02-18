@@ -13,7 +13,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star, BarChart2, Activity, RefreshCw } from "lucide-react";
 import { differenceInDays } from "date-fns";
-import KPICard from "@/components/ui/kpi-card";
+import GeoKPICard from "@/components/ui/geo-kpi-card";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -185,46 +185,39 @@ const PatientDashboard = () => {
           {/* ══ Visão Geral ══ */}
           <TabsContent value="overview" className="mt-5 space-y-5">
 
-            {/* KPI Stats */}
-            <div className="grid grid-cols-3 gap-3">
+            {/* GEO KPI Cards — Círculo (painel paciente) */}
+            <div className="grid grid-cols-3 gap-4 py-2">
               {loading ? (
                 [1, 2, 3].map(i => (
-                  <Card key={i} className="border-border/60 overflow-hidden">
-                    <CardContent className="pt-4 pb-0 px-4 space-y-2">
-                      <Skeleton className="h-3 w-14" />
-                      <Skeleton className="h-8 w-10" />
-                      <Skeleton className="h-12 w-full" />
-                    </CardContent>
-                  </Card>
+                  <div key={i} className="aspect-square animate-pulse bg-muted/60 rounded-full" />
                 ))
               ) : (
                 <>
-                  <KPICard
+                  <GeoKPICard
+                    shape="circle"
                     label="Consultas"
                     value={stats.total}
-                    compareLabel="realizadas"
-                    numColor="text-primary"
-                    sparkData={[1, 2, 1, 3, 2, 4, stats.total]}
-                    sparkColor="hsl(var(--primary))"
-                    isNew={stats.total > 0}
+                    icon={<Calendar />}
+                    color="bg-primary"
+                    delay={0}
                     onClick={() => navigate("/dashboard/appointments")}
                   />
-                  <KPICard
+                  <GeoKPICard
+                    shape="circle"
                     label="Receitas"
                     value={stats.prescriptions}
-                    compareLabel="emitidas"
-                    numColor="text-warning"
-                    sparkData={[0, 1, 0, 2, 1, 1, stats.prescriptions]}
-                    sparkColor="hsl(var(--warning))"
+                    icon={<FileText />}
+                    color="bg-warning"
+                    delay={0.08}
                     onClick={() => navigate("/dashboard/patient/health")}
                   />
-                  <KPICard
+                  <GeoKPICard
+                    shape="circle"
                     label="Documentos"
                     value={stats.documents}
-                    compareLabel="enviados"
-                    numColor="text-secondary"
-                    sparkData={[0, 0, 1, 1, 2, 1, stats.documents]}
-                    sparkColor="hsl(var(--secondary))"
+                    icon={<Upload />}
+                    color="bg-secondary"
+                    delay={0.16}
                     onClick={() => navigate("/dashboard/patient/documents")}
                   />
                 </>
