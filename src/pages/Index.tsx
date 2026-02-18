@@ -13,6 +13,7 @@ import ClinicPresentialSection from "@/components/landing/ClinicPresentialSectio
 import FAQSection from "@/components/landing/FAQSection";
 import SupportSection from "@/components/landing/SupportSection";
 import Footer from "@/components/landing/Footer";
+import PingoChatbot from "@/components/PingoChatbot";
 
 const Index = () => {
   return (
@@ -45,6 +46,7 @@ const Index = () => {
       <FAQSection />
       <SupportSection />
       <Footer />
+      <PingoChatbot />
     </div>
   );
 };

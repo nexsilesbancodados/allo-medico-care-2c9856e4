@@ -154,17 +154,33 @@ const PingoChatbot = () => {
       {/* FAB Button */}
       <AnimatePresence>
         {!open && (
-          <motion.button
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0 }}
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setOpen(true)}
-            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary-foreground/20 hover:shadow-xl transition-shadow"
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-2"
           >
-            <img src={mascotImg} alt="Pingo" className="w-14 h-14 object-cover" />
-          </motion.button>
+            {/* Tooltip label — visível apenas em mobile */}
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.8 }}
+              className="md:hidden bg-card border border-border text-foreground text-xs font-semibold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap"
+            >
+              💬 Falar com o Pingo
+            </motion.div>
+
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setOpen(true)}
+              className="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary-foreground/20 hover:shadow-xl transition-shadow"
+            >
+              {/* Pulso animado */}
+              <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
+              <img src={mascotImg} alt="Pingo" className="w-14 h-14 object-cover relative z-10" />
+            </motion.button>
+          </motion.div>
         )}
       </AnimatePresence>
 
