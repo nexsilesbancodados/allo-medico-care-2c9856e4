@@ -100,20 +100,36 @@ const NotificationBell = () => {
   };
 
   const markAsRead = async (id: string) => {
-    await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+    // Optimistic update
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
+    const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+    if (error) {
+      // Rollback
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: false } : n));
+    }
   };
 
   const markAllRead = async () => {
     const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id);
     if (unreadIds.length === 0) return;
-    await supabase.from("notifications").update({ is_read: true }).in("id", unreadIds);
+    // Optimistic update
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+    const { error } = await supabase.from("notifications").update({ is_read: true }).in("id", unreadIds);
+    if (error) {
+      // Rollback
+      fetchNotifications();
+    }
   };
 
   const deleteNotification = async (id: string) => {
-    await supabase.from("notifications").delete().eq("id", id);
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    // Optimistic update
+    const prev = notifications;
+    setNotifications(p => p.filter(n => n.id !== id));
+    const { error } = await supabase.from("notifications").delete().eq("id", id);
+    if (error) {
+      setNotifications(prev);
+      toast.error("Erro ao excluir notificação");
+    }
   };
 
   const handleClick = (n: Notification) => {

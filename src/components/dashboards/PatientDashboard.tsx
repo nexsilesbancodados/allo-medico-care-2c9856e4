@@ -24,6 +24,7 @@ import CreditsWidget from "@/components/patient/CreditsWidget";
 import UpsellBanner from "@/components/patient/UpsellBanner";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
+import CheckoutRecoveryBanner from "@/components/patient/CheckoutRecoveryBanner";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -277,6 +278,13 @@ const PatientDashboard = () => {
             </SectionErrorBoundary>
           </motion.div>
         )}
+
+        {/* ── Checkout recovery banner ── */}
+        <motion.div variants={fadeUp}>
+          <SectionErrorBoundary fallbackTitle="Erro no banner">
+            <CheckoutRecoveryBanner />
+          </SectionErrorBoundary>
+        </motion.div>
 
         {/* ── Upsell banner ── */}
         <motion.div variants={fadeUp}>
