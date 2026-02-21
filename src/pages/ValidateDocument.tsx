@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, XCircle, Search, Shield, FileText, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Search, Shield, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -17,6 +17,10 @@ const ValidateDocument = () => {
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
 
+  useEffect(() => {
+    if (paramId) handleSearch(paramId);
+  }, [paramId]);
+
   const handleSearch = async (id?: string) => {
     const docId = (id || searchId).trim();
     if (!docId) return;
@@ -25,64 +29,90 @@ const ValidateDocument = () => {
     setResult(null);
     setSearched(true);
 
-    const { data, error } = await supabase
+    // First try document_verifications (certificates/attestations)
+    const { data: verification } = await supabase
+      .from("document_verifications")
+      .select("*")
+      .eq("verification_code", docId)
+      .maybeSingle();
+
+    if (verification) {
+      setResult({
+        type: "certificate",
+        doctor_name: verification.doctor_name,
+        crm: verification.doctor_crm,
+        document_type: verification.document_type,
+        patient_name: verification.patient_name,
+        created_at: verification.issued_at,
+        details: verification.details,
+        code: verification.verification_code,
+      });
+      setLoading(false);
+      return;
+    }
+
+    // Then try prescriptions by ID
+    const { data: prescription } = await supabase
       .from("prescriptions")
       .select("id, created_at, diagnosis, medications, doctor_id, patient_id")
       .eq("id", docId)
       .maybeSingle();
 
-    if (error || !data) {
-      setNotFound(true);
+    if (prescription) {
+      const { data: doc } = await supabase
+        .from("doctor_profiles")
+        .select("crm, crm_state, user_id")
+        .eq("id", prescription.doctor_id)
+        .maybeSingle();
+
+      let doctorName = "Médico";
+      if (doc) {
+        const { data: p } = await supabase
+          .from("profiles")
+          .select("first_name, last_name")
+          .eq("user_id", doc.user_id)
+          .maybeSingle();
+        if (p) doctorName = `Dr(a). ${p.first_name} ${p.last_name}`;
+      }
+
+      setResult({
+        type: "prescription",
+        id: prescription.id,
+        doctor_name: doctorName,
+        crm: doc ? `${doc.crm}/${doc.crm_state}` : null,
+        created_at: prescription.created_at,
+        diagnosis: prescription.diagnosis,
+        medications: prescription.medications,
+      });
       setLoading(false);
       return;
     }
 
-    // Get doctor info
-    const { data: doc } = await supabase
-      .from("doctor_profiles")
-      .select("crm, crm_state, user_id")
-      .eq("id", data.doctor_id)
-      .maybeSingle();
-
-    let doctorName = "Médico";
-    if (doc) {
-      const { data: p } = await supabase
-        .from("profiles")
-        .select("first_name, last_name")
-        .eq("user_id", doc.user_id)
-        .maybeSingle();
-      if (p) doctorName = `Dr(a). ${p.first_name} ${p.last_name}`;
-    }
-
-    setResult({
-      ...data,
-      doctor_name: doctorName,
-      crm: doc?.crm,
-      crm_state: doc?.crm_state,
-    });
+    setNotFound(true);
     setLoading(false);
   };
 
-  // Auto-search if paramId
-  useState(() => {
-    if (paramId) handleSearch(paramId);
-  });
+  const DOC_TYPE_LABELS: Record<string, string> = {
+    certificate: "Atestado Médico",
+    absence: "Atestado de Afastamento",
+    attendance: "Declaração de Comparecimento",
+    fitness: "Atestado de Aptidão",
+    prescription: "Receita Médica",
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md space-y-6">
-        {/* Header */}
         <div className="text-center space-y-2">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">
             <Shield className="w-8 h-8 text-primary" />
           </div>
           <h1 className="text-xl font-bold text-foreground">Validador de Documentos</h1>
           <p className="text-sm text-muted-foreground">
-            Verifique a autenticidade de receitas e documentos emitidos pela Aloclinica
+            Verifique a autenticidade de receitas, atestados e documentos emitidos pela AloClínica
           </p>
         </div>
 
-        {/* Search */}
         <Card className="border-border">
           <CardContent className="p-4 space-y-3">
             <label className="text-xs font-medium text-foreground">Código do documento</label>
@@ -90,7 +120,8 @@ const ValidateDocument = () => {
               <Input
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
-                placeholder="Cole o código aqui..."
+                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                placeholder="Ex: AC-M2X9K-AB3F ou UUID..."
                 className="font-mono text-sm"
               />
               <Button onClick={() => handleSearch()} disabled={loading || !searchId.trim()}>
@@ -100,32 +131,40 @@ const ValidateDocument = () => {
           </CardContent>
         </Card>
 
-        {/* Result */}
         {searched && notFound && (
           <Card className="border-destructive/30 bg-destructive/5">
             <CardContent className="p-6 text-center space-y-2">
               <XCircle className="w-12 h-12 text-destructive mx-auto" />
               <p className="font-semibold text-destructive">Documento não encontrado</p>
               <p className="text-xs text-muted-foreground">
-                Este código não corresponde a nenhum documento registrado na plataforma.
-                Verifique o código e tente novamente.
+                Este código não corresponde a nenhum documento registrado.
               </p>
             </CardContent>
           </Card>
         )}
 
         {result && (
-          <Card className="border-success/30 bg-success/5">
+          <Card className="border-emerald-500/30 bg-emerald-500/5">
             <CardContent className="p-5 space-y-4">
               <div className="flex items-center gap-3">
-                <CheckCircle2 className="w-10 h-10 text-success shrink-0" />
+                <CheckCircle2 className="w-10 h-10 text-emerald-500 shrink-0" />
                 <div>
-                  <p className="font-bold text-success text-sm">✅ Documento Autêntico</p>
-                  <p className="text-xs text-muted-foreground">Emitido pela plataforma Aloclinica</p>
+                  <p className="font-bold text-emerald-600 text-sm">✅ Documento Autêntico</p>
+                  <p className="text-xs text-muted-foreground">Emitido pela plataforma AloClínica</p>
                 </div>
               </div>
 
               <div className="space-y-2 text-sm">
+                <div className="flex justify-between p-2 rounded-lg bg-background/60">
+                  <span className="text-muted-foreground">Tipo</span>
+                  <Badge variant="secondary">{DOC_TYPE_LABELS[result.document_type || result.type] || result.type}</Badge>
+                </div>
+                {result.patient_name && (
+                  <div className="flex justify-between p-2 rounded-lg bg-background/60">
+                    <span className="text-muted-foreground">Paciente</span>
+                    <span className="font-medium text-foreground">{result.patient_name}</span>
+                  </div>
+                )}
                 <div className="flex justify-between p-2 rounded-lg bg-background/60">
                   <span className="text-muted-foreground">Médico</span>
                   <span className="font-medium text-foreground">{result.doctor_name}</span>
@@ -133,7 +172,7 @@ const ValidateDocument = () => {
                 {result.crm && (
                   <div className="flex justify-between p-2 rounded-lg bg-background/60">
                     <span className="text-muted-foreground">CRM</span>
-                    <span className="font-medium text-foreground">{result.crm}/{result.crm_state}</span>
+                    <span className="font-medium text-foreground">{result.crm}</span>
                   </div>
                 )}
                 <div className="flex justify-between p-2 rounded-lg bg-background/60">
@@ -148,17 +187,17 @@ const ValidateDocument = () => {
                     <span className="font-medium text-foreground">{result.diagnosis}</span>
                   </div>
                 )}
-                <div className="flex justify-between p-2 rounded-lg bg-background/60">
-                  <span className="text-muted-foreground">Medicamentos</span>
-                  <Badge variant="secondary" className="text-xs">
-                    {Array.isArray(result.medications) ? result.medications.length : 0} item(s)
-                  </Badge>
-                </div>
+                {result.medications && (
+                  <div className="flex justify-between p-2 rounded-lg bg-background/60">
+                    <span className="text-muted-foreground">Medicamentos</span>
+                    <Badge variant="secondary">{Array.isArray(result.medications) ? result.medications.length : 0} item(s)</Badge>
+                  </div>
+                )}
               </div>
 
               <div className="text-center pt-2">
                 <p className="text-[10px] text-muted-foreground">
-                  ID: {result.id}
+                  Código: {result.code || result.id}
                 </p>
               </div>
             </CardContent>

@@ -563,6 +563,45 @@ export type Database = {
           },
         ]
       }
+      document_verifications: {
+        Row: {
+          created_at: string
+          details: Json | null
+          doctor_crm: string | null
+          doctor_name: string
+          document_type: string
+          id: string
+          issued_at: string
+          patient_cpf: string | null
+          patient_name: string
+          verification_code: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json | null
+          doctor_crm?: string | null
+          doctor_name: string
+          document_type?: string
+          id?: string
+          issued_at?: string
+          patient_cpf?: string | null
+          patient_name: string
+          verification_code: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json | null
+          doctor_crm?: string | null
+          doctor_name?: string
+          document_type?: string
+          id?: string
+          issued_at?: string
+          patient_cpf?: string | null
+          patient_name?: string
+          verification_code?: string
+        }
+        Relationships: []
+      }
       favorite_doctors: {
         Row: {
           created_at: string
