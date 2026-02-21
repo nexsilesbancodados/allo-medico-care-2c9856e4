@@ -35,6 +35,7 @@ const Accessibility = lazy(() => import("./pages/Accessibility"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const GuestCheckout = lazy(() => import("./pages/GuestCheckout"));
 const GuestConsultation = lazy(() => import("./pages/GuestConsultation"));
+const GuestRating = lazy(() => import("./pages/GuestRating"));
 const AuthParceiro = lazy(() => import("./pages/AuthParceiro"));
 const AuthAfiliado = lazy(() => import("./pages/AuthAfiliado"));
 const AuthClinica = lazy(() => import("./pages/AuthClinica"));
@@ -96,6 +97,7 @@ const App = () => (
             <Route path="/accessibility" element={<Accessibility />} />
             <Route path="/consulta-avulsa" element={<GuestCheckout />} />
             <Route path="/consulta" element={<GuestConsultation />} />
+            <Route path="/consulta/avaliacao" element={<GuestRating />} />
             <Route path="/parceiro" element={<AuthParceiro />} />
             <Route path="/afiliado" element={<AuthAfiliado />} />
             <Route path="/clinica" element={<AuthClinica />} />
