@@ -56,3 +56,6 @@ verify_jwt = false
 
 [functions.symptom-triage]
 verify_jwt = false
+
+[functions.clinical-summary]
+verify_jwt = false
