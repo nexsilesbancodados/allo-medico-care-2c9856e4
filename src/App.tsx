@@ -53,6 +53,7 @@ const App = () => (
             <Route path="/afiliado" element={<AuthAfiliado />} />
             <Route path="/clinica" element={<AuthClinica />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
+            <Route path="/convite/:code" element={<AuthPaciente />} />
             <Route path="/l/:id" element={<LinkRedirect />} />
             <Route
               path="/dashboard/*"

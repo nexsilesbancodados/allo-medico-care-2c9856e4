@@ -60,10 +60,12 @@ export type Database = {
           id: string
           jitsi_link: string | null
           notes: string | null
+          original_appointment_id: string | null
           patient_id: string | null
           payment_confirmed_at: string | null
           payment_confirmed_by: string | null
           payment_status: string | null
+          return_deadline: string | null
           scheduled_at: string
           status: string
           updated_at: string
@@ -81,10 +83,12 @@ export type Database = {
           id?: string
           jitsi_link?: string | null
           notes?: string | null
+          original_appointment_id?: string | null
           patient_id?: string | null
           payment_confirmed_at?: string | null
           payment_confirmed_by?: string | null
           payment_status?: string | null
+          return_deadline?: string | null
           scheduled_at: string
           status?: string
           updated_at?: string
@@ -102,10 +106,12 @@ export type Database = {
           id?: string
           jitsi_link?: string | null
           notes?: string | null
+          original_appointment_id?: string | null
           patient_id?: string | null
           payment_confirmed_at?: string | null
           payment_confirmed_by?: string | null
           payment_status?: string | null
+          return_deadline?: string | null
           scheduled_at?: string
           status?: string
           updated_at?: string
@@ -515,6 +521,35 @@ export type Database = {
             columns: ["specialty_id"]
             isOneToOne: false
             referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorite_doctors: {
+        Row: {
+          created_at: string
+          doctor_id: string
+          id: string
+          patient_id: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id: string
+          id?: string
+          patient_id: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorite_doctors_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -1044,6 +1079,8 @@ export type Database = {
           id: string
           last_name: string
           phone: string | null
+          referral_code: string | null
+          referred_by: string | null
           updated_at: string
           user_id: string
         }
@@ -1059,6 +1096,8 @@ export type Database = {
           id?: string
           last_name?: string
           phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_id: string
         }
@@ -1074,6 +1113,8 @@ export type Database = {
           id?: string
           last_name?: string
           phone?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -1380,6 +1421,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_credits: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          reason: string
+          reference_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason: string
+          reference_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          reason?: string
+          reference_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           current_page: string | null
@@ -1424,6 +1492,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      video_presence_logs: {
+        Row: {
+          appointment_id: string
+          duration_seconds: number | null
+          id: string
+          joined_at: string
+          left_at: string | null
+          user_id: string
+          user_role: string
+        }
+        Insert: {
+          appointment_id: string
+          duration_seconds?: number | null
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          user_id: string
+          user_role?: string
+        }
+        Update: {
+          appointment_id?: string
+          duration_seconds?: number | null
+          id?: string
+          joined_at?: string
+          left_at?: string | null
+          user_id?: string
+          user_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_presence_logs_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       withdrawal_requests: {
         Row: {

@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star, BarChart2, Activity, RefreshCw } from "lucide-react";
+import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star, BarChart2, Activity, RefreshCw, Gift, Share2, Copy } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import BlobKPICard from "@/components/ui/blob-kpi-card";
 import Sparkline from "@/components/ui/sparkline";
@@ -42,6 +42,9 @@ const PatientDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [credits, setCredits] = useState(0);
+  const [returnAppts, setReturnAppts] = useState<any[]>([]);
   const now = new Date();
 
   useEffect(() => { if (user) fetchData(); }, [user]);
@@ -119,6 +122,43 @@ const PatientDashboard = () => {
     }
     setLoading(false);
     setRefreshing(false);
+
+    // Fetch referral code
+    const { data: profileData } = await supabase.from("profiles").select("referral_code").eq("user_id", user!.id).single();
+    if (profileData?.referral_code) {
+      setReferralCode(profileData.referral_code);
+    } else {
+      // Generate one if missing
+      const code = (profile?.first_name || "user").toLowerCase().slice(0, 4) + user!.id.slice(0, 6);
+      await supabase.from("profiles").update({ referral_code: code }).eq("user_id", user!.id);
+      setReferralCode(code);
+    }
+
+    // Fetch credits
+    const { data: creditsData } = await supabase.from("user_credits").select("amount").eq("user_id", user!.id);
+    if (creditsData) setCredits(creditsData.reduce((sum, c) => sum + Number(c.amount), 0));
+
+    // Fetch completed appointments with return deadline
+    const { data: returnData } = await supabase.from("appointments")
+      .select("id, scheduled_at, doctor_id, return_deadline")
+      .eq("patient_id", user!.id)
+      .eq("status", "completed")
+      .not("return_deadline", "is", null)
+      .gte("return_deadline", new Date().toISOString());
+    if (returnData && returnData.length > 0) {
+      const retDoctorIds = [...new Set(returnData.map(a => a.doctor_id))];
+      const { data: retDocs } = await supabase.from("doctor_profiles").select("id, user_id").in("id", retDoctorIds);
+      if (retDocs) {
+        const retUserIds = retDocs.map(d => d.user_id);
+        const { data: retProfiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", retUserIds);
+        const retMap = new Map<string, string>();
+        retDocs.forEach(d => {
+          const p = retProfiles?.find(pr => pr.user_id === d.user_id);
+          if (p) retMap.set(d.id, `Dr(a). ${p.first_name} ${p.last_name}`);
+        });
+        setReturnAppts(returnData.map(a => ({ ...a, doctor_name: retMap.get(a.doctor_id) ?? "Médico" })));
+      }
+    }
   };
 
   const enterWaitingRoom = async (appointmentId: string) => {
@@ -288,6 +328,62 @@ const PatientDashboard = () => {
                 </Card>
               ))}
             </div>
+
+            {/* Return appointments (golden button) */}
+            {returnAppts.length > 0 && (
+              <Card className="border-amber-400/30 bg-gradient-to-r from-amber-50/80 to-yellow-50/80 dark:from-amber-900/20 dark:to-yellow-900/20">
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Gift className="w-4 h-4 text-amber-600" />
+                    <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">Retorno Grátis Disponível</p>
+                  </div>
+                  {returnAppts.map(ra => (
+                    <div key={ra.id} className="flex items-center justify-between p-2 rounded-lg bg-white/60 dark:bg-background/40">
+                      <div className="text-xs">
+                        <p className="font-medium text-foreground">{ra.doctor_name}</p>
+                        <p className="text-muted-foreground">Válido até {format(new Date(ra.return_deadline), "dd/MM/yyyy")}</p>
+                      </div>
+                      <Button size="sm" className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs h-7"
+                        onClick={() => navigate(`/dashboard/schedule/${ra.doctor_id}?return=true&original=${ra.id}`)}>
+                        ✨ Agendar Retorno
+                      </Button>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Referral & Credits Section */}
+            {referralCode && (
+              <Card className="border-border/50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Share2 className="w-4 h-4 text-primary" />
+                      <p className="text-sm font-semibold text-foreground">Indique e Ganhe</p>
+                    </div>
+                    {credits > 0 && (
+                      <Badge variant="outline" className="text-xs text-success border-success/30 bg-success/10">
+                        Saldo: R$ {credits.toFixed(2)}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Convide amigos e ganhe R$ 10 de crédito para cada cadastro realizado.
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 text-xs bg-muted/50 border border-border/50 rounded-lg px-3 py-2 truncate font-mono">
+                      {window.location.origin}/convite/{referralCode}
+                    </div>
+                    <Button size="sm" variant="outline" className="h-8 shrink-0" onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/convite/${referralCode}`);
+                    }}>
+                      <Copy className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* ══ Consultas ══ */}

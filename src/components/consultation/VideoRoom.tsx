@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
-  MessageSquare, FileText, Clock, Send, X
+  MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation from "./VideoConsultation";
@@ -43,6 +43,8 @@ const VideoRoom = () => {
   const [elapsed, setElapsed] = useState(0);
   const [showChat, setShowChat] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [splitMode, setSplitMode] = useState(false);
+  const presenceLogId = useRef<string | null>(null);
 
   // Chat & Notes
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -238,13 +240,44 @@ const VideoRoom = () => {
     toast({ title: "Anotações salvas!" });
   };
 
+  // ─── Video presence logging ───
+  useEffect(() => {
+    if (!appointmentId || !user || !deviceChecked) return;
+    const logPresence = async () => {
+      const { data } = await supabase.from("video_presence_logs").insert({
+        appointment_id: appointmentId,
+        user_id: user.id,
+        user_role: isDoctor ? "doctor" : "patient",
+      }).select("id").single();
+      if (data) presenceLogId.current = data.id;
+    };
+    logPresence();
+
+    return () => {
+      // Log exit time
+      if (presenceLogId.current) {
+        supabase.from("video_presence_logs").update({
+          left_at: new Date().toISOString(),
+          duration_seconds: elapsed,
+        }).eq("id", presenceLogId.current).then(() => {});
+      }
+    };
+  }, [appointmentId, user, deviceChecked]);
+
   const endCall = useCallback(async () => {
+    // Save presence log
+    if (presenceLogId.current) {
+      await supabase.from("video_presence_logs").update({
+        left_at: new Date().toISOString(),
+        duration_seconds: elapsed,
+      }).eq("id", presenceLogId.current);
+    }
     if (isDoctor && notes) await saveNotes();
     await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId);
     toast({ title: "Consulta encerrada" });
     if (isDoctor) navigate(`/dashboard/prescribe/${appointmentId}`);
     else navigate(`/dashboard/rate/${appointmentId}`);
-  }, [isDoctor, notes, appointmentId]);
+  }, [isDoctor, notes, appointmentId, elapsed]);
 
   const handleReconnect = useCallback(() => {
     setDeviceChecked(false);
@@ -345,15 +378,26 @@ const VideoRoom = () => {
           </Button>
 
           {isDoctor && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`rounded-full ${showNotes ? "bg-primary text-primary-foreground" : "text-[hsl(210,20%,70%)] hover:bg-[hsl(210,30%,14%)]"}`}
-              onClick={() => { setShowNotes(!showNotes); setShowChat(false); }}
-            >
-              <FileText className="w-4 h-4 mr-1.5" />
-              Notas
-            </Button>
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`rounded-full ${showNotes ? "bg-primary text-primary-foreground" : "text-[hsl(210,20%,70%)] hover:bg-[hsl(210,30%,14%)]"}`}
+                onClick={() => { setShowNotes(!showNotes); setShowChat(false); }}
+              >
+                <FileText className="w-4 h-4 mr-1.5" />
+                Notas
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`rounded-full ${splitMode ? "bg-primary text-primary-foreground" : "text-[hsl(210,20%,70%)] hover:bg-[hsl(210,30%,14%)]"}`}
+                onClick={() => setSplitMode(!splitMode)}
+                title="Modo Split Screen"
+              >
+                {splitMode ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
+              </Button>
+            </>
           )}
 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
@@ -367,13 +411,34 @@ const VideoRoom = () => {
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
         {/* Video area — Jitsi */}
-        <div className="flex-1 min-h-0">
+        <div className={splitMode && isDoctor ? "w-1/2" : "flex-1"} style={{ minHeight: 0 }}>
           <VideoConsultation
             appointmentId={appointmentId!}
             userName={currentUserName}
             onEndCall={endCall}
           />
         </div>
+
+        {/* Split screen: permanent notes panel for doctor */}
+        {splitMode && isDoctor && (
+          <div className="w-1/2 border-l border-border/15 bg-[hsl(210,50%,6%)] flex flex-col overflow-hidden">
+            <div className="p-3 border-b border-border/15">
+              <p className="text-sm font-semibold text-[hsl(210,20%,90%)]">📋 Prontuário — Modo Focado</p>
+            </div>
+            <div className="flex-1 flex flex-col p-3 gap-3 overflow-auto">
+              <MedicalAutocomplete
+                value={notes}
+                onChange={setNotes}
+                field="notes"
+                placeholder="Digite as anotações da consulta..."
+                className="flex-1 bg-[hsl(210,30%,10%)] border-border/20 text-[hsl(210,20%,90%)] placeholder:text-[hsl(210,15%,35%)] resize-none rounded-xl min-h-[200px]"
+              />
+              <Button onClick={saveNotes} size="sm" className="bg-gradient-hero text-primary-foreground rounded-xl">
+                Salvar Anotações
+              </Button>
+            </div>
+          </div>
+        )}
 
         {/* Side panel */}
         <AnimatePresence>
