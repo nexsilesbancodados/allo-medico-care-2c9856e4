@@ -87,9 +87,19 @@ const ClinicDashboard = () => {
   return (
     <DashboardLayout title="Clínica" nav={getClinicNav("overview")} role="clinic">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
-        <motion.div variants={fadeUp}>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">{clinicProfile?.name ?? "Minha Clínica"}</h1>
-          <p className="text-sm text-muted-foreground mt-1">Painel de gestão completo</p>
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">{clinicProfile?.name ?? "Minha Clínica"}</h1>
+            <p className="text-sm text-muted-foreground mt-1">Painel de gestão · {format(now, "dd 'de' MMMM", { locale: ptBR })}</p>
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Button size="sm" variant="outline" className="rounded-xl gap-1.5 h-9" onClick={() => navigate("/dashboard/clinic/doctors")}>
+              <Users className="w-3.5 h-3.5" /> Médicos
+            </Button>
+            <Button size="sm" className="rounded-xl gap-1.5 h-9 bg-primary text-primary-foreground" onClick={() => navigate("/dashboard/clinic/schedules")}>
+              <Calendar className="w-3.5 h-3.5" /> Agendamentos
+            </Button>
+          </div>
         </motion.div>
 
         {/* KPI Cards */}

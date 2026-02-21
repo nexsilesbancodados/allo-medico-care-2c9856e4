@@ -91,9 +91,14 @@ const PartnerDashboard = () => {
   return (
     <DashboardLayout title="Portal do Parceiro" nav={partnerNav}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-3xl space-y-6">
-        <motion.div variants={fadeUp}>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Portal de Parceiros</h1>
-          <p className="text-sm text-muted-foreground mt-1">Validação de receitas e pedidos de exame</p>
+        <motion.div variants={fadeUp} className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Portal de Parceiros</h1>
+            <p className="text-sm text-muted-foreground mt-1">Validação de receitas e pedidos de exame</p>
+          </div>
+          <Badge variant="outline" className="text-xs border-success/30 bg-success/10 text-success px-3 py-1.5 rounded-xl">
+            <CheckCircle className="w-3 h-3 mr-1" /> Farmácia Ativa
+          </Badge>
         </motion.div>
 
         {/* KPI cards */}

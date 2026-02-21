@@ -83,11 +83,49 @@ const AffiliateDashboard = () => {
             <CardContent className="p-5">
               <p className="text-sm font-semibold text-foreground mb-3">Seu Link de Indicação</p>
               {referralCode ? (
-                <div className="flex gap-2">
-                  <Input value={`${window.location.origin}?ref=${referralCode}`} readOnly className="font-mono text-sm rounded-xl" />
-                  <Button variant="outline" onClick={copyCode} className="rounded-xl gap-1.5">
-                    <Copy className="w-4 h-4" /> Copiar
-                  </Button>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input value={`${window.location.origin}?ref=${referralCode}`} readOnly className="font-mono text-sm rounded-xl" />
+                    <Button variant="outline" onClick={copyCode} className="rounded-xl gap-1.5">
+                      <Copy className="w-4 h-4" /> Copiar
+                    </Button>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl text-xs gap-1.5 flex-1"
+                      onClick={() => {
+                        const text = `Conheça a AloClínica! Use meu link: ${window.location.origin}?ref=${referralCode}`;
+                        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+                      }}
+                    >
+                      📱 WhatsApp
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl text-xs gap-1.5 flex-1"
+                      onClick={() => {
+                        const text = `Conheça a AloClínica! ${window.location.origin}?ref=${referralCode}`;
+                        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
+                      }}
+                    >
+                      🐦 Twitter
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-xl text-xs gap-1.5 flex-1"
+                      onClick={() => {
+                        const subject = "Conheça a AloClínica";
+                        const body = `Olá! Use meu link para se cadastrar: ${window.location.origin}?ref=${referralCode}`;
+                        window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+                      }}
+                    >
+                      ✉️ Email
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Button onClick={generateCode} className="rounded-xl">Gerar Código de Indicação</Button>

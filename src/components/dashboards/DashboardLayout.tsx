@@ -1,7 +1,7 @@
 import { ReactNode, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  LogOut, User, Settings, MoreHorizontal, Search, Menu, ShieldCheck, RefreshCw,
+  LogOut, User, Settings, MoreHorizontal, Search, Menu, ShieldCheck, ChevronDown,
 } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -30,6 +30,7 @@ interface NavItem {
   icon: ReactNode;
   active?: boolean;
   group?: string;
+  badge?: number;
 }
 
 interface DashboardLayoutProps {
@@ -52,19 +53,37 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 const ROLE_COLORS: Record<string, string> = {
-  patient: "bg-primary text-primary-foreground",
-  doctor: "bg-secondary text-secondary-foreground",
-  admin: "bg-destructive text-destructive-foreground",
-  receptionist: "bg-warning text-warning-foreground",
-  support: "bg-warning text-warning-foreground",
-  clinic: "bg-primary text-primary-foreground",
-  partner: "bg-success text-success-foreground",
-  affiliate: "bg-muted-foreground text-background",
+  patient: "bg-primary/15 text-primary border-primary/20",
+  doctor: "bg-secondary/15 text-secondary border-secondary/20",
+  admin: "bg-destructive/15 text-destructive border-destructive/20",
+  receptionist: "bg-warning/15 text-warning border-warning/20",
+  support: "bg-warning/15 text-warning border-warning/20",
+  clinic: "bg-primary/15 text-primary border-primary/20",
+  partner: "bg-success/15 text-success border-success/20",
+  affiliate: "bg-muted text-muted-foreground border-border",
+};
+
+const ROLE_ICON: Record<string, string> = {
+  patient: "👤",
+  doctor: "🩺",
+  admin: "⚙️",
+  receptionist: "🏥",
+  support: "🎧",
+  clinic: "🏢",
+  partner: "🤝",
+  affiliate: "📣",
+};
+
+const pageTransition = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.22, 1, 0.36, 1] as const } },
+  exit: { opacity: 0, y: -4, transition: { duration: 0.15 } },
 };
 
 const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLayoutProps) => {
   const { profile, roles } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const [moreOpen, setMoreOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -88,6 +107,23 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
     navigate("/");
   };
 
+  // Group nav items
+  const navGroups = useMemo(() => {
+    if (!nav) return [];
+    const groups: { label: string; items: NavItem[] }[] = [];
+    let currentGroup: { label: string; items: NavItem[] } = { label: "", items: [] };
+    nav.forEach(item => {
+      if (item.group && item.group !== currentGroup.label) {
+        if (currentGroup.items.length > 0) groups.push(currentGroup);
+        currentGroup = { label: item.group, items: [item] };
+      } else {
+        currentGroup.items.push(item);
+      }
+    });
+    if (currentGroup.items.length > 0) groups.push(currentGroup);
+    return groups;
+  }, [nav]);
+
   const bottomNav = nav?.slice(0, 4) ?? [];
   const moreNav = nav && nav.length > 4 ? nav.slice(4) : [];
 
@@ -108,6 +144,11 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         {item.icon}
       </span>
       <span className="flex-1 truncate">{item.label}</span>
+      {item.badge && item.badge > 0 && (
+        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-destructive text-destructive-foreground leading-none min-w-[18px] text-center">
+          {item.badge > 99 ? "99+" : item.badge}
+        </span>
+      )}
       {item.active && (
         <motion.div
           layoutId="sidebar-indicator"
@@ -126,12 +167,12 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         <span className="font-bold text-base text-foreground tracking-tight">AloClínica</span>
       </div>
 
-      {/* Role badge */}
+      {/* Role badge with icon */}
       <div className="px-4 pt-4 pb-2 shrink-0">
-        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${ROLE_COLORS[role] ?? ROLE_COLORS.patient}`}>
-          <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />
+        <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-semibold border ${ROLE_COLORS[role] ?? ROLE_COLORS.patient}`}>
+          <span>{ROLE_ICON[role] ?? "👤"}</span>
           {ROLE_LABELS[role] ?? title}
-        </span>
+        </div>
       </div>
 
       {/* Admin back button */}
@@ -139,7 +180,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         <div className="px-4 pb-2 shrink-0">
           <button
             onClick={() => { navigate("/dashboard"); onItemClick?.(); }}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-destructive bg-destructive/10 hover:bg-destructive/15 transition-colors"
+            className="w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-semibold text-destructive bg-destructive/10 hover:bg-destructive/15 transition-colors border border-destructive/20"
           >
             <ShieldCheck className="w-3.5 h-3.5" />
             Voltar ao Painel Admin
@@ -147,11 +188,22 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         </div>
       )}
 
-      {/* Nav items — flat list, no group headers */}
+      {/* Nav items with optional group labels */}
       {nav && nav.length > 0 && (
-        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-0.5">
-          {nav.map((item) => (
-            <NavItemRow key={item.href} item={item} onClick={onItemClick} />
+        <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
+          {navGroups.map((group, gi) => (
+            <div key={gi}>
+              {group.label && (
+                <p className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest px-3 pt-4 pb-1.5">
+                  {group.label}
+                </p>
+              )}
+              <div className="space-y-0.5">
+                {group.items.map((item) => (
+                  <NavItemRow key={item.href} item={item} onClick={onItemClick} />
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
       )}
@@ -160,9 +212,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       <div className="p-3 border-t border-border/30 mt-auto shrink-0">
         <button
           onClick={() => { navigate("/dashboard/profile"); onItemClick?.(); }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left group"
         >
-          <Avatar className="h-8 w-8 shrink-0">
+          <Avatar className="h-9 w-9 shrink-0 ring-2 ring-border/30 group-hover:ring-primary/20 transition-all">
             {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
             <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
               {initials}
@@ -225,7 +277,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           <Button
             variant="outline"
             size="sm"
-            className="h-7 text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+            className="h-7 text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10 rounded-xl"
             onClick={() => navigate("/dashboard")}
           >
             <ShieldCheck className="w-3.5 h-3.5" />
@@ -255,6 +307,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                 <span className="hidden md:block text-xs font-medium text-foreground max-w-[100px] truncate">
                   {profile?.first_name ?? "Usuário"}
                 </span>
+                <ChevronDown className="w-3 h-3 text-muted-foreground hidden md:block" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 rounded-xl border-border/50 shadow-lg p-1.5">
@@ -288,17 +341,18 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           </aside>
         )}
 
-        {/* ── Main content ── */}
+        {/* ── Main content with page transition ── */}
         <main className="flex-1 min-w-0 overflow-auto pb-24 md:pb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-            className="p-4 sm:p-6"
-          >
-            <DashboardBreadcrumbs />
-            {children}
-          </motion.div>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              {...pageTransition}
+              className="p-4 sm:p-6"
+            >
+              <DashboardBreadcrumbs />
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
@@ -327,10 +381,15 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <span className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                <span className={`relative w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 ${
                   item.active ? "bg-primary/10" : ""
                 }`}>
                   {item.icon}
+                  {item.badge && item.badge > 0 && (
+                    <span className="absolute -top-1 -right-1 text-[8px] font-bold px-1 py-0.5 rounded-full bg-destructive text-destructive-foreground leading-none min-w-[14px] text-center">
+                      {item.badge > 9 ? "9+" : item.badge}
+                    </span>
+                  )}
                 </span>
                 <span className="truncate max-w-[52px] leading-tight text-center">{item.label}</span>
               </Link>

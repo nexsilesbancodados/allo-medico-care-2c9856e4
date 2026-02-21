@@ -334,12 +334,58 @@ const DoctorDashboard = () => {
               <DoctorAnalyticsCharts />
             </TabsContent>
 
-            <TabsContent value="activity" className="mt-6">
+            <TabsContent value="activity" className="mt-6 space-y-4">
+              {/* Quick stats summary */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {[
+                  { label: "Realizadas hoje", value: done, color: "text-success" },
+                  { label: "Em andamento", value: inProg, color: "text-primary" },
+                  { label: "Aguardando", value: waitingCount, color: "text-warning" },
+                  { label: "Taxa conclusão", value: `${pct}%`, color: "text-foreground" },
+                ].map(s => (
+                  <div key={s.label} className="p-3 rounded-xl bg-muted/30 border border-border/40 text-center">
+                    <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+
               <Card className="border-border/50">
-                <CardHeader><CardTitle className="text-sm font-semibold">Histórico de Atividade</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-sm font-semibold">Consultas Recentes</CardTitle></CardHeader>
                 <CardContent>
-                  <p className="text-sm text-muted-foreground text-center py-8">Consulte a aba Consultas para o histórico completo.</p>
-                  <Button variant="outline" className="w-full" onClick={() => navigate("/dashboard/doctor/consultations")}>Ver Consultas</Button>
+                  {todayAppts.length === 0 && upcomingAppts.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Sparkles className="w-8 h-8 text-muted-foreground/40 mx-auto mb-3" />
+                      <p className="text-sm text-muted-foreground mb-4">Nenhuma atividade recente</p>
+                      <Button variant="outline" className="rounded-xl" onClick={() => navigate("/dashboard/doctor/consultations")}>
+                        Ver Histórico Completo
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {[...todayAppts, ...upcomingAppts].slice(0, 8).map(a => (
+                        <div key={a.id} className="flex items-center justify-between p-3 rounded-xl border border-border/40 hover:bg-muted/20 transition-colors">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-lg bg-muted/60 flex items-center justify-center shrink-0 text-xs font-bold text-foreground">
+                              {format(new Date(a.scheduled_at), "HH:mm")}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-medium text-foreground truncate">{a.patient_name}</p>
+                              <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border inline-block mt-0.5 ${statusColor[a.status] ?? "bg-muted text-muted-foreground border-border"}`}>
+                                {statusLabel[a.status] ?? a.status}
+                              </span>
+                            </div>
+                          </div>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {format(new Date(a.scheduled_at), "dd/MM", { locale: ptBR })}
+                          </span>
+                        </div>
+                      ))}
+                      <Button variant="outline" className="w-full rounded-xl mt-2" onClick={() => navigate("/dashboard/doctor/consultations")}>
+                        Ver Histórico Completo
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
