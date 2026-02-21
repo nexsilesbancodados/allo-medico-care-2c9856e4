@@ -1,11 +1,20 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, ComposedChart } from "recharts";
-import { format, subDays, startOfDay } from "date-fns";
+import {
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, ComposedChart,
+  ScatterChart, Scatter, ZAxis, Legend,
+} from "recharts";
+import { format, subDays, startOfDay, getDay, getHours } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--destructive))", "hsl(var(--muted-foreground))", "hsl(var(--warning))"];
+const COLORS = [
+  "hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--destructive))",
+  "hsl(var(--muted-foreground))", "hsl(var(--warning))",
+];
+const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 const AdminAnalyticsCharts = () => {
   const [dailyAppts, setDailyAppts] = useState<any[]>([]);
@@ -15,7 +24,10 @@ const AdminAnalyticsCharts = () => {
   const [patientGrowth, setPatientGrowth] = useState<any[]>([]);
   const [retentionData, setRetentionData] = useState<any[]>([]);
   const [funnelData, setFunnelData] = useState<any[]>([]);
+  const [heatmapData, setHeatmapData] = useState<any[]>([]);
+  const [npsTrend, setNpsTrend] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState("overview");
 
   useEffect(() => { fetchChartData(); }, []);
 
@@ -23,7 +35,7 @@ const AdminAnalyticsCharts = () => {
     const days = 14;
     const startDate = startOfDay(subDays(new Date(), days));
 
-    const [apptsRes, specsRes, docSpecsRes, subsRes, profilesRes, allApptsRes, surveysRes] = await Promise.all([
+    const [apptsRes, specsRes, docSpecsRes, subsRes, profilesRes, allApptsRes, surveysRes, allApptsHeatRes] = await Promise.all([
       supabase.from("appointments").select("id, scheduled_at, status").gte("scheduled_at", startDate.toISOString()).order("scheduled_at", { ascending: true }),
       supabase.from("specialties").select("id, name"),
       supabase.from("doctor_specialties").select("doctor_id, specialty_id"),
@@ -31,6 +43,7 @@ const AdminAnalyticsCharts = () => {
       supabase.from("profiles").select("id, created_at").order("created_at", { ascending: true }),
       supabase.from("appointments").select("id, status, patient_id").order("scheduled_at", { ascending: false }).limit(500),
       supabase.from("satisfaction_surveys").select("nps_score, created_at").order("created_at", { ascending: true }),
+      supabase.from("appointments").select("scheduled_at").gte("scheduled_at", subDays(new Date(), 90).toISOString()),
     ]);
 
     // Daily appointments
@@ -105,6 +118,34 @@ const AdminAnalyticsCharts = () => {
       { stage: "Avaliou", count: surveyed },
     ]);
 
+    // Heatmap: day x hour
+    const heatGrid: Record<string, number> = {};
+    (allApptsHeatRes.data ?? []).forEach(a => {
+      const dt = new Date(a.scheduled_at);
+      const day = getDay(dt);
+      const hour = getHours(dt);
+      const key = `${day}-${hour}`;
+      heatGrid[key] = (heatGrid[key] || 0) + 1;
+    });
+    const heatArr: any[] = [];
+    for (let d = 0; d < 7; d++) {
+      for (let h = 6; h <= 22; h++) {
+        heatArr.push({ day: DAYS[d], hour: `${h}h`, count: heatGrid[`${d}-${h}`] || 0, x: h, y: d });
+      }
+    }
+    setHeatmapData(heatArr);
+
+    // NPS trend (grouped by week)
+    const npsGrouped = new Map<string, { total: number; count: number }>();
+    (surveysRes.data ?? []).forEach(s => {
+      const wk = format(new Date(s.created_at), "dd/MM", { locale: ptBR });
+      const entry = npsGrouped.get(wk) || { total: 0, count: 0 };
+      entry.total += s.nps_score;
+      entry.count++;
+      npsGrouped.set(wk, entry);
+    });
+    setNpsTrend(Array.from(npsGrouped.entries()).map(([date, v]) => ({ date, nps: +(v.total / v.count).toFixed(1) })));
+
     setLoading(false);
   };
 
@@ -118,149 +159,259 @@ const AdminAnalyticsCharts = () => {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-4 sm:gap-6 mb-6" role="region" aria-label="Gráficos de análise">
-      {/* Daily appointments */}
-      <Card className="border-border lg:col-span-2">
-        <CardHeader><CardTitle className="text-base sm:text-lg">📈 Consultas por Dia (últimos 14 dias)</CardTitle></CardHeader>
-        <CardContent>
-          <div className="h-48 sm:h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={dailyAppts}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="date" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip contentStyle={ts} />
-                <Line type="monotone" dataKey="total" stroke="hsl(var(--primary))" strokeWidth={2} name="Total" dot={false} />
-                <Line type="monotone" dataKey="completed" stroke="hsl(var(--secondary))" strokeWidth={2} name="Concluídas" dot={false} />
-                <Line type="monotone" dataKey="cancelled" stroke="hsl(var(--destructive))" strokeWidth={2} name="Canceladas" dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="mb-6" role="region" aria-label="Gráficos de análise">
+      <Tabs value={tab} onValueChange={setTab} className="w-full">
+        <TabsList className="bg-muted/50 border border-border/40 h-9 mb-4">
+          <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">📊 Visão Geral</TabsTrigger>
+          <TabsTrigger value="funnel" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">🎯 Funil & Retenção</TabsTrigger>
+          <TabsTrigger value="heatmap" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">🗓️ Mapa de Calor</TabsTrigger>
+          <TabsTrigger value="nps" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">⭐ NPS & Satisfação</TabsTrigger>
+        </TabsList>
 
-      {/* Conversion Funnel */}
-      <Card className="border-border">
-        <CardHeader><CardTitle className="text-base sm:text-lg">🎯 Funil de Conversão</CardTitle></CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {funnelData.map((stage, i) => {
-              const maxVal = funnelData[0]?.count || 1;
-              const pct = maxVal > 0 ? (stage.count / maxVal) * 100 : 0;
-              const colors = ["primary", "secondary", "primary", "warning"];
-              return (
-                <div key={stage.stage} className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">{stage.stage}</span>
-                    <span className="font-semibold text-foreground">{stage.count} <span className="text-xs text-muted-foreground">({pct.toFixed(0)}%)</span></span>
+        {/* ── Overview Tab ── */}
+        <TabsContent value="overview" className="mt-0">
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* Daily appointments */}
+            <Card className="border-border lg:col-span-2">
+              <CardHeader><CardTitle className="text-base sm:text-lg">📈 Consultas por Dia (14 dias)</CardTitle></CardHeader>
+              <CardContent>
+                <div className="h-48 sm:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={dailyAppts}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <YAxis fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <Tooltip contentStyle={ts} />
+                      <Line type="monotone" dataKey="total" stroke="hsl(var(--primary))" strokeWidth={2} name="Total" dot={false} />
+                      <Line type="monotone" dataKey="completed" stroke="hsl(var(--secondary))" strokeWidth={2} name="Concluídas" dot={false} />
+                      <Line type="monotone" dataKey="cancelled" stroke="hsl(var(--destructive))" strokeWidth={2} name="Canceladas" dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Revenue */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">💰 Receita Mensal (MRR)</CardTitle></CardHeader>
+              <CardContent>
+                <div className="h-48 sm:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={revenueData}>
+                      <defs>
+                        <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.4} />
+                          <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="month" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <YAxis fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `R$${v}`} />
+                      <Tooltip formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Receita"]} contentStyle={ts} />
+                      <Area type="monotone" dataKey="revenue" stroke="hsl(var(--secondary))" fill="url(#revenueGrad)" strokeWidth={2} name="Receita" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Patient growth */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">👥 Crescimento de Pacientes</CardTitle></CardHeader>
+              <CardContent>
+                <div className="h-48 sm:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <ComposedChart data={patientGrowth}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="month" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <YAxis fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <Tooltip contentStyle={ts} />
+                      <Bar dataKey="novos" fill="hsl(var(--primary) / 0.3)" name="Novos no mês" radius={[4, 4, 0, 0]} />
+                      <Line type="monotone" dataKey="total" stroke="hsl(var(--primary))" strokeWidth={2} name="Total acumulado" dot={false} />
+                    </ComposedChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Status pie */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">📊 Status das Consultas</CardTitle></CardHeader>
+              <CardContent>
+                <div className="h-48 sm:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie data={statusBreakdown} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} fontSize={10}>
+                        {statusBreakdown.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip contentStyle={ts} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Specialty distribution */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">🩺 Médicos por Especialidade</CardTitle></CardHeader>
+              <CardContent>
+                <div className="h-48 sm:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={specialtyData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis type="number" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <YAxis type="category" dataKey="name" fontSize={10} width={100} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <Tooltip contentStyle={ts} />
+                      <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Médicos" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* ── Funnel & Retention Tab ── */}
+        <TabsContent value="funnel" className="mt-0">
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* Conversion Funnel */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">🎯 Funil de Conversão</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {funnelData.map((stage, i) => {
+                    const maxVal = funnelData[0]?.count || 1;
+                    const pct = maxVal > 0 ? (stage.count / maxVal) * 100 : 0;
+                    const prevPct = i > 0 && funnelData[i - 1].count > 0
+                      ? ((stage.count / funnelData[i - 1].count) * 100).toFixed(0)
+                      : null;
+                    const colors = ["primary", "secondary", "primary", "warning"];
+                    return (
+                      <div key={stage.stage} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">{stage.stage}</span>
+                          <span className="font-semibold text-foreground">
+                            {stage.count}
+                            <span className="text-xs text-muted-foreground ml-1">
+                              ({pct.toFixed(0)}%{prevPct ? ` · ${prevPct}% da etapa anterior` : ""})
+                            </span>
+                          </span>
+                        </div>
+                        <div className="h-4 rounded-full bg-muted overflow-hidden">
+                          <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.max(pct, 2)}%`, background: `hsl(var(--${colors[i]}) / ${1 - i * 0.15})` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Retention */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">🔁 Retenção de Pacientes</CardTitle></CardHeader>
+              <CardContent>
+                <div className="h-48 sm:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={retentionData} layout="vertical">
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis type="number" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <YAxis type="category" dataKey="name" fontSize={10} width={110} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <Tooltip contentStyle={ts} />
+                      <Bar dataKey="value" name="Pacientes" radius={[0, 6, 6, 0]}>
+                        {retentionData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* ── Heatmap Tab ── */}
+        <TabsContent value="heatmap" className="mt-0">
+          <Card className="border-border">
+            <CardHeader><CardTitle className="text-base sm:text-lg">🗓️ Mapa de Calor — Horários de Pico (90 dias)</CardTitle></CardHeader>
+            <CardContent>
+              <div className="overflow-x-auto">
+                <div className="min-w-[600px]">
+                  {/* Hour labels */}
+                  <div className="flex ml-12 mb-1">
+                    {Array.from({ length: 17 }, (_, i) => i + 6).map(h => (
+                      <div key={h} className="flex-1 text-center text-[10px] text-muted-foreground">{h}h</div>
+                    ))}
                   </div>
-                  <div className="h-3 rounded-full bg-muted overflow-hidden">
-                    <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.max(pct, 2)}%`, background: `hsl(var(--${colors[i]}) / ${1 - i * 0.15})` }} />
+                  {/* Grid rows */}
+                  {DAYS.map((dayName, dayIdx) => (
+                    <div key={dayName} className="flex items-center gap-1 mb-1">
+                      <span className="w-10 text-xs text-muted-foreground text-right pr-1">{dayName}</span>
+                      {Array.from({ length: 17 }, (_, i) => i + 6).map(h => {
+                        const cell = heatmapData.find(c => c.y === dayIdx && c.x === h);
+                        const count = cell?.count ?? 0;
+                        const maxCount = Math.max(...heatmapData.map(c => c.count), 1);
+                        const intensity = count / maxCount;
+                        return (
+                          <div
+                            key={h}
+                            className="flex-1 aspect-square rounded-sm transition-colors cursor-default"
+                            style={{
+                              backgroundColor: count === 0
+                                ? "hsl(var(--muted) / 0.3)"
+                                : `hsl(var(--primary) / ${0.15 + intensity * 0.85})`,
+                            }}
+                            title={`${dayName} ${h}h: ${count} consulta${count !== 1 ? "s" : ""}`}
+                          />
+                        );
+                      })}
+                    </div>
+                  ))}
+                  {/* Legend */}
+                  <div className="flex items-center justify-end gap-2 mt-3">
+                    <span className="text-[10px] text-muted-foreground">Menos</span>
+                    {[0.15, 0.35, 0.55, 0.75, 1].map((op, i) => (
+                      <div key={i} className="w-4 h-4 rounded-sm" style={{ backgroundColor: `hsl(var(--primary) / ${op})` }} />
+                    ))}
+                    <span className="text-[10px] text-muted-foreground">Mais</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
 
-      {/* Retention */}
-      <Card className="border-border">
-        <CardHeader><CardTitle className="text-base sm:text-lg">🔁 Retenção de Pacientes</CardTitle></CardHeader>
-        <CardContent>
-          <div className="h-48 sm:h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={retentionData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis type="number" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis type="category" dataKey="name" fontSize={10} width={110} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip contentStyle={ts} />
-                <Bar dataKey="value" name="Pacientes" radius={[0, 6, 6, 0]}>
-                  {retentionData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Revenue */}
-      <Card className="border-border">
-        <CardHeader><CardTitle className="text-base sm:text-lg">💰 Receita Mensal (MRR)</CardTitle></CardHeader>
-        <CardContent>
-          <div className="h-48 sm:h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={revenueData}>
-                <defs>
-                  <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--secondary))" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `R$${v}`} />
-                <Tooltip formatter={(value: number) => [`R$ ${value.toFixed(2)}`, "Receita"]} contentStyle={ts} />
-                <Area type="monotone" dataKey="revenue" stroke="hsl(var(--secondary))" fill="url(#revenueGrad)" strokeWidth={2} name="Receita" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Patient growth */}
-      <Card className="border-border">
-        <CardHeader><CardTitle className="text-base sm:text-lg">👥 Crescimento de Pacientes</CardTitle></CardHeader>
-        <CardContent>
-          <div className="h-48 sm:h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <ComposedChart data={patientGrowth}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="month" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip contentStyle={ts} />
-                <Bar dataKey="novos" fill="hsl(var(--primary) / 0.3)" name="Novos no mês" radius={[4, 4, 0, 0]} />
-                <Line type="monotone" dataKey="total" stroke="hsl(var(--primary))" strokeWidth={2} name="Total acumulado" dot={false} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Status pie */}
-      <Card className="border-border">
-        <CardHeader><CardTitle className="text-base sm:text-lg">📊 Status das Consultas</CardTitle></CardHeader>
-        <CardContent>
-          <div className="h-48 sm:h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={statusBreakdown} cx="50%" cy="50%" outerRadius={70} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} fontSize={10}>
-                  {statusBreakdown.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                </Pie>
-                <Tooltip contentStyle={ts} />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Specialty distribution */}
-      <Card className="border-border">
-        <CardHeader><CardTitle className="text-base sm:text-lg">🩺 Médicos por Especialidade</CardTitle></CardHeader>
-        <CardContent>
-          <div className="h-48 sm:h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={specialtyData} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis type="number" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                <YAxis type="category" dataKey="name" fontSize={10} width={100} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                <Tooltip contentStyle={ts} />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} name="Médicos" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
+        {/* ── NPS Tab ── */}
+        <TabsContent value="nps" className="mt-0">
+          <Card className="border-border">
+            <CardHeader><CardTitle className="text-base sm:text-lg">⭐ Tendência de NPS</CardTitle></CardHeader>
+            <CardContent>
+              {npsTrend.length === 0 ? (
+                <div className="text-center py-10">
+                  <p className="text-sm text-muted-foreground">Sem dados de NPS ainda. As avaliações aparecerão aqui.</p>
+                </div>
+              ) : (
+                <div className="h-48 sm:h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={npsTrend}>
+                      <defs>
+                        <linearGradient id="npsGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="hsl(var(--warning))" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis dataKey="date" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <YAxis domain={[0, 10]} fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                      <Tooltip contentStyle={ts} formatter={(v: number) => [v.toFixed(1), "NPS médio"]} />
+                      <Area type="monotone" dataKey="nps" stroke="hsl(var(--warning))" fill="url(#npsGrad)" strokeWidth={2} name="NPS" />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
