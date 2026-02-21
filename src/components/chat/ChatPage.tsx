@@ -4,9 +4,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MessageCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MessageCircle, ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { getDoctorNav } from "@/components/doctor/doctorNav";
+import { getPatientNav } from "@/components/patient/patientNav";
 import AppointmentChat from "./AppointmentChat";
 
 interface ChatConversation {
@@ -20,11 +24,17 @@ interface ChatConversation {
 
 const ChatPage = () => {
   const { user, roles } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [selected, setSelected] = useState<ChatConversation | null>(null);
   const [loading, setLoading] = useState(true);
 
   const isDoctor = roles.includes("doctor");
+  const forceRole = searchParams.get("role");
+  const activeRole = forceRole || (isDoctor ? "doctor" : "patient");
+  const nav = activeRole === "doctor" ? getDoctorNav("chat") : getPatientNav("chat");
+  const backHref = activeRole === "doctor" ? "/dashboard?role=doctor" : "/dashboard?role=patient";
 
   useEffect(() => { if (user) fetchConversations(); }, [user]);
 
@@ -100,10 +110,13 @@ const ChatPage = () => {
   };
 
   return (
-    <DashboardLayout title={isDoctor ? "Médico" : "Paciente"} nav={[]}>
+    <DashboardLayout title={activeRole === "doctor" ? "Médico" : "Paciente"} nav={nav} role={activeRole}>
       <div className="max-w-4xl">
+        <Button variant="ghost" size="sm" onClick={() => navigate(backHref)} className="mb-4 gap-2">
+          <ArrowLeft className="w-4 h-4" /> Voltar ao Painel
+        </Button>
         <h1 className="text-2xl font-bold text-foreground mb-1">Mensagens</h1>
-        <p className="text-muted-foreground mb-6">Converse com {isDoctor ? "seus pacientes" : "seus médicos"}</p>
+        <p className="text-muted-foreground mb-6">Converse com {activeRole === "doctor" ? "seus pacientes" : "seus médicos"}</p>
 
         <div className="grid md:grid-cols-[300px_1fr] gap-4">
           {/* Conversations list */}

@@ -1,4 +1,4 @@
-import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle } from "lucide-react";
+import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal } from "lucide-react";
 
 export const getAdminNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview" },
@@ -16,4 +16,5 @@ export const getAdminNav = (active: string) => [
   { label: "Códigos de Convite", href: "/dashboard/admin/invite-codes", icon: <KeyRound className="w-4 h-4" />, active: active === "invite-codes" },
   { label: "Histórico", href: "/dashboard/admin/logs", icon: <History className="w-4 h-4" />, active: active === "logs" },
   { label: "WhatsApp", href: "/dashboard/admin/whatsapp", icon: <MessageCircle className="w-4 h-4" />, active: active === "whatsapp" },
+  { label: "Configurações", href: "/dashboard/settings?role=admin", icon: <SlidersHorizontal className="w-4 h-4" />, active: active === "settings" },
 ];
