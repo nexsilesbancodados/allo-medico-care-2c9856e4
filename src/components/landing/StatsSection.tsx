@@ -1,13 +1,7 @@
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Users, Stethoscope, Star, Clock } from "lucide-react";
-
-const stats = [
-  { icon: Users, value: 12500, suffix: "+", label: "Pacientes atendidos" },
-  { icon: Stethoscope, value: 200, suffix: "+", label: "Médicos especialistas" },
-  { icon: Star, value: 4.9, suffix: "", label: "Nota média", decimals: 1 },
-  { icon: Clock, value: 15, suffix: "min", label: "Tempo médio de espera" },
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const AnimatedCounter = ({ value, suffix, decimals = 0 }: { value: number; suffix: string; decimals?: number }) => {
   const [count, setCount] = useState(0);
@@ -40,7 +34,50 @@ const AnimatedCounter = ({ value, suffix, decimals = 0 }: { value: number; suffi
   );
 };
 
+const fallbackStats = [
+  { icon: Users, value: 12500, suffix: "+", label: "Pacientes atendidos" },
+  { icon: Stethoscope, value: 200, suffix: "+", label: "Médicos especialistas" },
+  { icon: Star, value: 4.9, suffix: "", label: "Nota média", decimals: 1 },
+  { icon: Clock, value: 15, suffix: "min", label: "Tempo médio de espera" },
+];
+
 const StatsSection = () => {
+  const [stats, setStats] = useState(fallbackStats);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [patientsRes, specialtiesRes, appointmentsRes, npsRes] = await Promise.all([
+          supabase.from("profiles").select("id", { count: "exact", head: true }),
+          supabase.from("specialties").select("id", { count: "exact", head: true }),
+          supabase.from("appointments").select("id", { count: "exact", head: true }).eq("status", "completed"),
+          supabase.from("satisfaction_surveys").select("nps_score"),
+        ]);
+
+        const patients = patientsRes.count ?? 0;
+        const specialties = specialtiesRes.count ?? 0;
+        const appointments = appointmentsRes.count ?? 0;
+        const npsScores = npsRes.data ?? [];
+        const avgNps = npsScores.length > 0
+          ? npsScores.reduce((sum, s) => sum + s.nps_score, 0) / npsScores.length
+          : 0;
+
+        // Only update if we have meaningful data, otherwise keep fallbacks
+        if (patients > 10 || appointments > 5) {
+          setStats([
+            { icon: Users, value: patients, suffix: "+", label: "Pacientes atendidos" },
+            { icon: Stethoscope, value: specialties, suffix: "+", label: "Especialidades" },
+            { icon: Star, value: avgNps > 0 ? Math.round(avgNps * 10) / 10 : 4.9, suffix: "", label: "Nota média", decimals: 1 },
+            { icon: Clock, value: appointments, suffix: "+", label: "Consultas realizadas" },
+          ]);
+        }
+      } catch {
+        // Keep fallback stats
+      }
+    };
+    fetchStats();
+  }, []);
+
   return (
     <section className="py-8 md:py-16 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-hero opacity-[0.03]" />
@@ -60,7 +97,7 @@ const StatsSection = () => {
                 <stat.icon className="w-7 h-7 text-primary transition-transform duration-300 group-hover:scale-110" />
               </div>
               <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mb-1">
-                <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={stat.decimals} />
+                <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={(stat as any).decimals} />
               </p>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
             </motion.div>

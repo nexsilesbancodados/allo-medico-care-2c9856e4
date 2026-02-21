@@ -20,6 +20,9 @@ import {
 import BlobKPICard from "@/components/ui/blob-kpi-card";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import MedicalHistoryExport from "@/components/patient/MedicalHistoryExport";
+import CreditsWidget from "@/components/patient/CreditsWidget";
+import UpsellBanner from "@/components/patient/UpsellBanner";
+import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -265,31 +268,17 @@ const PatientDashboard = () => {
           </div>
         </motion.div>
 
-        {/* ── Live consultation alert ── */}
+        {/* ── Live consultation / Waiting Room ── */}
         {waitingAppt && (
           <motion.div variants={fadeUp}>
-            <Card className="border-primary/30 bg-gradient-to-r from-primary/8 to-secondary/8 overflow-hidden">
-              <CardContent className="p-3.5 flex items-center gap-3">
-                <div className="w-11 h-11 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0 animate-pulse">
-                  <Video className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">
-                    {waitingAppt.status === "in_progress" ? "🔴 Consulta em andamento" : "⏳ Sala de espera"}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">{waitingAppt.doctor_name}</p>
-                </div>
-                <Button
-                  size="sm"
-                  className="bg-primary text-primary-foreground shrink-0 rounded-xl h-9 px-4 text-xs font-semibold"
-                  onClick={() => navigate(`/dashboard/consultation/${waitingAppt.id}`)}
-                >
-                  Entrar →
-                </Button>
-              </CardContent>
-            </Card>
+            <PatientWaitingCard appointment={waitingAppt} />
           </motion.div>
         )}
+
+        {/* ── Upsell banner ── */}
+        <motion.div variants={fadeUp}>
+          <UpsellBanner />
+        </motion.div>
 
         {/* ── Quick Actions — 4 large touch targets ── */}
         <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2.5">
@@ -566,6 +555,11 @@ const PatientDashboard = () => {
             </Card>
           </motion.div>
         )}
+
+        {/* ── Credits widget ── */}
+        <motion.div variants={fadeUp}>
+          <CreditsWidget />
+        </motion.div>
 
         {/* ── Referral card ── */}
         {referralCode && (
