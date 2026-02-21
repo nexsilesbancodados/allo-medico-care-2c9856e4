@@ -59,7 +59,7 @@ const DoctorSearch = () => {
 
     const { data: doctorData } = await supabase
       .from("doctor_profiles")
-      .select("id, user_id, crm, crm_state, bio, consultation_price, rating, total_reviews, experience_years")
+      .select("id, user_id, crm, crm_state, bio, consultation_price, rating, total_reviews, experience_years, available_now, available_now_since")
       .eq("is_approved", true);
 
     if (!doctorData) { setLoading(false); return; }
@@ -108,20 +108,27 @@ const DoctorSearch = () => {
     setLoading(false);
   };
 
+  // Sort on-duty doctors first, then apply filters
   const filtered = doctors
     .filter(d => {
       const nameMatch = !search ||
         `${d.profile?.first_name} ${d.profile?.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
         d.crm.includes(search);
       const specMatch = !selectedSpecialty || d.specialties.some(s => s === selectedSpecialty);
-      const urgencyMatch = !isUrgency || availableNowIds.has(d.id);
+      const urgencyMatch = !isUrgency || availableNowIds.has(d.id) || (d as any).available_now;
       const priceMatch = d.consultation_price >= priceRange[0] && d.consultation_price <= priceRange[1];
       const ratingMatch = d.rating >= minRating;
       const availMatch = availabilityFilter === "all" ||
-        (availabilityFilter === "today" && availableNowIds.has(d.id));
+        (availabilityFilter === "today" && availableNowIds.has(d.id)) ||
+        (availabilityFilter === "on_duty" && (d as any).available_now);
       return nameMatch && specMatch && urgencyMatch && priceMatch && ratingMatch && availMatch;
     })
     .sort((a, b) => {
+      // On-duty doctors always come first
+      const aOnDuty = (a as any).available_now ? 1 : 0;
+      const bOnDuty = (b as any).available_now ? 1 : 0;
+      if (bOnDuty !== aOnDuty) return bOnDuty - aOnDuty;
+      
       if (sortBy === "rating") return b.rating - a.rating;
       if (sortBy === "price_asc") return a.consultation_price - b.consultation_price;
       if (sortBy === "price_desc") return b.consultation_price - a.consultation_price;
@@ -227,6 +234,7 @@ const DoctorSearch = () => {
                     <SelectContent>
                       <SelectItem value="all">Qualquer horário</SelectItem>
                       <SelectItem value="today">Atende hoje</SelectItem>
+                      <SelectItem value="on_duty">🟢 De plantão agora</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -307,7 +315,9 @@ const DoctorSearch = () => {
             {filtered.map(doctor => (
               <Card
                 key={doctor.id}
-                className="border-border hover:shadow-card transition-all duration-200 cursor-pointer active:scale-[0.99]"
+                className={`border-border hover:shadow-card transition-all duration-200 cursor-pointer active:scale-[0.99] ${
+                  (doctor as any).available_now ? "ring-2 ring-secondary/30 border-secondary/20" : ""
+                }`}
                 onClick={() => navigate(`/dashboard/schedule/${doctor.id}`)}
               >
                 <CardContent className="p-4 sm:p-5">
@@ -348,7 +358,12 @@ const DoctorSearch = () => {
                       )}
 
                       <div className="flex items-center gap-2 sm:gap-4 mt-2 sm:mt-3 flex-wrap">
-                        {availableNowIds.has(doctor.id) && (
+                        {(doctor as any).available_now && (
+                          <Badge className="bg-secondary text-secondary-foreground text-[10px] sm:text-xs gap-1 animate-pulse">
+                            <Zap className="w-3 h-3" /> De Plantão
+                          </Badge>
+                        )}
+                        {availableNowIds.has(doctor.id) && !(doctor as any).available_now && (
                           <Badge className="bg-secondary/10 text-secondary border-secondary/20 text-[10px] sm:text-xs gap-1">
                             <Zap className="w-3 h-3" /> Disponível agora
                           </Badge>

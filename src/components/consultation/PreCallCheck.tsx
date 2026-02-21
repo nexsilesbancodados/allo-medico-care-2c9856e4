@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import mascotImg from "@/assets/mascot-wave.png";
 import { format, differenceInSeconds } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import PreConsultationForm from "@/components/patient/PreConsultationForm";
 
 interface PreCallCheckProps {
   appointmentId?: string;
@@ -46,6 +47,21 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<WaitingMessage[]>([]);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const [symptomsSubmitted, setSymptomsSubmitted] = useState(false);
+  const [showSymptomForm, setShowSymptomForm] = useState(false);
+
+  // Check if symptoms already submitted
+  useEffect(() => {
+    if (!appointmentId || isDoctor) return;
+    supabase.from("pre_consultation_symptoms")
+      .select("id")
+      .eq("appointment_id", appointmentId)
+      .limit(1)
+      .then(({ data }) => {
+        if (data && data.length > 0) setSymptomsSubmitted(true);
+        else setShowSymptomForm(true);
+      });
+  }, [appointmentId, isDoctor]);
 
   // Countdown timer
   useEffect(() => {
@@ -450,6 +466,25 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
               )}
             </AnimatePresence>
           </div>
+        )}
+
+        {/* Pre-consultation questionnaire (patient only) */}
+        {!isDoctor && appointmentId && showSymptomForm && !symptomsSubmitted && (
+          <PreConsultationForm
+            appointmentId={appointmentId}
+            onComplete={() => { setSymptomsSubmitted(true); setShowSymptomForm(false); }}
+          />
+        )}
+        {!isDoctor && symptomsSubmitted && (
+          <Card className="border-secondary/20 bg-secondary/5">
+            <CardContent className="p-3 flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-secondary shrink-0" />
+              <div>
+                <p className="text-sm font-medium text-secondary">Sintomas enviados ✅</p>
+                <p className="text-xs text-muted-foreground">O médico terá acesso aos seus sintomas.</p>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Quick tips */}

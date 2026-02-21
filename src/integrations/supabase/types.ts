@@ -422,6 +422,8 @@ export type Database = {
       }
       doctor_profiles: {
         Row: {
+          available_now: boolean
+          available_now_since: string | null
           bio: string | null
           consultation_price: number | null
           created_at: string
@@ -441,6 +443,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          available_now?: boolean
+          available_now_since?: string | null
           bio?: string | null
           consultation_price?: number | null
           created_at?: string
@@ -460,6 +464,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          available_now?: boolean
+          available_now_since?: string | null
           bio?: string | null
           consultation_price?: number | null
           created_at?: string
@@ -884,6 +890,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      pre_consultation_symptoms: {
+        Row: {
+          additional_notes: string | null
+          appointment_id: string
+          created_at: string
+          duration: string | null
+          id: string
+          main_complaint: string
+          patient_id: string
+          severity: string | null
+          symptoms: string[] | null
+        }
+        Insert: {
+          additional_notes?: string | null
+          appointment_id: string
+          created_at?: string
+          duration?: string | null
+          id?: string
+          main_complaint: string
+          patient_id: string
+          severity?: string | null
+          symptoms?: string[] | null
+        }
+        Update: {
+          additional_notes?: string | null
+          appointment_id?: string
+          created_at?: string
+          duration?: string | null
+          id?: string
+          main_complaint?: string
+          patient_id?: string
+          severity?: string | null
+          symptoms?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pre_consultation_symptoms_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       prescription_validations: {
         Row: {
