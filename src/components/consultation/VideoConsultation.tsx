@@ -19,7 +19,13 @@ const JITSI_DOMAIN = "meet.jit.si";
 const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsultationProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const apiRef = useRef<any>(null);
+  const onEndCallRef = useRef(onEndCall);
   const [loading, setLoading] = useState(true);
+
+  // Keep ref in sync without triggering effect
+  useEffect(() => {
+    onEndCallRef.current = onEndCall;
+  }, [onEndCall]);
 
   useEffect(() => {
     const loadJitsiScript = (): Promise<void> => {
@@ -97,7 +103,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
         });
 
         apiRef.current.addListener("readyToClose", () => {
-          onEndCall();
+          onEndCallRef.current();
         });
       } catch (error) {
         console.error("[Jitsi] Error initializing:", error);
@@ -113,7 +119,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
         apiRef.current = null;
       }
     };
-  }, [appointmentId, userName, onEndCall]);
+  }, [appointmentId, userName]);
 
   return (
     <div className="flex flex-col w-full h-full">
