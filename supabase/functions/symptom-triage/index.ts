@@ -10,17 +10,17 @@ serve(async (req) => {
 
   try {
     const { symptoms } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
+    if (!DEEPSEEK_API_KEY) throw new Error("DEEPSEEK_API_KEY não configurada");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "deepseek-chat",
         messages: [
           {
             role: "system",
@@ -36,26 +36,8 @@ NUNCA faça diagnóstico. Apenas sugira a especialidade mais adequada.`,
             content: `Sintomas do paciente: ${symptoms}`,
           },
         ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "suggest_specialty",
-              description: "Suggest a medical specialty based on symptoms",
-              parameters: {
-                type: "object",
-                properties: {
-                  specialty: { type: "string", description: "Medical specialty name" },
-                  reason: { type: "string", description: "Short explanation" },
-                  urgency: { type: "string", enum: ["low", "medium", "high"] },
-                },
-                required: ["specialty", "reason", "urgency"],
-                additionalProperties: false,
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "suggest_specialty" } },
+        temperature: 0.2,
+        max_tokens: 200,
       }),
     });
 
@@ -65,30 +47,21 @@ NUNCA faça diagnóstico. Apenas sugira a especialidade mais adequada.`,
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Credits required" }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
       const t = await response.text();
-      console.error("AI error:", response.status, t);
-      throw new Error("AI gateway error");
+      console.error("DeepSeek error:", response.status, t);
+      throw new Error("DeepSeek API error");
     }
 
     const data = await response.json();
-    const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+    const content = data.choices?.[0]?.message?.content || "";
     
     let result;
-    if (toolCall?.function?.arguments) {
-      result = JSON.parse(toolCall.function.arguments);
-    } else {
-      // Fallback: try parsing content directly
-      const content = data.choices?.[0]?.message?.content || "";
-      try {
-        result = JSON.parse(content);
-      } catch {
-        result = { specialty: "Clínico Geral", reason: "Recomendamos uma avaliação geral.", urgency: "low" };
-      }
+    try {
+      // Try to parse JSON from the response content
+      const jsonMatch = content.match(/\{[\s\S]*\}/);
+      result = jsonMatch ? JSON.parse(jsonMatch[0]) : { specialty: "Clínico Geral", reason: "Recomendamos uma avaliação geral.", urgency: "low" };
+    } catch {
+      result = { specialty: "Clínico Geral", reason: "Recomendamos uma avaliação geral.", urgency: "low" };
     }
 
     return new Response(JSON.stringify(result), {
