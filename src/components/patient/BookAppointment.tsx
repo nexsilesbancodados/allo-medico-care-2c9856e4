@@ -52,8 +52,17 @@ const BookAppointment = () => {
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
+  const [dependents, setDependents] = useState<{ id: string; name: string; relationship: string }[]>([]);
+  const [bookingFor, setBookingFor] = useState<string>("self"); // "self" or dependent id
 
   const currentStep = !selectedDate ? 0 : !selectedTime ? 1 : 2;
+
+  useEffect(() => {
+    if (user) {
+      supabase.from("dependents").select("id, name, relationship").eq("user_id", user.id)
+        .then(({ data }) => setDependents(data ?? []));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (doctorId) fetchDoctor();
@@ -148,12 +157,16 @@ const BookAppointment = () => {
     const [h, m] = selectedTime.split(":").map(Number);
     const scheduledAt = setMinutes(setHours(new Date(selectedDate), h), m);
 
+    const dependentInfo = bookingFor !== "self" ? dependents.find(d => d.id === bookingFor) : null;
+    const notesText = dependentInfo ? `Consulta para dependente: ${dependentInfo.name} (${dependentInfo.relationship})` : null;
+
     const { data: insertedAppt, error } = await supabase.from("appointments").insert({
       patient_id: user.id,
       doctor_id: doctor.id,
       scheduled_at: scheduledAt.toISOString(),
       status: "scheduled",
       appointment_type: appointmentType,
+      notes: notesText,
     }).select("id").single();
 
     setBooking(false);
@@ -327,6 +340,25 @@ const BookAppointment = () => {
                     <CheckCircle2 className="w-5 h-5 text-primary" />
                     Confirmar Agendamento
                   </h3>
+
+                  {/* Dependent selection */}
+                  {dependents.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs text-muted-foreground mb-1">Para quem é a consulta?</p>
+                      <Select value={bookingFor} onValueChange={setBookingFor}>
+                        <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="self"><span className="flex items-center gap-2"><UserPlus className="w-3 h-3" /> Para mim</span></SelectItem>
+                          {dependents.map(dep => (
+                            <SelectItem key={dep.id} value={dep.id}>
+                              <span className="flex items-center gap-2"><UserCheck className="w-3 h-3" /> {dep.name} ({dep.relationship})</span>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+
                   <div className="mb-3">
                     <p className="text-xs text-muted-foreground mb-1">Tipo de Consulta</p>
                     <Select value={appointmentType} onValueChange={setAppointmentType}>

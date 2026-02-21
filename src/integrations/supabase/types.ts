@@ -1489,6 +1489,36 @@ export type Database = {
         }
         Relationships: []
       }
+      symptom_diary: {
+        Row: {
+          created_at: string
+          entry_date: string
+          id: string
+          mood: string
+          notes: string | null
+          patient_id: string
+          symptoms: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood?: string
+          notes?: string | null
+          patient_id: string
+          symptoms?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          entry_date?: string
+          id?: string
+          mood?: string
+          notes?: string | null
+          patient_id?: string
+          symptoms?: string[] | null
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           amount: number

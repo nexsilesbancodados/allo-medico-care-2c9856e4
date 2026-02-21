@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star, BarChart2, Activity, RefreshCw, Gift, Share2, Copy, ClipboardList } from "lucide-react";
+import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star, BarChart2, Activity, RefreshCw, Gift, Share2, Copy, ClipboardList, Stethoscope, Smile } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import BlobKPICard from "@/components/ui/blob-kpi-card";
 import Sparkline from "@/components/ui/sparkline";
@@ -46,6 +46,7 @@ const PatientDashboard = () => {
   const [credits, setCredits] = useState(0);
   const [returnAppts, setReturnAppts] = useState<any[]>([]);
   const [carePlan, setCarePlan] = useState<any | null>(null);
+  const [favDoctors, setFavDoctors] = useState<any[]>([]);
   const now = new Date();
 
   useEffect(() => { if (user) fetchData(); }, [user]);
@@ -178,6 +179,23 @@ const PatientDashboard = () => {
           if (p) docName = `Dr(a). ${p.first_name} ${p.last_name}`;
         }
         setCarePlan({ content: noteData.content, doctor: docName, date: latestCompleted.scheduled_at });
+      }
+    }
+
+    // Fetch favorite doctors
+    const { data: favData } = await supabase.from("favorite_doctors").select("doctor_id").eq("patient_id", user!.id);
+    if (favData && favData.length > 0) {
+      const favDocIds = favData.map(f => f.doctor_id);
+      const { data: favDocs } = await supabase.from("doctor_profiles").select("id, user_id, consultation_price, rating").in("id", favDocIds);
+      if (favDocs) {
+        const favUserIds = favDocs.map(d => d.user_id);
+        const { data: favProfiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", favUserIds);
+        const { data: favSpecs } = await supabase.from("doctor_specialties").select("doctor_id, specialties(name)").in("doctor_id", favDocIds);
+        setFavDoctors(favDocs.map(d => {
+          const p = favProfiles?.find(pr => pr.user_id === d.user_id);
+          const specs = favSpecs?.filter((s: any) => s.doctor_id === d.id).map((s: any) => s.specialties?.name).filter(Boolean) ?? [];
+          return { ...d, name: p ? `Dr(a). ${p.first_name} ${p.last_name}` : "Médico", specs };
+        }));
       }
     }
   };
@@ -424,6 +442,58 @@ const PatientDashboard = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Meus Médicos Favoritos */}
+            {favDoctors.length > 0 && (
+              <Card className="border-border/50">
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Stethoscope className="w-4 h-4 text-primary" />
+                      <p className="text-sm font-semibold text-foreground">Meus Médicos</p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="text-xs text-primary h-6" onClick={() => navigate("/dashboard/doctors")}>
+                      Ver todos →
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {favDoctors.slice(0, 3).map(doc => (
+                      <div key={doc.id} className="flex items-center justify-between p-2.5 rounded-xl border border-border/40 hover:bg-muted/30 transition-colors">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary shrink-0">
+                            {doc.name.charAt(6) || "M"}
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{doc.name}</p>
+                            <p className="text-[10px] text-muted-foreground truncate">
+                              {doc.specs.join(", ") || "Clínico Geral"}
+                              {doc.rating > 0 && ` · ⭐ ${Number(doc.rating).toFixed(1)}`}
+                            </p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="outline" className="text-xs h-7 shrink-0" onClick={() => navigate(`/dashboard/schedule/${doc.id}`)}>
+                          Agendar
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Symptom diary shortcut */}
+            <Card className="border-border/50 hover:shadow-md transition-all cursor-pointer hover:-translate-y-0.5" onClick={() => navigate("/dashboard/patient/diary")}>
+              <CardContent className="p-4 flex items-center gap-4">
+                <div className="w-11 h-11 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+                  <Smile className="w-5 h-5 text-accent-foreground" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">Diário de Sintomas</p>
+                  <p className="text-xs text-muted-foreground">Registre como você está se sentindo hoje</p>
+                </div>
+                <span className="text-lg">📝</span>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* ══ Consultas ══ */}

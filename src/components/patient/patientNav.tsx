@@ -1,4 +1,4 @@
-import { Calendar, FileText, Users, CreditCard, User, Search, Clock, Upload, Heart, History, MessageCircle, ClipboardList, SlidersHorizontal, Headphones } from "lucide-react";
+import { Calendar, FileText, Users, CreditCard, User, Search, Clock, Upload, Heart, History, MessageCircle, ClipboardList, SlidersHorizontal, Headphones, Smile } from "lucide-react";
 
 export const getPatientNav = (active: string) => [
   { label: "Início", href: "/dashboard?role=patient", icon: <Heart className="w-4 h-4" />, active: active === "home" },
@@ -9,6 +9,7 @@ export const getPatientNav = (active: string) => [
   { label: "Suporte", href: "/dashboard/patient/support", icon: <Headphones className="w-4 h-4" />, active: active === "support" },
   { label: "Prontuário", href: "/dashboard/medical-records", icon: <ClipboardList className="w-4 h-4" />, active: active === "medical-records" },
   { label: "Minha Saúde", href: "/dashboard/patient/health", icon: <FileText className="w-4 h-4" />, active: active === "health" },
+  { label: "Diário", href: "/dashboard/patient/diary", icon: <Smile className="w-4 h-4" />, active: active === "diary" },
   { label: "Meus Exames", href: "/dashboard/patient/documents", icon: <Upload className="w-4 h-4" />, active: active === "documents" },
   { label: "Pagamentos", href: "/dashboard/payment-history", icon: <CreditCard className="w-4 h-4" />, active: active === "payments" },
   { label: "Dependentes", href: "/dashboard/patient/dependents", icon: <Users className="w-4 h-4" />, active: active === "dependents" },
