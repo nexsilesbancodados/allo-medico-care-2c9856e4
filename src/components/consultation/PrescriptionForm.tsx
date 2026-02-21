@@ -372,13 +372,36 @@ const PrescriptionForm = () => {
     if (error) {
       toast({ title: "Erro ao salvar receita", description: error.message, variant: "destructive" });
     } else {
-      // Send notification to patient
+      // Send prescription via email + WhatsApp
+      const doctorFullName = `Dr(a). ${doctorInfo?.first_name} ${doctorInfo?.last_name}`;
+      supabase.functions.invoke("send-prescription", {
+        body: {
+          appointment_id: appointmentId,
+          doctor_name: doctorFullName,
+          patient_name: patientName,
+          medications: validMeds.map(m => ({ name: m.name, dosage: m.dosage, frequency: m.frequency })),
+          diagnosis: diagnosis || undefined,
+        },
+      }).then(({ data, error: sendErr }) => {
+        if (sendErr) {
+          console.error("Send prescription notification error:", sendErr);
+        } else {
+          const sentEmail = data?.sent_to?.email;
+          const sentWhatsapp = data?.sent_to?.whatsapp;
+          const channels = [sentEmail && "e-mail", sentWhatsapp && "WhatsApp"].filter(Boolean).join(" e ");
+          if (channels) {
+            toast({ title: `📩 Receita enviada por ${channels}` });
+          }
+        }
+      }).catch(console.error);
+
+      // Send push notification
       if (patientId) {
         supabase.functions.invoke("send-push-notification", {
           body: {
             user_id: patientId,
             title: "Nova Receita Médica 💊",
-            message: `Dr(a). ${doctorInfo?.first_name} ${doctorInfo?.last_name} emitiu uma receita para você.`,
+            message: `${doctorFullName} emitiu uma receita para você.`,
             link: "/dashboard/medical-history",
           },
         }).catch(console.error);

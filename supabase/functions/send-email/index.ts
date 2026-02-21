@@ -53,8 +53,10 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
         <h2 style="color:#1a6fc4;">Nova Receita Médica</h2>
         <p>Olá <strong>${d.patient_name}</strong>,</p>
         <p>O(a) <strong>${d.doctor_name}</strong> emitiu uma nova receita para você.</p>
-        <p>Acesse a plataforma para visualizar e baixar sua receita em PDF.</p>
-        <p style="color:#666;font-size:12px;">AloClinica — Telemedicina</p>
+        ${d.diagnosis ? `<div style="background:#fff8f0;padding:12px;border-radius:8px;margin:12px 0;"><strong>Diagnóstico:</strong> ${d.diagnosis}</div>` : ""}
+        ${d.medications ? `<div style="background:white;padding:16px;border-radius:8px;margin:16px 0;border:1px solid #e2e8f0;"><strong>Medicamentos:</strong><pre style="white-space:pre-wrap;font-family:sans-serif;font-size:14px;margin-top:8px;">${d.medications}</pre></div>` : ""}
+        <p>Acesse a plataforma para visualizar e baixar sua receita completa em PDF.</p>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
       </div>
     `,
   }),
