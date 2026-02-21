@@ -169,6 +169,7 @@ export type Database = {
       clinic_affiliations: {
         Row: {
           clinic_id: string
+          commission_percent: number
           created_at: string
           doctor_id: string
           id: string
@@ -176,6 +177,7 @@ export type Database = {
         }
         Insert: {
           clinic_id: string
+          commission_percent?: number
           created_at?: string
           doctor_id: string
           id?: string
@@ -183,6 +185,7 @@ export type Database = {
         }
         Update: {
           clinic_id?: string
+          commission_percent?: number
           created_at?: string
           doctor_id?: string
           id?: string
@@ -1256,6 +1259,30 @@ export type Database = {
           status?: string
           subject?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_presence: {
+        Row: {
+          current_page: string | null
+          id: string
+          is_online: boolean
+          last_seen_at: string
+          user_id: string
+        }
+        Insert: {
+          current_page?: string | null
+          id?: string
+          is_online?: boolean
+          last_seen_at?: string
+          user_id: string
+        }
+        Update: {
+          current_page?: string | null
+          id?: string
+          is_online?: boolean
+          last_seen_at?: string
+          user_id?: string
         }
         Relationships: []
       }

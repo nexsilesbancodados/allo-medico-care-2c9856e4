@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, Routes, Route, useSearchParams } from "react-router-dom";
+import { usePresence } from "@/hooks/use-presence";
 import PatientDashboard from "@/components/dashboards/PatientDashboard";
 import DoctorDashboard from "@/components/dashboards/DoctorDashboard";
 import ClinicDashboard from "@/components/dashboards/ClinicDashboard";
@@ -65,6 +66,7 @@ const Dashboard = () => {
   const { user, roles, loading } = useAuth();
   const [searchParams] = useSearchParams();
   const forceRole = searchParams.get("role");
+  usePresence();
 
   if (loading) {
     return (

@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
-import { Users, Calendar, BarChart3, Settings, Plus, Check, X, Search } from "lucide-react";
+import { Users, Calendar, BarChart3, Settings, Plus, Check, X, Search, Mail, MessageCircle, Percent } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -33,30 +35,38 @@ interface ClinicDoctor {
   crm: string;
   crm_state: string;
   specialties: string[];
+  commission_percent: number;
 }
 
 const ClinicDoctorsManagement = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [clinicProfileId, setClinicProfileId] = useState<string | null>(null);
+  const [clinicName, setClinicName] = useState("");
   const [doctors, setDoctors] = useState<ClinicDoctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchCrm, setSearchCrm] = useState("");
   const [searchResult, setSearchResult] = useState<any>(null);
   const [searching, setSearching] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [commissionDialogOpen, setCommissionDialogOpen] = useState(false);
+  const [editingDoctor, setEditingDoctor] = useState<ClinicDoctor | null>(null);
+  const [commissionValue, setCommissionValue] = useState(70);
 
   useEffect(() => { if (user) fetchClinicProfile(); }, [user]);
 
   const fetchClinicProfile = async () => {
     const { data } = await supabase
       .from("clinic_profiles")
-      .select("id")
+      .select("id, name")
       .eq("user_id", user!.id)
       .single();
 
     if (data) {
       setClinicProfileId(data.id);
+      setClinicName(data.name);
       fetchDoctors(data.id);
     }
     setLoading(false);
@@ -65,7 +75,7 @@ const ClinicDoctorsManagement = () => {
   const fetchDoctors = async (clinicId: string) => {
     const { data: affiliations } = await supabase
       .from("clinic_affiliations")
-      .select("id, doctor_id, status")
+      .select("id, doctor_id, status, commission_percent")
       .eq("clinic_id", clinicId);
 
     if (!affiliations || affiliations.length === 0) {
@@ -105,6 +115,7 @@ const ClinicDoctorsManagement = () => {
         crm: doc?.crm ?? "",
         crm_state: doc?.crm_state ?? "",
         specialties: specMap.get(a.doctor_id) ?? [],
+        commission_percent: (a as any).commission_percent ?? 70,
       };
     });
 
@@ -167,6 +178,41 @@ const ClinicDoctorsManagement = () => {
     if (clinicProfileId) fetchDoctors(clinicProfileId);
   };
 
+  const sendInviteEmail = async () => {
+    if (!inviteEmail.trim()) return;
+    try {
+      await supabase.functions.invoke("send-email", {
+        body: {
+          to: inviteEmail,
+          subject: `Convite para atender na ${clinicName}`,
+          html: `<p>Você foi convidado para atender na clínica <strong>${clinicName}</strong> na plataforma Allo Médico.</p><p>Cadastre-se em: <a href="${window.location.origin}/medico">${window.location.origin}/medico</a></p>`,
+        },
+      });
+      toast({ title: "Convite enviado por e-mail! 📧" });
+      setInviteEmail("");
+      setInviteDialogOpen(false);
+    } catch {
+      toast({ title: "Erro ao enviar convite", variant: "destructive" });
+    }
+  };
+
+  const sendInviteWhatsApp = () => {
+    const msg = encodeURIComponent(
+      `Olá! Você foi convidado para atender na clínica ${clinicName} na plataforma Allo Médico. Cadastre-se em: ${window.location.origin}/medico`
+    );
+    window.open(`https://wa.me/?text=${msg}`, "_blank");
+  };
+
+  const saveCommission = async () => {
+    if (!editingDoctor) return;
+    await supabase.from("clinic_affiliations")
+      .update({ commission_percent: commissionValue } as any)
+      .eq("id", editingDoctor.affiliation_id);
+    toast({ title: `Repasse atualizado: ${commissionValue}% para o médico` });
+    setCommissionDialogOpen(false);
+    if (clinicProfileId) fetchDoctors(clinicProfileId);
+  };
+
   const statusConfig: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
     pending: { label: "Pendente", variant: "outline" },
     active: { label: "Ativo", variant: "default" },
@@ -181,49 +227,71 @@ const ClinicDoctorsManagement = () => {
             <h1 className="text-2xl font-bold text-foreground">Médicos Vinculados</h1>
             <p className="text-muted-foreground">Gerencie os médicos da sua clínica</p>
           </div>
-
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-gradient-hero text-primary-foreground">
-                <Plus className="w-4 h-4 mr-1" /> Adicionar Médico
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Adicionar Médico</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Buscar por CRM..."
-                    value={searchCrm}
-                    onChange={e => setSearchCrm(e.target.value)}
-                  />
-                  <Button onClick={searchDoctor} disabled={searching}>
-                    <Search className="w-4 h-4" />
-                  </Button>
+          <div className="flex gap-2">
+            {/* Invite button */}
+            <Dialog open={inviteDialogOpen} onOpenChange={setInviteDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Mail className="w-4 h-4 mr-1" /> Convidar
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Convidar Médico</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Envie um convite para um médico se cadastrar e atender pela sua clínica.</p>
+                  <div>
+                    <Label>E-mail do médico</Label>
+                    <Input value={inviteEmail} onChange={e => setInviteEmail(e.target.value)} placeholder="medico@email.com" className="mt-1" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={sendInviteEmail} className="flex-1" disabled={!inviteEmail.trim()}>
+                      <Mail className="w-4 h-4 mr-1" /> Enviar por E-mail
+                    </Button>
+                    <Button variant="outline" onClick={sendInviteWhatsApp} className="flex-1">
+                      <MessageCircle className="w-4 h-4 mr-1" /> WhatsApp
+                    </Button>
+                  </div>
                 </div>
+              </DialogContent>
+            </Dialog>
 
-                {searchResult && (
-                  <Card className="border-border">
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-foreground">
-                          Dr(a). {searchResult.first_name} {searchResult.last_name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          CRM {searchResult.crm}/{searchResult.crm_state}
-                        </p>
-                      </div>
-                      <Button onClick={addDoctor} size="sm" className="bg-gradient-hero text-primary-foreground">
-                        <Plus className="w-4 h-4 mr-1" /> Vincular
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </DialogContent>
-          </Dialog>
+            {/* Add by CRM */}
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-gradient-hero text-primary-foreground">
+                  <Plus className="w-4 h-4 mr-1" /> Adicionar por CRM
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Adicionar Médico</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <Input placeholder="Buscar por CRM..." value={searchCrm} onChange={e => setSearchCrm(e.target.value)} />
+                    <Button onClick={searchDoctor} disabled={searching}>
+                      <Search className="w-4 h-4" />
+                    </Button>
+                  </div>
+                  {searchResult && (
+                    <Card className="border-border">
+                      <CardContent className="p-4 flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-foreground">Dr(a). {searchResult.first_name} {searchResult.last_name}</p>
+                          <p className="text-sm text-muted-foreground">CRM {searchResult.crm}/{searchResult.crm_state}</p>
+                        </div>
+                        <Button onClick={addDoctor} size="sm" className="bg-gradient-hero text-primary-foreground">
+                          <Plus className="w-4 h-4 mr-1" /> Vincular
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {loading ? (
@@ -253,11 +321,18 @@ const ClinicDoctorsManagement = () => {
                         {doc.specialties.map(s => <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>)}
                       </div>
                     )}
+                    <div className="flex items-center gap-1 mt-1">
+                      <Percent className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">Repasse: <strong className="text-foreground">{doc.commission_percent}%</strong> médico / <strong className="text-foreground">{100 - doc.commission_percent}%</strong> clínica</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Badge variant={statusConfig[doc.status]?.variant ?? "outline"}>
                       {statusConfig[doc.status]?.label ?? doc.status}
                     </Badge>
+                    <Button size="sm" variant="ghost" onClick={() => { setEditingDoctor(doc); setCommissionValue(doc.commission_percent); setCommissionDialogOpen(true); }}>
+                      <Percent className="w-4 h-4 text-primary" />
+                    </Button>
                     {doc.status === "pending" && (
                       <Button size="sm" variant="ghost" onClick={() => updateStatus(doc.affiliation_id, "active")}>
                         <Check className="w-4 h-4 text-secondary" />
@@ -274,6 +349,36 @@ const ClinicDoctorsManagement = () => {
             ))}
           </div>
         )}
+
+        {/* Commission dialog */}
+        <Dialog open={commissionDialogOpen} onOpenChange={setCommissionDialogOpen}>
+          <DialogContent className="max-w-sm">
+            <DialogHeader>
+              <DialogTitle>Configurar Repasse</DialogTitle>
+            </DialogHeader>
+            {editingDoctor && (
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Dr(a). {editingDoctor.first_name} {editingDoctor.last_name}
+                </p>
+                <div>
+                  <Label>Repasse para o médico: <strong>{commissionValue}%</strong></Label>
+                  <Slider
+                    value={[commissionValue]}
+                    onValueChange={v => setCommissionValue(v[0])}
+                    min={0} max={100} step={5}
+                    className="mt-3"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>Clínica retém: {100 - commissionValue}%</span>
+                    <span>Médico recebe: {commissionValue}%</span>
+                  </div>
+                </div>
+                <Button onClick={saveCommission} className="w-full">Salvar Repasse</Button>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

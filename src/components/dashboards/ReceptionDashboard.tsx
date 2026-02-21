@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComp } from "@/components/ui/calendar";
-import { Calendar, Clock, CheckCircle, Video, Search, Download, RefreshCw, Filter, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, Clock, CheckCircle, Video, Search, Download, RefreshCw, Filter, FileText, ChevronLeft, ChevronRight, Bell, Send } from "lucide-react";
 import { format, addDays, subDays, startOfDay, endOfDay, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -185,6 +185,50 @@ const ReceptionDashboard = () => {
             </div>
           </div>
           <div className="flex gap-2 shrink-0 flex-wrap">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                const tomorrow = addDays(new Date(), 1);
+                const tomorrowAppts = todayAppts.length > 0 ? todayAppts : [];
+                // Fetch tomorrow's appointments for reminders
+                const dayStart = startOfDay(tomorrow);
+                const dayEnd = endOfDay(tomorrow);
+                const { data } = await supabase
+                  .from("appointments")
+                  .select("id, scheduled_at, patient_id")
+                  .gte("scheduled_at", dayStart.toISOString())
+                  .lte("scheduled_at", dayEnd.toISOString())
+                  .in("status", ["scheduled", "confirmed"]);
+                if (!data || data.length === 0) {
+                  toast.info("Nenhuma consulta agendada para amanhã.");
+                  return;
+                }
+                const patientIds = [...new Set(data.map(a => a.patient_id).filter(Boolean))];
+                const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, phone").in("user_id", patientIds);
+                const phoneMap = new Map(profiles?.map(p => [p.user_id, p]) ?? []);
+                let sent = 0;
+                for (const appt of data) {
+                  const patient = phoneMap.get(appt.patient_id!);
+                  if (patient?.phone) {
+                    const time = format(new Date(appt.scheduled_at), "HH:mm");
+                    const dateStr = format(new Date(appt.scheduled_at), "dd/MM");
+                    try {
+                      await supabase.functions.invoke("send-whatsapp", {
+                        body: {
+                          phone: patient.phone,
+                          message: `🩺 Allo Médico - Lembrete\n\nOlá, ${patient.first_name}! Sua consulta está marcada para amanhã (${dateStr}) às ${time}.\n\nNão se esqueça! 💚`,
+                        },
+                      });
+                      sent++;
+                    } catch { /* skip */ }
+                  }
+                }
+                toast.success(`${sent} lembrete(s) enviado(s) para amanhã!`);
+              }}
+            >
+              <Bell className="w-4 h-4 mr-1" /> Lembretes Amanhã
+            </Button>
             <Button size="sm" variant="outline" onClick={() => fetchToday(true)} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
