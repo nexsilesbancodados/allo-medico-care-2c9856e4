@@ -192,6 +192,7 @@ const HeroSection = () => {
                     src={mascotPoses[poseIndex]}
                     alt="Pingo - Mascote do AloClinica"
                     className="w-full h-auto drop-shadow-2xl"
+                    loading="eager"
                     initial={{ opacity: 0, scale: 0.85, filter: "blur(8px)" }}
                     animate={{
                       opacity: 1,

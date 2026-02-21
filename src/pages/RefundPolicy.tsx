@@ -2,9 +2,11 @@ import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Clock, XCircle, RefreshCw, CreditCard, AlertTriangle, CheckCircle2 } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 const RefundPolicy = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Política de Reembolso" description="Conheça a política de cancelamento e reembolso da AloClinica." />
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <Link to="/" className="inline-flex items-center gap-2 mb-8 text-muted-foreground hover:text-foreground transition text-sm">
         <ArrowLeft className="w-4 h-4" /> Voltar ao início
