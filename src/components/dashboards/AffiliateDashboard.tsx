@@ -134,7 +134,7 @@ const AffiliateDashboard = () => {
           </Card>
         </motion.div>
 
-        {/* KPIs */}
+        {/* KPIs with conversion rate visual */}
         <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
           {[
             { label: "Total Indicações", value: stats.total, icon: Users, color: "text-primary", bg: "bg-primary/10" },
@@ -150,6 +150,29 @@ const AffiliateDashboard = () => {
             </div>
           ))}
         </motion.div>
+
+        {/* Conversion rate bar */}
+        {stats.total > 0 && (
+          <motion.div variants={fadeUp}>
+            <div className="p-4 rounded-2xl bg-card border border-border/50">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-semibold text-muted-foreground">Taxa de Conversão</p>
+                <span className="text-sm font-bold text-foreground">{stats.total > 0 ? Math.round((stats.converted / stats.total) * 100) : 0}%</span>
+              </div>
+              <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${stats.total > 0 ? (stats.converted / stats.total) * 100 : 0}%` }}
+                  transition={{ duration: 0.8, ease: "easeOut" }}
+                  className="h-full bg-gradient-to-r from-primary to-success rounded-full"
+                />
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1.5">
+                {stats.converted} de {stats.total} indicações convertidas
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {/* Conversion chart */}
         {monthlyData.length > 0 && (

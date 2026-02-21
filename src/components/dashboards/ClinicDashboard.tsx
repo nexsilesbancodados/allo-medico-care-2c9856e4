@@ -84,6 +84,8 @@ const ClinicDashboard = () => {
     { name: "Canceladas", value: appointments.filter(a => a.status === "cancelled").length },
   ].filter(s => s.value > 0);
 
+  const pendingDoctors = doctors.filter(d => d.status !== "active").length;
+
   return (
     <DashboardLayout title="Clínica" nav={getClinicNav("overview")} role="clinic">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
@@ -95,12 +97,47 @@ const ClinicDashboard = () => {
           <div className="flex gap-2 shrink-0">
             <Button size="sm" variant="outline" className="rounded-xl gap-1.5 h-9" onClick={() => navigate("/dashboard/clinic/doctors")}>
               <Users className="w-3.5 h-3.5" /> Médicos
+              {pendingDoctors > 0 && <span className="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-warning text-warning-foreground">{pendingDoctors}</span>}
             </Button>
             <Button size="sm" className="rounded-xl gap-1.5 h-9 bg-primary text-primary-foreground" onClick={() => navigate("/dashboard/clinic/schedules")}>
               <Calendar className="w-3.5 h-3.5" /> Agendamentos
             </Button>
           </div>
         </motion.div>
+
+        {/* Alert for pending doctors */}
+        {!loading && pendingDoctors > 0 && (
+          <motion.div variants={fadeUp}>
+            <div className="flex items-center gap-3 p-3 rounded-2xl border border-warning/20 bg-warning/5">
+              <Stethoscope className="w-5 h-5 text-warning shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-warning">{pendingDoctors} médico{pendingDoctors > 1 ? "s" : ""} pendente{pendingDoctors > 1 ? "s" : ""}</p>
+                <p className="text-xs text-muted-foreground">Aguardando aprovação de vínculo</p>
+              </div>
+              <Button size="sm" variant="ghost" className="text-xs text-warning h-7 shrink-0 rounded-xl" onClick={() => navigate("/dashboard/clinic/doctors")}>
+                Revisar →
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Welcome state for new clinics */}
+        {!loading && !clinicProfile && (
+          <motion.div variants={fadeUp}>
+            <Card className="border-dashed border-border/60">
+              <CardContent className="p-8 text-center">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+                  <Sparkles className="w-8 h-8 text-primary" />
+                </div>
+                <p className="text-base font-semibold text-foreground mb-1">Bem-vindo à AloClínica</p>
+                <p className="text-sm text-muted-foreground mb-5">Complete o perfil da sua clínica para começar</p>
+                <Button className="bg-primary text-primary-foreground rounded-xl h-11 px-8" onClick={() => navigate("/dashboard/profile")}>
+                  <Settings className="w-4 h-4 mr-2" /> Completar Perfil
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* KPI Cards */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3">

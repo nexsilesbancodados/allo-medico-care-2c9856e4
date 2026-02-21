@@ -184,12 +184,32 @@ const PartnerDashboard = () => {
               </Card>
             </TabsContent>
 
-            <TabsContent value="conversion" className="mt-5">
+            <TabsContent value="conversion" className="mt-5 space-y-4">
               <Card className="border-border/50">
                 <CardHeader><CardTitle className="text-sm font-semibold">Relatório de Conversão</CardTitle></CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
                   <p className="text-sm text-muted-foreground">
                     De cada receita validada, <strong className="text-foreground">{conversionRate}%</strong> resultaram em dispensação de medicamento.
+                  </p>
+                  {/* Conversion funnel */}
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-8 rounded-xl bg-primary/10 flex items-center px-3">
+                        <span className="text-xs font-semibold text-primary">Receitas consultadas</span>
+                        <span className="ml-auto text-sm font-bold text-primary">{validations.length}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 pl-4">
+                      <div className="flex-1 h-8 rounded-xl bg-success/10 flex items-center px-3" style={{ maxWidth: `${Math.max(conversionRate, 20)}%` }}>
+                        <span className="text-xs font-semibold text-success">Dispensados</span>
+                        <span className="ml-auto text-sm font-bold text-success">{dispensedCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {conversionRate >= 80 ? "🎉 Excelente taxa de conversão!" 
+                    : conversionRate >= 50 ? "👍 Boa taxa — continue assim!" 
+                    : "💡 Dica: Ofereça alternativas genéricas para aumentar a conversão"}
                   </p>
                 </CardContent>
               </Card>

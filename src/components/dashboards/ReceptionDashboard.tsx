@@ -364,11 +364,16 @@ const ReceptionDashboard = () => {
                           {a.status === "in_progress" && <span className="inline-block w-1.5 h-1.5 rounded-full bg-success mr-1 align-middle animate-pulse" />}
                           {statusLabel[a.status] ?? a.status}
                         </span>
-                        {a.status === "scheduled" && (
+                         {a.status === "scheduled" && (
                           <>
                             <Button size="sm" variant="outline" className="text-xs h-7 rounded-xl" onClick={() => updateStatus(a.id, "waiting")}>
-                              Check-in
+                              ✅ Check-in
                             </Button>
+                            {a.patient_phone && (
+                              <Button size="sm" variant="ghost" className="text-xs h-7 rounded-xl" onClick={() => window.open(`tel:${a.patient_phone}`, "_self")}>
+                                📞
+                              </Button>
+                            )}
                             <Button size="sm" variant="ghost" className="text-xs h-7 text-destructive hover:bg-destructive/10 rounded-xl" onClick={() => updateStatus(a.id, "no_show")}>
                               Faltou
                             </Button>

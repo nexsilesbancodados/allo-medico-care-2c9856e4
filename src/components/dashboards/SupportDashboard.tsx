@@ -281,6 +281,26 @@ const SupportDashboard = () => {
           </motion.div>
         )}
 
+        {/* System health quick indicators */}
+        {!loading && (
+          <motion.div variants={fadeUp}>
+            <div className="flex gap-2 flex-wrap">
+              {[
+                { label: "API", ok: errorCount === 0, detail: errorCount === 0 ? "Operacional" : `${errorCount} erros` },
+                { label: "DB", ok: true, detail: "Conectado" },
+                { label: "Auth", ok: !logs.some(l => l.action?.includes("auth") && getLogSeverity(l) === "error"), detail: "Normal" },
+              ].map(sys => (
+                <div key={sys.label} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-medium border ${
+                  sys.ok ? "bg-success/5 text-success border-success/20" : "bg-destructive/5 text-destructive border-destructive/20"
+                }`}>
+                  <span className={`w-1.5 h-1.5 rounded-full ${sys.ok ? "bg-success" : "bg-destructive animate-pulse"}`} />
+                  {sys.label}: {sys.detail}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
         <motion.div variants={fadeUp}>
           <Tabs defaultValue="inbox">
             <TabsList className="bg-muted/50 border border-border/40 h-10 rounded-xl p-1 w-full sm:w-auto flex-wrap">

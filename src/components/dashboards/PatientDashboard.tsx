@@ -128,6 +128,16 @@ const PatientDashboard = () => {
     return "Boa noite";
   };
 
+  const healthTips = [
+    "💧 Beba pelo menos 2L de água hoje",
+    "🏃 30 min de exercício reduz ansiedade em 40%",
+    "😴 Dormir 7-8h melhora a imunidade",
+    "🍎 Inclua 5 porções de frutas e vegetais",
+    "🧘 5 min de respiração profunda reduz o cortisol",
+    "☀️ 15 min de sol ajudam na vitamina D",
+  ];
+  const todayTip = healthTips[new Date().getDay() % healthTips.length];
+
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
@@ -151,6 +161,16 @@ const PatientDashboard = () => {
           </div>
         </motion.div>
 
+        {/* Daily wellness tip */}
+        <motion.div variants={fadeUp}>
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-gradient-to-r from-success/5 to-primary/5 border border-success/20">
+            <div className="w-9 h-9 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+              <Heart className="w-4 h-4 text-success" />
+            </div>
+            <p className="text-xs font-medium text-foreground flex-1">{todayTip}</p>
+          </div>
+        </motion.div>
+
         {/* Health summary strip */}
         {!loading && (stats?.total ?? 0) > 0 && (
           <motion.div variants={fadeUp}>
@@ -161,7 +181,7 @@ const PatientDashboard = () => {
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground">Resumo de Saúde</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {stats?.total ?? 0} consulta{(stats?.total ?? 0) !== 1 ? "s" : ""} realizadas · {stats?.prescriptions ?? 0} receita{(stats?.prescriptions ?? 0) !== 1 ? "s" : ""}
+                  {stats?.total ?? 0} consulta{(stats?.total ?? 0) !== 1 ? "s" : ""} · {stats?.prescriptions ?? 0} receita{(stats?.prescriptions ?? 0) !== 1 ? "s" : ""}
                 </p>
               </div>
               <Button size="sm" variant="ghost" className="text-xs text-primary h-8 rounded-xl shrink-0" onClick={() => navigate("/dashboard/patient/health")}>
