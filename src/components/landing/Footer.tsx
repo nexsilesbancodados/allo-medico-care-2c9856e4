@@ -94,9 +94,14 @@ const Footer = () => {
 
         <div className="border-t border-background/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs opacity-40">© 2026 AloClinica. Todos os direitos reservados.</p>
-          <div className="flex gap-6 text-xs opacity-40">
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs opacity-40">
             <Link to="/terms" className="hover:opacity-100 transition-opacity duration-200">Termos de Uso</Link>
-            <Link to="/privacy" className="hover:opacity-100 transition-opacity duration-200">Política de Privacidade</Link>
+            <Link to="/privacy" className="hover:opacity-100 transition-opacity duration-200">Privacidade</Link>
+            <Link to="/lgpd" className="hover:opacity-100 transition-opacity duration-200">LGPD</Link>
+            <Link to="/cookies" className="hover:opacity-100 transition-opacity duration-200">Cookies</Link>
+            <Link to="/refund" className="hover:opacity-100 transition-opacity duration-200">Reembolso</Link>
+            <Link to="/doctor-terms" className="hover:opacity-100 transition-opacity duration-200">Termos Médicos</Link>
+            <Link to="/accessibility" className="hover:opacity-100 transition-opacity duration-200">Acessibilidade</Link>
           </div>
         </div>
       </div>

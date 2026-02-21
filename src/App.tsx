@@ -14,6 +14,11 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import LGPD from "./pages/LGPD";
+import Cookies from "./pages/Cookies";
+import RefundPolicy from "./pages/RefundPolicy";
+import DoctorTerms from "./pages/DoctorTerms";
+import Accessibility from "./pages/Accessibility";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import GuestCheckout from "./pages/GuestCheckout";
@@ -47,6 +52,11 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/privacy" element={<Privacy />} />
+            <Route path="/lgpd" element={<LGPD />} />
+            <Route path="/cookies" element={<Cookies />} />
+            <Route path="/refund" element={<RefundPolicy />} />
+            <Route path="/doctor-terms" element={<DoctorTerms />} />
+            <Route path="/accessibility" element={<Accessibility />} />
             <Route path="/consulta-avulsa" element={<GuestCheckout />} />
             <Route path="/consulta" element={<GuestConsultation />} />
             <Route path="/parceiro" element={<AuthParceiro />} />
