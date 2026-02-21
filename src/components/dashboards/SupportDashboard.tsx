@@ -12,8 +12,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw } from "lucide-react";
+import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw, Inbox } from "lucide-react";
 import SupportChat from "@/components/support/SupportChat";
+import SupportInbox from "@/components/support/SupportInbox";
 import { toast } from "sonner";
 import BlobKPICard from "@/components/ui/blob-kpi-card";
 const supportNav = [
@@ -259,8 +260,11 @@ const SupportDashboard = () => {
           </div>
         )}
 
-        <Tabs defaultValue="chat">
+        <Tabs defaultValue="inbox">
           <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="inbox" className="flex-1 sm:flex-none">
+              <Inbox className="w-4 h-4 mr-1.5" /> Inbox
+            </TabsTrigger>
             <TabsTrigger value="chat" className="flex-1 sm:flex-none">
               <MessageCircle className="w-4 h-4 mr-1.5" /> Chat IA
             </TabsTrigger>
@@ -281,6 +285,10 @@ const SupportDashboard = () => {
               </TabsTrigger>
             )}
           </TabsList>
+
+          <TabsContent value="inbox" className="mt-4">
+            <SupportInbox />
+          </TabsContent>
 
           <TabsContent value="chat" className="mt-4">
             <SupportChat />
