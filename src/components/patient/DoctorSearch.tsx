@@ -303,70 +303,75 @@ const DoctorSearch = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {filtered.map(doctor => (
-              <Card key={doctor.id} className="border-border hover:shadow-card transition-shadow">
-                <CardContent className="p-5">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="w-14 h-14 flex-shrink-0">
-                      <AvatarFallback className="bg-primary/10 text-primary font-bold">
+              <Card
+                key={doctor.id}
+                className="border-border hover:shadow-card transition-all duration-200 cursor-pointer active:scale-[0.99]"
+                onClick={() => navigate(`/dashboard/schedule/${doctor.id}`)}
+              >
+                <CardContent className="p-4 sm:p-5">
+                  {/* Mobile: stacked layout / Desktop: row layout */}
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <Avatar className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0">
+                      <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm sm:text-base">
                         {doctor.profile?.first_name?.[0]}{doctor.profile?.last_name?.[0]}
                       </AvatarFallback>
                     </Avatar>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h3 className="font-semibold text-foreground">
+                        <div className="min-w-0">
+                          <h3 className="font-semibold text-foreground text-sm sm:text-base truncate">
                             Dr(a). {doctor.profile?.first_name} {doctor.profile?.last_name}
                           </h3>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-[11px] sm:text-xs text-muted-foreground">
                             CRM {doctor.crm}/{doctor.crm_state}
                           </p>
                         </div>
                         <div className="text-right flex-shrink-0">
-                          <p className="text-lg font-bold text-foreground">R${doctor.consultation_price}</p>
-                          <p className="text-xs text-muted-foreground">por consulta</p>
+                          <p className="text-base sm:text-lg font-bold text-foreground">R${doctor.consultation_price}</p>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground">por consulta</p>
                         </div>
                       </div>
 
                       {doctor.specialties.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
+                        <div className="flex flex-wrap gap-1 mt-1.5 sm:mt-2">
                           {doctor.specialties.map(s => (
-                            <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+                            <Badge key={s} variant="secondary" className="text-[10px] sm:text-xs px-1.5 py-0">{s}</Badge>
                           ))}
                         </div>
                       )}
 
                       {doctor.bio && (
-                        <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{doctor.bio}</p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2 line-clamp-2">{doctor.bio}</p>
                       )}
 
-                      <div className="flex items-center gap-4 mt-3">
+                      <div className="flex items-center gap-2 sm:gap-4 mt-2 sm:mt-3 flex-wrap">
                         {availableNowIds.has(doctor.id) && (
-                          <Badge className="bg-secondary/10 text-secondary border-secondary/20 text-xs gap-1">
+                          <Badge className="bg-secondary/10 text-secondary border-secondary/20 text-[10px] sm:text-xs gap-1">
                             <Zap className="w-3 h-3" /> Disponível agora
                           </Badge>
                         )}
                         {doctor.rating > 0 && (
-                          <span className="flex items-center gap-1 text-sm">
-                            <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                          <span className="flex items-center gap-1 text-xs sm:text-sm">
+                            <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-500 fill-yellow-500" />
                             {doctor.rating.toFixed(1)} ({doctor.total_reviews})
                           </span>
                         )}
                         {doctor.experience_years > 0 && (
-                          <span className="text-sm text-muted-foreground">
-                            {doctor.experience_years} anos de exp.
+                          <span className="text-xs sm:text-sm text-muted-foreground">
+                            {doctor.experience_years}a exp.
                           </span>
                         )}
                       </div>
 
                       <Button
-                        className="mt-3 bg-gradient-hero text-primary-foreground"
+                        className="mt-2.5 sm:mt-3 bg-gradient-hero text-primary-foreground w-full sm:w-auto h-9 sm:h-9 text-sm"
                         size="sm"
-                        onClick={() => navigate(`/dashboard/schedule/${doctor.id}`)}
+                        onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/schedule/${doctor.id}`); }}
                       >
-                        <Calendar className="w-4 h-4 mr-1" />
+                        <Calendar className="w-4 h-4 mr-1.5" />
                         Agendar Consulta
                       </Button>
                     </div>

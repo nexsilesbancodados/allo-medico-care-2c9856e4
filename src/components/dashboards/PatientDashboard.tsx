@@ -187,7 +187,7 @@ const PatientDashboard = () => {
           <TabsContent value="overview" className="mt-5 space-y-5">
 
             {/* BLOB KPI Cards — Paciente */}
-            <div className="grid grid-cols-3 gap-4 py-2">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 py-2">
               {loading ? (
                 [1,2,3].map(i => <div key={i} className="aspect-square animate-pulse bg-muted/50 rounded-full" />)
               ) : (
@@ -255,7 +255,7 @@ const PatientDashboard = () => {
             )}
 
             {/* Quick actions */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {[
                 { label: "Agendar", sub: "Consulta", icon: Calendar, color: "bg-primary/10", iconColor: "text-primary", path: "/dashboard/schedule" },
                 { label: "Urgência", sub: "Falar agora", icon: Zap, color: "bg-destructive/10", iconColor: "text-destructive", path: "/dashboard/schedule?urgency=true" },
@@ -263,16 +263,16 @@ const PatientDashboard = () => {
               ].map(item => (
                 <Card
                   key={item.label}
-                  className="border-border/50 hover:shadow-md transition-all duration-200 cursor-pointer hover:-translate-y-0.5"
+                  className="border-border/50 hover:shadow-md transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:scale-[0.97]"
                   onClick={() => navigate(item.path)}
                 >
-                  <CardContent className="p-4 flex flex-col items-start gap-2">
-                    <div className={`w-9 h-9 rounded-xl ${item.color} flex items-center justify-center`}>
-                      <item.icon className={`w-4.5 h-4.5 ${item.iconColor}`} />
+                  <CardContent className="p-3 sm:p-4 flex flex-col items-start gap-1.5 sm:gap-2">
+                    <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl ${item.color} flex items-center justify-center`}>
+                      <item.icon className={`w-4 h-4 sm:w-4.5 sm:h-4.5 ${item.iconColor}`} />
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                      <p className="text-xs text-muted-foreground">{item.sub}</p>
+                      <p className="text-xs sm:text-sm font-semibold text-foreground">{item.label}</p>
+                      <p className="text-[10px] sm:text-xs text-muted-foreground">{item.sub}</p>
                     </div>
                   </CardContent>
                 </Card>
