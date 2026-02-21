@@ -56,6 +56,8 @@ const VideoRoom = () => {
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
+  const [soapNotes, setSoapNotes] = useState({ subjective: "", objective: "", assessment: "", plan: "" });
+  const [activeSOAP, setActiveSOAP] = useState<"S" | "O" | "A" | "P">("S");
   const [notes, setNotes] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -244,8 +246,23 @@ const VideoRoom = () => {
 
     if (isDoctor) {
       const { data: noteData } = await supabase
-        .from("consultation_notes").select("content").eq("appointment_id", appointmentId).single();
-      if (noteData) setNotes(noteData.content);
+        .from("consultation_notes").select("content").eq("appointment_id", appointmentId).maybeSingle();
+      if (noteData) {
+        // Try to parse SOAP JSON, fallback to plain text
+        try {
+          const parsed = JSON.parse(noteData.content);
+          if (parsed.subjective !== undefined) {
+            setSoapNotes(parsed);
+            setNotes(JSON.stringify(parsed));
+          } else {
+            setNotes(noteData.content);
+            setSoapNotes({ subjective: noteData.content, objective: "", assessment: "", plan: "" });
+          }
+        } catch {
+          setNotes(noteData.content);
+          setSoapNotes({ subjective: noteData.content, objective: "", assessment: "", plan: "" });
+        }
+      }
     }
 
     setLoading(false);
@@ -466,26 +483,64 @@ const VideoRoom = () => {
     </>
   );
 
+  const soapTabs: { key: "S" | "O" | "A" | "P"; label: string; field: keyof typeof soapNotes; placeholder: string }[] = [
+    { key: "S", label: "Subjetivo", field: "subjective", placeholder: "O que o paciente relata: queixas, sintomas, histórico..." },
+    { key: "O", label: "Objetivo", field: "objective", placeholder: "Dados objetivos: sinais vitais, exames, observações clínicas..." },
+    { key: "A", label: "Avaliação", field: "assessment", placeholder: "Diagnóstico / hipótese diagnóstica (CID-10)..." },
+    { key: "P", label: "Plano", field: "plan", placeholder: "Plano terapêutico: medicamentos, exames solicitados, retorno..." },
+  ];
+
+  const updateSOAPField = (field: keyof typeof soapNotes, value: string) => {
+    const updated = { ...soapNotes, [field]: value };
+    setSoapNotes(updated);
+    setNotes(JSON.stringify(updated));
+  };
+
   const notesPanel = (
     <div className="flex-1 flex flex-col p-4 gap-3 overflow-auto">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-medium text-[hsl(220,15%,65%)]">Prontuário do atendimento</p>
-          <p className="text-[10px] text-[hsl(220,15%,40%)] mt-0.5">Salvo automaticamente no sistema</p>
+          <p className="text-xs font-medium text-[hsl(220,15%,65%)]">Prontuário SOAP</p>
+          <p className="text-[10px] text-[hsl(220,15%,40%)] mt-0.5">Estruturado · Salvo automaticamente</p>
         </div>
-        <SpeechToText onTranscript={(text) => setNotes(prev => prev ? prev + " " + text : text)} />
+        <SpeechToText onTranscript={(text) => updateSOAPField(soapTabs.find(t => t.key === activeSOAP)!.field, soapNotes[soapTabs.find(t => t.key === activeSOAP)!.field] + " " + text)} />
       </div>
-      <MedicalAutocomplete
-        value={notes}
-        onChange={setNotes}
-        field="notes"
-        placeholder="Anotações da consulta... (a IA sugere ao digitar)"
-        className="flex-1 bg-[hsl(220,20%,8%)] border-[hsl(220,15%,16%)] text-white placeholder:text-[hsl(220,15%,30%)] resize-none rounded-xl min-h-[150px] focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
-      />
+
+      {/* SOAP Tabs */}
+      <div className="flex gap-1 bg-[hsl(220,20%,8%)] rounded-xl p-1 border border-[hsl(220,15%,16%)]">
+        {soapTabs.map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveSOAP(tab.key)}
+            className={`flex-1 text-[11px] font-semibold py-1.5 rounded-lg transition-all ${
+              activeSOAP === tab.key
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-[hsl(220,15%,50%)] hover:text-[hsl(220,15%,70%)]"
+            }`}
+          >
+            {tab.key}
+          </button>
+        ))}
+      </div>
+
+      {/* Active SOAP field */}
+      {soapTabs.filter(t => t.key === activeSOAP).map(tab => (
+        <div key={tab.key} className="flex-1 flex flex-col gap-1.5">
+          <p className="text-[11px] font-medium text-[hsl(220,15%,55%)]">{tab.label}</p>
+          <MedicalAutocomplete
+            value={soapNotes[tab.field]}
+            onChange={(val) => updateSOAPField(tab.field, val)}
+            field="notes"
+            placeholder={tab.placeholder}
+            className="flex-1 bg-[hsl(220,20%,8%)] border-[hsl(220,15%,16%)] text-white placeholder:text-[hsl(220,15%,30%)] resize-none rounded-xl min-h-[120px] focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
+          />
+        </div>
+      ))}
+
       <div className="flex gap-2">
         <Button onClick={saveNotes} size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl gap-1.5">
           <FileText className="w-3.5 h-3.5" />
-          Salvar Anotações
+          Salvar SOAP
         </Button>
         <Button
           size="sm"
@@ -675,7 +730,7 @@ const VideoRoom = () => {
                   <p className="text-[10px] text-[hsl(220,15%,40%)]">Modo focado</p>
                 </div>
               </div>
-              <SpeechToText onTranscript={(text) => setNotes(prev => prev ? prev + " " + text : text)} />
+              <SpeechToText onTranscript={(text) => updateSOAPField(soapTabs.find(t => t.key === activeSOAP)!.field, soapNotes[soapTabs.find(t => t.key === activeSOAP)!.field] + " " + text)} />
             </div>
             {notesPanel}
           </div>

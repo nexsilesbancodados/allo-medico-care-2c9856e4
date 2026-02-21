@@ -42,6 +42,7 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const LinkRedirect = lazy(() => import("./pages/LinkRedirect"));
 const ValidateDocument = lazy(() => import("./pages/ValidateDocument"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const DoctorPublicProfilePage = lazy(() => import("./pages/DoctorPublicProfilePage"));
 
 const queryClient = new QueryClient();
 
@@ -98,6 +99,7 @@ const App = () => (
             <Route path="/clinica" element={<AuthClinica />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/convite/:code" element={<AuthPaciente />} />
+            <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
             <Route path="/l/:id" element={<LinkRedirect />} />
             <Route path="/validar/:id" element={<ValidateDocument />} />
             <Route path="/validar" element={<ValidateDocument />} />

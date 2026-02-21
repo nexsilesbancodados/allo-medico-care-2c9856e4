@@ -4,8 +4,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Star, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Star, ThumbsUp, ThumbsDown, Stethoscope, Clock, Video as VideoIcon, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { motion } from "framer-motion";
 
 interface RateConsultationProps {
   appointmentId: string;
@@ -13,12 +15,19 @@ interface RateConsultationProps {
   onClose: () => void;
 }
 
+const positiveTags = ["Atencioso", "Explicou bem", "Pontual", "Resolveu meu problema", "Profissional", "Empático"];
+const negativeTags = ["Demorou", "Qualidade do vídeo", "Explicação confusa", "Preço alto", "Pouco tempo", "Desorganizado"];
+
 const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultationProps) => {
   const { user } = useAuth();
+  const [step, setStep] = useState(0);
   const [nps, setNps] = useState<number | null>(null);
   const [ease, setEase] = useState(0);
   const [quality, setQuality] = useState(0);
+  const [punctuality, setPunctuality] = useState(0);
+  const [videoQuality, setVideoQuality] = useState(0);
   const [recommend, setRecommend] = useState<boolean | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [already, setAlready] = useState(false);
@@ -38,7 +47,6 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
   };
 
   const updateDoctorRating = async () => {
-    // Recalculate average rating from all surveys for this doctor
     const { data: surveys } = await supabase
       .from("satisfaction_surveys")
       .select("quality_score, nps_score")
@@ -46,7 +54,6 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
 
     if (!surveys || surveys.length === 0) return;
 
-    // Convert NPS (0-10) to 5-star scale, combine with quality
     const ratings = surveys.map(s => {
       const npsAs5 = (s.nps_score / 10) * 5;
       const qual = s.quality_score ?? npsAs5;
@@ -60,9 +67,20 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
       .eq("id", doctorId);
   };
 
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev =>
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
+  };
+
   const submit = async () => {
     if (nps === null) { toast.error("Selecione uma nota NPS (0-10)"); return; }
     setSubmitting(true);
+
+    const fullComment = [
+      selectedTags.length > 0 ? `Tags: ${selectedTags.join(", ")}` : "",
+      comment.trim(),
+    ].filter(Boolean).join(" | ");
 
     const { error } = await supabase.from("satisfaction_surveys").insert({
       appointment_id: appointmentId,
@@ -72,13 +90,12 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
       ease_score: ease || null,
       quality_score: quality || null,
       would_recommend: recommend,
-      comment: comment.trim() || null,
+      comment: fullComment || null,
     });
 
     if (error) {
       toast.error("Erro ao enviar avaliação");
     } else {
-      // Update the doctor's aggregate rating
       await updateDoctorRating();
       toast.success("Obrigado pela sua avaliação! ⭐");
       onClose();
@@ -94,6 +111,26 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
     return nps === i ? "bg-green-600 text-white" : "border-green-500/30 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/20";
   };
 
+  const StarRow = ({ label, value, onChange, icon: Icon }: { label: string; value: number; onChange: (v: number) => void; icon: any }) => (
+    <div>
+      <div className="flex items-center gap-1.5 mb-1.5">
+        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+        <p className="text-sm font-medium text-foreground">{label}</p>
+      </div>
+      <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map(i => (
+          <Star
+            key={i}
+            className={`w-7 h-7 cursor-pointer transition-all ${i <= value ? "text-yellow-500 fill-yellow-500 scale-110" : "text-muted-foreground/30 hover:text-yellow-400"}`}
+            onClick={() => onChange(i)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+
+  const totalSteps = 3;
+
   return (
     <Dialog open onOpenChange={() => onClose()}>
       <DialogContent className="max-w-md">
@@ -102,89 +139,166 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
             <Star className="w-5 h-5 text-yellow-500" />
             Como foi sua consulta?
           </DialogTitle>
+          {/* Step indicator */}
+          <div className="flex items-center gap-1.5 mt-2">
+            {Array.from({ length: totalSteps }).map((_, i) => (
+              <div
+                key={i}
+                className={`h-1 flex-1 rounded-full transition-all ${i <= step ? "bg-primary" : "bg-muted"}`}
+              />
+            ))}
+          </div>
         </DialogHeader>
-        <div className="space-y-5">
-          {/* NPS */}
-          <div>
-            <p className="text-sm font-medium text-foreground mb-2">De 0 a 10, o quanto você recomendaria a AloClinica?</p>
-            <div className="flex gap-1 flex-wrap">
-              {Array.from({ length: 11 }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setNps(i)}
-                  className={`w-9 h-9 rounded-lg border text-sm font-bold transition-all ${npsColors(i)} ${nps === i ? "scale-110 shadow-md" : ""}`}
-                >
-                  {i}
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
-              <span>Nada provável</span>
-              <span>Muito provável</span>
-            </div>
-          </div>
 
-          {/* Star ratings */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-sm font-medium text-foreground mb-1">Facilidade de uso</p>
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <Star
-                    key={i}
-                    className={`w-7 h-7 cursor-pointer transition-all ${i <= ease ? "text-yellow-500 fill-yellow-500 scale-110" : "text-muted-foreground/30 hover:text-yellow-400"}`}
-                    onClick={() => setEase(i)}
-                  />
-                ))}
+        <motion.div
+          key={step}
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -20 }}
+          className="space-y-5"
+        >
+          {step === 0 && (
+            <>
+              {/* NPS */}
+              <div>
+                <p className="text-sm font-medium text-foreground mb-2">De 0 a 10, o quanto recomendaria a AloClinica?</p>
+                <div className="flex gap-1 flex-wrap">
+                  {Array.from({ length: 11 }, (_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setNps(i)}
+                      className={`w-9 h-9 rounded-lg border text-sm font-bold transition-all ${npsColors(i)} ${nps === i ? "scale-110 shadow-md" : ""}`}
+                    >
+                      {i}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex justify-between text-[10px] text-muted-foreground mt-1">
+                  <span>Nada provável</span>
+                  <span>Muito provável</span>
+                </div>
               </div>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-foreground mb-1">Qualidade do atendimento</p>
-              <div className="flex gap-0.5">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <Star
-                    key={i}
-                    className={`w-7 h-7 cursor-pointer transition-all ${i <= quality ? "text-yellow-500 fill-yellow-500 scale-110" : "text-muted-foreground/30 hover:text-yellow-400"}`}
-                    onClick={() => setQuality(i)}
-                  />
-                ))}
+
+              {/* Star ratings */}
+              <div className="grid grid-cols-2 gap-4">
+                <StarRow label="Qualidade" value={quality} onChange={setQuality} icon={Stethoscope} />
+                <StarRow label="Facilidade" value={ease} onChange={setEase} icon={MessageSquare} />
+                <StarRow label="Pontualidade" value={punctuality} onChange={setPunctuality} icon={Clock} />
+                <StarRow label="Videochamada" value={videoQuality} onChange={setVideoQuality} icon={VideoIcon} />
               </div>
-            </div>
-          </div>
 
-          {/* Recommend */}
-          <div>
-            <p className="text-sm font-medium text-foreground mb-2">Recomendaria este médico?</p>
-            <div className="flex gap-2">
               <Button
-                size="sm"
-                variant={recommend === true ? "default" : "outline"}
-                onClick={() => setRecommend(true)}
-                className={recommend === true ? "gap-2" : "gap-2"}
+                className="w-full"
+                disabled={nps === null}
+                onClick={() => setStep(1)}
               >
-                <ThumbsUp className="w-4 h-4" /> Sim
+                Próximo →
               </Button>
-              <Button
-                size="sm"
-                variant={recommend === false ? "destructive" : "outline"}
-                onClick={() => setRecommend(false)}
-                className="gap-2"
-              >
-                <ThumbsDown className="w-4 h-4" /> Não
-              </Button>
-            </div>
-          </div>
+            </>
+          )}
 
-          {/* Comment */}
-          <div>
-            <p className="text-sm font-medium text-foreground mb-1">Comentário (opcional)</p>
-            <Textarea value={comment} onChange={e => setComment(e.target.value)} placeholder="Conte-nos mais sobre sua experiência..." rows={3} />
-          </div>
+          {step === 1 && (
+            <>
+              {/* Quick tags */}
+              <div>
+                <p className="text-sm font-medium text-foreground mb-2">O que foi bom? (opcional)</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {positiveTags.map(tag => (
+                    <Badge
+                      key={tag}
+                      variant={selectedTags.includes(tag) ? "default" : "outline"}
+                      className={`cursor-pointer transition-all text-xs ${
+                        selectedTags.includes(tag) ? "bg-success text-success-foreground" : "hover:bg-success/10"
+                      }`}
+                      onClick={() => toggleTag(tag)}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
 
-          <Button onClick={submit} disabled={nps === null || submitting} className="w-full h-11">
-            {submitting ? "Enviando..." : "⭐ Enviar Avaliação"}
-          </Button>
-        </div>
+              <div>
+                <p className="text-sm font-medium text-foreground mb-2">O que pode melhorar? (opcional)</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {negativeTags.map(tag => (
+                    <Badge
+                      key={tag}
+                      variant={selectedTags.includes(tag) ? "default" : "outline"}
+                      className={`cursor-pointer transition-all text-xs ${
+                        selectedTags.includes(tag) ? "bg-destructive text-destructive-foreground" : "hover:bg-destructive/10"
+                      }`}
+                      onClick={() => toggleTag(tag)}
+                    >
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+
+              {/* Recommend */}
+              <div>
+                <p className="text-sm font-medium text-foreground mb-2">Recomendaria este médico?</p>
+                <div className="flex gap-2">
+                  <Button size="sm" variant={recommend === true ? "default" : "outline"} onClick={() => setRecommend(true)} className="gap-2">
+                    <ThumbsUp className="w-4 h-4" /> Sim
+                  </Button>
+                  <Button size="sm" variant={recommend === false ? "destructive" : "outline"} onClick={() => setRecommend(false)} className="gap-2">
+                    <ThumbsDown className="w-4 h-4" /> Não
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(0)} className="flex-1">← Voltar</Button>
+                <Button onClick={() => setStep(2)} className="flex-1">Próximo →</Button>
+              </div>
+            </>
+          )}
+
+          {step === 2 && (
+            <>
+              {/* Comment */}
+              <div>
+                <p className="text-sm font-medium text-foreground mb-1">Comentário (opcional)</p>
+                <Textarea
+                  value={comment}
+                  onChange={e => setComment(e.target.value)}
+                  placeholder={selectedTags.length > 0
+                    ? `Conte mais sobre: ${selectedTags.slice(0, 2).join(", ")}...`
+                    : "Conte-nos mais sobre sua experiência..."
+                  }
+                  rows={4}
+                />
+              </div>
+
+              {/* Would use again */}
+              <div>
+                <p className="text-sm font-medium text-foreground mb-2">Você usaria a AloClinica de novo?</p>
+                <div className="flex gap-2">
+                  {["Sim", "Talvez", "Não"].map(opt => (
+                    <Button
+                      key={opt}
+                      size="sm"
+                      variant={recommend === (opt === "Sim") ? "default" : "outline"}
+                      onClick={() => setRecommend(opt === "Sim" ? true : opt === "Não" ? false : null)}
+                      className="flex-1"
+                    >
+                      {opt}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">← Voltar</Button>
+                <Button onClick={submit} disabled={submitting} className="flex-1 h-11">
+                  {submitting ? "Enviando..." : "⭐ Enviar Avaliação"}
+                </Button>
+              </div>
+            </>
+          )}
+        </motion.div>
       </DialogContent>
     </Dialog>
   );
