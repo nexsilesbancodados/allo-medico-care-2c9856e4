@@ -181,7 +181,10 @@ const GuestConsultation = () => {
       return;
     }
     toast({ title: "Consulta encerrada" });
-    navigate("/");
+    const params = new URLSearchParams();
+    if (appointment?.id) params.set("appointment", appointment.id);
+    if (doctorName) params.set("doctor", doctorName);
+    navigate(`/consulta/avaliacao?${params.toString()}`);
   };
 
   const toggleFullscreen = () => {
