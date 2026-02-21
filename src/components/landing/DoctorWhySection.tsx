@@ -1,6 +1,7 @@
-import { motion } from "framer-motion";
-import { Plus } from "lucide-react";
+import { motion, useInView } from "framer-motion";
+import { Plus, Shield, Clock, TrendingUp, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useRef, useEffect, useState } from "react";
 import doctorImg1 from "@/assets/doctor-signup-1.png";
 import doctorImg2 from "@/assets/doctor-signup-2.png";
 
@@ -9,7 +10,7 @@ const cards = [
     badge: "Cadastro Médico",
     title: "Cadastro para médicos especialistas e generalistas",
     image: doctorImg1,
-    link: "#",
+    link: "/medico",
   },
   {
     badge: "Parceiro Clínica",
@@ -18,6 +19,39 @@ const cards = [
     link: "/clinica",
   },
 ];
+
+const stats = [
+  { icon: Shield, label: "Certificação CFM", value: "100%" },
+  { icon: Clock, label: "Setup em", value: "5min" },
+  { icon: TrendingUp, label: "Crescimento médio", value: "+40%" },
+  { icon: Users, label: "Médicos ativos", value: "500+" },
+];
+
+const AnimatedCounter = ({ target, suffix = "" }: { target: string; suffix?: string }) => {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true });
+  const [display, setDisplay] = useState("0");
+
+  useEffect(() => {
+    if (!isInView) return;
+    const num = parseInt(target.replace(/\D/g, ""));
+    if (isNaN(num)) { setDisplay(target); return; }
+    const prefix = target.match(/^\D+/)?.[0] ?? "";
+    const suf = target.match(/\D+$/)?.[0] ?? suffix;
+    let start = 0;
+    const duration = 1200;
+    const step = Math.ceil(duration / 60);
+    const inc = num / (duration / step);
+    const timer = setInterval(() => {
+      start += inc;
+      if (start >= num) { start = num; clearInterval(timer); }
+      setDisplay(`${prefix}${Math.floor(start)}${suf}`);
+    }, step);
+    return () => clearInterval(timer);
+  }, [isInView, target, suffix]);
+
+  return <span ref={ref}>{display}</span>;
+};
 
 const DoctorWhySection = () => {
   const navigate = useNavigate();
@@ -45,9 +79,29 @@ const DoctorWhySection = () => {
               Confira as oportunidades disponíveis para todas as especialidades médicas na plataforma AloClinica, ou acesse o cadastro específico para sua categoria.
             </p>
 
-            <p className="text-sm text-muted-foreground/70">
-              Conheça o modelo exclusivo para profissionais que desejam expandir seus atendimentos.
-            </p>
+            {/* Stats grid */}
+            <div className="grid grid-cols-2 gap-3 mt-8">
+              {stats.map((s, i) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3 + i * 0.08, duration: 0.5 }}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border/40"
+                >
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <s.icon className="w-4.5 h-4.5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground leading-tight">
+                      <AnimatedCounter target={s.value} />
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">{s.label}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </motion.div>
 
           {/* Cards */}
@@ -63,24 +117,18 @@ const DoctorWhySection = () => {
                 onClick={() => navigate(card.link)}
                 className="relative flex-1 rounded-2xl overflow-hidden shadow-elevated cursor-pointer group min-h-[320px]"
               >
-                {/* Image */}
                 <img
                   src={card.image}
                   alt={card.title}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
                 />
-
-                {/* Gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-                {/* Badge */}
                 <div className="absolute top-4 left-4 z-10">
                   <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-semibold border border-white/20">
                     {card.badge}
                   </span>
                 </div>
-
-                {/* Bottom content */}
                 <div className="absolute bottom-0 left-0 right-0 p-5 z-10 flex items-end justify-between">
                   <h3 className="text-white font-bold text-lg leading-snug max-w-[75%]">
                     {card.title}
