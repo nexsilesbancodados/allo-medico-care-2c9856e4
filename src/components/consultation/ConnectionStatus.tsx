@@ -16,7 +16,7 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
   const [showQualityBadge, setShowQualityBadge] = useState(false);
   const rttHistory = useRef<number[]>([]);
 
-  // Monitor network quality
+  // Monitor network quality using a lightweight ping
   useEffect(() => {
     if (!navigator.onLine) {
       setNetworkQuality("offline");
@@ -26,9 +26,8 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
     const checkQuality = async () => {
       try {
         const start = performance.now();
-        await fetch("https://meet.jit.si/oxxhm7NFAT2n/oxxhm7NFAT2n", {
+        await fetch("/favicon.ico", {
           method: "HEAD",
-          mode: "no-cors",
           cache: "no-store",
         });
         const rtt = performance.now() - start;
@@ -38,8 +37,8 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
         
         const avgRtt = rttHistory.current.reduce((a, b) => a + b, 0) / rttHistory.current.length;
 
-        if (avgRtt < 200) setNetworkQuality("good");
-        else if (avgRtt < 500) setNetworkQuality("fair");
+        if (avgRtt < 300) setNetworkQuality("good");
+        else if (avgRtt < 800) setNetworkQuality("fair");
         else setNetworkQuality("poor");
       } catch {
         setNetworkQuality("poor");
@@ -47,11 +46,10 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
     };
 
     checkQuality();
-    const interval = setInterval(checkQuality, 15000);
+    const interval = setInterval(checkQuality, 20000);
     return () => clearInterval(interval);
   }, [isOnline]);
 
-  // Show quality badge for poor/fair
   useEffect(() => {
     if (networkQuality === "fair" || networkQuality === "poor") {
       setShowQualityBadge(true);
@@ -96,14 +94,13 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
 
   return (
     <>
-      {/* Network quality badge - top right corner */}
       <AnimatePresence>
         {showQualityBadge && isOnline && (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 20 }}
-            className="fixed top-16 right-4 z-[55] flex items-center gap-2 px-3 py-2 rounded-xl bg-[hsl(220,20%,10%,0.9)] backdrop-blur-md border border-[hsl(220,15%,20%)] shadow-xl"
+            initial={{ opacity: 0, x: 20, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 20, scale: 0.9 }}
+            className="fixed top-16 right-4 z-[55] flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[hsl(220,20%,8%,0.95)] backdrop-blur-md border border-[hsl(220,15%,18%)] shadow-2xl"
           >
             <QualityIcon className="w-4 h-4" style={{ color: qualityConfig[networkQuality].color }} />
             <span className="text-xs font-medium" style={{ color: qualityConfig[networkQuality].color }}>
@@ -113,7 +110,6 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
         )}
       </AnimatePresence>
 
-      {/* Offline / Reconnecting banner */}
       <AnimatePresence>
         {(!isOnline || showReconnecting) && (
           <motion.div
@@ -123,7 +119,7 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
             className={`fixed top-0 left-0 right-0 z-[60] px-4 py-3 flex items-center justify-center gap-3 text-sm font-medium backdrop-blur-md ${
               !isOnline
                 ? "bg-destructive/90 text-destructive-foreground"
-                : "bg-[hsl(45,90%,55%,0.9)] text-[hsl(45,90%,15%)]"
+                : "bg-amber-500/90 text-amber-950"
             }`}
           >
             {!isOnline ? (
