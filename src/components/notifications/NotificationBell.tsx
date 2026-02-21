@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,8 @@ import { Bell, Check, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 import PushNotificationToggle from "./PushNotificationToggle";
 
 interface Notification {
@@ -20,13 +22,48 @@ interface Notification {
   created_at: string;
 }
 
+const NOTIFICATION_SOUND_URL = "data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbsGczDjFjqufk0YhQMi5Xp+Xm0IROMy1Vp+bl0IJPMy5XqObl0YFPMy5Yqefl0YFPNC9ZquijAAA=";
+
+const playNotificationSound = () => {
+  try {
+    const audio = new Audio(NOTIFICATION_SOUND_URL);
+    audio.volume = 0.3;
+    audio.play().catch(() => {});
+  } catch {}
+};
+
 const NotificationBell = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
+  const [hasNewPulse, setHasNewPulse] = useState(false);
+  const pulseTimeout = useRef<NodeJS.Timeout>();
 
   const unreadCount = notifications.filter(n => !n.is_read).length;
+
+  const showRealtimeToast = useCallback((notif: Notification) => {
+    const typeIcons: Record<string, string> = {
+      appointment: "📅", reminder: "⏰", message: "💬", system: "🔔", info: "ℹ️",
+    };
+    const icon = typeIcons[notif.type] ?? "🔔";
+
+    playNotificationSound();
+
+    // Pulse animation on badge
+    setHasNewPulse(true);
+    if (pulseTimeout.current) clearTimeout(pulseTimeout.current);
+    pulseTimeout.current = setTimeout(() => setHasNewPulse(false), 3000);
+
+    toast(notif.title, {
+      description: notif.message,
+      icon,
+      action: notif.link
+        ? { label: "Ver", onClick: () => navigate(notif.link!) }
+        : undefined,
+      duration: 6000,
+    });
+  }, [navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -39,13 +76,18 @@ const NotificationBell = () => {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
         (payload) => {
-          setNotifications(prev => [payload.new as Notification, ...prev]);
+          const newNotif = payload.new as Notification;
+          setNotifications(prev => [newNotif, ...prev]);
+          showRealtimeToast(newNotif);
         }
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  }, [user]);
+    return () => {
+      supabase.removeChannel(channel);
+      if (pulseTimeout.current) clearTimeout(pulseTimeout.current);
+    };
+  }, [user, showRealtimeToast]);
 
   const fetchNotifications = async () => {
     const { data } = await supabase
@@ -90,11 +132,26 @@ const NotificationBell = () => {
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="w-5 h-5" />
-          {unreadCount > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold">
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
+          <AnimatePresence>
+            {unreadCount > 0 && (
+              <motion.span
+                key="badge"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{
+                  scale: hasNewPulse ? [1, 1.4, 1] : 1,
+                  opacity: 1,
+                }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={hasNewPulse
+                  ? { scale: { duration: 0.6, repeat: 3, ease: "easeInOut" } }
+                  : { duration: 0.2 }
+                }
+                className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold"
+              >
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </motion.span>
+            )}
+          </AnimatePresence>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
