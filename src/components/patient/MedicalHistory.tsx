@@ -6,17 +6,23 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, Download } from "lucide-react";
+import { FileText, Download, Sparkles, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import jsPDF from "jspdf";
 import { getPatientNav } from "./patientNav";
+import { useToast } from "@/hooks/use-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 const MedicalHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [summaries, setSummaries] = useState<Record<string, string>>({});
+  const [loadingSummary, setLoadingSummary] = useState<Record<string, boolean>>({});
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   useEffect(() => { if (user) fetchHistory(); }, [user]);
 
@@ -63,6 +69,36 @@ const MedicalHistory = () => {
       consultation_notes: notesMap.get(a.id) ?? null,
     })));
     setLoading(false);
+  };
+
+  const generateSummary = async (appt: any) => {
+    if (summaries[appt.id]) {
+      setExpandedId(expandedId === appt.id ? null : appt.id);
+      return;
+    }
+
+    setLoadingSummary(prev => ({ ...prev, [appt.id]: true }));
+    setExpandedId(appt.id);
+
+    try {
+      const presc = appt.prescriptions?.[0];
+      const { data, error } = await supabase.functions.invoke("clinical-summary", {
+        body: {
+          notes: appt.consultation_notes || appt.notes || "",
+          diagnosis: presc?.diagnosis || "",
+          medications: presc?.medications || [],
+        },
+      });
+
+      if (error) throw error;
+      setSummaries(prev => ({ ...prev, [appt.id]: data.summary }));
+    } catch (e) {
+      console.error(e);
+      toast({ title: "Erro ao gerar resumo", description: "Tente novamente em alguns segundos.", variant: "destructive" });
+      setExpandedId(null);
+    } finally {
+      setLoadingSummary(prev => ({ ...prev, [appt.id]: false }));
+    }
   };
 
   const downloadPrescription = (prescription: any, doctorName: string) => {
@@ -122,6 +158,50 @@ const MedicalHistory = () => {
                       <p className="text-sm text-foreground">{a.consultation_notes}</p>
                     </div>
                   )}
+
+                  {/* AI Summary Button */}
+                  {(a.consultation_notes || a.prescriptions.length > 0) && (
+                    <div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => generateSummary(a)}
+                        disabled={loadingSummary[a.id]}
+                        className="w-full justify-between border-primary/20 hover:bg-primary/5"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          {loadingSummary[a.id] ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 text-primary" />}
+                          {summaries[a.id] ? "Resumo Simplificado (IA)" : "Gerar resumo simplificado com IA"}
+                        </span>
+                        {summaries[a.id] && (expandedId === a.id ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />)}
+                      </Button>
+
+                      <AnimatePresence>
+                        {expandedId === a.id && summaries[a.id] && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden"
+                          >
+                            <div className="mt-2 p-4 rounded-xl bg-primary/5 border border-primary/10">
+                              <div className="flex items-center gap-1.5 mb-2">
+                                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                                <p className="text-xs font-semibold text-primary">Resumo para você</p>
+                              </div>
+                              <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">
+                                {summaries[a.id]}
+                              </p>
+                              <p className="text-[10px] text-muted-foreground mt-3">
+                                ⚠️ Este resumo foi gerado por IA para facilitar seu entendimento. Não substitui a orientação médica.
+                              </p>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )}
+
                   {a.prescriptions.length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-muted-foreground mb-2">Receitas</p>
