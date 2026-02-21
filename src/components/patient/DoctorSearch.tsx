@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search, Star, Calendar, Clock, Zap, AlertTriangle } from "lucide-react";
+import { Slider } from "@/components/ui/slider";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getPatientNav } from "./patientNav";
 
@@ -33,7 +35,14 @@ const DoctorSearch = () => {
   const [search, setSearch] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
+
+  // Advanced filters
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const [minRating, setMinRating] = useState(0);
+  const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("rating");
 
   useEffect(() => {
     fetchSpecialties();
@@ -64,7 +73,6 @@ const DoctorSearch = () => {
       supabase.from("availability_slots").select("doctor_id, day_of_week, start_time, end_time").eq("is_active", true).in("doctor_id", doctorIds),
     ]);
 
-    // Check which doctors are available RIGHT NOW
     const now = new Date();
     const currentDay = now.getDay();
     const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
@@ -92,18 +100,36 @@ const DoctorSearch = () => {
       specialties: specsMap.get(d.id) ?? [],
     }));
 
+    // Find max price for slider
+    const maxPrice = Math.max(...results.map(d => d.consultation_price), 500);
+    setPriceRange([0, maxPrice]);
+
     setDoctors(results);
     setLoading(false);
   };
 
-  const filtered = doctors.filter(d => {
-    const nameMatch = !search || 
-      `${d.profile?.first_name} ${d.profile?.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
-      d.crm.includes(search);
-    const specMatch = !selectedSpecialty || d.specialties.some(s => s === selectedSpecialty);
-    const urgencyMatch = !isUrgency || availableNowIds.has(d.id);
-    return nameMatch && specMatch && urgencyMatch;
-  });
+  const filtered = doctors
+    .filter(d => {
+      const nameMatch = !search ||
+        `${d.profile?.first_name} ${d.profile?.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
+        d.crm.includes(search);
+      const specMatch = !selectedSpecialty || d.specialties.some(s => s === selectedSpecialty);
+      const urgencyMatch = !isUrgency || availableNowIds.has(d.id);
+      const priceMatch = d.consultation_price >= priceRange[0] && d.consultation_price <= priceRange[1];
+      const ratingMatch = d.rating >= minRating;
+      const availMatch = availabilityFilter === "all" ||
+        (availabilityFilter === "today" && availableNowIds.has(d.id));
+      return nameMatch && specMatch && urgencyMatch && priceMatch && ratingMatch && availMatch;
+    })
+    .sort((a, b) => {
+      if (sortBy === "rating") return b.rating - a.rating;
+      if (sortBy === "price_asc") return a.consultation_price - b.consultation_price;
+      if (sortBy === "price_desc") return b.consultation_price - a.consultation_price;
+      if (sortBy === "experience") return b.experience_years - a.experience_years;
+      return 0;
+    });
+
+  const activeFilters = (minRating > 0 ? 1 : 0) + (availabilityFilter !== "all" ? 1 : 0) + (sortBy !== "rating" ? 1 : 0);
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("doctors")}>
@@ -113,7 +139,7 @@ const DoctorSearch = () => {
             <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
             <div>
               <p className="text-sm font-semibold text-foreground">Modo Urgência</p>
-              <p className="text-xs text-muted-foreground">Mostrando apenas médicos com disponibilidade agora. Selecione um para agendar imediatamente.</p>
+              <p className="text-xs text-muted-foreground">Mostrando apenas médicos com disponibilidade agora.</p>
             </div>
             <Button size="sm" variant="outline" className="ml-auto flex-shrink-0" onClick={() => navigate("/dashboard/schedule")}>
               Ver todos
@@ -127,8 +153,8 @@ const DoctorSearch = () => {
           {isUrgency ? "Médicos disponíveis agora para atendimento imediato" : "Encontre o especialista ideal para você"}
         </p>
 
-        {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        {/* Search + filter toggle */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
@@ -138,7 +164,106 @@ const DoctorSearch = () => {
               className="pl-10"
             />
           </div>
+          <Button
+            variant={showFilters ? "default" : "outline"}
+            size="sm"
+            onClick={() => setShowFilters(!showFilters)}
+            className="gap-1.5"
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            Filtros
+            {activeFilters > 0 && (
+              <span className="ml-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+                {activeFilters}
+              </span>
+            )}
+          </Button>
         </div>
+
+        {/* Advanced filters panel */}
+        {showFilters && (
+          <Card className="mb-4 border-border">
+            <CardContent className="p-4 space-y-4">
+              <div className="grid sm:grid-cols-3 gap-4">
+                {/* Price range */}
+                <div>
+                  <p className="text-xs font-medium text-foreground mb-2">
+                    Faixa de Preço: R${priceRange[0]} – R${priceRange[1]}
+                  </p>
+                  <Slider
+                    min={0}
+                    max={500}
+                    step={10}
+                    value={priceRange}
+                    onValueChange={(v) => setPriceRange(v as [number, number])}
+                  />
+                </div>
+
+                {/* Min rating */}
+                <div>
+                  <p className="text-xs font-medium text-foreground mb-2">Avaliação mínima</p>
+                  <div className="flex gap-1.5">
+                    {[0, 3, 3.5, 4, 4.5].map(r => (
+                      <Button
+                        key={r}
+                        variant={minRating === r ? "default" : "outline"}
+                        size="sm"
+                        className="text-xs h-8 gap-1"
+                        onClick={() => setMinRating(r)}
+                      >
+                        {r === 0 ? "Todas" : <><Star className="w-3 h-3 fill-current" /> {r}+</>}
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Availability */}
+                <div>
+                  <p className="text-xs font-medium text-foreground mb-2">Disponibilidade</p>
+                  <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+                    <SelectTrigger className="h-8 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Qualquer horário</SelectItem>
+                      <SelectItem value="today">Atende hoje</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-2 border-t border-border">
+                <div>
+                  <p className="text-xs font-medium text-foreground mb-1">Ordenar por</p>
+                  <Select value={sortBy} onValueChange={setSortBy}>
+                    <SelectTrigger className="h-8 text-xs w-44">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="rating">Melhor avaliação</SelectItem>
+                      <SelectItem value="price_asc">Menor preço</SelectItem>
+                      <SelectItem value="price_desc">Maior preço</SelectItem>
+                      <SelectItem value="experience">Mais experiente</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs text-muted-foreground"
+                  onClick={() => {
+                    setMinRating(0);
+                    setAvailabilityFilter("all");
+                    setSortBy("rating");
+                    setPriceRange([0, 500]);
+                  }}
+                >
+                  <X className="w-3 h-3 mr-1" /> Limpar filtros
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Specialty chips */}
         <div className="flex flex-wrap gap-2 mb-6">
@@ -160,6 +285,11 @@ const DoctorSearch = () => {
             </Badge>
           ))}
         </div>
+
+        {/* Results count */}
+        {!loading && (
+          <p className="text-xs text-muted-foreground mb-3">{filtered.length} médico{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}</p>
+        )}
 
         {/* Results */}
         {loading ? (
@@ -213,6 +343,11 @@ const DoctorSearch = () => {
                       )}
 
                       <div className="flex items-center gap-4 mt-3">
+                        {availableNowIds.has(doctor.id) && (
+                          <Badge className="bg-secondary/10 text-secondary border-secondary/20 text-xs gap-1">
+                            <Zap className="w-3 h-3" /> Disponível agora
+                          </Badge>
+                        )}
                         {doctor.rating > 0 && (
                           <span className="flex items-center gap-1 text-sm">
                             <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />

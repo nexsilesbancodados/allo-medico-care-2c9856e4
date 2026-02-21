@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw, Inbox, Wifi } from "lucide-react";
+import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw, Inbox, Wifi, Shield } from "lucide-react";
 import SupportChat from "@/components/support/SupportChat";
 import SupportInbox from "@/components/support/SupportInbox";
 import { toast } from "sonner";
@@ -321,6 +321,9 @@ const SupportDashboard = () => {
                 </span>
               )}
             </TabsTrigger>
+            <TabsTrigger value="audit" className="flex-1 sm:flex-none">
+              <Shield className="w-4 h-4 mr-1.5" /> Auditoria
+            </TabsTrigger>
             {viewAs && (
               <TabsTrigger value="impersonate" className="flex-1 sm:flex-none">
                 <Eye className="w-4 h-4 mr-1.5" /> Perfil
@@ -555,6 +558,66 @@ const SupportDashboard = () => {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="audit" className="mt-4">
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-primary" />
+                  Auditoria LGPD — Acessos a Dados Sensíveis
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Registros de quem acessou prontuários, receitas e documentos de pacientes. Exigência da LGPD para dados de saúde.
+                </p>
+                {loading ? (
+                  <div className="space-y-2">
+                    {[1,2,3].map(i => <Skeleton key={i} className="h-12 w-full rounded-xl" />)}
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[420px] overflow-y-auto">
+                    {logs
+                      .filter(l => {
+                        const a = (l.action ?? "").toLowerCase();
+                        const e = (l.entity_type ?? "").toLowerCase();
+                        return e.includes("medical_record") || e.includes("prescription") || e.includes("patient_document") ||
+                          a.includes("view_record") || a.includes("access") || a.includes("prontuario") || a.includes("receita");
+                      })
+                      .map(l => {
+                        const performer = users.find(u => u.user_id === l.performed_by || u.user_id === l.user_id);
+                        return (
+                          <div key={l.id} className="flex items-start gap-3 p-3 rounded-xl border border-border hover:bg-muted/30 transition-colors">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
+                              {performer?.first_name?.[0]}{performer?.last_name?.[0] ?? "?"}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-foreground">
+                                <span className="font-medium">{performer ? `${performer.first_name} ${performer.last_name}` : l.performed_by?.slice(0,8) ?? "Sistema"}</span>
+                                {" "}<span className="text-muted-foreground">{l.action}</span>
+                              </p>
+                              <p className="text-xs text-muted-foreground">
+                                {l.entity_type} · ID: {l.entity_id?.slice(0,8) ?? "—"} · {format(new Date(l.created_at), "dd/MM/yyyy HH:mm:ss", { locale: ptBR })}
+                              </p>
+                            </div>
+                            <Badge variant="outline" className="text-[10px] shrink-0">
+                              {l.entity_type}
+                            </Badge>
+                          </div>
+                        );
+                      })
+                    }
+                    {logs.filter(l => {
+                      const e = (l.entity_type ?? "").toLowerCase();
+                      return e.includes("medical_record") || e.includes("prescription") || e.includes("patient_document");
+                    }).length === 0 && (
+                      <p className="text-center text-sm text-muted-foreground py-8">Nenhum registro de auditoria encontrado.</p>
+                    )}
                   </div>
                 )}
               </CardContent>
