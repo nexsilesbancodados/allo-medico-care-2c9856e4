@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
+import { saveCheckoutDraft, clearCheckoutDraft } from "./CheckoutRecoveryBanner";
 import { ptBR } from "date-fns/locale";
 
 type PaymentMethod = "pix" | "card" | "boleto";
@@ -237,11 +238,14 @@ const PlansCheckout = () => {
     }
     setSelectedPlan(planId);
     setStep("checkout");
+    saveCheckoutDraft({ step: "checkout", plan_id: planId });
   };
 
   const handleSelectSpecialty = (specId: string) => {
     setSelectedSpecialty(specId);
     setStep("doctor");
+    const specName = specialties.find(s => s.id === specId)?.name;
+    saveCheckoutDraft({ step: "doctor", plan_id: selectedPlan ?? undefined, specialty_id: specId, specialty_name: specName });
   };
 
   const handleSelectDoctor = (doc: DoctorOption) => {
@@ -249,10 +253,18 @@ const PlansCheckout = () => {
     setSelectedDate(undefined);
     setSelectedTime(null);
     setStep("datetime");
+    saveCheckoutDraft({ step: "datetime", plan_id: selectedPlan ?? undefined, doctor_id: doc.id, doctor_name: `Dr(a). ${doc.first_name} ${doc.last_name}` });
   };
 
   const handleProceedToPayment = () => {
     setStep("checkout");
+    saveCheckoutDraft({
+      step: "checkout",
+      plan_id: selectedPlan ?? undefined,
+      doctor_id: selectedDoctor?.id,
+      doctor_name: selectedDoctor ? `Dr(a). ${selectedDoctor.first_name} ${selectedDoctor.last_name}` : undefined,
+      scheduled_at: selectedDate && selectedTime ? setMinutes(setHours(new Date(selectedDate), parseInt(selectedTime.split(":")[0])), parseInt(selectedTime.split(":")[1])).toISOString() : undefined,
+    });
   };
 
   const handleCheckout = async () => {
@@ -285,6 +297,7 @@ const PlansCheckout = () => {
     setTimeout(() => {
       setProcessing(false);
       setStep("success");
+      clearCheckoutDraft();
     }, delay);
   };
 
