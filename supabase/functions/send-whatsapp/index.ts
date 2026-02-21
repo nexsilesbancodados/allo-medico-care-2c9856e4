@@ -19,9 +19,8 @@ serve(async (req) => {
   try {
     const EVOLUTION_API_URL = Deno.env.get("EVOLUTION_API_URL");
     const EVOLUTION_API_KEY = Deno.env.get("EVOLUTION_API_KEY");
-    const EVOLUTION_INSTANCE_NAME = Deno.env.get("EVOLUTION_INSTANCE_NAME");
 
-    if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY || !EVOLUTION_INSTANCE_NAME) {
+    if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) {
       console.log("[DEV] WhatsApp would be sent but Evolution API not configured");
       const body: WhatsAppRequest = await req.json();
       console.log("[DEV] Message:", JSON.stringify(body));
@@ -30,6 +29,26 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Find first connected instance dynamically
+    const baseUrl = EVOLUTION_API_URL.replace(/\/+$/, "");
+    const apiHeaders = { "Content-Type": "application/json", apikey: EVOLUTION_API_KEY };
+    
+    const instancesRes = await fetch(`${baseUrl}/instance/fetchInstances`, { method: "GET", headers: apiHeaders });
+    const allInstances = await instancesRes.json();
+    const connectedInstance = Array.isArray(allInstances)
+      ? allInstances.find((i: any) => i?.instance?.status === "open")
+      : null;
+    
+    if (!connectedInstance) {
+      console.error("No connected WhatsApp instance found");
+      return new Response(
+        JSON.stringify({ error: "Nenhuma instância WhatsApp conectada. Configure no painel admin." }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const instanceName = connectedInstance.instance.instanceName;
 
     const body: WhatsAppRequest = await req.json();
     const { phone, message } = body;
@@ -46,14 +65,11 @@ serve(async (req) => {
     // Add country code if not present
     const fullPhone = cleanPhone.startsWith("55") ? cleanPhone : `55${cleanPhone}`;
 
-    const apiUrl = `${EVOLUTION_API_URL}/message/sendText/${EVOLUTION_INSTANCE_NAME}`;
+    const apiUrl = `${baseUrl}/message/sendText/${instanceName}`;
 
     const res = await fetch(apiUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: EVOLUTION_API_KEY,
-      },
+      headers: apiHeaders,
       body: JSON.stringify({
         number: fullPhone,
         text: message,
