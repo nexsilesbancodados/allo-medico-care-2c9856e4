@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 const Privacy = () => (
   <div className="min-h-screen bg-background">
+    <SEOHead title="Política de Privacidade" description="Saiba como a AloClinica coleta, usa e protege seus dados pessoais." canonical="https://allo-medico-care.lovable.app/privacy" />
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <Link to="/" className="inline-flex items-center gap-2 mb-8 text-muted-foreground hover:text-foreground transition text-sm">
         <ArrowLeft className="w-4 h-4" /> Voltar ao início

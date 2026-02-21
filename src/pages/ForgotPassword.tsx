@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Phone } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -32,6 +33,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <SEOHead title="Recuperar Senha" description="Recupere sua senha da plataforma AloClinica." />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <Link to="/" className="inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition text-sm">
           <ArrowLeft className="w-4 h-4" /> Voltar

@@ -151,10 +151,10 @@ const ClinicDashboard = () => {
         )}
 
         <Tabs defaultValue="overview" className="w-full">
-          <TabsList className="grid grid-cols-3 w-full max-w-md">
-            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="performance">Performance</TabsTrigger>
-            <TabsTrigger value="finance">Financeiro</TabsTrigger>
+          <TabsList className="grid grid-cols-3 w-full max-w-md mx-auto sm:mx-0">
+            <TabsTrigger value="overview" className="text-xs sm:text-sm">Visão Geral</TabsTrigger>
+            <TabsTrigger value="performance" className="text-xs sm:text-sm">Performance</TabsTrigger>
+            <TabsTrigger value="finance" className="text-xs sm:text-sm">Financeiro</TabsTrigger>
           </TabsList>
 
           {/* Overview tab */}
