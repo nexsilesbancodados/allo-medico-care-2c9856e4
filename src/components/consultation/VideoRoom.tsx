@@ -141,11 +141,12 @@ const VideoRoom = () => {
     return () => { supabase.removeChannel(queueChannel); };
   }, [appointment, isDoctor]);
 
-  // ─── Timer ───
+  // ─── Timer — only starts after device check is complete ───
   useEffect(() => {
+    if (!deviceChecked) return;
     timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, []);
+  }, [deviceChecked]);
 
   // ─── Realtime chat channel ───
   useEffect(() => {
@@ -175,7 +176,10 @@ const VideoRoom = () => {
     if (!data) { setLoading(false); return; }
     setAppointment(data);
 
-    await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId);
+    // Only doctor should set status to in_progress (prevents patient overwriting)
+    if (isDoctor) {
+      await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId);
+    }
 
     const otherUserId = isDoctor ? data.patient_id : null;
     const otherDoctorId = !isDoctor ? data.doctor_id : null;
@@ -266,20 +270,25 @@ const VideoRoom = () => {
     };
   }, [appointmentId, user, deviceChecked]);
 
+  const notesRef = useRef(notes);
+  useEffect(() => { notesRef.current = notes; }, [notes]);
+  const elapsedRef = useRef(elapsed);
+  useEffect(() => { elapsedRef.current = elapsed; }, [elapsed]);
+
   const endCall = useCallback(async () => {
     // Save presence log
     if (presenceLogId.current) {
       await supabase.from("video_presence_logs").update({
         left_at: new Date().toISOString(),
-        duration_seconds: elapsed,
+        duration_seconds: elapsedRef.current,
       }).eq("id", presenceLogId.current);
     }
-    if (isDoctor && notes) await saveNotes();
+    if (isDoctor && notesRef.current) await saveNotes();
     await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId);
     toast({ title: "Consulta encerrada" });
     if (isDoctor) navigate(`/dashboard/prescribe/${appointmentId}`);
     else navigate(`/dashboard/rate/${appointmentId}`);
-  }, [isDoctor, notes, appointmentId, elapsed]);
+  }, [isDoctor, appointmentId]);
 
   const handleReconnect = useCallback(() => {
     setDeviceChecked(false);
