@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Link2, DollarSign, Users, TrendingUp, Copy, UserCog, Sparkles } from "lucide-react";
+import { Link2, DollarSign, Users, TrendingUp, Copy, UserCog, Sparkles, Bot } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 
 const affiliateNav = [
   { label: "Indicações", href: "/dashboard", icon: <Link2 className="w-4 h-4" />, active: true },
+  { label: "Assistente IA", href: "/dashboard/ai-assistant", icon: <Bot className="w-4 h-4" /> },
   { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" /> },
 ];
 

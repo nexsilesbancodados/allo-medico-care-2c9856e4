@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Calendar, BarChart3, Settings, Stethoscope, Clock, DollarSign, TrendingUp, FileText, Sparkles } from "lucide-react";
+import { Users, Calendar, BarChart3, Settings, Stethoscope, Clock, DollarSign, TrendingUp, FileText, Sparkles, Bot } from "lucide-react";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -16,6 +16,7 @@ import { motion } from "framer-motion";
 
 const getClinicNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview" },
+  { label: "Assistente IA", href: "/dashboard/ai-assistant", icon: <Bot className="w-4 h-4" />, active: active === "ai-assistant" },
   { label: "Médicos", href: "/dashboard/clinic/doctors", icon: <Stethoscope className="w-4 h-4" />, active: active === "doctors" },
   { label: "Agendamentos", href: "/dashboard/clinic/schedules", icon: <Calendar className="w-4 h-4" />, active: active === "schedules" },
   { label: "Financeiro", href: "/dashboard/clinic/finance", icon: <DollarSign className="w-4 h-4" />, active: active === "finance" },

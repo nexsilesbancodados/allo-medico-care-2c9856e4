@@ -23,7 +23,8 @@ import { getReceptionNav } from "@/components/reception/receptionNav";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const AI_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`;
+const SUPABASE_URL = "https://oaixgmuocuwhsabidpei.supabase.co";
+const AI_URL = `${SUPABASE_URL}/functions/v1/ai-assistant`;
 
 interface QuickAction {
   label: string;
@@ -60,6 +61,21 @@ const quickActionsByRole: Record<string, QuickAction[]> = {
     { label: "Resposta de ticket", prompt: "Redija uma resposta profissional para um paciente insatisfeito com atraso na consulta.", icon: MessageSquare },
     { label: "Escalação", prompt: "Quais critérios usar para escalar um ticket para prioridade alta?", icon: ClipboardList },
   ],
+  clinic: [
+    { label: "Gestão de médicos", prompt: "Como otimizar a distribuição de consultas entre os médicos da clínica?", icon: Users },
+    { label: "Relatório financeiro", prompt: "Gere um resumo das comissões e receitas da clínica neste mês.", icon: BarChart3 },
+    { label: "Credenciamento", prompt: "Quais documentos são necessários para credenciar um novo médico na clínica?", icon: ClipboardList },
+  ],
+  partner: [
+    { label: "Validação de receita", prompt: "Como validar corretamente uma receita digital recebida pela plataforma?", icon: ClipboardList },
+    { label: "Integração", prompt: "Quais são as melhores práticas para integrar minha farmácia/laboratório à plataforma?", icon: Brain },
+    { label: "Relatório", prompt: "Gere um resumo das validações realizadas neste mês.", icon: BarChart3 },
+  ],
+  affiliate: [
+    { label: "Estratégias", prompt: "Quais estratégias posso usar para aumentar minhas indicações na plataforma?", icon: Brain },
+    { label: "Comissões", prompt: "Explique como funciona o sistema de comissões e quando recebo pagamento.", icon: BarChart3 },
+    { label: "Material", prompt: "Gere um texto de divulgação para eu compartilhar com potenciais pacientes.", icon: MessageSquare },
+  ],
 };
 
 const AIAssistantPanel = () => {
@@ -77,6 +93,8 @@ const AIAssistantPanel = () => {
     : roles.includes("receptionist") ? "receptionist"
     : roles.includes("support") ? "support"
     : roles.includes("clinic") ? "clinic"
+    : roles.includes("partner") ? "partner"
+    : roles.includes("affiliate") ? "affiliate"
     : "patient";
 
   const quickActions = quickActionsByRole[primaryRole] || quickActionsByRole.patient;
@@ -107,14 +125,18 @@ const AIAssistantPanel = () => {
     }
   };
 
-  const roleLabel = {
+  const roleLabel: Record<string, string> = {
     patient: "Paciente",
     doctor: "Médico",
     admin: "Administrador",
     receptionist: "Recepcionista",
     support: "Suporte",
     clinic: "Clínica",
-  }[primaryRole] || "Usuário";
+    partner: "Parceiro",
+    affiliate: "Afiliado",
+  };
+
+  const currentRoleLabel = roleLabel[primaryRole] || "Usuário";
 
   const copyMessage = (idx: number) => {
     const msg = messages[idx];
@@ -209,7 +231,7 @@ const AIAssistantPanel = () => {
   }, [input, isLoading, messages, userContext, primaryRole]);
 
   return (
-    <DashboardLayout title={roleLabel} nav={getNav()}>
+    <DashboardLayout title={currentRoleLabel} nav={getNav()}>
       <div className="max-w-4xl mx-auto flex flex-col" style={{ height: "calc(100vh - 120px)" }}>
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
@@ -222,11 +244,11 @@ const AIAssistantPanel = () => {
                 Assistente IA
                 <Badge variant="secondary" className="text-[10px] font-normal">
                   <Sparkles className="w-3 h-3 mr-1" />
-                  Gemini
+                  DeepSeek
                 </Badge>
               </h1>
               <p className="text-xs text-muted-foreground">
-                Assistente inteligente para {roleLabel.toLowerCase()}s
+                Assistente inteligente para {currentRoleLabel.toLowerCase()}s
               </p>
             </div>
           </div>
@@ -314,7 +336,7 @@ const AIAssistantPanel = () => {
                       title="Copiar"
                     >
                       {copiedIdx === i
-                        ? <Check className="w-3 h-3 text-emerald-500" />
+                        ? <Check className="w-3 h-3 text-primary" />
                         : <Copy className="w-3 h-3 text-muted-foreground" />}
                     </button>
                   )}
