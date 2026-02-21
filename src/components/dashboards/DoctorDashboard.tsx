@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity } from "lucide-react";
+import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity, Pill, ExternalLink } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
 import BlobKPICard from "@/components/ui/blob-kpi-card";
 
@@ -358,6 +358,47 @@ const DoctorDashboard = () => {
                 </Card>
               ))}
             </div>
+
+            {/* Memed Digital Prescription */}
+            <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5 hover:shadow-md transition-all">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                      <Pill className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-foreground flex items-center gap-2">
+                        Memed — Receita Digital
+                        <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Integrado</Badge>
+                      </h3>
+                      <p className="text-sm text-muted-foreground mt-0.5">
+                        Prescreva com a base de medicamentos mais completa do Brasil
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => window.open("https://memed.com.br/login", "_blank")}
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      Portal Memed
+                    </Button>
+                    <Button
+                      size="sm"
+                      className="bg-gradient-hero text-primary-foreground gap-1.5"
+                      onClick={() => navigate("/dashboard/prescriptions")}
+                    >
+                      <FileText className="w-3.5 h-3.5" />
+                      Minhas Receitas
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* ══ Análises ══ */}

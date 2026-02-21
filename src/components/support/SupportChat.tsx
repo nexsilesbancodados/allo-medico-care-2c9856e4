@@ -20,7 +20,11 @@ const SupportChat = () => {
   const [historyLoaded, setHistoryLoaded] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [otherTyping, setOtherTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const typingChannelRef = useRef<any>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Load chat history from DB
   useEffect(() => {
@@ -40,7 +44,7 @@ const SupportChat = () => {
     loadHistory();
   }, [user]);
 
-  // Realtime: listen for support replies
+  // Realtime: listen for support replies + typing indicators
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -49,10 +53,27 @@ const SupportChat = () => {
         const newMsg = payload.new as any;
         if (newMsg.role === "support") {
           setMessages(prev => [...prev, { role: "support" as const, content: newMsg.content }]);
+          setOtherTyping(false);
         }
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    // Typing broadcast channel
+    const typingChannel = supabase
+      .channel(`support-typing-${user.id}`)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload.sender_id !== user.id) {
+          setOtherTyping(true);
+          setTimeout(() => setOtherTyping(false), 3000);
+        }
+      })
+      .subscribe();
+    typingChannelRef.current = typingChannel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      supabase.removeChannel(typingChannel);
+    };
   }, [user]);
 
   useEffect(() => {
@@ -213,12 +234,29 @@ const SupportChat = () => {
                 <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
               </div>
             )}
+            {otherTyping && !isLoading && (
+              <div className="flex gap-2 items-center">
+                <div className="w-7 h-7 rounded-full bg-success/10 flex items-center justify-center">
+                  <Headset className="w-4 h-4 text-success" />
+                </div>
+                <span className="text-xs text-muted-foreground animate-pulse">digitando...</span>
+              </div>
+            )}
           </div>
         </ScrollArea>
         <div className="p-3 border-t border-border flex gap-2">
           <Input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              // Broadcast typing
+              if (!isTyping && typingChannelRef.current && user) {
+                setIsTyping(true);
+                typingChannelRef.current.send({ type: "broadcast", event: "typing", payload: { sender_id: user.id } });
+              }
+              clearTimeout(typingTimeoutRef.current);
+              typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 2000);
+            }}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendMessage()}
             placeholder="Digite sua mensagem..."
             disabled={isLoading}

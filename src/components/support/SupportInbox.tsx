@@ -57,8 +57,12 @@ const SupportInbox = () => {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("waiting_human");
   const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isTyping, setIsTyping] = useState(false);
+  const [otherTyping, setOtherTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const typingChannelRef = useRef<any>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
   // Create audio for notification
   useEffect(() => {
@@ -202,8 +206,24 @@ const SupportInbox = () => {
   useEffect(() => {
     if (selectedTicket) {
       fetchMessages(selectedTicket.id);
+      // Setup typing channel for this ticket's patient
+      const typingChannel = supabase
+        .channel(`support-typing-${selectedTicket.patient_id}`)
+        .on("broadcast", { event: "typing" }, (payload) => {
+          if (payload.payload.sender_id !== user?.id) {
+            setOtherTyping(true);
+            setTimeout(() => setOtherTyping(false), 3000);
+          }
+        })
+        .subscribe();
+      typingChannelRef.current = typingChannel;
+      return () => {
+        supabase.removeChannel(typingChannel);
+        typingChannelRef.current = null;
+        setOtherTyping(false);
+      };
     }
-  }, [selectedTicket, fetchMessages]);
+  }, [selectedTicket, fetchMessages, user]);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -294,6 +314,9 @@ const SupportInbox = () => {
                 </div>
               </div>
               <Badge variant="outline" className={`text-[10px] ${statusConf.color}`}>{statusConf.label}</Badge>
+              {otherTyping && (
+                <span className="text-[10px] text-primary font-medium animate-pulse">digitando...</span>
+              )}
               {selectedTicket.status !== "closed" && (
                 <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-destructive border-destructive/30 hover:bg-destructive/10" onClick={closeTicket}>
                   <XCircle className="w-3 h-3" /> Encerrar
@@ -342,7 +365,15 @@ const SupportInbox = () => {
             <div className="p-3 border-t border-border flex gap-2">
               <Input
                 value={input}
-                onChange={(e) => setInput(e.target.value)}
+                onChange={(e) => {
+                  setInput(e.target.value);
+                  if (!isTyping && typingChannelRef.current && user) {
+                    setIsTyping(true);
+                    typingChannelRef.current.send({ type: "broadcast", event: "typing", payload: { sender_id: user.id } });
+                  }
+                  clearTimeout(typingTimeoutRef.current);
+                  typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 2000);
+                }}
                 onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendReply()}
                 placeholder="Responder ao paciente..."
                 disabled={sending}
