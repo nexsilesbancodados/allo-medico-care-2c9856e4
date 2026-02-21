@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Accordion,
@@ -16,8 +17,27 @@ const faqs = [
 ];
 
 const FAQSection = () => {
+  // Inject FAQ JSON-LD for SEO
+  useEffect(() => {
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: faqs.map(f => ({
+        "@type": "Question",
+        name: f.q,
+        acceptedAnswer: { "@type": "Answer", text: f.a },
+      })),
+    };
+    const script = document.createElement("script");
+    script.type = "application/ld+json";
+    script.textContent = JSON.stringify(jsonLd);
+    script.id = "faq-jsonld";
+    document.head.appendChild(script);
+    return () => { document.getElementById("faq-jsonld")?.remove(); };
+  }, []);
+
   return (
-    <section id="faq" className="py-12 md:py-24">
+    <section id="faq" className="py-12 md:py-24" aria-labelledby="faq-heading">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -25,7 +45,7 @@ const FAQSection = () => {
           viewport={{ once: true }}
           className="text-center mb-10 md:mb-16"
         >
-          <h2 className="text-2xl md:text-4xl font-extrabold text-foreground mb-3">
+          <h2 id="faq-heading" className="text-2xl md:text-4xl font-extrabold text-foreground mb-3">
             Perguntas <span className="text-gradient">frequentes</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">

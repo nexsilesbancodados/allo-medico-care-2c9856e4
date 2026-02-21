@@ -5,35 +5,45 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
+import { lazy, Suspense } from "react";
+import { Loader2 } from "lucide-react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import AuthPaciente from "./pages/AuthPaciente";
-import AuthMedico from "./pages/AuthMedico";
-import AuthAdmin from "./pages/AuthAdmin";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Terms from "./pages/Terms";
-import Privacy from "./pages/Privacy";
-import LGPD from "./pages/LGPD";
-import Cookies from "./pages/Cookies";
-import RefundPolicy from "./pages/RefundPolicy";
-import DoctorTerms from "./pages/DoctorTerms";
-import Accessibility from "./pages/Accessibility";
-import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import GuestCheckout from "./pages/GuestCheckout";
-import GuestConsultation from "./pages/GuestConsultation";
-import AuthParceiro from "./pages/AuthParceiro";
-import AuthAfiliado from "./pages/AuthAfiliado";
-import AuthClinica from "./pages/AuthClinica";
-import NotFound from "./pages/NotFound";
-import LinkRedirect from "./pages/LinkRedirect";
-import ValidateDocument from "./pages/ValidateDocument";
-import PaymentSuccess from "./pages/PaymentSuccess";
 import PingoChatbot from "./components/PingoChatbot";
 import AccessibilityToggle from "./components/AccessibilityToggle";
 
+// Lazy-loaded pages for code splitting
+const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
+const AuthMedico = lazy(() => import("./pages/AuthMedico"));
+const AuthAdmin = lazy(() => import("./pages/AuthAdmin"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const Terms = lazy(() => import("./pages/Terms"));
+const Privacy = lazy(() => import("./pages/Privacy"));
+const LGPD = lazy(() => import("./pages/LGPD"));
+const Cookies = lazy(() => import("./pages/Cookies"));
+const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
+const DoctorTerms = lazy(() => import("./pages/DoctorTerms"));
+const Accessibility = lazy(() => import("./pages/Accessibility"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const GuestCheckout = lazy(() => import("./pages/GuestCheckout"));
+const GuestConsultation = lazy(() => import("./pages/GuestConsultation"));
+const AuthParceiro = lazy(() => import("./pages/AuthParceiro"));
+const AuthAfiliado = lazy(() => import("./pages/AuthAfiliado"));
+const AuthClinica = lazy(() => import("./pages/AuthClinica"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const LinkRedirect = lazy(() => import("./pages/LinkRedirect"));
+const ValidateDocument = lazy(() => import("./pages/ValidateDocument"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+
 const queryClient = new QueryClient();
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+  </div>
+);
 
 const App = () => (
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
@@ -43,8 +53,14 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <a href="#main-content" className="skip-to-content">Pular para o conteúdo</a>
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-medium focus:shadow-lg"
+          >
+            Pular para o conteúdo
+          </a>
           <main id="main-content">
+          <Suspense fallback={<PageLoader />}>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -80,6 +96,7 @@ const App = () => (
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </Suspense>
           </main>
           <PingoChatbot />
           <AccessibilityToggle />
