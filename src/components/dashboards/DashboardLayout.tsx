@@ -1,9 +1,10 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  LogOut, User, Settings, MoreHorizontal, Search, ChevronRight, Menu, X
+  LogOut, User, Settings, MoreHorizontal, Search, ChevronRight, Menu,
 } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -33,6 +34,7 @@ interface DashboardLayoutProps {
   title: string;
   nav?: NavItem[];
   role?: string;
+  loading?: boolean;
 }
 
 const ROLE_BADGE: Record<string, { bg: string; text: string; dot: string }> = {
@@ -46,11 +48,12 @@ const ROLE_BADGE: Record<string, { bg: string; text: string; dot: string }> = {
   affiliate:    { bg: "bg-muted",          text: "text-muted-foreground", dot: "bg-muted-foreground" },
 };
 
-const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLayoutProps) => {
-  const { profile, signOut } = useAuth();
+const DashboardLayout = ({ children, title, nav, role = "patient", loading: externalLoading }: DashboardLayoutProps) => {
+  const { profile } = useAuth();
   const navigate = useNavigate();
   const [moreOpen, setMoreOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { signOut } = useAuth();
 
   const initials = profile
     ? `${profile.first_name?.[0] ?? ""}${profile.last_name?.[0] ?? ""}`.toUpperCase()
@@ -70,12 +73,11 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const bottomNav = nav?.slice(0, 4) ?? [];
   const moreNav = nav && nav.length > 4 ? nav.slice(4) : [];
 
-  // Sidebar content shared between mobile sheet and desktop
   const SidebarContent = () => (
     <>
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-14 border-b border-border/40 shrink-0">
-        <img src={logoImg} alt="AloClinica" className="w-8 h-8 object-contain" />
+        <img src={logoImg} alt="AloClinica" className="w-8 h-8 object-contain" loading="lazy" />
         <span className="font-bold text-sm text-foreground hidden sm:block md:block">AloClínica</span>
       </div>
 
@@ -101,7 +103,6 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
               }`}
             >
-              {/* Active indicator bar */}
               {item.active && (
                 <motion.span
                   layoutId="sidebar-active-bar"
@@ -160,9 +161,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           </Sheet>
         )}
 
-        {/* Logo – hidden on desktop (shown in sidebar) */}
+        {/* Logo */}
         <Link to="/" className="flex items-center gap-2 shrink-0 md:hidden">
-          <img src={logoImg} alt="AloClinica" className="w-7 h-7 object-contain" />
+          <img src={logoImg} alt="AloClinica" className="w-7 h-7 object-contain" loading="lazy" />
         </Link>
         <Link to="/" className="hidden md:flex items-center gap-2 shrink-0">
           <span className="font-bold text-foreground text-sm">AloClínica</span>
@@ -184,7 +185,6 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
         {/* Right side */}
         <div className="flex items-center gap-1">
-          {/* Online pill */}
           <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-full border border-success/25 bg-success/8 text-success text-[11px] font-medium">
             <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
             Online
@@ -193,7 +193,6 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           <ThemeToggle />
           <NotificationBell />
 
-          {/* User menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="sm" className="h-8 gap-2 px-2 rounded-xl hover:bg-muted/60 transition-all">
