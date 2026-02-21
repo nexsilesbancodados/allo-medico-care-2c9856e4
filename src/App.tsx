@@ -14,6 +14,7 @@ import PingoChatbot from "./components/PingoChatbot";
 import AccessibilityToggle from "./components/AccessibilityToggle";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CookieConsent from "./components/CookieConsent";
+import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
 
 // Lazy-loaded pages for code splitting
 const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
@@ -47,6 +48,11 @@ const PageLoader = () => (
   </div>
 );
 
+const KeyboardShortcutsProvider = () => {
+  useKeyboardShortcuts();
+  return null;
+};
+
 const App = () => (
   <ErrorBoundary>
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
@@ -56,6 +62,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <KeyboardShortcutsProvider />
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-medium focus:shadow-lg"
