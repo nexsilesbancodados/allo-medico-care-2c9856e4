@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard/
+Disallow: /reset-password
+Disallow: /consulta
 
 Sitemap: https://allo-medico-care.lovable.app/sitemap.xml

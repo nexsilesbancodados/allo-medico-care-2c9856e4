@@ -1,66 +1,88 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, Routes, Route, useSearchParams } from "react-router-dom";
 import { usePresence } from "@/hooks/use-presence";
-import PatientDashboard from "@/components/dashboards/PatientDashboard";
-import DoctorDashboard from "@/components/dashboards/DoctorDashboard";
-import ClinicDashboard from "@/components/dashboards/ClinicDashboard";
-import AdminDashboard from "@/components/dashboards/AdminDashboard";
-import ReceptionDashboard from "@/components/dashboards/ReceptionDashboard";
-import SupportDashboard from "@/components/dashboards/SupportDashboard";
-import PartnerDashboard from "@/components/dashboards/PartnerDashboard";
-import AffiliateDashboard from "@/components/dashboards/AffiliateDashboard";
-import DoctorSearch from "@/components/patient/DoctorSearch";
-import AppointmentsList from "@/components/patient/AppointmentsList";
-import BookAppointment from "@/components/patient/BookAppointment";
-import PlansCheckout from "@/components/patient/PlansCheckout";
-import MedicalHistory from "@/components/patient/MedicalHistory";
-import PaymentHistory from "@/components/patient/PaymentHistory";
-import PatientExamUpload from "@/components/patient/PatientExamUpload";
-import PatientHealth from "@/components/patient/PatientHealth";
-import PatientSupportChat from "@/components/patient/PatientSupportChat";
-import DependentsManager from "@/components/patient/DependentsManager";
-import UserProfile from "@/components/profile/UserProfile";
-import DoctorAvailability from "@/components/doctor/DoctorAvailability";
-import DoctorPatients from "@/components/doctor/DoctorPatients";
-import DoctorPrescriptions from "@/components/doctor/DoctorPrescriptions";
-import DoctorEarnings from "@/components/doctor/DoctorEarnings";
-import MedicalCertificate from "@/components/doctor/MedicalCertificate";
-import DoctorConsultations from "@/components/doctor/DoctorConsultations";
-import DoctorCalendar from "@/components/doctor/DoctorCalendar";
-import DoctorWaitingRoom from "@/components/doctor/DoctorWaitingRoom";
-import PatientDocuments from "@/components/doctor/PatientDocuments";
-import VideoRoom from "@/components/consultation/VideoRoom";
-import PrescriptionForm from "@/components/consultation/PrescriptionForm";
-import RateConsultationPage from "@/components/patient/RateConsultationPage";
-import DoctorPublicProfile from "@/components/doctor/DoctorPublicProfile";
-import ClinicDoctorsManagement from "@/components/clinic/ClinicDoctorsManagement";
-import AdminDoctors from "@/components/admin/AdminDoctors";
-import AdminPatients from "@/components/admin/AdminPatients";
-import AdminClinics from "@/components/admin/AdminClinics";
-import AdminAppointments from "@/components/admin/AdminAppointments";
-import AdminSpecialties from "@/components/admin/AdminSpecialties";
-import AdminPlans from "@/components/admin/AdminPlans";
-import AdminSubscriptions from "@/components/admin/AdminSubscriptions";
-import AdminLogs from "@/components/admin/AdminLogs";
-import AdminInviteCodes from "@/components/admin/AdminInviteCodes";
-import AdminReports from "@/components/admin/AdminReports";
-import AdminUsers from "@/components/admin/AdminUsers";
-import AdminApprovals from "@/components/admin/AdminApprovals";
-import AdminSwitchPanel from "@/components/admin/AdminSwitchPanel";
-import ReceptionSchedules from "@/components/reception/ReceptionSchedules";
-import ReceptionCheckin from "@/components/reception/ReceptionCheckin";
-import ReceptionBilling from "@/components/reception/ReceptionBilling";
-import ChatPage from "@/components/chat/ChatPage";
-import AdminNPS from "@/components/admin/AdminNPS";
-import MedicalRecords from "@/components/medical/MedicalRecords";
-import HealthTimeline from "@/components/patient/HealthTimeline";
-import SymptomDiary from "@/components/patient/SymptomDiary";
-import AdminWhatsApp from "@/components/admin/AdminWhatsApp";
-import AdminLiveConsultations from "@/components/admin/AdminLiveConsultations";
-import SystemHealth from "@/components/admin/SystemHealth";
-import PanelSettings from "@/components/settings/PanelSettings";
+import { lazy, Suspense, ReactNode } from "react";
 import { Loader2 } from "lucide-react";
-import { ReactNode } from "react";
+
+const PageLoader = () => (
+  <div className="min-h-screen flex items-center justify-center bg-background">
+    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+  </div>
+);
+
+// Lazy-loaded dashboard components for code-splitting
+const PatientDashboard = lazy(() => import("@/components/dashboards/PatientDashboard"));
+const DoctorDashboard = lazy(() => import("@/components/dashboards/DoctorDashboard"));
+const ClinicDashboard = lazy(() => import("@/components/dashboards/ClinicDashboard"));
+const AdminDashboard = lazy(() => import("@/components/dashboards/AdminDashboard"));
+const ReceptionDashboard = lazy(() => import("@/components/dashboards/ReceptionDashboard"));
+const SupportDashboard = lazy(() => import("@/components/dashboards/SupportDashboard"));
+const PartnerDashboard = lazy(() => import("@/components/dashboards/PartnerDashboard"));
+const AffiliateDashboard = lazy(() => import("@/components/dashboards/AffiliateDashboard"));
+
+// Patient
+const DoctorSearch = lazy(() => import("@/components/patient/DoctorSearch"));
+const AppointmentsList = lazy(() => import("@/components/patient/AppointmentsList"));
+const BookAppointment = lazy(() => import("@/components/patient/BookAppointment"));
+const PlansCheckout = lazy(() => import("@/components/patient/PlansCheckout"));
+const MedicalHistory = lazy(() => import("@/components/patient/MedicalHistory"));
+const PaymentHistory = lazy(() => import("@/components/patient/PaymentHistory"));
+const PatientExamUpload = lazy(() => import("@/components/patient/PatientExamUpload"));
+const PatientHealth = lazy(() => import("@/components/patient/PatientHealth"));
+const PatientSupportChat = lazy(() => import("@/components/patient/PatientSupportChat"));
+const DependentsManager = lazy(() => import("@/components/patient/DependentsManager"));
+const HealthTimeline = lazy(() => import("@/components/patient/HealthTimeline"));
+const SymptomDiary = lazy(() => import("@/components/patient/SymptomDiary"));
+
+// Doctor
+const DoctorAvailability = lazy(() => import("@/components/doctor/DoctorAvailability"));
+const DoctorPatients = lazy(() => import("@/components/doctor/DoctorPatients"));
+const DoctorPrescriptions = lazy(() => import("@/components/doctor/DoctorPrescriptions"));
+const DoctorEarnings = lazy(() => import("@/components/doctor/DoctorEarnings"));
+const MedicalCertificate = lazy(() => import("@/components/doctor/MedicalCertificate"));
+const DoctorConsultations = lazy(() => import("@/components/doctor/DoctorConsultations"));
+const DoctorCalendar = lazy(() => import("@/components/doctor/DoctorCalendar"));
+const DoctorWaitingRoom = lazy(() => import("@/components/doctor/DoctorWaitingRoom"));
+const PatientDocuments = lazy(() => import("@/components/doctor/PatientDocuments"));
+const DoctorPublicProfile = lazy(() => import("@/components/doctor/DoctorPublicProfile"));
+
+// Consultation
+const VideoRoom = lazy(() => import("@/components/consultation/VideoRoom"));
+const PrescriptionForm = lazy(() => import("@/components/consultation/PrescriptionForm"));
+const RateConsultationPage = lazy(() => import("@/components/patient/RateConsultationPage"));
+
+// Shared
+const UserProfile = lazy(() => import("@/components/profile/UserProfile"));
+const ChatPage = lazy(() => import("@/components/chat/ChatPage"));
+const MedicalRecords = lazy(() => import("@/components/medical/MedicalRecords"));
+const PanelSettings = lazy(() => import("@/components/settings/PanelSettings"));
+
+// Clinic
+const ClinicDoctorsManagement = lazy(() => import("@/components/clinic/ClinicDoctorsManagement"));
+
+// Reception
+const ReceptionSchedules = lazy(() => import("@/components/reception/ReceptionSchedules"));
+const ReceptionCheckin = lazy(() => import("@/components/reception/ReceptionCheckin"));
+const ReceptionBilling = lazy(() => import("@/components/reception/ReceptionBilling"));
+
+// Admin
+const AdminDoctors = lazy(() => import("@/components/admin/AdminDoctors"));
+const AdminPatients = lazy(() => import("@/components/admin/AdminPatients"));
+const AdminClinics = lazy(() => import("@/components/admin/AdminClinics"));
+const AdminAppointments = lazy(() => import("@/components/admin/AdminAppointments"));
+const AdminSpecialties = lazy(() => import("@/components/admin/AdminSpecialties"));
+const AdminPlans = lazy(() => import("@/components/admin/AdminPlans"));
+const AdminSubscriptions = lazy(() => import("@/components/admin/AdminSubscriptions"));
+const AdminLogs = lazy(() => import("@/components/admin/AdminLogs"));
+const AdminInviteCodes = lazy(() => import("@/components/admin/AdminInviteCodes"));
+const AdminReports = lazy(() => import("@/components/admin/AdminReports"));
+const AdminUsers = lazy(() => import("@/components/admin/AdminUsers"));
+const AdminApprovals = lazy(() => import("@/components/admin/AdminApprovals"));
+const AdminSwitchPanel = lazy(() => import("@/components/admin/AdminSwitchPanel"));
+const AdminNPS = lazy(() => import("@/components/admin/AdminNPS"));
+const AdminWhatsApp = lazy(() => import("@/components/admin/AdminWhatsApp"));
+const AdminLiveConsultations = lazy(() => import("@/components/admin/AdminLiveConsultations"));
+const SystemHealth = lazy(() => import("@/components/admin/SystemHealth"));
 
 const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: string[]; children: ReactNode }) => {
   const isAdmin = roles.includes("admin");
@@ -76,16 +98,11 @@ const Dashboard = () => {
   usePresence();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (!user) return <Navigate to="/auth" replace />;
 
-  // Only admin can switch between all panels; others see only their own
   const isAdmin = roles.includes("admin");
   const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "affiliate", "admin"];
   const primaryRole = isAdmin && forceRole && validForceRoles.includes(forceRole)
@@ -100,6 +117,7 @@ const Dashboard = () => {
     : "patient";
 
   return (
+    <Suspense fallback={<PageLoader />}>
     <Routes>
       {/* ─── Role-based dashboard index routes ─── */}
       <Route path="patient" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientDashboard /></RoleGuard>} />
@@ -115,7 +133,7 @@ const Dashboard = () => {
       <Route path="profile" element={<UserProfile />} />
       <Route path="settings" element={<PanelSettings />} />
 
-      {/* Patient routes — patients + admin */}
+      {/* Patient routes */}
       <Route path="doctors" element={<RoleGuard allowed={["patient"]} roles={roles}><DoctorSearch /></RoleGuard>} />
       <Route path="appointments" element={<RoleGuard allowed={["patient"]} roles={roles}><AppointmentsList /></RoleGuard>} />
       <Route path="schedule" element={<RoleGuard allowed={["patient"]} roles={roles}><DoctorSearch /></RoleGuard>} />
@@ -132,7 +150,7 @@ const Dashboard = () => {
       <Route path="timeline" element={<RoleGuard allowed={["patient"]} roles={roles}><HealthTimeline /></RoleGuard>} />
       <Route path="patient/diary" element={<RoleGuard allowed={["patient"]} roles={roles}><SymptomDiary /></RoleGuard>} />
 
-      {/* Doctor routes — doctors + admin */}
+      {/* Doctor routes */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />
       <Route path="patients" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorPatients /></RoleGuard>} />
       <Route path="prescriptions" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorPrescriptions /></RoleGuard>} />
@@ -143,21 +161,21 @@ const Dashboard = () => {
       <Route path="doctor/waiting-room" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorWaitingRoom /></RoleGuard>} />
       <Route path="doctor/documents" element={<RoleGuard allowed={["doctor"]} roles={roles}><PatientDocuments /></RoleGuard>} />
 
-      {/* Consultation routes — doctor + patient + admin */}
+      {/* Consultation routes */}
       <Route path="consultation/:appointmentId" element={<RoleGuard allowed={["doctor", "patient"]} roles={roles}><VideoRoom /></RoleGuard>} />
       <Route path="prescribe/:appointmentId" element={<RoleGuard allowed={["doctor"]} roles={roles}><PrescriptionForm /></RoleGuard>} />
       <Route path="rate/:appointmentId" element={<RoleGuard allowed={["patient"]} roles={roles}><RateConsultationPage /></RoleGuard>} />
       <Route path="doctor-profile/:doctorId" element={<DoctorPublicProfile />} />
 
-      {/* Clinic routes — clinic + admin */}
+      {/* Clinic routes */}
       <Route path="clinic/doctors" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDoctorsManagement /></RoleGuard>} />
 
-      {/* Reception routes — receptionist + admin */}
+      {/* Reception routes */}
       <Route path="reception/schedules" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionSchedules /></RoleGuard>} />
       <Route path="reception/checkin" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionCheckin /></RoleGuard>} />
       <Route path="reception/billing" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionBilling /></RoleGuard>} />
 
-      {/* Admin routes — admin only */}
+      {/* Admin routes */}
       <Route path="admin/doctors" element={<RoleGuard allowed={[]} roles={roles}><AdminDoctors /></RoleGuard>} />
       <Route path="admin/users" element={<RoleGuard allowed={[]} roles={roles}><AdminUsers /></RoleGuard>} />
       <Route path="admin/patients" element={<RoleGuard allowed={[]} roles={roles}><AdminPatients /></RoleGuard>} />
@@ -182,6 +200,7 @@ const Dashboard = () => {
         element={<Navigate to={`/dashboard/${primaryRole}`} replace />}
       />
     </Routes>
+    </Suspense>
   );
 };
 

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Lock, Check } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -40,6 +41,7 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-6">
+      <SEOHead title="Redefinir Senha" description="Redefina sua senha de acesso à AloClinica." />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         {success ? (
           <div className="text-center py-8">

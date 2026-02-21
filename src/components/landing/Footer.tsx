@@ -83,7 +83,7 @@ const Footer = () => {
         {/* Platform status bar */}
         <div className="mb-6 px-4 py-2.5 rounded-xl bg-background/5 border border-background/10 flex items-center justify-center gap-4 text-xs">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="opacity-70">Operação: Normal</span>
           </span>
           <span className="opacity-30">|</span>

@@ -8,6 +8,7 @@ import {
   Clock, Send, X
 } from "lucide-react";
 import { format } from "date-fns";
+import SEOHead from "@/components/SEOHead";
 
 interface ChatMessage {
   id: string;
@@ -120,6 +121,7 @@ const GuestConsultation = () => {
 
   return (
     <div className="min-h-screen bg-[hsl(210,50%,5%)] flex flex-col">
+      <SEOHead title="Consulta por Vídeo" description="Sala de videoconsulta avulsa da AloClinica." />
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2 bg-[hsl(210,50%,8%)] border-b border-[hsl(210,30%,18%)]">
         <div className="flex items-center gap-3">

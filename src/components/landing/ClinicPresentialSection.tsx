@@ -21,7 +21,7 @@ const chatMessages = [
 const ClinicPresentialSection = () => {
   return (
     <section aria-label="Clínica presencial" className="py-0 px-0">
-      <div className="bg-[hsl(210,40%,15%)] dark:bg-[hsl(210,40%,10%)] text-white">
+      <div className="bg-[hsl(var(--foreground))] text-[hsl(var(--background))]">
         {/* Top section */}
         <div className="container mx-auto px-4 pt-16 pb-12">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
