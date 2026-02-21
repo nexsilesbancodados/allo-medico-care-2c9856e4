@@ -27,9 +27,8 @@ Deno.serve(async (req) => {
       { global: { headers: { Authorization: authHeader } } }
     );
 
-    const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims) {
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -40,8 +39,14 @@ Deno.serve(async (req) => {
     const appName = Deno.env.get("METERED_APP_NAME");
 
     if (!secretKey || !appName) {
-      return new Response(JSON.stringify({ error: "TURN server not configured" }), {
-        status: 500,
+      // Return STUN-only fallback if TURN not configured
+      console.log("[TURN] Metered not configured, returning STUN fallback");
+      return new Response(JSON.stringify({
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+        ],
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -59,8 +64,13 @@ Deno.serve(async (req) => {
     if (!createRes.ok) {
       const errText = await createRes.text();
       console.error("Metered create credential error:", errText);
-      return new Response(JSON.stringify({ error: "Failed to create TURN credential" }), {
-        status: 500,
+      // Return STUN fallback on error
+      return new Response(JSON.stringify({
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+        ],
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -76,13 +86,19 @@ Deno.serve(async (req) => {
     if (!iceRes.ok) {
       const errText = await iceRes.text();
       console.error("Metered get ICE servers error:", errText);
-      return new Response(JSON.stringify({ error: "Failed to get ICE servers" }), {
-        status: 500,
+      return new Response(JSON.stringify({
+        iceServers: [
+          { urls: "stun:stun.l.google.com:19302" },
+          { urls: "stun:stun1.l.google.com:19302" },
+        ],
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
     const iceServers = await iceRes.json();
+
+    console.log(`[TURN] Returned ${iceServers.length} ICE servers for user ${user.id}`);
 
     return new Response(JSON.stringify({ iceServers }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
