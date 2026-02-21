@@ -53,6 +53,7 @@ import ReceptionBilling from "@/components/reception/ReceptionBilling";
 import ChatPage from "@/components/chat/ChatPage";
 import AdminNPS from "@/components/admin/AdminNPS";
 import MedicalRecords from "@/components/medical/MedicalRecords";
+import HealthTimeline from "@/components/patient/HealthTimeline";
 import AdminWhatsApp from "@/components/admin/AdminWhatsApp";
 import SystemHealth from "@/components/admin/SystemHealth";
 import PanelSettings from "@/components/settings/PanelSettings";
@@ -126,6 +127,7 @@ const Dashboard = () => {
       <Route path="patient/dependents" element={<RoleGuard allowed={["patient"]} roles={roles}><DependentsManager /></RoleGuard>} />
       <Route path="chat" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><ChatPage /></RoleGuard>} />
       <Route path="medical-records" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><MedicalRecords /></RoleGuard>} />
+      <Route path="timeline" element={<RoleGuard allowed={["patient"]} roles={roles}><HealthTimeline /></RoleGuard>} />
 
       {/* Doctor routes — doctors + admin */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />

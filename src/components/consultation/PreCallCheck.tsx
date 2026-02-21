@@ -11,6 +11,7 @@ import mascotImg from "@/assets/mascot-wave.png";
 import { format, differenceInSeconds } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import PreConsultationForm from "@/components/patient/PreConsultationForm";
+import HealthTipsCarousel from "./HealthTipsCarousel";
 
 interface PreCallCheckProps {
   appointmentId?: string;
@@ -486,6 +487,9 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
             </CardContent>
           </Card>
         )}
+
+        {/* Educational health tips carousel */}
+        <HealthTipsCarousel />
 
         {/* Quick tips */}
         <Card className="border-border">
