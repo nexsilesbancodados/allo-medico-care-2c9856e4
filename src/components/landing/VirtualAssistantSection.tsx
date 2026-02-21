@@ -98,8 +98,13 @@ const VirtualAssistantSection = () => {
                   variant="outline"
                   className="rounded-full px-6 gap-2 font-semibold"
                   onClick={() => {
+                    // Try clicking the FAB button first, then dispatch custom event as fallback
                     const chatBtn = document.querySelector('[data-pingo-chat]') as HTMLButtonElement;
-                    if (chatBtn) chatBtn.click();
+                    if (chatBtn) {
+                      chatBtn.click();
+                    } else {
+                      window.dispatchEvent(new CustomEvent("open-pingo-chat"));
+                    }
                   }}
                 >
                   <MessageCircle className="w-5 h-5" />
