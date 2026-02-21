@@ -28,8 +28,8 @@ serve(async (req) => {
     // Get appointments in both windows
     const { data: appointments } = await supabase
       .from("appointments")
-      .select("id, scheduled_at, patient_id, doctor_id, status")
-      .eq("status", "scheduled")
+      .select("id, scheduled_at, patient_id, doctor_id, status, jitsi_link, guest_patient_id")
+      .in("status", ["scheduled", "confirmed"])
       .or(
         `and(scheduled_at.gte.${in1h.toISOString()},scheduled_at.lt.${in1h5.toISOString()}),and(scheduled_at.gte.${in15.toISOString()},scheduled_at.lt.${in20.toISOString()})`
       );
@@ -108,12 +108,14 @@ serve(async (req) => {
       }
 
       // Send WhatsApp reminder with Jitsi link
-      if (patient?.phone) {
+      const patientProfile = patientMap.get(appt.patient_id);
+      const patientPhone = patientProfile?.phone;
+      if (patientPhone) {
         try {
-          const consultaLink = `https://allo-medico-care.lovable.app/dashboard/consultation/${appt.id}`;
+          const jitsiLink = appt.jitsi_link || `https://meet.jit.si/allo-medico-${appt.id}`;
           const whatsappMsg = diffMin <= 20
-            ? `⏰ *Lembrete: sua consulta começa em 15 minutos!*\n\nOlá ${patient.first_name},\nSua consulta com ${docNameMap.get(appt.doctor_id) ?? "seu médico"} está prestes a começar.\n\n🔗 Acesse a sala de consulta com segurança:\n${consultaLink}\n\nEntre com 5 minutos de antecedência. 🏥`
-            : `📋 *Lembrete de Consulta*\n\nOlá ${patient.first_name},\nSua consulta com ${docNameMap.get(appt.doctor_id) ?? "seu médico"} é em 1 hora.\n\n📅 ${scheduledAt.toLocaleDateString("pt-BR")} às ${scheduledAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}\n\nPrepare-se e acesse o painel quando estiver na hora. 🏥`;
+            ? `⏰ *Lembrete: sua consulta começa em 15 minutos!*\n\nOlá ${patientProfile.first_name},\nSua consulta com ${docNameMap.get(appt.doctor_id) ?? "seu médico"} está prestes a começar.\n\n📹 Acesse a sala:\n${jitsiLink}\n\nEntre com 5 minutos de antecedência. 🏥`
+            : `📋 *Lembrete de Consulta*\n\nOlá ${patientProfile.first_name},\nSua consulta com ${docNameMap.get(appt.doctor_id) ?? "seu médico"} é em 1 hora.\n\n📅 ${scheduledAt.toLocaleDateString("pt-BR")} às ${scheduledAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}\n\n📹 Link da sala: ${jitsiLink}\n\nPrepare-se! 🏥`;
 
           await fetch(`${supabaseUrl}/functions/v1/send-whatsapp`, {
             method: "POST",
@@ -121,7 +123,7 @@ serve(async (req) => {
               "Content-Type": "application/json",
               Authorization: `Bearer ${anonKey}`,
             },
-            body: JSON.stringify({ phone: patient.phone, message: whatsappMsg }),
+            body: JSON.stringify({ phone: patientPhone, message: whatsappMsg }),
           });
         } catch (e) {
           console.error(`Failed to send WhatsApp reminder for appointment ${appt.id}:`, e);

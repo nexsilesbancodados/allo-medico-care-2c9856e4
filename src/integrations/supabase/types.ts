@@ -58,6 +58,7 @@ export type Database = {
           duration_minutes: number | null
           guest_patient_id: string | null
           id: string
+          jitsi_link: string | null
           notes: string | null
           patient_id: string | null
           payment_confirmed_at: string | null
@@ -78,6 +79,7 @@ export type Database = {
           duration_minutes?: number | null
           guest_patient_id?: string | null
           id?: string
+          jitsi_link?: string | null
           notes?: string | null
           patient_id?: string | null
           payment_confirmed_at?: string | null
@@ -98,6 +100,7 @@ export type Database = {
           duration_minutes?: number | null
           guest_patient_id?: string | null
           id?: string
+          jitsi_link?: string | null
           notes?: string | null
           patient_id?: string | null
           payment_confirmed_at?: string | null
