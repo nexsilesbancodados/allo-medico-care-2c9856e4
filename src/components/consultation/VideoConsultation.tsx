@@ -86,7 +86,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     `userInfo.displayName=${displayName}`,
   ].join("&");
 
-  const jitsiUrl = `https://meet.init7.net/${roomName}#${configParams}`;
+  const jitsiUrl = `https://meet.ffmuc.net/${roomName}#${configParams}`;
 
   useEffect(() => {
     // Fallback: mark as loaded after timeout
