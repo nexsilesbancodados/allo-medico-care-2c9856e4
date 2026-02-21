@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Phone, Mail, Lock, User, ArrowLeft, Heart, Check, Star, CreditCard, Shield } from "lucide-react";
+import { formatMask, unmask } from "@/hooks/use-mask";
 import patientPortalBg from "@/assets/patient-portal-bg.png";
 
 const plans = [
@@ -41,52 +41,51 @@ const AuthPaciente = () => {
   const [step, setStep] = useState<Step>(initialPlan ? "checkout" : "select");
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(initialPlan);
 
-  // Checkout state
-  const [cardName, setCardName] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvv, setCardCvv] = useState("");
-  const [processing, setProcessing] = useState(false);
-
   // Register state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [cpf, setCpf] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [processing, setProcessing] = useState(false);
 
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const currentPlan = plans.find(p => p.id === selectedPlanId);
 
-  const formatCardNumber = (value: string) => {
-    const cleaned = value.replace(/\D/g, "").slice(0, 16);
-    return cleaned.replace(/(\d{4})/g, "$1 ").trim();
-  };
-
-  const formatExpiry = (value: string) => {
-    const cleaned = value.replace(/\D/g, "").slice(0, 4);
-    if (cleaned.length >= 3) return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-    return cleaned;
-  };
-
   const handleSelectPlan = (planId: string) => {
     setSelectedPlanId(planId);
-    setStep("checkout");
+    setStep("register");
   };
 
-  const handleCheckout = () => {
-    if (!cardName || !cardNumber || !cardExpiry || !cardCvv) {
-      toast({ title: "Preencha todos os campos do cartão", variant: "destructive" });
-      return;
-    }
+  const handleCheckoutStripe = async () => {
+    if (!currentPlan) return;
     setProcessing(true);
-    setTimeout(() => {
-      setProcessing(false);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
+        body: {
+          mode: currentPlan.id === "mensal" ? "subscription" : "payment",
+          planId: currentPlan.id,
+          successUrl: `${window.location.origin}/payment-success`,
+          cancelUrl: `${window.location.origin}/paciente`,
+        },
+      });
+      if (error) throw error;
+      if (data?.sessionUrl) {
+        window.location.href = data.sessionUrl;
+      } else {
+        // Fallback: proceed without payment for now
+        toast({ title: "Pagamento", description: "Integração Stripe pendente. Criando conta..." });
+        setStep("register");
+      }
+    } catch (err: any) {
+      toast({ title: "Erro no pagamento", description: err.message || "Tente novamente", variant: "destructive" });
       setStep("register");
-      toast({ title: "Pagamento confirmado!", description: "Agora crie sua conta para acessar a plataforma." });
-    }, 2000);
+    }
+    setProcessing(false);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -94,13 +93,31 @@ const AuthPaciente = () => {
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email, password,
-      options: { emailRedirectTo: window.location.origin, data: { first_name: firstName, last_name: lastName } },
+      options: {
+        emailRedirectTo: window.location.origin,
+        data: { first_name: firstName, last_name: lastName },
+      },
     });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast({ title: "Erro no cadastro", description: error.message, variant: "destructive" });
       return;
     }
+    // Update profile with CPF and phone
+    if (data.user) {
+      await supabase.from("profiles").update({
+        cpf: unmask(cpf),
+        phone: unmask(phone),
+      }).eq("user_id", data.user.id);
+
+      // Send welcome email
+      try {
+        await supabase.functions.invoke("send-email", {
+          body: { type: "welcome", to: email, data: { name: firstName } },
+        });
+      } catch {}
+    }
+    setLoading(false);
     toast({ title: "Cadastro realizado!", description: "Sua conta foi criada com sucesso." });
     navigate("/dashboard");
   };
@@ -121,7 +138,7 @@ const AuthPaciente = () => {
 
   return (
     <div className="min-h-screen relative">
-      <img src={patientPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover -z-10" />
+      <img src={patientPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover -z-10" loading="lazy" />
       <div className="absolute inset-0 bg-background/70 -z-10" />
       {/* Header */}
       <div className="border-b border-border bg-card/50">
@@ -141,11 +158,10 @@ const AuthPaciente = () => {
       {/* Steps indicator */}
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-center gap-2 text-sm mb-8">
-          {["Escolher Plano", "Pagamento", "Criar Conta"].map((label, i) => {
-            const stepIndex = i;
-            const currentIndex = step === "select" ? 0 : step === "checkout" ? 1 : 2;
-            const isActive = stepIndex === currentIndex;
-            const isDone = stepIndex < currentIndex;
+          {["Escolher Plano", "Criar Conta"].map((label, i) => {
+            const currentIndex = step === "select" ? 0 : 1;
+            const isActive = i === currentIndex;
+            const isDone = i < currentIndex;
             return (
               <div key={label} className="flex items-center gap-2">
                 {i > 0 && <div className={`w-8 h-px ${isDone ? "bg-primary" : "bg-border"}`} />}
@@ -206,7 +222,6 @@ const AuthPaciente = () => {
               ))}
             </div>
 
-            {/* Login link for existing patients */}
             <p className="text-center text-sm text-muted-foreground mt-8">
               Já tem conta?{" "}
               <button onClick={() => { setStep("register"); setMode("login"); }} className="text-primary font-semibold hover:underline">
@@ -216,73 +231,8 @@ const AuthPaciente = () => {
           </motion.div>
         )}
 
-        {/* Step 2: Checkout */}
-        {step === "checkout" && currentPlan && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl mx-auto">
-            <button onClick={() => setStep("select")} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
-              <ArrowLeft className="w-4 h-4" /> Trocar plano
-            </button>
-            <h1 className="text-2xl font-bold text-foreground mb-6">Pagamento</h1>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="border-border">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-foreground mb-4">Resumo do Pedido</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">{currentPlan.name}</span>
-                      <span className="font-semibold text-foreground">R${currentPlan.price}</span>
-                    </div>
-                    <div className="border-t border-border pt-3 flex justify-between">
-                      <span className="font-bold text-foreground">Total</span>
-                      <span className="font-bold text-foreground text-lg">R${currentPlan.price}</span>
-                    </div>
-                  </div>
-                  <div className="mt-6 p-3 rounded-lg bg-muted">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Shield className="w-4 h-4" />
-                      Pagamento simulado — sem cobrança real
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" /> Dados de Pagamento
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-xs">Nome no cartão</Label>
-                      <Input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Nome completo" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Número do cartão</Label>
-                      <Input value={cardNumber} onChange={e => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" className="mt-1 font-mono" maxLength={19} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs">Validade</Label>
-                        <Input value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" className="mt-1 font-mono" maxLength={5} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">CVV</Label>
-                        <Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" className="mt-1 font-mono" maxLength={4} type="password" />
-                      </div>
-                    </div>
-                    <Button className="w-full bg-gradient-hero text-primary-foreground mt-2" size="lg" onClick={handleCheckout} disabled={processing}>
-                      {processing ? "Processando..." : `Pagar R$${currentPlan.price}`}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Step 3: Register (only after payment) */}
-        {step === "register" && (
+        {/* Step 2: Register */}
+        {(step === "register" || step === "checkout") && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md mx-auto">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
@@ -291,16 +241,49 @@ const AuthPaciente = () => {
               <div>
                 <h2 className="text-2xl font-bold text-foreground">{mode === "register" ? "Criar sua conta" : "Entrar"}</h2>
                 <p className="text-sm text-muted-foreground">
-                  {mode === "register" ? "Finalize seu cadastro para acessar a plataforma" : "Acesse sua conta de paciente"}
+                  {mode === "register" ? "Preencha seus dados para acessar a plataforma" : "Acesse sua conta de paciente"}
                 </p>
               </div>
             </div>
+
+            {currentPlan && mode === "register" && (
+              <div className="p-3 rounded-lg bg-primary/5 border border-primary/20 mb-4 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-foreground">{currentPlan.name}</p>
+                  <p className="text-xs text-muted-foreground">R${currentPlan.price}/{currentPlan.period}</p>
+                </div>
+                <button onClick={() => setStep("select")} className="text-xs text-primary hover:underline">Trocar</button>
+              </div>
+            )}
 
             {mode === "register" ? (
               <form onSubmit={handleRegister} className="space-y-4">
                 <div className="grid grid-cols-2 gap-3">
                   <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1" /></div>
                   <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1" /></div>
+                </div>
+                <div>
+                  <Label>CPF</Label>
+                  <Input
+                    value={cpf}
+                    onChange={e => setCpf(formatMask(e.target.value, 'cpf'))}
+                    placeholder="000.000.000-00"
+                    className="mt-1 font-mono"
+                    maxLength={14}
+                  />
+                </div>
+                <div>
+                  <Label>Telefone</Label>
+                  <div className="relative mt-1">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      value={phone}
+                      onChange={e => setPhone(formatMask(e.target.value, 'phone'))}
+                      placeholder="(00) 00000-0000"
+                      className="pl-10 font-mono"
+                      maxLength={15}
+                    />
+                  </div>
                 </div>
                 <div>
                   <Label>Email</Label>

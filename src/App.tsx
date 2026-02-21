@@ -22,6 +22,7 @@ import AuthParceiro from "./pages/AuthParceiro";
 import AuthAfiliado from "./pages/AuthAfiliado";
 import AuthClinica from "./pages/AuthClinica";
 import NotFound from "./pages/NotFound";
+import PaymentSuccess from "./pages/PaymentSuccess";
 import PingoChatbot from "./components/PingoChatbot";
 import AccessibilityToggle from "./components/AccessibilityToggle";
 
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/parceiro" element={<AuthParceiro />} />
             <Route path="/afiliado" element={<AuthAfiliado />} />
             <Route path="/clinica" element={<AuthClinica />} />
+            <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route
               path="/dashboard/*"
               element={

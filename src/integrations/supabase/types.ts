@@ -358,6 +358,7 @@ export type Database = {
           id: string
           is_approved: boolean | null
           rating: number | null
+          rejection_reason: string | null
           total_reviews: number | null
           updated_at: string
           user_id: string
@@ -373,6 +374,7 @@ export type Database = {
           id?: string
           is_approved?: boolean | null
           rating?: number | null
+          rejection_reason?: string | null
           total_reviews?: number | null
           updated_at?: string
           user_id: string
@@ -388,6 +390,7 @@ export type Database = {
           id?: string
           is_approved?: boolean | null
           rating?: number | null
+          rejection_reason?: string | null
           total_reviews?: number | null
           updated_at?: string
           user_id?: string
@@ -454,6 +457,39 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string
+        }
+        Relationships: []
+      }
+      health_metrics: {
+        Row: {
+          created_at: string | null
+          id: string
+          measured_at: string | null
+          notes: string | null
+          patient_id: string
+          type: string
+          unit: string
+          value: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          measured_at?: string | null
+          notes?: string | null
+          patient_id: string
+          type: string
+          unit: string
+          value: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          measured_at?: string | null
+          notes?: string | null
+          patient_id?: string
+          type?: string
+          unit?: string
+          value?: number
         }
         Relationships: []
       }
@@ -688,6 +724,7 @@ export type Database = {
           max_appointments: number | null
           name: string
           price: number
+          stripe_price_id: string | null
           updated_at: string
         }
         Insert: {
@@ -700,6 +737,7 @@ export type Database = {
           max_appointments?: number | null
           name: string
           price?: number
+          stripe_price_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -712,6 +750,7 @@ export type Database = {
           max_appointments?: number | null
           name?: string
           price?: number
+          stripe_price_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1011,6 +1050,7 @@ export type Database = {
         Row: {
           cancelled_at: string | null
           created_at: string
+          current_period_end: string | null
           expires_at: string | null
           id: string
           notes: string | null
@@ -1018,12 +1058,14 @@ export type Database = {
           plan_id: string
           starts_at: string
           status: string
+          stripe_subscription_id: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
           cancelled_at?: string | null
           created_at?: string
+          current_period_end?: string | null
           expires_at?: string | null
           id?: string
           notes?: string | null
@@ -1031,12 +1073,14 @@ export type Database = {
           plan_id: string
           starts_at?: string
           status?: string
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
           cancelled_at?: string | null
           created_at?: string
+          current_period_end?: string | null
           expires_at?: string | null
           id?: string
           notes?: string | null
@@ -1044,6 +1088,7 @@ export type Database = {
           plan_id?: string
           starts_at?: string
           status?: string
+          stripe_subscription_id?: string | null
           updated_at?: string
           user_id?: string
         }
