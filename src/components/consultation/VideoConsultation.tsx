@@ -98,6 +98,12 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
           },
         });
 
+        // Hide loading as soon as iframe is ready (not just when joined)
+        // This prevents the overlay from blocking the prejoin/lobby screen
+        apiRef.current.addListener("browserSupport", () => {
+          setLoading(false);
+        });
+
         apiRef.current.addListener("videoConferenceJoined", () => {
           setLoading(false);
         });
@@ -105,6 +111,9 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
         apiRef.current.addListener("readyToClose", () => {
           onEndCallRef.current();
         });
+
+        // Fallback: hide loading after 3s even if no event fires
+        setTimeout(() => setLoading(false), 3000);
       } catch (error) {
         console.error("[Jitsi] Error initializing:", error);
         setLoading(false);
@@ -125,7 +134,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     <div className="flex flex-col w-full h-full">
       <div className="relative flex-1 w-full min-h-0">
         {loading && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 pointer-events-none">
             <div className="flex flex-col items-center gap-3">
               <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary" />
               <p className="text-sm text-muted-foreground">Carregando videochamada...</p>
