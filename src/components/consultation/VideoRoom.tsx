@@ -198,7 +198,7 @@ const VideoRoom = () => {
     await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId);
     toast({ title: "Consulta encerrada" });
     if (isDoctor) navigate(`/dashboard/prescribe/${appointmentId}`);
-    else navigate("/dashboard/appointments");
+    else navigate(`/dashboard/rate/${appointmentId}`);
   }, [isDoctor, notes, appointmentId]);
 
   if (loading || checkingConsent) {
@@ -241,7 +241,10 @@ const VideoRoom = () => {
   if (!deviceChecked) {
     return (
       <PreCallCheck
+        appointmentId={appointmentId}
         doctorName={otherPartyName || undefined}
+        doctorSpecialty={undefined}
+        scheduledAt={appointment?.scheduled_at}
         isDoctor={isDoctor}
         onReady={() => setDeviceChecked(true)}
       />
