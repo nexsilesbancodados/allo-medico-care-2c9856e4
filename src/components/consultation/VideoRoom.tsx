@@ -7,7 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   Mic, MicOff, Video, VideoOff, Phone, MessageSquare,
-  FileText, Clock, Send, X, Monitor, MonitorOff, PhoneCall
+  FileText, Clock, Send, X, Monitor, MonitorOff, PhoneCall,
+  WifiOff, RefreshCw
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,12 +20,17 @@ interface ChatMessage {
   time: string;
 }
 
+type ConnectionStatus = "idle" | "connecting" | "connected" | "reconnecting" | "failed" | "disconnected";
+
 const FALLBACK_ICE: RTCConfiguration = {
   iceServers: [
     { urls: "stun:stun.l.google.com:19302" },
     { urls: "stun:stun1.l.google.com:19302" },
   ],
 };
+
+const MAX_RECONNECT_ATTEMPTS = 3;
+const RECONNECT_DELAY_MS = 2000;
 
 const VideoRoom = () => {
   const { appointmentId } = useParams();
@@ -53,7 +59,7 @@ const VideoRoom = () => {
   const [showNotes, setShowNotes] = useState(false);
   const [mediaReady, setMediaReady] = useState(false);
   const [mediaError, setMediaError] = useState("");
-  const [connected, setConnected] = useState(false);
+  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("idle");
   const [remoteConnected, setRemoteConnected] = useState(false);
   const [iceConfig, setIceConfig] = useState<RTCConfiguration>(FALLBACK_ICE);
 
@@ -65,6 +71,16 @@ const VideoRoom = () => {
   const isDoctor = roles.includes("doctor") || roles.includes("admin");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
+  const reconnectAttemptsRef = useRef(0);
+  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const iceConfigRef = useRef<RTCConfiguration>(FALLBACK_ICE);
+
+  const connected = connectionStatus === "connected";
+
+  // Keep iceConfigRef in sync
+  useEffect(() => {
+    iceConfigRef.current = iceConfig;
+  }, [iceConfig]);
 
   // ─── Initialize local media ───
   useEffect(() => {
@@ -101,8 +117,10 @@ const VideoRoom = () => {
         if (!session) return;
         const res = await supabase.functions.invoke("turn-credentials");
         if (res.data?.iceServers && Array.isArray(res.data.iceServers)) {
-          setIceConfig({ iceServers: res.data.iceServers });
-          console.log("[TURN] Metered ICE servers loaded");
+          const config = { iceServers: res.data.iceServers };
+          setIceConfig(config);
+          iceConfigRef.current = config;
+          console.log("[TURN] Metered ICE servers loaded:", res.data.iceServers.length, "servers");
         }
       } catch (err) {
         console.warn("[TURN] Failed to fetch, using STUN fallback:", err);
@@ -111,10 +129,12 @@ const VideoRoom = () => {
     fetchTurnCredentials();
   }, []);
 
-
   useEffect(() => {
     if (appointmentId) fetchAppointment();
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+    };
   }, [appointmentId]);
 
   // ─── Timer ───
@@ -122,6 +142,42 @@ const VideoRoom = () => {
     timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
+
+  // ─── Reconnection logic ───
+  const attemptReconnect = useCallback(async () => {
+    if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
+      setConnectionStatus("failed");
+      toast({ title: "Conexão perdida", description: "Não foi possível reconectar. Tente recarregar a página.", variant: "destructive" });
+      return;
+    }
+
+    reconnectAttemptsRef.current++;
+    setConnectionStatus("reconnecting");
+    console.log(`[WebRTC] Reconnect attempt ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS}`);
+
+    // Close existing connection
+    peerConnectionRef.current?.close();
+    peerConnectionRef.current = null;
+    pendingCandidatesRef.current = [];
+
+    // Wait before retrying
+    reconnectTimeoutRef.current = setTimeout(() => {
+      if (isDoctor) {
+        startCall();
+      } else {
+        // Patient announces presence again to trigger doctor's offer
+        channelRef.current?.send({
+          type: "broadcast", event: "peer-joined",
+          payload: { userId: user!.id, role: "patient" },
+        });
+      }
+    }, RECONNECT_DELAY_MS);
+  }, [isDoctor, user]);
+
+  const manualReconnect = useCallback(() => {
+    reconnectAttemptsRef.current = 0;
+    attemptReconnect();
+  }, [attemptReconnect]);
 
   // ─── WebRTC Signaling via Supabase Realtime ───
   useEffect(() => {
@@ -136,49 +192,66 @@ const VideoRoom = () => {
     roomChannel
       .on("broadcast", { event: "offer" }, async ({ payload }) => {
         console.log("[WebRTC] Received offer");
-        const pc = getOrCreatePeerConnection();
-        await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-        roomChannel.send({ type: "broadcast", event: "answer", payload: { sdp: answer, from: user.id } });
-        // Apply pending candidates
-        for (const c of pendingCandidatesRef.current) {
-          await pc.addIceCandidate(new RTCIceCandidate(c));
-        }
-        pendingCandidatesRef.current = [];
-      })
-      .on("broadcast", { event: "answer" }, async ({ payload }) => {
-        console.log("[WebRTC] Received answer");
-        const pc = peerConnectionRef.current;
-        if (pc) {
+        setConnectionStatus("connecting");
+        try {
+          const pc = getOrCreatePeerConnection();
           await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          roomChannel.send({ type: "broadcast", event: "answer", payload: { sdp: answer, from: user.id } });
+          // Apply pending candidates
           for (const c of pendingCandidatesRef.current) {
             await pc.addIceCandidate(new RTCIceCandidate(c));
           }
           pendingCandidatesRef.current = [];
+        } catch (err) {
+          console.error("[WebRTC] Error handling offer:", err);
+          attemptReconnect();
+        }
+      })
+      .on("broadcast", { event: "answer" }, async ({ payload }) => {
+        console.log("[WebRTC] Received answer");
+        try {
+          const pc = peerConnectionRef.current;
+          if (pc) {
+            await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+            for (const c of pendingCandidatesRef.current) {
+              await pc.addIceCandidate(new RTCIceCandidate(c));
+            }
+            pendingCandidatesRef.current = [];
+          }
+        } catch (err) {
+          console.error("[WebRTC] Error handling answer:", err);
+          attemptReconnect();
         }
       })
       .on("broadcast", { event: "ice-candidate" }, async ({ payload }) => {
-        const pc = peerConnectionRef.current;
-        if (pc && pc.remoteDescription) {
-          await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
-        } else {
-          pendingCandidatesRef.current.push(payload.candidate);
+        try {
+          const pc = peerConnectionRef.current;
+          if (pc && pc.remoteDescription) {
+            await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
+          } else {
+            pendingCandidatesRef.current.push(payload.candidate);
+          }
+        } catch (err) {
+          console.warn("[WebRTC] Error adding ICE candidate:", err);
         }
       })
       .on("broadcast", { event: "peer-joined" }, () => {
         setRemoteConnected(true);
-        // If doctor, initiate the call
+        reconnectAttemptsRef.current = 0;
         if (isDoctor) startCall();
       })
       .on("broadcast", { event: "peer-left" }, () => {
         setRemoteConnected(false);
-        setConnected(false);
+        setConnectionStatus("disconnected");
         if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
+      })
+      .on("broadcast", { event: "chat-message" }, ({ payload }) => {
+        setMessages((prev) => [...prev, payload as ChatMessage]);
       })
       .subscribe((status) => {
         if (status === "SUBSCRIBED") {
-          // Announce presence
           roomChannel.send({ type: "broadcast", event: "peer-joined", payload: { userId: user.id, role: isDoctor ? "doctor" : "patient" } });
         }
       });
@@ -192,9 +265,11 @@ const VideoRoom = () => {
   }, [appointmentId, user, mediaReady]);
 
   const getOrCreatePeerConnection = useCallback(() => {
-    if (peerConnectionRef.current) return peerConnectionRef.current;
+    if (peerConnectionRef.current && peerConnectionRef.current.connectionState !== "closed") {
+      return peerConnectionRef.current;
+    }
 
-    const pc = new RTCPeerConnection(iceConfig);
+    const pc = new RTCPeerConnection(iceConfigRef.current);
     peerConnectionRef.current = pc;
 
     // Add local tracks
@@ -209,7 +284,8 @@ const VideoRoom = () => {
       console.log("[WebRTC] Remote track received");
       if (remoteVideoRef.current && event.streams[0]) {
         remoteVideoRef.current.srcObject = event.streams[0];
-        setConnected(true);
+        setConnectionStatus("connected");
+        reconnectAttemptsRef.current = 0;
       }
     };
 
@@ -224,27 +300,59 @@ const VideoRoom = () => {
       }
     };
 
+    pc.oniceconnectionstatechange = () => {
+      console.log("[WebRTC] ICE state:", pc.iceConnectionState);
+      if (pc.iceConnectionState === "failed") {
+        console.warn("[WebRTC] ICE connection failed, attempting reconnect...");
+        attemptReconnect();
+      }
+    };
+
     pc.onconnectionstatechange = () => {
       console.log("[WebRTC] Connection state:", pc.connectionState);
-      if (pc.connectionState === "connected") setConnected(true);
-      if (pc.connectionState === "disconnected" || pc.connectionState === "failed") {
-        setConnected(false);
+      switch (pc.connectionState) {
+        case "connected":
+          setConnectionStatus("connected");
+          reconnectAttemptsRef.current = 0;
+          toast({ title: "Conectado! 🟢", description: "Videochamada estabelecida com sucesso." });
+          break;
+        case "disconnected":
+          setConnectionStatus("reconnecting");
+          // Give it a moment, sometimes it recovers
+          reconnectTimeoutRef.current = setTimeout(() => {
+            if (peerConnectionRef.current?.connectionState === "disconnected") {
+              attemptReconnect();
+            }
+          }, 3000);
+          break;
+        case "failed":
+          attemptReconnect();
+          break;
+        case "closed":
+          setConnectionStatus("disconnected");
+          break;
       }
     };
 
     return pc;
-  }, [user]);
+  }, [user, attemptReconnect]);
 
   const startCall = useCallback(async () => {
-    const pc = getOrCreatePeerConnection();
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    channelRef.current?.send({
-      type: "broadcast",
-      event: "offer",
-      payload: { sdp: offer, from: user!.id },
-    });
-  }, [getOrCreatePeerConnection, user]);
+    try {
+      setConnectionStatus("connecting");
+      const pc = getOrCreatePeerConnection();
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      channelRef.current?.send({
+        type: "broadcast",
+        event: "offer",
+        payload: { sdp: offer, from: user!.id },
+      });
+    } catch (err) {
+      console.error("[WebRTC] Error starting call:", err);
+      attemptReconnect();
+    }
+  }, [getOrCreatePeerConnection, user, attemptReconnect]);
 
   const fetchAppointment = async () => {
     const { data } = await supabase
@@ -296,7 +404,6 @@ const VideoRoom = () => {
     if (screenSharing) {
       screenStreamRef.current?.getTracks().forEach((t) => t.stop());
       screenStreamRef.current = null;
-      // Replace track back to camera
       const camTrack = localStreamRef.current?.getVideoTracks()[0];
       if (camTrack) {
         const sender = peerConnectionRef.current?.getSenders().find((s) => s.track?.kind === "video");
@@ -309,7 +416,6 @@ const VideoRoom = () => {
         const screen = await navigator.mediaDevices.getDisplayMedia({ video: true });
         screenStreamRef.current = screen;
         const screenTrack = screen.getVideoTracks()[0];
-        // Replace video track in peer connection
         const sender = peerConnectionRef.current?.getSenders().find((s) => s.track?.kind === "video");
         sender?.replaceTrack(screenTrack);
         if (localVideoRef.current) localVideoRef.current.srcObject = screen;
@@ -340,19 +446,9 @@ const VideoRoom = () => {
       time: format(new Date(), "HH:mm"),
     };
     setMessages((prev) => [...prev, msg]);
-    // Broadcast chat via realtime
     channelRef.current?.send({ type: "broadcast", event: "chat-message", payload: msg });
     setChatInput("");
   };
-
-  // Listen for chat messages from remote
-  useEffect(() => {
-    if (!channelRef.current) return;
-    const handler = channelRef.current.on("broadcast", { event: "chat-message" }, ({ payload }) => {
-      setMessages((prev) => [...prev, payload as ChatMessage]);
-    });
-    return () => { /* cleanup handled by channel removal */ };
-  }, [channelRef.current]);
 
   const saveNotes = async () => {
     if (!appointmentId || !appointment) return;
@@ -387,6 +483,18 @@ const VideoRoom = () => {
     else navigate("/dashboard/appointments");
   };
 
+  // ─── Connection status badge ───
+  const statusConfig: Record<ConnectionStatus, { label: string; color: string; icon?: React.ReactNode }> = {
+    idle: { label: "Aguardando participante", color: "bg-muted-foreground" },
+    connecting: { label: "Conectando...", color: "bg-yellow-500" },
+    connected: { label: "Conectado", color: "bg-emerald-500" },
+    reconnecting: { label: "Reconectando...", color: "bg-yellow-500", icon: <RefreshCw className="w-3 h-3 animate-spin" /> },
+    failed: { label: "Falha na conexão", color: "bg-destructive", icon: <WifiOff className="w-3 h-3" /> },
+    disconnected: { label: "Desconectado", color: "bg-muted-foreground" },
+  };
+
+  const currentStatus = statusConfig[connectionStatus];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -406,18 +514,32 @@ const VideoRoom = () => {
           <div>
             <p className="text-sm font-semibold text-[hsl(210,20%,95%)]">{otherPartyName || "Consulta"}</p>
             <div className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-[hsl(var(--secondary))]" : "bg-[hsl(var(--muted-foreground))]"} animate-pulse`} />
-              <p className="text-xs text-[hsl(210,15%,55%)]">
-                {connected ? "Conectado" : remoteConnected ? "Conectando..." : "Aguardando participante"}
-              </p>
+              <div className={`w-1.5 h-1.5 rounded-full ${currentStatus.color} animate-pulse`} />
+              {currentStatus.icon}
+              <p className="text-xs text-[hsl(210,15%,55%)]">{currentStatus.label}</p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
-          <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-          <Clock className="w-3.5 h-3.5" />
-          <span className="text-sm font-mono font-semibold">{formatTime(elapsed)}</span>
+        <div className="flex items-center gap-3">
+          {/* Reconnect button */}
+          {(connectionStatus === "failed" || connectionStatus === "disconnected") && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={manualReconnect}
+              className="text-xs border-primary/30 text-primary hover:bg-primary/10"
+            >
+              <RefreshCw className="w-3.5 h-3.5 mr-1" />
+              Reconectar
+            </Button>
+          )}
+
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
+            <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-sm font-mono font-semibold">{formatTime(elapsed)}</span>
+          </div>
         </div>
       </div>
 
@@ -440,6 +562,32 @@ const VideoRoom = () => {
                     <VideoOff className="w-16 h-16 text-destructive/50 mx-auto mb-4" />
                     <p className="text-[hsl(210,20%,70%)] text-sm max-w-sm">{mediaError}</p>
                   </div>
+                ) : connectionStatus === "failed" ? (
+                  <div className="text-center">
+                    <WifiOff className="w-16 h-16 text-destructive/50 mx-auto mb-4" />
+                    <p className="text-[hsl(210,20%,75%)] text-sm font-medium mb-2">Falha na conexão</p>
+                    <p className="text-[hsl(210,15%,40%)] text-xs mb-4 max-w-xs mx-auto">
+                      Não foi possível estabelecer a videochamada. Verifique sua conexão e tente novamente.
+                    </p>
+                    <Button size="sm" onClick={manualReconnect} className="bg-primary text-primary-foreground">
+                      <RefreshCw className="w-4 h-4 mr-2" />
+                      Tentar novamente
+                    </Button>
+                  </div>
+                ) : connectionStatus === "reconnecting" ? (
+                  <div className="text-center">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                      className="w-16 h-16 mx-auto mb-4"
+                    >
+                      <RefreshCw className="w-16 h-16 text-yellow-500/50" />
+                    </motion.div>
+                    <p className="text-[hsl(210,20%,75%)] text-sm font-medium">Reconectando...</p>
+                    <p className="text-[hsl(210,15%,40%)] text-xs mt-2">
+                      Tentativa {reconnectAttemptsRef.current}/{MAX_RECONNECT_ATTEMPTS}
+                    </p>
+                  </div>
                 ) : (
                   <div className="text-center">
                     <motion.div
@@ -450,12 +598,14 @@ const VideoRoom = () => {
                       <PhoneCall className="w-10 h-10 text-primary-foreground" />
                     </motion.div>
                     <p className="text-[hsl(210,20%,75%)] text-sm font-medium">
-                      Aguardando {otherPartyName || "participante"}...
+                      {connectionStatus === "connecting"
+                        ? "Estabelecendo conexão..."
+                        : `Aguardando ${otherPartyName || "participante"}...`}
                     </p>
                     <p className="text-[hsl(210,15%,40%)] text-xs mt-2 max-w-xs mx-auto">
                       A videochamada iniciará automaticamente quando ambos estiverem na sala
                     </p>
-                    {!remoteConnected && (
+                    {connectionStatus === "idle" && !remoteConnected && (
                       <div className="mt-6 flex items-center justify-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
                         <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
