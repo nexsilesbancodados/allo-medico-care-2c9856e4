@@ -4,23 +4,33 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Stethoscope, AlertTriangle, ArrowRight, RotateCcw, Loader2, ThermometerSun, Clock, MapPin } from "lucide-react";
+import { Stethoscope, AlertTriangle, ArrowRight, RotateCcw, Loader2, ThermometerSun, Clock, MapPin, Copy, Check, Plus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
+import { useToast } from "@/hooks/use-toast";
 
 const SUPABASE_URL = "https://oaixgmuocuwhsabidpei.supabase.co";
 
 const SEVERITY_OPTIONS = [
-  { value: "leve", label: "Leve", description: "Desconforto tolerável", color: "bg-success/15 text-success" },
-  { value: "moderado", label: "Moderado", description: "Interfere nas atividades", color: "bg-warning/15 text-warning" },
-  { value: "intenso", label: "Intenso", description: "Dor forte ou incapacitante", color: "bg-destructive/15 text-destructive" },
+  { value: "leve", label: "🟢 Leve", description: "Desconforto tolerável", color: "border-green-500/30 bg-green-500/5" },
+  { value: "moderado", label: "🟡 Moderado", description: "Interfere nas atividades", color: "border-yellow-500/30 bg-yellow-500/5" },
+  { value: "intenso", label: "🟠 Intenso", description: "Dor forte", color: "border-orange-500/30 bg-orange-500/5" },
+  { value: "muito_intenso", label: "🔴 Muito Intenso", description: "Incapacitante", color: "border-red-500/30 bg-red-500/5" },
 ];
 
 const DURATION_OPTIONS = [
   { value: "horas", label: "Algumas horas" },
-  { value: "dias", label: "Alguns dias" },
-  { value: "semanas", label: "Semanas" },
-  { value: "meses", label: "Meses ou mais" },
+  { value: "1-3dias", label: "1 a 3 dias" },
+  { value: "dias", label: "4 a 7 dias" },
+  { value: "semanas", label: "1 a 4 semanas" },
+  { value: "meses", label: "Mais de 1 mês" },
+];
+
+const COMMON_SYMPTOMS = [
+  "Dor de cabeça", "Febre", "Tosse", "Dor de garganta", "Enjoo",
+  "Dor abdominal", "Dor nas costas", "Falta de ar", "Tontura",
+  "Cansaço excessivo", "Dor no peito", "Insônia", "Diarreia",
+  "Dor muscular", "Coceira na pele", "Visão embaçada",
 ];
 
 interface TriageResult {
@@ -28,29 +38,46 @@ interface TriageResult {
 }
 
 const AITriageTab = () => {
+  const { toast } = useToast();
   const [symptoms, setSymptoms] = useState("");
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [severity, setSeverity] = useState("");
   const [duration, setDuration] = useState("");
+  const [age, setAge] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<TriageResult | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const toggleSymptom = (symptom: string) => {
+    setSelectedSymptoms(prev =>
+      prev.includes(symptom) ? prev.filter(s => s !== symptom) : [...prev, symptom]
+    );
+  };
+
+  const allSymptoms = [
+    ...selectedSymptoms,
+    ...(symptoms.trim() ? [symptoms.trim()] : []),
+  ].join(", ");
 
   const runTriage = useCallback(async () => {
-    if (!symptoms.trim()) return;
+    if (!allSymptoms) return;
     setIsLoading(true);
     setResult(null);
 
     const prompt = `Faça uma triagem dos seguintes sintomas e sugira a especialidade médica mais adequada:
 
-**Sintomas:** ${symptoms}
+**Sintomas:** ${allSymptoms}
 **Intensidade:** ${severity || "Não informada"}
 **Duração:** ${duration || "Não informada"}
+${age ? `**Idade:** ${age} anos` : ""}
 
 Responda com:
-1. 🚨 **Nível de urgência** (Verde/Amarelo/Laranja/Vermelho)
-2. 🩺 **Especialidade recomendada**
-3. 📋 **Possíveis causas** (sem diagnosticar)
-4. ⚠️ **Sinais de alerta** para ir ao pronto-socorro
-5. 💡 **Orientações** enquanto aguarda a consulta
+1. 🚨 **Nível de urgência** (Verde/Amarelo/Laranja/Vermelho) — com explicação
+2. 🩺 **Especialidade recomendada** (até 3 opções ranqueadas)
+3. 📋 **Possíveis causas** (sem diagnosticar, liste 3-5 possibilidades)
+4. ⚠️ **Sinais de alerta** para ir ao pronto-socorro imediatamente
+5. 💡 **Cuidados imediatos** enquanto aguarda a consulta
+6. 🔍 **Exames que o médico pode solicitar**
 
 IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
 
@@ -105,13 +132,23 @@ IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
       setResult({ content: "😕 Erro ao processar triagem. Tente novamente." });
     }
     setIsLoading(false);
-  }, [symptoms, severity, duration]);
+  }, [allSymptoms, severity, duration, age]);
 
   const reset = () => {
     setSymptoms("");
+    setSelectedSymptoms([]);
     setSeverity("");
     setDuration("");
+    setAge("");
     setResult(null);
+  };
+
+  const copyResult = () => {
+    if (!result) return;
+    navigator.clipboard.writeText(result.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    toast({ title: "Resultado copiado!" });
   };
 
   return (
@@ -123,23 +160,63 @@ IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
             Triagem Inteligente de Sintomas
           </CardTitle>
           <CardDescription className="text-xs">
-            Descreva seus sintomas para receber uma orientação sobre qual especialidade procurar. 
+            Selecione ou descreva sintomas para receber orientação sobre especialidade.
             <span className="text-destructive font-medium"> Não substitui consulta médica.</span>
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
+          {/* Quick symptom chips */}
           <div>
-            <label className="text-sm font-medium text-foreground mb-1.5 block">Descreva seus sintomas</label>
+            <label className="text-sm font-medium text-foreground mb-2 block">Sintomas comuns (clique para selecionar)</label>
+            <div className="flex flex-wrap gap-1.5">
+              {COMMON_SYMPTOMS.map((symptom) => {
+                const isSelected = selectedSymptoms.includes(symptom);
+                return (
+                  <motion.button
+                    key={symptom}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => toggleSymptom(symptom)}
+                    className={`text-xs px-2.5 py-1.5 rounded-full border transition-all ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-card text-foreground border-border hover:border-primary/40 hover:bg-muted/50"
+                    }`}
+                    disabled={isLoading}
+                  >
+                    {isSelected && <X className="w-3 h-3 inline mr-1" />}
+                    {symptom}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Selected symptoms */}
+          {selectedSymptoms.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {selectedSymptoms.map((s) => (
+                <Badge key={s} variant="default" className="gap-1 text-xs">
+                  {s}
+                  <X className="w-3 h-3 cursor-pointer" onClick={() => toggleSymptom(s)} />
+                </Badge>
+              ))}
+            </div>
+          )}
+
+          <div>
+            <label className="text-sm font-medium text-foreground mb-1.5 block">
+              Descreva detalhes adicionais
+            </label>
             <Textarea
               value={symptoms}
               onChange={(e) => setSymptoms(e.target.value)}
-              placeholder="Ex: Dor de cabeça na região da testa, acompanhada de enjoo há 3 dias..."
-              className="min-h-[80px] text-sm"
+              placeholder="Ex: A dor piora à noite e melhora com repouso..."
+              className="min-h-[60px] text-sm"
               disabled={isLoading}
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <label className="text-sm font-medium text-foreground mb-1.5 flex items-center gap-1.5">
                 <ThermometerSun className="w-3.5 h-3.5 text-muted-foreground" /> Intensidade
@@ -151,10 +228,7 @@ IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
                 <SelectContent>
                   {SEVERITY_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
-                      <div className="flex items-center gap-2">
-                        <span>{opt.label}</span>
-                        <span className="text-xs text-muted-foreground">— {opt.description}</span>
-                      </div>
+                      <span>{opt.label} — <span className="text-muted-foreground text-xs">{opt.description}</span></span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -176,18 +250,33 @@ IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
                 </SelectContent>
               </Select>
             </div>
+
+            <div>
+              <label className="text-sm font-medium text-foreground mb-1.5 block">Idade (anos)</label>
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                placeholder="Ex: 35"
+                className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                disabled={isLoading}
+                min={0}
+                max={120}
+              />
+            </div>
           </div>
 
           <div className="flex gap-2">
             <Button
               onClick={runTriage}
-              disabled={!symptoms.trim() || isLoading}
+              disabled={(!allSymptoms) || isLoading}
               className="gap-1.5"
+              size="lg"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
               Analisar Sintomas
             </Button>
-            {result && (
+            {(result || selectedSymptoms.length > 0) && (
               <Button variant="outline" onClick={reset} className="gap-1.5">
                 <RotateCcw className="w-4 h-4" /> Nova Triagem
               </Button>
@@ -200,11 +289,15 @@ IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
         {result && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
             <Card className="border-primary/20 bg-primary/5">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 flex-row items-center justify-between">
                 <CardTitle className="text-base flex items-center gap-2">
                   <MapPin className="w-4 h-4 text-primary" />
                   Resultado da Triagem
                 </CardTitle>
+                <Button variant="ghost" size="sm" onClick={copyResult} className="gap-1 text-xs">
+                  {copied ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? "Copiado" : "Copiar"}
+                </Button>
               </CardHeader>
               <CardContent>
                 <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
