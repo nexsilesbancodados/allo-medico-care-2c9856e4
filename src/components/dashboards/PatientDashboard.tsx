@@ -15,6 +15,7 @@ import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell,
 import { differenceInDays } from "date-fns";
 import BlobKPICard from "@/components/ui/blob-kpi-card";
 import Sparkline from "@/components/ui/sparkline";
+import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -40,9 +41,17 @@ const PatientDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const now = new Date();
 
   useEffect(() => { if (user) fetchData(); }, [user]);
+
+  // Show onboarding for first-time users
+  useEffect(() => {
+    if (!loading && stats.total === 0 && !localStorage.getItem(ONBOARDING_KEY)) {
+      setShowOnboarding(true);
+    }
+  }, [loading, stats.total]);
 
   useEffect(() => {
     if (!user) return;
@@ -130,6 +139,7 @@ const PatientDashboard = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
+      {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
       <div className="max-w-3xl space-y-5">
 
         {/* ── Page Header ── */}
