@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Pill, FlaskConical, CheckCircle, FileText, UserCog, Sparkles, TrendingUp } from "lucide-react";
+import { Search, Pill, FlaskConical, CheckCircle, FileText, UserCog, Sparkles, TrendingUp, Bot } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { motion } from "framer-motion";
 
 const partnerNav = [
   { label: "Validação", href: "/dashboard", icon: <Pill className="w-4 h-4" />, active: true },
+  { label: "Assistente IA", href: "/dashboard/ai-assistant", icon: <Bot className="w-4 h-4" /> },
   { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" /> },
 ];
 
