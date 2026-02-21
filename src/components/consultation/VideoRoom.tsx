@@ -12,6 +12,7 @@ import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation from "./VideoConsultation";
 import PreCallCheck from "./PreCallCheck";
 import ConnectionStatus from "./ConnectionStatus";
+import MedicalAutocomplete from "./MedicalAutocomplete";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -35,6 +36,8 @@ const VideoRoom = () => {
   const [checkingConsent, setCheckingConsent] = useState(true);
   const [crmBlocked, setCrmBlocked] = useState(false);
   const [deviceChecked, setDeviceChecked] = useState(false);
+  const [queuePosition, setQueuePosition] = useState<number | null>(null);
+  const [doctorBusy, setDoctorBusy] = useState(false);
 
   // State
   const [elapsed, setElapsed] = useState(0);
@@ -92,6 +95,47 @@ const VideoRoom = () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [appointmentId]);
+
+  // ─── Queue position check (patients only) ───
+  useEffect(() => {
+    if (!appointment || isDoctor) return;
+    const checkQueue = async () => {
+      // Check if doctor has an active consultation
+      const { data: activeAppts } = await supabase
+        .from("appointments")
+        .select("id, scheduled_at")
+        .eq("doctor_id", appointment.doctor_id)
+        .eq("status", "in_progress")
+        .neq("id", appointmentId);
+      
+      if (activeAppts && activeAppts.length > 0) {
+        setDoctorBusy(true);
+        // Count waiting patients ahead
+        const { data: waitingAhead } = await supabase
+          .from("appointments")
+          .select("id")
+          .eq("doctor_id", appointment.doctor_id)
+          .in("status", ["waiting", "in_progress"])
+          .neq("id", appointmentId)
+          .lt("scheduled_at", appointment.scheduled_at);
+        setQueuePosition((waitingAhead?.length ?? 0) + 1);
+      } else {
+        setDoctorBusy(false);
+        setQueuePosition(null);
+      }
+    };
+    checkQueue();
+
+    // Realtime updates for queue
+    const queueChannel = supabase
+      .channel(`queue-${appointment.doctor_id}`)
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "appointments", filter: `doctor_id=eq.${appointment.doctor_id}` }, () => {
+        checkQueue();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(queueChannel); };
+  }, [appointment, isDoctor]);
 
   // ─── Timer ───
   useEffect(() => {
@@ -261,9 +305,23 @@ const VideoRoom = () => {
     ? `Dr(a). ${user?.user_metadata?.first_name || "Médico"}`
     : user?.user_metadata?.first_name || "Paciente";
 
+  // Show queue position banner for patients
+  const showQueueBanner = !isDoctor && doctorBusy && queuePosition !== null;
+
   return (
     <div className="min-h-screen bg-[hsl(210,50%,4%)] flex flex-col">
       <ConnectionStatus onReconnect={handleReconnect} />
+      {/* Queue position banner */}
+      {showQueueBanner && (
+        <div className="px-4 py-3 bg-amber-500/10 border-b border-amber-500/20 flex items-center justify-center gap-2">
+          <Clock className="w-4 h-4 text-amber-500 animate-pulse" />
+          <p className="text-sm text-amber-200">
+            {queuePosition === 1
+              ? "O médico está finalizando outro atendimento. Você é o próximo!"
+              : `Posição na fila: ${queuePosition}º — aguarde, o médico atenderá em breve.`}
+          </p>
+        </div>
+      )}
       <div className="flex items-center justify-between px-4 py-2.5 bg-[hsl(210,50%,7%)] border-b border-border/15">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-gradient-hero flex items-center justify-center shadow-lg">
@@ -380,10 +438,11 @@ const VideoRoom = () => {
 
               {showNotes && isDoctor && (
                 <div className="flex-1 flex flex-col p-3 gap-3">
-                  <Textarea
+                  <MedicalAutocomplete
                     value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Anotações da consulta..."
+                    onChange={setNotes}
+                    field="notes"
+                    placeholder="Anotações da consulta... (a IA sugere ao digitar)"
                     className="flex-1 bg-[hsl(210,30%,10%)] border-border/20 text-[hsl(210,20%,90%)] placeholder:text-[hsl(210,15%,35%)] resize-none rounded-xl"
                   />
                   <Button onClick={saveNotes} size="sm" className="bg-gradient-hero text-primary-foreground rounded-xl">
