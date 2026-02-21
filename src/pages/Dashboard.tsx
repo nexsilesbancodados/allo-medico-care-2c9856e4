@@ -85,6 +85,7 @@ const AdminNPS = lazy(() => import("@/components/admin/AdminNPS"));
 const AdminWhatsApp = lazy(() => import("@/components/admin/AdminWhatsApp"));
 const AdminLiveConsultations = lazy(() => import("@/components/admin/AdminLiveConsultations"));
 const SystemHealth = lazy(() => import("@/components/admin/SystemHealth"));
+const PanelCenter = lazy(() => import("@/components/admin/PanelCenter"));
 
 const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: string[]; children: ReactNode }) => {
   const isAdmin = roles.includes("admin");
@@ -216,6 +217,7 @@ const Dashboard = () => {
       <Route path="admin/whatsapp" element={<RoleGuard allowed={[]} roles={roles}><AdminWhatsApp /></RoleGuard>} />
       <Route path="admin/health" element={<RoleGuard allowed={[]} roles={roles}><SystemHealth /></RoleGuard>} />
       <Route path="admin/live" element={<RoleGuard allowed={[]} roles={roles}><AdminLiveConsultations /></RoleGuard>} />
+      <Route path="admin/panel-center" element={<RoleGuard allowed={[]} roles={roles}><PanelCenter /></RoleGuard>} />
 
       {/* Fallback: redirect to role-appropriate dashboard */}
       <Route
