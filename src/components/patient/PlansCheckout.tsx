@@ -13,11 +13,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Check, Star, CreditCard, Calendar as CalIcon, Clock, FileText,
-  Search, ArrowLeft, Shield, User, History
+  Search, ArrowLeft, Shield, User, History, QrCode, FileBarChart, Copy, CheckCircle2, Lock
 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
+
+type PaymentMethod = "pix" | "card" | "boleto";
 
 const patientNav = [
   { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
@@ -89,10 +91,19 @@ const PlansCheckout = () => {
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
+  const [pixCopied, setPixCopied] = useState(false);
+  const [pixCountdown, setPixCountdown] = useState(900); // 15 min
 
   const currentPlan = plans.find(p => p.id === selectedPlan);
 
-  // Fetch specialties
+  // PIX countdown
+  useEffect(() => {
+    if (step !== "checkout" || paymentMethod !== "pix") return;
+    setPixCountdown(900);
+    const timer = setInterval(() => setPixCountdown(prev => (prev > 0 ? prev - 1 : 0)), 1000);
+    return () => clearInterval(timer);
+  }, [step, paymentMethod]);
   useEffect(() => {
     supabase.from("specialties").select("id, name").order("name").then(({ data }) => {
       if (data) setSpecialties(data);
@@ -241,8 +252,8 @@ const PlansCheckout = () => {
   };
 
   const handleCheckout = async () => {
-    if (!cardName || !cardNumber || !cardExpiry || !cardCvv) {
-      toast({ title: "Preencha todos os campos", variant: "destructive" });
+    if (paymentMethod === "card" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
+      toast({ title: "Preencha todos os campos do cartão", variant: "destructive" });
       return;
     }
     setProcessing(true);
@@ -256,6 +267,7 @@ const PlansCheckout = () => {
         doctor_id: selectedDoctor.id,
         scheduled_at: scheduledAt.toISOString(),
         status: "scheduled",
+        payment_status: "approved",
       });
       if (error) {
         toast({ title: "Erro ao agendar", description: "Tente novamente.", variant: "destructive" });
@@ -264,11 +276,25 @@ const PlansCheckout = () => {
       }
     }
 
-    // Simulate payment
+    // Simulate payment processing
+    const delay = paymentMethod === "pix" ? 3000 : paymentMethod === "boleto" ? 2000 : 2500;
     setTimeout(() => {
       setProcessing(false);
       setStep("success");
-    }, 2000);
+    }, delay);
+  };
+
+  const handleCopyPix = () => {
+    navigator.clipboard.writeText("00020126580014br.gov.bcb.pix0136aloclinica-demo-pix-key-simulated5204000053039865802BR5925ALOCLINICA SAUDE LTDA6009SAO PAULO62070503***6304ABCD");
+    setPixCopied(true);
+    toast({ title: "Código PIX copiado!" });
+    setTimeout(() => setPixCopied(false), 3000);
+  };
+
+  const formatPixTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
   const goBack = () => {
@@ -306,7 +332,7 @@ const PlansCheckout = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={patientNav}>
-      <div className="max-w-3xl">
+      <div className={step === "checkout" ? "max-w-4xl" : "max-w-3xl"}>
 
         {/* Step indicator */}
         {step !== "select" && step !== "success" && (
@@ -530,101 +556,311 @@ const PlansCheckout = () => {
           </>
         )}
 
-        {/* STEP 5: Checkout */}
+        {/* STEP 5: Checkout Transparente */}
         {step === "checkout" && (
-          <>
-            <h1 className="text-2xl font-bold text-foreground mb-6">Pagamento</h1>
-            <div className="grid md:grid-cols-2 gap-6">
-              <Card className="border-border">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-foreground mb-4">Resumo do Pedido</h3>
-                  <div className="space-y-3 text-sm">
-                    {selectedPlan === "avulsa" && selectedDoctor ? (
-                      <>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Consulta Avulsa</span>
-                          <span className="font-semibold text-foreground">R${selectedDoctor.consultation_price}</span>
-                        </div>
-                        <div className="text-muted-foreground text-xs space-y-1">
-                          <p>Dr(a). {selectedDoctor.first_name} {selectedDoctor.last_name}</p>
-                          <p>{selectedSpecialtyName}</p>
-                          {selectedDate && <p>{format(selectedDate, "dd/MM/yyyy", { locale: ptBR })} às {selectedTime}h</p>}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">{currentPlan?.name}</span>
-                        <span className="font-semibold text-foreground">R${currentPlan?.price}</span>
-                      </div>
-                    )}
-                    <div className="border-t border-border pt-3 flex justify-between">
-                      <span className="font-bold text-foreground">Total</span>
-                      <span className="font-bold text-foreground text-lg">R${totalPrice}</span>
-                    </div>
-                  </div>
-                  <div className="mt-6 p-3 rounded-lg bg-muted">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Shield className="w-4 h-4" /> Pagamento simulado — sem cobrança real
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="border-border">
-                <CardContent className="p-6">
-                  <h3 className="font-bold text-foreground mb-4 flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" /> Dados de Pagamento
-                  </h3>
-                  <div className="space-y-4">
-                    <div>
-                      <Label className="text-xs">Nome no cartão</Label>
-                      <Input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Nome completo" className="mt-1" />
-                    </div>
-                    <div>
-                      <Label className="text-xs">Número do cartão</Label>
-                      <Input value={cardNumber} onChange={e => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" className="mt-1 font-mono" maxLength={19} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label className="text-xs">Validade</Label>
-                        <Input value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" className="mt-1 font-mono" maxLength={5} />
-                      </div>
-                      <div>
-                        <Label className="text-xs">CVV</Label>
-                        <Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="000" className="mt-1 font-mono" maxLength={4} type="password" />
-                      </div>
-                    </div>
-                    <Button className="w-full bg-gradient-hero text-primary-foreground mt-2" size="lg" onClick={handleCheckout} disabled={processing}>
-                      {processing ? "Processando..." : `Pagar R$${totalPrice}`}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+            <div className="text-center mb-8">
+              <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-2" />
+              <h1 className="text-2xl font-bold text-foreground">Checkout Seguro</h1>
+              <p className="text-muted-foreground text-sm">Ambiente protegido • Pagamento simulado</p>
             </div>
-          </>
+
+            <div className="grid md:grid-cols-5 gap-6">
+              {/* Order Summary - Left */}
+              <div className="md:col-span-2">
+                <Card className="border-border sticky top-4">
+                  <CardContent className="p-5">
+                    <h3 className="font-bold text-foreground mb-4 text-sm uppercase tracking-wider">Resumo</h3>
+                    <div className="space-y-3 text-sm">
+                      {selectedPlan === "avulsa" && selectedDoctor ? (
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/50">
+                            <Avatar className="w-10 h-10">
+                              <AvatarFallback className="bg-primary/10 text-primary text-sm font-bold">
+                                {selectedDoctor.first_name[0]}{selectedDoctor.last_name[0]}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-foreground text-sm truncate">Dr(a). {selectedDoctor.first_name} {selectedDoctor.last_name}</p>
+                              <p className="text-xs text-muted-foreground">{selectedSpecialtyName}</p>
+                            </div>
+                          </div>
+                          {selectedDate && (
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                              <CalIcon className="w-4 h-4 text-primary" />
+                              <span>{format(selectedDate, "dd/MM/yyyy", { locale: ptBR })} às {selectedTime}h</span>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="p-3 rounded-xl bg-muted/50">
+                          <p className="font-semibold text-foreground">{currentPlan?.name}</p>
+                          <p className="text-xs text-muted-foreground">{currentPlan?.description}</p>
+                        </div>
+                      )}
+                      <div className="border-t border-border pt-3">
+                        <div className="flex justify-between items-baseline">
+                          <span className="text-muted-foreground">Subtotal</span>
+                          <span className="text-foreground">R$ {totalPrice.toFixed(2)}</span>
+                        </div>
+                        <div className="flex justify-between items-baseline mt-1">
+                          <span className="text-muted-foreground">Desconto</span>
+                          <span className="text-secondary font-medium">- R$ 0,00</span>
+                        </div>
+                      </div>
+                      <div className="border-t border-border pt-3 flex justify-between items-baseline">
+                        <span className="font-bold text-foreground text-base">Total</span>
+                        <span className="font-extrabold text-foreground text-2xl">R$ {totalPrice.toFixed(2)}</span>
+                      </div>
+                    </div>
+                    <div className="mt-4 p-2.5 rounded-lg bg-secondary/10 border border-secondary/20">
+                      <div className="flex items-center gap-2 text-xs text-secondary">
+                        <Shield className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span>Pagamento simulado — nenhuma cobrança será realizada</span>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Payment Methods - Right */}
+              <div className="md:col-span-3">
+                {/* Method Selector Tabs */}
+                <div className="grid grid-cols-3 gap-2 mb-5">
+                  {([
+                    { id: "pix" as PaymentMethod, label: "PIX", icon: QrCode, badge: "Instantâneo" },
+                    { id: "card" as PaymentMethod, label: "Cartão", icon: CreditCard, badge: null },
+                    { id: "boleto" as PaymentMethod, label: "Boleto", icon: FileBarChart, badge: null },
+                  ]).map(method => (
+                    <motion.button
+                      key={method.id}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setPaymentMethod(method.id)}
+                      className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                        paymentMethod === method.id
+                          ? "border-primary bg-primary/5 shadow-sm"
+                          : "border-border bg-card hover:border-primary/30"
+                      }`}
+                    >
+                      <method.icon className={`w-5 h-5 ${paymentMethod === method.id ? "text-primary" : "text-muted-foreground"}`} />
+                      <span className={`text-xs font-semibold ${paymentMethod === method.id ? "text-primary" : "text-foreground"}`}>{method.label}</span>
+                      {method.badge && (
+                        <Badge className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0 bg-secondary text-secondary-foreground border-0">
+                          {method.badge}
+                        </Badge>
+                      )}
+                    </motion.button>
+                  ))}
+                </div>
+
+                <AnimatePresence mode="wait">
+                  {/* PIX Payment */}
+                  {paymentMethod === "pix" && (
+                    <motion.div key="pix" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+                      <Card className="border-border">
+                        <CardContent className="p-6 text-center">
+                          <div className="mb-4">
+                            <Badge variant="outline" className="text-xs mb-3">
+                              Expira em {formatPixTime(pixCountdown)}
+                            </Badge>
+                          </div>
+                          {/* Simulated QR Code */}
+                          <div className="w-48 h-48 mx-auto rounded-2xl bg-card border-2 border-border p-3 mb-4 relative overflow-hidden">
+                            <div className="w-full h-full rounded-xl bg-foreground/5 grid grid-cols-8 grid-rows-8 gap-px">
+                              {Array.from({ length: 64 }).map((_, i) => (
+                                <div key={i} className={`rounded-[2px] ${Math.random() > 0.45 ? "bg-foreground" : "bg-card"}`} />
+                              ))}
+                            </div>
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="w-10 h-10 rounded-lg bg-card border-2 border-primary flex items-center justify-center">
+                                <QrCode className="w-5 h-5 text-primary" />
+                              </div>
+                            </div>
+                          </div>
+                          <p className="text-xs text-muted-foreground mb-3">Escaneie o QR Code ou copie o código</p>
+                          <Button
+                            variant="outline"
+                            className="w-full mb-4 font-mono text-xs"
+                            onClick={handleCopyPix}
+                          >
+                            {pixCopied ? (
+                              <><CheckCircle2 className="w-4 h-4 mr-2 text-secondary" /> Copiado!</>
+                            ) : (
+                              <><Copy className="w-4 h-4 mr-2" /> Copiar código PIX</>
+                            )}
+                          </Button>
+                          <Button
+                            className="w-full bg-gradient-hero text-primary-foreground h-12 text-base"
+                            onClick={handleCheckout}
+                            disabled={processing}
+                          >
+                            {processing ? (
+                              <motion.div className="flex items-center gap-2" animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+                                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                                Confirmando pagamento...
+                              </motion.div>
+                            ) : `Já paguei • R$ ${totalPrice.toFixed(2)}`}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
+
+                  {/* Card Payment */}
+                  {paymentMethod === "card" && (
+                    <motion.div key="card" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+                      <Card className="border-border">
+                        <CardContent className="p-6">
+                          {/* Card preview */}
+                          <div className="relative w-full h-44 rounded-2xl bg-gradient-hero p-5 mb-6 overflow-hidden">
+                            <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-primary-foreground/5 -translate-y-10 translate-x-10" />
+                            <div className="absolute bottom-0 left-0 w-32 h-32 rounded-full bg-primary-foreground/5 translate-y-10 -translate-x-10" />
+                            <div className="relative z-10 h-full flex flex-col justify-between">
+                              <div className="flex justify-between items-start">
+                                <div className="w-10 h-7 rounded bg-primary-foreground/20" />
+                                <CreditCard className="w-6 h-6 text-primary-foreground/60" />
+                              </div>
+                              <div>
+                                <p className="font-mono text-primary-foreground text-lg tracking-[0.2em]">
+                                  {cardNumber || "•••• •••• •••• ••••"}
+                                </p>
+                                <div className="flex justify-between mt-2">
+                                  <p className="text-primary-foreground/80 text-xs uppercase">{cardName || "SEU NOME"}</p>
+                                  <p className="text-primary-foreground/80 text-xs font-mono">{cardExpiry || "MM/AA"}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Nome no cartão</Label>
+                              <Input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Nome como está no cartão" className="mt-1" />
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Número do cartão</Label>
+                              <Input value={cardNumber} onChange={e => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" className="mt-1 font-mono" maxLength={19} />
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Validade</Label>
+                                <Input value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" className="mt-1 font-mono" maxLength={5} />
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">CVV</Label>
+                                <Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="•••" className="mt-1 font-mono" maxLength={4} type="password" />
+                              </div>
+                            </div>
+                            <Button
+                              className="w-full bg-gradient-hero text-primary-foreground h-12 text-base mt-2"
+                              onClick={handleCheckout}
+                              disabled={processing}
+                            >
+                              {processing ? (
+                                <motion.div className="flex items-center gap-2" animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+                                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                                  Processando...
+                                </motion.div>
+                              ) : (
+                                <><Lock className="w-4 h-4 mr-2" /> Pagar R$ {totalPrice.toFixed(2)}</>
+                              )}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
+
+                  {/* Boleto Payment */}
+                  {paymentMethod === "boleto" && (
+                    <motion.div key="boleto" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
+                      <Card className="border-border">
+                        <CardContent className="p-6 text-center">
+                          <FileBarChart className="w-12 h-12 mx-auto text-primary/60 mb-4" />
+                          <h3 className="font-bold text-foreground mb-2">Boleto Bancário</h3>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            O boleto será gerado e pode levar até 2 dias úteis para compensação.
+                          </p>
+                          <div className="p-4 rounded-xl bg-muted/50 border border-border mb-4">
+                            <p className="text-xs text-muted-foreground mb-1">Linha digitável (simulada)</p>
+                            <p className="font-mono text-xs text-foreground break-all">
+                              23793.38128 60000.000003 00000.000400 1 93670000{String(Math.round(totalPrice * 100)).padStart(8, "0")}
+                            </p>
+                          </div>
+                          <Button
+                            variant="outline"
+                            className="w-full mb-3"
+                            onClick={() => {
+                              navigator.clipboard.writeText("23793.38128 60000.000003 00000.000400 1 93670000" + String(Math.round(totalPrice * 100)).padStart(8, "0"));
+                              toast({ title: "Código de barras copiado!" });
+                            }}
+                          >
+                            <Copy className="w-4 h-4 mr-2" /> Copiar código
+                          </Button>
+                          <Button
+                            className="w-full bg-gradient-hero text-primary-foreground h-12 text-base"
+                            onClick={handleCheckout}
+                            disabled={processing}
+                          >
+                            {processing ? (
+                              <motion.div className="flex items-center gap-2" animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+                                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                                Gerando boleto...
+                              </motion.div>
+                            ) : `Gerar Boleto • R$ ${totalPrice.toFixed(2)}`}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Security badges */}
+                <div className="flex items-center justify-center gap-4 mt-4 text-muted-foreground">
+                  <div className="flex items-center gap-1 text-xs">
+                    <Lock className="w-3 h-3" /> SSL 256-bit
+                  </div>
+                  <div className="flex items-center gap-1 text-xs">
+                    <Shield className="w-3 h-3" /> PCI DSS
+                  </div>
+                  <div className="flex items-center gap-1 text-xs">
+                    <Check className="w-3 h-3" /> LGPD
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
         )}
 
         {/* STEP 6: Success */}
         {step === "success" && (
-          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-16">
-            <div className="w-20 h-20 rounded-full bg-secondary/10 mx-auto flex items-center justify-center mb-6">
-              <Check className="w-10 h-10 text-secondary" />
-            </div>
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 200 }} className="text-center py-12">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+              className="w-24 h-24 rounded-full bg-secondary/10 mx-auto flex items-center justify-center mb-6"
+            >
+              <CheckCircle2 className="w-12 h-12 text-secondary" />
+            </motion.div>
             <h1 className="text-2xl font-bold text-foreground mb-2">
               {selectedPlan === "avulsa" ? "Consulta Agendada e Paga!" : "Plano Ativado!"}
             </h1>
-            <p className="text-muted-foreground mb-2">
+            <p className="text-muted-foreground mb-1">
               {selectedPlan === "avulsa" && selectedDoctor && selectedDate && selectedTime
                 ? `Consulta com Dr(a). ${selectedDoctor.first_name} em ${format(selectedDate, "dd/MM/yyyy", { locale: ptBR })} às ${selectedTime}h`
                 : `Seu plano ${currentPlan?.name} foi ativado com sucesso.`
               }
             </p>
-            <Badge variant="default" className="mb-8">
-              {selectedPlan === "avulsa" ? "Consulta Confirmada" : "Plano Ativo"}
-            </Badge>
-            <div>
-              <Button onClick={() => navigate("/dashboard")} className="bg-gradient-hero text-primary-foreground">
-                Voltar ao Dashboard
+            <p className="text-xs text-muted-foreground mb-6">
+              Pagamento via {paymentMethod === "pix" ? "PIX" : paymentMethod === "card" ? "Cartão de Crédito" : "Boleto"} • Simulado
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => navigate("/dashboard")} className="bg-gradient-hero text-primary-foreground h-11">
+                <CalIcon className="w-4 h-4 mr-2" /> Ir para o Dashboard
+              </Button>
+              <Button variant="outline" onClick={() => navigate("/dashboard/appointments")} className="h-11">
+                Ver Minhas Consultas
               </Button>
             </div>
           </motion.div>
