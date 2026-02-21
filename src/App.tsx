@@ -16,6 +16,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import CookieConsent from "./components/CookieConsent";
 import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
 import ScrollToTop from "./components/ScrollToTop";
+import BackToTop from "./components/BackToTop";
 
 // Lazy-loaded pages for code splitting
 const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
@@ -113,6 +114,7 @@ const App = () => (
           <PingoChatbot />
           <AccessibilityToggle />
           <CookieConsent />
+          <BackToTop />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
