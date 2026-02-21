@@ -94,7 +94,7 @@ const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: str
 
 const Dashboard = () => {
   const { user, roles, loading } = useAuth();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const forceRole = searchParams.get("role");
   usePresence();
 
@@ -106,6 +106,8 @@ const Dashboard = () => {
 
   const isAdmin = roles.includes("admin");
   const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "affiliate", "admin"];
+  
+  // Determine primary role - admin always defaults to admin unless explicitly forced
   const primaryRole = isAdmin && forceRole && validForceRoles.includes(forceRole)
     ? forceRole
     : isAdmin ? "admin"
@@ -117,10 +119,27 @@ const Dashboard = () => {
     : roles.includes("affiliate") ? "affiliate"
     : "patient";
 
+  // Determine which dashboard to show at index based on the current role context
+  const IndexDashboard = () => {
+    switch (primaryRole) {
+      case "admin": return <AdminDashboard />;
+      case "doctor": return <DoctorDashboard />;
+      case "receptionist": return <ReceptionDashboard />;
+      case "support": return <SupportDashboard />;
+      case "clinic": return <ClinicDashboard />;
+      case "partner": return <PartnerDashboard />;
+      case "affiliate": return <AffiliateDashboard />;
+      default: return <PatientDashboard />;
+    }
+  };
+
   return (
     <Suspense fallback={<PageLoader />}>
     <Routes>
-      {/* ─── Role-based dashboard index routes ─── */}
+      {/* ─── Main dashboard index — shows dashboard based on primaryRole ─── */}
+      <Route index element={<IndexDashboard />} />
+
+      {/* ─── Role-based dashboard explicit routes ─── */}
       <Route path="patient" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientDashboard /></RoleGuard>} />
       <Route path="doctor" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorDashboard /></RoleGuard>} />
       <Route path="clinic" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
@@ -196,10 +215,10 @@ const Dashboard = () => {
       <Route path="admin/health" element={<RoleGuard allowed={[]} roles={roles}><SystemHealth /></RoleGuard>} />
       <Route path="admin/live" element={<RoleGuard allowed={[]} roles={roles}><AdminLiveConsultations /></RoleGuard>} />
 
-      {/* Default: redirect to role-specific dashboard */}
+      {/* Fallback: redirect to role-appropriate dashboard */}
       <Route
         path="*"
-        element={<Navigate to={`/dashboard/${primaryRole}`} replace />}
+        element={<Navigate to={`/dashboard${forceRole ? `?role=${forceRole}` : ''}`} replace />}
       />
     </Routes>
     </Suspense>
