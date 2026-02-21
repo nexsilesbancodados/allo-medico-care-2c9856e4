@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { motion, useMotionValue, useTransform, useSpring, AnimatePresence } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring, AnimatePresence, useScroll } from "framer-motion";
 import { Video, Shield, Clock, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
@@ -42,11 +42,21 @@ const poseContent = [
 const HeroSection = () => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [poseIndex, setPoseIndex] = useState(0);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+
+  // Parallax on scroll
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start start", "end start"],
+  });
+  const parallaxY = useTransform(scrollYProgress, [0, 1], [0, -120]);
+  const parallaxScale = useTransform(scrollYProgress, [0, 0.5], [1, 0.92]);
+  const bgParallax = useTransform(scrollYProgress, [0, 1], [0, 60]);
 
   const rotateX = useSpring(useTransform(mouseY, [-300, 300], [8, -8]), { stiffness: 150, damping: 20 });
   const rotateY = useSpring(useTransform(mouseX, [-300, 300], [-8, 8]), { stiffness: 150, damping: 20 });
@@ -77,33 +87,59 @@ const HeroSection = () => {
   };
 
   return (
-    <section aria-label="Início" className="relative min-h-[90vh] lg:min-h-screen flex items-center pt-28 sm:pt-24 overflow-hidden">
+    <section ref={sectionRef} aria-label="Início" className="relative min-h-[90vh] lg:min-h-screen flex items-center pt-28 sm:pt-24 overflow-hidden">
       {/* Floating particles */}
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div
+      {Array.from({ length: 8 }).map((_, i) => (
+        <motion.div
           key={i}
-          className="absolute w-2 h-2 rounded-full bg-primary/20 animate-float-particle pointer-events-none"
+          className="absolute rounded-full bg-primary/15 pointer-events-none"
           style={{
-            left: `${15 + i * 15}%`,
-            top: `${20 + (i % 3) * 25}%`,
-            animationDelay: `${i * 0.8}s`,
+            width: `${6 + (i % 3) * 4}px`,
+            height: `${6 + (i % 3) * 4}px`,
+            left: `${10 + i * 11}%`,
+            top: `${15 + (i % 4) * 20}%`,
+            y: bgParallax,
           }}
+          animate={{
+            y: [0, -25 - i * 3, 0],
+            x: [0, (i % 2 === 0 ? 12 : -12), 0],
+            opacity: [0.2, 0.5, 0.2],
+          }}
+          transition={{ duration: 5 + i * 0.5, repeat: Infinity, ease: "easeInOut", delay: i * 0.4 }}
         />
       ))}
 
-      {/* Background decoration */}
+      {/* Animated gradient mesh background */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-20 right-0 w-[500px] h-[500px] rounded-full bg-medical-blue-light opacity-60 blur-3xl" />
-        <div className="absolute bottom-20 left-0 w-[400px] h-[400px] rounded-full bg-medical-green-light opacity-60 blur-3xl" />
+        <motion.div
+          style={{ y: bgParallax }}
+          className="absolute top-20 right-0 w-[500px] h-[500px] rounded-full bg-medical-blue-light opacity-60 blur-3xl"
+          animate={{ scale: [1, 1.08, 1], x: [0, 15, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div
+          style={{ y: bgParallax }}
+          className="absolute bottom-20 left-0 w-[400px] h-[400px] rounded-full bg-medical-green-light opacity-60 blur-3xl"
+          animate={{ scale: [1, 1.12, 1], x: [0, -15, 0] }}
+          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        />
+        {/* Additional gradient orb */}
+        <motion.div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-20 blur-[100px]"
+          style={{ background: "radial-gradient(circle, hsl(var(--primary) / 0.3), transparent 70%)" }}
+          animate={{ scale: [0.8, 1.1, 0.8], rotate: [0, 180, 360] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
       </div>
 
       <div className="container mx-auto px-4 py-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Text */}
+          {/* Text with parallax */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
+            style={{ y: parallaxY, scale: parallaxScale }}
           >
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-medical-blue-light text-primary text-sm font-medium mb-6">
               <Video className="w-4 h-4" />
@@ -206,12 +242,12 @@ const HeroSection = () => {
                 </AnimatePresence>
               </motion.div>
 
-              {/* Floating card 1 */}
+              {/* Floating card 1 — glassmorphism */}
               <motion.div
-                animate={{ y: [0, -8, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-4 right-0 bg-card rounded-2xl shadow-card p-4 border border-border hidden md:flex"
-                whileHover={{ scale: 1.1 }}
+                animate={{ y: [0, -10, 0], rotate: [0, 1, 0] }}
+                transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                className="absolute top-4 right-0 backdrop-blur-xl bg-card/80 rounded-2xl shadow-elevated p-4 border border-border/50 hidden md:flex"
+                whileHover={{ scale: 1.12, boxShadow: "0 20px 50px -12px hsl(var(--primary) / 0.25)" }}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-medical-green-light flex items-center justify-center">
