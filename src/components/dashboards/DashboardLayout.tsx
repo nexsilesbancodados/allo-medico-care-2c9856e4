@@ -1,10 +1,9 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,6 +26,7 @@ interface NavItem {
   href: string;
   icon: ReactNode;
   active?: boolean;
+  group?: string;
 }
 
 interface DashboardLayoutProps {
@@ -37,24 +37,27 @@ interface DashboardLayoutProps {
   loading?: boolean;
 }
 
-const ROLE_BADGE: Record<string, { bg: string; text: string; dot: string }> = {
-  patient:      { bg: "bg-primary/10",     text: "text-primary",          dot: "bg-primary" },
-  doctor:       { bg: "bg-secondary/10",   text: "text-secondary",        dot: "bg-secondary" },
-  admin:        { bg: "bg-destructive/10", text: "text-destructive",      dot: "bg-destructive" },
-  receptionist: { bg: "bg-warning/10",     text: "text-warning",          dot: "bg-warning" },
-  support:      { bg: "bg-warning/10",     text: "text-warning",          dot: "bg-warning" },
-  clinic:       { bg: "bg-primary/10",     text: "text-primary",          dot: "bg-primary" },
-  partner:      { bg: "bg-success/10",     text: "text-success",          dot: "bg-success" },
-  affiliate:    { bg: "bg-muted",          text: "text-muted-foreground", dot: "bg-muted-foreground" },
+/* ── Role colour tokens ── */
+const ROLE_THEME: Record<string, { accent: string; accentBg: string; dot: string; iconBg: string; iconActive: string }> = {
+  patient:      { accent: "text-primary",     accentBg: "bg-primary/10",     dot: "bg-primary",     iconBg: "bg-primary/8",     iconActive: "bg-primary/20" },
+  doctor:       { accent: "text-secondary",   accentBg: "bg-secondary/10",   dot: "bg-secondary",   iconBg: "bg-secondary/8",   iconActive: "bg-secondary/20" },
+  admin:        { accent: "text-destructive", accentBg: "bg-destructive/10", dot: "bg-destructive", iconBg: "bg-destructive/8", iconActive: "bg-destructive/20" },
+  receptionist: { accent: "text-warning",     accentBg: "bg-warning/10",     dot: "bg-warning",     iconBg: "bg-warning/8",     iconActive: "bg-warning/20" },
+  support:      { accent: "text-warning",     accentBg: "bg-warning/10",     dot: "bg-warning",     iconBg: "bg-warning/8",     iconActive: "bg-warning/20" },
+  clinic:       { accent: "text-primary",     accentBg: "bg-primary/10",     dot: "bg-primary",     iconBg: "bg-primary/8",     iconActive: "bg-primary/20" },
+  partner:      { accent: "text-success",     accentBg: "bg-success/10",     dot: "bg-success",     iconBg: "bg-success/8",     iconActive: "bg-success/20" },
+  affiliate:    { accent: "text-muted-foreground", accentBg: "bg-muted", dot: "bg-muted-foreground", iconBg: "bg-muted/60", iconActive: "bg-muted" },
 };
 
-const DashboardLayout = ({ children, title, nav, role = "patient", loading: externalLoading }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLayoutProps) => {
   const { profile, roles } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [moreOpen, setMoreOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { signOut } = useAuth();
+
+  const theme = ROLE_THEME[role] ?? ROLE_THEME.patient;
 
   const isAdmin = roles.includes("admin");
   const forceRole = searchParams.get("role");
@@ -73,28 +76,66 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
     navigate("/");
   };
 
-  const roleBadge = ROLE_BADGE[role] ?? ROLE_BADGE.patient;
+  /* Group nav items by their `group` field */
+  const grouped = useMemo(() => {
+    if (!nav) return [];
+    const map = new Map<string, NavItem[]>();
+    nav.forEach(item => {
+      const g = item.group ?? "Menu";
+      if (!map.has(g)) map.set(g, []);
+      map.get(g)!.push(item);
+    });
+    return Array.from(map.entries());
+  }, [nav]);
 
   const bottomNav = nav?.slice(0, 4) ?? [];
   const moreNav = nav && nav.length > 4 ? nav.slice(4) : [];
 
-  const SidebarContent = () => (
+  /* ── Shared nav item renderer ── */
+  const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => (
+    <Link
+      to={item.href}
+      onClick={onClick}
+      className={`relative flex items-center gap-2.5 px-2.5 py-[7px] rounded-xl text-[13px] font-medium transition-all duration-150 group ${
+        item.active
+          ? `${theme.accentBg} ${theme.accent} font-semibold`
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+      }`}
+    >
+      {item.active && (
+        <motion.span
+          layoutId="sidebar-active-bar"
+          className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full ${theme.dot}`}
+          transition={{ type: "spring", stiffness: 500, damping: 35 }}
+        />
+      )}
+      <span className={`shrink-0 w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-150 ${
+        item.active ? theme.iconActive + " " + theme.accent : theme.iconBg + " text-muted-foreground group-hover:text-foreground"
+      }`}>
+        {item.icon}
+      </span>
+      <span className="flex-1 truncate">{item.label}</span>
+      {item.active && <ChevronRight className="w-3 h-3 opacity-40 shrink-0" />}
+    </Link>
+  );
+
+  const SidebarInner = () => (
     <>
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 h-14 border-b border-border/40 shrink-0">
         <img src={logoImg} alt="AloClinica" className="w-8 h-8 object-contain" loading="lazy" />
-        <span className="font-bold text-sm text-foreground hidden sm:block md:block">AloClínica</span>
+        <span className="font-bold text-sm text-foreground">AloClínica</span>
       </div>
 
       {/* Role badge */}
       <div className="px-3 pt-3 pb-1 shrink-0">
-        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${roleBadge.bg} ${roleBadge.text}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${roleBadge.dot}`} />
+        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${theme.accentBg} ${theme.accent}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${theme.dot}`} />
           {title}
         </div>
       </div>
 
-      {/* Admin back button when viewing other panel */}
+      {/* Admin back button */}
       {isAdminViewingOtherPanel && (
         <div className="px-3 pb-1 shrink-0">
           <button
@@ -107,33 +148,21 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
         </div>
       )}
 
-      {/* Nav items */}
-      {nav && nav.length > 0 && (
-        <nav className="flex flex-col gap-0.5 px-3 flex-1 py-2 overflow-y-auto">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              onClick={() => setSidebarOpen(false)}
-              className={`relative flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-150 group ${
-                item.active
-                  ? "bg-primary/10 text-primary font-semibold"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-              }`}
-            >
-              {item.active && (
-                <motion.span
-                  layoutId="sidebar-active-bar"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full"
-                  transition={{ type: "spring", stiffness: 500, damping: 35 }}
-                />
-              )}
-              <span className={`shrink-0 transition-all duration-150 ${item.active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}>
-                {item.icon}
-              </span>
-              <span className="flex-1 truncate">{item.label}</span>
-              {item.active && <ChevronRight className="w-3 h-3 text-primary/40 shrink-0" />}
-            </Link>
+      {/* Grouped nav items */}
+      {grouped.length > 0 && (
+        <nav className="flex flex-col px-3 flex-1 py-2 overflow-y-auto">
+          {grouped.map(([groupLabel, items], gi) => (
+            <div key={groupLabel}>
+              {gi > 0 && <div className="h-px bg-border/40 mx-1 my-2" />}
+              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2.5 mb-1 mt-1">
+                {groupLabel}
+              </p>
+              <div className="flex flex-col gap-0.5">
+                {items.map(item => (
+                  <NavItemRow key={item.href} item={item} onClick={() => setSidebarOpen(false)} />
+                ))}
+              </div>
+            </div>
           ))}
         </nav>
       )}
@@ -174,7 +203,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 w-64 flex flex-col border-border/50">
-              <SidebarContent />
+              <SidebarInner />
             </SheetContent>
           </Sheet>
         )}
@@ -201,7 +230,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
 
         <div className="flex-1" />
 
-        {/* Admin quick-return button in header */}
+        {/* Admin quick-return */}
         {isAdminViewingOtherPanel && (
           <Button
             variant="outline"
@@ -264,7 +293,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
         {/* ── Sidebar desktop ── */}
         {nav && nav.length > 0 && (
           <aside className="hidden md:flex w-56 shrink-0 flex-col border-r border-border/40 bg-card sticky top-14 h-[calc(100vh-3.5rem)]">
-            <SidebarContent />
+            <SidebarInner />
           </aside>
         )}
 
@@ -290,23 +319,25 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
           className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-card/96 backdrop-blur-xl border-t border-border/50"
           style={{ paddingBottom: "env(safe-area-inset-bottom, 4px)" }}
         >
-          <div className="flex items-stretch h-14">
+          <div className="flex items-stretch h-[60px]">
             {bottomNav.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
-                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium transition-all duration-200 ${
-                  item.active ? "text-primary" : "text-muted-foreground"
+                className={`relative flex flex-col items-center justify-center gap-1 flex-1 text-[10px] font-medium transition-all duration-200 ${
+                  item.active ? theme.accent : "text-muted-foreground"
                 }`}
               >
                 {item.active && (
                   <motion.span
                     layoutId="mobile-active-top"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2px] bg-primary rounded-b-full"
+                    className={`absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2.5px] rounded-b-full ${theme.dot}`}
                     transition={{ type: "spring", stiffness: 400, damping: 30 }}
                   />
                 )}
-                <span className={`transition-transform duration-200 ${item.active ? "scale-110" : ""}`}>
+                <span className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                  item.active ? theme.iconActive : ""
+                }`}>
                   {item.icon}
                 </span>
                 <span className="truncate max-w-[52px] leading-tight text-center">{item.label}</span>
@@ -316,8 +347,10 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
             {moreNav.length > 0 && (
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
                 <SheetTrigger asChild>
-                  <button className={`flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium transition-colors ${moreNav.some(i => i.active) ? "text-primary" : "text-muted-foreground"}`}>
-                    <MoreHorizontal className="w-4 h-4" />
+                  <button className={`flex flex-col items-center justify-center gap-1 flex-1 text-[10px] font-medium transition-colors ${moreNav.some(i => i.active) ? theme.accent : "text-muted-foreground"}`}>
+                    <span className={`w-8 h-8 rounded-xl flex items-center justify-center ${moreNav.some(i => i.active) ? theme.iconActive : ""}`}>
+                      <MoreHorizontal className="w-4 h-4" />
+                    </span>
                     <span>Mais</span>
                   </button>
                 </SheetTrigger>
@@ -332,10 +365,10 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
                           to={item.href}
                           onClick={() => setMoreOpen(false)}
                           className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl text-[11px] font-medium transition-all ${
-                            item.active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                            item.active ? `${theme.accentBg} ${theme.accent}` : "text-muted-foreground hover:bg-muted hover:text-foreground"
                           }`}
                         >
-                          <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${item.active ? "bg-primary/20 text-primary" : "bg-muted/80"}`}>
+                          <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${item.active ? theme.iconActive + " " + theme.accent : theme.iconBg}`}>
                             {item.icon}
                           </span>
                           <span className="text-center leading-tight line-clamp-1">{item.label}</span>
