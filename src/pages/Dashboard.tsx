@@ -50,6 +50,7 @@ const DoctorPublicProfile = lazy(() => import("@/components/doctor/DoctorPublicP
 const VideoRoom = lazy(() => import("@/components/consultation/VideoRoom"));
 const PrescriptionForm = lazy(() => import("@/components/consultation/PrescriptionForm"));
 const RateConsultationPage = lazy(() => import("@/components/patient/RateConsultationPage"));
+const PreConsultationPage = lazy(() => import("@/components/patient/PreConsultationPage"));
 
 // Shared
 const UserProfile = lazy(() => import("@/components/profile/UserProfile"));
@@ -165,6 +166,7 @@ const Dashboard = () => {
       <Route path="consultation/:appointmentId" element={<RoleGuard allowed={["doctor", "patient"]} roles={roles}><VideoRoom /></RoleGuard>} />
       <Route path="prescribe/:appointmentId" element={<RoleGuard allowed={["doctor"]} roles={roles}><PrescriptionForm /></RoleGuard>} />
       <Route path="rate/:appointmentId" element={<RoleGuard allowed={["patient"]} roles={roles}><RateConsultationPage /></RoleGuard>} />
+      <Route path="pre-consultation/:appointmentId" element={<RoleGuard allowed={["patient"]} roles={roles}><PreConsultationPage /></RoleGuard>} />
       <Route path="doctor-profile/:doctorId" element={<DoctorPublicProfile />} />
 
       {/* Clinic routes */}

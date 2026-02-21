@@ -23,6 +23,7 @@ import MedicalHistoryExport from "@/components/patient/MedicalHistoryExport";
 import CreditsWidget from "@/components/patient/CreditsWidget";
 import UpsellBanner from "@/components/patient/UpsellBanner";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
+import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -271,13 +272,17 @@ const PatientDashboard = () => {
         {/* ── Live consultation / Waiting Room ── */}
         {waitingAppt && (
           <motion.div variants={fadeUp}>
-            <PatientWaitingCard appointment={waitingAppt} />
+            <SectionErrorBoundary fallbackTitle="Erro na sala de espera">
+              <PatientWaitingCard appointment={waitingAppt} />
+            </SectionErrorBoundary>
           </motion.div>
         )}
 
         {/* ── Upsell banner ── */}
         <motion.div variants={fadeUp}>
-          <UpsellBanner />
+          <SectionErrorBoundary fallbackTitle="Erro no banner">
+            <UpsellBanner />
+          </SectionErrorBoundary>
         </motion.div>
 
         {/* ── Quick Actions — 4 large touch targets ── */}

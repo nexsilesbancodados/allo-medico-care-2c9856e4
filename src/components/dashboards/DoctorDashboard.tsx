@@ -15,6 +15,7 @@ import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, Tren
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
 import BlobKPICard from "@/components/ui/blob-kpi-card";
 import DoctorOnboarding from "@/components/doctor/DoctorOnboarding";
+import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -116,7 +117,9 @@ const DoctorDashboard = () => {
     <DashboardLayout title="Médico" nav={getDoctorNav("home")} role="doctor">
       <div className="max-w-5xl space-y-5">
         {/* ── Doctor Onboarding Checklist ── */}
-        <DoctorOnboarding />
+        <SectionErrorBoundary fallbackTitle="Erro no checklist de ativação">
+          <DoctorOnboarding />
+        </SectionErrorBoundary>
 
         {/* ── Page Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
