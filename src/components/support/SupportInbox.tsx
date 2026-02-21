@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,164 +6,259 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Send, User, Headset, Search, ArrowLeft, MessageCircle, Loader2, Inbox } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Send, User, Headset, Search, ArrowLeft, Loader2, Inbox, Bell, CheckCircle, Clock, XCircle, Volume2 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
-interface ChatMessage {
+interface Ticket {
   id: string;
-  user_id: string;
-  role: string;
+  patient_id: string;
+  assigned_to: string | null;
+  subject: string;
+  status: string;
+  priority: string;
+  created_at: string;
+  updated_at: string;
+  patient_name?: string;
+  patient_cpf?: string;
+  patient_phone?: string;
+  unread_count: number;
+  last_message?: string;
+  last_message_at?: string;
+}
+
+interface TicketMessage {
+  id: string;
+  ticket_id: string;
+  sender_id: string;
+  sender_role: string;
   content: string;
+  is_read: boolean;
   created_at: string;
 }
 
-interface Conversation {
-  user_id: string;
-  user_name: string;
-  last_message: string;
-  last_at: string;
-  unread: number;
-  messages: ChatMessage[];
-}
+const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof Clock }> = {
+  bot: { label: "Bot", color: "bg-secondary/10 text-secondary border-secondary/20", icon: Clock },
+  waiting_human: { label: "Aguardando", color: "bg-warning/10 text-warning border-warning/20", icon: Bell },
+  in_service: { label: "Em atendimento", color: "bg-success/10 text-success border-success/20", icon: Headset },
+  closed: { label: "Encerrado", color: "bg-muted text-muted-foreground border-border", icon: CheckCircle },
+};
 
 const SupportInbox = () => {
   const { user } = useAuth();
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicket, setSelectedTicket] = useState<Ticket | null>(null);
+  const [messages, setMessages] = useState<TicketMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("waiting_human");
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const fetchConversations = async () => {
-    // Fetch all support chat messages (support/admin can see all via RLS)
-    const { data: messages, error } = await supabase
-      .from("support_chat_messages")
+  // Create audio for notification
+  useEffect(() => {
+    // Use a simple beep sound via Web Audio API
+    audioRef.current = null; // We'll use Web Audio API instead
+  }, []);
+
+  const playNotificationSound = useCallback(() => {
+    if (!soundEnabled) return;
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 800;
+      gain.gain.value = 0.3;
+      osc.start();
+      osc.stop(ctx.currentTime + 0.2);
+      setTimeout(() => {
+        const osc2 = ctx.createOscillator();
+        const gain2 = ctx.createGain();
+        osc2.connect(gain2);
+        gain2.connect(ctx.destination);
+        osc2.frequency.value = 1000;
+        gain2.gain.value = 0.3;
+        osc2.start();
+        osc2.stop(ctx.currentTime + 0.15);
+      }, 250);
+    } catch (e) {
+      console.warn("Audio not available:", e);
+    }
+  }, [soundEnabled]);
+
+  const fetchTickets = useCallback(async () => {
+    const { data: ticketsData, error } = await supabase
+      .from("support_tickets")
       .select("*")
-      .order("created_at", { ascending: true });
+      .order("updated_at", { ascending: false });
 
-    if (error) {
-      console.error("Error fetching messages:", error);
+    if (error || !ticketsData) {
+      console.error("Error fetching tickets:", error);
       setLoading(false);
       return;
     }
 
-    // Get unique user_ids
-    const userIds = [...new Set((messages ?? []).map((m) => m.user_id))];
-
-    // Fetch profiles for those users
-    const { data: profiles } = userIds.length > 0
-      ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds)
+    // Get patient profiles
+    const patientIds = [...new Set(ticketsData.map(t => t.patient_id))];
+    const { data: profiles } = patientIds.length > 0
+      ? await supabase.from("profiles").select("user_id, first_name, last_name, cpf, phone").in("user_id", patientIds)
       : { data: [] };
 
-    const profileMap = new Map<string, string>();
-    (profiles ?? []).forEach((p) => {
-      profileMap.set(p.user_id, `${p.first_name} ${p.last_name}`.trim() || "Sem nome");
+    const profileMap = new Map<string, any>();
+    (profiles ?? []).forEach(p => profileMap.set(p.user_id, p));
+
+    // Get unread counts and last messages
+    const ticketIds = ticketsData.map(t => t.id);
+    const { data: allMessages } = ticketIds.length > 0
+      ? await supabase.from("support_messages").select("ticket_id, content, created_at, is_read, sender_role")
+          .in("ticket_id", ticketIds).order("created_at", { ascending: false })
+      : { data: [] };
+
+    const unreadMap = new Map<string, number>();
+    const lastMsgMap = new Map<string, { content: string; created_at: string }>();
+    (allMessages ?? []).forEach(m => {
+      if (!lastMsgMap.has(m.ticket_id)) {
+        lastMsgMap.set(m.ticket_id, { content: m.content, created_at: m.created_at });
+      }
+      if (!m.is_read && m.sender_role === "patient") {
+        unreadMap.set(m.ticket_id, (unreadMap.get(m.ticket_id) ?? 0) + 1);
+      }
     });
 
-    // Group messages by user_id
-    const groupedMap = new Map<string, ChatMessage[]>();
-    (messages ?? []).forEach((m) => {
-      if (!groupedMap.has(m.user_id)) groupedMap.set(m.user_id, []);
-      groupedMap.get(m.user_id)!.push(m);
+    const enrichedTickets: Ticket[] = ticketsData.map(t => {
+      const profile = profileMap.get(t.patient_id);
+      const lastMsg = lastMsgMap.get(t.id);
+      return {
+        ...t,
+        patient_name: profile ? `${profile.first_name} ${profile.last_name}`.trim() : "Paciente",
+        patient_cpf: profile?.cpf ?? null,
+        patient_phone: profile?.phone ?? null,
+        unread_count: unreadMap.get(t.id) ?? 0,
+        last_message: lastMsg?.content,
+        last_message_at: lastMsg?.created_at,
+      };
     });
 
-    const convs: Conversation[] = [];
-    groupedMap.forEach((msgs, uid) => {
-      // Filter out support's own conversations (support agents chatting with AI)
-      // We want to show conversations from patients/users who need help
-      const hasUserMessages = msgs.some((m) => m.role === "user");
-      if (!hasUserMessages) return;
-
-      const lastMsg = msgs[msgs.length - 1];
-      // Count messages from user that don't have a support reply after them
-      const lastSupportReply = [...msgs].reverse().findIndex((m) => m.role === "support");
-      const lastUserMsg = [...msgs].reverse().findIndex((m) => m.role === "user");
-      const unread = lastSupportReply === -1 ? msgs.filter((m) => m.role === "user").length 
-        : lastUserMsg < lastSupportReply ? 0 : 1;
-
-      convs.push({
-        user_id: uid,
-        user_name: profileMap.get(uid) ?? "Usuário",
-        last_message: lastMsg.content,
-        last_at: lastMsg.created_at,
-        unread,
-        messages: msgs,
-      });
-    });
-
-    // Sort by last message (most recent first)
-    convs.sort((a, b) => new Date(b.last_at).getTime() - new Date(a.last_at).getTime());
-    setConversations(convs);
+    setTickets(enrichedTickets);
     setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchConversations();
   }, []);
 
-  // Realtime: listen for new messages
+  const fetchMessages = useCallback(async (ticketId: string) => {
+    const { data } = await supabase
+      .from("support_messages")
+      .select("*")
+      .eq("ticket_id", ticketId)
+      .order("created_at", { ascending: true });
+    setMessages(data ?? []);
+
+    // Mark patient messages as read
+    if (user) {
+      await supabase.from("support_messages")
+        .update({ is_read: true })
+        .eq("ticket_id", ticketId)
+        .eq("sender_role", "patient")
+        .eq("is_read", false);
+    }
+  }, [user]);
+
+  useEffect(() => { fetchTickets(); }, [fetchTickets]);
+
+  // Realtime: listen for ticket changes and new messages
   useEffect(() => {
     const channel = supabase
-      .channel("support-inbox-realtime")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_chat_messages" }, () => {
-        fetchConversations();
+      .channel("support-tickets-realtime")
+      .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets" }, (payload) => {
+        fetchTickets();
+        if (payload.eventType === "UPDATE" && (payload.new as any).status === "waiting_human") {
+          playNotificationSound();
+          toast.info("🔔 Novo atendimento aguardando!", { duration: 5000 });
+        }
+        if (payload.eventType === "INSERT") {
+          playNotificationSound();
+          toast.info("🆕 Novo ticket de suporte!", { duration: 5000 });
+        }
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_messages" }, (payload) => {
+        const newMsg = payload.new as TicketMessage;
+        if (selectedTicket && newMsg.ticket_id === selectedTicket.id) {
+          setMessages(prev => [...prev, newMsg]);
+          if (newMsg.sender_role === "patient") {
+            playNotificationSound();
+          }
+        }
+        fetchTickets();
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, []);
+  }, [selectedTicket, fetchTickets, playNotificationSound]);
 
-  // Scroll to bottom when viewing a conversation
   useEffect(() => {
-    if (selectedUserId && scrollRef.current) {
+    if (selectedTicket) {
+      fetchMessages(selectedTicket.id);
+    }
+  }, [selectedTicket, fetchMessages]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
       scrollRef.current.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
     }
-  }, [selectedUserId, conversations]);
-
-  const selectedConv = conversations.find((c) => c.user_id === selectedUserId);
+  }, [messages]);
 
   const sendReply = async () => {
-    if (!input.trim() || !selectedUserId || !user || sending) return;
+    if (!input.trim() || !selectedTicket || !user || sending) return;
     setSending(true);
 
-    const { error } = await supabase.from("support_chat_messages").insert({
-      user_id: selectedUserId,
-      role: "support",
+    // Insert message
+    const { error } = await supabase.from("support_messages").insert({
+      ticket_id: selectedTicket.id,
+      sender_id: user.id,
+      sender_role: "support",
       content: input.trim(),
     });
 
     if (error) {
-      console.error("Error sending reply:", error);
       toast.error("Erro ao enviar resposta");
-    } else {
-      setInput("");
-      toast.success("Resposta enviada!");
-      await fetchConversations();
+      setSending(false);
+      return;
     }
+
+    // Update ticket status to in_service
+    if (selectedTicket.status === "waiting_human") {
+      await supabase.from("support_tickets")
+        .update({ status: "in_service", assigned_to: user.id })
+        .eq("id", selectedTicket.id);
+      setSelectedTicket(prev => prev ? { ...prev, status: "in_service", assigned_to: user.id } : null);
+    }
+
+    setInput("");
     setSending(false);
   };
 
-  const filteredConversations = conversations.filter((c) =>
-    c.user_name.toLowerCase().includes(search.toLowerCase()) ||
-    c.last_message.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case "user":
-        return <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/30 text-primary">Paciente</Badge>;
-      case "support":
-        return <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-success/30 text-success">Suporte</Badge>;
-      case "assistant":
-        return <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-secondary/30 text-secondary">IA</Badge>;
-      default:
-        return null;
-    }
+  const closeTicket = async () => {
+    if (!selectedTicket) return;
+    await supabase.from("support_tickets")
+      .update({ status: "closed", closed_at: new Date().toISOString() })
+      .eq("id", selectedTicket.id);
+    setSelectedTicket(null);
+    toast.success("Ticket encerrado!");
   };
+
+  const filteredTickets = tickets.filter(t => {
+    const matchesSearch = (t.patient_name ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (t.subject ?? "").toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "all" || t.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const waitingCount = tickets.filter(t => t.status === "waiting_human").length;
+  const inServiceCount = tickets.filter(t => t.status === "in_service").length;
 
   if (loading) {
     return (
@@ -174,152 +269,194 @@ const SupportInbox = () => {
   }
 
   // Conversation detail view
-  if (selectedConv) {
+  if (selectedTicket) {
+    const statusConf = STATUS_CONFIG[selectedTicket.status] ?? STATUS_CONFIG.bot;
     return (
       <Card className="border-border h-[600px] flex flex-col">
         <CardHeader className="pb-3 border-b border-border">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => setSelectedUserId(null)}>
+            <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => setSelectedTicket(null)}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <div className="flex items-center gap-2 flex-1 min-w-0">
               <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                 <User className="w-4 h-4 text-primary" />
               </div>
-              <div className="min-w-0">
-                <CardTitle className="text-sm font-semibold truncate">{selectedConv.user_name}</CardTitle>
-                <p className="text-[10px] text-muted-foreground">{selectedConv.messages.length} mensagens</p>
+              <div className="min-w-0 flex-1">
+                <CardTitle className="text-sm font-semibold truncate">{selectedTicket.patient_name}</CardTitle>
+                <div className="flex items-center gap-2 mt-0.5">
+                  {selectedTicket.patient_cpf && (
+                    <span className="text-[10px] text-muted-foreground">CPF: {selectedTicket.patient_cpf}</span>
+                  )}
+                  {selectedTicket.patient_phone && (
+                    <span className="text-[10px] text-muted-foreground">Tel: {selectedTicket.patient_phone}</span>
+                  )}
+                </div>
               </div>
+              <Badge variant="outline" className={`text-[10px] ${statusConf.color}`}>{statusConf.label}</Badge>
+              {selectedTicket.status !== "closed" && (
+                <Button size="sm" variant="outline" className="h-7 text-xs gap-1 text-destructive border-destructive/30 hover:bg-destructive/10" onClick={closeTicket}>
+                  <XCircle className="w-3 h-3" /> Encerrar
+                </Button>
+              )}
             </div>
           </div>
         </CardHeader>
         <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
           <ScrollArea className="flex-1 p-4" ref={scrollRef}>
             <div className="space-y-3">
-              {selectedConv.messages.map((msg) => (
-                <div key={msg.id} className={`flex gap-2 ${msg.role === "user" ? "justify-start" : "justify-end"}`}>
-                  {msg.role === "user" && (
+              {messages.map((msg) => (
+                <div key={msg.id} className={`flex gap-2 ${msg.sender_role === "patient" ? "justify-start" : "justify-end"}`}>
+                  {msg.sender_role === "patient" && (
                     <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-1">
                       <User className="w-4 h-4 text-primary" />
                     </div>
                   )}
                   <div className="max-w-[80%]">
                     <div className="flex items-center gap-1.5 mb-0.5">
-                      {getRoleBadge(msg.role)}
+                      <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${
+                        msg.sender_role === "patient" ? "border-primary/30 text-primary" : "border-success/30 text-success"
+                      }`}>
+                        {msg.sender_role === "patient" ? "Paciente" : "Suporte"}
+                      </Badge>
                       <span className="text-[10px] text-muted-foreground">
                         {format(new Date(msg.created_at), "dd/MM HH:mm", { locale: ptBR })}
                       </span>
                     </div>
-                    <div
-                      className={`rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
-                        msg.role === "user"
-                          ? "bg-muted text-foreground"
-                          : msg.role === "support"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary/10 text-foreground"
-                      }`}
-                    >
+                    <div className={`rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
+                      msg.sender_role === "patient" ? "bg-muted text-foreground" : "bg-primary text-primary-foreground"
+                    }`}>
                       {msg.content}
                     </div>
                   </div>
-                  {msg.role === "support" && (
+                  {msg.sender_role === "support" && (
                     <div className="w-7 h-7 rounded-full bg-success/10 flex items-center justify-center shrink-0 mt-1">
                       <Headset className="w-4 h-4 text-success" />
-                    </div>
-                  )}
-                  {msg.role === "assistant" && (
-                    <div className="w-7 h-7 rounded-full bg-secondary/10 flex items-center justify-center shrink-0 mt-1">
-                      <MessageCircle className="w-4 h-4 text-secondary" />
                     </div>
                   )}
                 </div>
               ))}
             </div>
           </ScrollArea>
-          <div className="p-3 border-t border-border flex gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendReply()}
-              placeholder="Responder ao paciente..."
-              disabled={sending}
-              className="flex-1"
-            />
-            <Button size="icon" onClick={sendReply} disabled={sending || !input.trim()}>
-              {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-            </Button>
-          </div>
+          {selectedTicket.status !== "closed" && (
+            <div className="p-3 border-t border-border flex gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && sendReply()}
+                placeholder="Responder ao paciente..."
+                disabled={sending}
+                className="flex-1"
+              />
+              <Button size="icon" onClick={sendReply} disabled={sending || !input.trim()}>
+                {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     );
   }
 
-  // Conversation list view
+  // Ticket list view
   return (
     <Card className="border-border h-[600px] flex flex-col">
       <CardHeader className="pb-3 border-b border-border">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Inbox className="w-5 h-5 text-primary" />
-          Inbox de Suporte
-          {conversations.filter((c) => c.unread > 0).length > 0 && (
-            <Badge variant="destructive" className="text-[10px]">
-              {conversations.filter((c) => c.unread > 0).length} pendente{conversations.filter((c) => c.unread > 0).length > 1 ? "s" : ""}
-            </Badge>
-          )}
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Inbox className="w-5 h-5 text-primary" />
+            Tickets de Suporte
+            {waitingCount > 0 && (
+              <Badge variant="destructive" className="text-[10px] animate-pulse">
+                {waitingCount} aguardando
+              </Badge>
+            )}
+          </CardTitle>
+          <Button
+            variant={soundEnabled ? "default" : "outline"}
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => setSoundEnabled(!soundEnabled)}
+            title={soundEnabled ? "Som ativado" : "Som desativado"}
+          >
+            <Volume2 className={`w-3.5 h-3.5 ${soundEnabled ? "" : "opacity-50"}`} />
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-        <div className="p-3 border-b border-border">
+        {/* Status filter tabs */}
+        <div className="p-3 border-b border-border space-y-2">
+          <Tabs value={statusFilter} onValueChange={setStatusFilter}>
+            <TabsList className="w-full h-8">
+              <TabsTrigger value="waiting_human" className="flex-1 text-[11px] h-6 gap-1">
+                <Bell className="w-3 h-3" /> Aguardando {waitingCount > 0 && `(${waitingCount})`}
+              </TabsTrigger>
+              <TabsTrigger value="in_service" className="flex-1 text-[11px] h-6 gap-1">
+                <Headset className="w-3 h-3" /> Atendendo {inServiceCount > 0 && `(${inServiceCount})`}
+              </TabsTrigger>
+              <TabsTrigger value="all" className="flex-1 text-[11px] h-6">Todos</TabsTrigger>
+              <TabsTrigger value="closed" className="flex-1 text-[11px] h-6">Fechados</TabsTrigger>
+            </TabsList>
+          </Tabs>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar conversas..."
-              className="pl-10"
-            />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por paciente..." className="pl-10 h-8 text-sm" />
           </div>
         </div>
+
         <ScrollArea className="flex-1">
-          {filteredConversations.length === 0 ? (
+          {filteredTickets.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-muted-foreground">
               <Inbox className="w-10 h-10 mb-3 opacity-40" />
-              <p className="text-sm font-medium">Nenhuma conversa encontrada</p>
-              <p className="text-xs mt-1">Quando pacientes enviarem mensagens no chat, elas aparecerão aqui.</p>
+              <p className="text-sm font-medium">Nenhum ticket encontrado</p>
+              <p className="text-xs mt-1">Tickets aparecerão aqui quando pacientes solicitarem atendimento humano.</p>
             </div>
           ) : (
             <div className="divide-y divide-border">
-              {filteredConversations.map((conv) => (
-                <button
-                  key={conv.user_id}
-                  onClick={() => setSelectedUserId(conv.user_id)}
-                  className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 transition-colors text-left"
-                >
-                  <div className="relative shrink-0">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                      <User className="w-5 h-5 text-primary" />
+              {filteredTickets.map((ticket) => {
+                const statusConf = STATUS_CONFIG[ticket.status] ?? STATUS_CONFIG.bot;
+                return (
+                  <button
+                    key={ticket.id}
+                    onClick={() => setSelectedTicket(ticket)}
+                    className={`w-full flex items-center gap-3 p-3 hover:bg-muted/40 transition-colors text-left ${
+                      ticket.status === "waiting_human" ? "bg-warning/5" : ""
+                    }`}
+                  >
+                    <div className="relative shrink-0">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        ticket.status === "waiting_human" ? "bg-warning/10" : "bg-primary/10"
+                      }`}>
+                        <User className={`w-5 h-5 ${ticket.status === "waiting_human" ? "text-warning" : "text-primary"}`} />
+                      </div>
+                      {ticket.unread_count > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
+                          {ticket.unread_count}
+                        </span>
+                      )}
                     </div>
-                    {conv.unread > 0 && (
-                      <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center">
-                        {conv.unread}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className={`text-sm truncate ${conv.unread > 0 ? "font-semibold text-foreground" : "font-medium text-foreground"}`}>
-                        {conv.user_name}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className={`text-sm truncate ${ticket.unread_count > 0 ? "font-semibold text-foreground" : "font-medium text-foreground"}`}>
+                          {ticket.patient_name}
+                        </p>
+                        <Badge variant="outline" className={`text-[9px] shrink-0 ${statusConf.color}`}>
+                          {statusConf.label}
+                        </Badge>
+                      </div>
+                      {ticket.patient_cpf && (
+                        <p className="text-[10px] text-muted-foreground/70">CPF: {ticket.patient_cpf}</p>
+                      )}
+                      <p className={`text-xs truncate mt-0.5 ${ticket.unread_count > 0 ? "text-foreground" : "text-muted-foreground"}`}>
+                        {ticket.last_message ?? ticket.subject}
                       </p>
-                      <span className="text-[10px] text-muted-foreground whitespace-nowrap shrink-0">
-                        {formatDistanceToNow(new Date(conv.last_at), { addSuffix: true, locale: ptBR })}
+                      <span className="text-[10px] text-muted-foreground">
+                        {formatDistanceToNow(new Date(ticket.last_message_at ?? ticket.created_at), { addSuffix: true, locale: ptBR })}
                       </span>
                     </div>
-                    <p className={`text-xs truncate mt-0.5 ${conv.unread > 0 ? "text-foreground" : "text-muted-foreground"}`}>
-                      {conv.last_message}
-                    </p>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           )}
         </ScrollArea>

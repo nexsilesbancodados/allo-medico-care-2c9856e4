@@ -16,6 +16,7 @@ import MedicalHistory from "@/components/patient/MedicalHistory";
 import PaymentHistory from "@/components/patient/PaymentHistory";
 import PatientExamUpload from "@/components/patient/PatientExamUpload";
 import PatientHealth from "@/components/patient/PatientHealth";
+import PatientSupportChat from "@/components/patient/PatientSupportChat";
 import UserProfile from "@/components/profile/UserProfile";
 import DoctorAvailability from "@/components/doctor/DoctorAvailability";
 import DoctorPatients from "@/components/doctor/DoctorPatients";
@@ -105,6 +106,7 @@ const Dashboard = () => {
       <Route path="payment-history" element={<RoleGuard allowed={["patient"]} roles={roles}><PaymentHistory /></RoleGuard>} />
       <Route path="patient/documents" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientExamUpload /></RoleGuard>} />
       <Route path="patient/health" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientHealth /></RoleGuard>} />
+      <Route path="patient/support" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientSupportChat /></RoleGuard>} />
       <Route path="chat" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><ChatPage /></RoleGuard>} />
       <Route path="medical-records" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><MedicalRecords /></RoleGuard>} />
 

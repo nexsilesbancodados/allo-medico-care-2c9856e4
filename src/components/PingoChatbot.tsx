@@ -154,18 +154,52 @@ const PingoChatbot = () => {
     buildContext();
   }, [user, profile, roles]);
 
-  const handleLiveSupport = () => {
+  const handleLiveSupport = async () => {
     if (user && (roles.includes("support") || roles.includes("admin"))) {
       setOpen(false);
       navigate("/dashboard?role=support");
+      return;
+    }
+
+    if (user) {
+      // Create a support ticket and redirect to patient support chat
+      setShowLiveSupport(true);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "🎧 Conectando você com nossa equipe de suporte..." },
+      ]);
+
+      const { data: ticket, error } = await supabase.from("support_tickets").insert({
+        patient_id: user.id,
+        subject: "Atendimento via Pingo",
+        status: "waiting_human",
+      }).select().single();
+
+      if (!error && ticket) {
+        // Send conversation summary as first message
+        const summary = messages.filter(m => m.role === "user").map(m => m.content).join(" | ");
+        await supabase.from("support_messages").insert({
+          ticket_id: ticket.id,
+          sender_id: user.id,
+          sender_role: "patient",
+          content: summary ? `[Resumo do chat com IA] ${summary}` : "Olá! Preciso de ajuda humana.",
+        });
+
+        setTimeout(() => {
+          setOpen(false);
+          navigate("/dashboard/patient/support");
+        }, 1000);
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          { role: "assistant", content: "😕 Erro ao conectar. Tente novamente ou envie um e-mail para contato@aloclinica.com.br." },
+        ]);
+      }
     } else {
       setShowLiveSupport(true);
       setMessages((prev) => [
         ...prev,
-        {
-          role: "assistant",
-          content: "🎧 Para falar com o suporte ao vivo, envie um e-mail para contato@aloclinica.com.br ou ligue para (11) 99999-0000. Nossa equipe responde em até 30 minutos durante o horário comercial (seg-sex, 8h-18h).",
-        },
+        { role: "assistant", content: "🎧 Para falar com o suporte ao vivo, faça login primeiro ou envie um e-mail para contato@aloclinica.com.br." },
       ]);
     }
   };
