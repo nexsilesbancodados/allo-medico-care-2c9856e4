@@ -10,7 +10,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { getAdminNav } from "./adminNav";
-import { Check, X, Clock, UserCheck, Building2, Handshake } from "lucide-react";
+import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const AdminApprovals = () => {
   const { toast } = useToast();
@@ -38,7 +39,7 @@ const AdminApprovals = () => {
 
   const fetchDoctors = async () => {
     const { data } = await supabase.from("doctor_profiles")
-      .select("id, user_id, crm, crm_state, is_approved, bio, consultation_price, experience_years, education, created_at")
+      .select("id, user_id, crm, crm_state, is_approved, crm_verified, crm_verified_at, bio, consultation_price, experience_years, education, created_at")
       .order("created_at", { ascending: false });
     if (!data) return;
     const userIds = data.map(d => d.user_id);
@@ -88,6 +89,16 @@ const AdminApprovals = () => {
     fetchAll();
   };
 
+  const toggleCrmVerified = async (id: string, currentValue: boolean) => {
+    const updateData: any = { 
+      crm_verified: !currentValue,
+      crm_verified_at: !currentValue ? new Date().toISOString() : null,
+    };
+    await supabase.from("doctor_profiles").update(updateData).eq("id", id);
+    toast({ title: !currentValue ? "CRM verificado ✅" : "Verificação de CRM removida" });
+    fetchAll();
+  };
+
   const reject = async () => {
     if (!rejectTarget) return;
     const table = rejectTarget.type === "doctor" ? "doctor_profiles" : rejectTarget.type === "clinic" ? "clinic_profiles" : "partner_profiles";
@@ -117,7 +128,33 @@ const AdminApprovals = () => {
               {type === "doctor" && (
                 <>
                   <p className="font-semibold text-foreground text-lg">Dr(a). {item.first_name} {item.last_name}</p>
-                  <p className="text-sm text-muted-foreground">CRM: <strong className="text-foreground">{item.crm}/{item.crm_state}</strong> · Tel: {item.phone || "—"}</p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>CRM: <strong className="text-foreground">{item.crm}/{item.crm_state}</strong></span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs text-primary hover:text-primary"
+                      onClick={() => window.open(`https://portal.cfm.org.br/busca-medicos/?crm=${encodeURIComponent(item.crm)}&uf=${encodeURIComponent(item.crm_state)}`, "_blank")}
+                    >
+                      <ExternalLink className="w-3 h-3 mr-1" /> Validar no CFM
+                    </Button>
+                    <span>· Tel: {item.phone || "—"}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Checkbox
+                      id={`crm-verified-${item.id}`}
+                      checked={!!item.crm_verified}
+                      onCheckedChange={() => toggleCrmVerified(item.id, !!item.crm_verified)}
+                    />
+                    <label htmlFor={`crm-verified-${item.id}`} className="text-sm cursor-pointer flex items-center gap-1">
+                      {item.crm_verified ? (
+                        <span className="text-secondary font-medium flex items-center gap-1"><ShieldCheck className="w-4 h-4" /> CRM Verificado</span>
+                      ) : (
+                        <span className="text-muted-foreground">CRM não verificado</span>
+                      )}
+                    </label>
+                    {item.crm_verified_at && <span className="text-xs text-muted-foreground">({new Date(item.crm_verified_at).toLocaleDateString("pt-BR")})</span>}
+                  </div>
                   {item.specialties?.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
                       {item.specialties.map((s: string, i: number) => <Badge key={i} variant="outline" className="text-xs bg-secondary/10 text-secondary">{s}</Badge>)}
