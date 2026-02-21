@@ -10,6 +10,7 @@ import { motion } from "framer-motion";
 import { Phone, Mail, Lock, User, ArrowLeft, Heart, Check, Star, CreditCard, Shield } from "lucide-react";
 import { formatMask, unmask } from "@/hooks/use-mask";
 import patientPortalBg from "@/assets/patient-portal-bg.png";
+import SEOHead from "@/components/SEOHead";
 
 const plans = [
   {
@@ -138,6 +139,7 @@ const AuthPaciente = () => {
 
   return (
     <div className="min-h-screen relative">
+      <SEOHead title="Cadastro de Paciente" description="Crie sua conta de paciente na AloClinica e agende consultas online com médicos especialistas." />
       <img src={patientPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover -z-10" loading="lazy" />
       <div className="absolute inset-0 bg-background/70 -z-10" />
       {/* Header */}

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Megaphone, LogIn, UserPlus } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 type Step = "welcome" | "register" | "login";
 
@@ -56,6 +57,7 @@ const AuthAfiliado = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <SEOHead title="Portal do Afiliado" description="Indique a AloClinica e ganhe comissões por cada paciente cadastrado." />
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-secondary/80 to-accent/80 items-center justify-center p-12">
         <div className="text-primary-foreground max-w-md">
           <Link to="/" className="inline-flex items-center gap-2 mb-8 opacity-80 hover:opacity-100 transition">

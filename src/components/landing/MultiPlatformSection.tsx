@@ -115,6 +115,7 @@ const MultiPlatformSection = () => {
                   src={devicesImg}
                   alt="AloClinica em notebook, celular e tablet"
                   className="w-full rounded-2xl drop-shadow-2xl"
+                  loading="lazy"
                 />
                 {/* Mascot floating on corner */}
                 <motion.img

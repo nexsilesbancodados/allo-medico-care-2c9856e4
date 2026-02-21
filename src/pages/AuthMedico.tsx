@@ -9,6 +9,7 @@ import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check, MessageCircle, LogIn } from "lucide-react";
 import doctorPortalBg from "@/assets/doctor-portal-bg.png";
 import DoctorWhySection from "@/components/landing/DoctorWhySection";
+import SEOHead from "@/components/SEOHead";
 
 type Step = "welcome" | "code" | "register" | "login";
 
@@ -92,6 +93,7 @@ const AuthMedico = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEOHead title="Portal do Médico" description="Cadastre-se como médico na AloClinica. Atenda pacientes por vídeo e emita receitas digitais." />
       <div className="flex min-h-screen">
         <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden">
           <img src={doctorPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover" />

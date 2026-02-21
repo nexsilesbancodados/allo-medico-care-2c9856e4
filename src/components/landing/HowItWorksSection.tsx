@@ -48,7 +48,7 @@ const HowItWorksSection = () => {
 
               <div className="w-20 h-20 rounded-2xl bg-gradient-hero flex items-center justify-center mx-auto mb-5 shadow-card overflow-hidden transition-all duration-300 group-hover:shadow-elevated group-hover:scale-105">
                 {step.image ? (
-                  <img src={step.image} alt={step.title} className="w-full h-full object-cover" />
+                  <img src={step.image} alt={step.title} className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <step.icon className="w-9 h-9 text-primary-foreground" />
                 )}

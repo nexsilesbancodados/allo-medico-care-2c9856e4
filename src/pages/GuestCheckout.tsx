@@ -18,6 +18,7 @@ import {
 import { motion } from "framer-motion";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import SEOHead from "@/components/SEOHead";
 
 type Step = "specialty" | "doctor" | "datetime" | "patient_info" | "checkout" | "success";
 
@@ -283,6 +284,7 @@ const GuestCheckout = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <Header />
+      <SEOHead title="Consulta Avulsa" description="Agende uma consulta médica avulsa sem cadastro na AloClinica. Pagamento seguro e consulta por vídeo." />
       <main className="flex-1 pt-24 md:pt-28 pb-8 px-4">
         <div className="max-w-3xl mx-auto">
 

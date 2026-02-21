@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Shield } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 const AuthAdmin = () => {
   const [email, setEmail] = useState("");
@@ -29,6 +30,7 @@ const AuthAdmin = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <SEOHead title="Acesso Administrativo" description="Painel administrativo da AloClinica." />
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-foreground to-muted-foreground items-center justify-center p-12">
         <div className="text-background max-w-md">
           <Link to="/" className="inline-flex items-center gap-2 mb-8 opacity-80 hover:opacity-100 transition">
