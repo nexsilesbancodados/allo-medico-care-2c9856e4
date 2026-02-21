@@ -53,10 +53,23 @@ const ConsentTCLE = ({ appointmentId, doctorName, onConsented }: ConsentTCLEProp
   const [submitting, setSubmitting] = useState(false);
   const [scrolledToEnd, setScrolledToEnd] = useState(false);
 
-  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const el = e.currentTarget;
-    if (el.scrollHeight - el.scrollTop - el.clientHeight < 30) {
+  const handleScroll = (e: Event) => {
+    const el = e.target as HTMLElement;
+    if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 40) {
       setScrolledToEnd(true);
+    }
+  };
+
+  // Attach scroll listener to the actual scrollable viewport inside ScrollArea
+  const scrollRef = (node: HTMLDivElement | null) => {
+    if (!node) return;
+    const viewport = node.querySelector('[data-radix-scroll-area-viewport]');
+    if (viewport) {
+      viewport.addEventListener('scroll', handleScroll);
+      // Check if content is short enough to not need scrolling
+      if (viewport.scrollHeight <= viewport.clientHeight + 40) {
+        setScrolledToEnd(true);
+      }
     }
   };
 
@@ -126,16 +139,16 @@ const ConsentTCLE = ({ appointmentId, doctorName, onConsented }: ConsentTCLEProp
 
         {/* TCLE content */}
         <div className="px-6 py-4">
-          <ScrollArea className="h-[300px] rounded-lg border border-border bg-muted/20 p-4">
-            <div onScroll={handleScroll} className="h-full overflow-auto pr-2">
+          <div ref={scrollRef}>
+            <ScrollArea className="h-[300px] rounded-lg border border-border bg-muted/20 p-4">
               <pre className="whitespace-pre-wrap text-sm text-foreground font-sans leading-relaxed">
                 {TCLE_TEXT}
               </pre>
-            </div>
-          </ScrollArea>
+            </ScrollArea>
+          </div>
 
           {!scrolledToEnd && (
-            <div className="flex items-center gap-2 mt-2 text-xs text-amber-600 dark:text-amber-400">
+            <div className="flex items-center gap-2 mt-2 text-xs text-warning">
               <AlertTriangle className="w-3.5 h-3.5" />
               <span>Role até o final do documento para habilitar o aceite</span>
             </div>
