@@ -100,6 +100,7 @@ const PartnerDashboard = () => {
         <Tabs defaultValue="validate">
           <TabsList>
             <TabsTrigger value="validate"><Pill className="w-4 h-4 mr-1" /> Validar Receita</TabsTrigger>
+            <TabsTrigger value="conversion"><FlaskConical className="w-4 h-4 mr-1" /> Conversão</TabsTrigger>
             <TabsTrigger value="history"><FileText className="w-4 h-4 mr-1" /> Histórico</TabsTrigger>
           </TabsList>
 
@@ -172,6 +173,33 @@ const PartnerDashboard = () => {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="conversion" className="mt-4">
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-lg">Relatório de Conversão</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="text-center p-4 rounded-lg bg-primary/5 border border-primary/20">
+                    <p className="text-2xl font-bold text-foreground">{validations.length}</p>
+                    <p className="text-xs text-muted-foreground">Total validações</p>
+                  </div>
+                  <div className="text-center p-4 rounded-lg bg-secondary/5 border border-secondary/20">
+                    <p className="text-2xl font-bold text-foreground">{validations.filter(v => v.status === "dispensed").length}</p>
+                    <p className="text-xs text-muted-foreground">Dispensados</p>
+                  </div>
+                  <div className="text-center p-4 rounded-lg bg-muted border border-border">
+                    <p className="text-2xl font-bold text-foreground">
+                      {validations.length > 0 ? Math.round((validations.filter(v => v.status === "dispensed").length / validations.length) * 100) : 0}%
+                    </p>
+                    <p className="text-xs text-muted-foreground">Taxa de conversão</p>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  De cada receita validada, <strong className="text-foreground">{validations.length > 0 ? Math.round((validations.filter(v => v.status === "dispensed").length / validations.length) * 100) : 0}%</strong> resultaram em dispensação de medicamento.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>

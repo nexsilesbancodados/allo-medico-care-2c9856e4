@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw, Inbox } from "lucide-react";
+import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw, Inbox, Wifi } from "lucide-react";
 import SupportChat from "@/components/support/SupportChat";
 import SupportInbox from "@/components/support/SupportInbox";
 import { toast } from "sonner";
@@ -78,6 +78,7 @@ const severityLabel: Record<string, string> = {
 const SupportDashboard = () => {
   const [logs, setLogs] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [searchLogs, setSearchLogs] = useState("");
   const [searchUsers, setSearchUsers] = useState("");
   const [logTypeFilter, setLogTypeFilter] = useState("all");
@@ -86,6 +87,39 @@ const SupportDashboard = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [viewAs, setViewAs] = useState<any>(null);
   const lastFetch = useRef<Date>(new Date());
+
+  // Fetch online users
+  useEffect(() => {
+    const fetchOnline = async () => {
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const { data } = await supabase
+        .from("user_presence")
+        .select("user_id, last_seen_at, current_page, is_online")
+        .eq("is_online", true)
+        .gte("last_seen_at", fiveMinAgo);
+      if (!data || data.length === 0) { setOnlineUsers([]); return; }
+      const userIds = data.map(d => d.user_id);
+      const [profilesRes, rolesRes] = await Promise.all([
+        supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds),
+        supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
+      ]);
+      const pMap = new Map(profilesRes.data?.map(p => [p.user_id, p]) ?? []);
+      const rMap = new Map<string, string[]>();
+      rolesRes.data?.forEach(r => {
+        if (!rMap.has(r.user_id)) rMap.set(r.user_id, []);
+        rMap.get(r.user_id)!.push(r.role);
+      });
+      setOnlineUsers(data.map(d => ({
+        ...d,
+        first_name: pMap.get(d.user_id)?.first_name ?? "",
+        last_name: pMap.get(d.user_id)?.last_name ?? "",
+        roles: rMap.get(d.user_id) ?? [],
+      })));
+    };
+    fetchOnline();
+    const interval = setInterval(fetchOnline, 15000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => { fetchData(); }, []);
 
@@ -279,6 +313,14 @@ const SupportDashboard = () => {
             <TabsTrigger value="users" className="flex-1 sm:flex-none">
               <Users className="w-4 h-4 mr-1.5" /> Usuários
             </TabsTrigger>
+            <TabsTrigger value="online" className="flex-1 sm:flex-none">
+              <Wifi className="w-4 h-4 mr-1.5" /> Online
+              {onlineUsers.length > 0 && (
+                <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-secondary text-secondary-foreground leading-none">
+                  {onlineUsers.length}
+                </span>
+              )}
+            </TabsTrigger>
             {viewAs && (
               <TabsTrigger value="impersonate" className="flex-1 sm:flex-none">
                 <Eye className="w-4 h-4 mr-1.5" /> Perfil
@@ -470,6 +512,53 @@ const SupportDashboard = () => {
                 )}
               </div>
             )}
+          </TabsContent>
+
+          <TabsContent value="online" className="mt-4">
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Wifi className="w-4 h-4 text-secondary" />
+                  Usuários Online ({onlineUsers.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {onlineUsers.length === 0 ? (
+                  <p className="text-muted-foreground text-sm text-center py-8">Nenhum usuário online no momento.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {onlineUsers.map(u => (
+                      <div key={u.user_id} className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-muted/30 transition-colors">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <div className="w-9 h-9 rounded-full bg-secondary/10 flex items-center justify-center text-xs font-bold text-secondary">
+                              {u.first_name?.[0]}{u.last_name?.[0]}
+                            </div>
+                            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-secondary border-2 border-background" />
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{u.first_name} {u.last_name}</p>
+                            <div className="flex items-center gap-1.5">
+                              {u.roles.slice(0, 2).map((r: string) => (
+                                <span key={r} className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full border ${roleColor[r] ?? "bg-muted text-muted-foreground border-border"}`}>
+                                  {roleLabel[r] ?? r}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-xs text-muted-foreground">{u.current_page ?? "/"}</p>
+                          <p className="text-[10px] text-muted-foreground">
+                            {formatDistanceToNow(new Date(u.last_seen_at), { addSuffix: true, locale: ptBR })}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {viewAs && (
