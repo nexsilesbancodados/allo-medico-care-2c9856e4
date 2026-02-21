@@ -109,22 +109,22 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
 
       {/* Nav items */}
       {nav && nav.length > 0 && (
-        <nav className="flex flex-col gap-0.5 px-2 flex-1 py-1 overflow-y-auto">
+        <nav className="flex flex-col gap-0.5 px-3 flex-1 py-2 overflow-y-auto">
           {nav.map((item) => (
             <Link
               key={item.href}
               to={item.href}
               onClick={() => setSidebarOpen(false)}
-              className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group ${
+              className={`relative flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-150 group ${
                 item.active
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                  ? "bg-primary/10 text-primary font-semibold"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
               }`}
             >
               {item.active && (
                 <motion.span
                   layoutId="sidebar-active-bar"
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-primary rounded-r-full"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-primary rounded-r-full"
                   transition={{ type: "spring", stiffness: 500, damping: 35 }}
                 />
               )}
