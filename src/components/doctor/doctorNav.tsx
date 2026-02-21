@@ -1,8 +1,7 @@
-import { Calendar, FileText, Users, DollarSign, Settings, User, FileBadge, Clock, History, CalendarDays, Upload, MessageCircle, SlidersHorizontal, Bot } from "lucide-react";
+import { Calendar, FileText, Users, DollarSign, Settings, User, FileBadge, Clock, History, CalendarDays, Upload, MessageCircle, SlidersHorizontal } from "lucide-react";
 
 export const getDoctorNav = (active: string) => [
   { label: "Início", href: "/dashboard?role=doctor", icon: <Calendar className="w-4 h-4" />, active: active === "home", group: "Principal" },
-  { label: "Assistente IA", href: "/dashboard/ai-assistant", icon: <Bot className="w-4 h-4" />, active: active === "ai-assistant", group: "Principal" },
   { label: "Calendário", href: "/dashboard/doctor/calendar", icon: <CalendarDays className="w-4 h-4" />, active: active === "calendar", group: "Principal" },
   { label: "Sala de Espera", href: "/dashboard/doctor/waiting-room", icon: <Clock className="w-4 h-4" />, active: active === "waiting-room", group: "Principal" },
   { label: "Consultas", href: "/dashboard/doctor/consultations", icon: <History className="w-4 h-4" />, active: active === "consultations", group: "Atendimento" },

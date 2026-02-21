@@ -14,12 +14,9 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-
-// Nav imports based on role
-import { getPatientNav } from "@/components/patient/patientNav";
-import { getDoctorNav } from "@/components/doctor/doctorNav";
-import { getAdminNav } from "@/components/admin/adminNav";
-import { getReceptionNav } from "@/components/reception/receptionNav";
+import {
+  History, Settings as SettingsIcon, User, Home,
+} from "lucide-react";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -116,14 +113,12 @@ const AIAssistantPanel = () => {
     }
   }, [messages]);
 
-  const getNav = () => {
-    switch (primaryRole) {
-      case "doctor": return getDoctorNav("ai-assistant");
-      case "admin": return getAdminNav("ai-assistant");
-      case "receptionist": return getReceptionNav("ai-assistant");
-      default: return getPatientNav("ai-assistant");
-    }
-  };
+  const aiNav = [
+    { label: "Chat IA", href: "/dashboard/ai-assistant", icon: <Bot className="w-4 h-4" />, active: true, group: "Assistente" },
+    { label: "Voltar ao Painel", href: "/dashboard", icon: <Home className="w-4 h-4" />, group: "Navegação" },
+    { label: "Configurações", href: "/dashboard/settings", icon: <SettingsIcon className="w-4 h-4" />, group: "Navegação" },
+    { label: "Perfil", href: "/dashboard/profile", icon: <User className="w-4 h-4" />, group: "Navegação" },
+  ];
 
   const roleLabel: Record<string, string> = {
     patient: "Paciente",
@@ -231,7 +226,7 @@ const AIAssistantPanel = () => {
   }, [input, isLoading, messages, userContext, primaryRole]);
 
   return (
-    <DashboardLayout title={currentRoleLabel} nav={getNav()}>
+    <DashboardLayout title="Assistente IA" nav={aiNav} role="ai">
       <div className="max-w-4xl mx-auto flex flex-col" style={{ height: "calc(100vh - 120px)" }}>
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
