@@ -10,10 +10,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Clock, Star, Check, Calendar as CalIcon, FileText, Users, Search, UserPlus, UserCheck, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Clock, Star, Check, UserPlus, UserCheck, AlertTriangle, CalendarDays, CheckCircle2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 
 import { getPatientNav } from "./patientNav";
 const patientNav = getPatientNav("schedule");
@@ -33,6 +34,12 @@ interface DoctorInfo {
   slots: { day_of_week: number; start_time: string; end_time: string }[];
 }
 
+const STEPS = [
+  { key: "date", label: "Data", icon: CalendarDays },
+  { key: "time", label: "Horário", icon: Clock },
+  { key: "confirm", label: "Confirmar", icon: CheckCircle2 },
+];
+
 const BookAppointment = () => {
   const { doctorId } = useParams();
   const { user } = useAuth();
@@ -45,6 +52,8 @@ const BookAppointment = () => {
   const [bookedSlots, setBookedSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [booking, setBooking] = useState(false);
+
+  const currentStep = !selectedDate ? 0 : !selectedTime ? 1 : 2;
 
   useEffect(() => {
     if (doctorId) fetchDoctor();
@@ -152,9 +161,7 @@ const BookAppointment = () => {
     if (error || !insertedAppt) {
       toast({ title: "Erro", description: "Não foi possível agendar. Tente novamente.", variant: "destructive" });
     } else {
-      // Trigger auto-confirmation (sends email + WhatsApp + notification)
       triggerAppointmentConfirmed(insertedAppt.id).catch(console.error);
-
       toast({ title: "Consulta agendada! ✅", description: `${format(scheduledAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} com Dr(a). ${doctor.first_name}` });
       navigate("/dashboard/appointments");
     }
@@ -185,7 +192,7 @@ const BookAppointment = () => {
                 <h2 className="text-xl font-bold text-foreground">Dr(a). {doctor.first_name} {doctor.last_name}</h2>
                 <p className="text-sm text-muted-foreground">CRM {doctor.crm}/{doctor.crm_state}</p>
                 {doctor.specialties.length > 0 && (
-                  <div className="flex gap-1 mt-1">
+                  <div className="flex gap-1 mt-1 flex-wrap">
                     {doctor.specialties.map(s => <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>)}
                   </div>
                 )}
@@ -203,10 +210,45 @@ const BookAppointment = () => {
           </CardContent>
         </Card>
 
+        {/* Step indicator */}
+        <div className="flex items-center justify-center gap-0 mb-6">
+          {STEPS.map((step, i) => {
+            const Icon = step.icon;
+            const isActive = i === currentStep;
+            const isDone = i < currentStep;
+            return (
+              <div key={step.key} className="flex items-center">
+                <div className="flex flex-col items-center">
+                  <div className={cn(
+                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all",
+                    isDone ? "bg-primary border-primary text-primary-foreground" :
+                    isActive ? "border-primary text-primary bg-primary/10" :
+                    "border-muted text-muted-foreground"
+                  )}>
+                    {isDone ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
+                  </div>
+                  <span className={cn(
+                    "text-xs mt-1 font-medium",
+                    isActive ? "text-primary" : isDone ? "text-foreground" : "text-muted-foreground"
+                  )}>
+                    {step.label}
+                  </span>
+                </div>
+                {i < STEPS.length - 1 && (
+                  <div className={cn(
+                    "w-16 h-0.5 mx-2 mb-5",
+                    i < currentStep ? "bg-primary" : "bg-muted"
+                  )} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
         <div className="grid md:grid-cols-2 gap-6">
           {/* Calendar */}
           <Card className="border-border">
-            <CardHeader><CardTitle className="text-base">Escolha a Data</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base flex items-center gap-2"><CalendarDays className="w-4 h-4 text-primary" /> Escolha a Data</CardTitle></CardHeader>
             <CardContent>
               <Calendar
                 mode="single"
@@ -221,15 +263,22 @@ const BookAppointment = () => {
             </CardContent>
           </Card>
 
-          {/* Time slots */}
+          {/* Time slots + confirm */}
           <div>
             <Card className="border-border">
-              <CardHeader><CardTitle className="text-base">Horários Disponíveis</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-base flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Horários Disponíveis</CardTitle></CardHeader>
               <CardContent>
                 {!selectedDate ? (
-                  <p className="text-sm text-muted-foreground">Selecione uma data primeiro.</p>
+                  <div className="text-center py-8">
+                    <CalendarDays className="w-10 h-10 mx-auto text-muted-foreground/40 mb-2" />
+                    <p className="text-sm text-muted-foreground">Selecione uma data no calendário</p>
+                  </div>
                 ) : availableTimes.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhum horário disponível nesta data.</p>
+                  <div className="text-center py-8">
+                    <Clock className="w-10 h-10 mx-auto text-muted-foreground/40 mb-2" />
+                    <p className="text-sm text-muted-foreground">Nenhum horário disponível nesta data.</p>
+                    <p className="text-xs text-muted-foreground mt-1">Tente outra data.</p>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-2">
                     {availableTimes.map(time => (
@@ -238,7 +287,10 @@ const BookAppointment = () => {
                         variant={selectedTime === time ? "default" : "outline"}
                         size="sm"
                         onClick={() => setSelectedTime(time)}
-                        className={selectedTime === time ? "bg-gradient-hero text-primary-foreground" : ""}
+                        className={cn(
+                          "transition-all",
+                          selectedTime === time && "bg-gradient-hero text-primary-foreground scale-105 shadow-md"
+                        )}
                       >
                         <Clock className="w-3 h-3 mr-1" />
                         {time}
@@ -250,9 +302,12 @@ const BookAppointment = () => {
             </Card>
 
             {selectedDate && selectedTime && (
-              <Card className="border-border mt-4">
+              <Card className="border-border mt-4 ring-2 ring-primary/20">
                 <CardContent className="p-5">
-                  <h3 className="font-semibold text-foreground mb-3">Confirmar Agendamento</h3>
+                  <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5 text-primary" />
+                    Confirmar Agendamento
+                  </h3>
                   <div className="mb-3">
                     <p className="text-xs text-muted-foreground mb-1">Tipo de Consulta</p>
                     <Select value={appointmentType} onValueChange={setAppointmentType}>
@@ -264,30 +319,31 @@ const BookAppointment = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2 text-sm text-muted-foreground mb-4">
-                    <p className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-secondary" />
+
+                  <div className="bg-muted/50 rounded-lg p-3 space-y-2 text-sm mb-4">
+                    <p className="flex items-center gap-2 text-foreground">
+                      <Check className="w-4 h-4 text-primary shrink-0" />
                       Dr(a). {doctor.first_name} {doctor.last_name}
                     </p>
-                    <p className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-secondary" />
+                    <p className="flex items-center gap-2 text-foreground">
+                      <Check className="w-4 h-4 text-primary shrink-0" />
                       {format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                     </p>
-                    <p className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-secondary" />
+                    <p className="flex items-center gap-2 text-foreground">
+                      <Check className="w-4 h-4 text-primary shrink-0" />
                       {selectedTime}h
                     </p>
-                    <p className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-secondary" />
+                    <p className="flex items-center gap-2 text-foreground font-semibold">
+                      <Check className="w-4 h-4 text-primary shrink-0" />
                       R${doctor.consultation_price}
                     </p>
                   </div>
                   <Button
-                    className="w-full bg-gradient-hero text-primary-foreground"
+                    className="w-full bg-gradient-hero text-primary-foreground h-12 text-base"
                     onClick={handleBook}
                     disabled={booking}
                   >
-                    {booking ? "Agendando..." : "Confirmar Agendamento"}
+                    {booking ? "Agendando..." : "✅ Confirmar Agendamento"}
                   </Button>
                 </CardContent>
               </Card>

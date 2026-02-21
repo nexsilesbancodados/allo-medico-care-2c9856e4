@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { AlertTriangle, Pill, Activity, FileText, Plus, Edit2 } from "lucide-react";
+import { AlertTriangle, Pill, Activity, FileText, Plus, Clock, Search, Filter } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
@@ -28,12 +28,13 @@ interface MedicalRecord {
   start_date: string | null;
   end_date: string | null;
   created_at: string;
+  doctor_id: string | null;
 }
 
 const SEVERITY_MAP: Record<string, { label: string; color: string }> = {
-  mild: { label: "Leve", color: "bg-yellow-100 text-yellow-800" },
-  moderate: { label: "Moderada", color: "bg-orange-100 text-orange-800" },
-  severe: { label: "Grave", color: "bg-red-100 text-red-800" },
+  mild: { label: "Leve", color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300" },
+  moderate: { label: "Moderada", color: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300" },
+  severe: { label: "Grave", color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" },
 };
 
 const TYPE_ICONS: Record<string, React.ReactNode> = {
@@ -55,6 +56,8 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
   const [records, setRecords] = useState<MedicalRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState("timeline");
   const [form, setForm] = useState({
     record_type: "allergy",
     title: "",
@@ -72,7 +75,7 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
   const fetchRecords = async () => {
     const { data } = await supabase
       .from("medical_records")
-      .select("id, record_type, title, description, cid_code, severity, is_active, start_date, end_date, created_at")
+      .select("id, record_type, title, description, cid_code, severity, is_active, start_date, end_date, created_at, doctor_id")
       .eq("patient_id", targetPatientId!)
       .order("created_at", { ascending: false });
     setRecords((data as MedicalRecord[]) ?? []);
@@ -114,10 +117,68 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
     fetchRecords();
   };
 
-  const allergies = records.filter(r => r.record_type === "allergy");
-  const medications = records.filter(r => r.record_type === "medication");
-  const conditions = records.filter(r => r.record_type === "condition");
-  const evolutions = records.filter(r => r.record_type === "evolution");
+  const filtered = records.filter(r =>
+    !searchQuery || r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.cid_code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    r.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const allergies = filtered.filter(r => r.record_type === "allergy");
+  const medications = filtered.filter(r => r.record_type === "medication");
+  const conditions = filtered.filter(r => r.record_type === "condition");
+  const evolutions = filtered.filter(r => r.record_type === "evolution");
+
+  // Group records by month for timeline
+  const timelineGroups = filtered.reduce<Record<string, MedicalRecord[]>>((acc, r) => {
+    const key = format(new Date(r.created_at), "MMMM yyyy", { locale: ptBR });
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(r);
+    return acc;
+  }, {});
+
+  const renderTimelineItem = (r: MedicalRecord) => (
+    <div key={r.id} className={`relative pl-8 pb-6 ${!r.is_active ? "opacity-50" : ""}`}>
+      {/* Timeline dot and line */}
+      <div className="absolute left-0 top-1 w-4 h-4 rounded-full border-2 border-primary bg-background z-10 flex items-center justify-center">
+        <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+      </div>
+      <div className="absolute left-[7px] top-5 bottom-0 w-0.5 bg-border" />
+
+      <Card className="border-border">
+        <CardContent className="p-3">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start gap-2">
+              {TYPE_ICONS[r.record_type]}
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="text-sm font-medium text-foreground">{r.title}</p>
+                  <Badge variant="outline" className="text-[10px]">{TYPE_LABELS[r.record_type]}</Badge>
+                  {r.cid_code && <Badge variant="secondary" className="text-[10px]">CID: {r.cid_code}</Badge>}
+                  {r.severity && SEVERITY_MAP[r.severity] && (
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded ${SEVERITY_MAP[r.severity].color}`}>
+                      {SEVERITY_MAP[r.severity].label}
+                    </span>
+                  )}
+                  {!r.is_active && <Badge variant="secondary" className="text-[10px]">Inativo</Badge>}
+                </div>
+                {r.description && <p className="text-xs text-muted-foreground mt-1">{r.description}</p>}
+                <p className="text-[10px] text-muted-foreground mt-1 flex items-center gap-1">
+                  <Clock className="w-3 h-3" />
+                  {format(new Date(r.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                  {r.start_date && ` · Início: ${format(new Date(r.start_date), "dd/MM/yyyy")}`}
+                </p>
+              </div>
+            </div>
+            {(isDoctorRole || !patientId) && (
+              <Button size="sm" variant="ghost" onClick={() => toggleActive(r.id, r.is_active)} className="text-xs shrink-0">
+                {r.is_active ? "Desativar" : "Reativar"}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 
   const renderRecordList = (items: MedicalRecord[], emptyMsg: string) => (
     items.length === 0 ? (
@@ -131,7 +192,7 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
                 <div className="flex items-start gap-2">
                   {TYPE_ICONS[r.record_type]}
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-sm font-medium text-foreground">{r.title}</p>
                       {r.cid_code && <Badge variant="outline" className="text-[10px]">CID: {r.cid_code}</Badge>}
                       {r.severity && SEVERITY_MAP[r.severity] && (
@@ -143,7 +204,7 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
                     </div>
                     {r.description && <p className="text-xs text-muted-foreground mt-1">{r.description}</p>}
                     <p className="text-[10px] text-muted-foreground mt-1">
-                      {r.start_date && `Início: ${format(new Date(r.start_date), "dd/MM/yyyy", { locale: ptBR })} · `}
+                      {r.start_date && `Início: ${format(new Date(r.start_date), "dd/MM/yyyy")} · `}
                       Registrado em {format(new Date(r.created_at), "dd/MM/yyyy", { locale: ptBR })}
                     </p>
                   </div>
@@ -177,14 +238,25 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
   function InnerContent() {
     return (
       <div className="max-w-3xl">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-bold text-foreground">Prontuário Eletrônico</h2>
-            <p className="text-sm text-muted-foreground">Histórico médico estruturado</p>
+            <p className="text-sm text-muted-foreground">Histórico médico completo com timeline</p>
           </div>
           <Button onClick={() => setShowAdd(true)} size="sm">
             <Plus className="w-4 h-4 mr-1" /> Novo Registro
           </Button>
+        </div>
+
+        {/* Search */}
+        <div className="relative mb-4">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Buscar por título, CID ou descrição..."
+            className="pl-9"
+          />
         </div>
 
         {/* Quick summary cards */}
@@ -212,13 +284,32 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
         </div>
 
         {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
-          <Tabs defaultValue="allergies">
-            <TabsList className="grid w-full grid-cols-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="timeline">Timeline</TabsTrigger>
               <TabsTrigger value="allergies">Alergias</TabsTrigger>
               <TabsTrigger value="medications">Medicamentos</TabsTrigger>
               <TabsTrigger value="conditions">Condições</TabsTrigger>
               <TabsTrigger value="evolutions">Evolução</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="timeline" className="mt-4">
+              {Object.keys(timelineGroups).length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">Nenhum registro encontrado.</p>
+              ) : (
+                <div>
+                  {Object.entries(timelineGroups).map(([month, items]) => (
+                    <div key={month} className="mb-6">
+                      <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-3 flex items-center gap-2">
+                        <Clock className="w-3.5 h-3.5" />
+                        {month}
+                      </h3>
+                      <div>{items.map(renderTimelineItem)}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </TabsContent>
             <TabsContent value="allergies" className="mt-4">{renderRecordList(allergies, "Nenhuma alergia registrada.")}</TabsContent>
             <TabsContent value="medications" className="mt-4">{renderRecordList(medications, "Nenhum medicamento contínuo.")}</TabsContent>
             <TabsContent value="conditions" className="mt-4">{renderRecordList(conditions, "Nenhuma condição registrada.")}</TabsContent>
@@ -246,9 +337,9 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
                 <label className="text-sm font-medium text-foreground">Título *</label>
                 <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} placeholder="Ex: Penicilina, Diabetes Tipo 2..." />
               </div>
-              {form.record_type === "condition" && (
+              {(form.record_type === "condition" || form.record_type === "evolution") && (
                 <div>
-                  <label className="text-sm font-medium text-foreground">Código CID</label>
+                  <label className="text-sm font-medium text-foreground">Código CID-10</label>
                   <Input value={form.cid_code} onChange={e => setForm(f => ({ ...f, cid_code: e.target.value }))} placeholder="Ex: E11, J45, I10..." />
                 </div>
               )}
