@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Switch } from "@/components/ui/switch";
-import { Accessibility, Eye, Type } from "lucide-react";
+import { Eye, Type, Users } from "lucide-react";
 
 const AccessibilityToggle = () => {
   const [accessibilityMode, setAccessibilityMode] = useState(() =>
@@ -31,13 +31,13 @@ const AccessibilityToggle = () => {
           className="fixed bottom-20 right-4 z-50 rounded-full w-12 h-12 shadow-elevated border-border bg-card"
           aria-label="Acessibilidade"
         >
-          <Accessibility className="w-5 h-5" />
+          <Users className="w-5 h-5" />
         </Button>
       </PopoverTrigger>
       <PopoverContent side="top" align="end" className="w-64">
         <div className="space-y-4">
           <h3 className="font-semibold text-foreground text-sm flex items-center gap-2">
-            <Accessibility className="w-4 h-4" /> Acessibilidade
+            <Users className="w-4 h-4" /> Acessibilidade
           </h3>
 
           <label className="flex items-center justify-between cursor-pointer">
