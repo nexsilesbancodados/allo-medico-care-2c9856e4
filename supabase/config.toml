@@ -32,3 +32,12 @@ verify_jwt = false
 
 [functions.appointment-confirmed]
 verify_jwt = false
+
+[functions.memed-prescriber]
+verify_jwt = false
+
+[functions.create-checkout-session]
+verify_jwt = false
+
+[functions.stripe-webhook]
+verify_jwt = false

@@ -13,6 +13,7 @@ import { ArrowLeft, Plus, Trash2, FileText, Download, Calendar, Clock, Users, Se
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import MemedPrescription from "./MemedPrescription";
 
 const doctorNav = [
   { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
@@ -387,6 +388,21 @@ const PrescriptionForm = () => {
 
         <h1 className="text-2xl font-bold text-foreground mb-1">Receita Médica</h1>
         <p className="text-muted-foreground mb-6">Prescreva medicamentos para o paciente</p>
+
+        {/* Memed Digital Prescription */}
+        {appointmentId && patientId && (
+          <div className="mb-6">
+            <MemedPrescription
+              appointmentId={appointmentId}
+              patientName={patientName}
+              patientCpf={patientCpf}
+              patientId={patientId}
+              onPrescriptionCreated={(data) => {
+                toast({ title: "Receita Memed salva! ✅", description: "A receita digital foi emitida e registrada." });
+              }}
+            />
+          </div>
+        )}
 
         {/* Patient info */}
         <Card className="border-border mb-6">
