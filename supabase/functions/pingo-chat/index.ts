@@ -10,8 +10,19 @@ serve(async (req) => {
 
   try {
     const { messages, context } = await req.json();
+    
+    // Try DeepSeek first, fallback to Lovable AI Gateway
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+    
+    const useDeepSeek = !!DEEPSEEK_API_KEY;
+    const apiUrl = useDeepSeek 
+      ? "https://api.deepseek.com/v1/chat/completions"
+      : "https://ai.gateway.lovable.dev/v1/chat/completions";
+    const apiKey = useDeepSeek ? DEEPSEEK_API_KEY : LOVABLE_API_KEY;
+    const model = useDeepSeek ? "deepseek-chat" : "google/gemini-3-flash-preview";
+
+    if (!apiKey) throw new Error("Nenhuma chave de IA configurada (DEEPSEEK_API_KEY ou LOVABLE_API_KEY)");
 
     const systemContent = `Você é o Pingo 🐧, o simpático pinguim assistente virtual da plataforma AloClinica. Sua função é realizar a teletriagem e suporte administrativo, seguindo estritamente as resoluções do CFM (2.314/2022) e a LGPD.
 
@@ -50,14 +61,14 @@ CONHECIMENTO DA PLATAFORMA:
 OBJETIVO: Ajude o paciente a agendar consultas, tirar dúvidas sobre a plataforma, testar câmera/microfone e entender como acessar receitas médicas.
 ${context ? `\n--- CONTEXTO DO PACIENTE LOGADO ---\n${context}\n---\nUse essas informações para personalizar suas respostas.` : ""}`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model,
         messages: [
           { role: "system", content: systemContent },
           ...messages,
@@ -82,7 +93,7 @@ ${context ? `\n--- CONTEXTO DO PACIENTE LOGADO ---\n${context}\n---\nUse essas i
         });
       }
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
+      console.error(`AI error (${useDeepSeek ? "DeepSeek" : "Lovable"}):`, response.status, t);
       return new Response(JSON.stringify({ error: "Erro no serviço de IA" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
