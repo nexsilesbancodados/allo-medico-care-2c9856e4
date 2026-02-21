@@ -86,7 +86,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
         await loadJitsiScript();
         if (!containerRef.current) return;
 
-        const roomName = `Telemed_Consulta_${appointmentId}`;
+        // Room name is built inside the API init below
 
         const mobileToolbar = [
           "microphone",
@@ -110,8 +110,12 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
           "select-background",
         ];
 
+        // Generate a short, clean room name to avoid meet.jit.si lobby/moderator issues
+        const shortId = appointmentId.replace(/-/g, "").slice(0, 12);
+        const cleanRoomName = `AloMed${shortId}`;
+
         apiRef.current = new window.JitsiMeetExternalAPI(JITSI_DOMAIN, {
-          roomName,
+          roomName: cleanRoomName,
           parentNode: containerRef.current,
           width: "100%",
           height: "100%",
@@ -127,6 +131,12 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
             disableThirdPartyRequests: true,
             enableClosePage: false,
             hideConferenceSubject: false,
+            // Disable lobby and moderator requirement
+            enableLobbyChat: false,
+            hideLobbyButton: true,
+            requireDisplayName: false,
+            lobbyModeEnabled: false,
+            enableInsecureRoomNameWarning: false,
             // Quality settings
             resolution: isMobile ? 480 : 720,
             constraints: {
