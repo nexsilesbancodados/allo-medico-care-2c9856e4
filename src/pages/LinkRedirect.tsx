@@ -33,10 +33,9 @@ const LinkRedirect = () => {
         return;
       }
 
-      // If confirmed/in_progress, redirect to Jitsi room
+      // If confirmed/in_progress, redirect to internal video room
       if (["confirmed", "in_progress"].includes(appt.status)) {
-        const jitsiLink = appt.jitsi_link || `https://meet.jit.si/allo-medico-${appt.id}`;
-        window.location.href = jitsiLink;
+        navigate(`/dashboard/consultation/${appt.id}`, { replace: true });
         return;
       }
 
