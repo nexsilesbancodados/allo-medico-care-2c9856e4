@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getDoctorNav } from "./doctorNav";
-import { Plus, Trash2, Clock, CalendarOff } from "lucide-react";
+import { Plus, Trash2, Clock, CalendarOff, Zap } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -46,22 +47,40 @@ const DoctorAvailability = () => {
   const [absenceDate, setAbsenceDate] = useState("");
   const [absenceReason, setAbsenceReason] = useState("");
   const [loading, setLoading] = useState(true);
+  const [availableNow, setAvailableNow] = useState(false);
+  const [togglingAvailability, setTogglingAvailability] = useState(false);
 
   useEffect(() => { if (user) fetchDoctorProfile(); }, [user]);
 
   const fetchDoctorProfile = async () => {
     const { data } = await supabase
       .from("doctor_profiles")
-      .select("id")
+      .select("id, available_now")
       .eq("user_id", user!.id)
       .single();
 
     if (data) {
       setDoctorProfileId(data.id);
+      setAvailableNow(data.available_now ?? false);
       fetchSlots(data.id);
       fetchAbsences(data.id);
     }
     setLoading(false);
+  };
+
+  const toggleAvailableNow = async () => {
+    if (!doctorProfileId) return;
+    setTogglingAvailability(true);
+    const newVal = !availableNow;
+    const { error } = await supabase.from("doctor_profiles").update({
+      available_now: newVal,
+      available_now_since: newVal ? new Date().toISOString() : null,
+    }).eq("id", doctorProfileId);
+    setTogglingAvailability(false);
+    if (!error) {
+      setAvailableNow(newVal);
+      toast({ title: newVal ? "🟢 Você está disponível para consultas imediatas!" : "Modo plantão desativado." });
+    }
   };
 
   const fetchSlots = async (profileId: string) => {
@@ -138,7 +157,29 @@ const DoctorAvailability = () => {
     <DashboardLayout title="Médico" nav={getDoctorNav("availability")}>
       <div className="max-w-3xl">
         <h1 className="text-2xl font-bold text-foreground mb-1">Disponibilidade</h1>
-        <p className="text-muted-foreground mb-6">Configure os horários em que você atende</p>
+        <p className="text-muted-foreground mb-4">Configure os horários em que você atende</p>
+
+        {/* On-duty toggle */}
+        <Card className={`border-border mb-6 ${availableNow ? "ring-2 ring-secondary/30 bg-secondary/5" : ""}`}>
+          <CardContent className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${availableNow ? "bg-secondary/20" : "bg-muted"}`}>
+                <Zap className={`w-5 h-5 ${availableNow ? "text-secondary" : "text-muted-foreground"}`} />
+              </div>
+              <div>
+                <p className="font-semibold text-foreground text-sm">Disponível para Agora</p>
+                <p className="text-xs text-muted-foreground">
+                  {availableNow ? "Pacientes podem te encontrar para consulta imediata" : "Ative para aparecer em destaque"}
+                </p>
+              </div>
+            </div>
+            <Switch
+              checked={availableNow}
+              onCheckedChange={toggleAvailableNow}
+              disabled={togglingAvailability}
+            />
+          </CardContent>
+        </Card>
 
         {/* Add slot */}
         <Card className="border-border mb-6">
