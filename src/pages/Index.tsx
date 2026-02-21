@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+import { useTheme } from "next-themes";
 import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import StatsSection from "@/components/landing/StatsSection";
@@ -17,6 +19,14 @@ import PingoChatbot from "@/components/PingoChatbot";
 import AnimateSection from "@/components/ui/animate-section";
 
 const Index = () => {
+  const { setTheme, theme } = useTheme();
+
+  useEffect(() => {
+    const prev = theme;
+    setTheme("light");
+    return () => { if (prev && prev !== "light") setTheme(prev); };
+  }, []);
+
   return (
     <div className="min-h-screen bg-background" style={{ background: 'var(--landing-bg)' }}>
       <Header />

@@ -4,7 +4,7 @@ import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
-import ThemeToggle from "@/components/ThemeToggle";
+// ThemeToggle removed from landing page
 
 const Header = () => {
   const navigate = useNavigate();
@@ -61,7 +61,6 @@ const Header = () => {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-3">
-          <ThemeToggle />
           <Button variant="ghost" size="sm" onClick={() => navigate("/medico")}>
             Sou Médico
           </Button>
