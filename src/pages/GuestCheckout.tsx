@@ -19,6 +19,7 @@ import { motion } from "framer-motion";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import SEOHead from "@/components/SEOHead";
+import { validarCPF } from "@/lib/cpf";
 
 type Step = "specialty" | "doctor" | "datetime" | "patient_info" | "checkout" | "success";
 
@@ -267,7 +268,7 @@ const GuestCheckout = () => {
       toast({ title: "Email inválido", variant: "destructive" });
       return;
     }
-    if (guestCpf.replace(/\D/g, "").length !== 11) {
+    if (!validarCPF(guestCpf)) {
       toast({ title: "CPF inválido", variant: "destructive" });
       return;
     }

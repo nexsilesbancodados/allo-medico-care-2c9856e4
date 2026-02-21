@@ -15,6 +15,7 @@ import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { getFeriadosNacionais } from "@/lib/feriados";
 
 import { getPatientNav } from "./patientNav";
 const patientNav = getPatientNav("schedule");
@@ -54,6 +55,7 @@ const BookAppointment = () => {
   const [booking, setBooking] = useState(false);
   const [dependents, setDependents] = useState<{ id: string; name: string; relationship: string }[]>([]);
   const [bookingFor, setBookingFor] = useState<string>("self");
+  const [feriados, setFeriados] = useState<Date[]>([]);
 
   const currentStep = !selectedDate ? 0 : !selectedTime ? 1 : 2;
 
@@ -62,6 +64,10 @@ const BookAppointment = () => {
       supabase.from("dependents").select("id, name, relationship").eq("user_id", user.id)
         .then(({ data }) => setDependents(data ?? []));
     }
+    // Load feriados for current and next year
+    const currentYear = new Date().getFullYear();
+    Promise.all([getFeriadosNacionais(currentYear), getFeriadosNacionais(currentYear + 1)])
+      .then(([f1, f2]) => setFeriados([...f1, ...f2]));
   }, [user]);
 
   useEffect(() => {
@@ -146,6 +152,9 @@ const BookAppointment = () => {
   const isDayAvailable = (date: Date): boolean => {
     if (!doctor) return false;
     if (isBefore(date, new Date()) && date.toDateString() !== new Date().toDateString()) return false;
+    // Check feriados
+    const isFeriado = feriados.some(f => f.getFullYear() === date.getFullYear() && f.getMonth() === date.getMonth() && f.getDate() === date.getDate());
+    if (isFeriado) return false;
     const dayOfWeek = date.getDay();
     return doctor.slots.some(s => s.day_of_week === dayOfWeek);
   };
