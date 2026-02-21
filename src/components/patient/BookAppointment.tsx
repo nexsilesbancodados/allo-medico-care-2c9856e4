@@ -278,6 +278,25 @@ const BookAppointment = () => {
                     <Clock className="w-10 h-10 mx-auto text-muted-foreground/40 mb-2" />
                     <p className="text-sm text-muted-foreground">Nenhum horário disponível nesta data.</p>
                     <p className="text-xs text-muted-foreground mt-1">Tente outra data.</p>
+                    {selectedDate && doctor && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mt-3 text-xs"
+                        onClick={async () => {
+                          const { error } = await supabase.from("appointment_waitlist").insert({
+                            patient_id: user!.id,
+                            doctor_id: doctor.id,
+                            desired_date: format(selectedDate, "yyyy-MM-dd"),
+                          });
+                          if (!error) {
+                            toast({ title: "✅ Avisaremos você!", description: "Se uma vaga abrir nesta data, você será notificado." });
+                          }
+                        }}
+                      >
+                        🔔 Me avise se vagar
+                      </Button>
+                    )}
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 sm:grid-cols-3 gap-1.5 sm:gap-2">

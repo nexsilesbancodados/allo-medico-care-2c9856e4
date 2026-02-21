@@ -18,9 +18,15 @@ import SupportSection from "@/components/landing/SupportSection";
 import Footer from "@/components/landing/Footer";
 import PingoChatbot from "@/components/PingoChatbot";
 import AnimateSection from "@/components/ui/animate-section";
+import EmergencyButton from "@/components/EmergencyButton";
+import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
+import { Button } from "@/components/ui/button";
+import { Stethoscope } from "lucide-react";
+import { useState } from "react";
 
 const Index = () => {
   const { setTheme, theme } = useTheme();
+  const [showQuiz, setShowQuiz] = useState(false);
 
   useEffect(() => {
     const prev = theme;
@@ -91,8 +97,23 @@ const Index = () => {
         <SupportSection />
       </AnimateSection>
 
+      {/* Specialty Quiz CTA */}
+      <div className="text-center py-8">
+        <Button
+          size="lg"
+          variant="outline"
+          className="gap-2 text-base border-primary/30 hover:bg-primary/5"
+          onClick={() => setShowQuiz(true)}
+        >
+          <Stethoscope className="w-5 h-5 text-primary" />
+          Não sabe qual especialidade? Descubra aqui
+        </Button>
+      </div>
+
       <Footer />
       <PingoChatbot />
+      <EmergencyButton />
+      {showQuiz && <SpecialtyQuiz onClose={() => setShowQuiz(false)} />}
     </div>
   );
 };

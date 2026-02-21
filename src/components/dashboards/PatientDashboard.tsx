@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star, BarChart2, Activity, RefreshCw, Gift, Share2, Copy } from "lucide-react";
+import { Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp, Bell, CheckCircle2, AlertCircle, Star, BarChart2, Activity, RefreshCw, Gift, Share2, Copy, ClipboardList } from "lucide-react";
 import { differenceInDays } from "date-fns";
 import BlobKPICard from "@/components/ui/blob-kpi-card";
 import Sparkline from "@/components/ui/sparkline";
@@ -45,6 +45,7 @@ const PatientDashboard = () => {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [credits, setCredits] = useState(0);
   const [returnAppts, setReturnAppts] = useState<any[]>([]);
+  const [carePlan, setCarePlan] = useState<any | null>(null);
   const now = new Date();
 
   useEffect(() => { if (user) fetchData(); }, [user]);
@@ -157,6 +158,26 @@ const PatientDashboard = () => {
           if (p) retMap.set(d.id, `Dr(a). ${p.first_name} ${p.last_name}`);
         });
         setReturnAppts(returnData.map(a => ({ ...a, doctor_name: retMap.get(a.doctor_id) ?? "Médico" })));
+      }
+    }
+
+    // Fetch latest care plan (consultation notes as "Plano de Cuidado")
+    const { data: latestCompleted } = await supabase.from("appointments")
+      .select("id, scheduled_at, doctor_id")
+      .eq("patient_id", user!.id).eq("status", "completed")
+      .order("scheduled_at", { ascending: false }).limit(1).single();
+    if (latestCompleted) {
+      const { data: noteData } = await supabase.from("consultation_notes")
+        .select("content, updated_at")
+        .eq("appointment_id", latestCompleted.id).single();
+      if (noteData && noteData.content) {
+        const { data: doc } = await supabase.from("doctor_profiles").select("user_id").eq("id", latestCompleted.doctor_id).single();
+        let docName = "Médico";
+        if (doc) {
+          const { data: p } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", doc.user_id).single();
+          if (p) docName = `Dr(a). ${p.first_name} ${p.last_name}`;
+        }
+        setCarePlan({ content: noteData.content, doctor: docName, date: latestCompleted.scheduled_at });
       }
     }
   };
@@ -384,6 +405,25 @@ const PatientDashboard = () => {
                 </CardContent>
               </Card>
             )}
+
+            {/* Care Plan Card */}
+            {carePlan && (
+              <Card className="border-secondary/30 bg-gradient-to-r from-secondary/5 to-primary/5">
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ClipboardList className="w-4 h-4 text-secondary" />
+                    <p className="text-sm font-semibold text-foreground">Plano de Cuidado</p>
+                    <Badge variant="outline" className="text-[10px] ml-auto border-secondary/30 text-secondary">
+                      {format(new Date(carePlan.date), "dd/MM/yyyy")}
+                    </Badge>
+                  </div>
+                  <div className="p-3 bg-card rounded-xl border border-border/50 mb-2">
+                    <p className="text-sm text-foreground whitespace-pre-line">{carePlan.content}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Orientações de {carePlan.doctor}</p>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* ══ Consultas ══ */}
@@ -472,6 +512,7 @@ const PatientDashboard = () => {
             <div className="grid sm:grid-cols-2 gap-3">
               {[
                 { label: "Minha Saúde", sub: "Receitas, atestados e histórico", icon: Heart, color: "bg-primary/10", iconColor: "text-primary", path: "/dashboard/patient/health" },
+                { label: "Timeline", sub: "Linha do tempo visual", icon: Activity, color: "bg-accent/10", iconColor: "text-accent-foreground", path: "/dashboard/timeline" },
                 { label: "Histórico", sub: "Prontuário completo", icon: FileText, color: "bg-warning/10", iconColor: "text-warning", path: "/dashboard/medical-records" },
                 { label: "Planos", sub: "Assinatura e pagamentos", icon: TrendingUp, color: "bg-success/10", iconColor: "text-success", path: "/dashboard/plans" },
                 { label: "Perfil", sub: "Dados pessoais e saúde", icon: Activity, color: "bg-secondary/10", iconColor: "text-secondary", path: "/dashboard/profile" },

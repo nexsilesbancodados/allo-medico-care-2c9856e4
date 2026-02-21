@@ -47,6 +47,44 @@ export type Database = {
         }
         Relationships: []
       }
+      appointment_waitlist: {
+        Row: {
+          created_at: string
+          desired_date: string
+          desired_time: string | null
+          doctor_id: string
+          id: string
+          notified: boolean
+          patient_id: string
+        }
+        Insert: {
+          created_at?: string
+          desired_date: string
+          desired_time?: string | null
+          doctor_id: string
+          id?: string
+          notified?: boolean
+          patient_id: string
+        }
+        Update: {
+          created_at?: string
+          desired_date?: string
+          desired_time?: string | null
+          doctor_id?: string
+          id?: string
+          notified?: boolean
+          patient_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_waitlist_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointments: {
         Row: {
           access_token: string | null
@@ -614,6 +652,36 @@ export type Database = {
           type?: string
           unit?: string
           value?: number
+        }
+        Relationships: []
+      }
+      health_tips: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          icon: string | null
+          id: string
+          is_active: boolean
+          title: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          title: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          title?: string
         }
         Relationships: []
       }
