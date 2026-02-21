@@ -63,6 +63,11 @@ const DoctorDashboard = () => {
   const done = todayAppts.filter(a => a.status === "completed").length;
   const inProg = todayAppts.filter(a => a.status === "in_progress").length;
   const pct = todayAppts.length > 0 ? Math.round((done / todayAppts.length) * 100) : 0;
+  
+  // Next patient info
+  const nextPatient = todayAppts.find(a => a.status === "scheduled" || a.status === "waiting");
+  const nextPatientTime = nextPatient ? format(new Date(nextPatient.scheduled_at), "HH:mm") : null;
+  const minutesUntilNext = nextPatient ? Math.max(0, Math.round((new Date(nextPatient.scheduled_at).getTime() - Date.now()) / 60000)) : null;
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("home")} role="doctor">
@@ -91,6 +96,28 @@ const DoctorDashboard = () => {
             </Button>
           </div>
         </motion.div>
+
+        {/* Next patient banner */}
+        {!loading && nextPatient && (
+          <motion.div variants={fadeUp}>
+            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-primary/5 to-secondary/5 border border-primary/20 cursor-pointer active:scale-[0.99] transition-all" onClick={() => navigate(`/dashboard/consultation/${nextPatient.id}`)}>
+              <div className="w-11 h-11 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
+                <span className="text-sm font-bold text-primary leading-none">{nextPatientTime}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">Próximo: {nextPatient.patient_name}</p>
+                <p className="text-xs text-muted-foreground">
+                  {minutesUntilNext !== null && minutesUntilNext <= 60
+                    ? `⏰ Em ${minutesUntilNext}min`
+                    : `${nextPatient.duration_minutes || 30}min de consulta`}
+                </p>
+              </div>
+              <Button size="sm" className="bg-primary text-primary-foreground text-xs h-9 px-4 rounded-xl gap-1.5 shrink-0">
+                <Video className="w-3.5 h-3.5" /> {nextPatient.status === "waiting" ? "Atender" : "Iniciar"}
+              </Button>
+            </div>
+          </motion.div>
+        )}
 
         {/* KPI Cards — clean card style */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
