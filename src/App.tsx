@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
+import { I18nProvider } from "@/i18n";
 import { lazy, Suspense } from "react";
 import { Loader2 } from "lucide-react";
 const Index = lazy(() => import("./pages/Index"));
@@ -57,6 +58,7 @@ const KeyboardShortcutsProvider = () => {
 
 const App = () => (
   <ErrorBoundary>
+  <I18nProvider>
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -120,6 +122,7 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
   </ThemeProvider>
+  </I18nProvider>
   </ErrorBoundary>
 );
 
