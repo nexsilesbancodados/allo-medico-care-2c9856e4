@@ -175,33 +175,33 @@ const BookAppointment = () => {
   return (
     <DashboardLayout title="Paciente" nav={patientNav}>
       <div className="max-w-3xl">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4 active:scale-95 transition-transform">
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
 
         {/* Doctor info */}
-        <Card className="border-border mb-6">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-4">
-              <Avatar className="w-16 h-16">
-                <AvatarFallback className="bg-primary/10 text-primary font-bold text-lg">
+        <Card className="border-border mb-4 sm:mb-6">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Avatar className="w-12 h-12 sm:w-16 sm:h-16 shrink-0">
+                <AvatarFallback className="bg-primary/10 text-primary font-bold text-base sm:text-lg">
                   {doctor.first_name[0]}{doctor.last_name[0]}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <h2 className="text-xl font-bold text-foreground">Dr(a). {doctor.first_name} {doctor.last_name}</h2>
-                <p className="text-sm text-muted-foreground">CRM {doctor.crm}/{doctor.crm_state}</p>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-base sm:text-xl font-bold text-foreground truncate">Dr(a). {doctor.first_name} {doctor.last_name}</h2>
+                <p className="text-xs sm:text-sm text-muted-foreground">CRM {doctor.crm}/{doctor.crm_state}</p>
                 {doctor.specialties.length > 0 && (
                   <div className="flex gap-1 mt-1 flex-wrap">
-                    {doctor.specialties.map(s => <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>)}
+                    {doctor.specialties.map(s => <Badge key={s} variant="secondary" className="text-[10px] sm:text-xs">{s}</Badge>)}
                   </div>
                 )}
               </div>
-              <div className="ml-auto text-right">
-                <p className="text-2xl font-bold text-foreground">R${doctor.consultation_price}</p>
+              <div className="text-right shrink-0">
+                <p className="text-lg sm:text-2xl font-bold text-foreground">R${doctor.consultation_price}</p>
                 {doctor.rating > 0 && (
-                  <span className="flex items-center gap-1 text-sm justify-end">
-                    <Star className="w-3.5 h-3.5 text-yellow-500 fill-yellow-500" />
+                  <span className="flex items-center gap-1 text-xs sm:text-sm justify-end">
+                    <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-500 fill-yellow-500" />
                     {doctor.rating.toFixed(1)}
                   </span>
                 )}
@@ -245,7 +245,7 @@ const BookAppointment = () => {
           })}
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           {/* Calendar */}
           <Card className="border-border">
             <CardHeader><CardTitle className="text-base flex items-center gap-2"><CalendarDays className="w-4 h-4 text-primary" /> Escolha a Data</CardTitle></CardHeader>
@@ -280,7 +280,7 @@ const BookAppointment = () => {
                     <p className="text-xs text-muted-foreground mt-1">Tente outra data.</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-3 gap-1.5 sm:gap-2">
                     {availableTimes.map(time => (
                       <Button
                         key={time}
@@ -288,7 +288,7 @@ const BookAppointment = () => {
                         size="sm"
                         onClick={() => setSelectedTime(time)}
                         className={cn(
-                          "transition-all",
+                          "transition-all h-10 sm:h-9 text-sm active:scale-95",
                           selectedTime === time && "bg-gradient-hero text-primary-foreground scale-105 shadow-md"
                         )}
                       >
@@ -339,7 +339,7 @@ const BookAppointment = () => {
                     </p>
                   </div>
                   <Button
-                    className="w-full bg-gradient-hero text-primary-foreground h-12 text-base"
+                    className="w-full bg-gradient-hero text-primary-foreground h-12 sm:h-12 text-base active:scale-[0.98] transition-transform"
                     onClick={handleBook}
                     disabled={booking}
                   >
