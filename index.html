@@ -2,29 +2,54 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>AloClinica - Telemedicina Online</title>
-    <meta name="description" content="Plataforma completa de telemedicina: videochamadas com médicos, agendamento online, receitas digitais e muito mais.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>AloClinica – Telemedicina Online | Consultas por Vídeo 24h</title>
+    <meta name="description" content="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades. Sua saúde na palma da mão.">
     <meta name="author" content="AloClinica" />
     <meta name="theme-color" content="#1a6fc4" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="AloClinica" />
     <link rel="apple-touch-icon" href="/pwa-192x192.png" />
+    <link rel="canonical" href="https://allo-medico-care.lovable.app/" />
+    <meta name="robots" content="index, follow" />
 
-    
-    
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/0XILPRqqUbSOh99ow53X5OBDOCC3/social-images/social-1771223927717-mascot-wave-DmAVveg6-removebg-preview.webp">
+    <meta property="og:url" content="https://allo-medico-care.lovable.app/" />
+    <meta property="og:title" content="AloClinica – Telemedicina Online | Consultas 24h" />
+    <meta property="og:description" content="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades." />
+    <meta property="og:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/0XILPRqqUbSOh99ow53X5OBDOCC3/social-images/social-1771223927717-mascot-wave-DmAVveg6-removebg-preview.webp" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:site_name" content="AloClinica" />
 
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@AloClinica" />
-    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/0XILPRqqUbSOh99ow53X5OBDOCC3/social-images/social-1771223927717-mascot-wave-DmAVveg6-removebg-preview.webp">
-    <meta property="og:title" content="AloClinica - Telemedicina Online">
-  <meta name="twitter:title" content="AloClinica - Telemedicina Online">
-  <meta property="og:description" content="Plataforma completa de telemedicina: videochamadas com médicos, agendamento online, receitas digitais e muito mais.">
-  <meta name="twitter:description" content="Plataforma completa de telemedicina: videochamadas com médicos, agendamento online, receitas digitais e muito mais.">
-</head>
+    <meta name="twitter:title" content="AloClinica – Telemedicina Online | Consultas 24h" />
+    <meta name="twitter:description" content="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades." />
+    <meta name="twitter:image" content="https://storage.googleapis.com/gpt-engineer-file-uploads/0XILPRqqUbSOh99ow53X5OBDOCC3/social-images/social-1771223927717-mascot-wave-DmAVveg6-removebg-preview.webp" />
+
+    <!-- JSON-LD structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MedicalBusiness",
+      "name": "AloClinica",
+      "url": "https://allo-medico-care.lovable.app",
+      "logo": "https://allo-medico-care.lovable.app/pwa-192x192.png",
+      "description": "Plataforma de telemedicina com consultas por vídeo 24h, receitas digitais e agendamento online.",
+      "address": { "@type": "PostalAddress", "addressCountry": "BR" },
+      "priceRange": "R$ 39 - R$ 149",
+      "medicalSpecialty": ["GeneralPractice","Cardiology","Dermatology","Pediatrics","Neurology","Orthopedics","Endocrinology","Ophthalmology"],
+      "availableService": {
+        "@type": "MedicalProcedure",
+        "name": "Teleconsulta médica",
+        "procedureType": "https://schema.org/NoninvasiveProcedure"
+      }
+    }
+    </script>
+  </head>
 
   <body>
     <div id="root"></div>
