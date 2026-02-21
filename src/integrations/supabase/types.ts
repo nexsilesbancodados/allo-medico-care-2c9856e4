@@ -666,6 +666,53 @@ export type Database = {
         }
         Relationships: []
       }
+      patient_consents: {
+        Row: {
+          accepted_at: string
+          appointment_id: string
+          consent_text: string
+          consent_type: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          patient_id: string
+          revoked_at: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          accepted_at?: string
+          appointment_id: string
+          consent_text: string
+          consent_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          patient_id: string
+          revoked_at?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          accepted_at?: string
+          appointment_id?: string
+          consent_text?: string
+          consent_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          patient_id?: string
+          revoked_at?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_consents_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_documents: {
         Row: {
           appointment_id: string | null
