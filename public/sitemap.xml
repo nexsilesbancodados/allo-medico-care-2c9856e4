@@ -4,8 +4,15 @@
   <url><loc>https://allo-medico-care.lovable.app/paciente</loc><priority>0.9</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://allo-medico-care.lovable.app/medico</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://allo-medico-care.lovable.app/clinica</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/parceiro</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/afiliado</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://allo-medico-care.lovable.app/consulta-avulsa</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
-  <url><loc>https://allo-medico-care.lovable.app/termos</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
-  <url><loc>https://allo-medico-care.lovable.app/privacidade</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/auth</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/terms</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/privacy</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
   <url><loc>https://allo-medico-care.lovable.app/lgpd</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/cookies</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/refund</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/doctor-terms</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/accessibility</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
 </urlset>
