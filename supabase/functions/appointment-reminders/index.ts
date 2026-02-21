@@ -104,7 +104,28 @@ serve(async (req) => {
         });
         sent++;
       } catch (e) {
-        console.error(`Failed to send reminder for appointment ${appt.id}:`, e);
+        console.error(`Failed to send email reminder for appointment ${appt.id}:`, e);
+      }
+
+      // Send WhatsApp reminder with Jitsi link
+      if (patient?.phone) {
+        try {
+          const consultaLink = `https://allo-medico-care.lovable.app/dashboard/consultation/${appt.id}`;
+          const whatsappMsg = diffMin <= 20
+            ? `⏰ *Lembrete: sua consulta começa em 15 minutos!*\n\nOlá ${patient.first_name},\nSua consulta com ${docNameMap.get(appt.doctor_id) ?? "seu médico"} está prestes a começar.\n\n🔗 Acesse a sala de consulta com segurança:\n${consultaLink}\n\nEntre com 5 minutos de antecedência. 🏥`
+            : `📋 *Lembrete de Consulta*\n\nOlá ${patient.first_name},\nSua consulta com ${docNameMap.get(appt.doctor_id) ?? "seu médico"} é em 1 hora.\n\n📅 ${scheduledAt.toLocaleDateString("pt-BR")} às ${scheduledAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}\n\nPrepare-se e acesse o painel quando estiver na hora. 🏥`;
+
+          await fetch(`${supabaseUrl}/functions/v1/send-whatsapp`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${anonKey}`,
+            },
+            body: JSON.stringify({ phone: patient.phone, message: whatsappMsg }),
+          });
+        } catch (e) {
+          console.error(`Failed to send WhatsApp reminder for appointment ${appt.id}:`, e);
+        }
       }
     }
 
