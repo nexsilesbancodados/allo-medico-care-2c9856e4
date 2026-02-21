@@ -1,13 +1,14 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send } from "lucide-react";
+import { Send, Image, Paperclip, Check, CheckCheck } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {
   id: string;
@@ -23,17 +24,42 @@ interface AppointmentChatProps {
   otherUserName?: string;
 }
 
+const TypingIndicator = () => (
+  <motion.div
+    initial={{ opacity: 0, y: 5 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 5 }}
+    className="flex justify-start"
+  >
+    <div className="bg-muted rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1">
+      {[0, 1, 2].map(i => (
+        <motion.span
+          key={i}
+          className="w-2 h-2 rounded-full bg-muted-foreground/50"
+          animate={{ y: [0, -4, 0] }}
+          transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15 }}
+        />
+      ))}
+    </div>
+  </motion.div>
+);
+
 const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps) => {
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [otherTyping, setOtherTyping] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const channelRef = useRef<any>(null);
 
   useEffect(() => {
     if (!user || !appointmentId) return;
     fetchMessages();
 
+    // Realtime for new messages
     const channel = supabase
       .channel(`chat-${appointmentId}`)
       .on(
@@ -41,21 +67,47 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
         { event: "INSERT", schema: "public", table: "messages", filter: `appointment_id=eq.${appointmentId}` },
         (payload) => {
           const newMsg = payload.new as Message;
-          setMessages(prev => [...prev, newMsg]);
-          // Mark as read if from other user
+          setMessages(prev => {
+            if (prev.some(m => m.id === newMsg.id)) return prev;
+            return [...prev, newMsg];
+          });
           if (newMsg.sender_id !== user.id) {
             supabase.from("messages").update({ is_read: true }).eq("id", newMsg.id).then(() => {});
+            setOtherTyping(false);
           }
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "messages", filter: `appointment_id=eq.${appointmentId}` },
+        (payload) => {
+          const updated = payload.new as Message;
+          setMessages(prev => prev.map(m => m.id === updated.id ? updated : m));
         }
       )
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // Presence channel for typing indicators
+    const presenceChannel = supabase.channel(`typing-${appointmentId}`)
+      .on("broadcast", { event: "typing" }, (payload) => {
+        if (payload.payload.user_id !== user.id) {
+          setOtherTyping(true);
+          setTimeout(() => setOtherTyping(false), 3000);
+        }
+      })
+      .subscribe();
+
+    channelRef.current = presenceChannel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      supabase.removeChannel(presenceChannel);
+    };
   }, [user, appointmentId]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, [messages, otherTyping]);
 
   const fetchMessages = async () => {
     const { data } = await supabase
@@ -65,16 +117,35 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
       .order("created_at", { ascending: true });
     setMessages((data as Message[]) ?? []);
 
-    // Mark unread messages as read
     const unread = (data ?? []).filter((m: any) => !m.is_read && m.sender_id !== user!.id);
     if (unread.length > 0) {
       await supabase.from("messages").update({ is_read: true }).in("id", unread.map((m: any) => m.id));
     }
   };
 
+  const broadcastTyping = useCallback(() => {
+    if (!channelRef.current || !user) return;
+    channelRef.current.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { user_id: user.id },
+    });
+  }, [user]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInput(e.target.value);
+    if (!isTyping) {
+      setIsTyping(true);
+      broadcastTyping();
+    }
+    clearTimeout(typingTimeoutRef.current);
+    typingTimeoutRef.current = setTimeout(() => setIsTyping(false), 2000);
+  };
+
   const sendMessage = async () => {
     if (!input.trim() || !user || sending) return;
     setSending(true);
+    setIsTyping(false);
     const { error } = await supabase.from("messages").insert({
       appointment_id: appointmentId,
       sender_id: user.id,
@@ -88,51 +159,118 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   };
 
+  // Group messages by date
+  const groupedMessages = messages.reduce<Record<string, Message[]>>((acc, m) => {
+    const day = format(new Date(m.created_at), "yyyy-MM-dd");
+    if (!acc[day]) acc[day] = [];
+    acc[day].push(m);
+    return acc;
+  }, {});
+
   return (
-    <div className="flex flex-col h-full border border-border rounded-lg bg-card">
-      <div className="px-4 py-3 border-b border-border">
-        <h3 className="text-sm font-semibold text-foreground">
-          💬 Chat {otherUserName ? `com ${otherUserName}` : "da Consulta"}
-        </h3>
+    <div className="flex flex-col h-full border border-border rounded-xl bg-card shadow-sm">
+      {/* Header */}
+      <div className="px-4 py-3 border-b border-border flex items-center gap-3">
+        <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">
+            {otherUserName ? `Chat com ${otherUserName}` : "Chat da Consulta"}
+          </h3>
+          <AnimatePresence>
+            {otherTyping && (
+              <motion.p
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="text-[10px] text-primary font-medium"
+              >
+                digitando...
+              </motion.p>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
+      {/* Messages */}
       <ScrollArea className="flex-1 p-4 max-h-[400px]">
         <div className="space-y-3">
           {messages.length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-8">
-              Nenhuma mensagem ainda. Envie a primeira!
-            </p>
+            <div className="text-center py-8">
+              <p className="text-xs text-muted-foreground">
+                Nenhuma mensagem ainda. Envie a primeira! 💬
+              </p>
+            </div>
           )}
-          {messages.map(m => {
-            const isMine = m.sender_id === user?.id;
-            return (
-              <div key={m.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-[75%] rounded-2xl px-4 py-2 ${
-                  isMine
-                    ? "bg-primary text-primary-foreground rounded-br-md"
-                    : "bg-muted text-foreground rounded-bl-md"
-                }`}>
-                  <p className="text-sm whitespace-pre-wrap break-words">{m.content}</p>
-                  <p className={`text-[10px] mt-1 ${isMine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
-                    {format(new Date(m.created_at), "HH:mm", { locale: ptBR })}
-                  </p>
-                </div>
+          {Object.entries(groupedMessages).map(([day, msgs]) => (
+            <div key={day}>
+              <div className="flex justify-center my-3">
+                <span className="text-[10px] text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                  {format(new Date(day), "dd 'de' MMMM", { locale: ptBR })}
+                </span>
               </div>
-            );
-          })}
+              {msgs.map((m, idx) => {
+                const isMine = m.sender_id === user?.id;
+                const showAvatar = idx === 0 || msgs[idx - 1]?.sender_id !== m.sender_id;
+                return (
+                  <motion.div
+                    key={m.id}
+                    initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                    className={`flex ${isMine ? "justify-end" : "justify-start"} ${showAvatar ? "mt-3" : "mt-0.5"}`}
+                  >
+                    {!isMine && showAvatar && (
+                      <Avatar className="w-6 h-6 mr-1.5 mt-auto shrink-0">
+                        <AvatarFallback className="text-[8px] bg-muted">
+                          {otherUserName?.[0] ?? "?"}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    {!isMine && !showAvatar && <div className="w-[30px] shrink-0" />}
+                    <div
+                      className={`max-w-[75%] rounded-2xl px-4 py-2 ${
+                        isMine
+                          ? "bg-primary text-primary-foreground rounded-br-md"
+                          : "bg-muted text-foreground rounded-bl-md"
+                      }`}
+                    >
+                      <p className="text-sm whitespace-pre-wrap break-words">{m.content}</p>
+                      <div className={`flex items-center gap-1 justify-end mt-1 ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                        <span className="text-[10px]">
+                          {format(new Date(m.created_at), "HH:mm", { locale: ptBR })}
+                        </span>
+                        {isMine && (
+                          m.is_read
+                            ? <CheckCheck className="w-3 h-3" />
+                            : <Check className="w-3 h-3" />
+                        )}
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ))}
+          <AnimatePresence>{otherTyping && <TypingIndicator />}</AnimatePresence>
           <div ref={scrollRef} />
         </div>
       </ScrollArea>
 
-      <div className="p-3 border-t border-border flex gap-2">
+      {/* Input */}
+      <div className="p-3 border-t border-border flex gap-2 items-center">
         <Input
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           placeholder="Digite sua mensagem..."
-          className="flex-1"
+          className="flex-1 rounded-xl"
         />
-        <Button size="icon" onClick={sendMessage} disabled={!input.trim() || sending}>
+        <Button
+          size="icon"
+          onClick={sendMessage}
+          disabled={!input.trim() || sending}
+          className="rounded-xl shrink-0"
+        >
           <Send className="w-4 h-4" />
         </Button>
       </div>
