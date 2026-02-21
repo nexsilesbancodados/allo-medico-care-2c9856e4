@@ -133,7 +133,7 @@ const PatientDashboard = () => {
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-2xl mx-auto space-y-6">
-        {/* Header greeting */}
+        {/* Header greeting — enhanced */}
         <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">
@@ -150,6 +150,26 @@ const PatientDashboard = () => {
             </Button>
           </div>
         </motion.div>
+
+        {/* Health summary strip */}
+        {!loading && (stats?.total ?? 0) > 0 && (
+          <motion.div variants={fadeUp}>
+            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-primary/5 via-card to-secondary/5 border border-border/40">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Activity className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground">Resumo de Saúde</p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {stats?.total ?? 0} consulta{(stats?.total ?? 0) !== 1 ? "s" : ""} realizadas · {stats?.prescriptions ?? 0} receita{(stats?.prescriptions ?? 0) !== 1 ? "s" : ""}
+                </p>
+              </div>
+              <Button size="sm" variant="ghost" className="text-xs text-primary h-8 rounded-xl shrink-0" onClick={() => navigate("/dashboard/patient/health")}>
+                Ver mais
+              </Button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Live consultation */}
         {waitingAppt && (

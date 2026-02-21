@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getAdminNav } from "@/components/admin/adminNav";
 import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, Video, Star, LayoutGrid, Download, RefreshCw } from "lucide-react";
 import AdminAnalyticsCharts from "./AdminAnalyticsCharts";
@@ -266,9 +267,28 @@ const AdminDashboard = () => {
             <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportAdminPDF} disabled={loading}>
               <FileText className="w-4 h-4" /> PDF
             </Button>
-            <Button variant="outline" size="sm" className="h-9 rounded-xl gap-1.5" onClick={() => navigate("/dashboard/admin/switch-panel")}>
-              <LayoutGrid className="w-4 h-4" /> Trocar Painel
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" className="h-9 rounded-xl gap-1.5">
+                  <LayoutGrid className="w-4 h-4" /> Trocar Painel
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 rounded-xl p-1.5">
+                {panelOptions.map(p => (
+                  <DropdownMenuItem
+                    key={p.role}
+                    onClick={() => navigate(`/dashboard?role=${p.role}`)}
+                    className="rounded-lg gap-2 cursor-pointer text-sm"
+                  >
+                    <span>{p.icon}</span>
+                    <div>
+                      <p className="font-medium">{p.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{p.description}</p>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </motion.div>
 

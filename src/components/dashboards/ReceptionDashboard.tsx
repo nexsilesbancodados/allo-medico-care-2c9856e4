@@ -237,6 +237,28 @@ const ReceptionDashboard = () => {
             <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportCSV} disabled={loading || todayAppts.length === 0}>
               <Download className="w-4 h-4" /> CSV
             </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-9 rounded-xl gap-1.5"
+              disabled={loading || todayAppts.length === 0}
+              onClick={() => {
+                const doc = new jsPDF();
+                doc.setFontSize(16);
+                doc.text(`Agenda — ${format(selectedDate, "dd/MM/yyyy")}`, 14, 20);
+                doc.setFontSize(10);
+                let y = 35;
+                filteredAppts.forEach(a => {
+                  doc.text(`${format(new Date(a.scheduled_at), "HH:mm")} — ${a.patient_name} — ${a.doctor_name} — ${statusLabel[a.status] ?? a.status}`, 14, y);
+                  y += 7;
+                  if (y > 280) { doc.addPage(); y = 20; }
+                });
+                doc.save(`agenda-${format(selectedDate, "yyyy-MM-dd")}.pdf`);
+                toast.success("PDF exportado!");
+              }}
+            >
+              <Download className="w-4 h-4" /> PDF
+            </Button>
           </div>
         </motion.div>
 
