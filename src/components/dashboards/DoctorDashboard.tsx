@@ -361,39 +361,39 @@ const DoctorDashboard = () => {
 
             {/* Memed Digital Prescription */}
             <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5 hover:shadow-md transition-all">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-                      <Pill className="w-6 h-6 text-primary-foreground" />
+              <CardContent className="p-4 sm:p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shrink-0">
+                      <Pill className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
                     </div>
-                    <div>
-                      <h3 className="font-bold text-foreground flex items-center gap-2">
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-sm sm:text-base text-foreground flex items-center gap-2 flex-wrap">
                         Memed — Receita Digital
                         <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Integrado</Badge>
                       </h3>
-                      <p className="text-sm text-muted-foreground mt-0.5">
-                        Prescreva com a base de medicamentos mais completa do Brasil
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
+                        Base de medicamentos completa do Brasil
                       </p>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 shrink-0">
                     <Button
                       variant="outline"
                       size="sm"
-                      className="gap-1.5"
+                      className="gap-1.5 text-xs flex-1 sm:flex-none"
                       onClick={() => window.open("https://memed.com.br/login", "_blank")}
                     >
                       <ExternalLink className="w-3.5 h-3.5" />
-                      Portal Memed
+                      Portal
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-gradient-hero text-primary-foreground gap-1.5"
+                      className="bg-gradient-hero text-primary-foreground gap-1.5 text-xs flex-1 sm:flex-none"
                       onClick={() => navigate("/dashboard/prescriptions")}
                     >
                       <FileText className="w-3.5 h-3.5" />
-                      Minhas Receitas
+                      Receitas
                     </Button>
                   </div>
                 </div>

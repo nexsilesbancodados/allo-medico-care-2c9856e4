@@ -29,7 +29,8 @@ const statusColor: Record<string, string> = {
 const DoctorCalendar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [view, setView] = useState<"day" | "week" | "month">("week");
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const [view, setView] = useState<"day" | "week" | "month">(isMobile ? "day" : "week");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -109,21 +110,21 @@ const DoctorCalendar = () => {
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("calendar")}>
       <div className="max-w-6xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Calendário</h1>
-            <p className="text-sm text-muted-foreground">Visualize sua agenda completa</p>
+        <div className="flex flex-col gap-3 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">Calendário</h1>
+              <p className="text-xs sm:text-sm text-muted-foreground">Visualize sua agenda completa</p>
+            </div>
+            <Button size="sm" variant="outline" onClick={() => setCurrentDate(new Date())} className="h-8 text-xs">Hoje</Button>
           </div>
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" onClick={() => setCurrentDate(new Date())}>Hoje</Button>
-            <Tabs value={view} onValueChange={(v) => setView(v as any)}>
-              <TabsList>
-                <TabsTrigger value="day">Dia</TabsTrigger>
-                <TabsTrigger value="week">Semana</TabsTrigger>
-                <TabsTrigger value="month">Mês</TabsTrigger>
-              </TabsList>
-            </Tabs>
-          </div>
+          <Tabs value={view} onValueChange={(v) => setView(v as any)}>
+            <TabsList className="w-full grid grid-cols-3">
+              <TabsTrigger value="day">Dia</TabsTrigger>
+              <TabsTrigger value="week">Semana</TabsTrigger>
+              <TabsTrigger value="month">Mês</TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
 
         <div className="flex items-center justify-between mb-4">
@@ -144,23 +145,43 @@ const DoctorCalendar = () => {
             </CardContent>
           </Card>
         ) : view === "week" ? (
-          /* WEEK VIEW */
-          <div className="grid grid-cols-7 gap-2">
-            {days.map(day => {
-              const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at), day));
-              const isToday = isSameDay(day, new Date());
-              return (
-                <div key={day.toISOString()} className={`min-h-[140px] rounded-lg border p-2 ${isToday ? "border-primary bg-primary/5" : "border-border"}`}>
-                  <p className={`text-xs font-medium mb-2 ${isToday ? "text-primary" : "text-muted-foreground"}`}>
-                    {format(day, "EEE dd", { locale: ptBR })}
-                  </p>
-                  <div className="space-y-1">
-                    {dayAppts.map(a => <AppointmentCard key={a.id} appt={a} />)}
+          /* WEEK VIEW — stacked on mobile, grid on desktop */
+          <>
+            {/* Mobile: vertical list */}
+            <div className="md:hidden space-y-2">
+              {days.map(day => {
+                const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at), day));
+                const isToday = isSameDay(day, new Date());
+                return (
+                  <div key={day.toISOString()} className={`rounded-xl border p-3 ${isToday ? "border-primary bg-primary/5" : "border-border"}`}>
+                    <p className={`text-sm font-semibold mb-2 capitalize ${isToday ? "text-primary" : "text-foreground"}`}>
+                      {format(day, "EEEE, dd", { locale: ptBR })}
+                    </p>
+                    {dayAppts.length === 0 ? (
+                      <p className="text-xs text-muted-foreground">Sem consultas</p>
+                    ) : (
+                      <div className="space-y-1.5">{dayAppts.map(a => <AppointmentCard key={a.id} appt={a} />)}</div>
+                    )}
                   </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+            {/* Desktop: 7-col grid */}
+            <div className="hidden md:grid grid-cols-7 gap-2">
+              {days.map(day => {
+                const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at), day));
+                const isToday = isSameDay(day, new Date());
+                return (
+                  <div key={day.toISOString()} className={`min-h-[140px] rounded-lg border p-2 ${isToday ? "border-primary bg-primary/5" : "border-border"}`}>
+                    <p className={`text-xs font-medium mb-2 ${isToday ? "text-primary" : "text-muted-foreground"}`}>
+                      {format(day, "EEE dd", { locale: ptBR })}
+                    </p>
+                    <div className="space-y-1">{dayAppts.map(a => <AppointmentCard key={a.id} appt={a} />)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
         ) : (
           /* MONTH VIEW */
           <div className="grid grid-cols-7 gap-1">
