@@ -50,6 +50,7 @@ const ROLE_LABELS: Record<string, string> = {
   clinic: "Clínica",
   partner: "Parceiro",
   affiliate: "Afiliado",
+  ai: "Assistente IA",
 };
 
 const ROLE_COLORS: Record<string, string> = {
@@ -61,6 +62,7 @@ const ROLE_COLORS: Record<string, string> = {
   clinic: "bg-primary/15 text-primary border-primary/20",
   partner: "bg-success/15 text-success border-success/20",
   affiliate: "bg-muted text-muted-foreground border-border",
+  ai: "bg-primary/15 text-primary border-primary/20",
 };
 
 const ROLE_ICON: Record<string, string> = {
@@ -72,6 +74,7 @@ const ROLE_ICON: Record<string, string> = {
   clinic: "🏢",
   partner: "🤝",
   affiliate: "📣",
+  ai: "🤖",
 };
 
 const pageTransition = {
