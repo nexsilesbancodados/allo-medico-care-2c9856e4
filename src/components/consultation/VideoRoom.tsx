@@ -14,6 +14,7 @@ import VideoErrorBoundary from "./VideoErrorBoundary";
 import PreCallCheck from "./PreCallCheck";
 import ConnectionStatus from "./ConnectionStatus";
 import MedicalAutocomplete from "./MedicalAutocomplete";
+import SpeechToText from "./SpeechToText";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -425,8 +426,9 @@ const VideoRoom = () => {
         {/* Split screen: permanent notes panel for doctor */}
         {splitMode && isDoctor && (
           <div className="w-1/2 border-l border-border/15 bg-[hsl(210,50%,6%)] flex flex-col overflow-hidden">
-            <div className="p-3 border-b border-border/15">
+            <div className="p-3 border-b border-border/15 flex items-center justify-between">
               <p className="text-sm font-semibold text-[hsl(210,20%,90%)]">📋 Prontuário — Modo Focado</p>
+              <SpeechToText onTranscript={(text) => setNotes(prev => prev ? prev + " " + text : text)} />
             </div>
             <div className="flex-1 flex flex-col p-3 gap-3 overflow-auto">
               <MedicalAutocomplete
@@ -506,6 +508,10 @@ const VideoRoom = () => {
 
               {showNotes && isDoctor && (
                 <div className="flex-1 flex flex-col p-3 gap-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs text-[hsl(210,15%,50%)]">Use o botão de ditado para falar</p>
+                    <SpeechToText onTranscript={(text) => setNotes(prev => prev ? prev + " " + text : text)} />
+                  </div>
                   <MedicalAutocomplete
                     value={notes}
                     onChange={setNotes}

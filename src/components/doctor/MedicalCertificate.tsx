@@ -158,10 +158,23 @@ const MedicalCertificate = () => {
     doc.text("AloClínica — Telemedicina Digital · contato@aloclinica.com.br · www.aloclinica.com.br", 105, 294, { align: "center" });
 
     doc.save(`${certType}-${patientName.replace(/\s/g, "-").toLowerCase()}.pdf`);
-    setGenerating(false);
 
+    // Persist verification code to DB
+    supabase.from("document_verifications").insert({
+      verification_code: verificationCode,
+      document_type: certType,
+      patient_name: patientName,
+      patient_cpf: patientCpf || null,
+      doctor_name: doctorName,
+      doctor_crm: crmText,
+      details: { days: certType === "absence" ? days : null, cid: cid || null, reason: reason || null },
+    } as any).then(({ error }) => {
+      if (error) console.error("Failed to persist verification:", error);
+    });
+
+    setGenerating(false);
     setHistory(prev => [{ name: patientName, date: today, type: certConfig.label }, ...prev.slice(0, 9)]);
-    toast({ title: "Documento gerado! ✅", description: "O PDF profissional foi baixado com sucesso." });
+    toast({ title: "Documento gerado! ✅", description: `Código de verificação: ${verificationCode}` });
   };
 
   return (
