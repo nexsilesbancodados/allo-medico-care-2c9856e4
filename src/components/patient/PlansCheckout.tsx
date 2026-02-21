@@ -93,7 +93,11 @@ const PlansCheckout = () => {
   const [processing, setProcessing] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [pixCopied, setPixCopied] = useState(false);
-  const [pixCountdown, setPixCountdown] = useState(900); // 15 min
+  const [pixCountdown, setPixCountdown] = useState(900);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(0);
+  const [couponValid, setCouponValid] = useState<boolean | null>(null);
+  const [checkingCoupon, setCheckingCoupon] = useState(false);
 
   const currentPlan = plans.find(p => p.id === selectedPlan);
 
@@ -320,7 +324,39 @@ const PlansCheckout = () => {
 
   const availableTimes = selectedDate ? getAvailableTimesForDate(selectedDate) : [];
   const selectedSpecialtyName = specialties.find(s => s.id === selectedSpecialty)?.name;
-  const totalPrice = selectedPlan === "avulsa" ? (selectedDoctor?.consultation_price ?? 89) : (currentPlan?.price ?? 149);
+  const basePrice = selectedPlan === "avulsa" ? (selectedDoctor?.consultation_price ?? 89) : (currentPlan?.price ?? 149);
+  const discountAmount = basePrice * (couponDiscount / 100);
+  const totalPrice = basePrice - discountAmount;
+
+  const applyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCheckingCoupon(true);
+    setCouponValid(null);
+    const { data, error } = await supabase
+      .from("coupons")
+      .select("discount_percentage, max_uses, times_used, expires_at")
+      .eq("code", couponCode.trim().toUpperCase())
+      .eq("is_active", true)
+      .single();
+    if (error || !data) {
+      setCouponValid(false);
+      setCouponDiscount(0);
+      toast({ title: "Cupom inválido", variant: "destructive" });
+    } else {
+      const expired = data.expires_at && new Date(data.expires_at) < new Date();
+      const maxReached = data.max_uses && data.times_used >= data.max_uses;
+      if (expired || maxReached) {
+        setCouponValid(false);
+        setCouponDiscount(0);
+        toast({ title: expired ? "Cupom expirado" : "Cupom esgotado", variant: "destructive" });
+      } else {
+        setCouponValid(true);
+        setCouponDiscount(Number(data.discount_percentage));
+        toast({ title: `Cupom aplicado! ${data.discount_percentage}% de desconto 🎉` });
+      }
+    }
+    setCheckingCoupon(false);
+  };
 
   // Step indicators
   const avulsaSteps = ["Plano", "Especialidade", "Médico", "Data/Hora", "Pagamento"];
@@ -599,13 +635,33 @@ const PlansCheckout = () => {
                         </div>
                       )}
                       <div className="border-t border-border pt-3">
+                        {/* Coupon field */}
+                        <div className="flex gap-2 mb-3">
+                          <Input
+                            value={couponCode}
+                            onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponValid(null); }}
+                            placeholder="Cupom de desconto"
+                            className="flex-1 text-xs h-8"
+                          />
+                          <Button size="sm" variant="outline" className="h-8 text-xs" onClick={applyCoupon} disabled={checkingCoupon || !couponCode.trim()}>
+                            {checkingCoupon ? "..." : "Aplicar"}
+                          </Button>
+                        </div>
+                        {couponValid === true && (
+                          <div className="flex items-center gap-1 text-xs text-green-600 mb-2">
+                            <CheckCircle2 className="w-3 h-3" /> Cupom {couponCode} — {couponDiscount}% off
+                          </div>
+                        )}
+                        {couponValid === false && (
+                          <p className="text-xs text-destructive mb-2">Cupom inválido ou expirado</p>
+                        )}
                         <div className="flex justify-between items-baseline">
                           <span className="text-muted-foreground">Subtotal</span>
-                          <span className="text-foreground">R$ {totalPrice.toFixed(2)}</span>
+                          <span className="text-foreground">R$ {basePrice.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-baseline mt-1">
                           <span className="text-muted-foreground">Desconto</span>
-                          <span className="text-secondary font-medium">- R$ 0,00</span>
+                          <span className="text-secondary font-medium">- R$ {discountAmount.toFixed(2)}</span>
                         </div>
                       </div>
                       <div className="border-t border-border pt-3 flex justify-between items-baseline">

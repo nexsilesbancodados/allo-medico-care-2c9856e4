@@ -282,3 +282,31 @@
   --primary: 210 100% 70%;
   --secondary: 160 80% 65%;
 }
+
+/* ─── Print Styles for Prescriptions & Certificates ─── */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
+    min-height: 297mm;
+    padding: 15mm;
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+  @page {
+    size: A4;
+    margin: 10mm;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
