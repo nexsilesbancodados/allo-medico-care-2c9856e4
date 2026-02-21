@@ -43,6 +43,8 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <a href="#main-content" className="skip-to-content">Pular para o conteúdo</a>
+          <main id="main-content">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -78,6 +80,7 @@ const App = () => (
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          </main>
           <PingoChatbot />
           <AccessibilityToggle />
         </AuthProvider>
