@@ -21,6 +21,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import GlobalCommand from "@/components/GlobalCommand";
 import logoImg from "@/assets/logo.png";
 import mascotImg from "@/assets/mascot.png";
+import DashboardBreadcrumbs from "@/components/dashboards/DashboardBreadcrumbs";
 
 interface NavItem {
   label: string;
@@ -306,6 +307,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
             className="p-4 sm:p-6"
           >
+            <DashboardBreadcrumbs />
             {children}
           </motion.div>
         </main>
