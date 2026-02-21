@@ -44,3 +44,9 @@ verify_jwt = false
 
 [functions.whatsapp-qr]
 verify_jwt = false
+
+[functions.cart-abandonment]
+verify_jwt = false
+
+[functions.post-consultation-survey]
+verify_jwt = false

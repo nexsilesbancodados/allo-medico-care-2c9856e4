@@ -112,6 +112,7 @@ const SupportChat = () => {
         },
         body: JSON.stringify({
           messages: allMessages.map((m) => ({ role: m.role, content: m.content })),
+          user_id: user?.id,
         }),
       });
 
