@@ -1,14 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Phone, Maximize2, Minimize2, Volume2 } from "lucide-react";
+import { Phone, Maximize2, Minimize2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-
-declare global {
-  interface Window {
-    JitsiMeetExternalAPI: any;
-  }
-}
 
 interface VideoConsultationProps {
   appointmentId: string;
@@ -16,16 +10,12 @@ interface VideoConsultationProps {
   onEndCall: () => void;
 }
 
-const JITSI_DOMAIN = "meet.jit.si";
-
 const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsultationProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const apiRef = useRef<any>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const onEndCallRef = useRef(onEndCall);
   const [loading, setLoading] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [participantCount, setParticipantCount] = useState(1);
-  const [audioLevel, setAudioLevel] = useState(0);
   const [showControls, setShowControls] = useState(true);
   const controlsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMobile = useIsMobile();
@@ -34,7 +24,6 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     onEndCallRef.current = onEndCall;
   }, [onEndCall]);
 
-  // Auto-hide controls after 4s on mobile
   const resetControlsTimer = useCallback(() => {
     setShowControls(true);
     if (controlsTimer.current) clearTimeout(controlsTimer.current);
@@ -48,7 +37,6 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     return () => { if (controlsTimer.current) clearTimeout(controlsTimer.current); };
   }, [resetControlsTimer]);
 
-  // Fullscreen toggle
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
       containerRef.current?.parentElement?.requestFullscreen?.();
@@ -65,181 +53,57 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     return () => document.removeEventListener("fullscreenchange", handleFsChange);
   }, []);
 
+  // Build Jitsi iframe URL
+  const shortId = appointmentId.replace(/-/g, "").slice(0, 16);
+  const roomName = `AloMedConsulta${shortId}`;
+  const displayName = encodeURIComponent(userName || "Participante");
+
+  const configParams = [
+    "config.prejoinPageEnabled=false",
+    "config.startWithAudioMuted=false",
+    "config.startWithVideoMuted=false",
+    "config.disableDeepLinking=true",
+    "config.disableInviteFunctions=true",
+    "config.hideConferenceSubject=true",
+    "config.hideConferenceTimer=true",
+    "config.disableThirdPartyRequests=true",
+    "config.enableClosePage=false",
+    "config.enableInsecureRoomNameWarning=false",
+    "config.enableLobbyChat=false",
+    "config.requireDisplayName=false",
+    `config.resolution=${isMobile ? 480 : 720}`,
+    "config.channelLastN=2",
+    "config.p2p.enabled=true",
+    "config.disableRemoteMute=true",
+    "interfaceConfig.SHOW_JITSI_WATERMARK=false",
+    "interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false",
+    "interfaceConfig.SHOW_BRAND_WATERMARK=false",
+    "interfaceConfig.DISABLE_JOIN_LEAVE_NOTIFICATIONS=true",
+    "interfaceConfig.HIDE_INVITE_MORE_HEADER=true",
+    "interfaceConfig.MOBILE_APP_PROMO=false",
+    `interfaceConfig.TOOLBAR_ALWAYS_VISIBLE=${!isMobile}`,
+    `interfaceConfig.DEFAULT_BACKGROUND=#0a0f1a`,
+    `userInfo.displayName=${displayName}`,
+  ].join("&");
+
+  const jitsiUrl = `https://meet.jit.si/${roomName}#${configParams}`;
+
   useEffect(() => {
-    const loadJitsiScript = (): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        if (window.JitsiMeetExternalAPI) {
-          resolve();
-          return;
-        }
-        const script = document.createElement("script");
-        script.src = "https://meet.jit.si/external_api.js";
-        script.async = true;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error("Failed to load Jitsi script"));
-        document.head.appendChild(script);
-      });
-    };
+    // Fallback: mark as loaded after timeout
+    const timer = setTimeout(() => setLoading(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
-    const initJitsi = async () => {
-      try {
-        await loadJitsiScript();
-        if (!containerRef.current) return;
-
-        // Room name is built inside the API init below
-
-        const mobileToolbar = [
-          "microphone",
-          "camera",
-          "chat",
-          "raisehand",
-          "tileview",
-          "fullscreen",
-        ];
-
-        const desktopToolbar = [
-          "microphone",
-          "camera",
-          "desktop",
-          "fullscreen",
-          "chat",
-          "raisehand",
-          "tileview",
-          "settings",
-          "filmstrip",
-          "select-background",
-        ];
-
-        // Generate a short, clean room name to avoid meet.jit.si lobby/moderator issues
-        const shortId = appointmentId.replace(/-/g, "").slice(0, 12);
-        const cleanRoomName = `AloMed${shortId}`;
-
-        apiRef.current = new window.JitsiMeetExternalAPI(JITSI_DOMAIN, {
-          roomName: cleanRoomName,
-          parentNode: containerRef.current,
-          width: "100%",
-          height: "100%",
-          userInfo: {
-            displayName: userName || "Participante",
-          },
-          configOverwrite: {
-            startWithAudioMuted: false,
-            startWithVideoMuted: false,
-            disableDeepLinking: true,
-            prejoinPageEnabled: false,
-            disableInviteFunctions: true,
-            disableThirdPartyRequests: true,
-            enableClosePage: false,
-            hideConferenceSubject: false,
-            // Disable lobby and moderator requirement
-            enableLobbyChat: false,
-            hideLobbyButton: true,
-            requireDisplayName: false,
-            lobbyModeEnabled: false,
-            enableInsecureRoomNameWarning: false,
-            // Quality settings
-            resolution: isMobile ? 480 : 720,
-            constraints: {
-              video: {
-                height: { ideal: isMobile ? 480 : 720, max: 1080, min: 240 },
-                width: { ideal: isMobile ? 640 : 1280 },
-              },
-            },
-            enableLayerSuspension: true,
-            // Better audio
-            disableAP: false,
-            disableAEC: false,
-            disableNS: false,
-            disableAGC: false,
-            disableHPF: false,
-            stereo: false,
-            // P2P optimization for 1:1
-            p2p: {
-              enabled: true,
-              preferH264: true,
-              disableH264: false,
-              useStunTurn: true,
-            },
-            // Bandwidth
-            channelLastN: 2,
-            lastNLimits: {
-              2: 2,
-              5: 4,
-            },
-            toolbarButtons: isMobile ? mobileToolbar : desktopToolbar,
-            notifications: [],
-            disableRemoteMute: true,
-            remoteVideoMenu: {
-              disableKick: true,
-              disableGrantModerator: true,
-            },
-            // Hide Jitsi top bar
-            hideConferenceTimer: true,
-            hideParticipantsStats: true,
-            // Reduce bandwidth on mobile
-            enableLipSync: false,
-          },
-          interfaceConfigOverwrite: {
-            SHOW_JITSI_WATERMARK: false,
-            SHOW_WATERMARK_FOR_GUESTS: false,
-            SHOW_BRAND_WATERMARK: false,
-            TOOLBAR_ALWAYS_VISIBLE: !isMobile,
-            DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-            HIDE_INVITE_MORE_HEADER: true,
-            SHARING_FEATURES: [],
-            TOOLBAR_BUTTONS: [],
-            DEFAULT_BACKGROUND: "#0a0f1a",
-            DISABLE_VIDEO_BACKGROUND: isMobile,
-            MOBILE_APP_PROMO: false,
-            RECENT_LIST_ENABLED: false,
-            filmStripOnly: false,
-            VERTICAL_FILMSTRIP: !isMobile,
-          },
-        });
-
-        apiRef.current.addListener("browserSupport", () => {
-          setLoading(false);
-        });
-
-        apiRef.current.addListener("videoConferenceJoined", () => {
-          setLoading(false);
-        });
-
-        apiRef.current.addListener("readyToClose", () => {
-          onEndCallRef.current();
-        });
-
-        apiRef.current.addListener("participantJoined", () => {
-          setParticipantCount(prev => prev + 1);
-        });
-
-        apiRef.current.addListener("participantLeft", () => {
-          setParticipantCount(prev => Math.max(1, prev - 1));
-        });
-
-        // Fallback
-        setTimeout(() => setLoading(false), 3000);
-      } catch (error) {
-        console.error("[Jitsi] Error initializing:", error);
-        setLoading(false);
-      }
-    };
-
-    initJitsi();
-
-    return () => {
-      if (apiRef.current) {
-        apiRef.current.dispose();
-        apiRef.current = null;
-      }
-    };
-  }, [appointmentId, userName, isMobile]);
+  const handleIframeLoad = () => {
+    setLoading(false);
+  };
 
   return (
     <div
       className="flex flex-col w-full h-full relative"
       onClick={resetControlsTimer}
       onTouchStart={resetControlsTimer}
+      ref={containerRef}
     >
       {/* Video container */}
       <div className="relative flex-1 w-full min-h-0 bg-[hsl(220,30%,5%)]">
@@ -282,18 +146,15 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
           )}
         </AnimatePresence>
 
-        {/* Jitsi container */}
-        <div ref={containerRef} className="w-full h-full" />
-
-        {/* Participant count badge */}
-        {!loading && participantCount > 0 && (
-          <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[hsl(220,20%,8%,0.75)] backdrop-blur-md border border-[hsl(220,15%,20%)]">
-            <div className="w-2 h-2 rounded-full bg-[hsl(150,60%,45%)] animate-pulse" />
-            <span className="text-[11px] font-medium text-[hsl(220,20%,85%)]">
-              {participantCount} {participantCount === 1 ? "participante" : "participantes"}
-            </span>
-          </div>
-        )}
+        {/* Jitsi iframe */}
+        <iframe
+          ref={iframeRef}
+          src={jitsiUrl}
+          className="w-full h-full border-0"
+          allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
+          allowFullScreen
+          onLoad={handleIframeLoad}
+        />
 
         {/* Fullscreen toggle */}
         {!loading && (
