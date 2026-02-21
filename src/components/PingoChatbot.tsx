@@ -309,6 +309,7 @@ const PingoChatbot = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setOpen(true)}
+              data-pingo-chat
               className="relative w-16 h-16 rounded-full bg-primary shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary-foreground/20 hover:shadow-xl transition-shadow"
             >
               <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
