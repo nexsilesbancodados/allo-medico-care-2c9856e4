@@ -1,7 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Shield, Clock, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+const trustBadges = [
+  { icon: Shield, text: "Dados criptografados" },
+  { icon: Clock, text: "Atendimento 24h" },
+  { icon: Star, text: "4.9★ avaliação" },
+];
 
 const CTABanner = () => {
   const navigate = useNavigate();
@@ -16,7 +22,6 @@ const CTABanner = () => {
           transition={{ duration: 0.6, type: "spring", stiffness: 80 }}
           className="relative overflow-hidden rounded-3xl bg-gradient-hero p-10 md:p-16 text-center shadow-elevated"
         >
-          {/* Decorative animated elements */}
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.1, 0.05] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -64,7 +69,7 @@ const CTABanner = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
-              className="flex flex-wrap justify-center gap-3"
+              className="flex flex-wrap justify-center gap-3 mb-8"
             >
               <Button
                 size="lg"
@@ -81,6 +86,22 @@ const CTABanner = () => {
               >
                 Consulta sem cadastro
               </Button>
+            </motion.div>
+
+            {/* Trust badges */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.65 }}
+              className="flex flex-wrap justify-center gap-4 md:gap-6"
+            >
+              {trustBadges.map((badge) => (
+                <div key={badge.text} className="flex items-center gap-1.5 text-primary-foreground/70 text-xs font-medium">
+                  <badge.icon className="w-3.5 h-3.5" />
+                  {badge.text}
+                </div>
+              ))}
             </motion.div>
           </div>
         </motion.div>
