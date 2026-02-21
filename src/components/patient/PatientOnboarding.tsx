@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import mascotWelcome from "@/assets/mascot-welcome.png";
 import { formatMask } from "@/hooks/use-mask";
+import { validarCPF } from "@/lib/cpf";
 
 const ONBOARDING_KEY = "aloclinica_onboarding_completed";
 
@@ -157,6 +158,9 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
             <div>
               <Label className="text-xs">CPF</Label>
               <Input value={cpfMasked} onChange={e => setCpf(e.target.value.replace(/\D/g, ""))} placeholder="000.000.000-00" className="mt-1 h-9 text-sm" maxLength={14} />
+              {cpf.replace(/\D/g, "").length === 11 && !validarCPF(cpf) && (
+                <p className="text-[10px] text-destructive mt-0.5">CPF inválido</p>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
