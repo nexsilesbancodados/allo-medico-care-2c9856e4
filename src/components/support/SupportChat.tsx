@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { Send, Bot, User, Loader2 } from "lucide-react";
+import { Send, Bot, User, Loader2, Headset } from "lucide-react";
 
-type Message = { role: "user" | "assistant"; content: string };
+type Message = { role: "user" | "assistant" | "support"; content: string };
 
 const WELCOME_MSG = "Olá! 🐧 Sou o Pingo, assistente virtual da Alô Médico. Como posso ajudar a equipe de suporte hoje?";
 
@@ -33,11 +33,26 @@ const SupportChat = () => {
         .order("created_at", { ascending: true })
         .limit(100);
       if (data && data.length > 0) {
-        setMessages(data.map(m => ({ role: m.role as "user" | "assistant", content: m.content })));
+        setMessages(data.map(m => ({ role: m.role as "user" | "assistant" | "support", content: m.content })));
       }
       setHistoryLoaded(true);
     };
     loadHistory();
+  }, [user]);
+
+  // Realtime: listen for support replies
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase
+      .channel("support-chat-realtime")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_chat_messages", filter: `user_id=eq.${user.id}` }, (payload) => {
+        const newMsg = payload.new as any;
+        if (newMsg.role === "support") {
+          setMessages(prev => [...prev, { role: "support" as const, content: newMsg.content }]);
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [user]);
 
   useEffect(() => {
@@ -164,13 +179,23 @@ const SupportChat = () => {
                     <Bot className="w-4 h-4 text-primary" />
                   </div>
                 )}
+                {msg.role === "support" && (
+                  <div className="w-7 h-7 rounded-full bg-success/10 flex items-center justify-center shrink-0 mt-1">
+                    <Headset className="w-4 h-4 text-success" />
+                  </div>
+                )}
                 <div
                   className={`max-w-[80%] rounded-lg px-3 py-2 text-sm whitespace-pre-wrap ${
                     msg.role === "user"
                       ? "bg-primary text-primary-foreground"
+                      : msg.role === "support"
+                      ? "bg-success/10 text-foreground border border-success/20"
                       : "bg-muted text-foreground"
                   }`}
                 >
+                  {msg.role === "support" && (
+                    <span className="text-[10px] font-medium text-success block mb-0.5">Equipe de Suporte</span>
+                  )}
                   {msg.content}
                 </div>
                 {msg.role === "user" && (
