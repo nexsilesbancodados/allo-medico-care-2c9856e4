@@ -3,19 +3,21 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "@/i18n";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import logo from "@/assets/logo.png";
-// ThemeToggle removed from landing page
 
 const Header = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t } = useTranslation();
 
   const navLinks = [
-    { label: "Como Funciona", href: "#como-funciona" },
-    { label: "Especialidades", href: "#especialidades" },
-    { label: "Planos", href: "#planos" },
-    { label: "Depoimentos", href: "#depoimentos" },
-    { label: "FAQ", href: "#faq" },
+    { label: t("nav.howItWorks"), href: "#como-funciona" },
+    { label: t("nav.specialties"), href: "#especialidades" },
+    { label: t("nav.plans"), href: "#planos" },
+    { label: t("nav.testimonials"), href: "#depoimentos" },
+    { label: t("nav.faq"), href: "#faq" },
   ];
 
   return (
@@ -25,12 +27,12 @@ const Header = () => {
         <div className="animate-marquee whitespace-nowrap py-2 text-xs font-semibold text-primary-foreground tracking-wide uppercase flex">
           {[...Array(2)].map((_, i) => (
             <span key={i} className="inline-flex shrink-0 items-center">
-              <span className="mx-6 flex items-center gap-1.5">✦ Consultas por vídeo 24h</span>
-              <span className="mx-6 flex items-center gap-1.5">✦ Receitas digitais válidas</span>
-              <span className="mx-6 flex items-center gap-1.5">✦ Médicos com nota máxima</span>
-              <span className="mx-6 flex items-center gap-1.5">✦ 100% seguro e criptografado</span>
-              <span className="mx-6 flex items-center gap-1.5">✦ Atendimento na palma da mão</span>
-              <span className="mx-6 flex items-center gap-1.5">✦ Cuidando de você e sua família</span>
+              <span className="mx-6 flex items-center gap-1.5">{t("marquee.video24h")}</span>
+              <span className="mx-6 flex items-center gap-1.5">{t("marquee.validPrescriptions")}</span>
+              <span className="mx-6 flex items-center gap-1.5">{t("marquee.topDoctors")}</span>
+              <span className="mx-6 flex items-center gap-1.5">{t("marquee.secure")}</span>
+              <span className="mx-6 flex items-center gap-1.5">{t("marquee.handy")}</span>
+              <span className="mx-6 flex items-center gap-1.5">{t("marquee.family")}</span>
             </span>
           ))}
         </div>
@@ -60,15 +62,16 @@ const Header = () => {
         </nav>
 
         {/* Desktop CTA */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
+          <LanguageSwitcher />
           <Button variant="ghost" size="sm" onClick={() => navigate("/medico")}>
-            Sou Médico
+            {t("nav.imDoctor")}
           </Button>
           <Button variant="outline" size="sm" onClick={() => navigate("/consulta-avulsa")}>
-            Comprar Consulta
+            {t("nav.buyConsultation")}
           </Button>
           <Button size="sm" className="bg-gradient-hero hover:opacity-90 transition-opacity" onClick={() => navigate("/paciente")}>
-            Sou Paciente
+            {t("nav.imPatient")}
           </Button>
         </div>
 
@@ -108,9 +111,10 @@ const Header = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-2 border-t border-border">
-                <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/medico"); }}>Sou Médico</Button>
-                <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/consulta-avulsa"); }}>Comprar Consulta</Button>
-                <Button size="sm" className="bg-gradient-hero text-primary-foreground" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>Sou Paciente</Button>
+                <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
+                <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/medico"); }}>{t("nav.imDoctor")}</Button>
+                <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/consulta-avulsa"); }}>{t("nav.buyConsultation")}</Button>
+                <Button size="sm" className="bg-gradient-hero text-primary-foreground" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>{t("nav.imPatient")}</Button>
               </div>
             </nav>
           </motion.div>

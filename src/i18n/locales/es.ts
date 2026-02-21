@@ -1,0 +1,76 @@
+import type { TranslationKeys } from "./pt-BR";
+
+const es: Record<TranslationKeys, string> = {
+  "nav.howItWorks": "Cómo Funciona",
+  "nav.specialties": "Especialidades",
+  "nav.plans": "Planes",
+  "nav.testimonials": "Testimonios",
+  "nav.faq": "FAQ",
+  "nav.imDoctor": "Soy Médico",
+  "nav.buyConsultation": "Comprar Consulta",
+  "nav.imPatient": "Soy Paciente",
+
+  "marquee.video24h": "✦ Consultas por video 24h",
+  "marquee.validPrescriptions": "✦ Recetas digitales válidas",
+  "marquee.topDoctors": "✦ Médicos con calificación máxima",
+  "marquee.secure": "✦ 100% seguro y encriptado",
+  "marquee.handy": "✦ Atención en la palma de tu mano",
+  "marquee.family": "✦ Cuidando de ti y tu familia",
+
+  "hero.badge": "Telemedicina por video",
+  "hero.title1": "Tu salud merece",
+  "hero.title2": "atención de excelencia",
+  "hero.subtitle": "Te conectamos con los mejores médicos de Brasil por videollamada. Consultas rápidas, seguras y con receta digital válida en todo el país.",
+  "hero.cta": "Agendar Consulta",
+  "hero.ctaSecondary": "Consulta Individual",
+  "hero.secureCard": "100% Seguro",
+  "hero.secureDesc": "Encriptación de extremo a extremo",
+  "hero.fastCard": "Consulta Rápida",
+  "hero.fastDesc": "En hasta 15 minutos",
+
+  "stats.patients": "Pacientes atendidos",
+  "stats.doctors": "Médicos especialistas",
+  "stats.specialties": "Especialidades",
+  "stats.satisfaction": "Satisfacción",
+
+  "howItWorks.title": "Cómo funciona",
+  "howItWorks.subtitle": "En 4 simples pasos ya puedes consultar con un especialista",
+  "howItWorks.step1": "Regístrate",
+  "howItWorks.step1Desc": "Crea tu cuenta gratis en menos de 2 minutos",
+  "howItWorks.step2": "Elige al especialista",
+  "howItWorks.step2Desc": "Encuentra al médico ideal para tus necesidades",
+  "howItWorks.step3": "Consulta por video",
+  "howItWorks.step3Desc": "Habla con el médico por videollamada segura",
+  "howItWorks.step4": "Receta digital",
+  "howItWorks.step4Desc": "Recibe tu receta válida en todo Brasil",
+
+  "specialties.title": "Especialidades Médicas",
+  "specialties.subtitle": "Más de 30 especialidades disponibles para ti",
+
+  "plans.title": "Planes y Precios",
+  "plans.subtitle": "Elige el plan ideal para ti y tu familia",
+
+  "testimonials.title": "Lo que dicen nuestros pacientes",
+  "testimonials.subtitle": "Miles de pacientes satisfechos con nuestra atención",
+
+  "faq.title": "Preguntas Frecuentes",
+  "faq.subtitle": "Resuelve tus dudas sobre la plataforma",
+
+  "cta.title": "Empieza a cuidar tu salud hoy",
+  "cta.subtitle": "Agenda tu primera consulta y recibe atención médica de calidad",
+  "cta.button": "Agendar Ahora",
+
+  "footer.platform": "Plataforma",
+  "footer.access": "Acceso",
+  "footer.contact": "Contacto",
+  "footer.rights": "© 2026 AloClinica. Todos los derechos reservados.",
+  "footer.description": "Plataforma completa de telemedicina. Conectando pacientes y médicos con seguridad y practicidad.",
+  "footer.status": "Operación: Normal",
+  "footer.online": "Plataforma 100% en línea",
+  "footer.lgpd": "Datos protegidos (LGPD)",
+
+  "common.learnMore": "Saber más",
+  "common.language": "Idioma",
+};
+
+export default es;
