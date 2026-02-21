@@ -4,11 +4,14 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getAdminNav } from "@/components/admin/adminNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Download, TrendingUp, Users, Stethoscope, XCircle, UserX, Star, DollarSign } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area } from "recharts";
-import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Download, TrendingUp, Users, Stethoscope, XCircle, UserX, Star, DollarSign, FileText, Calendar } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, LineChart, Line, AreaChart, Area, Legend } from "recharts";
+import { format, subMonths, startOfMonth, endOfMonth, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import jsPDF from "jspdf";
 
 const COLORS = ["hsl(210,90%,45%)", "hsl(160,55%,45%)", "hsl(40,90%,55%)", "hsl(0,84%,60%)", "hsl(270,60%,55%)"];
 
@@ -19,23 +22,27 @@ const AdminReports = () => {
   const [cancellationData, setCancellationData] = useState<any[]>([]);
   const [topDoctors, setTopDoctors] = useState<any[]>([]);
   const [summaryStats, setSummaryStats] = useState({
-    totalRevenue: 0, totalAppts: 0, totalCancelled: 0, totalNoShow: 0, avgTicket: 0,
+    totalRevenue: 0, totalAppts: 0, totalCancelled: 0, totalNoShow: 0, avgTicket: 0, avgNps: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [period, setPeriod] = useState("6");
 
-  useEffect(() => { fetchReports(); }, []);
+  useEffect(() => { fetchReports(); }, [period]);
+
+  const monthsBack = parseInt(period);
 
   const fetchReports = async () => {
+    setLoading(true);
     const now = new Date();
 
-    // Revenue by month (last 6 months)
+    // Revenue by month
     const { data: subs } = await supabase.from("subscriptions").select("plan_id, created_at, status");
     const { data: plans } = await supabase.from("plans").select("id, price");
     const planPriceMap = new Map(plans?.map(p => [p.id, Number(p.price)]) ?? []);
 
     const revChart = [];
     let totalRevAll = 0;
-    for (let i = 5; i >= 0; i--) {
+    for (let i = monthsBack - 1; i >= 0; i--) {
       const m = subMonths(now, i);
       const mStart = startOfMonth(m);
       const mEnd = endOfMonth(m);
@@ -52,7 +59,7 @@ const AdminReports = () => {
     // User growth
     const { data: roles } = await supabase.from("user_roles").select("role, created_at");
     const growthChart = [];
-    for (let i = 5; i >= 0; i--) {
+    for (let i = monthsBack - 1; i >= 0; i--) {
       const m = subMonths(now, i);
       const mEnd = endOfMonth(m);
       const patients = (roles ?? []).filter(r => r.role === "patient" && new Date(r.created_at) <= mEnd).length;
@@ -61,7 +68,7 @@ const AdminReports = () => {
     }
     setUserGrowth(growthChart);
 
-    // Appointments by specialty
+    // Appointments
     const { data: appts } = await supabase.from("appointments").select("doctor_id, status, scheduled_at");
     const completedAppts = (appts ?? []).filter(a => a.status === "completed");
     const doctorIds = [...new Set(completedAppts.map(a => a.doctor_id))];
@@ -80,10 +87,10 @@ const AdminReports = () => {
       setSpecialtyData(Object.entries(specCount).map(([name, value]) => ({ name, value })));
     }
 
-    // Cancellation & no-show trends (last 6 months)
+    // Cancellation trends
     const cancelChart = [];
     let totalAppts = 0, totalCancelled = 0, totalNoShow = 0;
-    for (let i = 5; i >= 0; i--) {
+    for (let i = monthsBack - 1; i >= 0; i--) {
       const m = subMonths(now, i);
       const mStart = startOfMonth(m);
       const mEnd = endOfMonth(m);
@@ -99,13 +106,13 @@ const AdminReports = () => {
       totalNoShow += noShow;
       cancelChart.push({
         month: format(m, "MMM/yy", { locale: ptBR }),
-        cancelamentos: total > 0 ? ((cancelled / total) * 100) : 0,
-        absenteismo: total > 0 ? ((noShow / total) * 100) : 0,
+        cancelamentos: total > 0 ? Math.round((cancelled / total) * 100) : 0,
+        absenteismo: total > 0 ? Math.round((noShow / total) * 100) : 0,
       });
     }
     setCancellationData(cancelChart);
 
-    // Top doctors by rating
+    // Top doctors
     const { data: docProfiles } = await supabase.from("doctor_profiles")
       .select("id, user_id, rating, total_reviews, consultation_price")
       .gt("total_reviews", 0)
@@ -120,6 +127,12 @@ const AdminReports = () => {
       })));
     }
 
+    // Average NPS
+    const { data: surveys } = await supabase.from("satisfaction_surveys").select("nps_score");
+    const avgNps = surveys && surveys.length > 0
+      ? surveys.reduce((a, s) => a + s.nps_score, 0) / surveys.length
+      : 0;
+
     const activeSubs = (subs ?? []).filter(s => s.status === "active");
     const avgTicket = activeSubs.length > 0
       ? activeSubs.reduce((acc, s) => acc + (planPriceMap.get(s.plan_id) ?? 0), 0) / activeSubs.length
@@ -131,6 +144,7 @@ const AdminReports = () => {
       totalCancelled,
       totalNoShow,
       avgTicket,
+      avgNps,
     });
 
     setLoading(false);
@@ -147,40 +161,121 @@ const AdminReports = () => {
     URL.revokeObjectURL(url);
   };
 
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    const today = format(new Date(), "dd/MM/yyyy HH:mm");
+
+    // Header
+    doc.setFillColor(0, 105, 146);
+    doc.rect(0, 0, 210, 20, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text("AloClínica — Relatório Executivo", 105, 13, { align: "center" });
+
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${today} | Período: últimos ${period} meses`, 105, 30, { align: "center" });
+
+    // KPIs
+    doc.setFontSize(12);
+    doc.text("Indicadores Principais", 20, 45);
+    doc.setFontSize(10);
+    const kpis = [
+      `Receita Total: R$ ${summaryStats.totalRevenue.toFixed(2)}`,
+      `Total de Consultas: ${summaryStats.totalAppts}`,
+      `Ticket Médio: R$ ${summaryStats.avgTicket.toFixed(2)}`,
+      `Cancelamentos: ${summaryStats.totalCancelled}`,
+      `Ausências (No-Show): ${summaryStats.totalNoShow}`,
+      `NPS Médio: ${summaryStats.avgNps.toFixed(1)}`,
+    ];
+    kpis.forEach((k, i) => doc.text(`• ${k}`, 25, 55 + i * 7));
+
+    // Revenue table
+    doc.setFontSize(12);
+    doc.text("Receita Mensal", 20, 105);
+    doc.setFontSize(9);
+    revenueData.forEach((r, i) => {
+      doc.text(`${r.month}: R$ ${r.receita.toFixed(2)}`, 25, 115 + i * 6);
+    });
+
+    // Top doctors
+    if (topDoctors.length > 0) {
+      const startY = 115 + revenueData.length * 6 + 10;
+      doc.setFontSize(12);
+      doc.text("Top Médicos (Avaliação)", 20, startY);
+      doc.setFontSize(9);
+      topDoctors.forEach((d, i) => {
+        doc.text(`#${i + 1} ${d.name} — ⭐ ${Number(d.rating).toFixed(1)} (${d.total_reviews} avaliações)`, 25, startY + 10 + i * 6);
+      });
+    }
+
+    // Footer
+    doc.setFillColor(0, 105, 146);
+    doc.rect(0, 290, 210, 7, "F");
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    doc.text("AloClínica — Telemedicina Digital · Relatório Confidencial", 105, 294, { align: "center" });
+
+    doc.save(`relatorio-aloclinica-${format(new Date(), "yyyy-MM-dd")}.pdf`);
+  };
+
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("reports")}>
       <div className="max-w-6xl">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-foreground mb-1">Relatórios & Análises</h1>
             <p className="text-muted-foreground">Métricas financeiras, operacionais e de qualidade</p>
           </div>
-          <Button variant="outline" onClick={() => exportCSV(revenueData, "receita-mensal")}>
-            <Download className="w-4 h-4 mr-2" /> Exportar CSV
-          </Button>
+          <div className="flex items-center gap-2">
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-[140px]">
+                <Calendar className="w-4 h-4 mr-1" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3">3 meses</SelectItem>
+                <SelectItem value="6">6 meses</SelectItem>
+                <SelectItem value="12">12 meses</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={() => exportCSV(revenueData, "receita-mensal")} size="sm">
+              <Download className="w-4 h-4 mr-1" /> CSV
+            </Button>
+            <Button variant="outline" onClick={exportPDF} size="sm">
+              <FileText className="w-4 h-4 mr-1" /> PDF
+            </Button>
+          </div>
         </div>
 
         {loading ? <p className="text-muted-foreground">Carregando...</p> : (
           <>
             {/* Summary KPIs */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+            <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-6">
               <div className="text-center p-3 rounded-lg bg-muted/50">
                 <DollarSign className="w-4 h-4 mx-auto text-primary mb-1" />
                 <p className="text-lg font-bold text-foreground">R$ {summaryStats.totalRevenue.toFixed(0)}</p>
-                <p className="text-xs text-muted-foreground">Receita 6 meses</p>
+                <p className="text-xs text-muted-foreground">Receita</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-muted/50">
+                <Stethoscope className="w-4 h-4 mx-auto text-primary mb-1" />
                 <p className="text-lg font-bold text-foreground">{summaryStats.totalAppts}</p>
-                <p className="text-xs text-muted-foreground">Consultas 6 meses</p>
+                <p className="text-xs text-muted-foreground">Consultas</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-muted/50">
-                <p className="text-lg font-bold text-foreground">R$ {summaryStats.avgTicket.toFixed(2)}</p>
+                <DollarSign className="w-4 h-4 mx-auto text-primary mb-1" />
+                <p className="text-lg font-bold text-foreground">R$ {summaryStats.avgTicket.toFixed(0)}</p>
                 <p className="text-xs text-muted-foreground">Ticket Médio</p>
+              </div>
+              <div className="text-center p-3 rounded-lg bg-muted/50">
+                <Star className="w-4 h-4 mx-auto text-yellow-500 mb-1" />
+                <p className="text-lg font-bold text-foreground">{summaryStats.avgNps.toFixed(1)}</p>
+                <p className="text-xs text-muted-foreground">NPS Médio</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-destructive/5">
                 <XCircle className="w-4 h-4 mx-auto text-destructive mb-1" />
                 <p className="text-lg font-bold text-destructive">{summaryStats.totalCancelled}</p>
-                <p className="text-xs text-muted-foreground">Cancelamentos</p>
+                <p className="text-xs text-muted-foreground">Cancelados</p>
               </div>
               <div className="text-center p-3 rounded-lg bg-destructive/5">
                 <UserX className="w-4 h-4 mx-auto text-destructive mb-1" />
@@ -192,7 +287,7 @@ const AdminReports = () => {
             <div className="grid lg:grid-cols-2 gap-6 mb-6">
               {/* Revenue chart */}
               <Card className="border-border">
-                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="w-5 h-5" /> Receita Mensal</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><TrendingUp className="w-5 h-5 text-primary" /> Receita Mensal</CardTitle></CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={revenueData}>
@@ -206,7 +301,7 @@ const AdminReports = () => {
                 </CardContent>
               </Card>
 
-              {/* Cancellation & no-show trend */}
+              {/* Cancellation trend */}
               <Card className="border-border">
                 <CardHeader><CardTitle className="text-lg flex items-center gap-2"><XCircle className="w-5 h-5 text-destructive" /> Cancelamentos & Absenteísmo (%)</CardTitle></CardHeader>
                 <CardContent>
@@ -215,7 +310,8 @@ const AdminReports = () => {
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                       <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={11} />
                       <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickFormatter={v => `${v}%`} />
-                      <Tooltip formatter={(v: number) => [`${v.toFixed(1)}%`]} />
+                      <Tooltip formatter={(v: number) => [`${v}%`]} />
+                      <Legend />
                       <Area type="monotone" dataKey="cancelamentos" stroke="hsl(var(--destructive))" fill="hsl(var(--destructive) / 0.1)" strokeWidth={2} name="Cancelamentos" />
                       <Area type="monotone" dataKey="absenteismo" stroke="hsl(40,90%,55%)" fill="hsl(40,90%,55%,0.1)" strokeWidth={2} name="Absenteísmo" />
                     </AreaChart>
@@ -225,7 +321,7 @@ const AdminReports = () => {
 
               {/* User growth */}
               <Card className="border-border">
-                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Users className="w-5 h-5" /> Crescimento de Usuários</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Users className="w-5 h-5 text-primary" /> Crescimento de Usuários</CardTitle></CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={280}>
                     <LineChart data={userGrowth}>
@@ -233,8 +329,9 @@ const AdminReports = () => {
                       <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={11} />
                       <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} />
                       <Tooltip />
-                      <Line type="monotone" dataKey="pacientes" stroke="hsl(var(--primary))" strokeWidth={2} name="Pacientes" />
-                      <Line type="monotone" dataKey="medicos" stroke="hsl(var(--secondary))" strokeWidth={2} name="Médicos" />
+                      <Legend />
+                      <Line type="monotone" dataKey="pacientes" stroke="hsl(var(--primary))" strokeWidth={2} name="Pacientes" dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="medicos" stroke="hsl(var(--secondary))" strokeWidth={2} name="Médicos" dot={{ r: 3 }} />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -242,7 +339,7 @@ const AdminReports = () => {
 
               {/* Specialty pie */}
               <Card className="border-border">
-                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Stethoscope className="w-5 h-5" /> Consultas por Especialidade</CardTitle></CardHeader>
+                <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Stethoscope className="w-5 h-5 text-primary" /> Consultas por Especialidade</CardTitle></CardHeader>
                 <CardContent className="flex items-center justify-center">
                   {specialtyData.length === 0 ? (
                     <p className="text-muted-foreground py-8">Sem dados de consultas concluídas.</p>
@@ -250,7 +347,7 @@ const AdminReports = () => {
                     <div className="flex items-center gap-6">
                       <ResponsiveContainer width={220} height={220}>
                         <PieChart>
-                          <Pie data={specialtyData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ name, percent }) => `${(percent * 100).toFixed(0)}%`}>
+                          <Pie data={specialtyData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={({ percent }) => `${(percent * 100).toFixed(0)}%`}>
                             {specialtyData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
                           </Pie>
                           <Tooltip />
@@ -259,7 +356,7 @@ const AdminReports = () => {
                       <div className="space-y-1">
                         {specialtyData.map((s, i) => (
                           <div key={s.name} className="flex items-center gap-2 text-sm">
-                            <div className="w-3 h-3 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
+                            <div className="w-3 h-3 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
                             <span className="text-foreground">{s.name}: {s.value}</span>
                           </div>
                         ))}
@@ -283,17 +380,19 @@ const AdminReports = () => {
                     {topDoctors.map((d, i) => (
                       <div key={d.id} className="flex items-center justify-between p-3 rounded-lg border border-border">
                         <div className="flex items-center gap-3">
-                          <span className="text-lg font-bold text-muted-foreground w-6">#{i + 1}</span>
+                          <span className={`text-lg font-bold w-8 h-8 rounded-full flex items-center justify-center ${i === 0 ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400" : "text-muted-foreground"}`}>
+                            #{i + 1}
+                          </span>
                           <div>
                             <p className="text-sm font-medium text-foreground">{d.name}</p>
                             <p className="text-xs text-muted-foreground">{d.total_reviews} avaliações</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                            <span className="font-bold text-foreground">{Number(d.rating).toFixed(1)}</span>
-                          </div>
+                        <div className="flex items-center gap-1">
+                          {[1, 2, 3, 4, 5].map(s => (
+                            <Star key={s} className={`w-4 h-4 ${s <= Math.round(Number(d.rating)) ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"}`} />
+                          ))}
+                          <span className="font-bold text-foreground ml-1">{Number(d.rating).toFixed(1)}</span>
                         </div>
                       </div>
                     ))}

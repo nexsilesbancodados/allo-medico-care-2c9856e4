@@ -9,22 +9,11 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const { messages, context } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
-        messages: [
-          {
-            role: "system",
-            content: `Você é o Pingo 🐧, o simpático pinguim médico assistente virtual da plataforma AloClinica.
+    const systemContent = `Você é o Pingo 🐧, o simpático pinguim médico assistente virtual da plataforma AloClinica.
 
 Personalidade:
 - Amigável, acolhedor e profissional
@@ -45,8 +34,19 @@ Instruções:
 - Ajude com dúvidas sobre a plataforma, agendamentos, planos e especialidades
 - NÃO forneça diagnósticos médicos ou receitas — sempre oriente a agendar uma consulta
 - Seja breve e objetivo nas respostas (máximo 3-4 frases)
-- Se não souber algo, diga honestamente e oriente o usuário a entrar em contato pelo email contato@aloclinica.com.br`
-          },
+- Se não souber algo, diga honestamente e oriente o usuário a entrar em contato pelo email contato@aloclinica.com.br
+${context ? `\n--- CONTEXTO DO PACIENTE LOGADO ---\n${context}\n---\nUse essas informações para personalizar suas respostas. Se o paciente perguntar sobre suas consultas ou plano, use os dados acima.` : ""}`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemContent },
           ...messages,
         ],
         stream: true,
