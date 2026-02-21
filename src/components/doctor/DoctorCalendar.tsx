@@ -11,6 +11,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronLeft, ChevronRight, Video, UserCheck, UserPlus, AlertTriangle } from "lucide-react";
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays, addWeeks, addMonths, subDays, subWeeks, subMonths, isSameDay, isSameMonth, eachDayOfInterval, getDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const typeLabel: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   first_visit: { label: "1ª Consulta", icon: <UserPlus className="w-3 h-3" />, color: "bg-blue-500/10 text-blue-700 border-blue-200" },
@@ -29,7 +30,7 @@ const statusColor: Record<string, string> = {
 const DoctorCalendar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const isMobile = useIsMobile();
   const [view, setView] = useState<"day" | "week" | "month">(isMobile ? "day" : "week");
   const [currentDate, setCurrentDate] = useState(new Date());
   const [appointments, setAppointments] = useState<any[]>([]);
