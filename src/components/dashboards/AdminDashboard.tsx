@@ -25,6 +25,7 @@ const panelOptions = [
   { label: "Clínica", role: "clinic", icon: "🏢", description: "Ver como clínica" },
   { label: "Parceiro", role: "partner", icon: "🤝", description: "Ver como parceiro" },
   { label: "Afiliado", role: "affiliate", icon: "📣", description: "Ver como afiliado" },
+  { label: "Assistente IA", role: "ai-assistant", icon: "🤖", description: "Chat inteligente com IA" },
 ];
 
 const PERIOD_OPTIONS = [
@@ -277,7 +278,7 @@ const AdminDashboard = () => {
                 {panelOptions.map(p => (
                   <DropdownMenuItem
                     key={p.role}
-                    onClick={() => navigate(`/dashboard?role=${p.role}`)}
+                    onClick={() => navigate(p.role === "ai-assistant" ? "/dashboard/ai-assistant" : `/dashboard?role=${p.role}`)}
                     className="rounded-lg gap-2 cursor-pointer text-sm"
                   >
                     <span>{p.icon}</span>
