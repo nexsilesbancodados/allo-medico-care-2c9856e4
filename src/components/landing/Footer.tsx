@@ -80,6 +80,18 @@ const Footer = () => {
           </motion.div>
         </div>
 
+        {/* Platform status bar */}
+        <div className="mb-6 px-4 py-2.5 rounded-xl bg-background/5 border border-background/10 flex items-center justify-center gap-4 text-xs">
+          <span className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <span className="opacity-70">Operação: Normal</span>
+          </span>
+          <span className="opacity-30">|</span>
+          <span className="opacity-70">Plataforma 100% online</span>
+          <span className="opacity-30">|</span>
+          <span className="opacity-70">Dados protegidos (LGPD)</span>
+        </div>
+
         <div className="border-t border-background/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs opacity-40">© 2026 AloClinica. Todos os direitos reservados.</p>
           <div className="flex gap-6 text-xs opacity-40">

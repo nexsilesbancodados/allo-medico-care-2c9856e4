@@ -8,8 +8,10 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X } from "lucide-react";
+import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getPatientNav } from "./patientNav";
 
 interface DoctorResult {
@@ -28,9 +30,11 @@ interface DoctorResult {
 
 const DoctorSearch = () => {
   const [searchParams] = useSearchParams();
+  const { user } = useAuth();
   const isUrgency = searchParams.get("urgency") === "true";
   const [doctors, setDoctors] = useState<DoctorResult[]>([]);
   const [availableNowIds, setAvailableNowIds] = useState<Set<string>>(new Set());
+  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
   const [specialties, setSpecialties] = useState<{ id: string; name: string }[]>([]);
   const [search, setSearch] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
@@ -47,7 +51,26 @@ const DoctorSearch = () => {
   useEffect(() => {
     fetchSpecialties();
     fetchDoctors();
-  }, []);
+    if (user) fetchFavorites();
+  }, [user]);
+
+  const fetchFavorites = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("favorite_doctors").select("doctor_id").eq("patient_id", user.id);
+    if (data) setFavoriteIds(new Set(data.map(f => f.doctor_id)));
+  };
+
+  const toggleFavorite = async (doctorId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) return;
+    if (favoriteIds.has(doctorId)) {
+      await supabase.from("favorite_doctors").delete().eq("patient_id", user.id).eq("doctor_id", doctorId);
+      setFavoriteIds(prev => { const n = new Set(prev); n.delete(doctorId); return n; });
+    } else {
+      await supabase.from("favorite_doctors").insert({ patient_id: user.id, doctor_id: doctorId });
+      setFavoriteIds(prev => new Set(prev).add(doctorId));
+    }
+  };
 
   const fetchSpecialties = async () => {
     const { data } = await supabase.from("specialties").select("id, name").order("name");
@@ -124,7 +147,11 @@ const DoctorSearch = () => {
       return nameMatch && specMatch && urgencyMatch && priceMatch && ratingMatch && availMatch;
     })
     .sort((a, b) => {
-      // On-duty doctors always come first
+      // Favorites first, then on-duty
+      const aFav = favoriteIds.has(a.id) ? 1 : 0;
+      const bFav = favoriteIds.has(b.id) ? 1 : 0;
+      if (bFav !== aFav) return bFav - aFav;
+
       const aOnDuty = (a as any).available_now ? 1 : 0;
       const bOnDuty = (b as any).available_now ? 1 : 0;
       if (bOnDuty !== aOnDuty) return bOnDuty - aOnDuty;
@@ -301,7 +328,32 @@ const DoctorSearch = () => {
 
         {/* Results */}
         {loading ? (
-          <p className="text-muted-foreground text-sm">Carregando médicos...</p>
+          <div className="space-y-3">
+            {[1, 2, 3, 4].map(i => (
+              <Card key={i} className="border-border">
+                <CardContent className="p-4 sm:p-5">
+                  <div className="flex items-start gap-3 sm:gap-4">
+                    <Skeleton className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-48" />
+                      <Skeleton className="h-3 w-24" />
+                      <div className="flex gap-1 mt-2">
+                        <Skeleton className="h-5 w-20 rounded-full" />
+                        <Skeleton className="h-5 w-24 rounded-full" />
+                      </div>
+                      <Skeleton className="h-3 w-full mt-2" />
+                      <Skeleton className="h-3 w-3/4" />
+                      <Skeleton className="h-9 w-40 mt-3 rounded-md" />
+                    </div>
+                    <div className="text-right space-y-1">
+                      <Skeleton className="h-6 w-16 ml-auto" />
+                      <Skeleton className="h-3 w-14 ml-auto" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         ) : filtered.length === 0 ? (
           <Card className="border-border">
             <CardContent className="py-12 text-center">
@@ -335,9 +387,18 @@ const DoctorSearch = () => {
                           <h3 className="font-semibold text-foreground text-sm sm:text-base truncate">
                             Dr(a). {doctor.profile?.first_name} {doctor.profile?.last_name}
                           </h3>
-                          <p className="text-[11px] sm:text-xs text-muted-foreground">
+                         <p className="text-[11px] sm:text-xs text-muted-foreground">
                             CRM {doctor.crm}/{doctor.crm_state}
                           </p>
+                        </div>
+                        <div className="flex items-start gap-2 flex-shrink-0">
+                          <button
+                            onClick={(e) => toggleFavorite(doctor.id, e)}
+                            className="p-1 rounded-full hover:bg-muted/50 transition-colors"
+                            title={favoriteIds.has(doctor.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
+                          >
+                            <Heart className={`w-4 h-4 ${favoriteIds.has(doctor.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                          </button>
                         </div>
                         <div className="text-right flex-shrink-0">
                           <p className="text-base sm:text-lg font-bold text-foreground">R${doctor.consultation_price}</p>
