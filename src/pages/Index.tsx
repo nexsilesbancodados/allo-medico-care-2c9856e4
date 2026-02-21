@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useTheme } from "next-themes";
+import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import SocialProofBar from "@/components/landing/SocialProofBar";
@@ -36,6 +37,11 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background" style={{ background: 'var(--landing-bg)' }}>
+      <SEOHead
+        title="Consultas Médicas Online por Vídeo 24h"
+        description="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades. Sua saúde na palma da mão."
+        canonical="https://allo-medico-care.lovable.app/"
+      />
       <Header />
 
       {/* 1. Impacto inicial — sem animação (above the fold) */}

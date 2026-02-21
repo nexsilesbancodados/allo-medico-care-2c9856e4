@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SEOHead from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -136,6 +137,7 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <SEOHead title="Login e Cadastro" description="Acesse sua conta ou cadastre-se na AloClinica para consultas médicas online por vídeo." />
       {/* Left panel */}
       <div className="hidden lg:flex lg:w-[45%] bg-gradient-hero items-center justify-center p-12 relative overflow-hidden">
         {/* Background pattern */}
