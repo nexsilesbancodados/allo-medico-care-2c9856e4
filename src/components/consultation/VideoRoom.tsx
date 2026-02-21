@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Mic, MicOff, Video, VideoOff, Phone, MessageSquare,
-  FileText, Clock, Send, X, Monitor, MonitorOff, PhoneCall,
-  WifiOff, RefreshCw
+  MessageSquare, FileText, Clock, Send, X
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
+import VideoConsultation from "./VideoConsultation";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -20,18 +19,6 @@ interface ChatMessage {
   text: string;
   time: string;
 }
-
-type ConnectionStatus = "idle" | "connecting" | "connected" | "reconnecting" | "failed" | "disconnected";
-
-const FALLBACK_ICE: RTCConfiguration = {
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    { urls: "stun:stun1.l.google.com:19302" },
-  ],
-};
-
-const MAX_RECONNECT_ATTEMPTS = 3;
-const RECONNECT_DELAY_MS = 2000;
 
 const VideoRoom = () => {
   const { appointmentId } = useParams();
@@ -44,26 +31,11 @@ const VideoRoom = () => {
   const [loading, setLoading] = useState(true);
   const [hasConsent, setHasConsent] = useState(false);
   const [checkingConsent, setCheckingConsent] = useState(true);
-  // Media refs
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const localStreamRef = useRef<MediaStream | null>(null);
-  const screenStreamRef = useRef<MediaStream | null>(null);
-  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // State
-  const [micOn, setMicOn] = useState(true);
-  const [camOn, setCamOn] = useState(true);
-  const [screenSharing, setScreenSharing] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [showChat, setShowChat] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
-  const [mediaReady, setMediaReady] = useState(false);
-  const [mediaError, setMediaError] = useState("");
-  const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("idle");
-  const [remoteConnected, setRemoteConnected] = useState(false);
-  const [iceConfig, setIceConfig] = useState<RTCConfiguration>(FALLBACK_ICE);
 
   // Chat & Notes
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -72,12 +44,7 @@ const VideoRoom = () => {
 
   const isDoctor = roles.includes("doctor") || roles.includes("admin");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pendingCandidatesRef = useRef<RTCIceCandidateInit[]>([]);
-  const reconnectAttemptsRef = useRef(0);
-  const reconnectTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const iceConfigRef = useRef<RTCConfiguration>(FALLBACK_ICE);
-
-  const connected = connectionStatus === "connected";
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // ─── Check existing TCLE consent (patients only) ───
   useEffect(() => {
@@ -101,63 +68,10 @@ const VideoRoom = () => {
     checkConsent();
   }, [appointmentId, user, isDoctor]);
 
-  // Keep iceConfigRef in sync
-  useEffect(() => {
-    iceConfigRef.current = iceConfig;
-  }, [iceConfig]);
-
-  // ─── Initialize local media ───
-  useEffect(() => {
-    const initMedia = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
-          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-        });
-        localStreamRef.current = stream;
-        if (localVideoRef.current) localVideoRef.current.srcObject = stream;
-        setMediaReady(true);
-      } catch (err: any) {
-        console.error("Media error:", err);
-        setMediaError(
-          err.name === "NotAllowedError"
-            ? "Permissão de câmera/microfone negada. Habilite nas configurações do navegador."
-            : "Erro ao acessar câmera/microfone. Verifique se estão conectados."
-        );
-      }
-    };
-    initMedia();
-    return () => {
-      localStreamRef.current?.getTracks().forEach((t) => t.stop());
-      screenStreamRef.current?.getTracks().forEach((t) => t.stop());
-    };
-  }, []);
-
-  // ─── Fetch TURN credentials from Metered ───
-  useEffect(() => {
-    const fetchTurnCredentials = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session) return;
-        const res = await supabase.functions.invoke("turn-credentials");
-        if (res.data?.iceServers && Array.isArray(res.data.iceServers)) {
-          const config = { iceServers: res.data.iceServers };
-          setIceConfig(config);
-          iceConfigRef.current = config;
-          console.log("[TURN] Metered ICE servers loaded:", res.data.iceServers.length, "servers");
-        }
-      } catch (err) {
-        console.warn("[TURN] Failed to fetch, using STUN fallback:", err);
-      }
-    };
-    fetchTurnCredentials();
-  }, []);
-
   useEffect(() => {
     if (appointmentId) fetchAppointment();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
     };
   }, [appointmentId]);
 
@@ -167,45 +81,9 @@ const VideoRoom = () => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
-  // ─── Reconnection logic ───
-  const attemptReconnect = useCallback(async () => {
-    if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
-      setConnectionStatus("failed");
-      toast({ title: "Conexão perdida", description: "Não foi possível reconectar. Tente recarregar a página.", variant: "destructive" });
-      return;
-    }
-
-    reconnectAttemptsRef.current++;
-    setConnectionStatus("reconnecting");
-    console.log(`[WebRTC] Reconnect attempt ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS}`);
-
-    // Close existing connection
-    peerConnectionRef.current?.close();
-    peerConnectionRef.current = null;
-    pendingCandidatesRef.current = [];
-
-    // Wait before retrying
-    reconnectTimeoutRef.current = setTimeout(() => {
-      if (isDoctor) {
-        startCall();
-      } else {
-        // Patient announces presence again to trigger doctor's offer
-        channelRef.current?.send({
-          type: "broadcast", event: "peer-joined",
-          payload: { userId: user!.id, role: "patient" },
-        });
-      }
-    }, RECONNECT_DELAY_MS);
-  }, [isDoctor, user]);
-
-  const manualReconnect = useCallback(() => {
-    reconnectAttemptsRef.current = 0;
-    attemptReconnect();
-  }, [attemptReconnect]);
-
-  // ─── WebRTC Signaling via Supabase Realtime ───
+  // ─── Realtime chat channel ───
   useEffect(() => {
-    if (!appointmentId || !user || !mediaReady) return;
+    if (!appointmentId || !user) return;
 
     const roomChannel = supabase.channel(`video-room-${appointmentId}`, {
       config: { broadcast: { self: false } },
@@ -214,169 +92,15 @@ const VideoRoom = () => {
     channelRef.current = roomChannel;
 
     roomChannel
-      .on("broadcast", { event: "offer" }, async ({ payload }) => {
-        console.log("[WebRTC] Received offer");
-        setConnectionStatus("connecting");
-        try {
-          const pc = getOrCreatePeerConnection();
-          await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-          const answer = await pc.createAnswer();
-          await pc.setLocalDescription(answer);
-          roomChannel.send({ type: "broadcast", event: "answer", payload: { sdp: answer, from: user.id } });
-          // Apply pending candidates
-          for (const c of pendingCandidatesRef.current) {
-            await pc.addIceCandidate(new RTCIceCandidate(c));
-          }
-          pendingCandidatesRef.current = [];
-        } catch (err) {
-          console.error("[WebRTC] Error handling offer:", err);
-          attemptReconnect();
-        }
-      })
-      .on("broadcast", { event: "answer" }, async ({ payload }) => {
-        console.log("[WebRTC] Received answer");
-        try {
-          const pc = peerConnectionRef.current;
-          if (pc) {
-            await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-            for (const c of pendingCandidatesRef.current) {
-              await pc.addIceCandidate(new RTCIceCandidate(c));
-            }
-            pendingCandidatesRef.current = [];
-          }
-        } catch (err) {
-          console.error("[WebRTC] Error handling answer:", err);
-          attemptReconnect();
-        }
-      })
-      .on("broadcast", { event: "ice-candidate" }, async ({ payload }) => {
-        try {
-          const pc = peerConnectionRef.current;
-          if (pc && pc.remoteDescription) {
-            await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
-          } else {
-            pendingCandidatesRef.current.push(payload.candidate);
-          }
-        } catch (err) {
-          console.warn("[WebRTC] Error adding ICE candidate:", err);
-        }
-      })
-      .on("broadcast", { event: "peer-joined" }, () => {
-        setRemoteConnected(true);
-        reconnectAttemptsRef.current = 0;
-        if (isDoctor) startCall();
-      })
-      .on("broadcast", { event: "peer-left" }, () => {
-        setRemoteConnected(false);
-        setConnectionStatus("disconnected");
-        if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null;
-      })
       .on("broadcast", { event: "chat-message" }, ({ payload }) => {
         setMessages((prev) => [...prev, payload as ChatMessage]);
       })
-      .subscribe((status) => {
-        if (status === "SUBSCRIBED") {
-          roomChannel.send({ type: "broadcast", event: "peer-joined", payload: { userId: user.id, role: isDoctor ? "doctor" : "patient" } });
-        }
-      });
+      .subscribe();
 
     return () => {
-      roomChannel.send({ type: "broadcast", event: "peer-left", payload: { userId: user.id } });
       supabase.removeChannel(roomChannel);
-      peerConnectionRef.current?.close();
-      peerConnectionRef.current = null;
     };
-  }, [appointmentId, user, mediaReady]);
-
-  const getOrCreatePeerConnection = useCallback(() => {
-    if (peerConnectionRef.current && peerConnectionRef.current.connectionState !== "closed") {
-      return peerConnectionRef.current;
-    }
-
-    const pc = new RTCPeerConnection(iceConfigRef.current);
-    peerConnectionRef.current = pc;
-
-    // Add local tracks
-    if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => {
-        pc.addTrack(track, localStreamRef.current!);
-      });
-    }
-
-    // Handle remote stream
-    pc.ontrack = (event) => {
-      console.log("[WebRTC] Remote track received");
-      if (remoteVideoRef.current && event.streams[0]) {
-        remoteVideoRef.current.srcObject = event.streams[0];
-        setConnectionStatus("connected");
-        reconnectAttemptsRef.current = 0;
-      }
-    };
-
-    // Handle ICE candidates
-    pc.onicecandidate = (event) => {
-      if (event.candidate && channelRef.current) {
-        channelRef.current.send({
-          type: "broadcast",
-          event: "ice-candidate",
-          payload: { candidate: event.candidate.toJSON(), from: user!.id },
-        });
-      }
-    };
-
-    pc.oniceconnectionstatechange = () => {
-      console.log("[WebRTC] ICE state:", pc.iceConnectionState);
-      if (pc.iceConnectionState === "failed") {
-        console.warn("[WebRTC] ICE connection failed, attempting reconnect...");
-        attemptReconnect();
-      }
-    };
-
-    pc.onconnectionstatechange = () => {
-      console.log("[WebRTC] Connection state:", pc.connectionState);
-      switch (pc.connectionState) {
-        case "connected":
-          setConnectionStatus("connected");
-          reconnectAttemptsRef.current = 0;
-          toast({ title: "Conectado! 🟢", description: "Videochamada estabelecida com sucesso." });
-          break;
-        case "disconnected":
-          setConnectionStatus("reconnecting");
-          // Give it a moment, sometimes it recovers
-          reconnectTimeoutRef.current = setTimeout(() => {
-            if (peerConnectionRef.current?.connectionState === "disconnected") {
-              attemptReconnect();
-            }
-          }, 3000);
-          break;
-        case "failed":
-          attemptReconnect();
-          break;
-        case "closed":
-          setConnectionStatus("disconnected");
-          break;
-      }
-    };
-
-    return pc;
-  }, [user, attemptReconnect]);
-
-  const startCall = useCallback(async () => {
-    try {
-      setConnectionStatus("connecting");
-      const pc = getOrCreatePeerConnection();
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      channelRef.current?.send({
-        type: "broadcast",
-        event: "offer",
-        payload: { sdp: offer, from: user!.id },
-      });
-    } catch (err) {
-      console.error("[WebRTC] Error starting call:", err);
-      attemptReconnect();
-    }
-  }, [getOrCreatePeerConnection, user, attemptReconnect]);
+  }, [appointmentId, user]);
 
   const fetchAppointment = async () => {
     const { data } = await supabase
@@ -412,47 +136,6 @@ const VideoRoom = () => {
 
     setLoading(false);
   };
-
-  // ─── Controls ───
-  const toggleMic = useCallback(() => {
-    localStreamRef.current?.getAudioTracks().forEach((t) => { t.enabled = !t.enabled; });
-    setMicOn((p) => !p);
-  }, []);
-
-  const toggleCam = useCallback(() => {
-    localStreamRef.current?.getVideoTracks().forEach((t) => { t.enabled = !t.enabled; });
-    setCamOn((p) => !p);
-  }, []);
-
-  const toggleScreenShare = useCallback(async () => {
-    if (screenSharing) {
-      screenStreamRef.current?.getTracks().forEach((t) => t.stop());
-      screenStreamRef.current = null;
-      const camTrack = localStreamRef.current?.getVideoTracks()[0];
-      if (camTrack) {
-        const sender = peerConnectionRef.current?.getSenders().find((s) => s.track?.kind === "video");
-        sender?.replaceTrack(camTrack);
-      }
-      if (localVideoRef.current && localStreamRef.current) localVideoRef.current.srcObject = localStreamRef.current;
-      setScreenSharing(false);
-    } else {
-      try {
-        const screen = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        screenStreamRef.current = screen;
-        const screenTrack = screen.getVideoTracks()[0];
-        const sender = peerConnectionRef.current?.getSenders().find((s) => s.track?.kind === "video");
-        sender?.replaceTrack(screenTrack);
-        if (localVideoRef.current) localVideoRef.current.srcObject = screen;
-        screenTrack.onended = () => {
-          const camTrack = localStreamRef.current?.getVideoTracks()[0];
-          if (camTrack) sender?.replaceTrack(camTrack);
-          if (localVideoRef.current && localStreamRef.current) localVideoRef.current.srcObject = localStreamRef.current;
-          setScreenSharing(false);
-        };
-        setScreenSharing(true);
-      } catch (err) { console.error("Screen share error:", err); }
-    }
-  }, [screenSharing]);
 
   const formatTime = (s: number) => {
     const h = Math.floor(s / 3600);
@@ -493,31 +176,13 @@ const VideoRoom = () => {
     toast({ title: "Anotações salvas!" });
   };
 
-  const endCall = async () => {
-    peerConnectionRef.current?.close();
-    localStreamRef.current?.getTracks().forEach((t) => t.stop());
-    screenStreamRef.current?.getTracks().forEach((t) => t.stop());
-
+  const endCall = useCallback(async () => {
     if (isDoctor && notes) await saveNotes();
-
     await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId);
     toast({ title: "Consulta encerrada" });
-
     if (isDoctor) navigate(`/dashboard/prescribe/${appointmentId}`);
     else navigate("/dashboard/appointments");
-  };
-
-  // ─── Connection status badge ───
-  const statusConfig: Record<ConnectionStatus, { label: string; color: string; icon?: React.ReactNode }> = {
-    idle: { label: "Aguardando participante", color: "bg-muted-foreground" },
-    connecting: { label: "Conectando...", color: "bg-yellow-500" },
-    connected: { label: "Conectado", color: "bg-emerald-500" },
-    reconnecting: { label: "Reconectando...", color: "bg-yellow-500", icon: <RefreshCw className="w-3 h-3 animate-spin" /> },
-    failed: { label: "Falha na conexão", color: "bg-destructive", icon: <WifiOff className="w-3 h-3" /> },
-    disconnected: { label: "Desconectado", color: "bg-muted-foreground" },
-  };
-
-  const currentStatus = statusConfig[connectionStatus];
+  }, [isDoctor, notes, appointmentId]);
 
   if (loading || checkingConsent) {
     return (
@@ -537,35 +202,44 @@ const VideoRoom = () => {
     );
   }
 
+  const currentUserName = isDoctor
+    ? `Dr(a). ${user?.user_metadata?.first_name || "Médico"}`
+    : user?.user_metadata?.first_name || "Paciente";
+
   return (
     <div className="min-h-screen bg-[hsl(210,50%,4%)] flex flex-col">
       {/* Top bar */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-[hsl(210,50%,7%)] border-b border-border/15">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-gradient-hero flex items-center justify-center shadow-lg">
-            <Video className="w-4 h-4 text-primary-foreground" />
+            <MessageSquare className="w-4 h-4 text-primary-foreground" />
           </div>
           <div>
             <p className="text-sm font-semibold text-[hsl(210,20%,95%)]">{otherPartyName || "Consulta"}</p>
-            <div className="flex items-center gap-2">
-              <div className={`w-1.5 h-1.5 rounded-full ${currentStatus.color} animate-pulse`} />
-              {currentStatus.icon}
-              <p className="text-xs text-[hsl(210,15%,55%)]">{currentStatus.label}</p>
-            </div>
+            <p className="text-xs text-[hsl(210,15%,55%)]">Jitsi Meet • Criptografado</p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Reconnect button */}
-          {(connectionStatus === "failed" || connectionStatus === "disconnected") && (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`rounded-full ${showChat ? "bg-primary text-primary-foreground" : "text-[hsl(210,20%,70%)] hover:bg-[hsl(210,30%,14%)]"}`}
+            onClick={() => { setShowChat(!showChat); setShowNotes(false); }}
+          >
+            <MessageSquare className="w-4 h-4 mr-1.5" />
+            Chat
+          </Button>
+
+          {isDoctor && (
             <Button
+              variant="ghost"
               size="sm"
-              variant="outline"
-              onClick={manualReconnect}
-              className="text-xs border-primary/30 text-primary hover:bg-primary/10"
+              className={`rounded-full ${showNotes ? "bg-primary text-primary-foreground" : "text-[hsl(210,20%,70%)] hover:bg-[hsl(210,30%,14%)]"}`}
+              onClick={() => { setShowNotes(!showNotes); setShowChat(false); }}
             >
-              <RefreshCw className="w-3.5 h-3.5 mr-1" />
-              Reconectar
+              <FileText className="w-4 h-4 mr-1.5" />
+              Notas
             </Button>
           )}
 
@@ -579,108 +253,13 @@ const VideoRoom = () => {
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Video area */}
-        <div className="flex-1 relative flex items-center justify-center p-3 md:p-6">
-          {/* Remote video / Waiting screen */}
-          <div className="w-full max-w-5xl aspect-video rounded-2xl bg-[hsl(210,50%,7%)] border border-border/10 overflow-hidden shadow-2xl relative">
-            <video
-              ref={remoteVideoRef}
-              autoPlay
-              playsInline
-              className={`w-full h-full object-cover ${!connected ? "hidden" : ""}`}
-            />
-            {!connected && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                {mediaError ? (
-                  <div className="text-center p-8">
-                    <VideoOff className="w-16 h-16 text-destructive/50 mx-auto mb-4" />
-                    <p className="text-[hsl(210,20%,70%)] text-sm max-w-sm">{mediaError}</p>
-                  </div>
-                ) : connectionStatus === "failed" ? (
-                  <div className="text-center">
-                    <WifiOff className="w-16 h-16 text-destructive/50 mx-auto mb-4" />
-                    <p className="text-[hsl(210,20%,75%)] text-sm font-medium mb-2">Falha na conexão</p>
-                    <p className="text-[hsl(210,15%,40%)] text-xs mb-4 max-w-xs mx-auto">
-                      Não foi possível estabelecer a videochamada. Verifique sua conexão e tente novamente.
-                    </p>
-                    <Button size="sm" onClick={manualReconnect} className="bg-primary text-primary-foreground">
-                      <RefreshCw className="w-4 h-4 mr-2" />
-                      Tentar novamente
-                    </Button>
-                  </div>
-                ) : connectionStatus === "reconnecting" ? (
-                  <div className="text-center">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                      className="w-16 h-16 mx-auto mb-4"
-                    >
-                      <RefreshCw className="w-16 h-16 text-yellow-500/50" />
-                    </motion.div>
-                    <p className="text-[hsl(210,20%,75%)] text-sm font-medium">Reconectando...</p>
-                    <p className="text-[hsl(210,15%,40%)] text-xs mt-2">
-                      Tentativa {reconnectAttemptsRef.current}/{MAX_RECONNECT_ATTEMPTS}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="text-center">
-                    <motion.div
-                      animate={{ scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] }}
-                      transition={{ duration: 2.5, repeat: Infinity }}
-                      className="w-28 h-28 rounded-full bg-gradient-hero mx-auto flex items-center justify-center mb-5 shadow-xl"
-                    >
-                      <PhoneCall className="w-10 h-10 text-primary-foreground" />
-                    </motion.div>
-                    <p className="text-[hsl(210,20%,75%)] text-sm font-medium">
-                      {connectionStatus === "connecting"
-                        ? "Estabelecendo conexão..."
-                        : `Aguardando ${otherPartyName || "participante"}...`}
-                    </p>
-                    <p className="text-[hsl(210,15%,40%)] text-xs mt-2 max-w-xs mx-auto">
-                      A videochamada iniciará automaticamente quando ambos estiverem na sala
-                    </p>
-                    {connectionStatus === "idle" && !remoteConnected && (
-                      <div className="mt-6 flex items-center justify-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                        <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                        <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Self video (PiP) */}
-          <motion.div
-            drag
-            dragConstraints={{ left: -400, right: 0, top: -300, bottom: 0 }}
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="absolute bottom-6 right-6 w-40 md:w-48 h-28 md:h-36 rounded-xl overflow-hidden shadow-2xl border-2 border-primary/30 cursor-grab active:cursor-grabbing z-10"
-          >
-            <video
-              ref={localVideoRef}
-              autoPlay
-              playsInline
-              muted
-              className={`w-full h-full object-cover ${!camOn ? "hidden" : ""}`}
-            />
-            {!camOn && (
-              <div className="w-full h-full bg-[hsl(210,50%,10%)] flex items-center justify-center">
-                <VideoOff className="w-6 h-6 text-[hsl(210,15%,45%)]" />
-              </div>
-            )}
-            <div className={`absolute bottom-2 left-2 w-6 h-6 rounded-full flex items-center justify-center ${micOn ? "bg-primary/80" : "bg-destructive/80"}`}>
-              {micOn ? <Mic className="w-3 h-3 text-primary-foreground" /> : <MicOff className="w-3 h-3 text-destructive-foreground" />}
-            </div>
-            {screenSharing && (
-              <div className="absolute top-2 left-2 px-2 py-0.5 rounded bg-[hsl(var(--secondary))]/80 text-secondary-foreground text-[10px] font-semibold">
-                Tela
-              </div>
-            )}
-          </motion.div>
+        {/* Video area — Jitsi */}
+        <div className="flex-1 min-h-0">
+          <VideoConsultation
+            appointmentId={appointmentId!}
+            userName={currentUserName}
+            onEndCall={endCall}
+          />
         </div>
 
         {/* Side panel */}
@@ -760,55 +339,6 @@ const VideoRoom = () => {
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
-
-      {/* Bottom controls */}
-      <div className="flex items-center justify-center gap-2 md:gap-3 py-4 bg-[hsl(210,50%,6%)] border-t border-border/15">
-        <Button variant="ghost" size="icon"
-          className={`rounded-full w-12 h-12 transition-all ${micOn ? "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]" : "bg-destructive text-destructive-foreground"}`}
-          onClick={toggleMic} title={micOn ? "Desligar microfone" : "Ligar microfone"}
-        >
-          {micOn ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-        </Button>
-
-        <Button variant="ghost" size="icon"
-          className={`rounded-full w-12 h-12 transition-all ${camOn ? "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]" : "bg-destructive text-destructive-foreground"}`}
-          onClick={toggleCam} title={camOn ? "Desligar câmera" : "Ligar câmera"}
-        >
-          {camOn ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
-        </Button>
-
-        <Button variant="ghost" size="icon"
-          className={`rounded-full w-12 h-12 transition-all ${screenSharing ? "bg-[hsl(var(--secondary))] text-secondary-foreground" : "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]"}`}
-          onClick={toggleScreenShare} title={screenSharing ? "Parar compartilhamento" : "Compartilhar tela"}
-        >
-          {screenSharing ? <MonitorOff className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
-        </Button>
-
-        <Button variant="ghost" size="icon"
-          className={`rounded-full w-12 h-12 transition-all ${showChat ? "bg-primary text-primary-foreground" : "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]"}`}
-          onClick={() => { setShowChat(!showChat); setShowNotes(false); }} title="Chat"
-        >
-          <MessageSquare className="w-5 h-5" />
-        </Button>
-
-        {isDoctor && (
-          <Button variant="ghost" size="icon"
-            className={`rounded-full w-12 h-12 transition-all ${showNotes ? "bg-primary text-primary-foreground" : "bg-[hsl(210,30%,14%)] text-[hsl(210,20%,90%)] hover:bg-[hsl(210,30%,20%)]"}`}
-            onClick={() => { setShowNotes(!showNotes); setShowChat(false); }} title="Anotações"
-          >
-            <FileText className="w-5 h-5" />
-          </Button>
-        )}
-
-        <div className="w-px h-8 bg-border/15 mx-1" />
-
-        <Button onClick={endCall}
-          className="rounded-full w-14 h-14 bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-lg transition-transform hover:scale-105"
-          title="Encerrar consulta"
-        >
-          <Phone className="w-6 h-6 rotate-[135deg]" />
-        </Button>
       </div>
     </div>
   );
