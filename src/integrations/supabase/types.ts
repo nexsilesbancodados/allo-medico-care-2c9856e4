@@ -356,6 +356,9 @@ export type Database = {
           created_at: string
           crm: string
           crm_state: string
+          crm_verified: boolean
+          crm_verified_at: string | null
+          crm_verified_by: string | null
           education: string | null
           experience_years: number | null
           id: string
@@ -372,6 +375,9 @@ export type Database = {
           created_at?: string
           crm: string
           crm_state?: string
+          crm_verified?: boolean
+          crm_verified_at?: string | null
+          crm_verified_by?: string | null
           education?: string | null
           experience_years?: number | null
           id?: string
@@ -388,6 +394,9 @@ export type Database = {
           created_at?: string
           crm?: string
           crm_state?: string
+          crm_verified?: boolean
+          crm_verified_at?: string | null
+          crm_verified_by?: string | null
           education?: string | null
           experience_years?: number | null
           id?: string

@@ -31,6 +31,7 @@ const VideoRoom = () => {
   const [loading, setLoading] = useState(true);
   const [hasConsent, setHasConsent] = useState(false);
   const [checkingConsent, setCheckingConsent] = useState(true);
+  const [crmBlocked, setCrmBlocked] = useState(false);
 
   // State
   const [elapsed, setElapsed] = useState(0);
@@ -45,6 +46,20 @@ const VideoRoom = () => {
   const isDoctor = roles.includes("doctor") || roles.includes("admin");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+
+  // ─── Check CRM verified (doctors only) ───
+  useEffect(() => {
+    if (!user || !isDoctor) return;
+    const checkCrm = async () => {
+      const { data } = await supabase
+        .from("doctor_profiles")
+        .select("crm_verified")
+        .eq("user_id", user.id)
+        .single();
+      if (data && !data.crm_verified) setCrmBlocked(true);
+    };
+    checkCrm();
+  }, [user, isDoctor]);
 
   // ─── Check existing TCLE consent (patients only) ───
   useEffect(() => {
@@ -188,6 +203,25 @@ const VideoRoom = () => {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (crmBlocked) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="max-w-md text-center space-y-4 p-8">
+          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
+            <X className="w-8 h-8 text-destructive" />
+          </div>
+          <h2 className="text-xl font-bold text-foreground">CRM não verificado</h2>
+          <p className="text-muted-foreground text-sm">
+            Seu CRM ainda não foi verificado pelo administrador. Você não pode acessar a sala de vídeo até que a verificação seja concluída.
+          </p>
+          <Button onClick={() => navigate("/dashboard")} variant="outline">
+            Voltar ao Dashboard
+          </Button>
+        </div>
       </div>
     );
   }

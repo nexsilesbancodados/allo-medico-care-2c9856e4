@@ -230,6 +230,17 @@ const AuthMedico = () => {
                   <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1" /></div>
                   <div><Label>UF</Label><Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1" maxLength={2} /></div>
                 </div>
+                {crm && crmState.length === 2 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-primary border-primary/30 hover:bg-primary/10"
+                    onClick={() => window.open(`https://portal.cfm.org.br/busca-medicos/?crm=${encodeURIComponent(crm)}&uf=${encodeURIComponent(crmState)}`, "_blank")}
+                  >
+                    🔍 Validar CRM no Portal CFM
+                  </Button>
+                )}
                 <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={loading}>
                   {loading ? "Criando conta..." : "Cadastrar como Médico"}
                 </Button>
