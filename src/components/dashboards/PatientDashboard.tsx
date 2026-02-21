@@ -16,6 +16,7 @@ import { differenceInDays } from "date-fns";
 import BlobKPICard from "@/components/ui/blob-kpi-card";
 import Sparkline from "@/components/ui/sparkline";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
+import MedicalHistoryExport from "@/components/patient/MedicalHistoryExport";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -229,9 +230,12 @@ const PatientDashboard = () => {
               {greeting()}, {profile?.first_name || "Paciente"}! · {format(now, "dd/MM/yyyy", { locale: ptBR })}
             </p>
           </div>
-          <Button size="sm" variant="outline" className="h-8 self-start sm:self-auto" onClick={() => fetchData(true)} disabled={refreshing}>
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""} mr-1.5`} /> Atualizar
-          </Button>
+          <div className="flex gap-2 self-start sm:self-auto">
+            <MedicalHistoryExport />
+            <Button size="sm" variant="outline" className="h-8" onClick={() => fetchData(true)} disabled={refreshing}>
+              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""} mr-1.5`} /> Atualizar
+            </Button>
+          </div>
         </div>
 
         {/* ── Active waiting room alert ── */}

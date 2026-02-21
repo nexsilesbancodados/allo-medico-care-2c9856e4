@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation from "./VideoConsultation";
+import VideoErrorBoundary from "./VideoErrorBoundary";
 import PreCallCheck from "./PreCallCheck";
 import ConnectionStatus from "./ConnectionStatus";
 import MedicalAutocomplete from "./MedicalAutocomplete";
@@ -412,11 +413,13 @@ const VideoRoom = () => {
       <div className="flex-1 flex overflow-hidden">
         {/* Video area — Jitsi */}
         <div className={splitMode && isDoctor ? "w-1/2" : "flex-1"} style={{ minHeight: 0 }}>
-          <VideoConsultation
-            appointmentId={appointmentId!}
-            userName={currentUserName}
-            onEndCall={endCall}
-          />
+          <VideoErrorBoundary onEndCall={endCall}>
+            <VideoConsultation
+              appointmentId={appointmentId!}
+              userName={currentUserName}
+              onEndCall={endCall}
+            />
+          </VideoErrorBoundary>
         </div>
 
         {/* Split screen: permanent notes panel for doctor */}
