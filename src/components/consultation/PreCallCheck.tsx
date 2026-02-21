@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Camera, Mic, MicOff, CameraOff, CheckCircle2, AlertTriangle, Loader2, Users, Headphones, Volume2, Info, MessageCircle, Clock, Send, RefreshCw } from "lucide-react";
+import {
+  Camera, Mic, MicOff, CameraOff, CheckCircle2, AlertTriangle,
+  Loader2, Users, Volume2, MessageCircle, Clock, Send, RefreshCw,
+  PhoneCall, Settings, ChevronDown, Wifi, Shield
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import mascotImg from "@/assets/mascot-wave.png";
 import { format, differenceInSeconds } from "date-fns";
@@ -35,8 +38,11 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
   const videoRef = useRef<HTMLVideoElement>(null);
   const animFrameRef = useRef<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
   const [cameraOk, setCameraOk] = useState<boolean | null>(null);
   const [micOk, setMicOk] = useState<boolean | null>(null);
+  const [cameraOn, setCameraOn] = useState(true);
+  const [micOn, setMicOn] = useState(true);
   const [testing, setTesting] = useState(true);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [volume, setVolume] = useState(0);
@@ -50,6 +56,7 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const [symptomsSubmitted, setSymptomsSubmitted] = useState(false);
   const [showSymptomForm, setShowSymptomForm] = useState(false);
+  const [showTips, setShowTips] = useState(false);
 
   // Check if symptoms already submitted
   useEffect(() => {
@@ -111,7 +118,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
     };
     checkNow();
 
-    // Check waiting position
     const checkPosition = async () => {
       const { data } = await supabase
         .from("appointments")
@@ -188,6 +194,24 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
     setTesting(false);
   };
 
+  const toggleCamera = useCallback(() => {
+    if (!stream) return;
+    const videoTrack = stream.getVideoTracks()[0];
+    if (videoTrack) {
+      videoTrack.enabled = !videoTrack.enabled;
+      setCameraOn(videoTrack.enabled);
+    }
+  }, [stream]);
+
+  const toggleMic = useCallback(() => {
+    if (!stream) return;
+    const audioTrack = stream.getAudioTracks()[0];
+    if (audioTrack) {
+      audioTrack.enabled = !audioTrack.enabled;
+      setMicOn(audioTrack.enabled);
+    }
+  }, [stream]);
+
   const handleEnter = useCallback(() => {
     stream?.getTracks().forEach(t => t.stop());
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
@@ -217,345 +241,409 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
   };
 
   const allGood = cameraOk === true && micOk === true;
+  const userName = user?.user_metadata?.first_name || (isDoctor ? "Médico" : "Paciente");
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-3 sm:p-4">
+    <div className="min-h-screen bg-[hsl(220,20%,6%)] flex flex-col items-center justify-center p-4">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="max-w-lg w-full space-y-4 sm:space-y-5"
+        initial={{ opacity: 0, scale: 0.97 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-5xl"
       >
-        {/* Header */}
-        <div className="text-center space-y-2">
-          <img src={mascotImg} alt="Mascot" className="w-14 h-14 sm:w-16 sm:h-16 mx-auto" />
-          <h1 className="text-xl sm:text-2xl font-bold text-foreground">
-            {isDoctor ? "Preparar Atendimento" : "Sala de Espera"}
-          </h1>
-          <p className="text-muted-foreground text-xs sm:text-sm">
-            Vamos verificar se sua câmera e microfone estão funcionando
-          </p>
+        {/* Top bar */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <img src={mascotImg} alt="Mascot" className="w-10 h-10" />
+            <div>
+              <h1 className="text-lg font-bold text-white">
+                {isDoctor ? "Preparar Atendimento" : "Pronto para entrar?"}
+              </h1>
+              <p className="text-xs text-[hsl(220,15%,55%)]">
+                Verifique seu áudio e vídeo antes de entrar
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[hsl(150,60%,40%,0.15)] border border-[hsl(150,60%,40%,0.25)]">
+              <Wifi className="w-3 h-3 text-[hsl(150,60%,45%)]" />
+              <span className="text-[11px] text-[hsl(150,60%,55%)] font-medium">Conexão boa</span>
+            </div>
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[hsl(220,20%,15%)] border border-[hsl(220,15%,25%)]">
+              <Shield className="w-3 h-3 text-[hsl(220,15%,55%)]" />
+              <span className="text-[11px] text-[hsl(220,15%,55%)] font-medium">Criptografado</span>
+            </div>
+          </div>
         </div>
 
-        {/* Countdown + Appointment details */}
-        {!isDoctor && (doctorName || scheduledAt) && (
-          <Card className="border-primary/20 bg-primary/5">
-            <CardContent className="p-3 sm:p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  {doctorName && (
-                    <p className="text-sm font-semibold text-foreground truncate">
-                      📋 Consulta com {doctorName}
-                    </p>
-                  )}
-                  {doctorSpecialty && (
-                    <p className="text-xs text-muted-foreground">{doctorSpecialty}</p>
-                  )}
-                  {scheduledAt && (
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(scheduledAt), "dd/MM 'às' HH:mm", { locale: ptBR })}
-                    </p>
-                  )}
-                </div>
-                {countdown !== null && countdown > 0 && (
-                  <div className="text-right shrink-0">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary/10 border border-primary/20">
-                      <Clock className="w-3.5 h-3.5 text-primary" />
-                      <span className="text-sm font-mono font-bold text-primary">
-                        {formatCountdown(countdown)}
-                      </span>
+        {/* Main content: two columns */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+          {/* Left: Video preview */}
+          <div className="space-y-4">
+            <div className="relative rounded-2xl overflow-hidden bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,18%)] shadow-2xl">
+              {/* Video aspect ratio container */}
+              <div className="relative aspect-[4/3]">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  playsInline
+                  className={`w-full h-full object-cover ${!cameraOn ? 'hidden' : ''}`}
+                  style={{ transform: 'scaleX(-1)' }}
+                />
+
+                {/* Camera off state */}
+                {(!cameraOn || (!cameraOk && !testing)) && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[hsl(220,20%,12%)]">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-24 h-24 rounded-full bg-[hsl(220,20%,20%)] flex items-center justify-center">
+                        <span className="text-4xl font-bold text-[hsl(220,15%,55%)]">
+                          {userName.charAt(0).toUpperCase()}
+                        </span>
+                      </div>
+                      <p className="text-sm text-[hsl(220,15%,55%)]">
+                        {!cameraOk && !testing ? "Câmera não detectada" : "Câmera desligada"}
+                      </p>
                     </div>
-                    <p className="text-[10px] text-muted-foreground mt-0.5">para começar</p>
                   </div>
                 )}
-                {countdown !== null && countdown === 0 && (
-                  <Badge className="bg-secondary/10 text-secondary border-secondary/20 shrink-0">
-                    ⏰ Horário chegou!
-                  </Badge>
+
+                {/* Loading overlay */}
+                {testing && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-[hsl(220,20%,8%,0.7)] backdrop-blur-sm">
+                    <div className="flex flex-col items-center gap-3">
+                      <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                      <p className="text-sm text-[hsl(220,15%,65%)]">Verificando dispositivos...</p>
+                    </div>
+                  </div>
+                )}
+
+                {/* User name badge */}
+                <div className="absolute bottom-3 left-3">
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[hsl(220,20%,8%,0.75)] backdrop-blur-md border border-[hsl(220,15%,20%)]">
+                    <span className="text-sm font-medium text-white">{userName}</span>
+                  </div>
+                </div>
+
+                {/* Mic volume indicator */}
+                {micOn && micOk && (
+                  <div className="absolute bottom-3 right-3">
+                    <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[hsl(220,20%,8%,0.75)] backdrop-blur-md border border-[hsl(220,15%,20%)]">
+                      <Volume2 className="w-3.5 h-3.5 text-[hsl(150,60%,50%)]" />
+                      <div className="flex gap-0.5 items-end h-3">
+                        {[0.2, 0.4, 0.6, 0.8, 1].map((threshold, i) => (
+                          <motion.div
+                            key={i}
+                            className={`w-1 rounded-full ${volume >= threshold ? 'bg-[hsl(150,60%,50%)]' : 'bg-[hsl(220,15%,30%)]'}`}
+                            animate={{ height: volume >= threshold ? `${60 + i * 10}%` : '30%' }}
+                            transition={{ duration: 0.1 }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 )}
               </div>
-              {waitingPosition !== null && waitingPosition > 0 && (
-                <div className="mt-2 pt-2 border-t border-primary/10">
-                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                    <Users className="w-3 h-3 text-primary" />
-                    Você é o <strong className="text-primary">#{waitingPosition}</strong> na fila
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Video preview */}
-        <Card className="border-border overflow-hidden">
-          <CardContent className="p-0">
-            <div className="relative aspect-video bg-muted">
-              <video
-                ref={videoRef}
-                autoPlay
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-              />
-              {!cameraOk && !testing && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted">
-                  <div className="text-center space-y-2">
-                    <CameraOff className="w-10 h-10 text-muted-foreground mx-auto" />
-                    <p className="text-sm text-muted-foreground">Câmera não detectada</p>
-                  </div>
-                </div>
-              )}
-              {testing && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted/80">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                </div>
+              {/* Controls bar */}
+              <div className="flex items-center justify-center gap-3 py-4 bg-[hsl(220,20%,9%)]">
+                <button
+                  onClick={toggleMic}
+                  disabled={!micOk}
+                  className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    micOn && micOk
+                      ? 'bg-[hsl(220,20%,18%)] hover:bg-[hsl(220,20%,23%)] text-white'
+                      : 'bg-destructive/90 hover:bg-destructive text-destructive-foreground'
+                  }`}
+                  title={micOn ? "Desligar microfone" : "Ligar microfone"}
+                >
+                  {micOn && micOk ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
+                  {micOk === false && (
+                    <div className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
+                      <AlertTriangle className="w-2.5 h-2.5 text-destructive-foreground" />
+                    </div>
+                  )}
+                </button>
+
+                <button
+                  onClick={toggleCamera}
+                  disabled={!cameraOk}
+                  className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    cameraOn && cameraOk
+                      ? 'bg-[hsl(220,20%,18%)] hover:bg-[hsl(220,20%,23%)] text-white'
+                      : 'bg-destructive/90 hover:bg-destructive text-destructive-foreground'
+                  }`}
+                  title={cameraOn ? "Desligar câmera" : "Ligar câmera"}
+                >
+                  {cameraOn && cameraOk ? <Camera className="w-5 h-5" /> : <CameraOff className="w-5 h-5" />}
+                  {cameraOk === false && (
+                    <div className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
+                      <AlertTriangle className="w-2.5 h-2.5 text-destructive-foreground" />
+                    </div>
+                  )}
+                </button>
+
+                <div className="w-px h-8 bg-[hsl(220,15%,20%)] mx-1" />
+
+                <button
+                  onClick={testDevices}
+                  disabled={testing}
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-[hsl(220,20%,18%)] hover:bg-[hsl(220,20%,23%)] text-[hsl(220,15%,60%)] transition-all duration-200"
+                  title="Re-testar dispositivos"
+                >
+                  <RefreshCw className={`w-4 h-4 ${testing ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Device status pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                cameraOk ? 'bg-[hsl(150,60%,40%,0.12)] text-[hsl(150,60%,55%)] border border-[hsl(150,60%,40%,0.2)]'
+                         : cameraOk === false ? 'bg-destructive/10 text-destructive border border-destructive/20'
+                         : 'bg-[hsl(220,20%,15%)] text-[hsl(220,15%,55%)] border border-[hsl(220,15%,22%)]'
+              }`}>
+                {cameraOk ? <CheckCircle2 className="w-3.5 h-3.5" /> : cameraOk === false ? <AlertTriangle className="w-3.5 h-3.5" /> : <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Câmera {cameraOk ? 'OK' : cameraOk === false ? 'Erro' : '...'}
+              </div>
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+                micOk ? 'bg-[hsl(150,60%,40%,0.12)] text-[hsl(150,60%,55%)] border border-[hsl(150,60%,40%,0.2)]'
+                      : micOk === false ? 'bg-destructive/10 text-destructive border border-destructive/20'
+                      : 'bg-[hsl(220,20%,15%)] text-[hsl(220,15%,55%)] border border-[hsl(220,15%,22%)]'
+              }`}>
+                {micOk ? <CheckCircle2 className="w-3.5 h-3.5" /> : micOk === false ? <AlertTriangle className="w-3.5 h-3.5" /> : <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                Microfone {micOk ? 'OK' : micOk === false ? 'Erro' : '...'}
+              </div>
+              {!allGood && !testing && (
+                <p className="text-[11px] text-[hsl(220,15%,45%)]">
+                  Dispositivos com erro não impedirão sua entrada.
+                </p>
               )}
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Device status */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <Card className={`border ${cameraOk ? "border-secondary/30 bg-secondary/5" : cameraOk === false ? "border-destructive/30 bg-destructive/5" : "border-border"}`}>
-            <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
-              {cameraOk ? (
-                <CheckCircle2 className="w-5 h-5 text-secondary shrink-0" />
-              ) : cameraOk === false ? (
-                <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
-              ) : (
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground shrink-0" />
-              )}
-              <div>
-                <p className="text-xs sm:text-sm font-medium text-foreground flex items-center gap-1">
-                  <Camera className="w-3.5 h-3.5" /> Câmera
-                </p>
-                <p className="text-[10px] sm:text-xs text-muted-foreground">
-                  {cameraOk ? "OK" : cameraOk === false ? "Erro" : "..."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className={`border ${micOk ? "border-secondary/30 bg-secondary/5" : micOk === false ? "border-destructive/30 bg-destructive/5" : "border-border"}`}>
-            <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
-              {micOk ? (
-                <CheckCircle2 className="w-5 h-5 text-secondary shrink-0" />
-              ) : micOk === false ? (
-                <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
-              ) : (
-                <Loader2 className="w-5 h-5 animate-spin text-muted-foreground shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-medium text-foreground flex items-center gap-1">
-                  {micOk ? <Mic className="w-3.5 h-3.5" /> : <MicOff className="w-3.5 h-3.5" />} Mic
-                </p>
-                {micOk && (
-                  <div className="flex items-center gap-1 mt-0.5">
-                    <Volume2 className="w-3 h-3 text-muted-foreground shrink-0" />
-                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
-                      <motion.div
-                        className="h-full bg-secondary rounded-full"
-                        animate={{ width: `${volume * 100}%` }}
-                        transition={{ duration: 0.1 }}
-                      />
+          {/* Right: Info panel */}
+          <div className="space-y-4">
+            {/* Appointment details */}
+            {!isDoctor && (doctorName || scheduledAt) && (
+              <div className="rounded-xl bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,18%)] p-4 space-y-3">
+                {doctorName && (
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                      <span className="text-sm font-bold text-primary">{doctorName.charAt(0)}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-semibold text-white truncate">{doctorName}</p>
+                      {doctorSpecialty && (
+                        <p className="text-xs text-[hsl(220,15%,50%)]">{doctorSpecialty}</p>
+                      )}
                     </div>
                   </div>
                 )}
-                {!micOk && micOk !== null && (
-                  <p className="text-[10px] sm:text-xs text-muted-foreground">Erro</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Doctor status (patient only) */}
-        {!isDoctor && appointmentId && (
-          <Card className={`border ${doctorPresent ? "border-secondary/30 bg-secondary/5" : "border-primary/20 bg-primary/5"}`}>
-            <CardContent className="p-3 sm:p-4 flex items-center gap-3">
-              <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 ${doctorPresent ? "bg-secondary/10" : "bg-primary/10"}`}>
-                {doctorPresent ? (
-                  <CheckCircle2 className={`w-5 h-5 text-secondary`} />
-                ) : (
-                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
-                    <Loader2 className="w-5 h-5 text-primary" />
-                  </motion.div>
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                {doctorPresent ? (
-                  <>
-                    <p className="text-sm font-medium text-secondary">✅ Médico na sala!</p>
-                    <p className="text-xs text-muted-foreground">Clique em "Entrar" para iniciar.</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium text-foreground">Aguardando o médico...</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {doctorName ? `${doctorName} foi notificado(a)` : "O médico será notificado"}
+                {scheduledAt && (
+                  <div className="flex items-center justify-between py-2 px-3 rounded-lg bg-[hsl(220,20%,13%)]">
+                    <p className="text-xs text-[hsl(220,15%,55%)]">
+                      {format(new Date(scheduledAt), "dd/MM 'às' HH:mm", { locale: ptBR })}
                     </p>
-                  </>
+                    {countdown !== null && countdown > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="w-3 h-3 text-primary" />
+                        <span className="text-xs font-mono font-bold text-primary">
+                          {formatCountdown(countdown)}
+                        </span>
+                      </div>
+                    )}
+                    {countdown !== null && countdown === 0 && (
+                      <Badge className="bg-[hsl(150,60%,40%,0.15)] text-[hsl(150,60%,55%)] border-[hsl(150,60%,40%,0.25)] text-[10px]">
+                        Horário chegou!
+                      </Badge>
+                    )}
+                  </div>
+                )}
+                {waitingPosition !== null && waitingPosition > 0 && (
+                  <div className="flex items-center gap-2 text-xs text-[hsl(220,15%,55%)]">
+                    <Users className="w-3.5 h-3.5 text-primary" />
+                    Posição na fila: <strong className="text-primary">#{waitingPosition}</strong>
+                  </div>
                 )}
               </div>
-              <Badge variant="outline" className={`shrink-0 text-[10px] sm:text-xs ${doctorPresent ? "border-secondary/30 text-secondary" : "border-primary/30 text-primary"}`}>
-                {doctorPresent ? "Pronto" : "Na fila"}
-              </Badge>
-            </CardContent>
-          </Card>
-        )}
+            )}
 
-        {/* Waiting room chat */}
-        {!isDoctor && appointmentId && (
-          <div>
-            <button
-              onClick={() => setShowChat(!showChat)}
-              className="flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors mb-2"
+            {/* Doctor status */}
+            {!isDoctor && appointmentId && (
+              <div className={`rounded-xl border p-4 flex items-center gap-3 ${
+                doctorPresent
+                  ? 'bg-[hsl(150,60%,40%,0.08)] border-[hsl(150,60%,40%,0.2)]'
+                  : 'bg-[hsl(220,20%,10%)] border-[hsl(220,15%,18%)]'
+              }`}>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
+                  doctorPresent ? 'bg-[hsl(150,60%,40%,0.15)]' : 'bg-primary/10'
+                }`}>
+                  {doctorPresent ? (
+                    <CheckCircle2 className="w-5 h-5 text-[hsl(150,60%,50%)]" />
+                  ) : (
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
+                      <Loader2 className="w-5 h-5 text-primary" />
+                    </motion.div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  {doctorPresent ? (
+                    <>
+                      <p className="text-sm font-medium text-[hsl(150,60%,55%)]">Médico na sala!</p>
+                      <p className="text-xs text-[hsl(220,15%,50%)]">Clique para entrar na consulta.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium text-white">Aguardando o médico...</p>
+                      <p className="text-xs text-[hsl(220,15%,50%)] truncate">
+                        {doctorName ? `${doctorName} foi notificado(a)` : "O médico será notificado"}
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Enter button */}
+            <Button
+              className={`w-full h-12 rounded-xl text-sm font-semibold shadow-lg transition-all duration-200 active:scale-[0.98] gap-2 ${
+                doctorPresent
+                  ? 'bg-[hsl(150,60%,40%)] hover:bg-[hsl(150,60%,35%)] text-white'
+                  : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+              }`}
+              onClick={handleEnter}
+              disabled={testing}
             >
-              <MessageCircle className="w-3.5 h-3.5" />
-              {showChat ? "Fechar chat" : "Abrir chat da sala de espera"}
-              {chatMessages.length > 0 && (
-                <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
-                  {chatMessages.length}
-                </span>
-              )}
+              <PhoneCall className="w-5 h-5" />
+              {doctorPresent ? "Entrar na Consulta" : allGood ? "Entrar na Consulta" : "Entrar mesmo assim"}
+            </Button>
+
+            {/* Waiting room chat */}
+            {!isDoctor && appointmentId && (
+              <div>
+                <button
+                  onClick={() => setShowChat(!showChat)}
+                  className="flex items-center gap-2 text-xs font-medium text-[hsl(220,15%,55%)] hover:text-white transition-colors w-full"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  {showChat ? "Fechar chat" : "Chat da sala de espera"}
+                  {chatMessages.length > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+                      {chatMessages.length}
+                    </span>
+                  )}
+                </button>
+                <AnimatePresence>
+                  {showChat && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden mt-2"
+                    >
+                      <div className="rounded-xl bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,18%)] p-3">
+                        <div className="h-32 overflow-y-auto space-y-2 mb-2">
+                          {chatMessages.length === 0 && (
+                            <p className="text-xs text-[hsl(220,15%,40%)] text-center mt-8">
+                              Envie uma mensagem enquanto espera...
+                            </p>
+                          )}
+                          {chatMessages.map(msg => (
+                            <div key={msg.id} className={`flex ${msg.sender === (isDoctor ? "doctor" : "patient") ? "justify-end" : "justify-start"}`}>
+                              <div className={`max-w-[80%] rounded-2xl px-3 py-1.5 text-xs ${
+                                msg.sender === (isDoctor ? "doctor" : "patient")
+                                  ? "bg-primary text-primary-foreground rounded-br-sm"
+                                  : "bg-[hsl(220,20%,18%)] text-white rounded-bl-sm"
+                              }`}>
+                                <p>{msg.text}</p>
+                                <p className="text-[9px] opacity-50 mt-0.5">{msg.time}</p>
+                              </div>
+                            </div>
+                          ))}
+                          <div ref={chatEndRef} />
+                        </div>
+                        <div className="flex gap-2">
+                          <input
+                            value={chatInput}
+                            onChange={e => setChatInput(e.target.value)}
+                            onKeyDown={e => e.key === "Enter" && sendChatMessage()}
+                            placeholder="Digite uma mensagem..."
+                            className="flex-1 bg-[hsl(220,20%,15%)] border border-[hsl(220,15%,22%)] rounded-xl px-3 py-2 text-xs text-white placeholder:text-[hsl(220,15%,40%)] outline-none focus:border-primary/50 transition-colors"
+                          />
+                          <button onClick={sendChatMessage} className="text-primary hover:text-primary/80 px-2">
+                            <Send className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
+
+            {/* Pre-consultation questionnaire (patient only) */}
+            {!isDoctor && appointmentId && showSymptomForm && !symptomsSubmitted && (
+              <PreConsultationForm
+                appointmentId={appointmentId}
+                onComplete={() => { setSymptomsSubmitted(true); setShowSymptomForm(false); }}
+              />
+            )}
+            {!isDoctor && symptomsSubmitted && (
+              <div className="rounded-xl bg-[hsl(150,60%,40%,0.08)] border border-[hsl(150,60%,40%,0.2)] p-3 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-[hsl(150,60%,50%)] shrink-0" />
+                <div>
+                  <p className="text-sm font-medium text-[hsl(150,60%,55%)]">Sintomas enviados</p>
+                  <p className="text-xs text-[hsl(220,15%,50%)]">O médico terá acesso aos seus sintomas.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Tips toggle */}
+            <button
+              onClick={() => setShowTips(!showTips)}
+              className="flex items-center gap-2 text-xs text-[hsl(220,15%,55%)] hover:text-white transition-colors w-full"
+            >
+              <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showTips ? 'rotate-180' : ''}`} />
+              Dicas para a consulta
             </button>
             <AnimatePresence>
-              {showChat && (
+              {showTips && (
                 <motion.div
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
                   className="overflow-hidden"
                 >
-                  <Card className="border-border">
-                    <CardContent className="p-3">
-                      <div className="h-32 overflow-y-auto space-y-2 mb-2">
-                        {chatMessages.length === 0 && (
-                          <p className="text-xs text-muted-foreground text-center mt-8">
-                            Envie uma mensagem enquanto espera...
-                          </p>
-                        )}
-                        {chatMessages.map(msg => (
-                          <div key={msg.id} className={`flex ${msg.sender === (isDoctor ? "doctor" : "patient") ? "justify-end" : "justify-start"}`}>
-                            <div className={`max-w-[80%] rounded-2xl px-3 py-1.5 text-xs ${
-                              msg.sender === (isDoctor ? "doctor" : "patient")
-                                ? "bg-primary text-primary-foreground rounded-br-sm"
-                                : "bg-muted text-foreground rounded-bl-sm"
-                            }`}>
-                              <p>{msg.text}</p>
-                              <p className="text-[9px] opacity-50 mt-0.5">{msg.time}</p>
-                            </div>
-                          </div>
-                        ))}
-                        <div ref={chatEndRef} />
-                      </div>
-                      <div className="flex gap-2">
-                        <input
-                          value={chatInput}
-                          onChange={e => setChatInput(e.target.value)}
-                          onKeyDown={e => e.key === "Enter" && sendChatMessage()}
-                          placeholder="Digite uma mensagem..."
-                          className="flex-1 bg-muted border border-border rounded-xl px-3 py-2 text-xs text-foreground placeholder:text-muted-foreground outline-none focus:border-primary/50 transition-colors"
-                        />
-                        <Button size="icon" variant="ghost" onClick={sendChatMessage} className="text-primary hover:bg-primary/10 rounded-xl h-8 w-8">
-                          <Send className="w-3.5 h-3.5" />
-                        </Button>
-                      </div>
-                    </CardContent>
-                  </Card>
+                  <div className="rounded-xl bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,18%)] p-4 space-y-2">
+                    {[
+                      { icon: "🎧", text: "Esteja em um lugar silencioso" },
+                      { icon: "📶", text: "Verifique sua conexão com a internet" },
+                      { icon: "📋", text: "Tenha seus exames em mãos" },
+                      { icon: "💡", text: "Boa iluminação ajuda o médico a avaliar" },
+                    ].map((tip, i) => (
+                      <p key={i} className="text-xs text-[hsl(220,15%,55%)] flex items-center gap-2">
+                        <span>{tip.icon}</span> {tip.text}
+                      </p>
+                    ))}
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
+
+            {/* Support link */}
+            <div className="text-center pt-2">
+              <button
+                className="text-[11px] text-[hsl(220,15%,45%)] hover:text-primary transition-colors flex items-center gap-1.5 mx-auto"
+                onClick={() => navigate("/dashboard/patient/support")}
+              >
+                <MessageCircle className="w-3 h-3" />
+                Problemas? Fale com o Suporte
+              </button>
+            </div>
           </div>
-        )}
-
-        {/* Pre-consultation questionnaire (patient only) */}
-        {!isDoctor && appointmentId && showSymptomForm && !symptomsSubmitted && (
-          <PreConsultationForm
-            appointmentId={appointmentId}
-            onComplete={() => { setSymptomsSubmitted(true); setShowSymptomForm(false); }}
-          />
-        )}
-        {!isDoctor && symptomsSubmitted && (
-          <Card className="border-secondary/20 bg-secondary/5">
-            <CardContent className="p-3 flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-secondary shrink-0" />
-              <div>
-                <p className="text-sm font-medium text-secondary">Sintomas enviados ✅</p>
-                <p className="text-xs text-muted-foreground">O médico terá acesso aos seus sintomas.</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Educational health tips carousel */}
-        <HealthTipsCarousel />
-
-        {/* Quick tips */}
-        <Card className="border-border">
-          <CardContent className="p-3 sm:p-4">
-            <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
-              <Info className="w-3.5 h-3.5 text-primary" /> Dicas rápidas
-            </p>
-            <ul className="space-y-1 sm:space-y-1.5 text-[11px] sm:text-xs text-muted-foreground">
-              <li className="flex items-start gap-2">
-                <Headphones className="w-3 h-3 sm:w-3.5 sm:h-3.5 mt-0.5 text-primary shrink-0" />
-                Esteja em um lugar silencioso
-              </li>
-              <li className="flex items-start gap-2">
-                <Volume2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 mt-0.5 text-primary shrink-0" />
-                Verifique sua conexão com a internet
-              </li>
-              <li className="flex items-start gap-2">
-                <Info className="w-3 h-3 sm:w-3.5 sm:h-3.5 mt-0.5 text-primary shrink-0" />
-                Tenha seus exames em mãos
-              </li>
-            </ul>
-          </CardContent>
-        </Card>
-
-        {/* Actions */}
-        <div className="flex gap-2 sm:gap-3">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1 h-10 sm:h-10 active:scale-[0.97] transition-transform"
-            onClick={testDevices}
-            disabled={testing}
-          >
-            <RefreshCw className={`w-3.5 h-3.5 mr-1.5 ${testing ? "animate-spin" : ""}`} />
-            Testar
-          </Button>
-          <Button
-            className={`flex-1 h-10 sm:h-10 active:scale-[0.97] transition-transform ${
-              doctorPresent ? "bg-secondary text-secondary-foreground hover:bg-secondary/90" : "bg-gradient-hero text-primary-foreground"
-            }`}
-            onClick={handleEnter}
-            disabled={testing}
-          >
-            <CheckCircle2 className="w-4 h-4 mr-1.5" />
-            {doctorPresent ? "Entrar na Consulta" : allGood ? "Entrar na Consulta" : "Entrar mesmo assim"}
-          </Button>
         </div>
-
-        {/* Support link */}
-        <div className="text-center pb-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="text-[11px] sm:text-xs text-muted-foreground hover:text-primary gap-1.5"
-            onClick={() => navigate("/dashboard/patient/support")}
-          >
-            <MessageCircle className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-            Problemas? Fale com o Suporte
-          </Button>
-        </div>
-
-        {!allGood && !testing && (
-          <p className="text-[10px] sm:text-xs text-center text-muted-foreground pb-2">
-            Alguns dispositivos não foram detectados. Você ainda pode entrar.
-          </p>
-        )}
       </motion.div>
     </div>
   );
