@@ -97,18 +97,30 @@ const Index = () => {
         <SupportSection />
       </AnimateSection>
 
-      {/* Specialty Quiz CTA */}
-      <div className="text-center py-8">
-        <Button
-          size="lg"
-          variant="outline"
-          className="gap-2 text-base border-primary/30 hover:bg-primary/5"
-          onClick={() => setShowQuiz(true)}
-        >
-          <Stethoscope className="w-5 h-5 text-primary" />
-          Não sabe qual especialidade? Descubra aqui
-        </Button>
-      </div>
+      {/* Specialty Quiz CTA — prominent section */}
+      <AnimateSection direction="scale" delay={0.05}>
+        <section className="py-16 px-4">
+          <div className="container mx-auto max-w-2xl text-center space-y-5">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
+              <Stethoscope className="w-8 h-8 text-primary" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+              Não sabe qual especialidade procurar?
+            </h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
+            </p>
+            <Button
+              size="lg"
+              className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
+              onClick={() => setShowQuiz(true)}
+            >
+              <Stethoscope className="w-5 h-5" />
+              Fazer Triagem Gratuita
+            </Button>
+          </div>
+        </section>
+      </AnimateSection>
 
       <Footer />
       <PingoChatbot />
