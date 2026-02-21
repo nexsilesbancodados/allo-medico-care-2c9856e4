@@ -15,6 +15,7 @@ import AccessibilityToggle from "./components/AccessibilityToggle";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CookieConsent from "./components/CookieConsent";
 import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Lazy-loaded pages for code splitting
 const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
@@ -63,6 +64,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <KeyboardShortcutsProvider />
+          <ScrollToTop />
           <a
             href="#main-content"
             className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-medium focus:shadow-lg"
