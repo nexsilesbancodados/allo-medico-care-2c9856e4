@@ -57,6 +57,7 @@ const UserProfile = lazy(() => import("@/components/profile/UserProfile"));
 const ChatPage = lazy(() => import("@/components/chat/ChatPage"));
 const MedicalRecords = lazy(() => import("@/components/medical/MedicalRecords"));
 const PanelSettings = lazy(() => import("@/components/settings/PanelSettings"));
+const AIAssistantPanel = lazy(() => import("@/components/ai/AIAssistantPanel"));
 
 // Clinic
 const ClinicDoctorsManagement = lazy(() => import("@/components/clinic/ClinicDoctorsManagement"));
@@ -152,6 +153,7 @@ const Dashboard = () => {
       {/* Shared routes */}
       <Route path="profile" element={<UserProfile />} />
       <Route path="settings" element={<PanelSettings />} />
+      <Route path="ai-assistant" element={<AIAssistantPanel />} />
 
       {/* Patient routes */}
       <Route path="doctors" element={<RoleGuard allowed={["patient"]} roles={roles}><DoctorSearch /></RoleGuard>} />
