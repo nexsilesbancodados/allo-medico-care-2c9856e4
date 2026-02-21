@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Phone, Maximize2, Minimize2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { supabase } from "@/integrations/supabase/client";
 
 interface VideoConsultationProps {
   appointmentId: string;
@@ -12,13 +13,15 @@ interface VideoConsultationProps {
 
 const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsultationProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const frameContainerRef = useRef<HTMLDivElement>(null);
   const onEndCallRef = useRef(onEndCall);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const controlsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isMobile = useIsMobile();
+  const frameInitialized = useRef(false);
 
   useEffect(() => {
     onEndCallRef.current = onEndCall;
@@ -53,50 +56,77 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     return () => document.removeEventListener("fullscreenchange", handleFsChange);
   }, []);
 
-  // Build Jitsi iframe URL
-  const shortId = appointmentId.replace(/-/g, "").slice(0, 16);
-  const roomName = `AloMedConsulta${shortId}`;
-  const displayName = encodeURIComponent(userName || "Participante");
-
-  const configParams = [
-    "config.prejoinPageEnabled=false",
-    "config.startWithAudioMuted=false",
-    "config.startWithVideoMuted=false",
-    "config.disableDeepLinking=true",
-    "config.disableInviteFunctions=true",
-    "config.hideConferenceSubject=true",
-    "config.hideConferenceTimer=true",
-    "config.disableThirdPartyRequests=true",
-    "config.enableClosePage=false",
-    "config.enableInsecureRoomNameWarning=false",
-    "config.enableLobbyChat=false",
-    "config.requireDisplayName=false",
-    `config.resolution=${isMobile ? 480 : 720}`,
-    "config.channelLastN=2",
-    "config.p2p.enabled=true",
-    "config.disableRemoteMute=true",
-    "interfaceConfig.SHOW_JITSI_WATERMARK=false",
-    "interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false",
-    "interfaceConfig.SHOW_BRAND_WATERMARK=false",
-    "interfaceConfig.DISABLE_JOIN_LEAVE_NOTIFICATIONS=true",
-    "interfaceConfig.HIDE_INVITE_MORE_HEADER=true",
-    "interfaceConfig.MOBILE_APP_PROMO=false",
-    `interfaceConfig.TOOLBAR_ALWAYS_VISIBLE=${!isMobile}`,
-    `interfaceConfig.DEFAULT_BACKGROUND=#0a0f1a`,
-    `userInfo.displayName=${displayName}`,
-  ].join("&");
-
-  const jitsiUrl = `https://meet.ffmuc.net/${roomName}#${configParams}`;
-
+  // Initialize Metered video room
   useEffect(() => {
-    // Fallback: mark as loaded after timeout
-    const timer = setTimeout(() => setLoading(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
+    if (frameInitialized.current) return;
+    frameInitialized.current = true;
 
-  const handleIframeLoad = () => {
-    setLoading(false);
-  };
+    const initRoom = async () => {
+      try {
+        // 1. Create/get room via edge function
+        const { data, error: fnError } = await supabase.functions.invoke("metered-room", {
+          body: { appointmentId },
+        });
+
+        if (fnError || !data?.roomURL) {
+          console.error("Failed to create room:", fnError, data);
+          setError("Não foi possível criar a sala de vídeo. Tente novamente.");
+          setLoading(false);
+          return;
+        }
+
+        const roomURL = data.roomURL;
+
+        // 2. Load Metered Frame SDK
+        await new Promise<void>((resolve, reject) => {
+          if ((window as any).MeteredFrame) {
+            resolve();
+            return;
+          }
+          const script = document.createElement("script");
+          script.src = "https://cdn.metered.ca/sdk/frame/1.4.3/sdk-frame.min.js";
+          script.async = true;
+          script.onload = () => resolve();
+          script.onerror = () => reject(new Error("Failed to load Metered SDK"));
+          document.head.appendChild(script);
+        });
+
+        // 3. Initialize frame
+        if (!frameContainerRef.current) return;
+
+        const frame = new (window as any).MeteredFrame();
+        frame.init(
+          {
+            roomURL,
+            autoJoin: true,
+            name: userName || "Participante",
+            joinVideoOn: true,
+            joinAudioOn: true,
+            showInviteBox: false,
+          },
+          frameContainerRef.current
+        );
+
+        // Listen for events
+        frame.on("participantJoined", () => {
+          setLoading(false);
+        });
+
+        frame.on("meetingEnded", () => {
+          onEndCallRef.current();
+        });
+
+        // Fallback: mark loaded after timeout
+        setTimeout(() => setLoading(false), 5000);
+      } catch (err) {
+        console.error("Video init error:", err);
+        setError("Erro ao inicializar a videochamada.");
+        setLoading(false);
+      }
+    };
+
+    initRoom();
+  }, [appointmentId, userName]);
 
   return (
     <div
@@ -109,7 +139,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
       <div className="relative flex-1 w-full min-h-0 bg-[hsl(220,30%,5%)]">
         {/* Loading overlay */}
         <AnimatePresence>
-          {loading && (
+          {loading && !error && (
             <motion.div
               initial={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -146,18 +176,28 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
           )}
         </AnimatePresence>
 
-        {/* Jitsi iframe */}
-        <iframe
-          ref={iframeRef}
-          src={jitsiUrl}
-          className="w-full h-full border-0"
-          allow="camera; microphone; fullscreen; display-capture; autoplay; clipboard-write"
-          allowFullScreen
-          onLoad={handleIframeLoad}
+        {/* Error state */}
+        {error && (
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-[hsl(220,30%,5%)]">
+            <div className="flex flex-col items-center gap-4 text-center px-6">
+              <Phone className="w-12 h-12 text-destructive" />
+              <p className="text-sm text-[hsl(220,20%,85%)]">{error}</p>
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Tentar novamente
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Metered Frame container */}
+        <div
+          ref={frameContainerRef}
+          className="w-full h-full"
+          style={{ minHeight: "400px" }}
         />
 
         {/* Fullscreen toggle */}
-        {!loading && (
+        {!loading && !error && (
           <button
             onClick={toggleFullscreen}
             className="absolute top-3 right-3 z-20 w-9 h-9 rounded-lg bg-[hsl(220,20%,8%,0.75)] backdrop-blur-md border border-[hsl(220,15%,20%)] flex items-center justify-center text-[hsl(220,20%,70%)] hover:text-white transition-colors"
@@ -170,7 +210,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
 
       {/* Bottom control bar */}
       <AnimatePresence>
-        {showControls && !loading && (
+        {showControls && !loading && !error && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
