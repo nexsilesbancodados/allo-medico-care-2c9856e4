@@ -9,7 +9,7 @@ const DoctorPremiumSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-10 md:py-20 px-4">
+    <section aria-label="Para médicos" className="py-10 md:py-20 px-4">
       <div className="container mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -84,6 +84,7 @@ const DoctorPremiumSection = () => {
                   src={doctorImg1}
                   alt="Médica profissional"
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </motion.div>
 
@@ -98,6 +99,7 @@ const DoctorPremiumSection = () => {
                   src={doctorImg2}
                   alt="Médico atendendo online"
                   className="w-full h-full object-cover"
+                  loading="lazy"
                 />
               </motion.div>
             </div>

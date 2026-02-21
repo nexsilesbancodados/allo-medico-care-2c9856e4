@@ -20,7 +20,7 @@ const chatMessages = [
 
 const ClinicPresentialSection = () => {
   return (
-    <section className="py-0 px-0">
+    <section aria-label="Clínica presencial" className="py-0 px-0">
       <div className="bg-[hsl(210,40%,15%)] dark:bg-[hsl(210,40%,10%)] text-white">
         {/* Top section */}
         <div className="container mx-auto px-4 pt-16 pb-12">
@@ -73,6 +73,7 @@ const ClinicPresentialSection = () => {
                   src={clinicReceptionist}
                   alt="Recepcionista da clínica Alô Médico"
                   className="w-full h-48 sm:h-64 md:h-80 object-cover"
+                  loading="lazy"
                 />
               </div>
             </motion.div>
@@ -120,6 +121,7 @@ const ClinicPresentialSection = () => {
                     src={clinicPatientChat}
                     alt="Paciente agendando consulta"
                     className="w-full h-full object-cover"
+                    loading="lazy"
                   />
                 </div>
 

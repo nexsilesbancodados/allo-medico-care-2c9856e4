@@ -77,7 +77,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-[90vh] lg:min-h-screen flex items-center pt-28 sm:pt-24 overflow-hidden">
+    <section aria-label="Início" className="relative min-h-[90vh] lg:min-h-screen flex items-center pt-28 sm:pt-24 overflow-hidden">
       {/* Floating particles */}
       {Array.from({ length: 6 }).map((_, i) => (
         <div
