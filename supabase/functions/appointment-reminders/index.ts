@@ -129,6 +129,37 @@ serve(async (req) => {
           console.error(`Failed to send WhatsApp reminder for appointment ${appt.id}:`, e);
         }
       }
+
+      // Send WhatsApp reminder to doctor too
+      const doctorProfile = doctorsRes.data?.find(d => d.id === appt.doctor_id);
+      if (doctorProfile) {
+        const { data: docProfileData } = await supabase
+          .from("profiles")
+          .select("phone, first_name")
+          .eq("user_id", doctorProfile.user_id)
+          .single();
+
+        if (docProfileData?.phone) {
+          try {
+            const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
+            const jitsiLink = appt.jitsi_link || `https://meet.jit.si/allo-medico-${appt.id}`;
+            const docMsg = diffMin <= 20
+              ? `⏰ *Lembrete: consulta em 15 minutos!*\n\nDr(a). ${docProfileData.first_name},\nSua consulta com ${patientName} está prestes a começar.\n\n📹 Sala: ${jitsiLink}\n\nAcesse com antecedência. 🏥`
+              : `📋 *Lembrete de Consulta*\n\nDr(a). ${docProfileData.first_name},\nSua consulta com ${patientName} é em 1 hora.\n\n📅 ${scheduledAt.toLocaleDateString("pt-BR")} às ${scheduledAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}\n\n📹 Sala: ${jitsiLink}\n\nPrepare-se! 🏥`;
+
+            await fetch(`${supabaseUrl}/functions/v1/send-whatsapp`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${anonKey}`,
+              },
+              body: JSON.stringify({ phone: docProfileData.phone, message: docMsg }),
+            });
+          } catch (e) {
+            console.error(`Failed to send WhatsApp reminder to doctor for appointment ${appt.id}:`, e);
+          }
+        }
+      }
     }
 
     console.log(`Sent ${sent} reminder emails`);

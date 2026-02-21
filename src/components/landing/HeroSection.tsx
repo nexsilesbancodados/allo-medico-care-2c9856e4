@@ -78,6 +78,19 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen flex items-center pt-24 sm:pt-20 overflow-hidden">
+      {/* Floating particles */}
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div
+          key={i}
+          className="absolute w-2 h-2 rounded-full bg-primary/20 animate-float-particle pointer-events-none"
+          style={{
+            left: `${15 + i * 15}%`,
+            top: `${20 + (i % 3) * 25}%`,
+            animationDelay: `${i * 0.8}s`,
+          }}
+        />
+      ))}
+
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-20 right-0 w-[500px] h-[500px] rounded-full bg-medical-blue-light opacity-60 blur-3xl" />

@@ -11,6 +11,7 @@ import {
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation from "./VideoConsultation";
 import PreCallCheck from "./PreCallCheck";
+import ConnectionStatus from "./ConnectionStatus";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -201,6 +202,11 @@ const VideoRoom = () => {
     else navigate(`/dashboard/rate/${appointmentId}`);
   }, [isDoctor, notes, appointmentId]);
 
+  const handleReconnect = useCallback(() => {
+    setDeviceChecked(false);
+    setTimeout(() => setDeviceChecked(true), 500);
+  }, []);
+
   if (loading || checkingConsent) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -257,7 +263,7 @@ const VideoRoom = () => {
 
   return (
     <div className="min-h-screen bg-[hsl(210,50%,4%)] flex flex-col">
-      {/* Top bar */}
+      <ConnectionStatus onReconnect={handleReconnect} />
       <div className="flex items-center justify-between px-4 py-2.5 bg-[hsl(210,50%,7%)] border-b border-border/15">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-gradient-hero flex items-center justify-center shadow-lg">
