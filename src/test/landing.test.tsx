@@ -29,7 +29,7 @@ import StatsSection from "@/components/landing/StatsSection";
 describe("Header", () => {
   it("renders logo and nav links", () => {
     render(<BrowserRouter><Header /></BrowserRouter>);
-    expect(screen.getByText("Médico")).toBeInTheDocument();
+    expect(screen.getByText("Sou Médico")).toBeInTheDocument();
     expect(screen.getByText("Sou Paciente")).toBeInTheDocument();
   });
 });
