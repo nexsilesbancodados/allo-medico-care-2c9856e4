@@ -3,7 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,13 +11,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar as CalendarIcon, Clock, FileText, Video, X, Search, Download, Filter } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, FileText, Video, Search, Download, Filter, ArrowLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { format, isWithinInterval, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getPatientNav } from "./patientNav";
 import { cn } from "@/lib/utils";
 import jsPDF from "jspdf";
 import CancelRescheduleDialog from "./CancelRescheduleDialog";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface Appointment {
   id: string;
@@ -30,22 +31,13 @@ interface Appointment {
   specialties: string[];
 }
 
-const statusColor: Record<string, string> = {
-  scheduled: "bg-primary/10 text-primary border-primary/20",
-  waiting: "bg-warning/10 text-warning border-warning/20",
-  in_progress: "bg-success/10 text-success border-success/20",
-  completed: "bg-muted text-muted-foreground border-border",
-  cancelled: "bg-destructive/10 text-destructive border-destructive/20",
-  no_show: "bg-destructive/10 text-destructive border-destructive/20",
-};
-
-const statusLabel: Record<string, string> = {
-  scheduled: "Agendada",
-  waiting: "Sala de espera",
-  in_progress: "Em andamento",
-  completed: "Concluída",
-  cancelled: "Cancelada",
-  no_show: "Não compareceu",
+const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
+  scheduled: { label: "Agendada", color: "bg-primary/10 text-primary", dot: "bg-primary" },
+  waiting: { label: "Sala de espera", color: "bg-amber-500/10 text-amber-600", dot: "bg-amber-500" },
+  in_progress: { label: "Em andamento", color: "bg-secondary/10 text-secondary", dot: "bg-secondary animate-pulse" },
+  completed: { label: "Concluída", color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
+  cancelled: { label: "Cancelada", color: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
+  no_show: { label: "Não compareceu", color: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
 };
 
 const PERIOD_OPTIONS = [
@@ -54,8 +46,13 @@ const PERIOD_OPTIONS = [
   { value: "week", label: "Esta semana" },
   { value: "month", label: "Este mês" },
   { value: "last3", label: "Últimos 3 meses" },
-  { value: "custom", label: "Período personalizado" },
+  { value: "custom", label: "Personalizado" },
 ];
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 10 },
+  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.04, duration: 0.3 } }),
+};
 
 const AppointmentsList = () => {
   const { user } = useAuth();
@@ -70,10 +67,10 @@ const AppointmentsList = () => {
   const [customTo, setCustomTo] = useState<Date | undefined>();
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [calendarStep, setCalendarStep] = useState<"from" | "to">("from");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => { if (user) fetchAppointments(); }, [user]);
 
-  // Realtime sync
   useEffect(() => {
     if (!user) return;
     const channel = supabase
@@ -150,25 +147,21 @@ const AppointmentsList = () => {
     });
   }, [appointments, search, filterStatus, period, customFrom, customTo]);
 
-  // handleCancel removed - now using CancelRescheduleDialog
-
   const exportPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text("Minhas Consultas", 14, 20);
     doc.setFontSize(10);
     doc.text(`Gerado em: ${format(new Date(), "dd/MM/yyyy HH:mm")}`, 14, 28);
-
     let y = 40;
     filtered.forEach((a, i) => {
       if (y > 270) { doc.addPage(); y = 20; }
       doc.setFontSize(11);
       doc.text(`${i + 1}. ${a.doctor_name}`, 14, y);
       doc.setFontSize(9);
-      doc.text(`Data: ${format(new Date(a.scheduled_at), "dd/MM/yyyy 'às' HH:mm")} | Status: ${statusLabel[a.status] ?? a.status} | Duração: ${a.duration_minutes || 30}min`, 14, y + 6);
+      doc.text(`Data: ${format(new Date(a.scheduled_at), "dd/MM/yyyy 'às' HH:mm")} | Status: ${statusConfig[a.status]?.label ?? a.status} | Duração: ${a.duration_minutes || 30}min`, 14, y + 6);
       y += 16;
     });
-
     doc.save(`consultas-${format(new Date(), "yyyy-MM-dd")}.pdf`);
     toast({ title: "PDF exportado com sucesso!" });
   };
@@ -177,12 +170,11 @@ const AppointmentsList = () => {
     const rows = [
       ["Médico", "CRM", "Data", "Hora", "Duração", "Status"],
       ...filtered.map(a => [
-        a.doctor_name,
-        a.doctor_crm,
+        a.doctor_name, a.doctor_crm,
         format(new Date(a.scheduled_at), "dd/MM/yyyy"),
         format(new Date(a.scheduled_at), "HH:mm"),
         `${a.duration_minutes || 30}min`,
-        statusLabel[a.status] ?? a.status,
+        statusConfig[a.status]?.label ?? a.status,
       ]),
     ];
     const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
@@ -211,207 +203,267 @@ const AppointmentsList = () => {
   const upcoming = filtered.filter(a => ["scheduled", "waiting", "in_progress"].includes(a.status));
   const past = filtered.filter(a => ["completed", "cancelled", "no_show"].includes(a.status));
 
-  const renderAppointment = (appt: Appointment) => (
-    <div key={appt.id} className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border gap-3 transition-colors ${
-      appt.status === "in_progress" ? "border-success/30 bg-success/5"
-      : appt.status === "waiting" ? "border-warning/30 bg-warning/5"
-      : "border-border hover:bg-muted/30"
-    }`}>
-      <div className="flex items-center gap-3 min-w-0">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-          <Video className="w-5 h-5 text-primary" />
-        </div>
-        <div className="min-w-0">
-          <p className="font-semibold text-foreground text-sm truncate">{appt.doctor_name}</p>
-          <p className="text-xs text-muted-foreground">CRM {appt.doctor_crm}</p>
-          {appt.specialties.length > 0 && (
-            <div className="flex gap-1 mt-1 flex-wrap">
-              {appt.specialties.slice(0, 2).map(s => (
-                <span key={s} className="text-[10px] px-1.5 py-0.5 rounded-full bg-secondary/20 text-secondary-foreground">{s}</span>
-              ))}
+  const activeFilterCount = (filterStatus !== "all" ? 1 : 0) + (period !== "all" ? 1 : 0) + (search ? 1 : 0);
+
+  const renderAppointment = (appt: Appointment, i: number) => {
+    const config = statusConfig[appt.status] ?? { label: appt.status, color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" };
+    const isActive = ["waiting", "in_progress", "scheduled"].includes(appt.status);
+    const scheduledDate = new Date(appt.scheduled_at);
+
+    return (
+      <motion.div
+        key={appt.id}
+        custom={i}
+        variants={fadeUp}
+        initial="hidden"
+        animate="show"
+        className={cn(
+          "p-4 rounded-2xl border transition-all active:scale-[0.98]",
+          appt.status === "in_progress" ? "border-secondary/40 bg-secondary/5" :
+          appt.status === "waiting" ? "border-amber-500/30 bg-amber-500/5" :
+          "border-border bg-card"
+        )}
+      >
+        <div className="flex items-start gap-3">
+          {/* Date pill */}
+          <div className="w-14 shrink-0 text-center">
+            <div className="bg-primary/10 rounded-xl py-2">
+              <p className="text-[11px] text-primary font-medium uppercase">
+                {format(scheduledDate, "MMM", { locale: ptBR })}
+              </p>
+              <p className="text-xl font-bold text-primary leading-none mt-0.5">
+                {format(scheduledDate, "dd")}
+              </p>
             </div>
-          )}
+            <p className="text-[11px] text-muted-foreground mt-1">{format(scheduledDate, "HH:mm")}h</p>
+          </div>
+
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <p className="font-semibold text-foreground text-[15px] leading-tight truncate">{appt.doctor_name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">CRM {appt.doctor_crm} · {appt.duration_minutes || 30}min</p>
+
+            {appt.specialties.length > 0 && (
+              <div className="flex gap-1 mt-1.5 flex-wrap">
+                {appt.specialties.slice(0, 2).map(s => (
+                  <span key={s} className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/8 text-primary font-medium">{s}</span>
+                ))}
+              </div>
+            )}
+
+            {/* Status + actions */}
+            <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+              <span className={cn("flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full", config.color)}>
+                <span className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
+                {config.label}
+              </span>
+
+              {isActive && (
+                <Button
+                  size="sm"
+                  className="h-8 px-3 rounded-xl bg-gradient-hero text-primary-foreground text-xs font-medium gap-1"
+                  onClick={() => navigate(`/dashboard/consultation/${appt.id}`)}
+                >
+                  <Video className="w-3.5 h-3.5" /> Entrar
+                </Button>
+              )}
+
+              {appt.status === "scheduled" && (
+                <CancelRescheduleDialog
+                  appointmentId={appt.id}
+                  currentDate={format(scheduledDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                  doctorName={appt.doctor_name}
+                  onSuccess={fetchAppointments}
+                />
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="flex items-center gap-2 sm:flex-col sm:items-end shrink-0">
-        <div className="text-right hidden sm:block">
-          <p className="text-sm font-medium text-foreground">{format(new Date(appt.scheduled_at), "dd/MM/yyyy", { locale: ptBR })}</p>
-          <p className="text-xs text-muted-foreground">{format(new Date(appt.scheduled_at), "HH:mm")}h · {appt.duration_minutes || 30}min</p>
-        </div>
-        <div className="sm:hidden text-xs text-muted-foreground">
-          {format(new Date(appt.scheduled_at), "dd/MM · HH:mm")}
-        </div>
-        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${statusColor[appt.status] ?? "bg-muted text-muted-foreground border-border"}`}>
-          {statusLabel[appt.status] ?? appt.status}
-        </span>
-        <div className="flex gap-1.5">
-          {appt.status === "scheduled" && (
-            <CancelRescheduleDialog
-              appointmentId={appt.id}
-              currentDate={format(new Date(appt.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-              doctorName={appt.doctor_name}
-              onSuccess={fetchAppointments}
-            />
-          )}
-          {(appt.status === "waiting" || appt.status === "in_progress" || appt.status === "scheduled") && (
-            <Button size="sm" className="bg-gradient-hero text-primary-foreground text-xs h-7" onClick={() => navigate(`/dashboard/consultation/${appt.id}`)}>
-              <Video className="w-3 h-3 mr-1" /> Entrar
-            </Button>
-          )}
-        </div>
-      </div>
-    </div>
-  );
+      </motion.div>
+    );
+  };
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("appointments")}>
-      <div className="max-w-3xl space-y-5">
-        {/* Back button */}
+      <div className="max-w-2xl mx-auto pb-6">
+        {/* Back */}
         <button
           onClick={() => navigate("/dashboard?role=patient")}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
+          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4 active:scale-95"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
-          Voltar ao painel
+          <ArrowLeft className="w-4 h-4" /> Voltar ao painel
         </button>
+
         {/* Header */}
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-3 mb-5">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Minhas Consultas</h1>
+            <h1 className="text-xl font-bold text-foreground">Minhas Consultas</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
-              {filtered.length} consulta(s) · {upcoming.length} próxima(s)
+              {filtered.length} consulta{filtered.length !== 1 ? "s" : ""} · {upcoming.length} próxima{upcoming.length !== 1 ? "s" : ""}
             </p>
           </div>
-          <div className="flex gap-2 shrink-0">
-            <Button size="sm" variant="outline" onClick={exportCSV} disabled={filtered.length === 0} title="Exportar CSV">
-              <Download className="w-4 h-4 mr-1" /> CSV
-            </Button>
-            <Button size="sm" variant="outline" onClick={exportPDF} disabled={filtered.length === 0} title="Exportar PDF">
-              <FileText className="w-4 h-4 mr-1" /> PDF
-            </Button>
-          </div>
+
+          {/* Export menu */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button size="icon" variant="outline" className="rounded-xl h-10 w-10 shrink-0">
+                <MoreHorizontal className="w-5 h-5" />
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-3xl">
+              <SheetHeader><SheetTitle>Exportar consultas</SheetTitle></SheetHeader>
+              <div className="space-y-3 py-4">
+                <Button variant="outline" className="w-full h-12 rounded-xl justify-start gap-3" onClick={exportCSV} disabled={filtered.length === 0}>
+                  <Download className="w-5 h-5" /> Exportar CSV
+                </Button>
+                <Button variant="outline" className="w-full h-12 rounded-xl justify-start gap-3" onClick={exportPDF} disabled={filtered.length === 0}>
+                  <FileText className="w-5 h-5" /> Exportar PDF
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
 
-        {/* Filters */}
-        <Card className="border-border">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar médico..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="pl-8 h-9 text-sm"
-                />
+        {/* Search + Filters */}
+        <div className="flex gap-2 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Buscar médico..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-10 h-11 rounded-2xl text-sm bg-muted/50 border-transparent focus:border-primary/30"
+            />
+          </div>
+          <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="icon" className="h-11 w-11 rounded-2xl shrink-0 relative">
+                <Filter className="w-4.5 h-4.5" />
+                {activeFilterCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-3xl max-h-[80vh] overflow-y-auto">
+              <SheetHeader><SheetTitle>Filtros</SheetTitle></SheetHeader>
+              <div className="space-y-5 py-3">
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-2">Status</p>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="scheduled">Agendada</SelectItem>
+                      <SelectItem value="waiting">Na espera</SelectItem>
+                      <SelectItem value="in_progress">Em andamento</SelectItem>
+                      <SelectItem value="completed">Concluída</SelectItem>
+                      <SelectItem value="cancelled">Cancelada</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground mb-2">Período</p>
+                  <Select value={period} onValueChange={v => { setPeriod(v); if (v === "custom") setCalendarOpen(true); }}>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Período" /></SelectTrigger>
+                    <SelectContent>
+                      {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  {period === "custom" && (
+                    <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="h-11 rounded-xl mt-2 w-full text-sm">
+                          <CalendarIcon className="w-4 h-4 mr-2" />
+                          {customFrom && customTo
+                            ? `${format(customFrom, "dd/MM")} → ${format(customTo, "dd/MM")}`
+                            : calendarStep === "from" ? "Selecione início" : "Selecione fim"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <p className="text-xs text-muted-foreground px-3 pt-3 pb-1">
+                          {calendarStep === "from" ? "Data inicial" : "Data final"}
+                        </p>
+                        <Calendar
+                          mode="single"
+                          selected={calendarStep === "from" ? customFrom : customTo}
+                          onSelect={handleCalendarSelect}
+                          initialFocus
+                          className={cn("p-3 pointer-events-auto")}
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={() => { setFilterStatus("all"); setPeriod("all"); setSearch(""); }}>
+                    Limpar
+                  </Button>
+                  <Button className="flex-1 h-11 rounded-xl bg-gradient-hero text-primary-foreground" onClick={() => setFiltersOpen(false)}>
+                    Aplicar
+                  </Button>
+                </div>
               </div>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full sm:w-40 h-9">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos status</SelectItem>
-                  <SelectItem value="scheduled">Agendada</SelectItem>
-                  <SelectItem value="waiting">Na espera</SelectItem>
-                  <SelectItem value="in_progress">Em andamento</SelectItem>
-                  <SelectItem value="completed">Concluída</SelectItem>
-                  <SelectItem value="cancelled">Cancelada</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={period} onValueChange={v => { setPeriod(v); if (v === "custom") setCalendarOpen(true); }}>
-                <SelectTrigger className="w-full sm:w-44 h-9">
-                  <Filter className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
-                  <SelectValue placeholder="Período" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              {period === "custom" && (
-                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="h-9 text-xs shrink-0">
-                      <CalendarIcon className="w-3.5 h-3.5 mr-1.5" />
-                      {customFrom && customTo
-                        ? `${format(customFrom, "dd/MM")} → ${format(customTo, "dd/MM")}`
-                        : calendarStep === "from" ? "Selecione início" : "Selecione fim"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <p className="text-xs text-muted-foreground px-3 pt-3 pb-1">
-                      {calendarStep === "from" ? "Selecione a data inicial" : "Selecione a data final"}
-                    </p>
-                    <Calendar
-                      mode="single"
-                      selected={calendarStep === "from" ? customFrom : customTo}
-                      onSelect={handleCalendarSelect}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+            </SheetContent>
+          </Sheet>
+        </div>
 
         {/* Upcoming */}
-        <div>
-          <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+        <div className="mb-6">
+          <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" /> Próximas ({upcoming.length})
           </h2>
           {loading ? (
             <div className="space-y-3">
               {[1, 2].map(i => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border">
-                  <div className="flex items-center gap-3 flex-1">
-                    <Skeleton className="w-10 h-10 rounded-xl" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-4 w-40" />
-                      <Skeleton className="h-3 w-24" />
-                    </div>
+                <div key={i} className="flex items-start gap-3 p-4 rounded-2xl border border-border">
+                  <Skeleton className="w-14 h-16 rounded-xl shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-40" />
+                    <Skeleton className="h-3 w-28" />
+                    <Skeleton className="h-7 w-24 rounded-full" />
                   </div>
-                  <Skeleton className="h-7 w-20 rounded-full" />
                 </div>
               ))}
             </div>
           ) : upcoming.length === 0 ? (
-            <div className="text-center py-8 rounded-xl border border-dashed border-border">
+            <div className="text-center py-12 rounded-2xl border border-dashed border-border bg-muted/20">
               <CalendarIcon className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-sm text-muted-foreground">Nenhuma consulta próxima</p>
+              <Button size="sm" variant="outline" className="mt-3 rounded-xl" onClick={() => navigate("/dashboard/schedule")}>
+                Agendar consulta
+              </Button>
             </div>
           ) : (
-            <div className="space-y-2">{upcoming.map(renderAppointment)}</div>
+            <div className="space-y-3">{upcoming.map((a, i) => renderAppointment(a, i))}</div>
           )}
         </div>
 
-        {/* Past */}
+        {/* History */}
         <div>
-          <h2 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+          <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <FileText className="w-4 h-4 text-muted-foreground" /> Histórico ({past.length})
           </h2>
           {loading ? (
-            <div className="space-y-2">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border">
-                  <div className="flex items-center gap-3 flex-1">
-                    <Skeleton className="w-10 h-10 rounded-xl" />
-                    <div className="space-y-2 flex-1">
-                      <Skeleton className="h-4 w-36" />
-                      <Skeleton className="h-3 w-20" />
-                    </div>
+            <div className="space-y-3">
+              {[1, 2].map(i => (
+                <div key={i} className="flex items-start gap-3 p-4 rounded-2xl border border-border">
+                  <Skeleton className="w-14 h-16 rounded-xl shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-36" />
+                    <Skeleton className="h-3 w-20" />
                   </div>
-                  <Skeleton className="h-6 w-16 rounded-full" />
                 </div>
               ))}
             </div>
           ) : past.length === 0 ? (
-            <div className="text-center py-8 rounded-xl border border-dashed border-border">
+            <div className="text-center py-10 rounded-2xl border border-dashed border-border bg-muted/20">
               <FileText className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
               <p className="text-sm text-muted-foreground">Nenhuma consulta no histórico</p>
             </div>
           ) : (
-            <div className="space-y-2">{past.map(renderAppointment)}</div>
+            <div className="space-y-3">{past.map((a, i) => renderAppointment(a, i))}</div>
           )}
         </div>
       </div>
