@@ -459,6 +459,16 @@ const BookAppointment = () => {
                   </div>
                 </div>
 
+                {/* Return policy notice */}
+                {appointmentType === "return" && (
+                  <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 mb-4">
+                    <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                      Retornos são gratuitos dentro de 15 dias da consulta original. Fora desse prazo, será cobrado o valor integral.
+                    </p>
+                  </div>
+                )}
+
                 <Button
                   className="w-full h-14 rounded-xl bg-gradient-hero text-primary-foreground text-base font-semibold active:scale-[0.98] transition-transform"
                   onClick={handleBook}
@@ -476,6 +486,10 @@ const BookAppointment = () => {
                     </span>
                   )}
                 </Button>
+
+                <p className="text-[10px] text-center text-muted-foreground mt-3">
+                  Ao confirmar, você concorda com os termos de uso e política de cancelamento.
+                </p>
               </div>
             </motion.div>
           )}
