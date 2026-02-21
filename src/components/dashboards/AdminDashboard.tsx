@@ -10,11 +10,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { getAdminNav } from "@/components/admin/adminNav";
 import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, Video, Star, LayoutGrid, Download, RefreshCw } from "lucide-react";
 import AdminAnalyticsCharts from "./AdminAnalyticsCharts";
-import { format, startOfMonth, subMonths, endOfMonth } from "date-fns";
+import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
-import BlobKPICard from "@/components/ui/blob-kpi-card";
+import { motion } from "framer-motion";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -33,6 +33,9 @@ const PERIOD_OPTIONS = [
   { value: "all", label: "Todo período" },
 ];
 
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
+const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [periodFilter, setPeriodFilter] = useState("month");
@@ -50,7 +53,6 @@ const AdminDashboard = () => {
 
   useEffect(() => { fetchAll(); }, [periodFilter]);
 
-  // Realtime for live consultation monitoring
   useEffect(() => {
     const channel = supabase
       .channel("admin-live-monitor")
@@ -146,16 +148,10 @@ const AdminDashboard = () => {
     }
 
     setStats({
-      total_revenue: totalRevenue,
-      active_subs: activeSubsRes.count ?? 0,
-      overdue_subs: expiredSubsRes.data?.length ?? 0,
-      total_patients: patientsRes.count ?? 0,
-      total_doctors: doctorsRes.count ?? 0,
-      monthly_appts: monthApptsRes.count ?? 0,
-      live_now: 0, waiting_now: 0,
-      cancel_rate: cancelRate,
-      no_show_rate: noShowRate,
-      avg_rating: avgRating,
+      total_revenue: totalRevenue, active_subs: activeSubsRes.count ?? 0,
+      overdue_subs: expiredSubsRes.data?.length ?? 0, total_patients: patientsRes.count ?? 0,
+      total_doctors: doctorsRes.count ?? 0, monthly_appts: monthApptsRes.count ?? 0,
+      live_now: 0, waiting_now: 0, cancel_rate: cancelRate, no_show_rate: noShowRate, avg_rating: avgRating,
     });
 
     const allSubs = [...(allSubsRes.data ?? []), ...(expiredSubsRes.data ?? [])];
@@ -168,10 +164,8 @@ const AdminDashboard = () => {
     const pMap = new Map((profilesRes.data ?? []).map((p: any) => [p.user_id, `${p.first_name} ${p.last_name}`] as const));
     const planMap = new Map((plansRes2.data ?? []).map((p: any) => [p.id, p] as const));
     const enrichSub = (s: any) => ({
-      ...s,
-      user_name: pMap.get(s.user_id) ?? "—",
-      plan_name: planMap.get(s.plan_id)?.name ?? "—",
-      plan_price: planMap.get(s.plan_id)?.price ?? 0,
+      ...s, user_name: pMap.get(s.user_id) ?? "—",
+      plan_name: planMap.get(s.plan_id)?.name ?? "—", plan_price: planMap.get(s.plan_id)?.price ?? 0,
     });
     setRecentSubs((allSubsRes.data ?? []).map(enrichSub));
     setOverdueSubs((expiredSubsRes.data ?? []).map(enrichSub));
@@ -211,11 +205,7 @@ const AdminDashboard = () => {
     let y = 48;
     doc.setFontSize(12);
     doc.text("Métricas Gerais", 14, y); y += 10;
-    metrics.forEach(([label, value]) => {
-      doc.setFontSize(10);
-      doc.text(`${label}: ${value}`, 14, y);
-      y += 8;
-    });
+    metrics.forEach(([label, value]) => { doc.setFontSize(10); doc.text(`${label}: ${value}`, 14, y); y += 8; });
     doc.save(`relatorio-admin-${format(new Date(), "yyyy-MM-dd")}.pdf`);
     toast.success("Relatório PDF exportado!");
   };
@@ -236,9 +226,7 @@ const AdminDashboard = () => {
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const el = document.createElement("a");
-    el.href = url;
-    el.download = `relatorio-admin-${format(new Date(), "yyyy-MM-dd")}.csv`;
-    el.click();
+    el.href = url; el.download = `relatorio-admin-${format(new Date(), "yyyy-MM-dd")}.csv`; el.click();
     URL.revokeObjectURL(url);
     toast.success("CSV exportado!");
   };
@@ -248,143 +236,143 @@ const AdminDashboard = () => {
     fetchAll();
   };
 
-  const statusVariant: Record<string, "default" | "destructive" | "outline"> = {
-    active: "default", cancelled: "destructive", expired: "outline", paused: "outline",
-  };
   const statusLabel: Record<string, string> = { active: "Ativa", cancelled: "Cancelada", expired: "Vencida", paused: "Pausada" };
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("overview")}>
-      <div className="max-w-6xl">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+      <motion.div variants={container} initial="hidden" animate="show" className="max-w-6xl space-y-6">
+
+        {/* Header */}
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Painel de Controle</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Monitoramento em tempo real, finanças e operações</p>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel de Controle</h1>
+            <p className="text-sm text-muted-foreground mt-1">Monitoramento em tempo real, finanças e operações</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Select value={periodFilter} onValueChange={setPeriodFilter}>
-              <SelectTrigger className="w-40 h-9">
+              <SelectTrigger className="w-40 h-9 rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button size="sm" variant="outline" className="h-9" onClick={() => fetchAll(true)} disabled={refreshing}>
+            <Button size="icon" variant="outline" className="h-9 w-9 rounded-xl" onClick={() => fetchAll(true)} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
-            <Button size="sm" variant="outline" className="h-9" onClick={exportAdminCSV} disabled={loading}>
-              <Download className="w-4 h-4 mr-1" /> CSV
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportAdminCSV} disabled={loading}>
+              <Download className="w-4 h-4" /> CSV
             </Button>
-            <Button size="sm" variant="outline" className="h-9" onClick={exportAdminPDF} disabled={loading}>
-              <FileText className="w-4 h-4 mr-1" /> PDF
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportAdminPDF} disabled={loading}>
+              <FileText className="w-4 h-4" /> PDF
             </Button>
-            <Button variant="outline" size="sm" className="h-9" onClick={() => navigate("/dashboard/admin/switch-panel")}>
-              <LayoutGrid className="w-4 h-4 mr-1" /> Trocar Painel
+            <Button variant="outline" size="sm" className="h-9 rounded-xl gap-1.5" onClick={() => navigate("/dashboard/admin/switch-panel")}>
+              <LayoutGrid className="w-4 h-4" /> Trocar Painel
             </Button>
           </div>
-        </div>
+        </motion.div>
 
-
-        {/* Real-time Operations Banner */}
-        <Card className="border-primary/30 bg-primary/5 mb-6">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Activity className="w-5 h-5 text-primary animate-pulse" />
-              <h2 className="font-semibold text-foreground">Monitoramento em Tempo Real</h2>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Video className="w-4 h-4 text-primary" />
-                  <span className="text-2xl font-bold text-foreground">{stats.live_now}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">Ao vivo agora</p>
+        {/* Real-time banner */}
+        <motion.div variants={fadeUp}>
+          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <Activity className="w-5 h-5 text-primary animate-pulse" />
+                <h2 className="font-semibold text-foreground">Tempo Real</h2>
               </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Clock className="w-4 h-4 text-secondary" />
-                  <span className="text-2xl font-bold text-foreground">{stats.waiting_now}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">Na fila</p>
-              </div>
-              <div className="text-center">
-                <span className="text-2xl font-bold text-foreground">{stats.cancel_rate.toFixed(1)}%</span>
-                <p className="text-xs text-muted-foreground">Cancelamentos</p>
-              </div>
-              <div className="text-center">
-                <span className="text-2xl font-bold text-destructive">{stats.no_show_rate.toFixed(1)}%</span>
-                <p className="text-xs text-muted-foreground">Absenteísmo</p>
-              </div>
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-1">
-                  <Star className="w-4 h-4 text-warning" />
-                  <span className="text-2xl font-bold text-foreground">{stats.avg_rating.toFixed(1)}</span>
-                </div>
-                <p className="text-xs text-muted-foreground">NPS Médicos</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Live consultations list */}
-        {liveAppts.length > 0 && (
-          <Card className="border-border mb-6">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                Consultas Ativas ({liveAppts.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {liveAppts.map(a => (
-                  <div key={a.id} className="flex items-center justify-between p-3 rounded-lg border border-border">
-                    <div className="flex items-center gap-3">
-                      <Badge variant={a.status === "in_progress" ? "default" : "secondary"} className="text-xs">
-                        {a.status === "in_progress" ? "🔴 Ao vivo" : "⏳ Esperando"}
-                      </Badge>
-                      <div>
-                        <p className="text-sm font-medium text-foreground">{a.patient_name}</p>
-                        <p className="text-xs text-muted-foreground">{a.doctor_name}</p>
-                      </div>
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                {[
+                  { icon: Video, color: "text-primary", value: stats.live_now, label: "Ao vivo" },
+                  { icon: Clock, color: "text-secondary", value: stats.waiting_now, label: "Na fila" },
+                  { icon: null, color: "", value: `${stats.cancel_rate.toFixed(1)}%`, label: "Cancelamentos" },
+                  { icon: null, color: "text-destructive", value: `${stats.no_show_rate.toFixed(1)}%`, label: "Absenteísmo" },
+                  { icon: Star, color: "text-warning", value: stats.avg_rating.toFixed(1), label: "NPS Médicos" },
+                ].map((item, i) => (
+                  <div key={i} className="text-center p-3 rounded-xl bg-card/50">
+                    <div className="flex items-center justify-center gap-1.5 mb-1">
+                      {item.icon && <item.icon className={`w-4 h-4 ${item.color}`} />}
+                      <span className={`text-2xl font-bold ${item.color || "text-foreground"}`}>{item.value}</span>
                     </div>
-                    <span className="text-xs text-muted-foreground">
-                      {format(new Date(a.scheduled_at), "HH:mm", { locale: ptBR })}
-                    </span>
+                    <p className="text-xs text-muted-foreground">{item.label}</p>
                   </div>
                 ))}
               </div>
             </CardContent>
           </Card>
+        </motion.div>
+
+        {/* Live consultations */}
+        {liveAppts.length > 0 && (
+          <motion.div variants={fadeUp}>
+            <Card className="border-border/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                  Consultas Ativas ({liveAppts.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-2">
+                  {liveAppts.map(a => (
+                    <div key={a.id} className="flex items-center justify-between p-3.5 rounded-xl border border-border/50 hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Badge variant={a.status === "in_progress" ? "default" : "secondary"} className="text-xs">
+                          {a.status === "in_progress" ? "🔴 Ao vivo" : "⏳ Esperando"}
+                        </Badge>
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{a.patient_name}</p>
+                          <p className="text-xs text-muted-foreground">{a.doctor_name}</p>
+                        </div>
+                      </div>
+                      <span className="text-xs text-muted-foreground">
+                        {format(new Date(a.scheduled_at), "HH:mm", { locale: ptBR })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
-        {/* BLOB KPI Cards — Admin */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-8 py-2">
+        {/* KPI Cards */}
+        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {loading ? (
-            Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className="aspect-square animate-pulse bg-muted/50 rounded-full" />
-            ))
+            Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" />)
           ) : (
-            <>
-              <BlobKPICard variant={0} label="Receita (MRR)" value={`R$${stats.total_revenue.toFixed(0)}`} icon={<DollarSign className="w-5 h-5" />} color="success" delay={0} />
-              <BlobKPICard variant={1} label="Assinaturas" value={stats.active_subs} icon={<CreditCard className="w-5 h-5" />} color="primary" delay={0.07} onClick={() => navigate("/dashboard/admin/subscriptions")} />
-              <BlobKPICard variant={2} label="Inadimplentes" value={stats.overdue_subs} icon={<AlertTriangle className="w-5 h-5" />} color="destructive" delay={0.14} />
-              <BlobKPICard variant={3} label="Pacientes" value={stats.total_patients} icon={<Users className="w-5 h-5" />} color="secondary" delay={0.21} onClick={() => navigate("/dashboard/admin/patients")} />
-              <BlobKPICard variant={4} label="Médicos" value={stats.total_doctors} icon={<FileText className="w-5 h-5" />} color="warning" delay={0.28} onClick={() => navigate("/dashboard/admin/doctors")} />
-              <BlobKPICard variant={0} label="Consultas" value={stats.monthly_appts} icon={<TrendingUp className="w-5 h-5" />} color="primary" delay={0.35} onClick={() => navigate("/dashboard/admin/appointments")} />
-            </>
+            [
+              { label: "Receita (MRR)", value: `R$ ${stats.total_revenue.toFixed(0)}`, icon: DollarSign, color: "text-success", bg: "bg-success/10" },
+              { label: "Assinaturas", value: stats.active_subs, icon: CreditCard, color: "text-primary", bg: "bg-primary/10", path: "/dashboard/admin/subscriptions" },
+              { label: "Inadimplentes", value: stats.overdue_subs, icon: AlertTriangle, color: "text-destructive", bg: "bg-destructive/10" },
+              { label: "Pacientes", value: stats.total_patients, icon: Users, color: "text-secondary", bg: "bg-secondary/10", path: "/dashboard/admin/patients" },
+              { label: "Médicos", value: stats.total_doctors, icon: FileText, color: "text-warning", bg: "bg-warning/10", path: "/dashboard/admin/doctors" },
+              { label: "Consultas", value: stats.monthly_appts, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10", path: "/dashboard/admin/appointments" },
+            ].map((kpi) => (
+              <button
+                key={kpi.label}
+                onClick={() => (kpi as any).path && navigate((kpi as any).path)}
+                className="p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md transition-all text-left"
+              >
+                <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
+                  <kpi.icon className={`w-4 h-4 ${kpi.color}`} />
+                </div>
+                <p className="text-xl font-bold text-foreground">{kpi.value}</p>
+                <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
+              </button>
+            ))
           )}
-        </div>
+        </motion.div>
 
         {/* Analytics Charts */}
-        <AdminAnalyticsCharts />
+        <motion.div variants={fadeUp}>
+          <AdminAnalyticsCharts />
+        </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-4 mb-6">
-          {/* Overdue / Inadimplência */}
-          <Card className="border-border">
+        <motion.div variants={fadeUp} className="grid lg:grid-cols-2 gap-4">
+          {/* Overdue */}
+          <Card className="border-border/50">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-destructive" /> Inadimplentes
                 {overdueSubs.length > 0 && (
                   <span className="ml-auto text-xs font-normal text-destructive bg-destructive/10 px-2 py-0.5 rounded-full">
@@ -395,14 +383,14 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent className="pt-0">
               {overdueSubs.length === 0 ? (
-                <div className="text-center py-6">
+                <div className="text-center py-8">
                   <p className="text-2xl mb-1">🎉</p>
                   <p className="text-sm text-muted-foreground">Nenhum inadimplente!</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {overdueSubs.map(s => (
-                    <div key={s.id} className="flex items-center justify-between p-3 rounded-xl border border-destructive/20 bg-destructive/5 hover:bg-destructive/8 transition-colors">
+                    <div key={s.id} className="flex items-center justify-between p-3.5 rounded-xl border border-destructive/20 bg-destructive/5">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{s.user_name}</p>
                         <p className="text-xs text-muted-foreground">{s.plan_name} · R$ {Number(s.plan_price).toFixed(2)}</p>
@@ -418,9 +406,9 @@ const AdminDashboard = () => {
           </Card>
 
           {/* Pending doctors */}
-          <Card className="border-border">
+          <Card className="border-border/50">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 Médicos Pendentes
                 {pendingDoctors.length > 0 && (
                   <span className="ml-auto text-xs font-normal text-warning bg-warning/10 px-2 py-0.5 rounded-full">
@@ -431,19 +419,19 @@ const AdminDashboard = () => {
             </CardHeader>
             <CardContent className="pt-0">
               {pendingDoctors.length === 0 ? (
-                <div className="text-center py-6">
+                <div className="text-center py-8">
                   <p className="text-2xl mb-1">✅</p>
                   <p className="text-sm text-muted-foreground">Nenhum pendente de aprovação</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {pendingDoctors.map(d => (
-                    <div key={d.id} className="flex items-center justify-between p-3 rounded-xl border border-warning/20 bg-warning/5">
+                    <div key={d.id} className="flex items-center justify-between p-3.5 rounded-xl border border-warning/20 bg-warning/5">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
                         <p className="text-xs text-muted-foreground">CRM {d.crm}/{d.crm_state}</p>
                       </div>
-                      <Button size="sm" className="bg-success/10 text-success border border-success/30 hover:bg-success/20 text-xs h-7 shrink-0 ml-2" onClick={() => approveDoctor(d.id)}>
+                      <Button size="sm" className="bg-success/10 text-success border border-success/30 hover:bg-success/20 text-xs h-8 shrink-0 ml-2 rounded-xl" onClick={() => approveDoctor(d.id)}>
                         Aprovar
                       </Button>
                     </div>
@@ -452,56 +440,58 @@ const AdminDashboard = () => {
               )}
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
         {/* Recent subscriptions */}
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-base font-semibold">Assinaturas Recentes</CardTitle>
-              <Button size="sm" variant="ghost" className="text-xs text-primary" onClick={() => navigate("/dashboard/admin/subscriptions")}>
-                Ver todas →
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {recentSubs.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">Nenhuma assinatura registrada.</p>
-            ) : (
-              <div className="overflow-auto rounded-lg border border-border">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="bg-muted/40">
-                      <TableHead className="text-xs">Usuário</TableHead>
-                      <TableHead className="text-xs">Plano</TableHead>
-                      <TableHead className="text-xs">Valor</TableHead>
-                      <TableHead className="text-xs">Status</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {recentSubs.map(s => (
-                      <TableRow key={s.id} className="hover:bg-muted/30">
-                        <TableCell className="font-medium text-foreground text-sm">{s.user_name}</TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{s.plan_name}</TableCell>
-                        <TableCell className="text-foreground text-sm">R$ {Number(s.plan_price).toFixed(2)}</TableCell>
-                        <TableCell>
-                          <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${
-                            s.status === "active" ? "bg-success/10 text-success border-success/20"
-                            : s.status === "cancelled" ? "bg-destructive/10 text-destructive border-destructive/20"
-                            : "bg-muted text-muted-foreground border-border"
-                          }`}>
-                            {statusLabel[s.status] ?? s.status}
-                          </span>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+        <motion.div variants={fadeUp}>
+          <Card className="border-border/50">
+            <CardHeader className="pb-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-sm font-semibold">Assinaturas Recentes</CardTitle>
+                <Button size="sm" variant="ghost" className="text-xs text-primary" onClick={() => navigate("/dashboard/admin/subscriptions")}>
+                  Ver todas →
+                </Button>
               </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {recentSubs.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-6">Nenhuma assinatura registrada.</p>
+              ) : (
+                <div className="overflow-auto rounded-xl border border-border/50">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/30">
+                        <TableHead className="text-xs">Usuário</TableHead>
+                        <TableHead className="text-xs">Plano</TableHead>
+                        <TableHead className="text-xs">Valor</TableHead>
+                        <TableHead className="text-xs">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {recentSubs.map(s => (
+                        <TableRow key={s.id} className="hover:bg-muted/20">
+                          <TableCell className="font-medium text-foreground text-sm">{s.user_name}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{s.plan_name}</TableCell>
+                          <TableCell className="text-foreground text-sm">R$ {Number(s.plan_price).toFixed(2)}</TableCell>
+                          <TableCell>
+                            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${
+                              s.status === "active" ? "bg-success/10 text-success border-success/20"
+                              : s.status === "cancelled" ? "bg-destructive/10 text-destructive border-destructive/20"
+                              : "bg-muted text-muted-foreground border-border"
+                            }`}>
+                              {statusLabel[s.status] ?? s.status}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </DashboardLayout>
   );
 };
