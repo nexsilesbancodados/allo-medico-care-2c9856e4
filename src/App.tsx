@@ -28,6 +28,7 @@ import AuthAfiliado from "./pages/AuthAfiliado";
 import AuthClinica from "./pages/AuthClinica";
 import NotFound from "./pages/NotFound";
 import LinkRedirect from "./pages/LinkRedirect";
+import ValidateDocument from "./pages/ValidateDocument";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import PingoChatbot from "./components/PingoChatbot";
 import AccessibilityToggle from "./components/AccessibilityToggle";
@@ -65,6 +66,8 @@ const App = () => (
             <Route path="/payment-success" element={<PaymentSuccess />} />
             <Route path="/convite/:code" element={<AuthPaciente />} />
             <Route path="/l/:id" element={<LinkRedirect />} />
+            <Route path="/validar/:id" element={<ValidateDocument />} />
+            <Route path="/validar" element={<ValidateDocument />} />
             <Route
               path="/dashboard/*"
               element={

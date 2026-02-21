@@ -54,7 +54,9 @@ import ChatPage from "@/components/chat/ChatPage";
 import AdminNPS from "@/components/admin/AdminNPS";
 import MedicalRecords from "@/components/medical/MedicalRecords";
 import HealthTimeline from "@/components/patient/HealthTimeline";
+import SymptomDiary from "@/components/patient/SymptomDiary";
 import AdminWhatsApp from "@/components/admin/AdminWhatsApp";
+import AdminLiveConsultations from "@/components/admin/AdminLiveConsultations";
 import SystemHealth from "@/components/admin/SystemHealth";
 import PanelSettings from "@/components/settings/PanelSettings";
 import { Loader2 } from "lucide-react";
@@ -128,6 +130,7 @@ const Dashboard = () => {
       <Route path="chat" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><ChatPage /></RoleGuard>} />
       <Route path="medical-records" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><MedicalRecords /></RoleGuard>} />
       <Route path="timeline" element={<RoleGuard allowed={["patient"]} roles={roles}><HealthTimeline /></RoleGuard>} />
+      <Route path="patient/diary" element={<RoleGuard allowed={["patient"]} roles={roles}><SymptomDiary /></RoleGuard>} />
 
       {/* Doctor routes — doctors + admin */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />
@@ -171,6 +174,7 @@ const Dashboard = () => {
       <Route path="admin/nps" element={<RoleGuard allowed={[]} roles={roles}><AdminNPS /></RoleGuard>} />
       <Route path="admin/whatsapp" element={<RoleGuard allowed={[]} roles={roles}><AdminWhatsApp /></RoleGuard>} />
       <Route path="admin/health" element={<RoleGuard allowed={[]} roles={roles}><SystemHealth /></RoleGuard>} />
+      <Route path="admin/live" element={<RoleGuard allowed={[]} roles={roles}><AdminLiveConsultations /></RoleGuard>} />
 
       {/* Default: redirect to role-specific dashboard */}
       <Route
