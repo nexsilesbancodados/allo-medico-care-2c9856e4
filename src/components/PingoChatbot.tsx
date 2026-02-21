@@ -242,7 +242,18 @@ const PingoChatbot = () => {
         messages: [...messages, userMsg],
         context: userContext || undefined,
         onDelta: upsert,
-        onDone: () => setIsLoading(false),
+        onDone: () => {
+          setIsLoading(false);
+          // Detect [TRANSFERINDO] in the final assistant message and auto-escalate
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last?.role === "assistant" && last.content.includes("[TRANSFERINDO]")) {
+              // Auto-escalate to human support
+              handleLiveSupport();
+            }
+            return prev;
+          });
+        },
         onError: (err) => {
           setMessages((prev) => [...prev, { role: "assistant", content: `😕 ${err}` }]);
           setIsLoading(false);
