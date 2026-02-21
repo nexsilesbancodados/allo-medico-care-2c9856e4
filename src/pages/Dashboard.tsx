@@ -30,6 +30,7 @@ import DoctorWaitingRoom from "@/components/doctor/DoctorWaitingRoom";
 import PatientDocuments from "@/components/doctor/PatientDocuments";
 import VideoRoom from "@/components/consultation/VideoRoom";
 import PrescriptionForm from "@/components/consultation/PrescriptionForm";
+import RateConsultationPage from "@/components/patient/RateConsultationPage";
 import ClinicDoctorsManagement from "@/components/clinic/ClinicDoctorsManagement";
 import AdminDoctors from "@/components/admin/AdminDoctors";
 import AdminPatients from "@/components/admin/AdminPatients";
@@ -136,6 +137,7 @@ const Dashboard = () => {
       {/* Consultation routes — doctor + patient + admin */}
       <Route path="consultation/:appointmentId" element={<RoleGuard allowed={["doctor", "patient"]} roles={roles}><VideoRoom /></RoleGuard>} />
       <Route path="prescribe/:appointmentId" element={<RoleGuard allowed={["doctor"]} roles={roles}><PrescriptionForm /></RoleGuard>} />
+      <Route path="rate/:appointmentId" element={<RoleGuard allowed={["patient"]} roles={roles}><RateConsultationPage /></RoleGuard>} />
 
       {/* Clinic routes — clinic + admin */}
       <Route path="clinic/doctors" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDoctorsManagement /></RoleGuard>} />

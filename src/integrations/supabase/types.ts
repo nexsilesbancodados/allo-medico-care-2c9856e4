@@ -319,6 +319,38 @@ export type Database = {
         }
         Relationships: []
       }
+      doctor_absences: {
+        Row: {
+          absence_date: string
+          created_at: string
+          doctor_id: string
+          id: string
+          reason: string | null
+        }
+        Insert: {
+          absence_date: string
+          created_at?: string
+          doctor_id: string
+          id?: string
+          reason?: string | null
+        }
+        Update: {
+          absence_date?: string
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_absences_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctor_invite_codes: {
         Row: {
           code: string

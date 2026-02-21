@@ -5,10 +5,13 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { getDoctorNav } from "./doctorNav";
-import { Plus, Trash2, Clock } from "lucide-react";
+import { Plus, Trash2, Clock, CalendarOff } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { format, parseISO } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 const daysOfWeek = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 const timeOptions = Array.from({ length: 28 }, (_, i) => {
@@ -25,14 +28,23 @@ interface Slot {
   is_active: boolean;
 }
 
+interface Absence {
+  id: string;
+  absence_date: string;
+  reason: string | null;
+}
+
 const DoctorAvailability = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
   const [slots, setSlots] = useState<Slot[]>([]);
+  const [absences, setAbsences] = useState<Absence[]>([]);
   const [newDay, setNewDay] = useState("1");
   const [newStart, setNewStart] = useState("08:00");
   const [newEnd, setNewEnd] = useState("12:00");
+  const [absenceDate, setAbsenceDate] = useState("");
+  const [absenceReason, setAbsenceReason] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { if (user) fetchDoctorProfile(); }, [user]);
@@ -47,6 +59,7 @@ const DoctorAvailability = () => {
     if (data) {
       setDoctorProfileId(data.id);
       fetchSlots(data.id);
+      fetchAbsences(data.id);
     }
     setLoading(false);
   };
@@ -58,8 +71,17 @@ const DoctorAvailability = () => {
       .eq("doctor_id", profileId)
       .order("day_of_week")
       .order("start_time");
-
     if (data) setSlots(data);
+  };
+
+  const fetchAbsences = async (profileId: string) => {
+    const { data } = await supabase
+      .from("doctor_absences")
+      .select("*")
+      .eq("doctor_id", profileId)
+      .gte("absence_date", new Date().toISOString().split("T")[0])
+      .order("absence_date");
+    if (data) setAbsences(data);
   };
 
   const addSlot = async () => {
@@ -70,7 +92,6 @@ const DoctorAvailability = () => {
       start_time: newStart,
       end_time: newEnd,
     });
-
     if (error) {
       toast({ title: "Erro", description: error.message, variant: "destructive" });
     } else {
@@ -84,7 +105,29 @@ const DoctorAvailability = () => {
     if (doctorProfileId) fetchSlots(doctorProfileId);
   };
 
-  // Group by day
+  const addAbsence = async () => {
+    if (!doctorProfileId || !absenceDate) return;
+    const { error } = await supabase.from("doctor_absences").insert({
+      doctor_id: doctorProfileId,
+      absence_date: absenceDate,
+      reason: absenceReason.trim() || null,
+    });
+    if (error) {
+      if (error.code === "23505") toast({ title: "Essa data já está marcada como folga", variant: "destructive" });
+      else toast({ title: "Erro", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Folga registrada!" });
+      setAbsenceDate("");
+      setAbsenceReason("");
+      fetchAbsences(doctorProfileId);
+    }
+  };
+
+  const removeAbsence = async (id: string) => {
+    await supabase.from("doctor_absences").delete().eq("id", id);
+    if (doctorProfileId) fetchAbsences(doctorProfileId);
+  };
+
   const grouped = daysOfWeek.map((day, i) => ({
     day,
     index: i,
@@ -135,6 +178,58 @@ const DoctorAvailability = () => {
                 <Plus className="w-4 h-4 mr-1" /> Adicionar
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Day-off / Absence management */}
+        <Card className="border-border mb-6">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <CalendarOff className="w-4 h-4 text-destructive" /> Folgas e Ausências
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-3 items-end mb-4">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">Data</p>
+                <Input
+                  type="date"
+                  value={absenceDate}
+                  onChange={e => setAbsenceDate(e.target.value)}
+                  min={new Date().toISOString().split("T")[0]}
+                  className="w-40"
+                />
+              </div>
+              <div className="flex-1 min-w-[120px]">
+                <p className="text-xs text-muted-foreground mb-1">Motivo (opcional)</p>
+                <Input
+                  placeholder="Ex: Feriado, Congresso..."
+                  value={absenceReason}
+                  onChange={e => setAbsenceReason(e.target.value)}
+                />
+              </div>
+              <Button onClick={addAbsence} variant="outline" className="gap-1 border-destructive/30 text-destructive hover:bg-destructive/10">
+                <CalendarOff className="w-4 h-4" /> Marcar Folga
+              </Button>
+            </div>
+
+            {absences.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {absences.map(a => (
+                  <Badge key={a.id} variant="outline" className="flex items-center gap-2 py-1.5 px-3 border-destructive/20 text-destructive">
+                    <CalendarOff className="w-3 h-3" />
+                    {format(parseISO(a.absence_date), "dd/MM/yyyy", { locale: ptBR })}
+                    {a.reason && <span className="text-muted-foreground font-normal">({a.reason})</span>}
+                    <button onClick={() => removeAbsence(a.id)} className="ml-1 hover:text-destructive">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+            {absences.length === 0 && (
+              <p className="text-xs text-muted-foreground">Nenhuma folga registrada.</p>
+            )}
           </CardContent>
         </Card>
 
