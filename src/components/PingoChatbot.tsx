@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, MessageCircle, Headphones } from "lucide-react";
+import { X, Send, MessageCircle, Headphones, Sparkles, CalendarDays, CreditCard, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import mascotImg from "@/assets/mascot.png";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -14,11 +14,13 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pingo-chat`;
 
 async function streamChat({
   messages,
+  context,
   onDelta,
   onDone,
   onError,
 }: {
   messages: Msg[];
+  context?: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError: (err: string) => void;
@@ -29,7 +31,7 @@ async function streamChat({
       "Content-Type": "application/json",
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages, context }),
   });
 
   if (!resp.ok) {
@@ -75,14 +77,82 @@ async function streamChat({
 
 const PingoChatbot = () => {
   const navigate = useNavigate();
-  const { user, roles } = useAuth();
+  const { user, roles, profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [showLiveSupport, setShowLiveSupport] = useState(false);
+  const [userContext, setUserContext] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Build patient context when user is logged in
+  useEffect(() => {
+    if (!user) return;
+    const buildContext = async () => {
+      const parts: string[] = [];
+      
+      if (profile) {
+        parts.push(`Paciente: ${profile.first_name} ${profile.last_name}`);
+      }
+      parts.push(`Roles: ${roles.join(", ")}`);
+
+      // Get upcoming appointments
+      const { data: appts } = await supabase
+        .from("appointments")
+        .select("scheduled_at, status, doctor_id")
+        .eq("patient_id", user.id)
+        .gte("scheduled_at", new Date().toISOString())
+        .order("scheduled_at")
+        .limit(3);
+
+      if (appts && appts.length > 0) {
+        const doctorIds = [...new Set(appts.map(a => a.doctor_id))];
+        const { data: docs } = await supabase
+          .from("doctor_profiles")
+          .select("id, user_id")
+          .in("id", doctorIds);
+        
+        if (docs) {
+          const userIds = docs.map(d => d.user_id);
+          const { data: profiles } = await supabase
+            .from("profiles")
+            .select("user_id, first_name, last_name")
+            .in("user_id", userIds);
+          
+          const nameMap = new Map(profiles?.map(p => [p.user_id, `Dr(a). ${p.first_name} ${p.last_name}`]) ?? []);
+          const docNameMap = new Map(docs.map(d => [d.id, nameMap.get(d.user_id) ?? ""]));
+
+          const apptTexts = appts.map(a => {
+            const date = new Date(a.scheduled_at);
+            return `${date.toLocaleDateString("pt-BR")} ${date.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })} - ${docNameMap.get(a.doctor_id) ?? "médico"} (${a.status})`;
+          });
+          parts.push(`Próximas consultas: ${apptTexts.join("; ")}`);
+        }
+      } else {
+        parts.push("Sem consultas agendadas.");
+      }
+
+      // Get active subscription
+      const { data: subs } = await supabase
+        .from("subscriptions")
+        .select("status, plan_id, expires_at")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .limit(1);
+
+      if (subs && subs.length > 0) {
+        const { data: plan } = await supabase.from("plans").select("name").eq("id", subs[0].plan_id).single();
+        parts.push(`Plano ativo: ${plan?.name ?? "sim"}`);
+      } else {
+        parts.push("Sem plano ativo (consultas avulsas).");
+      }
+
+      setUserContext(parts.join("\n"));
+    };
+    buildContext();
+  }, [user, profile, roles]);
 
   const handleLiveSupport = () => {
     if (user && (roles.includes("support") || roles.includes("admin"))) {
@@ -112,8 +182,8 @@ const PingoChatbot = () => {
     }
   }, [open]);
 
-  const send = async () => {
-    const text = input.trim();
+  const send = async (overrideText?: string) => {
+    const text = (overrideText ?? input).trim();
     if (!text || isLoading) return;
     setInput("");
 
@@ -136,6 +206,7 @@ const PingoChatbot = () => {
     try {
       await streamChat({
         messages: [...messages, userMsg],
+        context: userContext || undefined,
         onDelta: upsert,
         onDone: () => setIsLoading(false),
         onError: (err) => {
@@ -149,6 +220,19 @@ const PingoChatbot = () => {
     }
   };
 
+  // Dynamic quick actions based on user state
+  const quickActions = user
+    ? [
+        { label: "Minhas consultas", icon: CalendarDays, text: "Quais são minhas próximas consultas?" },
+        { label: "Meu plano", icon: CreditCard, text: "Qual meu plano atual e quais os benefícios?" },
+        { label: "Especialidades", icon: Stethoscope, text: "Quais especialidades estão disponíveis?" },
+      ]
+    : [
+        { label: "Como funciona?", icon: Sparkles, text: "Como funciona a AloClínica?" },
+        { label: "Especialidades", icon: Stethoscope, text: "Quais especialidades vocês oferecem?" },
+        { label: "Quanto custa?", icon: CreditCard, text: "Quanto custa uma consulta?" },
+      ];
+
   return (
     <>
       {/* FAB Button */}
@@ -160,7 +244,6 @@ const PingoChatbot = () => {
             exit={{ scale: 0, opacity: 0 }}
             className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-2"
           >
-            {/* Tooltip label — visível apenas em mobile */}
             <motion.div
               initial={{ opacity: 0, x: 10 }}
               animate={{ opacity: 1, x: 0 }}
@@ -176,7 +259,6 @@ const PingoChatbot = () => {
               onClick={() => setOpen(true)}
               className="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary-foreground/20 hover:shadow-xl transition-shadow"
             >
-              {/* Pulso animado */}
               <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
               <img src={mascotImg} alt="Pingo" className="w-14 h-14 object-cover relative z-10" />
             </motion.button>
@@ -199,7 +281,9 @@ const PingoChatbot = () => {
               <img src={mascotImg} alt="Pingo" className="w-10 h-10 rounded-full bg-white/20 object-cover" />
               <div className="flex-1">
                 <p className="font-bold text-sm">Pingo 🐧</p>
-                <p className="text-xs opacity-80">Assistente virtual</p>
+                <p className="text-xs opacity-80">
+                  {user ? `Olá, ${profile?.first_name ?? ""}!` : "Assistente virtual"}
+                </p>
               </div>
               <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-white/20 transition-colors">
                 <X className="w-5 h-5" />
@@ -209,34 +293,42 @@ const PingoChatbot = () => {
             {/* Messages */}
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 && (
-                <div className="text-center py-8">
-                  <img src={mascotImg} alt="Pingo" className="w-20 h-20 mx-auto mb-3 opacity-80" />
-                  <p className="text-sm font-semibold text-foreground">Olá! Eu sou o Pingo! 🐧</p>
+                <div className="text-center py-6">
+                  <img src={mascotImg} alt="Pingo" className="w-16 h-16 mx-auto mb-3 opacity-80" />
+                  <p className="text-sm font-semibold text-foreground">
+                    {user ? `Olá, ${profile?.first_name}! 🐧` : "Olá! Eu sou o Pingo! 🐧"}
+                  </p>
                   <p className="text-xs text-muted-foreground mt-1">Como posso te ajudar hoje?</p>
-                   <div className="flex flex-wrap gap-2 mt-4 justify-center">
-                     {["Como funciona?", "Quais especialidades?", "Quanto custa?"].map((q) => (
-                       <button
-                         key={q}
-                         onClick={() => { setInput(q); }}
-                         className="text-xs px-3 py-1.5 rounded-full bg-medical-blue-light text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-                       >
-                         {q}
-                       </button>
-                     ))}
-                   </div>
-                   <button
-                     onClick={handleLiveSupport}
-                     className="mt-3 inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-full border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-medium"
-                   >
-                     <Headphones className="w-3.5 h-3.5" /> Falar com suporte ao vivo
-                   </button>
-                 </div>
-               )}
+                  
+                  <div className="flex flex-col gap-2 mt-4">
+                    {quickActions.map((q) => {
+                      const Icon = q.icon;
+                      return (
+                        <button
+                          key={q.label}
+                          onClick={() => send(q.text)}
+                          className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg bg-muted/50 text-foreground hover:bg-primary hover:text-primary-foreground transition-colors text-left"
+                        >
+                          <Icon className="w-3.5 h-3.5 shrink-0" />
+                          {q.label}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-               {messages.map((msg, i) => (
+                  <button
+                    onClick={handleLiveSupport}
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs px-4 py-2 rounded-full border border-primary/30 text-primary hover:bg-primary hover:text-primary-foreground transition-colors font-medium"
+                  >
+                    <Headphones className="w-3.5 h-3.5" /> Falar com suporte ao vivo
+                  </button>
+                </div>
+              )}
+
+              {messages.map((msg, i) => (
                 <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   <div
-                    className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
+                    className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                       msg.role === "user"
                         ? "bg-primary text-primary-foreground rounded-br-md"
                         : "bg-muted text-foreground rounded-bl-md"
