@@ -5,7 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
-  MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft
+  MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft,
+  UserRound, Pill
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation from "./VideoConsultation";
@@ -14,6 +15,8 @@ import PreCallCheck from "./PreCallCheck";
 import ConnectionStatus from "./ConnectionStatus";
 import MedicalAutocomplete from "./MedicalAutocomplete";
 import SpeechToText from "./SpeechToText";
+import PatientInfoPanel from "./PatientInfoPanel";
+import DoctorInfoPanel from "./DoctorInfoPanel";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -45,6 +48,7 @@ const VideoRoom = () => {
   const [elapsed, setElapsed] = useState(0);
   const [showChat, setShowChat] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
   const [splitMode, setSplitMode] = useState(false);
   const presenceLogId = useRef<string | null>(null);
 
@@ -358,8 +362,8 @@ const VideoRoom = () => {
     : user?.user_metadata?.first_name || "Paciente";
 
   const showQueueBanner = !isDoctor && doctorBusy && queuePosition !== null;
-  const showSidePanel = (showChat || showNotes) && !isMobile;
-  const showBottomSheet = (showChat || showNotes) && isMobile;
+  const showSidePanel = (showChat || showNotes || showInfo) && !isMobile;
+  const showBottomSheet = (showChat || showNotes || showInfo) && isMobile;
 
   const chatPanel = (
     <>
@@ -461,7 +465,7 @@ const VideoRoom = () => {
                 ? "bg-primary text-primary-foreground"
                 : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
             }`}
-            onClick={() => { setShowChat(!showChat); setShowNotes(false); }}
+            onClick={() => { setShowChat(!showChat); setShowNotes(false); setShowInfo(false); }}
           >
             <MessageSquare className="w-3.5 h-3.5" />
             {!isMobile && "Chat"}
@@ -480,7 +484,7 @@ const VideoRoom = () => {
                     ? "bg-primary text-primary-foreground"
                     : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
                 }`}
-                onClick={() => { setShowNotes(!showNotes); setShowChat(false); }}
+                onClick={() => { setShowNotes(!showNotes); setShowChat(false); setShowInfo(false); }}
               >
                 <FileText className="w-3.5 h-3.5" />
                 {!isMobile && "Notas"}
@@ -501,7 +505,33 @@ const VideoRoom = () => {
             </>
           )}
 
-          {/* Timer */}
+          {/* Info panel button */}
+          <button
+            className={`flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              showInfo
+                ? "bg-primary text-primary-foreground"
+                : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
+            }`}
+            onClick={() => { setShowInfo(!showInfo); setShowChat(false); setShowNotes(false); }}
+          >
+            <UserRound className="w-3.5 h-3.5" />
+            {!isMobile && (isDoctor ? "Paciente" : "Médico")}
+          </button>
+
+          {/* Quick prescription button (doctor only) */}
+          {isDoctor && (
+            <button
+              className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full text-xs font-medium text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)] transition-all"
+              onClick={() => window.open(`/dashboard/prescribe/${appointmentId}`, '_blank')}
+              title="Abrir receita em nova aba"
+            >
+              <Pill className="w-3.5 h-3.5" />
+              {!isMobile && "Receita"}
+            </button>
+          )}
+
+          {/* Timer */
+          }
           <div className="flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/20">
             <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
             <span className="text-[11px] md:text-xs font-mono font-semibold text-destructive">{formatTime(elapsed)}</span>
@@ -545,14 +575,20 @@ const VideoRoom = () => {
             >
               <div className="p-3 border-b border-[hsl(220,15%,12%)] flex items-center justify-between shrink-0">
                 <p className="text-sm font-semibold text-white">
-                  {showChat ? "💬 Chat" : "📝 Anotações"}
+                  {showChat ? "💬 Chat" : showNotes ? "📝 Anotações" : isDoctor ? "🩺 Paciente" : "👨‍⚕️ Médico"}
                 </p>
-                <button onClick={() => { setShowChat(false); setShowNotes(false); }}>
+                <button onClick={() => { setShowChat(false); setShowNotes(false); setShowInfo(false); }}>
                   <X className="w-4 h-4 text-[hsl(220,15%,45%)] hover:text-white" />
                 </button>
               </div>
               {showChat && chatPanel}
               {showNotes && isDoctor && notesPanel}
+              {showInfo && isDoctor && appointment?.patient_id && (
+                <PatientInfoPanel patientId={appointment.patient_id} appointmentId={appointmentId!} />
+              )}
+              {showInfo && !isDoctor && appointment?.doctor_id && (
+                <DoctorInfoPanel doctorId={appointment.doctor_id} appointmentId={appointmentId!} />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -567,7 +603,7 @@ const VideoRoom = () => {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="absolute inset-0 z-30 bg-black/40"
-                onClick={() => { setShowChat(false); setShowNotes(false); }}
+                onClick={() => { setShowChat(false); setShowNotes(false); setShowInfo(false); }}
               />
               {/* Sheet */}
               <motion.div
@@ -584,15 +620,21 @@ const VideoRoom = () => {
                 </div>
                 <div className="px-4 pb-2 flex items-center justify-between">
                   <p className="text-sm font-semibold text-white">
-                    {showChat ? "💬 Chat" : "📝 Anotações"}
+                    {showChat ? "💬 Chat" : showNotes ? "📝 Anotações" : isDoctor ? "🩺 Paciente" : "👨‍⚕️ Médico"}
                   </p>
-                  <button onClick={() => { setShowChat(false); setShowNotes(false); }}>
+                  <button onClick={() => { setShowChat(false); setShowNotes(false); setShowInfo(false); }}>
                     <X className="w-4 h-4 text-[hsl(220,15%,45%)]" />
                   </button>
                 </div>
                 <div className="flex-1 flex flex-col overflow-hidden">
                   {showChat && chatPanel}
                   {showNotes && isDoctor && notesPanel}
+                  {showInfo && isDoctor && appointment?.patient_id && (
+                    <PatientInfoPanel patientId={appointment.patient_id} appointmentId={appointmentId!} />
+                  )}
+                  {showInfo && !isDoctor && appointment?.doctor_id && (
+                    <DoctorInfoPanel doctorId={appointment.doctor_id} appointmentId={appointmentId!} />
+                  )}
                 </div>
               </motion.div>
             </>
