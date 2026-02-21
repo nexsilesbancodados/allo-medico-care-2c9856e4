@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ArrowLeft, Building2, Mail, Lock, Phone, MapPin, FileText } from "lucide-react";
 import doctorPortalBg from "@/assets/doctor-portal-bg.png";
+import SEOHead from "@/components/SEOHead";
 
 const AuthClinica = () => {
   const [mode, setMode] = useState<"register" | "login">("register");
@@ -104,6 +105,7 @@ const AuthClinica = () => {
 
   return (
     <div className="min-h-screen relative">
+      <SEOHead title="Portal da Clínica" description="Cadastre sua clínica na AloClinica e gerencie médicos e atendimentos online." />
       <img src={doctorPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover -z-10" />
       <div className="absolute inset-0 bg-background/70 -z-10" />
 

@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Handshake, Building2, LogIn } from "lucide-react";
+import SEOHead from "@/components/SEOHead";
 
 type Step = "welcome" | "register" | "login";
 
@@ -64,6 +65,7 @@ const AuthParceiro = () => {
 
   return (
     <div className="min-h-screen bg-background flex">
+      <SEOHead title="Portal do Parceiro" description="Torne-se parceiro da AloClinica e ofereça telemedicina aos seus clientes." />
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/80 to-secondary/80 items-center justify-center p-12">
         <div className="text-primary-foreground max-w-md">
           <Link to="/" className="inline-flex items-center gap-2 mb-8 opacity-80 hover:opacity-100 transition">
