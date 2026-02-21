@@ -13,6 +13,7 @@ const panelOptions = [
   { label: "Clínica", role: "clinic", icon: "🏢", description: "Gestão de médicos vinculados" },
   { label: "Parceiro", role: "partner", icon: "🤝", description: "Validação de receitas e relatórios" },
   { label: "Afiliado", role: "affiliate", icon: "📣", description: "Referências e comissões" },
+  { label: "Assistente IA", role: "ai-assistant", icon: "🤖", description: "Chat inteligente com IA contextual" },
 ];
 
 const AdminSwitchPanel = () => {
@@ -32,7 +33,7 @@ const AdminSwitchPanel = () => {
             <Card
               key={opt.role}
               className="border-border hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group"
-              onClick={() => navigate(`/dashboard?role=${opt.role}`)}
+              onClick={() => navigate(opt.role === "ai-assistant" ? "/dashboard/ai-assistant" : `/dashboard?role=${opt.role}`)}
             >
               <CardContent className="pt-6 pb-5 text-center">
                 <span className="text-4xl mb-3 block">{opt.icon}</span>
