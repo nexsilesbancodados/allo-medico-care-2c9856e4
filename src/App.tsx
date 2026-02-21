@@ -13,6 +13,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PingoChatbot from "./components/PingoChatbot";
 import AccessibilityToggle from "./components/AccessibilityToggle";
 import ErrorBoundary from "./components/ErrorBoundary";
+import CookieConsent from "./components/CookieConsent";
 
 // Lazy-loaded pages for code splitting
 const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
@@ -102,6 +103,7 @@ const App = () => (
           </main>
           <PingoChatbot />
           <AccessibilityToggle />
+          <CookieConsent />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
