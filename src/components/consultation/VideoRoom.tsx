@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import {
   MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft
@@ -17,6 +16,7 @@ import MedicalAutocomplete from "./MedicalAutocomplete";
 import SpeechToText from "./SpeechToText";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ChatMessage {
   id: string;
@@ -30,6 +30,7 @@ const VideoRoom = () => {
   const { user, roles } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const [appointment, setAppointment] = useState<any>(null);
   const [otherPartyName, setOtherPartyName] = useState("");
@@ -41,21 +42,21 @@ const VideoRoom = () => {
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [doctorBusy, setDoctorBusy] = useState(false);
 
-  // State
   const [elapsed, setElapsed] = useState(0);
   const [showChat, setShowChat] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
   const [splitMode, setSplitMode] = useState(false);
   const presenceLogId = useRef<string | null>(null);
 
-  // Chat & Notes
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [notes, setNotes] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const isDoctor = roles.includes("doctor") || roles.includes("admin");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   // ─── Check CRM verified (doctors only) ───
   useEffect(() => {
@@ -104,17 +105,15 @@ const VideoRoom = () => {
   useEffect(() => {
     if (!appointment || isDoctor) return;
     const checkQueue = async () => {
-      // Check if doctor has an active consultation
       const { data: activeAppts } = await supabase
         .from("appointments")
         .select("id, scheduled_at")
         .eq("doctor_id", appointment.doctor_id)
         .eq("status", "in_progress")
         .neq("id", appointmentId);
-      
+
       if (activeAppts && activeAppts.length > 0) {
         setDoctorBusy(true);
-        // Count waiting patients ahead
         const { data: waitingAhead } = await supabase
           .from("appointments")
           .select("id")
@@ -130,7 +129,6 @@ const VideoRoom = () => {
     };
     checkQueue();
 
-    // Realtime updates for queue
     const queueChannel = supabase
       .channel(`queue-${appointment.doctor_id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "appointments", filter: `doctor_id=eq.${appointment.doctor_id}` }, () => {
@@ -141,26 +139,26 @@ const VideoRoom = () => {
     return () => { supabase.removeChannel(queueChannel); };
   }, [appointment, isDoctor]);
 
-  // ─── Timer — only starts after device check is complete ───
+  // ─── Timer ───
   useEffect(() => {
     if (!deviceChecked) return;
     timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000);
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [deviceChecked]);
 
-  // ─── Realtime chat channel ───
+  // ─── Realtime chat ───
   useEffect(() => {
     if (!appointmentId || !user) return;
 
     const roomChannel = supabase.channel(`video-room-${appointmentId}`, {
       config: { broadcast: { self: false } },
     });
-
     channelRef.current = roomChannel;
 
     roomChannel
       .on("broadcast", { event: "chat-message" }, ({ payload }) => {
         setMessages((prev) => [...prev, payload as ChatMessage]);
+        if (!showChat) setUnreadCount(prev => prev + 1);
       })
       .subscribe();
 
@@ -169,6 +167,16 @@ const VideoRoom = () => {
     };
   }, [appointmentId, user]);
 
+  // Scroll chat to bottom
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // Clear unread when opening chat
+  useEffect(() => {
+    if (showChat) setUnreadCount(0);
+  }, [showChat]);
+
   const fetchAppointment = async () => {
     const { data } = await supabase
       .from("appointments").select("*").eq("id", appointmentId).single();
@@ -176,7 +184,6 @@ const VideoRoom = () => {
     if (!data) { setLoading(false); return; }
     setAppointment(data);
 
-    // Only doctor should set status to in_progress (prevents patient overwriting)
     if (isDoctor) {
       await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId);
     }
@@ -260,7 +267,6 @@ const VideoRoom = () => {
     logPresence();
 
     return () => {
-      // Log exit time
       if (presenceLogId.current) {
         supabase.from("video_presence_logs").update({
           left_at: new Date().toISOString(),
@@ -276,7 +282,6 @@ const VideoRoom = () => {
   useEffect(() => { elapsedRef.current = elapsed; }, [elapsed]);
 
   const endCall = useCallback(async () => {
-    // Save presence log
     if (presenceLogId.current) {
       await supabase.from("video_presence_logs").update({
         left_at: new Date().toISOString(),
@@ -297,24 +302,27 @@ const VideoRoom = () => {
 
   if (loading || checkingConsent) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      <div className="min-h-screen bg-[hsl(220,30%,5%)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-12 h-12 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
+          <p className="text-sm text-[hsl(220,15%,55%)]">Carregando sala...</p>
+        </div>
       </div>
     );
   }
 
   if (crmBlocked) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="max-w-md text-center space-y-4 p-8">
+      <div className="min-h-screen bg-[hsl(220,30%,5%)] flex items-center justify-center p-4">
+        <div className="max-w-md text-center space-y-4 p-8 rounded-2xl bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,18%)]">
           <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
             <X className="w-8 h-8 text-destructive" />
           </div>
-          <h2 className="text-xl font-bold text-foreground">CRM não verificado</h2>
-          <p className="text-muted-foreground text-sm">
+          <h2 className="text-xl font-bold text-white">CRM não verificado</h2>
+          <p className="text-[hsl(220,15%,55%)] text-sm">
             Seu CRM ainda não foi verificado pelo administrador. Você não pode acessar a sala de vídeo até que a verificação seja concluída.
           </p>
-          <Button onClick={() => navigate("/dashboard")} variant="outline">
+          <Button onClick={() => navigate("/dashboard")} variant="outline" className="rounded-xl">
             Voltar ao Dashboard
           </Button>
         </div>
@@ -349,80 +357,162 @@ const VideoRoom = () => {
     ? `Dr(a). ${user?.user_metadata?.first_name || "Médico"}`
     : user?.user_metadata?.first_name || "Paciente";
 
-  // Show queue position banner for patients
   const showQueueBanner = !isDoctor && doctorBusy && queuePosition !== null;
+  const showSidePanel = (showChat || showNotes) && !isMobile;
+  const showBottomSheet = (showChat || showNotes) && isMobile;
+
+  const chatPanel = (
+    <>
+      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+        {messages.length === 0 && (
+          <div className="text-center mt-12">
+            <MessageSquare className="w-8 h-8 text-[hsl(220,15%,25%)] mx-auto mb-2" />
+            <p className="text-xs text-[hsl(220,15%,35%)]">Nenhuma mensagem</p>
+          </div>
+        )}
+        {messages.map((msg) => (
+          <motion.div
+            key={msg.id}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`flex ${msg.sender === (isDoctor ? "doctor" : "patient") ? "justify-end" : "justify-start"}`}
+          >
+            <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
+              msg.sender === (isDoctor ? "doctor" : "patient")
+                ? "bg-primary text-primary-foreground rounded-br-sm"
+                : "bg-[hsl(220,20%,15%)] text-[hsl(220,20%,90%)] rounded-bl-sm"
+            }`}>
+              <p>{msg.text}</p>
+              <p className="text-[10px] opacity-50 mt-1">{msg.time}</p>
+            </div>
+          </motion.div>
+        ))}
+        <div ref={chatEndRef} />
+      </div>
+      <div className="p-3 border-t border-[hsl(220,15%,15%)] flex gap-2 shrink-0">
+        <input
+          value={chatInput}
+          onChange={(e) => setChatInput(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          placeholder="Digite..."
+          className="flex-1 bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,20%)] rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-[hsl(220,15%,35%)] outline-none focus:border-primary/50 transition-colors"
+        />
+        <Button size="icon" variant="ghost" onClick={sendMessage} className="text-primary hover:bg-primary/20 rounded-xl h-10 w-10">
+          <Send className="w-4 h-4" />
+        </Button>
+      </div>
+    </>
+  );
+
+  const notesPanel = (
+    <div className="flex-1 flex flex-col p-3 gap-3 overflow-auto">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-[hsl(220,15%,50%)]">Use o botão de ditado para falar</p>
+        <SpeechToText onTranscript={(text) => setNotes(prev => prev ? prev + " " + text : text)} />
+      </div>
+      <MedicalAutocomplete
+        value={notes}
+        onChange={setNotes}
+        field="notes"
+        placeholder="Anotações da consulta... (a IA sugere ao digitar)"
+        className="flex-1 bg-[hsl(220,20%,10%)] border-[hsl(220,15%,20%)] text-white placeholder:text-[hsl(220,15%,35%)] resize-none rounded-xl min-h-[150px]"
+      />
+      <Button onClick={saveNotes} size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl">
+        Salvar Anotações
+      </Button>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-[hsl(210,50%,4%)] flex flex-col">
+    <div className="min-h-screen bg-[hsl(220,30%,5%)] flex flex-col">
       <ConnectionStatus onReconnect={handleReconnect} />
-      {/* Queue position banner */}
+
+      {/* Queue banner */}
       {showQueueBanner && (
-        <div className="px-4 py-3 bg-amber-500/10 border-b border-amber-500/20 flex items-center justify-center gap-2">
-          <Clock className="w-4 h-4 text-amber-500 animate-pulse" />
-          <p className="text-sm text-amber-200">
+        <div className="px-4 py-3 bg-[hsl(45,90%,55%,0.1)] border-b border-[hsl(45,90%,55%,0.2)] flex items-center justify-center gap-2">
+          <Clock className="w-4 h-4 text-[hsl(45,90%,55%)] animate-pulse" />
+          <p className="text-sm text-[hsl(45,90%,70%)]">
             {queuePosition === 1
               ? "O médico está finalizando outro atendimento. Você é o próximo!"
               : `Posição na fila: ${queuePosition}º — aguarde, o médico atenderá em breve.`}
           </p>
         </div>
       )}
-      <div className="flex items-center justify-between px-4 py-2.5 bg-[hsl(210,50%,7%)] border-b border-border/15">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-gradient-hero flex items-center justify-center shadow-lg">
-            <MessageSquare className="w-4 h-4 text-primary-foreground" />
+
+      {/* Top bar */}
+      <div className="flex items-center justify-between px-3 md:px-4 py-2 bg-[hsl(220,25%,7%)] border-b border-[hsl(220,15%,12%)]">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
+            <span className="text-xs font-bold text-primary">
+              {(otherPartyName || "C").charAt(0)}
+            </span>
           </div>
-          <div>
-            <p className="text-sm font-semibold text-[hsl(210,20%,95%)]">{otherPartyName || "Consulta"}</p>
-            <p className="text-xs text-[hsl(210,15%,55%)]">Jitsi Meet • Criptografado</p>
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-white truncate">{otherPartyName || "Consulta"}</p>
+            <p className="text-[10px] text-[hsl(220,15%,45%)]">Criptografado • E2E</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            className={`rounded-full ${showChat ? "bg-primary text-primary-foreground" : "text-[hsl(210,20%,70%)] hover:bg-[hsl(210,30%,14%)]"}`}
+        <div className="flex items-center gap-1.5 md:gap-2.5 shrink-0">
+          {/* Chat button with unread badge */}
+          <button
+            className={`relative flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+              showChat
+                ? "bg-primary text-primary-foreground"
+                : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
+            }`}
             onClick={() => { setShowChat(!showChat); setShowNotes(false); }}
           >
-            <MessageSquare className="w-4 h-4 mr-1.5" />
-            Chat
-          </Button>
+            <MessageSquare className="w-3.5 h-3.5" />
+            {!isMobile && "Chat"}
+            {unreadCount > 0 && !showChat && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] flex items-center justify-center font-bold">
+                {unreadCount}
+              </span>
+            )}
+          </button>
 
           {isDoctor && (
             <>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`rounded-full ${showNotes ? "bg-primary text-primary-foreground" : "text-[hsl(210,20%,70%)] hover:bg-[hsl(210,30%,14%)]"}`}
+              <button
+                className={`flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  showNotes
+                    ? "bg-primary text-primary-foreground"
+                    : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
+                }`}
                 onClick={() => { setShowNotes(!showNotes); setShowChat(false); }}
               >
-                <FileText className="w-4 h-4 mr-1.5" />
-                Notas
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`rounded-full ${splitMode ? "bg-primary text-primary-foreground" : "text-[hsl(210,20%,70%)] hover:bg-[hsl(210,30%,14%)]"}`}
-                onClick={() => setSplitMode(!splitMode)}
-                title="Modo Split Screen"
-              >
-                {splitMode ? <PanelLeftClose className="w-4 h-4" /> : <PanelLeft className="w-4 h-4" />}
-              </Button>
+                <FileText className="w-3.5 h-3.5" />
+                {!isMobile && "Notas"}
+              </button>
+              {!isMobile && (
+                <button
+                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    splitMode
+                      ? "bg-primary text-primary-foreground"
+                      : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
+                  }`}
+                  onClick={() => setSplitMode(!splitMode)}
+                  title="Modo Split Screen"
+                >
+                  {splitMode ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeft className="w-3.5 h-3.5" />}
+                </button>
+              )}
             </>
           )}
 
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-destructive/15 text-destructive border border-destructive/20">
-            <div className="w-2 h-2 rounded-full bg-destructive animate-pulse" />
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-sm font-mono font-semibold">{formatTime(elapsed)}</span>
+          {/* Timer */}
+          <div className="flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/20">
+            <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
+            <span className="text-[11px] md:text-xs font-mono font-semibold text-destructive">{formatTime(elapsed)}</span>
           </div>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Video area — Jitsi */}
-        <div className={splitMode && isDoctor ? "w-1/2" : "flex-1"} style={{ minHeight: 0 }}>
+      <div className="flex-1 flex overflow-hidden relative">
+        {/* Video area */}
+        <div className={splitMode && isDoctor && !isMobile ? "w-1/2" : "flex-1"} style={{ minHeight: 0 }}>
           <VideoErrorBoundary onEndCall={endCall}>
             <VideoConsultation
               appointmentId={appointmentId!}
@@ -432,108 +522,80 @@ const VideoRoom = () => {
           </VideoErrorBoundary>
         </div>
 
-        {/* Split screen: permanent notes panel for doctor */}
-        {splitMode && isDoctor && (
-          <div className="w-1/2 border-l border-border/15 bg-[hsl(210,50%,6%)] flex flex-col overflow-hidden">
-            <div className="p-3 border-b border-border/15 flex items-center justify-between">
-              <p className="text-sm font-semibold text-[hsl(210,20%,90%)]">📋 Prontuário — Modo Focado</p>
+        {/* Split screen notes (desktop doctor) */}
+        {splitMode && isDoctor && !isMobile && (
+          <div className="w-1/2 border-l border-[hsl(220,15%,12%)] bg-[hsl(220,25%,7%)] flex flex-col overflow-hidden">
+            <div className="p-3 border-b border-[hsl(220,15%,12%)] flex items-center justify-between">
+              <p className="text-sm font-semibold text-white">📋 Prontuário — Modo Focado</p>
               <SpeechToText onTranscript={(text) => setNotes(prev => prev ? prev + " " + text : text)} />
             </div>
-            <div className="flex-1 flex flex-col p-3 gap-3 overflow-auto">
-              <MedicalAutocomplete
-                value={notes}
-                onChange={setNotes}
-                field="notes"
-                placeholder="Digite as anotações da consulta..."
-                className="flex-1 bg-[hsl(210,30%,10%)] border-border/20 text-[hsl(210,20%,90%)] placeholder:text-[hsl(210,15%,35%)] resize-none rounded-xl min-h-[200px]"
-              />
-              <Button onClick={saveNotes} size="sm" className="bg-gradient-hero text-primary-foreground rounded-xl">
-                Salvar Anotações
-              </Button>
-            </div>
+            {notesPanel}
           </div>
         )}
 
-        {/* Side panel */}
+        {/* Desktop side panel */}
         <AnimatePresence>
-          {(showChat || showNotes) && (
+          {showSidePanel && !splitMode && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: 320, opacity: 1 }}
+              animate={{ width: isMobile ? "100%" : 340, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="border-l border-border/15 bg-[hsl(210,50%,6%)] flex flex-col overflow-hidden"
+              className="border-l border-[hsl(220,15%,12%)] bg-[hsl(220,25%,7%)] flex flex-col overflow-hidden"
             >
-              <div className="p-3 border-b border-border/15 flex items-center justify-between shrink-0">
-                <p className="text-sm font-semibold text-[hsl(210,20%,90%)]">
+              <div className="p-3 border-b border-[hsl(220,15%,12%)] flex items-center justify-between shrink-0">
+                <p className="text-sm font-semibold text-white">
                   {showChat ? "💬 Chat" : "📝 Anotações"}
                 </p>
                 <button onClick={() => { setShowChat(false); setShowNotes(false); }}>
-                  <X className="w-4 h-4 text-[hsl(210,15%,50%)] hover:text-[hsl(210,20%,80%)]" />
+                  <X className="w-4 h-4 text-[hsl(220,15%,45%)] hover:text-white" />
                 </button>
               </div>
-
-              {showChat && (
-                <>
-                  <div className="flex-1 overflow-y-auto p-3 space-y-3">
-                    {messages.length === 0 && (
-                      <div className="text-center mt-12">
-                        <MessageSquare className="w-8 h-8 text-[hsl(210,15%,25%)] mx-auto mb-2" />
-                        <p className="text-xs text-[hsl(210,15%,35%)]">Nenhuma mensagem</p>
-                      </div>
-                    )}
-                    {messages.map((msg) => (
-                      <motion.div
-                        key={msg.id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className={`flex ${msg.sender === (isDoctor ? "doctor" : "patient") ? "justify-end" : "justify-start"}`}
-                      >
-                        <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-                          msg.sender === (isDoctor ? "doctor" : "patient")
-                            ? "bg-primary text-primary-foreground rounded-br-sm"
-                            : "bg-[hsl(210,30%,15%)] text-[hsl(210,20%,90%)] rounded-bl-sm"
-                        }`}>
-                          <p>{msg.text}</p>
-                          <p className="text-[10px] opacity-50 mt-1">{msg.time}</p>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                  <div className="p-3 border-t border-border/15 flex gap-2 shrink-0">
-                    <input
-                      value={chatInput}
-                      onChange={(e) => setChatInput(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                      placeholder="Digite..."
-                      className="flex-1 bg-[hsl(210,30%,10%)] border border-border/20 rounded-xl px-3 py-2 text-sm text-[hsl(210,20%,90%)] placeholder:text-[hsl(210,15%,35%)] outline-none focus:border-primary/50 transition-colors"
-                    />
-                    <Button size="icon" variant="ghost" onClick={sendMessage} className="text-primary hover:bg-primary/20 rounded-xl">
-                      <Send className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              {showNotes && isDoctor && (
-                <div className="flex-1 flex flex-col p-3 gap-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs text-[hsl(210,15%,50%)]">Use o botão de ditado para falar</p>
-                    <SpeechToText onTranscript={(text) => setNotes(prev => prev ? prev + " " + text : text)} />
-                  </div>
-                  <MedicalAutocomplete
-                    value={notes}
-                    onChange={setNotes}
-                    field="notes"
-                    placeholder="Anotações da consulta... (a IA sugere ao digitar)"
-                    className="flex-1 bg-[hsl(210,30%,10%)] border-border/20 text-[hsl(210,20%,90%)] placeholder:text-[hsl(210,15%,35%)] resize-none rounded-xl"
-                  />
-                  <Button onClick={saveNotes} size="sm" className="bg-gradient-hero text-primary-foreground rounded-xl">
-                    Salvar Anotações
-                  </Button>
-                </div>
-              )}
+              {showChat && chatPanel}
+              {showNotes && isDoctor && notesPanel}
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Mobile bottom sheet */}
+        <AnimatePresence>
+          {showBottomSheet && (
+            <>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-30 bg-black/40"
+                onClick={() => { setShowChat(false); setShowNotes(false); }}
+              />
+              {/* Sheet */}
+              <motion.div
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", stiffness: 350, damping: 35 }}
+                className="absolute bottom-0 left-0 right-0 z-40 bg-[hsl(220,25%,7%)] rounded-t-2xl border-t border-[hsl(220,15%,15%)] flex flex-col"
+                style={{ maxHeight: "70vh" }}
+              >
+                {/* Handle */}
+                <div className="flex justify-center pt-2 pb-1">
+                  <div className="w-10 h-1 rounded-full bg-[hsl(220,15%,25%)]" />
+                </div>
+                <div className="px-4 pb-2 flex items-center justify-between">
+                  <p className="text-sm font-semibold text-white">
+                    {showChat ? "💬 Chat" : "📝 Anotações"}
+                  </p>
+                  <button onClick={() => { setShowChat(false); setShowNotes(false); }}>
+                    <X className="w-4 h-4 text-[hsl(220,15%,45%)]" />
+                  </button>
+                </div>
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {showChat && chatPanel}
+                  {showNotes && isDoctor && notesPanel}
+                </div>
+              </motion.div>
+            </>
           )}
         </AnimatePresence>
       </div>
