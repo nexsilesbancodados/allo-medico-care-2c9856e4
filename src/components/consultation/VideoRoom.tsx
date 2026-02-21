@@ -10,6 +10,7 @@ import {
   FileText, Clock, Send, X, Monitor, MonitorOff, PhoneCall,
   WifiOff, RefreshCw
 } from "lucide-react";
+import ConsentTCLE from "./ConsentTCLE";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -41,7 +42,8 @@ const VideoRoom = () => {
   const [appointment, setAppointment] = useState<any>(null);
   const [otherPartyName, setOtherPartyName] = useState("");
   const [loading, setLoading] = useState(true);
-
+  const [hasConsent, setHasConsent] = useState(false);
+  const [checkingConsent, setCheckingConsent] = useState(true);
   // Media refs
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
@@ -76,6 +78,28 @@ const VideoRoom = () => {
   const iceConfigRef = useRef<RTCConfiguration>(FALLBACK_ICE);
 
   const connected = connectionStatus === "connected";
+
+  // ─── Check existing TCLE consent (patients only) ───
+  useEffect(() => {
+    if (!appointmentId || !user) return;
+    if (isDoctor) {
+      setHasConsent(true);
+      setCheckingConsent(false);
+      return;
+    }
+    const checkConsent = async () => {
+      const { data } = await supabase
+        .from("patient_consents")
+        .select("id")
+        .eq("appointment_id", appointmentId)
+        .eq("patient_id", user.id)
+        .is("revoked_at", null)
+        .limit(1);
+      setHasConsent((data?.length ?? 0) > 0);
+      setCheckingConsent(false);
+    };
+    checkConsent();
+  }, [appointmentId, user, isDoctor]);
 
   // Keep iceConfigRef in sync
   useEffect(() => {
@@ -495,11 +519,21 @@ const VideoRoom = () => {
 
   const currentStatus = statusConfig[connectionStatus];
 
-  if (loading) {
+  if (loading || checkingConsent) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
       </div>
+    );
+  }
+
+  if (!hasConsent) {
+    return (
+      <ConsentTCLE
+        appointmentId={appointmentId!}
+        doctorName={otherPartyName || undefined}
+        onConsented={() => setHasConsent(true)}
+      />
     );
   }
 
