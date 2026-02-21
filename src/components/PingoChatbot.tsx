@@ -7,6 +7,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import mascotImg from "@/assets/mascot.png";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -87,9 +88,17 @@ const PingoChatbot = () => {
   const [userContext, setUserContext] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
 
   // Hide on consultation/video pages
   const isConsultationPage = location.pathname.includes("/consultation");
+
+  // Listen for external open events (from bottom nav)
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-pingo-chat", handler);
+    return () => window.removeEventListener("open-pingo-chat", handler);
+  }, []);
 
 
   // Build patient context when user is logged in
@@ -287,29 +296,20 @@ const PingoChatbot = () => {
 
   return (
     <>
-      {/* FAB Button */}
+      {/* FAB Button — hidden on mobile (Pingo is in the bottom nav) */}
       <AnimatePresence>
-        {!open && (
+        {!open && !isMobile && (
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0, opacity: 0 }}
-            className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-2"
+            className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2"
           >
-            <motion.div
-              initial={{ opacity: 0, x: 10 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 }}
-              className="md:hidden bg-card border border-border text-foreground text-xs font-semibold px-3 py-1.5 rounded-full shadow-md whitespace-nowrap"
-            >
-              💬 Falar com o Pingo
-            </motion.div>
-
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setOpen(true)}
-              className="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-primary shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary-foreground/20 hover:shadow-xl transition-shadow"
+              className="relative w-16 h-16 rounded-full bg-primary shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary-foreground/20 hover:shadow-xl transition-shadow"
             >
               <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
               <img src={mascotImg} alt="Pingo" className="w-14 h-14 object-cover relative z-10" />
@@ -326,7 +326,11 @@ const PingoChatbot = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="fixed bottom-20 md:bottom-6 right-2 md:right-6 z-50 w-[380px] max-w-[calc(100vw-1rem)] h-[480px] md:h-[520px] max-h-[calc(100vh-6rem)] bg-card border border-border rounded-2xl shadow-elevated flex flex-col overflow-hidden"
+            className={`fixed z-50 bg-card border border-border rounded-2xl shadow-elevated flex flex-col overflow-hidden ${
+              isMobile
+                ? "inset-x-0 bottom-[68px] mx-2 h-[calc(100vh-8rem)]"
+                : "bottom-6 right-6 w-[380px] max-w-[calc(100vw-1rem)] h-[520px] max-h-[calc(100vh-6rem)]"
+            }`}
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 bg-gradient-hero text-primary-foreground">
