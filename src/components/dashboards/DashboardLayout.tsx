@@ -22,6 +22,7 @@ import GlobalCommand from "@/components/GlobalCommand";
 import logoImg from "@/assets/logo.png";
 import mascotImg from "@/assets/mascot.png";
 import DashboardBreadcrumbs from "@/components/dashboards/DashboardBreadcrumbs";
+import useNotificationTitle from "@/hooks/use-notification-title";
 
 interface NavItem {
   label: string;
@@ -58,6 +59,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const [moreOpen, setMoreOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { signOut } = useAuth();
+  useNotificationTitle();
 
   const theme = ROLE_THEME[role] ?? ROLE_THEME.patient;
 
