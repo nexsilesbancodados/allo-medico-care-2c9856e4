@@ -1,16 +1,70 @@
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import avatarMaria from "@/assets/avatar-maria.png";
 import avatarCarlos from "@/assets/avatar-carlos.png";
 import avatarAna from "@/assets/avatar-ana.png";
 
-const testimonials = [
+const fallbackTestimonials = [
   { name: "Maria Silva", role: "Paciente", text: "Consegui uma consulta com cardiologista em menos de 1 hora. A receita chegou digital na hora. Incrível!", rating: 5, avatar: avatarMaria },
   { name: "Dr. Carlos Mendes", role: "Clínico Geral", text: "A plataforma facilitou muito meu dia a dia. Atendo de casa com a mesma qualidade do consultório.", rating: 5, avatar: avatarCarlos },
   { name: "Ana Costa", role: "Paciente", text: "Com o plano mensal, cuido da saúde de toda minha família sem sair de casa. Vale cada centavo.", rating: 5, avatar: avatarAna },
 ];
 
 const TestimonialsSection = () => {
+  const [testimonials, setTestimonials] = useState(fallbackTestimonials);
+
+  useEffect(() => {
+    const fetchRealTestimonials = async () => {
+      try {
+        const { data } = await supabase
+          .from("satisfaction_surveys")
+          .select("nps_score, comment, patient_id, doctor_id, created_at")
+          .not("comment", "is", null)
+          .gte("nps_score", 8)
+          .order("created_at", { ascending: false })
+          .limit(3);
+
+        if (!data || data.length < 2) return; // Keep fallbacks if not enough real data
+
+        const patientIds = [...new Set(data.map(d => d.patient_id))];
+        const doctorIds = [...new Set(data.map(d => d.doctor_id))];
+
+        const [pRes, dRes] = await Promise.all([
+          supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds),
+          supabase.from("doctor_profiles").select("id, user_id").in("id", doctorIds),
+        ]);
+
+        const patientMap = new Map(pRes.data?.map(p => [p.user_id, `${p.first_name} ${p.last_name?.charAt(0) || ""}.`]) ?? []);
+
+        let doctorNameMap = new Map<string, string>();
+        if (dRes.data && dRes.data.length > 0) {
+          const docUserIds = dRes.data.map(d => d.user_id);
+          const { data: docProfiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", docUserIds);
+          dRes.data.forEach(d => {
+            const p = docProfiles?.find(pr => pr.user_id === d.user_id);
+            if (p) doctorNameMap.set(d.id, `Dr(a). ${p.first_name}`);
+          });
+        }
+
+        const avatars = [avatarMaria, avatarCarlos, avatarAna];
+        const realTestimonials = data.map((item, i) => ({
+          name: patientMap.get(item.patient_id) || "Paciente",
+          role: `Paciente · ${doctorNameMap.get(item.doctor_id) || "Consulta"}`,
+          text: item.comment!,
+          rating: Math.min(5, Math.round(item.nps_score / 2)),
+          avatar: avatars[i % avatars.length],
+        }));
+
+        setTestimonials(realTestimonials);
+      } catch {
+        // Keep fallbacks
+      }
+    };
+    fetchRealTestimonials();
+  }, []);
+
   return (
     <section id="depoimentos" className="py-12 md:py-24">
       <div className="container mx-auto px-4">

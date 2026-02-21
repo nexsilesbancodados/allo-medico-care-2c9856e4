@@ -14,6 +14,7 @@ import { ptBR } from "date-fns/locale";
 import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity, Pill, ExternalLink } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
 import BlobKPICard from "@/components/ui/blob-kpi-card";
+import DoctorOnboarding from "@/components/doctor/DoctorOnboarding";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -114,6 +115,8 @@ const DoctorDashboard = () => {
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("home")} role="doctor">
       <div className="max-w-5xl space-y-5">
+        {/* ── Doctor Onboarding Checklist ── */}
+        <DoctorOnboarding />
 
         {/* ── Page Header ── */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
