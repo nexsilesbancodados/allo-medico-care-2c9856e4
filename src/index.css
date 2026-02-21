@@ -342,7 +342,32 @@
     size: A4;
     margin: 10mm;
   }
-  .no-print {
+  .no-print,
+  nav, header, footer,
+  [data-pingo-chat],
+  [data-accessibility-toggle],
+  .cookie-consent {
     display: none !important;
+  }
+  /* Medical document print enhancements */
+  .print-prescription h1,
+  .print-prescription h2 {
+    color: #1a6fc4 !important;
+  }
+  .print-prescription .doctor-signature {
+    border-top: 1px solid #333;
+    padding-top: 8mm;
+    margin-top: 15mm;
+  }
+  .print-prescription table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .print-prescription table th,
+  .print-prescription table td {
+    border: 0.5pt solid #ccc;
+    padding: 2mm 3mm;
+    text-align: left;
+    font-size: 10pt;
   }
 }
