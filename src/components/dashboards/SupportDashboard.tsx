@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw, Inbox, Wifi, Shield, Bot } from "lucide-react";
+import { Users, AlertTriangle, Activity, MessageCircle, UserCog, ShieldAlert, History, Eye, Search, Filter, Download, RefreshCw, Inbox, Wifi, Shield } from "lucide-react";
 import SupportChat from "@/components/support/SupportChat";
 import SupportInbox from "@/components/support/SupportInbox";
 import { toast } from "sonner";
@@ -20,7 +20,6 @@ import { motion } from "framer-motion";
 
 const supportNav = [
   { label: "Visão Geral", href: "/dashboard", icon: <Activity className="w-4 h-4" />, active: true },
-  { label: "Assistente IA", href: "/dashboard/ai-assistant", icon: <Bot className="w-4 h-4" /> },
   { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" /> },
 ];
 
