@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
   MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft,
-  UserRound, Pill
+  UserRound, Pill, PhoneOff, Mic, MicOff, Video, VideoOff, Shield,
+  MoreVertical, Maximize2, Minimize2, Copy, Share2
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation from "./VideoConsultation";
@@ -50,17 +51,34 @@ const VideoRoom = () => {
   const [showNotes, setShowNotes] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
   const [splitMode, setSplitMode] = useState(false);
+  const [activePanel, setActivePanel] = useState<"chat" | "notes" | "info" | null>(null);
   const presenceLogId = useRef<string | null>(null);
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
   const [notes, setNotes] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const isDoctor = roles.includes("doctor") || roles.includes("admin");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Sync panel state helpers
+  const openPanel = (panel: "chat" | "notes" | "info") => {
+    setActivePanel(prev => prev === panel ? null : panel);
+    setShowChat(panel === "chat" ? !showChat : false);
+    setShowNotes(panel === "notes" ? !showNotes : false);
+    setShowInfo(panel === "info" ? !showInfo : false);
+  };
+
+  const closeAllPanels = () => {
+    setActivePanel(null);
+    setShowChat(false);
+    setShowNotes(false);
+    setShowInfo(false);
+  };
 
   // ─── Check CRM verified (doctors only) ───
   useEffect(() => {
@@ -171,15 +189,30 @@ const VideoRoom = () => {
     };
   }, [appointmentId, user]);
 
-  // Scroll chat to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Clear unread when opening chat
   useEffect(() => {
     if (showChat) setUnreadCount(0);
   }, [showChat]);
+
+  // Fullscreen
+  useEffect(() => {
+    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handleFsChange);
+    return () => document.removeEventListener("fullscreenchange", handleFsChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen?.();
+      setIsFullscreen(true);
+    } else {
+      document.exitFullscreen?.();
+      setIsFullscreen(false);
+    }
+  };
 
   const fetchAppointment = async () => {
     const { data } = await supabase
@@ -254,7 +287,7 @@ const VideoRoom = () => {
         appointment_id: appointmentId, doctor_id: doc.id, content: notes,
       });
     }
-    toast({ title: "Anotações salvas!" });
+    toast({ title: "✅ Anotações salvas!" });
   };
 
   // ─── Video presence logging ───
@@ -306,10 +339,18 @@ const VideoRoom = () => {
 
   if (loading || checkingConsent) {
     return (
-      <div className="min-h-screen bg-[hsl(220,30%,5%)] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-12 h-12 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
-          <p className="text-sm text-[hsl(220,15%,55%)]">Carregando sala...</p>
+      <div className="min-h-screen bg-[hsl(220,30%,4%)] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-16 h-16 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Video className="w-6 h-6 text-primary" />
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-medium text-white">Preparando sua consulta</p>
+            <p className="text-xs text-[hsl(220,15%,45%)] mt-1">Conectando à sala segura...</p>
+          </div>
         </div>
       </div>
     );
@@ -317,19 +358,23 @@ const VideoRoom = () => {
 
   if (crmBlocked) {
     return (
-      <div className="min-h-screen bg-[hsl(220,30%,5%)] flex items-center justify-center p-4">
-        <div className="max-w-md text-center space-y-4 p-8 rounded-2xl bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,18%)]">
+      <div className="min-h-screen bg-[hsl(220,30%,4%)] flex items-center justify-center p-4">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md text-center space-y-4 p-8 rounded-2xl bg-[hsl(220,20%,8%)] border border-[hsl(220,15%,15%)] shadow-2xl"
+        >
           <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">
             <X className="w-8 h-8 text-destructive" />
           </div>
           <h2 className="text-xl font-bold text-white">CRM não verificado</h2>
-          <p className="text-[hsl(220,15%,55%)] text-sm">
+          <p className="text-[hsl(220,15%,55%)] text-sm leading-relaxed">
             Seu CRM ainda não foi verificado pelo administrador. Você não pode acessar a sala de vídeo até que a verificação seja concluída.
           </p>
           <Button onClick={() => navigate("/dashboard")} variant="outline" className="rounded-xl">
             Voltar ao Dashboard
           </Button>
-        </div>
+        </motion.div>
       </div>
     );
   }
@@ -365,43 +410,56 @@ const VideoRoom = () => {
   const showSidePanel = (showChat || showNotes || showInfo) && !isMobile;
   const showBottomSheet = (showChat || showNotes || showInfo) && isMobile;
 
+  // Timer color based on duration
+  const timerColor = elapsed > 3600
+    ? "text-destructive"
+    : elapsed > 1800
+    ? "text-amber-400"
+    : "text-[hsl(150,60%,55%)]";
+
   const chatPanel = (
     <>
-      <div className="flex-1 overflow-y-auto p-3 space-y-3">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
-          <div className="text-center mt-12">
-            <MessageSquare className="w-8 h-8 text-[hsl(220,15%,25%)] mx-auto mb-2" />
-            <p className="text-xs text-[hsl(220,15%,35%)]">Nenhuma mensagem</p>
+          <div className="text-center mt-12 space-y-2">
+            <div className="w-14 h-14 rounded-2xl bg-[hsl(220,20%,12%)] flex items-center justify-center mx-auto">
+              <MessageSquare className="w-6 h-6 text-[hsl(220,15%,30%)]" />
+            </div>
+            <p className="text-xs text-[hsl(220,15%,35%)]">Inicie uma conversa</p>
+            <p className="text-[10px] text-[hsl(220,15%,25%)]">Mensagens são criptografadas</p>
           </div>
         )}
-        {messages.map((msg) => (
-          <motion.div
-            key={msg.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className={`flex ${msg.sender === (isDoctor ? "doctor" : "patient") ? "justify-end" : "justify-start"}`}
-          >
-            <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${
-              msg.sender === (isDoctor ? "doctor" : "patient")
-                ? "bg-primary text-primary-foreground rounded-br-sm"
-                : "bg-[hsl(220,20%,15%)] text-[hsl(220,20%,90%)] rounded-bl-sm"
-            }`}>
-              <p>{msg.text}</p>
-              <p className="text-[10px] opacity-50 mt-1">{msg.time}</p>
-            </div>
-          </motion.div>
-        ))}
+        {messages.map((msg) => {
+          const isMine = msg.sender === (isDoctor ? "doctor" : "patient");
+          return (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 8, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              className={`flex ${isMine ? "justify-end" : "justify-start"}`}
+            >
+              <div className={`max-w-[80%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                isMine
+                  ? "bg-primary text-primary-foreground rounded-br-md"
+                  : "bg-[hsl(220,20%,13%)] text-[hsl(220,20%,90%)] rounded-bl-md border border-[hsl(220,15%,18%)]"
+              }`}>
+                <p>{msg.text}</p>
+                <p className={`text-[10px] mt-1 ${isMine ? "text-primary-foreground/50" : "text-[hsl(220,15%,35%)]"}`}>{msg.time}</p>
+              </div>
+            </motion.div>
+          );
+        })}
         <div ref={chatEndRef} />
       </div>
-      <div className="p-3 border-t border-[hsl(220,15%,15%)] flex gap-2 shrink-0">
+      <div className="p-3 border-t border-[hsl(220,15%,12%)] flex gap-2 shrink-0">
         <input
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="Digite..."
-          className="flex-1 bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,20%)] rounded-xl px-3 py-2.5 text-sm text-white placeholder:text-[hsl(220,15%,35%)] outline-none focus:border-primary/50 transition-colors"
+          placeholder="Mensagem..."
+          className="flex-1 bg-[hsl(220,20%,8%)] border border-[hsl(220,15%,16%)] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-[hsl(220,15%,30%)] outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
         />
-        <Button size="icon" variant="ghost" onClick={sendMessage} className="text-primary hover:bg-primary/20 rounded-xl h-10 w-10">
+        <Button size="icon" onClick={sendMessage} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 w-10 shrink-0">
           <Send className="w-4 h-4" />
         </Button>
       </div>
@@ -409,9 +467,12 @@ const VideoRoom = () => {
   );
 
   const notesPanel = (
-    <div className="flex-1 flex flex-col p-3 gap-3 overflow-auto">
+    <div className="flex-1 flex flex-col p-4 gap-3 overflow-auto">
       <div className="flex items-center justify-between">
-        <p className="text-xs text-[hsl(220,15%,50%)]">Use o botão de ditado para falar</p>
+        <div>
+          <p className="text-xs font-medium text-[hsl(220,15%,65%)]">Prontuário do atendimento</p>
+          <p className="text-[10px] text-[hsl(220,15%,40%)] mt-0.5">Salvo automaticamente no sistema</p>
+        </div>
         <SpeechToText onTranscript={(text) => setNotes(prev => prev ? prev + " " + text : text)} />
       </div>
       <MedicalAutocomplete
@@ -419,123 +480,172 @@ const VideoRoom = () => {
         onChange={setNotes}
         field="notes"
         placeholder="Anotações da consulta... (a IA sugere ao digitar)"
-        className="flex-1 bg-[hsl(220,20%,10%)] border-[hsl(220,15%,20%)] text-white placeholder:text-[hsl(220,15%,35%)] resize-none rounded-xl min-h-[150px]"
+        className="flex-1 bg-[hsl(220,20%,8%)] border-[hsl(220,15%,16%)] text-white placeholder:text-[hsl(220,15%,30%)] resize-none rounded-xl min-h-[150px] focus:border-primary/50 focus:ring-1 focus:ring-primary/20"
       />
-      <Button onClick={saveNotes} size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl">
-        Salvar Anotações
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={saveNotes} size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl gap-1.5">
+          <FileText className="w-3.5 h-3.5" />
+          Salvar Anotações
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          className="rounded-xl border-[hsl(220,15%,18%)] text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
+          onClick={() => window.open(`/dashboard/prescribe/${appointmentId}`, '_blank')}
+        >
+          <Pill className="w-3.5 h-3.5" />
+        </Button>
+      </div>
     </div>
   );
 
+  // Toolbar button component
+  const ToolbarBtn = ({ active, icon, label, badge, onClick }: {
+    active?: boolean; icon: React.ReactNode; label: string; badge?: number; onClick: () => void;
+  }) => (
+    <button
+      className={`relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
+        active
+          ? "bg-primary/15 text-primary border border-primary/25 shadow-[0_0_12px_hsl(var(--primary)/0.15)]"
+          : "text-[hsl(220,15%,55%)] hover:text-white hover:bg-[hsl(220,20%,12%)] border border-transparent"
+      }`}
+      onClick={onClick}
+    >
+      {icon}
+      {!isMobile && <span>{label}</span>}
+      {badge && badge > 0 && (
+        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold shadow-lg animate-pulse">
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+
   return (
-    <div className="min-h-screen bg-[hsl(220,30%,5%)] flex flex-col">
+    <div className="min-h-screen bg-[hsl(220,30%,4%)] flex flex-col">
       <ConnectionStatus onReconnect={handleReconnect} />
 
       {/* Queue banner */}
-      {showQueueBanner && (
-        <div className="px-4 py-3 bg-[hsl(45,90%,55%,0.1)] border-b border-[hsl(45,90%,55%,0.2)] flex items-center justify-center gap-2">
-          <Clock className="w-4 h-4 text-[hsl(45,90%,55%)] animate-pulse" />
-          <p className="text-sm text-[hsl(45,90%,70%)]">
-            {queuePosition === 1
-              ? "O médico está finalizando outro atendimento. Você é o próximo!"
-              : `Posição na fila: ${queuePosition}º — aguarde, o médico atenderá em breve.`}
-          </p>
-        </div>
-      )}
+      <AnimatePresence>
+        {showQueueBanner && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            className="px-4 py-3 bg-amber-500/5 border-b border-amber-500/15 flex items-center justify-center gap-2"
+          >
+            <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
+            <p className="text-sm text-amber-300">
+              {queuePosition === 1
+                ? "O médico está finalizando outro atendimento. Você é o próximo!"
+                : `Posição na fila: ${queuePosition}º — aguarde, o médico atenderá em breve.`}
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-3 md:px-4 py-2 bg-[hsl(220,25%,7%)] border-b border-[hsl(220,15%,12%)]">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-            <span className="text-xs font-bold text-primary">
-              {(otherPartyName || "C").charAt(0)}
-            </span>
+      {/* Top bar - redesigned */}
+      <div className="flex items-center justify-between px-3 md:px-5 py-2.5 bg-[hsl(220,25%,6%)] border-b border-[hsl(220,15%,10%)]">
+        {/* Left: participant info */}
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="relative">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+              <span className="text-xs font-bold text-primary">
+                {(otherPartyName || "C").charAt(0)}
+              </span>
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[hsl(150,60%,45%)] border-2 border-[hsl(220,25%,6%)]" />
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-white truncate">{otherPartyName || "Consulta"}</p>
-            <p className="text-[10px] text-[hsl(220,15%,45%)]">Criptografado • E2E</p>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <Shield className="w-2.5 h-2.5 text-[hsl(150,60%,45%)]" />
+                <span className="text-[10px] text-[hsl(220,15%,40%)]">E2E</span>
+              </div>
+              <span className="text-[10px] text-[hsl(220,15%,20%)]">•</span>
+              <span className="text-[10px] text-[hsl(220,15%,40%)]">CFM 2.314/22</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 md:gap-2.5 shrink-0">
-          {/* Chat button with unread badge */}
-          <button
-            className={`relative flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              showChat
-                ? "bg-primary text-primary-foreground"
-                : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
-            }`}
-            onClick={() => { setShowChat(!showChat); setShowNotes(false); setShowInfo(false); }}
-          >
-            <MessageSquare className="w-3.5 h-3.5" />
-            {!isMobile && "Chat"}
-            {unreadCount > 0 && !showChat && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] flex items-center justify-center font-bold">
-                {unreadCount}
-              </span>
-            )}
-          </button>
+        {/* Center: tools */}
+        <div className="flex items-center gap-1 md:gap-1.5">
+          <ToolbarBtn
+            active={showChat}
+            icon={<MessageSquare className="w-3.5 h-3.5" />}
+            label="Chat"
+            badge={showChat ? 0 : unreadCount}
+            onClick={() => openPanel("chat")}
+          />
 
           {isDoctor && (
             <>
-              <button
-                className={`flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  showNotes
-                    ? "bg-primary text-primary-foreground"
-                    : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
-                }`}
-                onClick={() => { setShowNotes(!showNotes); setShowChat(false); setShowInfo(false); }}
-              >
-                <FileText className="w-3.5 h-3.5" />
-                {!isMobile && "Notas"}
-              </button>
+              <ToolbarBtn
+                active={showNotes}
+                icon={<FileText className="w-3.5 h-3.5" />}
+                label="Prontuário"
+                onClick={() => openPanel("notes")}
+              />
               {!isMobile && (
-                <button
-                  className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    splitMode
-                      ? "bg-primary text-primary-foreground"
-                      : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
-                  }`}
+                <ToolbarBtn
+                  active={splitMode}
+                  icon={splitMode ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeft className="w-3.5 h-3.5" />}
+                  label="Split"
                   onClick={() => setSplitMode(!splitMode)}
-                  title="Modo Split Screen"
-                >
-                  {splitMode ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeft className="w-3.5 h-3.5" />}
-                </button>
+                />
               )}
             </>
           )}
 
-          {/* Info panel button */}
-          <button
-            className={`flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-              showInfo
-                ? "bg-primary text-primary-foreground"
-                : "text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)]"
-            }`}
-            onClick={() => { setShowInfo(!showInfo); setShowChat(false); setShowNotes(false); }}
-          >
-            <UserRound className="w-3.5 h-3.5" />
-            {!isMobile && (isDoctor ? "Paciente" : "Médico")}
-          </button>
+          <ToolbarBtn
+            active={showInfo}
+            icon={<UserRound className="w-3.5 h-3.5" />}
+            label={isDoctor ? "Paciente" : "Médico"}
+            onClick={() => openPanel("info")}
+          />
 
-          {/* Quick prescription button (doctor only) */}
           {isDoctor && (
-            <button
-              className="flex items-center gap-1.5 px-2.5 md:px-3 py-1.5 rounded-full text-xs font-medium text-[hsl(220,15%,60%)] hover:bg-[hsl(220,20%,12%)] transition-all"
+            <ToolbarBtn
+              icon={<Pill className="w-3.5 h-3.5" />}
+              label="Receita"
               onClick={() => window.open(`/dashboard/prescribe/${appointmentId}`, '_blank')}
-              title="Abrir receita em nova aba"
+            />
+          )}
+        </div>
+
+        {/* Right: timer & controls */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Timer */}
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[hsl(220,20%,8%)] border border-[hsl(220,15%,12%)]">
+            <div className={`w-2 h-2 rounded-full animate-pulse ${
+              elapsed > 3600 ? "bg-destructive" : elapsed > 1800 ? "bg-amber-400" : "bg-[hsl(150,60%,45%)]"
+            }`} />
+            <span className={`text-xs font-mono font-bold tracking-wider ${timerColor}`}>
+              {formatTime(elapsed)}
+            </span>
+          </div>
+
+          {/* Fullscreen */}
+          {!isMobile && (
+            <button
+              onClick={toggleFullscreen}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-[hsl(220,15%,45%)] hover:text-white hover:bg-[hsl(220,20%,12%)] transition-all"
+              title={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
             >
-              <Pill className="w-3.5 h-3.5" />
-              {!isMobile && "Receita"}
+              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
             </button>
           )}
 
-          {/* Timer */
-          }
-          <div className="flex items-center gap-1 px-2 md:px-3 py-1.5 rounded-full bg-destructive/10 border border-destructive/20">
-            <div className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
-            <span className="text-[11px] md:text-xs font-mono font-semibold text-destructive">{formatTime(elapsed)}</span>
-          </div>
+          {/* End call */}
+          <Button
+            onClick={endCall}
+            size="sm"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl gap-1.5 shadow-lg shadow-destructive/20 hover:shadow-destructive/30 transition-all hover:scale-105 active:scale-95 h-9 px-4"
+          >
+            <PhoneOff className="w-4 h-4" />
+            {!isMobile && <span className="text-xs font-semibold">Encerrar</span>}
+          </Button>
         </div>
       </div>
 
@@ -554,9 +664,17 @@ const VideoRoom = () => {
 
         {/* Split screen notes (desktop doctor) */}
         {splitMode && isDoctor && !isMobile && (
-          <div className="w-1/2 border-l border-[hsl(220,15%,12%)] bg-[hsl(220,25%,7%)] flex flex-col overflow-hidden">
-            <div className="p-3 border-b border-[hsl(220,15%,12%)] flex items-center justify-between">
-              <p className="text-sm font-semibold text-white">📋 Prontuário — Modo Focado</p>
+          <div className="w-1/2 border-l border-[hsl(220,15%,10%)] bg-[hsl(220,25%,6%)] flex flex-col overflow-hidden">
+            <div className="p-4 border-b border-[hsl(220,15%,10%)] flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <FileText className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">Prontuário</p>
+                  <p className="text-[10px] text-[hsl(220,15%,40%)]">Modo focado</p>
+                </div>
+              </div>
               <SpeechToText onTranscript={(text) => setNotes(prev => prev ? prev + " " + text : text)} />
             </div>
             {notesPanel}
@@ -568,17 +686,34 @@ const VideoRoom = () => {
           {showSidePanel && !splitMode && (
             <motion.div
               initial={{ width: 0, opacity: 0 }}
-              animate={{ width: isMobile ? "100%" : 340, opacity: 1 }}
+              animate={{ width: 360, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="border-l border-[hsl(220,15%,12%)] bg-[hsl(220,25%,7%)] flex flex-col overflow-hidden"
+              transition={{ type: "spring", stiffness: 350, damping: 35 }}
+              className="border-l border-[hsl(220,15%,10%)] bg-[hsl(220,25%,6%)] flex flex-col overflow-hidden"
             >
-              <div className="p-3 border-b border-[hsl(220,15%,12%)] flex items-center justify-between shrink-0">
-                <p className="text-sm font-semibold text-white">
-                  {showChat ? "💬 Chat" : showNotes ? "📝 Anotações" : isDoctor ? "🩺 Paciente" : "👨‍⚕️ Médico"}
-                </p>
-                <button onClick={() => { setShowChat(false); setShowNotes(false); setShowInfo(false); }}>
-                  <X className="w-4 h-4 text-[hsl(220,15%,45%)] hover:text-white" />
+              <div className="p-4 border-b border-[hsl(220,15%,10%)] flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                    showChat ? "bg-primary/10" : showNotes ? "bg-amber-500/10" : "bg-[hsl(220,20%,12%)]"
+                  }`}>
+                    {showChat ? <MessageSquare className="w-4 h-4 text-primary" /> :
+                     showNotes ? <FileText className="w-4 h-4 text-amber-400" /> :
+                     <UserRound className="w-4 h-4 text-[hsl(220,15%,55%)]" />}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">
+                      {showChat ? "Chat" : showNotes ? "Prontuário" : isDoctor ? "Paciente" : "Médico"}
+                    </p>
+                    <p className="text-[10px] text-[hsl(220,15%,40%)]">
+                      {showChat ? `${messages.length} mensagens` : showNotes ? "Auto-save ativo" : "Informações"}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={closeAllPanels}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-[hsl(220,15%,40%)] hover:text-white hover:bg-[hsl(220,20%,12%)] transition-all"
+                >
+                  <X className="w-4 h-4" />
                 </button>
               </div>
               {showChat && chatPanel}
@@ -597,33 +732,42 @@ const VideoRoom = () => {
         <AnimatePresence>
           {showBottomSheet && (
             <>
-              {/* Backdrop */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 z-30 bg-black/40"
-                onClick={() => { setShowChat(false); setShowNotes(false); setShowInfo(false); }}
+                className="absolute inset-0 z-30 bg-black/50 backdrop-blur-[2px]"
+                onClick={closeAllPanels}
               />
-              {/* Sheet */}
               <motion.div
                 initial={{ y: "100%" }}
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
-                transition={{ type: "spring", stiffness: 350, damping: 35 }}
-                className="absolute bottom-0 left-0 right-0 z-40 bg-[hsl(220,25%,7%)] rounded-t-2xl border-t border-[hsl(220,15%,15%)] flex flex-col"
-                style={{ maxHeight: "70vh" }}
+                transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                className="absolute bottom-0 left-0 right-0 z-40 bg-[hsl(220,25%,6%)] rounded-t-3xl border-t border-[hsl(220,15%,12%)] flex flex-col shadow-2xl"
+                style={{ maxHeight: "75vh" }}
               >
-                {/* Handle */}
-                <div className="flex justify-center pt-2 pb-1">
-                  <div className="w-10 h-1 rounded-full bg-[hsl(220,15%,25%)]" />
+                <div className="flex justify-center pt-3 pb-1">
+                  <div className="w-10 h-1 rounded-full bg-[hsl(220,15%,20%)]" />
                 </div>
-                <div className="px-4 pb-2 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-white">
-                    {showChat ? "💬 Chat" : showNotes ? "📝 Anotações" : isDoctor ? "🩺 Paciente" : "👨‍⚕️ Médico"}
-                  </p>
-                  <button onClick={() => { setShowChat(false); setShowNotes(false); setShowInfo(false); }}>
-                    <X className="w-4 h-4 text-[hsl(220,15%,45%)]" />
+                <div className="px-4 pb-3 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                      showChat ? "bg-primary/10" : showNotes ? "bg-amber-500/10" : "bg-[hsl(220,20%,12%)]"
+                    }`}>
+                      {showChat ? <MessageSquare className="w-4 h-4 text-primary" /> :
+                       showNotes ? <FileText className="w-4 h-4 text-amber-400" /> :
+                       <UserRound className="w-4 h-4 text-[hsl(220,15%,55%)]" />}
+                    </div>
+                    <p className="text-sm font-semibold text-white">
+                      {showChat ? "Chat" : showNotes ? "Prontuário" : isDoctor ? "Paciente" : "Médico"}
+                    </p>
+                  </div>
+                  <button
+                    onClick={closeAllPanels}
+                    className="w-7 h-7 rounded-lg flex items-center justify-center text-[hsl(220,15%,40%)] hover:text-white"
+                  >
+                    <X className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="flex-1 flex flex-col overflow-hidden">

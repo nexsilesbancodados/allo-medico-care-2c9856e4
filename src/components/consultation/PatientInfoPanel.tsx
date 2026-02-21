@@ -4,10 +4,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import {
   User, Heart, AlertTriangle, Droplets, FileText, Stethoscope,
-  ChevronDown, ChevronUp, Clock, Pill
+  ChevronDown, ChevronUp, Clock, Pill, Activity, Calendar,
+  Phone, CreditCard, Shield
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface PatientInfoPanelProps {
   patientId: string;
@@ -47,16 +49,10 @@ interface PrescriptionData {
   created_at: string;
 }
 
-const severityColor: Record<string, string> = {
-  mild: "bg-green-500/15 text-green-600 border-green-500/20",
-  moderate: "bg-amber-500/15 text-amber-600 border-amber-500/20",
-  severe: "bg-destructive/15 text-destructive border-destructive/20",
-};
-
-const severityLabel: Record<string, string> = {
-  mild: "Leve",
-  moderate: "Moderado",
-  severe: "Grave",
+const severityConfig: Record<string, { color: string; bg: string; border: string; label: string }> = {
+  mild: { color: "text-[hsl(150,60%,55%)]", bg: "bg-[hsl(150,60%,40%,0.1)]", border: "border-[hsl(150,60%,40%,0.2)]", label: "Leve" },
+  moderate: { color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", label: "Moderado" },
+  severe: { color: "text-destructive", bg: "bg-destructive/10", border: "border-destructive/20", label: "Grave" },
 };
 
 const PatientInfoPanel = ({ patientId, appointmentId }: PatientInfoPanelProps) => {
@@ -114,8 +110,11 @@ const PatientInfoPanel = ({ patientId, appointmentId }: PatientInfoPanelProps) =
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+      <div className="flex items-center justify-center py-12">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <p className="text-xs text-[hsl(220,15%,40%)]">Carregando dados...</p>
+        </div>
       </div>
     );
   }
@@ -124,24 +123,57 @@ const PatientInfoPanel = ({ patientId, appointmentId }: PatientInfoPanelProps) =
     ? Math.floor((Date.now() - new Date(patient.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
     : null;
 
+  const hasAlerts = (patient?.allergies?.length ?? 0) > 0 || (patient?.chronic_conditions?.length ?? 0) > 0;
+
   return (
     <ScrollArea className="flex-1">
-      <div className="p-3 space-y-3">
-        {/* Patient header */}
+      <div className="p-4 space-y-3">
+        {/* Patient header card */}
         {patient && (
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-[hsl(220,20%,12%)] border border-[hsl(220,15%,18%)]">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center shrink-0">
-              <User className="w-5 h-5 text-primary" />
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-[hsl(220,20%,10%)] to-[hsl(220,20%,8%)] border border-[hsl(220,15%,15%)] shadow-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/25 to-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+                <User className="w-5 h-5 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold text-white truncate">
+                  {patient.first_name} {patient.last_name}
+                </p>
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                  {age && (
+                    <span className="text-[11px] text-[hsl(220,15%,50%)] flex items-center gap-1">
+                      <Calendar className="w-2.5 h-2.5" />{age} anos
+                    </span>
+                  )}
+                  {patient.blood_type && (
+                    <span className="text-[11px] text-red-400 flex items-center gap-1 font-medium">
+                      <Droplets className="w-2.5 h-2.5" />{patient.blood_type}
+                    </span>
+                  )}
+                  {patient.phone && (
+                    <span className="text-[11px] text-[hsl(220,15%,45%)] flex items-center gap-1">
+                      <Phone className="w-2.5 h-2.5" />{patient.phone}
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-white truncate">
-                {patient.first_name} {patient.last_name}
-              </p>
-              <p className="text-[11px] text-[hsl(220,15%,50%)]">
-                {age ? `${age} anos` : ""}{age && patient.blood_type ? " · " : ""}
-                {patient.blood_type ? `Tipo ${patient.blood_type}` : ""}
-              </p>
-            </div>
+
+            {/* Quick alert badges */}
+            {hasAlerts && (
+              <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-[hsl(220,15%,13%)]">
+                {patient?.allergies?.map((a, i) => (
+                  <span key={`a-${i}`} className="text-[10px] px-2 py-0.5 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-1">
+                    <AlertTriangle className="w-2.5 h-2.5" />{a}
+                  </span>
+                ))}
+                {patient?.chronic_conditions?.map((c, i) => (
+                  <span key={`c-${i}`} className="text-[10px] px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1">
+                    <Activity className="w-2.5 h-2.5" />{c}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -152,91 +184,105 @@ const PatientInfoPanel = ({ patientId, appointmentId }: PatientInfoPanelProps) =
           expanded={expandedSections.symptoms}
           onToggle={() => toggleSection("symptoms")}
           highlight={!!preConsult}
+          count={preConsult?.symptoms?.length}
         >
           {preConsult ? (
-            <div className="space-y-2">
-              <div>
-                <p className="text-[10px] uppercase text-[hsl(220,15%,45%)] font-semibold mb-1">Queixa principal</p>
-                <p className="text-sm text-white">{preConsult.main_complaint}</p>
+            <div className="space-y-3">
+              <div className="p-3 rounded-xl bg-[hsl(220,20%,7%)] border border-[hsl(220,15%,12%)]">
+                <p className="text-[10px] uppercase tracking-wider text-[hsl(220,15%,40%)] font-semibold mb-1.5">Queixa principal</p>
+                <p className="text-sm text-white leading-relaxed">{preConsult.main_complaint}</p>
               </div>
-              {preConsult.severity && (
-                <Badge variant="outline" className={`text-[10px] ${severityColor[preConsult.severity] ?? ""}`}>
-                  {severityLabel[preConsult.severity] ?? preConsult.severity}
-                </Badge>
-              )}
-              {preConsult.duration && (
-                <p className="text-xs text-[hsl(220,15%,55%)]">
-                  <Clock className="w-3 h-3 inline mr-1" />Duração: {preConsult.duration}
-                </p>
-              )}
+
+              <div className="flex items-center gap-2">
+                {preConsult.severity && (() => {
+                  const sev = severityConfig[preConsult.severity];
+                  return sev ? (
+                    <span className={`text-[10px] px-2.5 py-1 rounded-lg font-semibold ${sev.bg} ${sev.color} border ${sev.border}`}>
+                      ● {sev.label}
+                    </span>
+                  ) : null;
+                })()}
+                {preConsult.duration && (
+                  <span className="text-[10px] px-2.5 py-1 rounded-lg bg-[hsl(220,20%,10%)] text-[hsl(220,15%,55%)] border border-[hsl(220,15%,15%)] flex items-center gap-1">
+                    <Clock className="w-2.5 h-2.5" />{preConsult.duration}
+                  </span>
+                )}
+              </div>
+
               {preConsult.symptoms && preConsult.symptoms.length > 0 && (
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {preConsult.symptoms.map((s, i) => (
-                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                    <span key={i} className="text-[10px] px-2.5 py-1 rounded-lg bg-primary/8 text-primary border border-primary/15 font-medium">
                       {s}
                     </span>
                   ))}
                 </div>
               )}
+
               {preConsult.additional_notes && (
-                <p className="text-xs text-[hsl(220,15%,55%)] italic">"{preConsult.additional_notes}"</p>
+                <div className="p-2.5 rounded-lg bg-[hsl(220,20%,7%)] border-l-2 border-primary/30">
+                  <p className="text-xs text-[hsl(220,15%,55%)] italic leading-relaxed">"{preConsult.additional_notes}"</p>
+                </div>
               )}
             </div>
           ) : (
-            <p className="text-xs text-[hsl(220,15%,40%)]">Paciente não preencheu sintomas</p>
+            <div className="py-4 text-center">
+              <Stethoscope className="w-6 h-6 text-[hsl(220,15%,20%)] mx-auto mb-2" />
+              <p className="text-xs text-[hsl(220,15%,35%)]">Paciente não preencheu sintomas</p>
+            </div>
           )}
         </Section>
 
         {/* Health info */}
         <Section
-          title="Saúde do Paciente"
+          title="Perfil de Saúde"
           icon={<Heart className="w-3.5 h-3.5" />}
           expanded={expandedSections.health}
           onToggle={() => toggleSection("health")}
+          alert={hasAlerts}
         >
-          {/* Allergies */}
-          <div className="space-y-2">
-            {patient?.allergies && patient.allergies.length > 0 ? (
-              <div>
-                <p className="text-[10px] uppercase text-destructive font-semibold flex items-center gap-1 mb-1">
-                  <AlertTriangle className="w-3 h-3" /> Alergias
-                </p>
-                <div className="flex flex-wrap gap-1">
+          <div className="space-y-3">
+            {/* Allergies */}
+            <div className="p-3 rounded-xl bg-[hsl(220,20%,7%)] border border-[hsl(220,15%,12%)]">
+              <p className="text-[10px] uppercase tracking-wider text-destructive font-semibold flex items-center gap-1.5 mb-2">
+                <AlertTriangle className="w-3 h-3" /> Alergias
+              </p>
+              {patient?.allergies && patient.allergies.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
                   {patient.allergies.map((a, i) => (
-                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20">
+                    <span key={i} className="text-[10px] px-2.5 py-1 rounded-lg bg-destructive/10 text-destructive border border-destructive/20 font-medium">
                       {a}
                     </span>
                   ))}
                 </div>
-              </div>
-            ) : (
-              <p className="text-xs text-[hsl(220,15%,40%)]">
-                <AlertTriangle className="w-3 h-3 inline mr-1" />Sem alergias registradas
-              </p>
-            )}
+              ) : (
+                <p className="text-xs text-[hsl(220,15%,35%)]">Nenhuma alergia registrada ✓</p>
+              )}
+            </div>
 
             {/* Chronic conditions */}
-            {patient?.chronic_conditions && patient.chronic_conditions.length > 0 ? (
-              <div>
-                <p className="text-[10px] uppercase text-amber-500 font-semibold flex items-center gap-1 mb-1">
-                  <Heart className="w-3 h-3" /> Condições crônicas
-                </p>
-                <div className="flex flex-wrap gap-1">
+            <div className="p-3 rounded-xl bg-[hsl(220,20%,7%)] border border-[hsl(220,15%,12%)]">
+              <p className="text-[10px] uppercase tracking-wider text-amber-400 font-semibold flex items-center gap-1.5 mb-2">
+                <Activity className="w-3 h-3" /> Condições Crônicas
+              </p>
+              {patient?.chronic_conditions && patient.chronic_conditions.length > 0 ? (
+                <div className="flex flex-wrap gap-1.5">
                   {patient.chronic_conditions.map((c, i) => (
-                    <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    <span key={i} className="text-[10px] px-2.5 py-1 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 font-medium">
                       {c}
                     </span>
                   ))}
                 </div>
-              </div>
-            ) : (
-              <p className="text-xs text-[hsl(220,15%,40%)]">Sem condições crônicas</p>
-            )}
+              ) : (
+                <p className="text-xs text-[hsl(220,15%,35%)]">Nenhuma condição crônica ✓</p>
+              )}
+            </div>
 
             {patient?.blood_type && (
-              <div className="flex items-center gap-1.5">
-                <Droplets className="w-3 h-3 text-red-400" />
-                <p className="text-xs text-[hsl(220,15%,60%)]">Tipo sanguíneo: <span className="font-semibold text-white">{patient.blood_type}</span></p>
+              <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-[hsl(220,20%,7%)] border border-[hsl(220,15%,12%)]">
+                <Droplets className="w-4 h-4 text-red-400" />
+                <p className="text-xs text-[hsl(220,15%,60%)]">Tipo sanguíneo</p>
+                <span className="text-sm font-bold text-white ml-auto">{patient.blood_type}</span>
               </div>
             )}
           </div>
@@ -244,52 +290,77 @@ const PatientInfoPanel = ({ patientId, appointmentId }: PatientInfoPanelProps) =
 
         {/* Past consultations */}
         <Section
-          title={`Histórico (${pastConsults.length})`}
+          title="Histórico"
           icon={<Clock className="w-3.5 h-3.5" />}
           expanded={expandedSections.history}
           onToggle={() => toggleSection("history")}
+          count={pastConsults.length}
         >
           {pastConsults.length > 0 ? (
             <div className="space-y-2">
               {pastConsults.map(c => (
-                <div key={c.id} className="p-2 rounded-lg bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,16%)]">
-                  <p className="text-[11px] text-[hsl(220,15%,55%)]">
-                    {format(new Date(c.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                  </p>
-                  {c.notes && <p className="text-xs text-[hsl(220,15%,70%)] mt-1 line-clamp-2">{c.notes}</p>}
+                <div key={c.id} className="p-3 rounded-xl bg-[hsl(220,20%,7%)] border border-[hsl(220,15%,12%)] hover:border-[hsl(220,15%,18%)] transition-colors">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] text-[hsl(220,15%,50%)] flex items-center gap-1">
+                      <Calendar className="w-2.5 h-2.5" />
+                      {format(new Date(c.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                    </p>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-[hsl(150,60%,40%,0.1)] text-[hsl(150,60%,50%)] border border-[hsl(150,60%,40%,0.15)]">
+                      Concluída
+                    </span>
+                  </div>
+                  {c.notes && <p className="text-xs text-[hsl(220,15%,65%)] mt-1.5 line-clamp-2 leading-relaxed">{c.notes}</p>}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-[hsl(220,15%,40%)]">Primeira consulta com você</p>
+            <div className="py-4 text-center">
+              <Clock className="w-6 h-6 text-[hsl(220,15%,20%)] mx-auto mb-2" />
+              <p className="text-xs text-[hsl(220,15%,35%)]">Primeira consulta</p>
+            </div>
           )}
         </Section>
 
         {/* Recent prescriptions */}
         <Section
-          title={`Receitas (${prescriptions.length})`}
+          title="Receitas"
           icon={<Pill className="w-3.5 h-3.5" />}
           expanded={expandedSections.prescriptions}
           onToggle={() => toggleSection("prescriptions")}
+          count={prescriptions.length}
         >
           {prescriptions.length > 0 ? (
             <div className="space-y-2">
               {prescriptions.map(p => (
-                <div key={p.id} className="p-2 rounded-lg bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,16%)]">
-                  <p className="text-[11px] text-[hsl(220,15%,55%)]">
-                    {format(new Date(p.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                  </p>
-                  {p.diagnosis && <p className="text-xs text-white font-medium mt-0.5">{p.diagnosis}</p>}
-                  <p className="text-[10px] text-[hsl(220,15%,45%)] mt-0.5">
-                    {Array.isArray(p.medications) ? `${p.medications.length} medicamento(s)` : ""}
-                  </p>
+                <div key={p.id} className="p-3 rounded-xl bg-[hsl(220,20%,7%)] border border-[hsl(220,15%,12%)] hover:border-[hsl(220,15%,18%)] transition-colors">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] text-[hsl(220,15%,50%)]">
+                      {format(new Date(p.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                    </p>
+                    <span className="text-[10px] text-[hsl(220,15%,40%)]">
+                      {Array.isArray(p.medications) ? `${p.medications.length} med.` : ""}
+                    </span>
+                  </div>
+                  {p.diagnosis && <p className="text-xs text-white font-medium mt-1">{p.diagnosis}</p>}
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-[hsl(220,15%,40%)]">Sem receitas anteriores</p>
+            <div className="py-4 text-center">
+              <Pill className="w-6 h-6 text-[hsl(220,15%,20%)] mx-auto mb-2" />
+              <p className="text-xs text-[hsl(220,15%,35%)]">Sem receitas anteriores</p>
+            </div>
           )}
         </Section>
+
+        {/* Security footer */}
+        <div className="p-3 rounded-xl bg-[hsl(150,40%,6%)] border border-[hsl(150,40%,15%)] flex items-center gap-2.5">
+          <Shield className="w-4 h-4 text-[hsl(150,60%,45%)] shrink-0" />
+          <div>
+            <p className="text-[11px] font-medium text-[hsl(150,60%,55%)]">Dados protegidos</p>
+            <p className="text-[10px] text-[hsl(150,40%,35%)]">LGPD · CFM 2.314/22 · Criptografia E2E</p>
+          </div>
+        </div>
       </div>
     </ScrollArea>
   );
@@ -297,33 +368,50 @@ const PatientInfoPanel = ({ patientId, appointmentId }: PatientInfoPanelProps) =
 
 // Collapsible section component
 const Section = ({
-  title,
-  icon,
-  expanded,
-  onToggle,
-  highlight,
-  children,
+  title, icon, expanded, onToggle, highlight, alert, count, children,
 }: {
-  title: string;
-  icon: React.ReactNode;
-  expanded: boolean;
-  onToggle: () => void;
-  highlight?: boolean;
-  children: React.ReactNode;
+  title: string; icon: React.ReactNode; expanded: boolean; onToggle: () => void;
+  highlight?: boolean; alert?: boolean; count?: number; children: React.ReactNode;
 }) => (
-  <div className={`rounded-xl border ${highlight ? "border-primary/30 bg-primary/5" : "border-[hsl(220,15%,16%)] bg-[hsl(220,20%,9%)]"}`}>
+  <div className={`rounded-2xl border transition-colors ${
+    highlight ? "border-primary/25 bg-primary/3" :
+    alert ? "border-destructive/20 bg-destructive/3" :
+    "border-[hsl(220,15%,12%)] bg-[hsl(220,20%,7%)]"
+  }`}>
     <button
       onClick={onToggle}
-      className="w-full flex items-center justify-between px-3 py-2.5 text-left"
+      className="w-full flex items-center justify-between px-4 py-3 text-left group"
     >
-      <div className="flex items-center gap-2">
-        <span className={highlight ? "text-primary" : "text-[hsl(220,15%,50%)]"}>{icon}</span>
-        <span className="text-xs font-semibold text-[hsl(220,15%,80%)]">{title}</span>
-        {highlight && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />}
+      <div className="flex items-center gap-2.5">
+        <span className={`${highlight ? "text-primary" : alert ? "text-destructive" : "text-[hsl(220,15%,45%)]"} group-hover:text-white transition-colors`}>
+          {icon}
+        </span>
+        <span className="text-xs font-semibold text-[hsl(220,15%,75%)] group-hover:text-white transition-colors">{title}</span>
+        {highlight && <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />}
+        {alert && !highlight && <span className="w-2 h-2 rounded-full bg-destructive animate-pulse" />}
+        {typeof count === "number" && count > 0 && (
+          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-[hsl(220,20%,12%)] text-[hsl(220,15%,50%)] font-medium">
+            {count}
+          </span>
+        )}
       </div>
-      {expanded ? <ChevronUp className="w-3.5 h-3.5 text-[hsl(220,15%,40%)]" /> : <ChevronDown className="w-3.5 h-3.5 text-[hsl(220,15%,40%)]" />}
+      <motion.div animate={{ rotate: expanded ? 180 : 0 }} transition={{ duration: 0.2 }}>
+        <ChevronDown className="w-3.5 h-3.5 text-[hsl(220,15%,35%)] group-hover:text-[hsl(220,15%,55%)] transition-colors" />
+      </motion.div>
     </button>
-    {expanded && <div className="px-3 pb-3">{children}</div>}
+    <AnimatePresence>
+      {expanded && (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="overflow-hidden"
+        >
+          <div className="px-4 pb-4">{children}</div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   </div>
 );
 
