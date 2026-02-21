@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation from "./VideoConsultation";
+import PreCallCheck from "./PreCallCheck";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -32,6 +33,7 @@ const VideoRoom = () => {
   const [hasConsent, setHasConsent] = useState(false);
   const [checkingConsent, setCheckingConsent] = useState(true);
   const [crmBlocked, setCrmBlocked] = useState(false);
+  const [deviceChecked, setDeviceChecked] = useState(false);
 
   // State
   const [elapsed, setElapsed] = useState(0);
@@ -232,6 +234,16 @@ const VideoRoom = () => {
         appointmentId={appointmentId!}
         doctorName={otherPartyName || undefined}
         onConsented={() => setHasConsent(true)}
+      />
+    );
+  }
+
+  if (!deviceChecked) {
+    return (
+      <PreCallCheck
+        doctorName={otherPartyName || undefined}
+        isDoctor={isDoctor}
+        onReady={() => setDeviceChecked(true)}
       />
     );
   }
