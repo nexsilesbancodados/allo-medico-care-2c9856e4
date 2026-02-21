@@ -48,6 +48,7 @@ import ReceptionBilling from "@/components/reception/ReceptionBilling";
 import ChatPage from "@/components/chat/ChatPage";
 import AdminNPS from "@/components/admin/AdminNPS";
 import MedicalRecords from "@/components/medical/MedicalRecords";
+import AdminWhatsApp from "@/components/admin/AdminWhatsApp";
 import { Loader2 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -143,6 +144,7 @@ const Dashboard = () => {
       <Route path="admin/approvals" element={<RoleGuard allowed={[]} roles={roles}><AdminApprovals /></RoleGuard>} />
       <Route path="admin/switch-panel" element={<RoleGuard allowed={[]} roles={roles}><AdminSwitchPanel /></RoleGuard>} />
       <Route path="admin/nps" element={<RoleGuard allowed={[]} roles={roles}><AdminNPS /></RoleGuard>} />
+      <Route path="admin/whatsapp" element={<RoleGuard allowed={[]} roles={roles}><AdminWhatsApp /></RoleGuard>} />
 
       {/* Default: role-based dashboard */}
       <Route
