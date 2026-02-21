@@ -270,7 +270,13 @@
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
-/* ── Focus ring ── */
+/* ── Focus ring (global) ── */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
 .focus-ring:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
@@ -282,6 +288,35 @@
   background: hsl(var(--card) / 0.7);
   backdrop-filter: blur(12px);
   border: 1px solid hsl(var(--border) / 0.5);
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .animate-marquee,
+  .animate-float-particle,
+  .animate-pulse-glow,
+  .animate-pulse {
+    animation: none !important;
+  }
+}
+
+/* ── Minimum touch target (WCAG 2.5.8) ── */
+@media (pointer: coarse) {
+  button, a[href], [role="button"], input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Allow smaller inline links in text */
+  p a, li a, span a {
+    min-height: unset;
+    min-width: unset;
+  }
 }
 
 /* Skip-to-content handled via Tailwind sr-only in App.tsx */

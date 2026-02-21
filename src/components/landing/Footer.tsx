@@ -51,7 +51,7 @@ const Footer = () => {
               transition={{ delay: ci * 0.1 + 0.1 }}
             >
               <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-80">{col.title}</h4>
-              <ul className="space-y-2 text-sm opacity-60">
+              <ul className="space-y-2 text-sm opacity-60" role="list">
                 {col.links.map((link, li) => (
                   <li key={li}>
                     {"to" in link ? (
