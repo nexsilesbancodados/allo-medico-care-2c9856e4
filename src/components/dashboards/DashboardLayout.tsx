@@ -1,7 +1,7 @@
 import { ReactNode, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import {
-  LogOut, User, Settings, MoreHorizontal, Search, ChevronRight, Menu,
+  LogOut, User, Settings, MoreHorizontal, Search, ChevronRight, Menu, ShieldCheck,
 } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -49,11 +49,16 @@ const ROLE_BADGE: Record<string, { bg: string; text: string; dot: string }> = {
 };
 
 const DashboardLayout = ({ children, title, nav, role = "patient", loading: externalLoading }: DashboardLayoutProps) => {
-  const { profile } = useAuth();
+  const { profile, roles } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [moreOpen, setMoreOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { signOut } = useAuth();
+
+  const isAdmin = roles.includes("admin");
+  const forceRole = searchParams.get("role");
+  const isAdminViewingOtherPanel = isAdmin && forceRole && forceRole !== "admin";
 
   const initials = profile
     ? `${profile.first_name?.[0] ?? ""}${profile.last_name?.[0] ?? ""}`.toUpperCase()
@@ -88,6 +93,19 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
           {title}
         </div>
       </div>
+
+      {/* Admin back button when viewing other panel */}
+      {isAdminViewingOtherPanel && (
+        <div className="px-3 pb-1 shrink-0">
+          <button
+            onClick={() => { navigate("/dashboard"); setSidebarOpen(false); }}
+            className="w-full flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold text-destructive bg-destructive/10 hover:bg-destructive/20 transition-colors"
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            Voltar ao Painel Admin
+          </button>
+        </div>
+      )}
 
       {/* Nav items */}
       {nav && nav.length > 0 && (
@@ -182,6 +200,19 @@ const DashboardLayout = ({ children, title, nav, role = "patient", loading: exte
         </button>
 
         <div className="flex-1" />
+
+        {/* Admin quick-return button in header */}
+        {isAdminViewingOtherPanel && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
+            onClick={() => navigate("/dashboard")}
+          >
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Admin</span>
+          </Button>
+        )}
 
         {/* Right side */}
         <div className="flex items-center gap-1">
