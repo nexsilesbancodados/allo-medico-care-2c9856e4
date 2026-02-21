@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -52,26 +52,37 @@ const ConsentTCLE = ({ appointmentId, doctorName, onConsented }: ConsentTCLEProp
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [scrolledToEnd, setScrolledToEnd] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const listenerAttached = useRef(false);
 
-  const handleScroll = (e: Event) => {
+  const handleScroll = useCallback((e: Event) => {
     const el = e.target as HTMLElement;
     if (el && el.scrollHeight - el.scrollTop - el.clientHeight < 40) {
       setScrolledToEnd(true);
     }
-  };
+  }, []);
 
-  // Attach scroll listener to the actual scrollable viewport inside ScrollArea
-  const scrollRef = (node: HTMLDivElement | null) => {
-    if (!node) return;
+  // Attach scroll listener once to Radix viewport, with proper cleanup
+  useEffect(() => {
+    const node = scrollContainerRef.current;
+    if (!node || listenerAttached.current) return;
+
     const viewport = node.querySelector('[data-radix-scroll-area-viewport]');
-    if (viewport) {
-      viewport.addEventListener('scroll', handleScroll);
-      // Check if content is short enough to not need scrolling
-      if (viewport.scrollHeight <= viewport.clientHeight + 40) {
-        setScrolledToEnd(true);
-      }
+    if (!viewport) return;
+
+    listenerAttached.current = true;
+    viewport.addEventListener('scroll', handleScroll);
+
+    // If content fits without scrolling, enable immediately
+    if (viewport.scrollHeight <= viewport.clientHeight + 40) {
+      setScrolledToEnd(true);
     }
-  };
+
+    return () => {
+      viewport.removeEventListener('scroll', handleScroll);
+      listenerAttached.current = false;
+    };
+  }, [handleScroll]);
 
   const handleAccept = async () => {
     if (!user || !accepted || !acceptedPrivacy) return;
@@ -139,7 +150,7 @@ const ConsentTCLE = ({ appointmentId, doctorName, onConsented }: ConsentTCLEProp
 
         {/* TCLE content */}
         <div className="px-6 py-4">
-          <div ref={scrollRef}>
+          <div ref={scrollContainerRef}>
             <ScrollArea className="h-[300px] rounded-lg border border-border bg-muted/20 p-4">
               <pre className="whitespace-pre-wrap text-sm text-foreground font-sans leading-relaxed">
                 {TCLE_TEXT}
