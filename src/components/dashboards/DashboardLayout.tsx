@@ -20,6 +20,7 @@ import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
 import GlobalCommand from "@/components/GlobalCommand";
 import logoImg from "@/assets/logo.png";
+import mascotImg from "@/assets/mascot.png";
 
 interface NavItem {
   label: string;
@@ -343,6 +344,17 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                 <span className="truncate max-w-[52px] leading-tight text-center">{item.label}</span>
               </Link>
             ))}
+
+            {/* Pingo button */}
+            <button
+              onClick={() => window.dispatchEvent(new Event("open-pingo-chat"))}
+              className="relative flex flex-col items-center justify-center gap-1 flex-1 text-[10px] font-medium text-muted-foreground"
+            >
+              <span className="w-8 h-8 rounded-xl flex items-center justify-center overflow-hidden">
+                <img src={mascotImg} alt="Pingo" className="w-7 h-7 object-cover rounded-full" />
+              </span>
+              <span className="truncate max-w-[52px] leading-tight text-center">Pingo</span>
+            </button>
 
             {moreNav.length > 0 && (
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
