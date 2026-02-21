@@ -18,6 +18,7 @@ import { ptBR } from "date-fns/locale";
 import { getPatientNav } from "./patientNav";
 import { cn } from "@/lib/utils";
 import jsPDF from "jspdf";
+import CancelRescheduleDialog from "./CancelRescheduleDialog";
 
 interface Appointment {
   id: string;
@@ -149,18 +150,7 @@ const AppointmentsList = () => {
     });
   }, [appointments, search, filterStatus, period, customFrom, customTo]);
 
-  const handleCancel = async (id: string) => {
-    const { error } = await supabase
-      .from("appointments")
-      .update({ status: "cancelled", cancelled_by: user!.id })
-      .eq("id", id);
-    if (error) {
-      toast({ title: "Erro", description: "Não foi possível cancelar.", variant: "destructive" });
-    } else {
-      toast({ title: "Consulta cancelada" });
-      fetchAppointments();
-    }
-  };
+  // handleCancel removed - now using CancelRescheduleDialog
 
   const exportPDF = () => {
     const doc = new jsPDF();
@@ -256,9 +246,12 @@ const AppointmentsList = () => {
         </span>
         <div className="flex gap-1.5">
           {appt.status === "scheduled" && (
-            <Button size="sm" variant="ghost" className="text-xs h-7 text-destructive hover:bg-destructive/10" onClick={() => handleCancel(appt.id)}>
-              <X className="w-3 h-3" />
-            </Button>
+            <CancelRescheduleDialog
+              appointmentId={appt.id}
+              currentDate={format(new Date(appt.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+              doctorName={appt.doctor_name}
+              onSuccess={fetchAppointments}
+            />
           )}
           {(appt.status === "waiting" || appt.status === "in_progress" || appt.status === "scheduled") && (
             <Button size="sm" className="bg-gradient-hero text-primary-foreground text-xs h-7" onClick={() => navigate(`/dashboard/consultation/${appt.id}`)}>
