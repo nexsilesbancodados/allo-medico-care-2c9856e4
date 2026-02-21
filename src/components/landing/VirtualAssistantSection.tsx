@@ -6,7 +6,7 @@ import mascotWave from "@/assets/mascot-wave.png";
 
 const VirtualAssistantSection = () => {
   return (
-    <section className="py-10 md:py-20 px-4">
+    <section aria-label="Assistente virtual Pingo" className="py-10 md:py-20 px-4">
       <div className="container mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -29,6 +29,7 @@ const VirtualAssistantSection = () => {
                   src={patientImg}
                   alt="Paciente usando o assistente virtual"
                   className="w-full h-80 object-cover"
+                  loading="lazy"
                 />
                 {/* Decorative chevrons */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -48,7 +49,7 @@ const VirtualAssistantSection = () => {
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 className="absolute -bottom-4 -right-4 w-24 h-24 z-20"
               >
-                <img src={mascotWave} alt="Pingo" className="w-full h-full object-contain drop-shadow-lg" />
+                <img src={mascotWave} alt="Pingo" className="w-full h-full object-contain drop-shadow-lg" loading="lazy" />
               </motion.div>
             </motion.div>
 

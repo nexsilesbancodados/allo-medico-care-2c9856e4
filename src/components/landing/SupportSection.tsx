@@ -5,7 +5,7 @@ import supportImage from "@/assets/mascot-thumbsup.png";
 
 const SupportSection = () => {
   return (
-    <section className="py-10 md:py-20 px-4">
+    <section aria-label="Suporte" className="py-10 md:py-20 px-4">
       <div className="container mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
