@@ -3,16 +3,17 @@ import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart } from "lucide-react";
+import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart, ChevronRight, MapPin } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getPatientNav } from "./patientNav";
+import { motion, AnimatePresence } from "framer-motion";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface DoctorResult {
   id: string;
@@ -28,6 +29,11 @@ interface DoctorResult {
   specialties: string[];
 }
 
+const fadeUp = {
+  hidden: { opacity: 0, y: 12 },
+  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.05, duration: 0.3, ease: [0.22, 1, 0.36, 1] as const } }),
+};
+
 const DoctorSearch = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
@@ -39,7 +45,6 @@ const DoctorSearch = () => {
   const [search, setSearch] = useState("");
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showFilters, setShowFilters] = useState(false);
   const navigate = useNavigate();
 
   // Advanced filters
@@ -47,6 +52,7 @@ const DoctorSearch = () => {
   const [minRating, setMinRating] = useState(0);
   const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("rating");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   useEffect(() => {
     fetchSpecialties();
@@ -79,7 +85,6 @@ const DoctorSearch = () => {
 
   const fetchDoctors = async () => {
     setLoading(true);
-
     const { data: doctorData } = await supabase
       .from("doctor_profiles")
       .select("id, user_id, crm, crm_state, bio, consultation_price, rating, total_reviews, experience_years, available_now, available_now_since")
@@ -123,15 +128,12 @@ const DoctorSearch = () => {
       specialties: specsMap.get(d.id) ?? [],
     }));
 
-    // Find max price for slider
     const maxPrice = Math.max(...results.map(d => d.consultation_price), 500);
     setPriceRange([0, maxPrice]);
-
     setDoctors(results);
     setLoading(false);
   };
 
-  // Sort on-duty doctors first, then apply filters
   const filtered = doctors
     .filter(d => {
       const nameMatch = !search ||
@@ -147,15 +149,12 @@ const DoctorSearch = () => {
       return nameMatch && specMatch && urgencyMatch && priceMatch && ratingMatch && availMatch;
     })
     .sort((a, b) => {
-      // Favorites first, then on-duty
       const aFav = favoriteIds.has(a.id) ? 1 : 0;
       const bFav = favoriteIds.has(b.id) ? 1 : 0;
       if (bFav !== aFav) return bFav - aFav;
-
       const aOnDuty = (a as any).available_now ? 1 : 0;
       const bOnDuty = (b as any).available_now ? 1 : 0;
       if (bOnDuty !== aOnDuty) return bOnDuty - aOnDuty;
-      
       if (sortBy === "rating") return b.rating - a.rating;
       if (sortBy === "price_asc") return a.consultation_price - b.consultation_price;
       if (sortBy === "price_desc") return b.consultation_price - a.consultation_price;
@@ -165,146 +164,152 @@ const DoctorSearch = () => {
 
   const activeFilters = (minRating > 0 ? 1 : 0) + (availabilityFilter !== "all" ? 1 : 0) + (sortBy !== "rating" ? 1 : 0);
 
+  const clearFilters = () => {
+    setMinRating(0);
+    setAvailabilityFilter("all");
+    setSortBy("rating");
+    setPriceRange([0, 500]);
+  };
+
+  const FiltersContent = () => (
+    <div className="space-y-5 py-2">
+      {/* Price */}
+      <div>
+        <p className="text-sm font-medium text-foreground mb-3">
+          💰 Preço: R${priceRange[0]} – R${priceRange[1]}
+        </p>
+        <Slider min={0} max={500} step={10} value={priceRange} onValueChange={(v) => setPriceRange(v as [number, number])} />
+      </div>
+
+      {/* Rating */}
+      <div>
+        <p className="text-sm font-medium text-foreground mb-3">⭐ Avaliação mínima</p>
+        <div className="flex gap-2 flex-wrap">
+          {[0, 3, 3.5, 4, 4.5].map(r => (
+            <Button
+              key={r}
+              variant={minRating === r ? "default" : "outline"}
+              size="sm"
+              className="h-10 min-w-[52px] text-sm gap-1"
+              onClick={() => setMinRating(r)}
+            >
+              {r === 0 ? "Todas" : <><Star className="w-3.5 h-3.5 fill-current" /> {r}+</>}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* Availability */}
+      <div>
+        <p className="text-sm font-medium text-foreground mb-3">📅 Disponibilidade</p>
+        <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
+          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Qualquer horário</SelectItem>
+            <SelectItem value="today">Atende hoje</SelectItem>
+            <SelectItem value="on_duty">🟢 De plantão agora</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Sort */}
+      <div>
+        <p className="text-sm font-medium text-foreground mb-3">🔄 Ordenar por</p>
+        <Select value={sortBy} onValueChange={setSortBy}>
+          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="rating">Melhor avaliação</SelectItem>
+            <SelectItem value="price_asc">Menor preço</SelectItem>
+            <SelectItem value="price_desc">Maior preço</SelectItem>
+            <SelectItem value="experience">Mais experiente</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex gap-3 pt-2">
+        <Button variant="outline" className="flex-1 h-11" onClick={clearFilters}>
+          <X className="w-4 h-4 mr-1" /> Limpar
+        </Button>
+        <Button className="flex-1 h-11 bg-gradient-hero text-primary-foreground" onClick={() => setFiltersOpen(false)}>
+          Ver {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("doctors")}>
-      <div className="max-w-4xl">
+      <div className="max-w-2xl mx-auto pb-6">
+        {/* Urgency banner */}
         {isUrgency && (
-          <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 flex items-center gap-2">
-            <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0" />
-            <div>
-              <p className="text-sm font-semibold text-foreground">Modo Urgência</p>
-              <p className="text-xs text-muted-foreground">Mostrando apenas médicos com disponibilidade agora.</p>
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 p-3.5 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center gap-3"
+          >
+            <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
             </div>
-            <Button size="sm" variant="outline" className="ml-auto flex-shrink-0" onClick={() => navigate("/dashboard/schedule")}>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Modo Urgência</p>
+              <p className="text-xs text-muted-foreground">Médicos disponíveis agora</p>
+            </div>
+            <Button size="sm" variant="outline" className="shrink-0 h-9 rounded-xl" onClick={() => navigate("/dashboard/schedule")}>
               Ver todos
             </Button>
-          </div>
+          </motion.div>
         )}
-        <h1 className="text-2xl font-bold text-foreground mb-1">
-          {isUrgency ? "⚡ Consulta de Urgência" : "Buscar Médicos"}
-        </h1>
-        <p className="text-muted-foreground mb-6">
-          {isUrgency ? "Médicos disponíveis agora para atendimento imediato" : "Encontre o especialista ideal para você"}
-        </p>
 
-        {/* Search + filter toggle */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por nome ou CRM..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Button
-            variant={showFilters ? "default" : "outline"}
-            size="sm"
-            onClick={() => setShowFilters(!showFilters)}
-            className="gap-1.5"
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            Filtros
-            {activeFilters > 0 && (
-              <span className="ml-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
-                {activeFilters}
-              </span>
-            )}
-          </Button>
+        {/* Header */}
+        <div className="mb-5">
+          <h1 className="text-xl font-bold text-foreground">
+            {isUrgency ? "⚡ Consulta Urgente" : "Encontre seu médico"}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {isUrgency ? "Atendimento imediato" : "Especialistas prontos para te atender"}
+          </p>
         </div>
 
-        {/* Advanced filters panel */}
-        {showFilters && (
-          <Card className="mb-4 border-border">
-            <CardContent className="p-4 space-y-4">
-              <div className="grid sm:grid-cols-3 gap-4">
-                {/* Price range */}
-                <div>
-                  <p className="text-xs font-medium text-foreground mb-2">
-                    Faixa de Preço: R${priceRange[0]} – R${priceRange[1]}
-                  </p>
-                  <Slider
-                    min={0}
-                    max={500}
-                    step={10}
-                    value={priceRange}
-                    onValueChange={(v) => setPriceRange(v as [number, number])}
-                  />
-                </div>
+        {/* Search bar + filter button */}
+        <div className="flex gap-2 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="Nome ou CRM..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="pl-10 h-12 rounded-2xl text-base bg-muted/50 border-transparent focus:border-primary/30"
+            />
+          </div>
+          <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="h-12 w-12 rounded-2xl shrink-0 relative"
+              >
+                <SlidersHorizontal className="w-5 h-5" />
+                {activeFilters > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+                    {activeFilters}
+                  </span>
+                )}
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
+              <SheetHeader>
+                <SheetTitle>Filtros</SheetTitle>
+              </SheetHeader>
+              <FiltersContent />
+            </SheetContent>
+          </Sheet>
+        </div>
 
-                {/* Min rating */}
-                <div>
-                  <p className="text-xs font-medium text-foreground mb-2">Avaliação mínima</p>
-                  <div className="flex gap-1.5">
-                    {[0, 3, 3.5, 4, 4.5].map(r => (
-                      <Button
-                        key={r}
-                        variant={minRating === r ? "default" : "outline"}
-                        size="sm"
-                        className="text-xs h-8 gap-1"
-                        onClick={() => setMinRating(r)}
-                      >
-                        {r === 0 ? "Todas" : <><Star className="w-3 h-3 fill-current" /> {r}+</>}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Availability */}
-                <div>
-                  <p className="text-xs font-medium text-foreground mb-2">Disponibilidade</p>
-                  <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
-                    <SelectTrigger className="h-8 text-xs">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Qualquer horário</SelectItem>
-                      <SelectItem value="today">Atende hoje</SelectItem>
-                      <SelectItem value="on_duty">🟢 De plantão agora</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-2 border-t border-border">
-                <div>
-                  <p className="text-xs font-medium text-foreground mb-1">Ordenar por</p>
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="h-8 text-xs w-44">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="rating">Melhor avaliação</SelectItem>
-                      <SelectItem value="price_asc">Menor preço</SelectItem>
-                      <SelectItem value="price_desc">Maior preço</SelectItem>
-                      <SelectItem value="experience">Mais experiente</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs text-muted-foreground"
-                  onClick={() => {
-                    setMinRating(0);
-                    setAvailabilityFilter("all");
-                    setSortBy("rating");
-                    setPriceRange([0, 500]);
-                  }}
-                >
-                  <X className="w-3 h-3 mr-1" /> Limpar filtros
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Specialty chips */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        {/* Specialty chips - horizontal scroll */}
+        <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide snap-x -mx-1 px-1">
           <Badge
             variant={selectedSpecialty === null ? "default" : "outline"}
-            className="cursor-pointer"
+            className="cursor-pointer shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-transform"
             onClick={() => setSelectedSpecialty(null)}
           >
             Todas
@@ -313,7 +318,7 @@ const DoctorSearch = () => {
             <Badge
               key={s.id}
               variant={selectedSpecialty === s.name ? "default" : "outline"}
-              className="cursor-pointer"
+              className="cursor-pointer shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-transform"
               onClick={() => setSelectedSpecialty(selectedSpecialty === s.name ? null : s.name)}
             >
               {s.name}
@@ -323,138 +328,134 @@ const DoctorSearch = () => {
 
         {/* Results count */}
         {!loading && (
-          <p className="text-xs text-muted-foreground mb-3">{filtered.length} médico{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}</p>
+          <p className="text-xs text-muted-foreground mb-3">
+            {filtered.length} médico{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
+          </p>
         )}
 
-        {/* Results */}
+        {/* Loading skeleton */}
         {loading ? (
           <div className="space-y-3">
             {[1, 2, 3, 4].map(i => (
-              <Card key={i} className="border-border">
-                <CardContent className="p-4 sm:p-5">
-                  <div className="flex items-start gap-3 sm:gap-4">
-                    <Skeleton className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex-shrink-0" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-48" />
-                      <Skeleton className="h-3 w-24" />
-                      <div className="flex gap-1 mt-2">
-                        <Skeleton className="h-5 w-20 rounded-full" />
-                        <Skeleton className="h-5 w-24 rounded-full" />
-                      </div>
-                      <Skeleton className="h-3 w-full mt-2" />
-                      <Skeleton className="h-3 w-3/4" />
-                      <Skeleton className="h-9 w-40 mt-3 rounded-md" />
-                    </div>
-                    <div className="text-right space-y-1">
-                      <Skeleton className="h-6 w-16 ml-auto" />
-                      <Skeleton className="h-3 w-14 ml-auto" />
-                    </div>
+              <div key={i} className="p-4 rounded-2xl border border-border bg-card">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-14 h-14 rounded-2xl shrink-0" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-36" />
+                    <Skeleton className="h-3 w-24" />
+                    <div className="flex gap-1"><Skeleton className="h-6 w-20 rounded-full" /></div>
                   </div>
-                </CardContent>
-              </Card>
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <Card className="border-border">
-            <CardContent className="py-12 text-center">
-              <Search className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
-              <p className="text-muted-foreground">Nenhum médico encontrado.</p>
-              <p className="text-sm text-muted-foreground mt-1">Tente ajustar os filtros de busca.</p>
-            </CardContent>
-          </Card>
+          <div className="text-center py-16">
+            <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <Search className="w-8 h-8 text-muted-foreground/40" />
+            </div>
+            <p className="text-foreground font-medium">Nenhum médico encontrado</p>
+            <p className="text-sm text-muted-foreground mt-1">Ajuste os filtros de busca</p>
+          </div>
         ) : (
           <div className="space-y-3">
-            {filtered.map(doctor => (
-              <Card
-                key={doctor.id}
-                className={`border-border hover:shadow-card transition-all duration-200 cursor-pointer active:scale-[0.99] ${
-                  (doctor as any).available_now ? "ring-2 ring-secondary/30 border-secondary/20" : ""
-                }`}
-                onClick={() => navigate(`/dashboard/schedule/${doctor.id}`)}
-              >
-                <CardContent className="p-4 sm:p-5">
-                  {/* Mobile: stacked layout / Desktop: row layout */}
-                  <div className="flex items-start gap-3 sm:gap-4">
-                    <Avatar className="w-12 h-12 sm:w-14 sm:h-14 flex-shrink-0">
-                      <AvatarFallback className="bg-primary/10 text-primary font-bold text-sm sm:text-base">
+            <AnimatePresence>
+              {filtered.map((doctor, i) => (
+                <motion.div
+                  key={doctor.id}
+                  custom={i}
+                  variants={fadeUp}
+                  initial="hidden"
+                  animate="show"
+                  className={`relative p-4 rounded-2xl border bg-card active:scale-[0.98] transition-transform cursor-pointer ${
+                    (doctor as any).available_now
+                      ? "border-secondary/40 shadow-[0_0_0_1px_hsl(var(--secondary)/0.2)]"
+                      : "border-border"
+                  }`}
+                  onClick={() => navigate(`/dashboard/schedule/${doctor.id}`)}
+                >
+                  {/* Favorite button */}
+                  <button
+                    onClick={(e) => toggleFavorite(doctor.id, e)}
+                    className="absolute top-3 right-3 p-2 rounded-full hover:bg-muted/50 transition-colors z-10"
+                  >
+                    <Heart className={`w-5 h-5 transition-colors ${favoriteIds.has(doctor.id) ? "fill-red-500 text-red-500" : "text-muted-foreground/40"}`} />
+                  </button>
+
+                  <div className="flex items-start gap-3">
+                    {/* Avatar */}
+                    <Avatar className="w-14 h-14 rounded-2xl shrink-0">
+                      <AvatarFallback className="rounded-2xl bg-primary/10 text-primary font-bold text-base">
                         {doctor.profile?.first_name?.[0]}{doctor.profile?.last_name?.[0]}
                       </AvatarFallback>
                     </Avatar>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-foreground text-sm sm:text-base truncate">
-                            Dr(a). {doctor.profile?.first_name} {doctor.profile?.last_name}
-                          </h3>
-                         <p className="text-[11px] sm:text-xs text-muted-foreground">
-                            CRM {doctor.crm}/{doctor.crm_state}
-                          </p>
-                        </div>
-                        <div className="flex items-start gap-2 flex-shrink-0">
-                          <button
-                            onClick={(e) => toggleFavorite(doctor.id, e)}
-                            className="p-1 rounded-full hover:bg-muted/50 transition-colors"
-                            title={favoriteIds.has(doctor.id) ? "Remover dos favoritos" : "Adicionar aos favoritos"}
-                          >
-                            <Heart className={`w-4 h-4 ${favoriteIds.has(doctor.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
-                          </button>
-                        </div>
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-base sm:text-lg font-bold text-foreground">R${doctor.consultation_price}</p>
-                          <p className="text-[10px] sm:text-xs text-muted-foreground">por consulta</p>
-                        </div>
-                      </div>
+                    <div className="flex-1 min-w-0 pr-8">
+                      {/* Name */}
+                      <h3 className="font-semibold text-foreground text-[15px] leading-tight truncate">
+                        Dr(a). {doctor.profile?.first_name} {doctor.profile?.last_name}
+                      </h3>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        CRM {doctor.crm}/{doctor.crm_state}
+                        {doctor.experience_years > 0 && ` · ${doctor.experience_years}a exp.`}
+                      </p>
 
+                      {/* Specialties */}
                       {doctor.specialties.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1.5 sm:mt-2">
-                          {doctor.specialties.map(s => (
-                            <Badge key={s} variant="secondary" className="text-[10px] sm:text-xs px-1.5 py-0">{s}</Badge>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {doctor.specialties.slice(0, 2).map(s => (
+                            <span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/8 text-primary font-medium">{s}</span>
                           ))}
+                          {doctor.specialties.length > 2 && (
+                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">+{doctor.specialties.length - 2}</span>
+                          )}
                         </div>
                       )}
 
-                      {doctor.bio && (
-                        <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 sm:mt-2 line-clamp-2">{doctor.bio}</p>
-                      )}
-
-                      <div className="flex items-center gap-2 sm:gap-4 mt-2 sm:mt-3 flex-wrap">
+                      {/* Status badges */}
+                      <div className="flex items-center gap-2 mt-2 flex-wrap">
                         {(doctor as any).available_now && (
-                          <Badge className="bg-secondary text-secondary-foreground text-[10px] sm:text-xs gap-1 animate-pulse">
-                            <Zap className="w-3 h-3" /> De Plantão
-                          </Badge>
+                          <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/15 text-secondary font-semibold flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+                            Plantão
+                          </span>
                         )}
                         {availableNowIds.has(doctor.id) && !(doctor as any).available_now && (
-                          <Badge className="bg-secondary/10 text-secondary border-secondary/20 text-[10px] sm:text-xs gap-1">
-                            <Zap className="w-3 h-3" /> Disponível agora
-                          </Badge>
-                        )}
-                        {doctor.rating > 0 && (
-                          <span className="flex items-center gap-1 text-xs sm:text-sm">
-                            <Star className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-500 fill-yellow-500" />
-                            {doctor.rating.toFixed(1)} ({doctor.total_reviews})
+                          <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/10 text-secondary font-medium flex items-center gap-1">
+                            <Zap className="w-3 h-3" /> Disponível
                           </span>
                         )}
-                        {doctor.experience_years > 0 && (
-                          <span className="text-xs sm:text-sm text-muted-foreground">
-                            {doctor.experience_years}a exp.
+                        {doctor.rating > 0 && (
+                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                            {doctor.rating.toFixed(1)}
+                            <span className="text-muted-foreground/60">({doctor.total_reviews})</span>
                           </span>
                         )}
                       </div>
-
-                      <Button
-                        className="mt-2.5 sm:mt-3 bg-gradient-hero text-primary-foreground w-full sm:w-auto h-9 sm:h-9 text-sm"
-                        size="sm"
-                        onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/schedule/${doctor.id}`); }}
-                      >
-                        <Calendar className="w-4 h-4 mr-1.5" />
-                        Agendar Consulta
-                      </Button>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
+
+                  {/* Bottom bar: price + CTA */}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/60">
+                    <div>
+                      <span className="text-lg font-bold text-foreground">R${doctor.consultation_price}</span>
+                      <span className="text-xs text-muted-foreground ml-1">/consulta</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      className="h-10 px-5 rounded-xl bg-gradient-hero text-primary-foreground text-sm font-medium gap-1.5"
+                      onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/schedule/${doctor.id}`); }}
+                    >
+                      <Calendar className="w-4 h-4" />
+                      Agendar
+                      <ChevronRight className="w-4 h-4 -mr-1" />
+                    </Button>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
       </div>
