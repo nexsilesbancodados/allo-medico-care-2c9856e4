@@ -1,7 +1,8 @@
-import { Home, Calendar, Search, Clock, MessageCircle, Headphones, ClipboardList, Heart, Smile, Upload, CreditCard, Users, SlidersHorizontal, User } from "lucide-react";
+import { Home, Calendar, Search, Clock, MessageCircle, Headphones, ClipboardList, Heart, Smile, Upload, CreditCard, Users, SlidersHorizontal, User, Bot } from "lucide-react";
 
 export const getPatientNav = (active: string) => [
   { label: "Início", href: "/dashboard?role=patient", icon: <Home className="w-4 h-4" />, active: active === "home", group: "Principal" },
+  { label: "Assistente IA", href: "/dashboard/ai-assistant", icon: <Bot className="w-4 h-4" />, active: active === "ai-assistant", group: "Principal" },
   { label: "Agendar", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" />, active: active === "schedule", group: "Principal" },
   { label: "Buscar Médicos", href: "/dashboard/doctors", icon: <Search className="w-4 h-4" />, active: active === "doctors", group: "Principal" },
   { label: "Consultas", href: "/dashboard/appointments", icon: <Clock className="w-4 h-4" />, active: active === "appointments", group: "Principal" },
