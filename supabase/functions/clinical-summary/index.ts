@@ -10,21 +10,21 @@ serve(async (req) => {
 
   try {
     const { notes, diagnosis, medications } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
+    if (!DEEPSEEK_API_KEY) throw new Error("DEEPSEEK_API_KEY não configurada");
 
     const medsText = Array.isArray(medications)
       ? medications.map((m: any) => typeof m === "string" ? m : `${m.name || m.medication || ""} ${m.dosage || ""} ${m.instructions || ""}`).join("; ")
       : "";
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "deepseek-chat",
         messages: [
           {
             role: "system",
@@ -39,6 +39,8 @@ Seja empático, use linguagem acolhedora. Máximo 200 palavras. NÃO faça diagn
             content: `Notas do médico: ${notes || "Não informado"}\nDiagnóstico: ${diagnosis || "Não informado"}\nMedicamentos: ${medsText || "Nenhum prescrito"}`,
           },
         ],
+        temperature: 0.3,
+        max_tokens: 400,
       }),
     });
 
@@ -48,12 +50,7 @@ Seja empático, use linguagem acolhedora. Máximo 200 palavras. NÃO faça diagn
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Credits required" }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error("AI gateway error");
+      throw new Error("DeepSeek API error");
     }
 
     const data = await response.json();

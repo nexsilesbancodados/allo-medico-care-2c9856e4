@@ -11,18 +11,8 @@ serve(async (req) => {
   try {
     const { messages, context, ticket_id, user_id } = await req.json();
     
-    // Try DeepSeek first, fallback to Lovable AI Gateway
     const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    const useDeepSeek = !!DEEPSEEK_API_KEY;
-    const apiUrl = useDeepSeek 
-      ? "https://api.deepseek.com/v1/chat/completions"
-      : "https://ai.gateway.lovable.dev/v1/chat/completions";
-    const apiKey = useDeepSeek ? DEEPSEEK_API_KEY : LOVABLE_API_KEY;
-    const model = useDeepSeek ? "deepseek-chat" : "google/gemini-3-flash-preview";
-
-    if (!apiKey) throw new Error("Nenhuma chave de IA configurada (DEEPSEEK_API_KEY ou LOVABLE_API_KEY)");
+    if (!DEEPSEEK_API_KEY) throw new Error("DEEPSEEK_API_KEY não configurada");
 
     const systemContent = `Você é o Pingo 🐧, o simpático pinguim assistente virtual da plataforma AloClinica. Sua função é realizar a teletriagem e suporte administrativo, seguindo estritamente as resoluções do CFM (2.314/2022) e a LGPD.
 
@@ -61,14 +51,14 @@ CONHECIMENTO DA PLATAFORMA:
 OBJETIVO: Ajude o paciente a agendar consultas, tirar dúvidas sobre a plataforma, testar câmera/microfone e entender como acessar receitas médicas.
 ${context ? `\n--- CONTEXTO DO PACIENTE LOGADO ---\n${context}\n---\nUse essas informações para personalizar suas respostas.` : ""}`;
 
-    const response = await fetch(apiUrl, {
+    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model,
+        model: "deepseek-chat",
         messages: [
           { role: "system", content: systemContent },
           ...messages,
@@ -82,21 +72,13 @@ ${context ? `\n--- CONTEXTO DO PACIENTE LOGADO ---\n${context}\n---\nUse essas i
     if (!response.ok) {
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Muitas mensagens! Aguarde um momento e tente novamente." }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos de IA esgotados." }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const t = await response.text();
-      console.error(`AI error (${useDeepSeek ? "DeepSeek" : "Lovable"}):`, response.status, t);
+      console.error("DeepSeek error:", response.status, t);
       return new Response(JSON.stringify({ error: "Erro no serviço de IA" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -128,20 +110,17 @@ ${context ? `\n--- CONTEXTO DO PACIENTE LOGADO ---\n${context}\n---\nUse essas i
             Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
           );
 
-          // Update ticket priority
           await supabase
             .from("support_tickets")
             .update({ priority: detectedPriority })
             .eq("id", ticket_id);
 
-          // If high priority, also escalate to waiting_human
           if (detectedPriority === "high") {
             await supabase
               .from("support_tickets")
               .update({ status: "waiting_human", priority: "high" })
               .eq("id", ticket_id);
 
-            // Send push notification to admins/support
             const { data: supportUsers } = await supabase
               .from("user_roles")
               .select("user_id")
@@ -173,8 +152,7 @@ ${context ? `\n--- CONTEXTO DO PACIENTE LOGADO ---\n${context}\n---\nUse essas i
   } catch (e) {
     console.error("chat error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
