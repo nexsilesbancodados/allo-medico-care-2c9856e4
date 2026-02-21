@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isToday, isFuture } from "date-fns";
+import { CalendarDays, ChevronLeft, ChevronRight, BarChart2 } from "lucide-react";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, addMonths, subMonths, isToday, isFuture, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 const MOODS = [
   { key: "great", emoji: "😃", label: "Ótimo", color: "bg-success/20 border-success/40 text-success" },
@@ -32,6 +33,8 @@ interface DiaryEntry {
   symptoms: string[];
   notes: string | null;
 }
+
+const MOOD_SCORE: Record<string, number> = { great: 5, good: 4, neutral: 3, bad: 2, terrible: 1 };
 
 const SymptomDiary = () => {
   const { user } = useAuth();
@@ -238,6 +241,43 @@ const SymptomDiary = () => {
             </Card>
           </div>
         </div>
+
+        {/* Mood chart */}
+        {entries.length >= 3 && (
+          <Card className="border-border/50">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <BarChart2 className="w-4 h-4 text-primary" /> Evolução do Humor
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ResponsiveContainer width="100%" height={160}>
+                <AreaChart data={entries.sort((a, b) => a.entry_date.localeCompare(b.entry_date)).map(e => ({
+                  date: format(new Date(e.entry_date + "T12:00:00"), "dd/MM"),
+                  humor: MOOD_SCORE[e.mood] ?? 3,
+                  sintomas: (e.symptoms?.length ?? 0),
+                }))}>
+                  <defs>
+                    <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <YAxis domain={[0, 5]} ticks={[1, 2, 3, 4, 5]} tick={{ fontSize: 10 }} stroke="hsl(var(--muted-foreground))" />
+                  <Tooltip
+                    contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }}
+                    formatter={(value: number, name: string) => [
+                      name === "humor" ? ["Péssimo", "Mal", "Normal", "Bem", "Ótimo"][value - 1] : `${value} sintomas`,
+                      name === "humor" ? "Humor" : "Sintomas"
+                    ]}
+                  />
+                  <Area type="monotone" dataKey="humor" stroke="hsl(var(--primary))" fill="url(#moodGrad)" strokeWidth={2} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );

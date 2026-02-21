@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useConsultationStore } from "@/stores/consultationStore";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -37,16 +38,29 @@ const PrescriptionForm = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const store = useConsultationStore();
   const [patientName, setPatientName] = useState("");
   const [patientCpf, setPatientCpf] = useState("");
   const [patientId, setPatientId] = useState("");
   const [doctorInfo, setDoctorInfo] = useState<any>(null);
-  const [diagnosis, setDiagnosis] = useState("");
-  const [observations, setObservations] = useState("");
-  const [medications, setMedications] = useState<Medication[]>([
-    { name: "", dosage: "", frequency: "", duration: "", instructions: "" },
-  ]);
+  const [diagnosis, setDiagnosis] = useState(store.appointmentId === appointmentId ? store.diagnosis : "");
+  const [observations, setObservations] = useState(store.appointmentId === appointmentId ? store.observations : "");
+  const [medications, setMedications] = useState<Medication[]>(
+    store.appointmentId === appointmentId && store.medications.some(m => m.name)
+      ? store.medications
+      : [{ name: "", dosage: "", frequency: "", duration: "", instructions: "" }]
+  );
   const [saving, setSaving] = useState(false);
+
+  // Persist draft to Zustand
+  useEffect(() => {
+    if (appointmentId) {
+      store.setAppointmentId(appointmentId);
+      store.setDiagnosis(diagnosis);
+      store.setObservations(observations);
+      store.setMedications(medications);
+    }
+  }, [diagnosis, observations, medications, appointmentId]);
 
   useEffect(() => {
     if (appointmentId && user) fetchData();
@@ -369,6 +383,7 @@ const PrescriptionForm = () => {
           },
         }).catch(console.error);
       }
+      store.clearDraft();
       toast({ title: "Receita salva com sucesso! ✅" });
       navigate("/dashboard/prescriptions");
     }
