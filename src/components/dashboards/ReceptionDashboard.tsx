@@ -9,12 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComp } from "@/components/ui/calendar";
-import { Calendar, Clock, CheckCircle, Video, Search, Download, RefreshCw, Filter, FileText, ChevronLeft, ChevronRight, Bell, Send } from "lucide-react";
+import { Calendar, Clock, CheckCircle, Video, Search, Download, RefreshCw, Filter, ChevronLeft, ChevronRight, Bell } from "lucide-react";
 import { format, addDays, subDays, startOfDay, endOfDay, isSameDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import BlobKPICard from "@/components/ui/blob-kpi-card";
+import { motion } from "framer-motion";
 import jsPDF from "jspdf";
 
 const statusLabel: Record<string, string> = {
@@ -30,6 +30,9 @@ const statusColor: Record<string, string> = {
   cancelled: "bg-destructive/10 text-destructive border-destructive/20",
   no_show: "bg-destructive/10 text-destructive border-destructive/20",
 };
+
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
 
 const ReceptionDashboard = () => {
   const [todayAppts, setTodayAppts] = useState<any[]>([]);
@@ -148,12 +151,12 @@ const ReceptionDashboard = () => {
 
   return (
     <DashboardLayout title="Recepção" nav={getReceptionNav("overview")}>
-      <div className="max-w-5xl space-y-5">
+      <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Painel da Recepção</h1>
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel da Recepção</h1>
             {/* Date navigator */}
             <div className="flex items-center gap-2 mt-1">
               <button onClick={() => setSelectedDate(d => subDays(d, 1))} className="w-7 h-7 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors">
@@ -188,10 +191,9 @@ const ReceptionDashboard = () => {
             <Button
               size="sm"
               variant="outline"
+              className="h-9 rounded-xl gap-1.5"
               onClick={async () => {
                 const tomorrow = addDays(new Date(), 1);
-                const tomorrowAppts = todayAppts.length > 0 ? todayAppts : [];
-                // Fetch tomorrow's appointments for reminders
                 const dayStart = startOfDay(tomorrow);
                 const dayEnd = endOfDay(tomorrow);
                 const { data } = await supabase
@@ -227,138 +229,138 @@ const ReceptionDashboard = () => {
                 toast.success(`${sent} lembrete(s) enviado(s) para amanhã!`);
               }}
             >
-              <Bell className="w-4 h-4 mr-1" /> Lembretes Amanhã
+              <Bell className="w-3.5 h-3.5" /> Lembretes
             </Button>
-            <Button size="sm" variant="outline" onClick={() => fetchToday(true)} disabled={refreshing}>
+            <Button size="sm" variant="outline" className="h-9 w-9 rounded-xl" onClick={() => fetchToday(true)} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
-            <Button size="sm" variant="outline" onClick={exportCSV} disabled={loading || todayAppts.length === 0}>
-              <Download className="w-4 h-4 mr-1" /> CSV
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportCSV} disabled={loading || todayAppts.length === 0}>
+              <Download className="w-4 h-4" /> CSV
             </Button>
           </div>
-        </div>
+        </motion.div>
 
-        {/* BLOB KPI Cards — Recepção */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-2">
+        {/* KPI Cards — unified style */}
+        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {loading ? (
-            [1,2,3,4].map(i => <div key={i} className="aspect-square animate-pulse bg-muted/50 rounded-full" />)
+            [1, 2, 3, 4].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" />)
           ) : (
-            kpis.map((s, i) => (
-              <BlobKPICard
-                key={s.label}
-                variant={i as 0|1|2|3}
-                label={s.label}
-                value={s.value}
-                icon={<s.icon className="w-5 h-5" />}
-                color={["primary","warning","success","secondary"][i] as any}
-                delay={i * 0.08}
-              />
+            kpis.map((s) => (
+              <div key={s.label} className="p-4 rounded-2xl bg-card border border-border/50">
+                <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
+                  <s.icon className={`w-4 h-4 ${s.color}`} />
+                </div>
+                <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                <p className="text-xs font-medium text-muted-foreground mt-0.5">{s.label}</p>
+              </div>
             ))
           )}
-        </div>
+        </motion.div>
 
         {/* Agenda */}
-        <Card className="border-border">
-          <CardHeader className="pb-3">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <CardTitle className="text-base font-semibold">
-                Agenda — {filteredAppts.length} consulta(s)
-              </CardTitle>
-              <div className="flex gap-2 flex-wrap">
-                <div className="relative w-full sm:w-44">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                  <Input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-8 text-sm" />
-                </div>
-                <Select value={filterStatus} onValueChange={setFilterStatus}>
-                  <SelectTrigger className="h-8 w-full sm:w-36 text-xs">
-                    <Filter className="w-3 h-3 mr-1 text-muted-foreground" />
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="scheduled">Agendada</SelectItem>
-                    <SelectItem value="waiting">Na espera</SelectItem>
-                    <SelectItem value="in_progress">Em andamento</SelectItem>
-                    <SelectItem value="completed">Concluída</SelectItem>
-                    <SelectItem value="no_show">Faltou</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            {loading ? (
-              <div className="space-y-3">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-border">
-                    <Skeleton className="h-10 w-14 rounded-lg" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-36" />
-                      <Skeleton className="h-3 w-28" />
-                    </div>
-                    <Skeleton className="h-7 w-20 rounded-full" />
+        <motion.div variants={fadeUp}>
+          <Card className="border-border/50">
+            <CardHeader className="pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <CardTitle className="text-sm font-semibold">
+                  Agenda — {filteredAppts.length} consulta(s)
+                </CardTitle>
+                <div className="flex gap-2 flex-wrap">
+                  <div className="relative w-full sm:w-44">
+                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                    <Input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-8 text-sm rounded-xl" />
                   </div>
-                ))}
-              </div>
-            ) : filteredAppts.length === 0 ? (
-              <div className="text-center py-10">
-                <div className="w-14 h-14 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-3">
-                  <Calendar className="w-7 h-7 text-muted-foreground/40" />
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="h-8 w-full sm:w-36 text-xs rounded-xl">
+                      <Filter className="w-3 h-3 mr-1 text-muted-foreground" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="scheduled">Agendada</SelectItem>
+                      <SelectItem value="waiting">Na espera</SelectItem>
+                      <SelectItem value="in_progress">Em andamento</SelectItem>
+                      <SelectItem value="completed">Concluída</SelectItem>
+                      <SelectItem value="no_show">Faltou</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <p className="text-sm font-medium text-foreground mb-1">
-                  {search ? "Nenhum resultado encontrado" : "Nenhuma consulta para hoje"}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {search ? "Tente um nome diferente" : "A agenda está limpa por hoje"}
-                </p>
               </div>
-            ) : (
-              <div className="space-y-2">
-                {filteredAppts.map(a => (
-                  <div
-                    key={a.id}
-                    className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border gap-3 transition-colors ${
-                      a.status === "in_progress" ? "border-success/30 bg-success/5"
-                      : a.status === "waiting" ? "border-warning/30 bg-warning/5"
-                      : "border-border hover:bg-muted/30"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="min-w-[52px] text-center p-1.5 rounded-lg bg-muted/60">
-                        <p className="text-sm font-bold text-foreground">{format(new Date(a.scheduled_at), "HH:mm")}</p>
-                        <p className="text-[10px] text-muted-foreground">{a.duration_minutes || 30}min</p>
+            </CardHeader>
+            <CardContent className="pt-0">
+              {loading ? (
+                <div className="space-y-3">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-border/40">
+                      <Skeleton className="h-10 w-14 rounded-lg" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-36" />
+                        <Skeleton className="h-3 w-28" />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-foreground truncate">{a.patient_name}</p>
-                        <p className="text-xs text-muted-foreground truncate">{a.doctor_name}</p>
-                        {a.patient_phone && (
-                          <p className="text-xs text-muted-foreground">📞 {a.patient_phone}</p>
+                      <Skeleton className="h-7 w-20 rounded-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : filteredAppts.length === 0 ? (
+                <div className="text-center py-10">
+                  <div className="w-14 h-14 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
+                    <Calendar className="w-7 h-7 text-muted-foreground/40" />
+                  </div>
+                  <p className="text-sm font-medium text-foreground mb-1">
+                    {search ? "Nenhum resultado encontrado" : "Nenhuma consulta para hoje"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {search ? "Tente um nome diferente" : "A agenda está limpa por hoje"}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {filteredAppts.map(a => (
+                    <div
+                      key={a.id}
+                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border gap-3 transition-colors ${
+                        a.status === "in_progress" ? "border-success/30 bg-success/5"
+                        : a.status === "waiting" ? "border-warning/30 bg-warning/5"
+                        : "border-border/50 hover:bg-muted/30"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="min-w-[52px] text-center p-1.5 rounded-lg bg-muted/60">
+                          <p className="text-sm font-bold text-foreground">{format(new Date(a.scheduled_at), "HH:mm")}</p>
+                          <p className="text-[10px] text-muted-foreground">{a.duration_minutes || 30}min</p>
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-semibold text-foreground truncate">{a.patient_name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{a.doctor_name}</p>
+                          {a.patient_phone && (
+                            <p className="text-xs text-muted-foreground">📞 {a.patient_phone}</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${statusColor[a.status] ?? "bg-muted text-muted-foreground border-border"}`}>
+                          {a.status === "in_progress" && <span className="inline-block w-1.5 h-1.5 rounded-full bg-success mr-1 align-middle animate-pulse" />}
+                          {statusLabel[a.status] ?? a.status}
+                        </span>
+                        {a.status === "scheduled" && (
+                          <>
+                            <Button size="sm" variant="outline" className="text-xs h-7 rounded-xl" onClick={() => updateStatus(a.id, "waiting")}>
+                              Check-in
+                            </Button>
+                            <Button size="sm" variant="ghost" className="text-xs h-7 text-destructive hover:bg-destructive/10 rounded-xl" onClick={() => updateStatus(a.id, "no_show")}>
+                              Faltou
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${statusColor[a.status] ?? "bg-muted text-muted-foreground border-border"}`}>
-                        {a.status === "in_progress" && <span className="inline-block w-1.5 h-1.5 rounded-full bg-success mr-1 align-middle animate-pulse" />}
-                        {statusLabel[a.status] ?? a.status}
-                      </span>
-                      {a.status === "scheduled" && (
-                        <>
-                          <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => updateStatus(a.id, "waiting")}>
-                            Check-in
-                          </Button>
-                          <Button size="sm" variant="ghost" className="text-xs h-7 text-destructive hover:bg-destructive/10" onClick={() => updateStatus(a.id, "no_show")}>
-                            Faltou
-                          </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </motion.div>
     </DashboardLayout>
   );
 };
