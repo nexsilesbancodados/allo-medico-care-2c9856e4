@@ -49,6 +49,7 @@ import ChatPage from "@/components/chat/ChatPage";
 import AdminNPS from "@/components/admin/AdminNPS";
 import MedicalRecords from "@/components/medical/MedicalRecords";
 import AdminWhatsApp from "@/components/admin/AdminWhatsApp";
+import PanelSettings from "@/components/settings/PanelSettings";
 import { Loader2 } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -92,6 +93,7 @@ const Dashboard = () => {
     <Routes>
       {/* Shared routes */}
       <Route path="profile" element={<UserProfile />} />
+      <Route path="settings" element={<PanelSettings />} />
 
       {/* Patient routes — patients + admin */}
       <Route path="doctors" element={<RoleGuard allowed={["patient"]} roles={roles}><DoctorSearch /></RoleGuard>} />
