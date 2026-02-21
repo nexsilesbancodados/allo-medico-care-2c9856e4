@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, MessageCircle, Headphones, Sparkles, CalendarDays, CreditCard, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import mascotImg from "@/assets/mascot.png";
@@ -77,6 +77,7 @@ async function streamChat({
 
 const PingoChatbot = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, roles, profile } = useAuth();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -86,6 +87,10 @@ const PingoChatbot = () => {
   const [userContext, setUserContext] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Hide on consultation/video pages
+  const isConsultationPage = location.pathname.includes("/consultation");
+
 
   // Build patient context when user is logged in
   useEffect(() => {
@@ -277,6 +282,8 @@ const PingoChatbot = () => {
         { label: "Especialidades", icon: Stethoscope, text: "Quais especialidades vocês oferecem?" },
         { label: "Quanto custa?", icon: CreditCard, text: "Quanto custa uma consulta?" },
       ];
+
+  if (isConsultationPage) return null;
 
   return (
     <>
