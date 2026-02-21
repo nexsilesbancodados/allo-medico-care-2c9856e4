@@ -92,6 +92,16 @@ const Dashboard = () => {
 
   return (
     <Routes>
+      {/* ─── Role-based dashboard index routes ─── */}
+      <Route path="patient" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientDashboard /></RoleGuard>} />
+      <Route path="doctor" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorDashboard /></RoleGuard>} />
+      <Route path="clinic" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
+      <Route path="admin" element={<RoleGuard allowed={[]} roles={roles}><AdminDashboard /></RoleGuard>} />
+      <Route path="receptionist" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
+      <Route path="support" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
+      <Route path="partner" element={<RoleGuard allowed={["partner"]} roles={roles}><PartnerDashboard /></RoleGuard>} />
+      <Route path="affiliate" element={<RoleGuard allowed={["affiliate"]} roles={roles}><AffiliateDashboard /></RoleGuard>} />
+
       {/* Shared routes */}
       <Route path="profile" element={<UserProfile />} />
       <Route path="settings" element={<PanelSettings />} />
@@ -150,19 +160,10 @@ const Dashboard = () => {
       <Route path="admin/nps" element={<RoleGuard allowed={[]} roles={roles}><AdminNPS /></RoleGuard>} />
       <Route path="admin/whatsapp" element={<RoleGuard allowed={[]} roles={roles}><AdminWhatsApp /></RoleGuard>} />
 
-      {/* Default: role-based dashboard */}
+      {/* Default: redirect to role-specific dashboard */}
       <Route
         path="*"
-        element={
-          primaryRole === "admin" ? <AdminDashboard /> :
-          primaryRole === "doctor" ? <DoctorDashboard /> :
-          primaryRole === "receptionist" ? <ReceptionDashboard /> :
-          primaryRole === "support" ? <SupportDashboard /> :
-          primaryRole === "clinic" ? <ClinicDashboard /> :
-          primaryRole === "partner" ? <PartnerDashboard /> :
-          primaryRole === "affiliate" ? <AffiliateDashboard /> :
-          <PatientDashboard />
-        }
+        element={<Navigate to={`/dashboard/${primaryRole}`} replace />}
       />
     </Routes>
   );
