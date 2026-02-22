@@ -105,36 +105,21 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
 
         const roomURL = data.roomURL;
 
-        await new Promise<void>((resolve, reject) => {
-          if ((window as any).MeteredFrame) { resolve(); return; }
-          const script = document.createElement("script");
-          script.src = "https://cdn.metered.ca/sdk/frame/1.4.3/sdk-frame.min.js";
-          script.async = true;
-          script.onload = () => resolve();
-          script.onerror = () => reject(new Error("Failed to load Metered SDK"));
-          document.head.appendChild(script);
-        });
-
         if (!frameContainerRef.current) return;
 
-        const frame = new (window as any).MeteredFrame();
-        frame.init(
-          {
-            roomURL,
-            autoJoin: true,
-            name: userName || "Participante",
-            joinVideoOn: true,
-            joinAudioOn: true,
-            showInviteBox: false,
-            showJoinForm: false,
-            showLeaveBtn: false,
-          },
-          frameContainerRef.current
-        );
+        // Use direct iframe approach — more reliable than MeteredFrame SDK
+        const displayName = encodeURIComponent(userName || "Participante");
+        const iframeSrc = `https://${roomURL}?autoJoin=true&name=${displayName}&joinVideoOn=true&joinAudioOn=true&showInviteBox=false&showJoinForm=false&showLeaveBtn=false`;
 
-        frame.on("participantJoined", () => {
+        const iframe = document.createElement("iframe");
+        iframe.src = iframeSrc;
+        iframe.allow = "camera; microphone; display-capture; autoplay; clipboard-write; clipboard-read; fullscreen";
+        iframe.style.cssText = "width:100%;height:100%;border:none;min-height:400px;";
+        iframe.title = "Videochamada";
+
+        iframe.onload = () => {
           setLoading(false);
-          // Play notification sound when other participant joins
+          // Play notification sound
           try {
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const oscillator = audioCtx.createOscillator();
@@ -149,9 +134,18 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
             oscillator.start(audioCtx.currentTime);
             oscillator.stop(audioCtx.currentTime + 0.4);
           } catch {}
-        });
-        frame.on("meetingEnded", () => onEndCallRef.current());
-        setTimeout(() => setLoading(false), 5000);
+        };
+
+        iframe.onerror = () => {
+          setError("Erro ao carregar a sala de vídeo.");
+          setLoading(false);
+        };
+
+        frameContainerRef.current.innerHTML = "";
+        frameContainerRef.current.appendChild(iframe);
+
+        // Fallback timeout
+        setTimeout(() => setLoading(false), 8000);
       } catch (err) {
         console.error("Video init error:", err);
         setError("Erro ao inicializar a videochamada.");
@@ -279,16 +273,12 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
 
         {/* Metered Frame container */}
         <div ref={frameContainerRef} className="w-full h-full metered-container" style={{ minHeight: "400px" }} />
-        {/* Hide Metered invite box via CSS override */}
+        {/* Ensure iframe fills container */}
         <style>{`
           .metered-container iframe {
             width: 100% !important;
             height: 100% !important;
-          }
-          /* Hide invite instructions overlay from Metered SDK */
-          [class*="invite"], [class*="Invite"],
-          [data-testid*="invite"], [data-testid*="Invite"] {
-            display: none !important;
+            border: none !important;
           }
         `}</style>
       </div>
