@@ -17,7 +17,7 @@ import ClinicPresentialSection from "@/components/landing/ClinicPresentialSectio
 import FAQSection from "@/components/landing/FAQSection";
 import SupportSection from "@/components/landing/SupportSection";
 import Footer from "@/components/landing/Footer";
-import PingoChatbot from "@/components/PingoChatbot";
+
 import AnimateSection from "@/components/ui/animate-section";
 import EmergencyButton from "@/components/EmergencyButton";
 import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
@@ -168,7 +168,6 @@ const Index = () => {
       </AnimateSection>
 
       <Footer />
-      <PingoChatbot />
       <EmergencyButton />
       <FloatingMobileCTA />
       {showQuiz && <SpecialtyQuiz onClose={() => setShowQuiz(false)} />}
