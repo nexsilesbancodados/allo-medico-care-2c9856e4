@@ -123,9 +123,20 @@ const PatientDashboard = () => {
 
   const greeting = () => {
     const h = new Date().getHours();
-    if (h < 12) return "Bom dia";
-    if (h < 18) return "Boa tarde";
-    return "Boa noite";
+    if (h < 6) return "Boa madrugada 🌙";
+    if (h < 12) return "Bom dia ☀️";
+    if (h < 18) return "Boa tarde 🌤️";
+    if (h < 22) return "Boa noite 🌆";
+    return "Boa noite 🌙";
+  };
+
+  const greetingSubtext = () => {
+    const h = new Date().getHours();
+    if (h < 6) return "Descanse bem, o sono é essencial para a saúde.";
+    if (h < 12) return "Comece o dia cuidando da sua saúde!";
+    if (h < 18) return "Já bebeu água hoje? Mantenha-se hidratado.";
+    if (h < 22) return "Que tal revisar seus próximos compromissos?";
+    return "Hora de relaxar. Boa noite de sono!";
   };
 
   const healthTips = [
@@ -135,6 +146,7 @@ const PatientDashboard = () => {
     "🍎 Inclua 5 porções de frutas e vegetais",
     "🧘 5 min de respiração profunda reduz o cortisol",
     "☀️ 15 min de sol ajudam na vitamina D",
+    "🫀 Monitore sua pressão regularmente",
   ];
   const todayTip = healthTips[new Date().getDay() % healthTips.length];
 
@@ -147,11 +159,12 @@ const PatientDashboard = () => {
         <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              {greeting()}, {profile?.first_name || "Paciente"} 👋
+              {greeting()}, {profile?.first_name || "Paciente"}
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-0.5">
               {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
             </p>
+            <p className="text-xs text-muted-foreground/70 mt-0.5">{greetingSubtext()}</p>
           </div>
           <div className="flex items-center gap-2">
             <MedicalHistoryExport />
