@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Shield, Clock, Star, Users } from "lucide-react";
+import { ArrowRight, Sparkles, Shield, Clock, Star, Users, MessageCircle, Check, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -10,17 +10,45 @@ const trustBadges = [
   { icon: Star, text: "4.9★ avaliação" },
 ];
 
+const comparisonRows = [
+  { feature: "Espera", us: "~15 min", them: "2-5 horas" },
+  { feature: "Receita digital", us: true, them: false },
+  { feature: "Acesso 24h", us: true, them: false },
+  { feature: "Preço", us: "A partir de R$89", them: "R$200-400" },
+];
+
 const CTABanner = () => {
   const navigate = useNavigate();
   const [onlineNow, setOnlineNow] = useState(47);
 
-  // Fake fluctuating online counter for social proof
+  // Countdown for urgency (resets every day)
+  const getTimeLeft = () => {
+    const now = new Date();
+    const endOfDay = new Date(now);
+    endOfDay.setHours(23, 59, 59, 999);
+    const diff = endOfDay.getTime() - now.getTime();
+    const hours = Math.floor(diff / 3600000);
+    const minutes = Math.floor((diff % 3600000) / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+    return { hours, minutes, seconds };
+  };
+
+  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
+
+  useEffect(() => {
+    const timer = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Fake fluctuating online counter
   useEffect(() => {
     const timer = setInterval(() => {
       setOnlineNow((prev) => Math.max(30, Math.min(80, prev + Math.floor(Math.random() * 7) - 3)));
     }, 4000);
     return () => clearInterval(timer);
   }, []);
+
+  const pad = (n: number) => n.toString().padStart(2, "0");
 
   return (
     <section className="py-10 md:py-20 px-4">
@@ -60,35 +88,62 @@ const CTABanner = () => {
           ))}
 
           <div className="relative z-10">
-            {/* Social proof badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.15 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-primary-foreground text-sm font-medium mb-4 backdrop-blur-sm"
-            >
-              <Users className="w-4 h-4" />
-              <motion.span
-                key={onlineNow}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3 }}
+            {/* Social proof + countdown row */}
+            <div className="flex flex-wrap justify-center gap-3 mb-5">
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.15 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-primary-foreground text-sm font-medium backdrop-blur-sm"
               >
-                {onlineNow} pessoas online agora
-              </motion.span>
-              <span className="w-2 h-2 rounded-full bg-medical-green animate-pulse" />
-            </motion.div>
+                <Users className="w-4 h-4" />
+                <motion.span
+                  key={onlineNow}
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {onlineNow} pessoas online agora
+                </motion.span>
+                <span className="w-2 h-2 rounded-full bg-medical-green animate-pulse" />
+              </motion.div>
 
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-primary-foreground text-sm font-medium backdrop-blur-sm"
+              >
+                <Sparkles className="w-4 h-4" />
+                Primeira consulta com desconto
+              </motion.div>
+            </div>
+
+            {/* Countdown timer */}
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-primary-foreground text-sm font-medium mb-6 backdrop-blur-sm ml-2"
+              transition={{ delay: 0.25 }}
+              className="flex items-center justify-center gap-1.5 mb-6"
             >
-              <Sparkles className="w-4 h-4" />
-              Primeira consulta com desconto
+              <span className="text-primary-foreground/60 text-xs font-medium">Oferta expira em:</span>
+              <div className="flex gap-1">
+                {[
+                  { val: pad(timeLeft.hours), label: "h" },
+                  { val: pad(timeLeft.minutes), label: "m" },
+                  { val: pad(timeLeft.seconds), label: "s" },
+                ].map((t, i) => (
+                  <div key={i} className="flex items-center gap-0.5">
+                    <span className="bg-white/20 backdrop-blur-sm rounded-lg px-2 py-1 text-sm font-bold text-primary-foreground tabular-nums">
+                      {t.val}
+                    </span>
+                    <span className="text-primary-foreground/50 text-[10px]">{t.label}</span>
+                  </div>
+                ))}
+              </div>
             </motion.div>
 
             <motion.h2
@@ -115,7 +170,7 @@ const CTABanner = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.5 }}
-              className="flex flex-wrap justify-center gap-3 mb-8"
+              className="flex flex-wrap justify-center gap-3 mb-6"
             >
               <Button
                 size="lg"
@@ -132,6 +187,53 @@ const CTABanner = () => {
               >
                 Consulta sem cadastro
               </Button>
+            </motion.div>
+
+            {/* WhatsApp CTA */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.55 }}
+              className="mb-8"
+            >
+              <button
+                onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Quero saber mais sobre a AloClinica.", "_blank")}
+                className="inline-flex items-center gap-2 text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" />
+                Prefere WhatsApp? Fale com a gente
+              </button>
+            </motion.div>
+
+            {/* Mini comparison table */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.6 }}
+              className="max-w-sm mx-auto mb-8 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 overflow-hidden"
+            >
+              <div className="grid grid-cols-3 text-[11px] font-bold text-primary-foreground/80 p-3 border-b border-white/10">
+                <span></span>
+                <span className="text-center">AloClinica</span>
+                <span className="text-center opacity-50">Consulta Tradicional</span>
+              </div>
+              {comparisonRows.map((row, i) => (
+                <div key={i} className={`grid grid-cols-3 text-[11px] text-primary-foreground/70 p-2.5 ${i < comparisonRows.length - 1 ? "border-b border-white/5" : ""}`}>
+                  <span className="font-medium">{row.feature}</span>
+                  <span className="text-center font-semibold text-primary-foreground">
+                    {typeof row.us === "boolean" ? (
+                      row.us ? <Check className="w-3.5 h-3.5 text-medical-green mx-auto" /> : <X className="w-3.5 h-3.5 opacity-40 mx-auto" />
+                    ) : row.us}
+                  </span>
+                  <span className="text-center opacity-50">
+                    {typeof row.them === "boolean" ? (
+                      row.them ? <Check className="w-3.5 h-3.5 mx-auto" /> : <X className="w-3.5 h-3.5 mx-auto" />
+                    ) : row.them}
+                  </span>
+                </div>
+              ))}
             </motion.div>
 
             {/* Trust badges */}
