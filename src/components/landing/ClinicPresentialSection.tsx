@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Stethoscope, Building2, MapPin, Phone, Clock, ArrowRight } from "lucide-react";
+import { Stethoscope, Building2, MapPin, Phone, Clock, ArrowRight, Star, Users, Shield, CheckCircle, Wifi } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -19,6 +19,19 @@ const chatMessages = [
   { type: "received", text: "Aqui você cuida da sua saúde de um jeito fácil e completo." },
   { type: "sent", text: "Quero agendar uma consulta presencial" },
   { type: "received", text: "Claro! Temos diversas especialidades. Qual horário é melhor para você? 📅" },
+];
+
+const clinicHighlights = [
+  { icon: Star, value: "4.9", label: "Avaliação" },
+  { icon: Users, value: "3.2k+", label: "Atendidos" },
+  { icon: Shield, value: "100%", label: "Seguro" },
+];
+
+const clinicAmenities = [
+  { icon: Wifi, label: "Wi-Fi gratuito" },
+  { icon: CheckCircle, label: "Acessibilidade" },
+  { icon: Clock, label: "Pontualidade" },
+  { icon: Shield, label: "Protocolos sanitários" },
 ];
 
 const ClinicPresentialSection = () => {
@@ -83,33 +96,79 @@ const ClinicPresentialSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="text-background/70 text-lg max-w-lg mb-8 leading-relaxed"
+                className="text-background/70 text-lg max-w-lg mb-6 leading-relaxed"
               >
                 Unimos atendimento presencial e digital com impacto direto na sua saúde. Consultas com especialistas na nossa clínica própria.
               </motion.p>
 
+              {/* Clinic highlights */}
               <motion.div
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.3 }}
-                className="flex flex-wrap gap-3 mb-8"
+                transition={{ delay: 0.25 }}
+                className="flex gap-4 mb-6"
+              >
+                {clinicHighlights.map((h, i) => (
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 + i * 0.08 }}
+                    className="bg-background/10 backdrop-blur-sm rounded-xl px-4 py-3 text-center border border-background/5"
+                  >
+                    <h.icon className="w-4 h-4 text-primary mx-auto mb-1" />
+                    <p className="text-lg font-extrabold leading-none">{h.value}</p>
+                    <p className="text-[10px] text-background/50 mt-0.5">{h.label}</p>
+                  </motion.div>
+                ))}
+              </motion.div>
+
+              {/* Info pills */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.35 }}
+                className="flex flex-wrap gap-2 mb-6"
               >
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/10 text-xs font-medium">
                   <Clock className="w-3 h-3" />
-                  Seg-Sex 8h-18h
+                  Seg-Sex 8h-18h • Sáb 8h-12h
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background/10 text-xs font-medium">
                   <MapPin className="w-3 h-3" />
-                  São Paulo, SP
+                  Boa Vista, RR
                 </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-medical-green/20 text-medical-green text-xs font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-medical-green animate-pulse" />
+                  Aberto agora
+                </div>
+              </motion.div>
+
+              {/* Amenities */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.38 }}
+                className="flex flex-wrap gap-2 mb-8"
+              >
+                {clinicAmenities.map((a, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-background/5 text-[10px] font-medium text-background/60">
+                    <a.icon className="w-3 h-3" />
+                    {a.label}
+                  </span>
+                ))}
               </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.35 }}
+                transition={{ delay: 0.4 }}
+                className="flex flex-wrap gap-3"
               >
                 <Button
                   size="lg"
@@ -117,6 +176,15 @@ const ClinicPresentialSection = () => {
                   onClick={() => navigate("/clinica")}
                 >
                   Agendar presencial <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-background/20 text-background hover:bg-background/10 rounded-full px-6"
+                  onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Gostaria de agendar uma consulta presencial.", "_blank")}
+                >
+                  <Phone className="w-4 h-4 mr-1.5" />
+                  WhatsApp
                 </Button>
               </motion.div>
             </div>
@@ -126,6 +194,7 @@ const ClinicPresentialSection = () => {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.3, duration: 0.6 }}
+              className="relative"
             >
               <div className="rounded-2xl overflow-hidden shadow-2xl">
                 <img
@@ -135,6 +204,21 @@ const ClinicPresentialSection = () => {
                   loading="lazy"
                 />
               </div>
+
+              {/* Floating review card */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6, type: "spring" }}
+                className="absolute -bottom-4 -left-4 bg-card text-foreground rounded-xl shadow-elevated px-4 py-3 max-w-[200px]"
+              >
+                <div className="flex gap-0.5 mb-1">
+                  {[1,2,3,4,5].map(s => <Star key={s} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}
+                </div>
+                <p className="text-[10px] text-muted-foreground italic leading-relaxed">"Atendimento excelente, equipe muito acolhedora!"</p>
+                <p className="text-[9px] font-semibold text-foreground mt-1">— Maria S., paciente</p>
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -142,7 +226,7 @@ const ClinicPresentialSection = () => {
         {/* Bottom section - Steps + Chat */}
         <div className="container mx-auto px-4 pb-16">
           <div className="grid lg:grid-cols-2 gap-12 items-start">
-            {/* Steps with icons */}
+            {/* Steps */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -173,7 +257,7 @@ const ClinicPresentialSection = () => {
               ))}
             </motion.div>
 
-            {/* Chat mockup with animation */}
+            {/* Chat mockup */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -192,15 +276,15 @@ const ClinicPresentialSection = () => {
                 </div>
 
                 <div className="flex-1 bg-background/10 backdrop-blur-sm rounded-2xl border border-background/10 shadow-xl overflow-hidden">
-                  {/* Chat header */}
                   <div className="flex items-center gap-2 px-4 py-3 border-b border-background/10">
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                       <Stethoscope className="w-4 h-4 text-primary" />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <span className="font-semibold text-sm">Clínica AloClinica</span>
                       <p className="text-[10px] text-medical-green">Online</p>
                     </div>
+                    <span className="text-[9px] text-background/40">agora</span>
                   </div>
 
                   <div className="p-4 space-y-3 min-h-[240px] max-h-[280px] overflow-hidden">
@@ -226,7 +310,6 @@ const ClinicPresentialSection = () => {
                       ))}
                     </AnimatePresence>
 
-                    {/* Typing indicator */}
                     <AnimatePresence>
                       {isTyping && (
                         <motion.div
@@ -248,6 +331,13 @@ const ClinicPresentialSection = () => {
                         </motion.div>
                       )}
                     </AnimatePresence>
+                  </div>
+
+                  {/* Input bar */}
+                  <div className="px-4 py-2.5 border-t border-background/10 flex items-center gap-2">
+                    <div className="flex-1 bg-background/5 rounded-full px-3 py-1.5 text-[10px] text-background/30">
+                      Digite sua mensagem...
+                    </div>
                   </div>
                 </div>
               </div>
