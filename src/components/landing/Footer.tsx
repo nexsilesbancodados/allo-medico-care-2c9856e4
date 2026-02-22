@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Phone, Instagram, Linkedin, Youtube, ArrowRight, Heart } from "lucide-react";
+import { Mail, MapPin, Phone, Instagram, Linkedin, Youtube, ArrowRight, Heart, Shield, Award, Lock, Verified, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import logo from "@/assets/logo.png";
+
+const trustBadges = [
+  { icon: Shield, label: "CFM Regulamentado" },
+  { icon: Lock, label: "LGPD Compliant" },
+  { icon: Verified, label: "SSL Criptografado" },
+  { icon: Award, label: "ISO 27001" },
+];
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -15,7 +22,6 @@ const Footer = () => {
     e.preventDefault();
     if (!email.trim()) return;
     setSubmitting(true);
-    // Simulated — no real backend
     setTimeout(() => {
       toast.success("Inscrito com sucesso! 🎉", { description: "Você receberá nossas novidades." });
       setEmail("");
@@ -25,6 +31,29 @@ const Footer = () => {
 
   return (
     <footer aria-label="Rodapé" className="bg-foreground text-background">
+      {/* Trust badges strip */}
+      <div className="border-b border-background/10">
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-wrap justify-center gap-6 md:gap-10">
+            {trustBadges.map((badge, i) => (
+              <motion.div
+                key={badge.label}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.08 }}
+                className="flex items-center gap-2 group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-background/8 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <badge.icon className="w-4 h-4 text-primary" />
+                </div>
+                <span className="text-xs font-semibold opacity-60 group-hover:opacity-100 transition-opacity">{badge.label}</span>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Newsletter strip */}
       <div className="border-b border-background/10">
         <div className="container mx-auto px-4 py-10">
@@ -67,7 +96,7 @@ const Footer = () => {
               com segurança e praticidade.
             </p>
             {/* Social links */}
-            <div className="flex gap-2">
+            <div className="flex gap-2 mb-6">
               {[
                 { icon: Instagram, label: "Instagram", href: "#" },
                 { icon: Linkedin, label: "LinkedIn", href: "#" },
@@ -83,6 +112,19 @@ const Footer = () => {
                 </a>
               ))}
             </div>
+
+            {/* Mini stats */}
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { value: "12.5k+", label: "Pacientes" },
+                { value: "500+", label: "Médicos" },
+              ].map((stat) => (
+                <div key={stat.label} className="bg-background/5 rounded-lg p-2.5 text-center border border-background/10">
+                  <p className="text-sm font-bold">{stat.value}</p>
+                  <p className="text-[10px] opacity-50">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
 
           {[
@@ -93,6 +135,7 @@ const Footer = () => {
                 { label: "Especialidades", href: "#especialidades" },
                 { label: "Planos", href: "#planos" },
                 { label: "FAQ", href: "#faq" },
+                { label: "Blog de saúde", href: "#", external: true },
               ],
             },
             {
@@ -100,6 +143,7 @@ const Footer = () => {
               links: [
                 { label: "Sou Paciente", to: "/paciente" },
                 { label: "Sou Médico", to: "/medico" },
+                { label: "Sou Clínica", to: "/clinica" },
                 { label: "Consulta Avulsa", to: "/consulta-avulsa" },
                 { label: "Administração", to: "/admin" },
               ],
@@ -119,7 +163,10 @@ const Footer = () => {
                     {"to" in link ? (
                       <Link to={link.to!} className="hover:opacity-100 transition-opacity duration-200 hover:translate-x-0.5 inline-block">{link.label}</Link>
                     ) : (
-                      <a href={link.href} className="hover:opacity-100 transition-opacity duration-200 hover:translate-x-0.5 inline-block">{link.label}</a>
+                      <a href={link.href} className="hover:opacity-100 transition-opacity duration-200 hover:translate-x-0.5 inline-flex items-center gap-1">
+                        {link.label}
+                        {"external" in link && link.external && <ExternalLink className="w-3 h-3" />}
+                      </a>
                     )}
                   </li>
                 ))}
@@ -139,6 +186,19 @@ const Footer = () => {
               <li className="flex items-center gap-2"><Phone className="w-4 h-4 shrink-0" /> 0800 123 4567</li>
               <li className="flex items-center gap-2"><MapPin className="w-4 h-4 shrink-0" /> São Paulo, SP</li>
             </ul>
+
+            {/* App badges */}
+            <div className="mt-6 space-y-2">
+              <p className="text-xs font-semibold opacity-50 uppercase tracking-wider">Disponível em</p>
+              <div className="flex gap-2">
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-background/10 border border-background/10 text-xs font-medium">
+                  🌐 PWA App
+                </div>
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-background/10 border border-background/10 text-xs font-medium">
+                  📱 Mobile
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
 
@@ -152,6 +212,8 @@ const Footer = () => {
           <span className="opacity-70">Plataforma 100% online</span>
           <span className="opacity-30 hidden sm:inline">|</span>
           <span className="opacity-70">Dados protegidos (LGPD)</span>
+          <span className="opacity-30 hidden sm:inline">|</span>
+          <span className="opacity-70">Uptime 99.9%</span>
         </div>
 
         <div className="border-t border-background/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">

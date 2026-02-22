@@ -36,6 +36,13 @@ const Index = () => {
     return () => { if (prev && prev !== "light") setTheme(prev); };
   }, []);
 
+  // Listen for quiz open event from FloatingMobileCTA
+  useEffect(() => {
+    const handler = () => setShowQuiz(true);
+    window.addEventListener("open-specialty-quiz", handler);
+    return () => window.removeEventListener("open-specialty-quiz", handler);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background" style={{ background: 'var(--landing-bg)' }}>
       <SEOHead
