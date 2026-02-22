@@ -32,6 +32,8 @@ const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transi
 const AffiliateDashboard = () => {
   const { user } = useAuth();
   const [referrals, setReferrals] = useState<any[]>([]);
+  const location = useLocation();
+  const currentPath = location.pathname;
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [affiliateProfile, setAffiliateProfile] = useState<any>(null);
   const [stats, setStats] = useState({ total: 0, converted: 0, totalEarnings: 0, pendingBalance: 0, paidBalance: 0 });
@@ -144,8 +146,15 @@ const AffiliateDashboard = () => {
 
   const formatCurrency = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
-  return (
-    <DashboardLayout title="Afiliados" nav={getAffiliateNav("overview")}>
+    const activeTab = currentPath.includes("/referrals") ? "referrals" 
+      : currentPath.includes("/earnings") ? "earnings" 
+      : currentPath.includes("/withdrawals") ? "withdrawals" 
+      : currentPath.includes("/profile") ? "profile"
+      : currentPath.includes("/settings") ? "settings"
+      : "overview";
+    
+    return (
+    <DashboardLayout title="Afiliados" nav={getAffiliateNav(activeTab)}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl space-y-6">
         <motion.div variants={fadeUp}>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel de Afiliado</h1>

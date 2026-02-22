@@ -153,6 +153,9 @@ const Dashboard = () => {
       <Route path="support" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
       <Route path="partner" element={<RoleGuard allowed={["partner"]} roles={roles}><PartnerDashboard /></RoleGuard>} />
       <Route path="affiliate" element={<RoleGuard allowed={["affiliate"]} roles={roles}><AffiliateDashboard /></RoleGuard>} />
+      <Route path="affiliate/referrals" element={<RoleGuard allowed={["affiliate"]} roles={roles}><AffiliateDashboard /></RoleGuard>} />
+      <Route path="affiliate/earnings" element={<RoleGuard allowed={["affiliate"]} roles={roles}><AffiliateDashboard /></RoleGuard>} />
+      <Route path="affiliate/withdrawals" element={<RoleGuard allowed={["affiliate"]} roles={roles}><AffiliateDashboard /></RoleGuard>} />
 
       {/* Shared routes */}
       <Route path="profile" element={<UserProfile />} />
