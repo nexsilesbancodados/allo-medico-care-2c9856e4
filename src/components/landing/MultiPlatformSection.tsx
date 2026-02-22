@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Monitor, Smartphone, Tablet, Apple, Chrome, Download, Wifi, Zap } from "lucide-react";
+import { Monitor, Smartphone, Tablet, Apple, Chrome, Download, Wifi, Zap, Shield, Bell, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import devicesImg from "@/assets/devices-mascot.png";
@@ -15,14 +15,29 @@ const platforms = [
 ];
 
 const pwaFeatures = [
-  { icon: Download, title: "Sem download", desc: "Funciona direto do navegador" },
-  { icon: Wifi, title: "Funciona offline", desc: "Acesse dados sem internet" },
-  { icon: Zap, title: "Super rápido", desc: "Carrega em menos de 2s" },
+  { icon: Download, title: "Sem download", desc: "Funciona direto do navegador", stat: "0 MB" },
+  { icon: Wifi, title: "Funciona offline", desc: "Acesse dados sem internet", stat: "100%" },
+  { icon: Zap, title: "Super rápido", desc: "Carrega em menos de 2s", stat: "< 2s" },
+];
+
+const comparisons = [
+  { feature: "Instalação", pwa: "Instantânea", native: "3-5 min" },
+  { feature: "Espaço usado", pwa: "~2 MB", native: "50-200 MB" },
+  { feature: "Atualizações", pwa: "Automáticas", native: "Manual" },
+  { feature: "Notificações", pwa: "✅ Sim", native: "✅ Sim" },
+  { feature: "Offline", pwa: "✅ Sim", native: "✅ Sim" },
+];
+
+const extraFeatures = [
+  { icon: Bell, label: "Push Notifications" },
+  { icon: Shield, label: "Criptografia E2E" },
+  { icon: RefreshCw, label: "Auto-update" },
 ];
 
 const MultiPlatformSection = () => {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [installed, setInstalled] = useState(false);
+  const [showComparison, setShowComparison] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -88,18 +103,18 @@ const MultiPlatformSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
-                className="text-primary-foreground/80 text-base md:text-lg max-w-md mb-8 leading-relaxed"
+                className="text-primary-foreground/80 text-base md:text-lg max-w-md mb-6 leading-relaxed"
               >
                 A AloClinica é um app progressivo (PWA) — funciona direto do navegador sem precisar baixar nada.
               </motion.p>
 
-              {/* PWA feature cards */}
+              {/* PWA feature cards with stats */}
               <motion.div
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.35 }}
-                className="grid grid-cols-3 gap-3 mb-8"
+                className="grid grid-cols-3 gap-3 mb-6"
               >
                 {pwaFeatures.map((feat, i) => (
                   <motion.div
@@ -108,22 +123,80 @@ const MultiPlatformSection = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.4 + i * 0.08 }}
-                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10 text-center"
+                    whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10 text-center hover:bg-white/15 transition-all"
                   >
                     <feat.icon className="w-5 h-5 mx-auto mb-1.5" />
                     <p className="text-xs font-bold leading-tight">{feat.title}</p>
                     <p className="text-[10px] opacity-60 mt-0.5">{feat.desc}</p>
+                    <p className="text-sm font-extrabold mt-1.5">{feat.stat}</p>
                   </motion.div>
                 ))}
               </motion.div>
+
+              {/* Extra features pills */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.45 }}
+                className="flex flex-wrap gap-2 mb-6"
+              >
+                {extraFeatures.map((f, i) => (
+                  <span key={i} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-[11px] font-medium backdrop-blur-sm">
+                    <f.icon className="w-3 h-3" />
+                    {f.label}
+                  </span>
+                ))}
+              </motion.div>
+
+              {/* Comparison toggle */}
+              <motion.button
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.48 }}
+                onClick={() => setShowComparison(!showComparison)}
+                className="text-xs font-semibold text-white/70 hover:text-white underline underline-offset-2 mb-4 transition-colors"
+              >
+                {showComparison ? "Ocultar comparativo" : "📊 Ver comparativo: PWA vs App Nativo"}
+              </motion.button>
+
+              {showComparison && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="bg-white/10 backdrop-blur-sm rounded-xl border border-white/10 p-3 mb-6 overflow-hidden"
+                >
+                  <table className="w-full text-[11px]">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-1.5 font-semibold opacity-60">Recurso</th>
+                        <th className="text-center py-1.5 font-bold">AloClinica PWA</th>
+                        <th className="text-center py-1.5 font-semibold opacity-60">App Nativo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {comparisons.map((row, i) => (
+                        <tr key={i} className="border-b border-white/5">
+                          <td className="py-1.5 opacity-70">{row.feature}</td>
+                          <td className="py-1.5 text-center font-bold">{row.pwa}</td>
+                          <td className="py-1.5 text-center opacity-60">{row.native}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </motion.div>
+              )}
 
               {/* Rating */}
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.4 }}
-                className="flex items-center gap-4 mb-8"
+                transition={{ delay: 0.5 }}
+                className="flex items-center gap-4 mb-6"
               >
                 <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm rounded-full px-4 py-2">
                   <div className="flex">
@@ -143,7 +216,7 @@ const MultiPlatformSection = () => {
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.55 }}
                 className="flex flex-wrap gap-3"
               >
                 <Button
@@ -198,6 +271,23 @@ const MultiPlatformSection = () => {
                   animate={{ y: [0, -8, 0] }}
                   transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                 />
+
+                {/* Speed badge */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.6, type: "spring" }}
+                  className="absolute -top-3 -left-3 bg-card text-foreground rounded-xl shadow-elevated px-3 py-2 flex items-center gap-2"
+                >
+                  <div className="w-8 h-8 rounded-lg bg-medical-green/15 flex items-center justify-center">
+                    <Zap className="w-4 h-4 text-medical-green" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold leading-none">Lighthouse</p>
+                    <p className="text-lg font-extrabold text-medical-green leading-none">98</p>
+                  </div>
+                </motion.div>
               </div>
 
               {/* Platform grid */}
