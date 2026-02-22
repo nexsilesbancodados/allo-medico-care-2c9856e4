@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
-import { Monitor, Smartphone, Tablet, Apple, Chrome } from "lucide-react";
+import { Monitor, Smartphone, Tablet, Apple, Chrome, Download, Wifi, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useEffect } from "react";
 import devicesImg from "@/assets/devices-mascot.png";
 import mascotImg from "@/assets/mascot-thumbsup.png";
 
@@ -13,7 +14,35 @@ const platforms = [
   { icon: Tablet, label: "Tablet" },
 ];
 
+const pwaFeatures = [
+  { icon: Download, title: "Sem download", desc: "Funciona direto do navegador" },
+  { icon: Wifi, title: "Funciona offline", desc: "Acesse dados sem internet" },
+  { icon: Zap, title: "Super rápido", desc: "Carrega em menos de 2s" },
+];
+
 const MultiPlatformSection = () => {
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [installed, setInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    window.addEventListener("appinstalled", () => setInstalled(true));
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === "accepted") setInstalled(true);
+      setDeferredPrompt(null);
+    }
+  };
+
   return (
     <section className="py-10 md:py-20 px-4">
       <div className="container mx-auto">
@@ -24,13 +53,23 @@ const MultiPlatformSection = () => {
           transition={{ duration: 0.6 }}
           className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-10 md:p-16 text-primary-foreground"
         >
-          {/* Decorative circles */}
+          {/* Decorative */}
           <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-white/5 -translate-y-1/3 translate-x-1/3" />
           <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full bg-white/5 translate-y-1/3 -translate-x-1/3" />
 
           <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
             {/* Text */}
             <div>
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 text-xs font-semibold mb-6 backdrop-blur-sm"
+              >
+                <Smartphone className="w-3 h-3" />
+                Progressive Web App
+              </motion.span>
+
               <motion.h2
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -38,7 +77,7 @@ const MultiPlatformSection = () => {
                 transition={{ delay: 0.2 }}
                 className="text-2xl md:text-4xl lg:text-5xl font-extrabold leading-tight mb-4"
               >
-                Sua saúde ainda mais conectada em{" "}
+                Sua saúde conectada em{" "}
                 <span className="text-white/90 underline decoration-white/30 underline-offset-4">
                   qualquer dispositivo
                 </span>
@@ -51,8 +90,32 @@ const MultiPlatformSection = () => {
                 transition={{ delay: 0.3 }}
                 className="text-primary-foreground/80 text-base md:text-lg max-w-md mb-8 leading-relaxed"
               >
-                A AloClinica é um app progressivo (PWA) — funciona direto do navegador sem precisar baixar nada. Acesse de qualquer lugar, em qualquer plataforma.
+                A AloClinica é um app progressivo (PWA) — funciona direto do navegador sem precisar baixar nada.
               </motion.p>
+
+              {/* PWA feature cards */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.35 }}
+                className="grid grid-cols-3 gap-3 mb-8"
+              >
+                {pwaFeatures.map((feat, i) => (
+                  <motion.div
+                    key={feat.title}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4 + i * 0.08 }}
+                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10 text-center"
+                  >
+                    <feat.icon className="w-5 h-5 mx-auto mb-1.5" />
+                    <p className="text-xs font-bold leading-tight">{feat.title}</p>
+                    <p className="text-[10px] opacity-60 mt-0.5">{feat.desc}</p>
+                  </motion.div>
+                ))}
+              </motion.div>
 
               {/* Rating */}
               <motion.div
@@ -90,18 +153,30 @@ const MultiPlatformSection = () => {
                   <Chrome className="w-5 h-5" />
                   Abrir no navegador
                 </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="border-white/30 text-primary-foreground hover:bg-white/10 rounded-full px-6 gap-2"
-                >
-                  <Smartphone className="w-5 h-5" />
-                  Instalar como app
-                </Button>
+                {deferredPrompt && !installed ? (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 text-primary-foreground hover:bg-white/10 rounded-full px-6 gap-2"
+                    onClick={handleInstall}
+                  >
+                    <Download className="w-5 h-5" />
+                    Instalar como app
+                  </Button>
+                ) : (
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 text-primary-foreground hover:bg-white/10 rounded-full px-6 gap-2"
+                  >
+                    <Smartphone className="w-5 h-5" />
+                    {installed ? "✅ Instalado!" : "Instalar como app"}
+                  </Button>
+                )}
               </motion.div>
             </div>
 
-            {/* Right side: Devices + mascot + platform icons */}
+            {/* Right side */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -109,7 +184,6 @@ const MultiPlatformSection = () => {
               transition={{ delay: 0.3, duration: 0.6 }}
               className="flex flex-col items-center gap-6"
             >
-              {/* Devices image with mascot overlay */}
               <div className="relative w-full max-w-md">
                 <img
                   src={devicesImg}
@@ -117,7 +191,6 @@ const MultiPlatformSection = () => {
                   className="w-full rounded-2xl drop-shadow-2xl"
                   loading="lazy"
                 />
-                {/* Mascot floating on corner */}
                 <motion.img
                   src={mascotImg}
                   alt="Mascote Pingo"
@@ -127,7 +200,7 @@ const MultiPlatformSection = () => {
                 />
               </div>
 
-              {/* Platform grid below */}
+              {/* Platform grid */}
               <div className="grid grid-cols-3 gap-3 w-full max-w-sm mt-4">
                 {platforms.map((platform, i) => (
                   <motion.div
@@ -135,7 +208,7 @@ const MultiPlatformSection = () => {
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.4 + i * 0.1 }}
+                    transition={{ delay: 0.4 + i * 0.08 }}
                     whileHover={{ scale: 1.08, y: -4 }}
                     className="flex flex-col items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10 hover:bg-white/15 transition-colors cursor-default"
                   >
