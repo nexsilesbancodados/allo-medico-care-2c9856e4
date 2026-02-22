@@ -50,10 +50,11 @@ function getBaseUrl(apiKey: string): string {
   const env = Deno.env.get("ASAAS_ENVIRONMENT"); // "production" or "sandbox"
   if (env === "production") return "https://api.asaas.com/v3";
   if (env === "sandbox") return "https://api-sandbox.asaas.com/v3";
-  // Auto-detect: production keys start with $aact_
-  return apiKey.startsWith("$aact_")
-    ? "https://api.asaas.com/v3"
-    : "https://api-sandbox.asaas.com/v3";
+  // Auto-detect: hmlg keys → sandbox, otherwise production
+  if (apiKey.includes("hmlg") || apiKey.includes("sandbox")) {
+    return "https://api-sandbox.asaas.com/v3";
+  }
+  return "https://api.asaas.com/v3";
 }
 
 serve(async (req) => {
