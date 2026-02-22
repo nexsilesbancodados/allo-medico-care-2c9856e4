@@ -143,8 +143,17 @@ serve(async (req) => {
       };
       if (customerEmail) customerBody.email = customerEmail;
       // Per docs: "mobilePhone" is the correct field for cell phone
+      // Asaas expects Brazilian format without country code: (DD)9XXXX-XXXX or 11 digits
       if (customerMobilePhone || customerPhone) {
-        customerBody.mobilePhone = (customerMobilePhone || customerPhone).replace(/\D/g, "");
+        let rawPhone = (customerMobilePhone || customerPhone).replace(/\D/g, "");
+        // Remove country code 55 prefix if present (13 digits → 11)
+        if (rawPhone.length === 13 && rawPhone.startsWith("55")) {
+          rawPhone = rawPhone.substring(2);
+        }
+        // Only set if valid length (10-11 digits)
+        if (rawPhone.length >= 10 && rawPhone.length <= 11) {
+          customerBody.mobilePhone = rawPhone;
+        }
       }
       if (customerPostalCode) customerBody.postalCode = customerPostalCode.replace(/\D/g, "");
       if (customerAddress) customerBody.address = customerAddress;
