@@ -35,10 +35,10 @@ const AnimatedCounter = ({ value, suffix, decimals = 0 }: { value: number; suffi
 };
 
 const fallbackStats = [
-  { icon: Users, value: 12500, suffix: "+", label: "Pacientes atendidos" },
-  { icon: Stethoscope, value: 200, suffix: "+", label: "Médicos especialistas" },
-  { icon: Star, value: 4.9, suffix: "", label: "Nota média", decimals: 1 },
-  { icon: Clock, value: 15, suffix: "min", label: "Tempo médio de espera" },
+  { icon: Users, value: 12500, suffix: "+", label: "Pacientes atendidos", color: "from-primary/20 to-primary/5" },
+  { icon: Stethoscope, value: 200, suffix: "+", label: "Médicos especialistas", color: "from-secondary/20 to-secondary/5" },
+  { icon: Star, value: 4.9, suffix: "", label: "Nota média", decimals: 1, color: "from-accent/20 to-accent/5" },
+  { icon: Clock, value: 15, suffix: "min", label: "Tempo médio de espera", color: "from-primary/20 to-primary/5" },
 ];
 
 const StatsSection = () => {
@@ -62,13 +62,12 @@ const StatsSection = () => {
           ? npsScores.reduce((sum, s) => sum + s.nps_score, 0) / npsScores.length
           : 0;
 
-        // Only update if we have meaningful data, otherwise keep fallbacks
         if (patients > 10 || appointments > 5) {
           setStats([
-            { icon: Users, value: patients, suffix: "+", label: "Pacientes atendidos" },
-            { icon: Stethoscope, value: specialties, suffix: "+", label: "Especialidades" },
-            { icon: Star, value: avgNps > 0 ? Math.round(avgNps * 10) / 10 : 4.9, suffix: "", label: "Nota média", decimals: 1 },
-            { icon: Clock, value: appointments, suffix: "+", label: "Consultas realizadas" },
+            { icon: Users, value: patients, suffix: "+", label: "Pacientes atendidos", color: "from-primary/20 to-primary/5" },
+            { icon: Stethoscope, value: specialties, suffix: "+", label: "Especialidades", color: "from-secondary/20 to-secondary/5" },
+            { icon: Star, value: avgNps > 0 ? Math.round(avgNps * 10) / 10 : 4.9, suffix: "", label: "Nota média", decimals: 1, color: "from-accent/20 to-accent/5" },
+            { icon: Clock, value: appointments, suffix: "+", label: "Consultas realizadas", color: "from-primary/20 to-primary/5" },
           ]);
         }
       } catch {
@@ -82,7 +81,7 @@ const StatsSection = () => {
     <section className="py-8 md:py-16 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-hero opacity-[0.03]" />
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
           {stats.map((stat, i) => (
             <motion.div
               key={i}
@@ -91,15 +90,20 @@ const StatsSection = () => {
               viewport={{ once: true }}
               transition={{ delay: i * 0.12, duration: 0.5, type: "spring", stiffness: 100 }}
               whileHover={{ y: -6, transition: { duration: 0.25 } }}
-              className="text-center group cursor-default"
+              className="relative text-center group cursor-default rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-card hover:shadow-elevated hover:border-primary/20 transition-all duration-300 overflow-hidden"
             >
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:bg-primary/20 group-hover:shadow-lg group-hover:shadow-primary/10 group-hover:scale-110">
-                <stat.icon className="w-7 h-7 text-primary transition-transform duration-300 group-hover:scale-110" />
+              {/* Gradient glow behind */}
+              <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`} />
+
+              <div className="relative z-10">
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:bg-primary/20 group-hover:shadow-lg group-hover:shadow-primary/10 group-hover:scale-110">
+                  <stat.icon className="w-7 h-7 text-primary transition-transform duration-300 group-hover:scale-110" />
+                </div>
+                <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mb-1">
+                  <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={(stat as any).decimals} />
+                </p>
+                <p className="text-sm text-muted-foreground">{stat.label}</p>
               </div>
-              <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mb-1">
-                <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={(stat as any).decimals} />
-              </p>
-              <p className="text-sm text-muted-foreground">{stat.label}</p>
             </motion.div>
           ))}
         </div>

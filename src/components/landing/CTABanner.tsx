@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Shield, Clock, Star } from "lucide-react";
+import { ArrowRight, Sparkles, Shield, Clock, Star, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 const trustBadges = [
   { icon: Shield, text: "Dados criptografados" },
@@ -11,6 +12,15 @@ const trustBadges = [
 
 const CTABanner = () => {
   const navigate = useNavigate();
+  const [onlineNow, setOnlineNow] = useState(47);
+
+  // Fake fluctuating online counter for social proof
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setOnlineNow((prev) => Math.max(30, Math.min(80, prev + Math.floor(Math.random() * 7) - 3)));
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   return (
     <section className="py-10 md:py-20 px-4">
@@ -22,6 +32,7 @@ const CTABanner = () => {
           transition={{ duration: 0.6, type: "spring", stiffness: 80 }}
           className="relative overflow-hidden rounded-3xl bg-gradient-hero p-10 md:p-16 text-center shadow-elevated"
         >
+          {/* Animated orbs */}
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.1, 0.05] }}
             transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
@@ -33,13 +44,48 @@ const CTABanner = () => {
             className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/2"
           />
 
+          {/* Floating sparkle particles */}
+          {Array.from({ length: 6 }).map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 rounded-full bg-white/30"
+              style={{ left: `${15 + i * 14}%`, top: `${20 + (i % 3) * 25}%` }}
+              animate={{
+                y: [0, -20, 0],
+                opacity: [0.2, 0.7, 0.2],
+                scale: [0.8, 1.4, 0.8],
+              }}
+              transition={{ duration: 3 + i * 0.5, repeat: Infinity, delay: i * 0.6 }}
+            />
+          ))}
+
           <div className="relative z-10">
+            {/* Social proof badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.15 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-primary-foreground text-sm font-medium mb-4 backdrop-blur-sm"
+            >
+              <Users className="w-4 h-4" />
+              <motion.span
+                key={onlineNow}
+                initial={{ opacity: 0, y: 4 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {onlineNow} pessoas online agora
+              </motion.span>
+              <span className="w-2 h-2 rounded-full bg-medical-green animate-pulse" />
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-primary-foreground text-sm font-medium mb-6 backdrop-blur-sm"
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-primary-foreground text-sm font-medium mb-6 backdrop-blur-sm ml-2"
             >
               <Sparkles className="w-4 h-4" />
               Primeira consulta com desconto
