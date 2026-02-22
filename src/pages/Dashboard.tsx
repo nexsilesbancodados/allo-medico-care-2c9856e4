@@ -124,7 +124,7 @@ const Dashboard = () => {
   // Determine which dashboard to show at index based on the current role context
   const IndexDashboard = () => {
     switch (primaryRole) {
-      case "admin": return <AdminDashboard />;
+      case "admin": return <Navigate to="/dashboard/admin/panel-center" replace />;
       case "doctor": return <DoctorDashboard />;
       case "receptionist": return <ReceptionDashboard />;
       case "support": return <SupportDashboard />;
