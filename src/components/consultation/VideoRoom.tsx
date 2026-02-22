@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft,
   UserRound, Pill, PhoneOff, Mic, MicOff, Video, VideoOff, Shield,
-  MoreVertical, Maximize2, Minimize2, Copy, Share2
+  MoreVertical, Maximize2, Minimize2, Copy, Share2, FileBadge, Paperclip, Image
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation from "./VideoConsultation";
@@ -17,6 +17,7 @@ import PreCallCheck from "./PreCallCheck";
 import ConnectionStatus from "./ConnectionStatus";
 import MedicalAutocomplete from "./MedicalAutocomplete";
 import SpeechToText from "./SpeechToText";
+import PostConsultationSummary from "./PostConsultationSummary";
 import PatientInfoPanel from "./PatientInfoPanel";
 import DoctorInfoPanel from "./DoctorInfoPanel";
 import { format } from "date-fns";
@@ -28,6 +29,9 @@ interface ChatMessage {
   sender: "patient" | "doctor";
   text: string;
   time: string;
+  fileUrl?: string;
+  fileName?: string;
+  fileType?: string;
 }
 
 const VideoRoom = () => {
@@ -46,6 +50,7 @@ const VideoRoom = () => {
   const [deviceChecked, setDeviceChecked] = useState(false);
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [doctorBusy, setDoctorBusy] = useState(false);
+  const [showSummary, setShowSummary] = useState(false);
 
   const [elapsed, setElapsed] = useState(0);
   const [showChat, setShowChat] = useState(false);
@@ -279,20 +284,40 @@ const VideoRoom = () => {
     return `${h > 0 ? `${h}:` : ""}${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
-  const sendMessage = () => {
-    if (!chatInput.trim()) return;
+  const sendMessage = (fileUrl?: string, fileName?: string, fileType?: string) => {
+    if (!chatInput.trim() && !fileUrl) return;
     const msg: ChatMessage = {
       id: Date.now().toString(),
       sender: isDoctor ? "doctor" : "patient",
       text: chatInput.trim(),
       time: format(new Date(), "HH:mm"),
+      fileUrl,
+      fileName,
+      fileType,
     };
     setMessages((prev) => [...prev, msg]);
     channelRef.current?.send({ type: "broadcast", event: "chat-message", payload: msg });
     setChatInput("");
   };
 
-  const saveNotes = async () => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    const ext = file.name.split('.').pop();
+    const filePath = `consultation-chat/${appointmentId}/${Date.now()}.${ext}`;
+    const { data, error: uploadErr } = await supabase.storage
+      .from("patient-documents")
+      .upload(filePath, file, { contentType: file.type });
+    if (uploadErr) {
+      toast({ title: "Erro ao enviar arquivo", variant: "destructive" });
+      return;
+    }
+    const { data: urlData } = supabase.storage.from("patient-documents").getPublicUrl(filePath);
+    sendMessage(urlData.publicUrl, file.name, file.type);
+    e.target.value = "";
+  };
+
+  const saveNotes = async (silent = false) => {
     if (!appointmentId || !appointment) return;
     const { data: doc } = await supabase
       .from("doctor_profiles").select("id").eq("user_id", user!.id).single();
@@ -308,8 +333,17 @@ const VideoRoom = () => {
         appointment_id: appointmentId, doctor_id: doc.id, content: notes,
       });
     }
-    toast({ title: "✅ Anotações salvas!" });
+    if (!silent) toast({ title: "✅ Anotações salvas!" });
   };
+
+  // Auto-save SOAP notes every 30 seconds
+  useEffect(() => {
+    if (!isDoctor || !deviceChecked || !notes) return;
+    const autoSaveInterval = setInterval(() => {
+      saveNotes(true);
+    }, 30000);
+    return () => clearInterval(autoSaveInterval);
+  }, [isDoctor, deviceChecked, notes, appointmentId, appointment]);
 
   // ─── Video presence logging ───
   useEffect(() => {
@@ -346,9 +380,13 @@ const VideoRoom = () => {
         duration_seconds: elapsedRef.current,
       }).eq("id", presenceLogId.current);
     }
-    if (isDoctor && notesRef.current) await saveNotes();
+    if (isDoctor && notesRef.current) await saveNotes(true);
     await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId);
     toast({ title: "Consulta encerrada" });
+    setShowSummary(true);
+  }, [isDoctor, appointmentId]);
+
+  const handleSummaryContinue = useCallback(() => {
     if (isDoctor) navigate(`/dashboard/prescribe/${appointmentId}`);
     else navigate(`/dashboard/rate/${appointmentId}`);
   }, [isDoctor, appointmentId]);
@@ -423,6 +461,18 @@ const VideoRoom = () => {
     );
   }
 
+  if (showSummary) {
+    return (
+      <PostConsultationSummary
+        appointmentId={appointmentId!}
+        isDoctor={isDoctor}
+        elapsed={elapsed}
+        messageCount={messages.length}
+        onContinue={handleSummaryContinue}
+      />
+    );
+  }
+
   const currentUserName = isDoctor
     ? `Dr(a). ${user?.user_metadata?.first_name || "Médico"}`
     : user?.user_metadata?.first_name || "Paciente";
@@ -464,7 +514,18 @@ const VideoRoom = () => {
                   ? "bg-primary text-primary-foreground rounded-br-md"
                   : "bg-[hsl(220,20%,13%)] text-[hsl(220,20%,90%)] rounded-bl-md border border-[hsl(220,15%,18%)]"
               }`}>
-                <p>{msg.text}</p>
+                {msg.fileUrl && msg.fileType?.startsWith("image/") && (
+                  <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="block mb-2">
+                    <img src={msg.fileUrl} alt={msg.fileName} className="max-w-full rounded-lg max-h-48 object-cover" />
+                  </a>
+                )}
+                {msg.fileUrl && !msg.fileType?.startsWith("image/") && (
+                  <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg bg-white/10 hover:bg-white/15 transition-colors">
+                    <Paperclip className="w-3.5 h-3.5 shrink-0" />
+                    <span className="text-xs truncate">{msg.fileName || "Arquivo"}</span>
+                  </a>
+                )}
+                {msg.text && <p>{msg.text}</p>}
                 <p className={`text-[10px] mt-1 ${isMine ? "text-primary-foreground/50" : "text-[hsl(220,15%,35%)]"}`}>{msg.time}</p>
               </div>
             </motion.div>
@@ -473,6 +534,10 @@ const VideoRoom = () => {
         <div ref={chatEndRef} />
       </div>
       <div className="p-3 border-t border-[hsl(220,15%,12%)] flex gap-2 shrink-0">
+        <label className="w-10 h-10 rounded-xl bg-[hsl(220,20%,12%)] hover:bg-[hsl(220,20%,16%)] flex items-center justify-center cursor-pointer transition-colors shrink-0">
+          <Paperclip className="w-4 h-4 text-[hsl(220,15%,55%)]" />
+          <input type="file" className="hidden" accept="image/*,.pdf,.doc,.docx" onChange={handleFileUpload} />
+        </label>
         <input
           value={chatInput}
           onChange={(e) => setChatInput(e.target.value)}
@@ -480,7 +545,7 @@ const VideoRoom = () => {
           placeholder="Mensagem..."
           className="flex-1 bg-[hsl(220,20%,8%)] border border-[hsl(220,15%,16%)] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-[hsl(220,15%,30%)] outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
         />
-        <Button size="icon" onClick={sendMessage} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 w-10 shrink-0">
+        <Button size="icon" onClick={() => sendMessage()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 w-10 shrink-0">
           <Send className="w-4 h-4" />
         </Button>
       </div>
@@ -542,7 +607,7 @@ const VideoRoom = () => {
       ))}
 
       <div className="flex gap-2">
-        <Button onClick={saveNotes} size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl gap-1.5">
+        <Button onClick={() => saveNotes()} size="sm" className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl gap-1.5">
           <FileText className="w-3.5 h-3.5" />
           Salvar SOAP
         </Button>
@@ -669,6 +734,14 @@ const VideoRoom = () => {
               icon={<Pill className="w-3.5 h-3.5" />}
               label="Receita"
               onClick={() => window.open(`/dashboard/prescribe/${appointmentId}`, '_blank')}
+            />
+          )}
+
+          {isDoctor && (
+            <ToolbarBtn
+              icon={<FileBadge className="w-3.5 h-3.5" />}
+              label="Atestado"
+              onClick={() => window.open('/dashboard/certificates', '_blank')}
             />
           )}
         </div>

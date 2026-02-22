@@ -214,11 +214,15 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
     }
   }, [stream]);
 
-  const handleEnter = useCallback(() => {
+  const handleEnter = useCallback(async () => {
+    // Update appointment status to "waiting" so the doctor knows patient arrived
+    if (appointmentId && !isDoctor) {
+      await supabase.from("appointments").update({ status: "waiting" }).eq("id", appointmentId);
+    }
     stream?.getTracks().forEach(t => t.stop());
     if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     onReady();
-  }, [stream, onReady]);
+  }, [stream, onReady, appointmentId, isDoctor]);
 
   const sendChatMessage = () => {
     if (!chatInput.trim()) return;
