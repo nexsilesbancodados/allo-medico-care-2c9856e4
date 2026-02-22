@@ -1,9 +1,10 @@
-import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid } from "lucide-react";
+import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet } from "lucide-react";
 
 export const getAdminNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard/admin/panel-center?role=admin", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview" || active === "panel-center", group: "Principal" },
   { label: "Centro de Painéis", href: "/dashboard/admin/panel-center?role=admin", icon: <LayoutGrid className="w-4 h-4" />, active: active === "panel-center", group: "Principal" },
   { label: "Ao Vivo", href: "/dashboard/admin/live?role=admin", icon: <Video className="w-4 h-4" />, active: active === "live", group: "Principal" },
+  { label: "Financeiro", href: "/dashboard/admin/financial?role=admin", icon: <Wallet className="w-4 h-4" />, active: active === "financial", group: "Principal" },
   { label: "Relatórios", href: "/dashboard/admin/reports?role=admin", icon: <TrendingUp className="w-4 h-4" />, active: active === "reports", group: "Principal" },
   { label: "NPS", href: "/dashboard/admin/nps?role=admin", icon: <Star className="w-4 h-4" />, active: active === "nps", group: "Monitoramento" },
   { label: "Aprovações", href: "/dashboard/admin/approvals?role=admin", icon: <UserCheck className="w-4 h-4" />, active: active === "approvals", group: "Monitoramento" },
