@@ -15,10 +15,10 @@ import { motion } from "framer-motion";
 
 const getPartnerNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard?role=partner", icon: <TrendingUp className="w-4 h-4" />, active: active === "overview", group: "Principal" },
-  { label: "Validar Receitas", href: "/dashboard/partner/validate", icon: <Pill className="w-4 h-4" />, active: active === "validate", group: "Principal" },
-  { label: "Histórico", href: "/dashboard/partner/history", icon: <FileText className="w-4 h-4" />, active: active === "history", group: "Operações" },
-  { label: "Conversão", href: "/dashboard/partner/conversion", icon: <FlaskConical className="w-4 h-4" />, active: active === "conversion", group: "Operações" },
-  { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" />, active: active === "profile", group: "Conta" },
+  { label: "Validar Receitas", href: "/dashboard/partner/validate?role=partner", icon: <Pill className="w-4 h-4" />, active: active === "validate", group: "Principal" },
+  { label: "Histórico", href: "/dashboard/partner/history?role=partner", icon: <FileText className="w-4 h-4" />, active: active === "history", group: "Operações" },
+  { label: "Conversão", href: "/dashboard/partner/conversion?role=partner", icon: <FlaskConical className="w-4 h-4" />, active: active === "conversion", group: "Operações" },
+  { label: "Perfil", href: "/dashboard/profile?role=partner", icon: <UserCog className="w-4 h-4" />, active: active === "profile", group: "Conta" },
   { label: "Configurações", href: "/dashboard/settings?role=partner", icon: <Search className="w-4 h-4" />, active: active === "settings", group: "Conta" },
 ];
 

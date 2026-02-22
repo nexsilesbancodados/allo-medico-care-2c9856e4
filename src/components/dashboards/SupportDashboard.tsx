@@ -20,13 +20,13 @@ import { motion } from "framer-motion";
 
 const getSupportNav = (active: string) => [
   { label: "Helpdesk", href: "/dashboard?role=support", icon: <Activity className="w-4 h-4" />, active: active === "overview", group: "Principal" },
-  { label: "Inbox", href: "/dashboard/support/inbox", icon: <Inbox className="w-4 h-4" />, active: active === "inbox", group: "Principal" },
-  { label: "Chat IA", href: "/dashboard/support/chat", icon: <MessageCircle className="w-4 h-4" />, active: active === "Atendimento", group: "Atendimento" },
-  { label: "Logs", href: "/dashboard/support/logs", icon: <History className="w-4 h-4" />, active: active === "logs", group: "Monitoramento" },
-  { label: "Usuários", href: "/dashboard/support/users", icon: <Users className="w-4 h-4" />, active: active === "users", group: "Monitoramento" },
-  { label: "Online", href: "/dashboard/support/online", icon: <Wifi className="w-4 h-4" />, active: active === "online", group: "Monitoramento" },
-  { label: "Auditoria", href: "/dashboard/support/audit", icon: <Shield className="w-4 h-4" />, active: active === "audit", group: "Sistema" },
-  { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" />, active: active === "profile", group: "Conta" },
+  { label: "Inbox", href: "/dashboard/support/inbox?role=support", icon: <Inbox className="w-4 h-4" />, active: active === "inbox", group: "Principal" },
+  { label: "Chat IA", href: "/dashboard/support/chat?role=support", icon: <MessageCircle className="w-4 h-4" />, active: active === "Atendimento", group: "Atendimento" },
+  { label: "Logs", href: "/dashboard/support/logs?role=support", icon: <History className="w-4 h-4" />, active: active === "logs", group: "Monitoramento" },
+  { label: "Usuários", href: "/dashboard/support/users?role=support", icon: <Users className="w-4 h-4" />, active: active === "users", group: "Monitoramento" },
+  { label: "Online", href: "/dashboard/support/online?role=support", icon: <Wifi className="w-4 h-4" />, active: active === "online", group: "Monitoramento" },
+  { label: "Auditoria", href: "/dashboard/support/audit?role=support", icon: <Shield className="w-4 h-4" />, active: active === "audit", group: "Sistema" },
+  { label: "Perfil", href: "/dashboard/profile?role=support", icon: <UserCog className="w-4 h-4" />, active: active === "profile", group: "Conta" },
   { label: "Configurações", href: "/dashboard/settings?role=support", icon: <Eye className="w-4 h-4" />, active: active === "settings", group: "Conta" },
 ];
 

@@ -19,11 +19,11 @@ import { useLocation } from "react-router-dom";
 
 const getAffiliateNav = (active: string) => [
   { label: "Painel", href: "/dashboard?role=affiliate", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview" },
-  { label: "Indicações", href: "/dashboard/affiliate/referrals", icon: <Link2 className="w-4 h-4" />, active: active === "referrals" },
-  { label: "Ganhos", href: "/dashboard/affiliate/earnings", icon: <DollarSign className="w-4 h-4" />, active: active === "earnings" },
-  { label: "Saques", href: "/dashboard/affiliate/withdrawals", icon: <Wallet className="w-4 h-4" />, active: active === "withdrawals" },
-  { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" />, active: active === "profile" },
-  { label: "Configurações", href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, active: active === "settings" },
+  { label: "Indicações", href: "/dashboard/affiliate/referrals?role=affiliate", icon: <Link2 className="w-4 h-4" />, active: active === "referrals" },
+  { label: "Ganhos", href: "/dashboard/affiliate/earnings?role=affiliate", icon: <DollarSign className="w-4 h-4" />, active: active === "earnings" },
+  { label: "Saques", href: "/dashboard/affiliate/withdrawals?role=affiliate", icon: <Wallet className="w-4 h-4" />, active: active === "withdrawals" },
+  { label: "Perfil", href: "/dashboard/profile?role=affiliate", icon: <UserCog className="w-4 h-4" />, active: active === "profile" },
+  { label: "Configurações", href: "/dashboard/settings?role=affiliate", icon: <Settings className="w-4 h-4" />, active: active === "settings" },
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };

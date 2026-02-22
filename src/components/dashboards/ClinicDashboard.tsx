@@ -15,14 +15,14 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { motion } from "framer-motion";
 
 const getClinicNav = (active: string) => [
-  { label: "Visão Geral", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview", group: "Principal" },
-  { label: "Médicos", href: "/dashboard/clinic/doctors", icon: <Stethoscope className="w-4 h-4" />, active: active === "doctors", group: "Principal" },
-  { label: "Agendamentos", href: "/dashboard/clinic/schedules", icon: <Calendar className="w-4 h-4" />, active: active === "schedules", group: "Principal" },
-  { label: "Pacientes", href: "/dashboard/clinic/patients", icon: <Users className="w-4 h-4" />, active: active === "patients", group: "Atendimento" },
-  { label: "Sala de Espera", href: "/dashboard/clinic/waiting-room", icon: <Clock className="w-4 h-4" />, active: active === "waiting-room", group: "Atendimento" },
-  { label: "Financeiro", href: "/dashboard/clinic/finance", icon: <DollarSign className="w-4 h-4" />, active: active === "finance", group: "Gestão" },
-  { label: "Relatórios", href: "/dashboard/clinic/reports", icon: <FileText className="w-4 h-4" />, active: active === "reports", group: "Gestão" },
-  { label: "Perfil", href: "/dashboard/profile", icon: <Settings className="w-4 h-4" />, active: active === "profile", group: "Conta" },
+  { label: "Visão Geral", href: "/dashboard?role=clinic", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview", group: "Principal" },
+  { label: "Médicos", href: "/dashboard/clinic/doctors?role=clinic", icon: <Stethoscope className="w-4 h-4" />, active: active === "doctors", group: "Principal" },
+  { label: "Agendamentos", href: "/dashboard/clinic/schedules?role=clinic", icon: <Calendar className="w-4 h-4" />, active: active === "schedules", group: "Principal" },
+  { label: "Pacientes", href: "/dashboard/clinic/patients?role=clinic", icon: <Users className="w-4 h-4" />, active: active === "patients", group: "Atendimento" },
+  { label: "Sala de Espera", href: "/dashboard/clinic/waiting-room?role=clinic", icon: <Clock className="w-4 h-4" />, active: active === "waiting-room", group: "Atendimento" },
+  { label: "Financeiro", href: "/dashboard/clinic/finance?role=clinic", icon: <DollarSign className="w-4 h-4" />, active: active === "finance", group: "Gestão" },
+  { label: "Relatórios", href: "/dashboard/clinic/reports?role=clinic", icon: <FileText className="w-4 h-4" />, active: active === "reports", group: "Gestão" },
+  { label: "Perfil", href: "/dashboard/profile?role=clinic", icon: <Settings className="w-4 h-4" />, active: active === "profile", group: "Conta" },
   { label: "Configurações", href: "/dashboard/settings?role=clinic", icon: <SlidersHorizontal className="w-4 h-4" />, active: active === "settings", group: "Conta" },
 ];
 
