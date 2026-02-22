@@ -330,12 +330,32 @@ serve(async (req) => {
     }
 
     // Step 3 (PIX / BOLETO / UNDEFINED): create payment directly
-    const payRes = await asaasFetch(`${baseUrl}/payments`, {
+    let payRes = await asaasFetch(`${baseUrl}/payments`, {
       method: "POST",
       headers,
       body: JSON.stringify(paymentBody),
     });
-    const payData = await safeJson(payRes);
+    let payData = await safeJson(payRes);
+    let actualBillingType = billingType;
+    let fallbackUsed = false;
+
+    // If PIX fails (e.g. account not approved), auto-fallback to BOLETO
+    if (!payRes.ok && billingType === "PIX") {
+      const errDesc = payData.errors?.[0]?.description || "";
+      const errCode = payData.errors?.[0]?.code || "";
+      console.warn("PIX unavailable, falling back to BOLETO:", errDesc);
+      
+      paymentBody.billingType = "BOLETO";
+      actualBillingType = "BOLETO";
+      fallbackUsed = true;
+
+      payRes = await asaasFetch(`${baseUrl}/payments`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(paymentBody),
+      });
+      payData = await safeJson(payRes);
+    }
 
     if (!payRes.ok) {
       console.error("Asaas payment error:", payData);
@@ -347,7 +367,7 @@ serve(async (req) => {
 
     // If PIX, get QR code (GET /v3/payments/{id}/pixQrCode)
     let pixData = null;
-    if (billingType === "PIX" && payData.id) {
+    if (actualBillingType === "PIX" && payData.id) {
       await new Promise(r => setTimeout(r, 1500));
       try {
         const pixRes = await asaasFetch(`${baseUrl}/payments/${payData.id}/pixQrCode`, { headers });
@@ -369,6 +389,9 @@ serve(async (req) => {
         bankSlipUrl: payData.bankSlipUrl,
         pixQrCode: pixData?.encodedImage || null,
         pixCopyPaste: pixData?.payload || null,
+        billingType: actualBillingType,
+        fallbackUsed,
+        fallbackMessage: fallbackUsed ? "PIX indisponível no momento. Boleto gerado automaticamente." : null,
         ...payData,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
