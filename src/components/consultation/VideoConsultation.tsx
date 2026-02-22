@@ -126,6 +126,8 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
             joinVideoOn: true,
             joinAudioOn: true,
             showInviteBox: false,
+            showJoinForm: false,
+            showLeaveBtn: false,
           },
           frameContainerRef.current
         );
@@ -276,7 +278,19 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
         </AnimatePresence>
 
         {/* Metered Frame container */}
-        <div ref={frameContainerRef} className="w-full h-full" style={{ minHeight: "400px" }} />
+        <div ref={frameContainerRef} className="w-full h-full metered-container" style={{ minHeight: "400px" }} />
+        {/* Hide Metered invite box via CSS override */}
+        <style>{`
+          .metered-container iframe {
+            width: 100% !important;
+            height: 100% !important;
+          }
+          /* Hide invite instructions overlay from Metered SDK */
+          [class*="invite"], [class*="Invite"],
+          [data-testid*="invite"], [data-testid*="Invite"] {
+            display: none !important;
+          }
+        `}</style>
       </div>
 
       {/* Bottom control bar */}
