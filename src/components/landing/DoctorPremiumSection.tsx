@@ -1,9 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Check, TrendingUp, Calendar, Shield, Wallet } from "lucide-react";
+import { ArrowRight, Check, TrendingUp, Calendar, Shield, Wallet, Star, Quote, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 import doctorImg1 from "@/assets/doctor-premium-1.png";
 import doctorImg2 from "@/assets/doctor-premium-2.png";
+import avatarCarlos from "@/assets/avatar-carlos.png";
 
 const benefits = [
   "Agenda inteligente e personalizada",
@@ -20,8 +22,25 @@ const floatingStats = [
   { icon: Wallet, label: "Saque", value: "PIX", color: "bg-secondary/15 text-secondary" },
 ];
 
+const earningsSteps = [
+  { consultations: 5, earnings: "R$ 1.125" },
+  { consultations: 10, earnings: "R$ 2.250" },
+  { consultations: 20, earnings: "R$ 4.500" },
+  { consultations: 40, earnings: "R$ 9.000" },
+];
+
 const DoctorPremiumSection = () => {
   const navigate = useNavigate();
+  const [earningsIndex, setEarningsIndex] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setEarningsIndex(prev => (prev + 1) % earningsSteps.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const current = earningsSteps[earningsIndex];
 
   return (
     <section aria-label="Para médicos" className="py-10 md:py-20 px-4">
@@ -69,10 +88,57 @@ const DoctorPremiumSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
-                className="text-muted-foreground text-lg max-w-md mb-8 leading-relaxed"
+                className="text-muted-foreground text-lg max-w-md mb-6 leading-relaxed"
               >
                 Um <strong className="text-foreground">formato exclusivo para médicos</strong> conectarem suas carreiras a novas possibilidades com a AloClinica.
               </motion.p>
+
+              {/* Earnings estimator */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.32 }}
+                className="mb-6 p-4 rounded-2xl bg-card border border-border shadow-card max-w-sm"
+              >
+                <p className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
+                  <Wallet className="w-3.5 h-3.5 text-primary" />
+                  Estimativa de ganhos semanais
+                </p>
+                <div className="flex items-end gap-3">
+                  <motion.div
+                    key={earningsIndex}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <span className="text-2xl font-extrabold text-foreground">{current.earnings}</span>
+                    <span className="text-xs text-muted-foreground ml-1.5">/semana</span>
+                  </motion.div>
+                  <div className="flex-1" />
+                  <div className="text-right">
+                    <p className="text-xs text-muted-foreground">com</p>
+                    <motion.p
+                      key={earningsIndex}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-sm font-bold text-primary"
+                    >
+                      {current.consultations} consultas
+                    </motion.p>
+                  </div>
+                </div>
+                {/* Progress dots */}
+                <div className="flex gap-1.5 mt-3">
+                  {earningsSteps.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setEarningsIndex(i)}
+                      className={`h-1 rounded-full transition-all duration-300 ${i === earningsIndex ? "w-6 bg-primary" : "w-2 bg-muted-foreground/20"}`}
+                    />
+                  ))}
+                </div>
+              </motion.div>
 
               {/* Benefits checklist */}
               <motion.ul
@@ -80,7 +146,7 @@ const DoctorPremiumSection = () => {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.35 }}
-                className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-8"
+                className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-6"
               >
                 {benefits.map((b, i) => (
                   <motion.li
@@ -98,6 +164,27 @@ const DoctorPremiumSection = () => {
                   </motion.li>
                 ))}
               </motion.ul>
+
+              {/* Doctor testimonial inline */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.45 }}
+                className="flex items-start gap-3 p-3.5 rounded-xl bg-primary/5 border border-primary/10 mb-6 max-w-sm"
+              >
+                <img src={avatarCarlos} alt="Dr. Carlos" className="w-9 h-9 rounded-full object-cover shrink-0" />
+                <div>
+                  <div className="flex items-center gap-1 mb-1">
+                    <Quote className="w-3 h-3 text-primary/40" />
+                    <span className="text-[10px] font-semibold text-primary">Dr. Carlos Mendes</span>
+                    <div className="flex gap-0.5 ml-1">
+                      {[1,2,3,4,5].map(s => <Star key={s} className="w-2.5 h-2.5 fill-medical-green text-medical-green" />)}
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed italic">"Minha renda aumentou 40% e atendo de casa. A plataforma é incrível."</p>
+                </div>
+              </motion.div>
 
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
@@ -122,6 +209,19 @@ const DoctorPremiumSection = () => {
                   Sou Clínica
                 </Button>
               </motion.div>
+
+              {/* Social proof */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 }}
+                className="flex items-center gap-2 mt-4 text-xs text-muted-foreground"
+              >
+                <Users className="w-3.5 h-3.5" />
+                <span><strong className="text-foreground">500+</strong> médicos já cadastrados</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-medical-green animate-pulse" />
+              </motion.div>
             </div>
 
             {/* Images + floating badges */}
@@ -133,12 +233,7 @@ const DoctorPremiumSection = () => {
                 transition={{ delay: 0.3, duration: 0.6 }}
                 className="absolute top-0 left-2 sm:left-8 w-40 sm:w-52 lg:w-64 h-56 sm:h-72 lg:h-80 rounded-2xl overflow-hidden shadow-elevated z-10"
               >
-                <img
-                  src={doctorImg1}
-                  alt="Médica profissional"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                <img src={doctorImg1} alt="Médica profissional" className="w-full h-full object-cover" loading="lazy" />
               </motion.div>
 
               <motion.div
@@ -148,12 +243,7 @@ const DoctorPremiumSection = () => {
                 transition={{ delay: 0.5, duration: 0.6 }}
                 className="absolute bottom-0 right-2 sm:right-8 w-36 sm:w-48 lg:w-56 h-52 sm:h-64 lg:h-72 rounded-2xl overflow-hidden shadow-elevated z-20"
               >
-                <img
-                  src={doctorImg2}
-                  alt="Médico atendendo online"
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
+                <img src={doctorImg2} alt="Médico atendendo online" className="w-full h-full object-cover" loading="lazy" />
               </motion.div>
 
               {/* Floating stat badges */}
