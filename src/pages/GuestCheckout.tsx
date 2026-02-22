@@ -225,6 +225,7 @@ const GuestCheckout = () => {
     const scheduledAt = setMinutes(setHours(new Date(selectedDate), h), m);
 
     try {
+      // Step 1: Create guest appointment
       const { data, error } = await supabase.functions.invoke("guest-checkout", {
         body: {
           full_name: guestName,
@@ -240,6 +241,48 @@ const GuestCheckout = () => {
       });
 
       if (error) throw error;
+
+      // Step 2: Create real payment via Asaas
+      const billingTypeMap: Record<string, string> = {
+        credit: "CREDIT_CARD",
+        pix: "PIX",
+        boleto: "BOLETO",
+      };
+
+      const [expiryMonth, expiryYear] = (cardExpiry || "/").split("/");
+
+      const paymentPayload: Record<string, any> = {
+        customerName: guestName,
+        customerCpf: guestCpf,
+        customerEmail: guestEmail,
+        customerPhone: guestPhone,
+        billingType: billingTypeMap[paymentMethod],
+        value: totalPrice,
+        description: `Consulta Avulsa - AloClinica`,
+        appointmentId: data.appointment_id,
+      };
+
+      if (paymentMethod === "credit") {
+        paymentPayload.cardHolderName = cardName;
+        paymentPayload.cardNumber = cardNumber;
+        paymentPayload.cardExpiryMonth = expiryMonth;
+        paymentPayload.cardExpiryYear = `20${expiryYear}`;
+        paymentPayload.cardCcv = cardCvv;
+        paymentPayload.cardHolderCpf = guestCpf;
+        paymentPayload.cardHolderPhone = guestPhone;
+      }
+
+      const { data: payData, error: payError } = await supabase.functions.invoke("create-asaas-payment", {
+        body: paymentPayload,
+      });
+
+      if (payError || !payData?.success) {
+        console.error("Payment error:", payError, payData);
+        toast({
+          title: "Consulta agendada, mas pagamento pendente",
+          description: payData?.error || "Você receberá instruções de pagamento por email.",
+        });
+      }
 
       setConsultationUrl(data.consultation_url);
       setStep("success");
@@ -539,7 +582,7 @@ const GuestCheckout = () => {
                     </div>
                     <div className="mt-6 p-3 rounded-lg bg-muted">
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Shield className="w-4 h-4" /> Pagamento simulado — sem cobrança real
+                        <Shield className="w-4 h-4" /> Pagamento seguro via Asaas • Dados protegidos
                       </div>
                     </div>
                   </CardContent>
@@ -599,14 +642,10 @@ const GuestCheckout = () => {
                           <div className="text-center">
                             <Shield className="w-12 h-12 text-muted-foreground/50 mx-auto mb-2" />
                             <p className="text-xs text-muted-foreground">QR Code PIX</p>
-                            <p className="text-xs text-muted-foreground">(simulado)</p>
+                            <p className="text-xs text-muted-foreground">Gerado após confirmar</p>
                           </div>
                         </div>
-                        <div className="bg-muted p-3 rounded-lg">
-                          <p className="text-xs text-muted-foreground mb-1">Chave PIX (copia e cola):</p>
-                          <p className="text-sm font-mono text-foreground break-all">00020126580014br.gov.bcb.pix0136aloclinica-simulado</p>
-                        </div>
-                        <p className="text-xs text-muted-foreground">Após o pagamento, a confirmação será automática.</p>
+                        <p className="text-xs text-muted-foreground">Após o pagamento, a confirmação será automática via webhook.</p>
                       </div>
                     )}
 
@@ -615,10 +654,8 @@ const GuestCheckout = () => {
                       <div className="text-center space-y-4">
                         <div className="w-full bg-muted rounded-xl p-6 border-2 border-dashed border-border">
                           <FileText className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-                          <p className="text-sm text-muted-foreground mb-2">Boleto Bancário (simulado)</p>
-                          <div className="bg-background p-3 rounded-lg">
-                            <p className="text-xs font-mono text-foreground break-all">23793.38128 60000.000003 00000.000400 1 84340000008900</p>
-                          </div>
+                          <p className="text-sm text-muted-foreground mb-2">Boleto Bancário</p>
+                          <p className="text-xs text-muted-foreground">O boleto será gerado automaticamente após confirmar.</p>
                         </div>
                         <p className="text-xs text-muted-foreground">O boleto vence em 3 dias úteis. Após confirmação do pagamento, você receberá o link da consulta por email.</p>
                       </div>

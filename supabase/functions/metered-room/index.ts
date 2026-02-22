@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
 serve(async (req) => {
@@ -29,17 +30,21 @@ serve(async (req) => {
       });
     }
 
+    // Normalize app name — remove .metered.live suffix if present to avoid duplication
+    const cleanAppName = appName.replace(/\.metered\.live$/i, "");
+    const meteredDomain = `${cleanAppName}.metered.live`;
+
     const roomName = `consulta-${appointmentId.replace(/-/g, "").slice(0, 16)}`;
 
     // Try to get existing room first
     const getRes = await fetch(
-      `https://${appName}.metered.live/api/v1/room/${roomName}?secretKey=${secretKey}`
+      `https://${meteredDomain}/api/v1/room/${roomName}?secretKey=${secretKey}`
     );
 
     if (getRes.ok) {
       const room = await getRes.json();
       return new Response(JSON.stringify({
-        roomURL: `${appName}.metered.live/${roomName}`,
+        roomURL: `${meteredDomain}/${roomName}`,
         roomName: room.roomName,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -48,7 +53,7 @@ serve(async (req) => {
 
     // Create room if it doesn't exist
     const createRes = await fetch(
-      `https://${appName}.metered.live/api/v1/room?secretKey=${secretKey}`,
+      `https://${meteredDomain}/api/v1/room?secretKey=${secretKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -58,7 +63,6 @@ serve(async (req) => {
           autoJoin: true,
           maxParticipants: 4,
           ejectAtRoomExp: true,
-          // Expire room 4 hours from now
           expireUnixSec: Math.floor(Date.now() / 1000) + 4 * 3600,
         }),
       }
@@ -75,7 +79,7 @@ serve(async (req) => {
 
     const room = await createRes.json();
     return new Response(JSON.stringify({
-      roomURL: `${appName}.metered.live/${room.roomName}`,
+      roomURL: `${meteredDomain}/${room.roomName}`,
       roomName: room.roomName,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
