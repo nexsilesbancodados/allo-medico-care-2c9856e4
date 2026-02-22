@@ -1,10 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Phone, Maximize2, Minimize2, Clock, Wifi, WifiOff, Shield } from "lucide-react";
+import {
+  Phone, Maximize2, Minimize2, Clock, Wifi, WifiOff,
+  Shield, Mic, MicOff, Video, VideoOff, RotateCcw
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-// Jitsi Meet - no external SDK needed, uses iframe
 
 interface VideoConsultationProps {
   appointmentId: string;
@@ -23,8 +25,12 @@ const formatElapsed = (seconds: number) => {
 
 const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsultationProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const frameContainerRef = useRef<HTMLDivElement>(null);
+  const localVideoRef = useRef<HTMLVideoElement>(null);
+  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
   const onEndCallRef = useRef(onEndCall);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -32,10 +38,15 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
   const [elapsed, setElapsed] = useState(0);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [confirmEnd, setConfirmEnd] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isCamOff, setIsCamOff] = useState(false);
+  const [remoteConnected, setRemoteConnected] = useState(false);
+  const [pip, setPip] = useState<{x: number; y: number}>({ x: 16, y: 16 });
+
   const controlsTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const elapsedTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const isMobile = useIsMobile();
-  const frameInitialized = useRef(false);
+  const initialized = useRef(false);
 
   useEffect(() => { onEndCallRef.current = onEndCall; }, [onEndCall]);
 
@@ -49,20 +60,18 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
 
   // Network status
   useEffect(() => {
-    const onOnline = () => setIsOnline(true);
-    const onOffline = () => setIsOnline(false);
-    window.addEventListener("online", onOnline);
-    window.addEventListener("offline", onOffline);
-    return () => { window.removeEventListener("online", onOnline); window.removeEventListener("offline", onOffline); };
+    const onOn = () => setIsOnline(true);
+    const onOff = () => setIsOnline(false);
+    window.addEventListener("online", onOn);
+    window.addEventListener("offline", onOff);
+    return () => { window.removeEventListener("online", onOn); window.removeEventListener("offline", onOff); };
   }, []);
 
   const resetControlsTimer = useCallback(() => {
     setShowControls(true);
     if (controlsTimer.current) clearTimeout(controlsTimer.current);
-    if (isMobile) {
-      controlsTimer.current = setTimeout(() => setShowControls(false), 4000);
-    }
-  }, [isMobile]);
+    controlsTimer.current = setTimeout(() => setShowControls(false), 5000);
+  }, []);
 
   useEffect(() => {
     resetControlsTimer();
@@ -71,7 +80,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
 
   const toggleFullscreen = useCallback(() => {
     if (!document.fullscreenElement) {
-      containerRef.current?.parentElement?.requestFullscreen?.();
+      containerRef.current?.requestFullscreen?.();
       setIsFullscreen(true);
     } else {
       document.exitFullscreen?.();
@@ -85,59 +94,86 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     return () => document.removeEventListener("fullscreenchange", handleFsChange);
   }, []);
 
-  // Initialize Jitsi Meet via iframe
+  // Initialize local camera + Jitsi iframe as fallback for signaling
   useEffect(() => {
-    if (frameInitialized.current) return;
-    frameInitialized.current = true;
+    if (initialized.current) return;
+    initialized.current = true;
 
-    try {
-      if (!frameContainerRef.current) return;
-
-      const roomName = `allo-medico-${appointmentId.replace(/-/g, "").slice(0, 20)}`;
-      const displayName = encodeURIComponent(userName || "Participante");
-      
-      const iframeSrc = `https://meet.jit.si/${roomName}#config.prejoinPageEnabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.disableInviteFunctions=true&userInfo.displayName=${displayName}`;
-
-      const iframe = document.createElement("iframe");
-      iframe.src = iframeSrc;
-      iframe.allow = "camera; microphone; display-capture; autoplay; clipboard-write; clipboard-read; fullscreen";
-      iframe.style.cssText = "width:100%;height:100%;border:none;min-height:400px;";
-      iframe.title = "Videochamada";
-
-      iframe.onload = () => {
+    const initMedia = async () => {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user", width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: true,
+        });
+        localStreamRef.current = stream;
+        if (localVideoRef.current) {
+          localVideoRef.current.srcObject = stream;
+        }
         setLoading(false);
-        // Play notification sound
+
+        // Play entry sound
         try {
           const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const oscillator = audioCtx.createOscillator();
-          const gainNode = audioCtx.createGain();
-          oscillator.connect(gainNode);
-          gainNode.connect(audioCtx.destination);
-          oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-          oscillator.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.1);
-          gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-          oscillator.start(audioCtx.currentTime);
-          oscillator.stop(audioCtx.currentTime + 0.4);
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+          osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+          osc.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.1);
+          gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+          osc.start(audioCtx.currentTime);
+          osc.stop(audioCtx.currentTime + 0.35);
         } catch {}
-      };
-
-      iframe.onerror = () => {
-        setError("Erro ao carregar a sala de vídeo.");
+      } catch (err) {
+        console.error("Camera error:", err);
+        setError("Não foi possível acessar câmera/microfone. Verifique as permissões do navegador.");
         setLoading(false);
-      };
+      }
+    };
 
-      frameContainerRef.current.innerHTML = "";
-      frameContainerRef.current.appendChild(iframe);
+    initMedia();
 
-      // Fallback timeout
-      setTimeout(() => setLoading(false), 8000);
-    } catch (err) {
-      console.error("Video init error:", err);
-      setError("Erro ao inicializar a videochamada.");
-      setLoading(false);
+    return () => {
+      localStreamRef.current?.getTracks().forEach(t => t.stop());
+    };
+  }, []);
+
+  const toggleMic = () => {
+    const audioTrack = localStreamRef.current?.getAudioTracks()[0];
+    if (audioTrack) {
+      audioTrack.enabled = !audioTrack.enabled;
+      setIsMuted(!audioTrack.enabled);
     }
-  }, [appointmentId, userName]);
+  };
+
+  const toggleCam = () => {
+    const videoTrack = localStreamRef.current?.getVideoTracks()[0];
+    if (videoTrack) {
+      videoTrack.enabled = !videoTrack.enabled;
+      setIsCamOff(!videoTrack.enabled);
+    }
+  };
+
+  const switchCamera = async () => {
+    const currentTrack = localStreamRef.current?.getVideoTracks()[0];
+    if (!currentTrack) return;
+    const currentFacing = currentTrack.getSettings().facingMode;
+    const newFacing = currentFacing === "user" ? "environment" : "user";
+    try {
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: newFacing, width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      });
+      const newTrack = newStream.getVideoTracks()[0];
+      currentTrack.stop();
+      localStreamRef.current?.removeTrack(currentTrack);
+      localStreamRef.current?.addTrack(newTrack);
+      if (localVideoRef.current && localStreamRef.current) {
+        localVideoRef.current.srcObject = localStreamRef.current;
+      }
+    } catch {}
+  };
 
   const handleEndCall = () => {
     if (!confirmEnd) {
@@ -145,152 +181,243 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
       setTimeout(() => setConfirmEnd(false), 4000);
       return;
     }
+    localStreamRef.current?.getTracks().forEach(t => t.stop());
     onEndCall();
   };
 
+  // Hidden Jitsi iframe for the actual P2P connection
+  const roomName = `allo-medico-${appointmentId.replace(/-/g, "").slice(0, 20)}`;
+  const displayName = encodeURIComponent(userName || "Participante");
+  const jitsiSrc = `https://meet.jit.si/${roomName}#config.prejoinPageEnabled=false&config.startWithAudioMuted=true&config.startWithVideoMuted=true&config.disableInviteFunctions=true&config.toolbarButtons=[]&interfaceConfig.filmStripOnly=true&interfaceConfig.TOOLBAR_BUTTONS=[]&userInfo.displayName=${displayName}`;
+
   return (
     <div
-      className="flex flex-col w-full h-full relative"
+      ref={containerRef}
+      className="relative w-full h-full overflow-hidden select-none"
+      style={{ background: "hsl(220, 25%, 4%)" }}
       onClick={resetControlsTimer}
       onTouchStart={resetControlsTimer}
-      ref={containerRef}
     >
-      {/* Video container */}
-      <div className="relative flex-1 w-full min-h-0 bg-[hsl(220,30%,5%)]">
-        {/* Top bar: timer + status */}
-        <AnimatePresence>
-          {!loading && !error && showControls && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-3 py-2 bg-gradient-to-b from-[hsl(220,30%,5%,0.85)] to-transparent"
-            >
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-[hsl(220,20%,10%,0.8)] border-[hsl(220,15%,25%)] text-[hsl(220,20%,85%)] gap-1.5 font-mono text-xs">
-                  <Clock className="w-3 h-3" />
-                  {formatElapsed(elapsed)}
-                </Badge>
-                <Badge variant="outline" className={`gap-1 text-[10px] ${isOnline ? "border-emerald-500/30 text-emerald-400" : "border-destructive/30 text-destructive"}`}>
-                  {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-                  {isOnline ? "Conectado" : "Offline"}
-                </Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge variant="outline" className="border-emerald-500/20 text-emerald-400/80 text-[10px] gap-1">
-                  <Shield className="w-3 h-3" />
-                  Criptografado
-                </Badge>
-                <button
-                  onClick={toggleFullscreen}
-                  className="w-8 h-8 rounded-lg bg-[hsl(220,20%,8%,0.75)] backdrop-blur-md border border-[hsl(220,15%,20%)] flex items-center justify-center text-[hsl(220,20%,70%)] hover:text-white transition-colors"
-                  title={isFullscreen ? "Sair do fullscreen" : "Tela cheia"}
-                >
-                  {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      {/* ===== REMOTE VIDEO (full screen) ===== */}
+      {/* Using Jitsi iframe as the main remote view */}
+      <iframe
+        src={jitsiSrc}
+        allow="camera; microphone; display-capture; autoplay; clipboard-write; fullscreen"
+        className="absolute inset-0 w-full h-full border-none z-[1]"
+        title="Videochamada"
+        style={{ minHeight: 400 }}
+      />
 
-        {/* Loading overlay */}
-        <AnimatePresence>
-          {loading && !error && (
-            <motion.div
-              initial={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4 }}
-              className="absolute inset-0 z-10 flex items-center justify-center bg-[hsl(220,30%,5%)]"
-            >
-              <div className="flex flex-col items-center gap-4">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full border-[3px] border-primary/20 border-t-primary animate-spin" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <Phone className="w-6 h-6 text-primary" />
-                  </div>
-                </div>
-                <div className="text-center space-y-1">
-                  <p className="text-sm font-medium text-[hsl(220,20%,85%)]">Conectando à videochamada...</p>
-                  <p className="text-xs text-[hsl(220,15%,45%)]">Verifique se câmera e microfone estão permitidos</p>
-                </div>
-                <div className="flex gap-1.5">
-                  {[0, 1, 2].map(i => (
-                    <motion.div
-                      key={i}
-                      className="w-2 h-2 rounded-full bg-primary"
-                      animate={{ opacity: [0.3, 1, 0.3] }}
-                      transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
-                    />
-                  ))}
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Error state */}
-        {error && (
-          <div className="absolute inset-0 z-10 flex items-center justify-center bg-[hsl(220,30%,5%)]">
-            <div className="flex flex-col items-center gap-4 text-center px-6">
-              <Phone className="w-12 h-12 text-destructive" />
-              <p className="text-sm text-[hsl(220,20%,85%)]">{error}</p>
-              <Button variant="outline" onClick={() => window.location.reload()}>Tentar novamente</Button>
-            </div>
+      {/* ===== LOCAL VIDEO PiP (WhatsApp style corner) ===== */}
+      <motion.div
+        drag
+        dragMomentum={false}
+        className="absolute z-[15] rounded-2xl overflow-hidden shadow-2xl border-2 border-white/20"
+        style={{
+          width: isMobile ? 110 : 160,
+          height: isMobile ? 155 : 220,
+          right: 12,
+          top: 60,
+        }}
+        whileDrag={{ scale: 1.05 }}
+      >
+        <video
+          ref={localVideoRef}
+          autoPlay
+          playsInline
+          muted
+          className={`w-full h-full object-cover ${isCamOff ? "hidden" : ""}`}
+          style={{ transform: "scaleX(-1)" }}
+        />
+        {isCamOff && (
+          <div className="w-full h-full flex items-center justify-center bg-[hsl(220,25%,12%)]">
+            <VideoOff className="w-8 h-8 text-white/40" />
           </div>
         )}
+        {/* Name label on PiP */}
+        <div className="absolute bottom-0 left-0 right-0 px-2 py-1 bg-gradient-to-t from-black/60 to-transparent">
+          <span className="text-[10px] text-white font-medium truncate">Você</span>
+        </div>
+      </motion.div>
 
-        {/* Network warning */}
-        <AnimatePresence>
-          {!isOnline && !loading && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="absolute top-14 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-xl bg-destructive/90 text-destructive-foreground text-xs font-medium flex items-center gap-2 shadow-lg"
-            >
-              <WifiOff className="w-4 h-4" />
-              Conexão perdida. Reconectando...
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Metered Frame container */}
-        <div ref={frameContainerRef} className="w-full h-full metered-container" style={{ minHeight: "400px" }} />
-        {/* Ensure iframe fills container */}
-        <style>{`
-          .metered-container iframe {
-            width: 100% !important;
-            height: 100% !important;
-            border: none !important;
-          }
-        `}</style>
-      </div>
-
-      {/* Bottom control bar */}
+      {/* ===== TOP BAR ===== */}
       <AnimatePresence>
         {showControls && !loading && !error && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            transition={{ duration: 0.2 }}
-            className={`${
-              isMobile
-                ? "absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-[hsl(220,30%,5%)] via-[hsl(220,30%,5%,0.9)] to-transparent pt-12 pb-6 px-4"
-                : "flex items-center justify-center py-3 bg-[hsl(220,30%,5%)] border-t border-[hsl(220,15%,15%)]"
-            }`}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3"
+            style={{ background: "linear-gradient(to bottom, hsla(220,25%,4%,0.85), transparent)" }}
           >
-            <Button
-              onClick={handleEndCall}
-              className={`rounded-full px-8 py-3 h-12 shadow-lg transition-all hover:scale-105 active:scale-95 gap-2 font-semibold mx-auto flex ${
-                confirmEnd
-                  ? "bg-amber-600 hover:bg-amber-700 text-white shadow-amber-600/25"
-                  : "bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-destructive/25"
-              }`}
-            >
-              <Phone className="w-5 h-5 rotate-[135deg]" />
-              {confirmEnd ? "Confirmar encerramento?" : "Finalizar Atendimento"}
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="bg-black/40 border-white/10 text-white gap-1.5 font-mono text-xs backdrop-blur-md">
+                <Clock className="w-3 h-3" />
+                {formatElapsed(elapsed)}
+              </Badge>
+              <Badge variant="outline" className={`gap-1 text-[10px] backdrop-blur-md ${isOnline ? "border-emerald-500/30 text-emerald-400 bg-emerald-500/10" : "border-red-500/30 text-red-400 bg-red-500/10"}`}>
+                {isOnline ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+                {isOnline ? "Online" : "Offline"}
+              </Badge>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="border-emerald-500/20 text-emerald-400/80 text-[10px] gap-1 bg-emerald-500/5 backdrop-blur-md">
+                <Shield className="w-3 h-3" />
+                E2E
+              </Badge>
+              <button
+                onClick={toggleFullscreen}
+                className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white/70 hover:text-white hover:bg-white/20 transition-all"
+              >
+                {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ===== LOADING ===== */}
+      <AnimatePresence>
+        {loading && !error && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-30 flex items-center justify-center"
+            style={{ background: "hsl(220, 25%, 4%)" }}
+          >
+            <div className="flex flex-col items-center gap-5">
+              <div className="relative">
+                <div className="w-20 h-20 rounded-full border-[3px] border-emerald-500/20 border-t-emerald-500 animate-spin" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Phone className="w-7 h-7 text-emerald-500" />
+                </div>
+              </div>
+              <div className="text-center space-y-1.5">
+                <p className="text-base font-medium text-white">Conectando...</p>
+                <p className="text-xs text-white/40">Ativando câmera e microfone</p>
+              </div>
+              <div className="flex gap-1.5">
+                {[0, 1, 2].map(i => (
+                  <motion.div
+                    key={i}
+                    className="w-2 h-2 rounded-full bg-emerald-500"
+                    animate={{ opacity: [0.3, 1, 0.3] }}
+                    transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ===== ERROR ===== */}
+      {error && (
+        <div className="absolute inset-0 z-30 flex items-center justify-center" style={{ background: "hsl(220, 25%, 4%)" }}>
+          <div className="flex flex-col items-center gap-4 text-center px-6">
+            <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
+              <Phone className="w-8 h-8 text-red-500" />
+            </div>
+            <p className="text-sm text-white/80">{error}</p>
+            <Button variant="outline" onClick={() => window.location.reload()} className="border-white/20 text-white hover:bg-white/10">
+              Tentar novamente
             </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ===== NETWORK WARNING ===== */}
+      <AnimatePresence>
+        {!isOnline && !loading && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-red-500/90 text-white text-xs font-medium flex items-center gap-2 shadow-lg backdrop-blur-sm"
+          >
+            <WifiOff className="w-4 h-4" />
+            Conexão perdida...
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ===== BOTTOM CONTROLS (WhatsApp style) ===== */}
+      <AnimatePresence>
+        {showControls && !loading && !error && (
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 30 }}
+            className="absolute bottom-0 left-0 right-0 z-20 pb-8 pt-16 px-4"
+            style={{ background: "linear-gradient(to top, hsla(220,25%,4%,0.9), transparent)" }}
+          >
+            <div className="flex items-center justify-center gap-5">
+              {/* Mic toggle */}
+              <button
+                onClick={toggleMic}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  isMuted ? "bg-white text-black" : "bg-white/15 text-white backdrop-blur-md hover:bg-white/25"
+                }`}
+              >
+                {isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              </button>
+
+              {/* Camera toggle */}
+              <button
+                onClick={toggleCam}
+                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                  isCamOff ? "bg-white text-black" : "bg-white/15 text-white backdrop-blur-md hover:bg-white/25"
+                }`}
+              >
+                {isCamOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+              </button>
+
+              {/* End call */}
+              <button
+                onClick={handleEndCall}
+                className={`w-14 h-14 rounded-full flex items-center justify-center transition-all shadow-lg ${
+                  confirmEnd
+                    ? "bg-amber-500 hover:bg-amber-600 shadow-amber-500/30"
+                    : "bg-red-500 hover:bg-red-600 shadow-red-500/30"
+                }`}
+              >
+                <Phone className="w-6 h-6 text-white rotate-[135deg]" />
+              </button>
+
+              {/* Switch camera (mobile) */}
+              {isMobile && (
+                <button
+                  onClick={switchCamera}
+                  className="w-12 h-12 rounded-full bg-white/15 text-white backdrop-blur-md flex items-center justify-center hover:bg-white/25 transition-all"
+                >
+                  <RotateCcw className="w-5 h-5" />
+                </button>
+              )}
+
+              {/* Fullscreen (desktop) */}
+              {!isMobile && (
+                <button
+                  onClick={toggleFullscreen}
+                  className="w-12 h-12 rounded-full bg-white/15 text-white backdrop-blur-md flex items-center justify-center hover:bg-white/25 transition-all"
+                >
+                  {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                </button>
+              )}
+            </div>
+
+            {/* Confirm end label */}
+            <AnimatePresence>
+              {confirmEnd && (
+                <motion.p
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="text-center text-xs text-amber-300 mt-3 font-medium"
+                >
+                  Toque novamente para confirmar
+                </motion.p>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
