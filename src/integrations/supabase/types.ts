@@ -599,6 +599,7 @@ export type Database = {
           details: Json | null
           doctor_crm: string | null
           doctor_name: string
+          document_hash: string | null
           document_type: string
           id: string
           issued_at: string
@@ -611,6 +612,7 @@ export type Database = {
           details?: Json | null
           doctor_crm?: string | null
           doctor_name: string
+          document_hash?: string | null
           document_type?: string
           id?: string
           issued_at?: string
@@ -623,6 +625,7 @@ export type Database = {
           details?: Json | null
           doctor_crm?: string | null
           doctor_name?: string
+          document_hash?: string | null
           document_type?: string
           id?: string
           issued_at?: string
@@ -1158,6 +1161,7 @@ export type Database = {
           created_at: string
           diagnosis: string | null
           doctor_id: string
+          document_hash: string | null
           id: string
           medications: Json
           observations: string | null
@@ -1169,6 +1173,7 @@ export type Database = {
           created_at?: string
           diagnosis?: string | null
           doctor_id: string
+          document_hash?: string | null
           id?: string
           medications?: Json
           observations?: string | null
@@ -1180,6 +1185,7 @@ export type Database = {
           created_at?: string
           diagnosis?: string | null
           doctor_id?: string
+          document_hash?: string | null
           id?: string
           medications?: Json
           observations?: string | null
@@ -1585,6 +1591,39 @@ export type Database = {
           notes?: string | null
           patient_id?: string
           symptoms?: string[] | null
+        }
+        Relationships: []
+      }
+      user_consents: {
+        Row: {
+          accepted_at: string
+          consent_type: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+          user_id: string
+          version: string
+        }
+        Insert: {
+          accepted_at?: string
+          consent_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id: string
+          version?: string
+        }
+        Update: {
+          accepted_at?: string
+          consent_type?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+          user_id?: string
+          version?: string
         }
         Relationships: []
       }

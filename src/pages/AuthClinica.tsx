@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { ArrowLeft, Building2, Mail, Lock, Phone, MapPin, FileText } from "lucide-react";
+import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
+import { registerConsent } from "@/lib/consent";
 import doctorPortalBg from "@/assets/doctor-portal-bg.png";
 import SEOHead from "@/components/SEOHead";
 
@@ -22,6 +24,7 @@ const AuthClinica = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -42,6 +45,10 @@ const AuthClinica = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      toast({ title: "Aceite os termos", description: "Você precisa aceitar os Termos de Uso e Política de Privacidade.", variant: "destructive" });
+      return;
+    }
     if (!clinicName || !cnpj) {
       toast({ title: "Preencha nome e CNPJ da clínica", variant: "destructive" });
       return;
@@ -81,6 +88,9 @@ const AuthClinica = () => {
       await supabase.functions.invoke("assign-role", {
         body: { user_id: data.user.id, role: "clinic" },
       }).catch(console.error);
+
+      // Register consent
+      await registerConsent(data.user.id, "terms_and_privacy_clinic");
 
       // Send welcome email for clinic
       supabase.functions.invoke("send-email", {
@@ -217,7 +227,8 @@ const AuthClinica = () => {
                     </div>
                   </div>
 
-                  <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading}>
+                  <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
+                  <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading || !termsAccepted}>
                     {loading ? "Cadastrando..." : "Cadastrar Clínica"}
                   </Button>
 

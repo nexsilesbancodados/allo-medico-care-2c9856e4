@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { notifyCertificateSent } from "@/lib/notifications";
 import { supabase } from "@/integrations/supabase/client";
+import { gerarHashDocumento } from "@/lib/signature";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -69,7 +70,7 @@ const MedicalCertificate = () => {
     });
   };
 
-  const generateCertificate = () => {
+  const generateCertificate = async () => {
     if (!patientName) {
       toast({ title: "Informe o nome do paciente", variant: "destructive" });
       return;
@@ -160,7 +161,22 @@ const MedicalCertificate = () => {
 
     doc.save(`${certType}-${patientName.replace(/\s/g, "-").toLowerCase()}.pdf`);
 
-    // Persist verification code to DB
+    // Generate digital hash for document integrity
+    const docContent = JSON.stringify({
+      type: certType,
+      patient: patientName,
+      patient_cpf: patientCpf,
+      doctor: doctorName,
+      crm: crmText,
+      days: certType === "absence" ? days : null,
+      cid: cid || null,
+      reason: reason || null,
+      verification_code: verificationCode,
+      timestamp: new Date().toISOString(),
+    });
+    const documentHash = await gerarHashDocumento(docContent);
+
+    // Persist verification code to DB with hash
     supabase.from("document_verifications").insert({
       verification_code: verificationCode,
       document_type: certType,
@@ -168,6 +184,7 @@ const MedicalCertificate = () => {
       patient_cpf: patientCpf || null,
       doctor_name: doctorName,
       doctor_crm: crmText,
+      document_hash: documentHash,
       details: { days: certType === "absence" ? days : null, cid: cid || null, reason: reason || null },
     } as any).then(({ error }) => {
       if (error) console.error("Failed to persist verification:", error);

@@ -8,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Phone, Mail, Lock, User, ArrowLeft, Heart, Check, Star, CreditCard, Shield } from "lucide-react";
+import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
+import { registerConsent } from "@/lib/consent";
 import { formatMask, unmask } from "@/hooks/use-mask";
 import patientPortalBg from "@/assets/patient-portal-bg.png";
 import SEOHead from "@/components/SEOHead";
@@ -51,6 +53,7 @@ const AuthPaciente = () => {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -91,6 +94,10 @@ const AuthPaciente = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      toast({ title: "Aceite os termos", description: "Você precisa aceitar os Termos de Uso e Política de Privacidade para continuar.", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email, password,
@@ -110,6 +117,9 @@ const AuthPaciente = () => {
         cpf: unmask(cpf),
         phone: unmask(phone),
       }).eq("user_id", data.user.id);
+
+      // Register consent
+      await registerConsent(data.user.id);
 
       // Send welcome email
       try {
@@ -301,7 +311,8 @@ const AuthPaciente = () => {
                     <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="pl-10" required minLength={6} />
                   </div>
                 </div>
-                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading}>
+                <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
+                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading || !termsAccepted}>
                   {loading ? "Criando conta..." : "Criar conta"}
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
