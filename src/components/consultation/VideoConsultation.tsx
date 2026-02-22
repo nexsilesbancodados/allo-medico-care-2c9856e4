@@ -222,6 +222,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
         userInfo: { displayName },
         configOverwrite: {
           prejoinPageEnabled: false,
+          prejoinConfig: { enabled: false },
           startWithAudioMuted: false,
           startWithVideoMuted: false,
           disableInviteFunctions: true,
@@ -230,6 +231,12 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
           disableDeepLinking: true,
           disableThirdPartyRequests: true,
           enableWelcomePage: false,
+          deeplinking: {
+            disabled: true,
+            desktop: { enabled: false },
+            android: { enabled: false },
+            ios: { enabled: false },
+          },
           toolbarButtons: [
             "microphone", "camera", "desktop", "chat",
             "raisehand", "tileview", "hangup"
@@ -243,7 +250,11 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
           MOBILE_APP_PROMO: false,
           HIDE_INVITE_MORE_HEADER: true,
           DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+          DISABLE_PRESENCE_STATUS: true,
           filmStripOnly: false,
+          MOBILE_DOWNLOAD_LINK_ANDROID: "",
+          MOBILE_DOWNLOAD_LINK_IOS: "",
+          MOBILE_DOWNLOAD_LINK_F_DROID: "",
         },
       });
 
