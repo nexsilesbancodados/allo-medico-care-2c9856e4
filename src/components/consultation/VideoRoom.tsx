@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { notifyConsultationStarted } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -225,6 +226,9 @@ const VideoRoom = () => {
 
     if (isDoctor) {
       await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId);
+      // Notify patient that doctor entered the room
+      const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
+      notifyConsultationStarted(appointmentId!, docName).catch(console.error);
     }
 
     const otherUserId = isDoctor ? data.patient_id : null;
