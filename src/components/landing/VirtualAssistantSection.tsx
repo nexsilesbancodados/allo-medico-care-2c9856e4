@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, ChevronRight, Sparkles, Send } from "lucide-react";
+import { MessageCircle, ChevronRight, Sparkles, Send, Clock, Brain, Zap, Shield, FileText, Stethoscope } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import mascotWave from "@/assets/mascot-wave.png";
 
@@ -13,13 +13,27 @@ const chatDemo = [
   { role: "bot", text: "Ótimo! Encontrei 3 dermatologistas disponíveis hoje. Quer ver os horários? 📅" },
 ];
 
+const capabilities = [
+  { icon: Brain, label: "Triagem inteligente", desc: "Analisa sintomas e sugere especialidade" },
+  { icon: Clock, label: "Disponível 24/7", desc: "Sem filas, sem espera" },
+  { icon: FileText, label: "Resumos clínicos", desc: "Gera resumos de consultas com IA" },
+  { icon: Shield, label: "Privacidade total", desc: "Seus dados são criptografados" },
+  { icon: Stethoscope, label: "Agendamento", desc: "Marca consultas em segundos" },
+  { icon: Zap, label: "Respostas instantâneas", desc: "Powered by DeepSeek AI" },
+];
+
+const pingoStats = [
+  { value: "50k+", label: "Mensagens respondidas" },
+  { value: "< 3s", label: "Tempo de resposta" },
+  { value: "98%", label: "Satisfação" },
+];
+
 const VirtualAssistantSection = () => {
   const [visibleMessages, setVisibleMessages] = useState(0);
   const [isTyping, setIsTyping] = useState(false);
 
   const advanceChat = useCallback(() => {
     if (visibleMessages >= chatDemo.length) {
-      // Reset after pause
       setTimeout(() => setVisibleMessages(0), 3000);
       return;
     }
@@ -67,9 +81,13 @@ const VirtualAssistantSection = () => {
                     <img src={mascotWave} alt="Pingo" className="w-9 h-9 rounded-full object-contain bg-primary/10 p-0.5" />
                     <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-medical-green border-2 border-card" />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm font-bold text-foreground">Pingo</p>
                     <p className="text-[10px] text-medical-green font-medium">Online agora</p>
+                  </div>
+                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/5 text-primary">
+                    <Sparkles className="w-3 h-3" />
+                    <span className="text-[10px] font-semibold">IA</span>
                   </div>
                 </div>
 
@@ -131,9 +149,25 @@ const VirtualAssistantSection = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Pingo stats below chat */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5 }}
+                className="flex justify-center gap-4 mt-4 max-w-sm mx-auto"
+              >
+                {pingoStats.map((stat, i) => (
+                  <div key={i} className="text-center">
+                    <p className="text-sm font-extrabold text-foreground">{stat.value}</p>
+                    <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                  </div>
+                ))}
+              </motion.div>
             </motion.div>
 
-            {/* Text */}
+            {/* Text + Capabilities */}
             <div className="relative z-10">
               <motion.span
                 initial={{ opacity: 0, y: 10 }}
@@ -166,21 +200,30 @@ const VirtualAssistantSection = () => {
                 Seu atendente virtual está sempre disponível. Tire dúvidas, agende consultas e receba orientações — tudo direto pelo chat, sem complicação.
               </motion.p>
 
-              {/* Feature pills */}
+              {/* Capabilities grid */}
               <motion.div
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.35 }}
-                className="flex flex-wrap gap-2 mb-8"
+                className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 mb-8"
               >
-                {["Disponível 24h", "Triagem inteligente", "Agendamento rápido", "Respostas em segundos"].map((feat, i) => (
-                  <span
+                {capabilities.map((cap, i) => (
+                  <motion.div
                     key={i}
-                    className="px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-medium"
+                    initial={{ opacity: 0, y: 8 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4 + i * 0.05 }}
+                    whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                    className="p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all cursor-default"
                   >
-                    {feat}
-                  </span>
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                      <cap.icon className="w-4 h-4 text-primary" />
+                    </div>
+                    <p className="text-xs font-semibold text-foreground mb-0.5">{cap.label}</p>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">{cap.desc}</p>
+                  </motion.div>
                 ))}
               </motion.div>
 
@@ -188,7 +231,7 @@ const VirtualAssistantSection = () => {
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.5 }}
                 className="flex flex-col sm:flex-row gap-3"
               >
                 <Button
@@ -209,7 +252,7 @@ const VirtualAssistantSection = () => {
                 initial={{ opacity: 0 }}
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.55 }}
                 href="#como-funciona"
                 className="inline-flex items-center gap-1 mt-4 text-sm text-muted-foreground hover:text-primary transition-colors"
               >
