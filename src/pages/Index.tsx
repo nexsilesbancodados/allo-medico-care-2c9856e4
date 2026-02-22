@@ -21,6 +21,7 @@ import PingoChatbot from "@/components/PingoChatbot";
 import AnimateSection from "@/components/ui/animate-section";
 import EmergencyButton from "@/components/EmergencyButton";
 import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
+import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import { Button } from "@/components/ui/button";
 import { Stethoscope } from "lucide-react";
 import { useState } from "react";
@@ -162,6 +163,7 @@ const Index = () => {
       <Footer />
       <PingoChatbot />
       <EmergencyButton />
+      <FloatingMobileCTA />
       {showQuiz && <SpecialtyQuiz onClose={() => setShowQuiz(false)} />}
     </div>
   );
