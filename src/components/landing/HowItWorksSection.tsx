@@ -30,7 +30,8 @@ const HowItWorksSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Desktop: horizontal */}
+        <div className="hidden lg:grid lg:grid-cols-4 gap-8">
           {steps.map((step, i) => (
             <motion.div
               key={i}
@@ -43,7 +44,14 @@ const HowItWorksSection = () => {
             >
               {/* Connector line */}
               {i < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-10 left-[60%] w-[80%] h-px border-t-2 border-dashed border-border" />
+                <motion.div
+                  className="absolute top-10 left-[60%] w-[80%] h-px border-t-2 border-dashed border-primary/20"
+                  initial={{ scaleX: 0 }}
+                  whileInView={{ scaleX: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.15 + 0.3, duration: 0.6 }}
+                  style={{ originX: 0 }}
+                />
               )}
 
               <div className="w-20 h-20 rounded-2xl bg-gradient-hero flex items-center justify-center mx-auto mb-5 shadow-card overflow-hidden transition-all duration-300 group-hover:shadow-elevated group-hover:scale-105">
@@ -66,6 +74,53 @@ const HowItWorksSection = () => {
               </motion.div>
             </motion.div>
           ))}
+        </div>
+
+        {/* Mobile/Tablet: vertical timeline */}
+        <div className="lg:hidden relative">
+          {/* Timeline line */}
+          <motion.div
+            className="absolute left-6 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/40 via-primary/20 to-transparent"
+            initial={{ scaleY: 0 }}
+            whileInView={{ scaleY: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, ease: "easeOut" }}
+            style={{ originY: 0 }}
+          />
+
+          <div className="space-y-8">
+            {steps.map((step, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.12, duration: 0.5 }}
+                className="relative flex gap-4 pl-2"
+              >
+                {/* Timeline dot */}
+                <motion.div
+                  className="relative z-10 w-10 h-10 rounded-xl bg-gradient-hero flex items-center justify-center shrink-0 shadow-card overflow-hidden"
+                  initial={{ scale: 0 }}
+                  whileInView={{ scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.12 + 0.1, type: "spring", stiffness: 300 }}
+                >
+                  {step.image ? (
+                    <img src={step.image} alt={step.title} className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <step.icon className="w-5 h-5 text-primary-foreground" />
+                  )}
+                </motion.div>
+
+                <div className="flex-1 bg-card rounded-2xl border border-border p-4 shadow-card">
+                  <div className="text-[10px] font-bold text-primary mb-1 uppercase tracking-wider">Passo {i + 1}</div>
+                  <h3 className="text-base font-bold text-foreground mb-1">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
