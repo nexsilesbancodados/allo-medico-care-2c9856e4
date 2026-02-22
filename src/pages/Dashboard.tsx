@@ -123,8 +123,11 @@ const Dashboard = () => {
 
   // Determine which dashboard to show at index based on the current role context
   const IndexDashboard = () => {
+    // Admin without explicit ?role= goes to Panel Center
+    // Admin WITH ?role=admin goes to AdminDashboard
+    if (isAdmin && !forceRole) return <Navigate to="/dashboard/admin/panel-center" replace />;
     switch (primaryRole) {
-      case "admin": return <Navigate to="/dashboard/admin/panel-center" replace />;
+      case "admin": return <AdminDashboard />;
       case "doctor": return <DoctorDashboard />;
       case "receptionist": return <ReceptionDashboard />;
       case "support": return <SupportDashboard />;
@@ -145,7 +148,7 @@ const Dashboard = () => {
       <Route path="patient" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientDashboard /></RoleGuard>} />
       <Route path="doctor" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorDashboard /></RoleGuard>} />
       <Route path="clinic" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
-      <Route path="admin" element={<RoleGuard allowed={[]} roles={roles}><Navigate to="/dashboard/admin/panel-center" replace /></RoleGuard>} />
+      <Route path="admin" element={<RoleGuard allowed={[]} roles={roles}><AdminDashboard /></RoleGuard>} />
       <Route path="receptionist" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
       <Route path="support" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
       <Route path="partner" element={<RoleGuard allowed={["partner"]} roles={roles}><PartnerDashboard /></RoleGuard>} />
