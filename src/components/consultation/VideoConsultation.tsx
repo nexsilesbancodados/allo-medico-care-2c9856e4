@@ -26,8 +26,6 @@ const formatElapsed = (seconds: number) => {
 const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsultationProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const onEndCallRef = useRef(onEndCall);
 
@@ -189,87 +187,37 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
   const roomName = `allo-medico-${appointmentId.replace(/-/g, "").slice(0, 20)}`;
   const displayName = userName || "Participante";
 
-  // Use Jitsi IFrame API for proper auto-join (no prejoin screen)
-  const jitsiContainerRef = useRef<HTMLDivElement>(null);
-  const jitsiApiRef = useRef<any>(null);
+  // Build Jitsi iframe URL with ALL config in the hash to bypass deep linking
+  const jitsiUrl = `https://meet.jit.si/${roomName}#` + [
+    `config.prejoinPageEnabled=false`,
+    `config.prejoinConfig.enabled=false`,
+    `config.startWithAudioMuted=false`,
+    `config.startWithVideoMuted=false`,
+    `config.disableDeepLinking=true`,
+    `config.disableInviteFunctions=true`,
+    `config.hideConferenceSubject=true`,
+    `config.hideConferenceTimer=true`,
+    `config.enableWelcomePage=false`,
+    `config.disableThirdPartyRequests=true`,
+    `config.deeplinking.disabled=true`,
+    `config.deeplinking.desktop.enabled=false`,
+    `config.deeplinking.android.enabled=false`,
+    `config.deeplinking.ios.enabled=false`,
+    `config.toolbarButtons=["microphone","camera","desktop","chat","raisehand","tileview","hangup"]`,
+    `interfaceConfig.SHOW_JITSI_WATERMARK=false`,
+    `interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false`,
+    `interfaceConfig.SHOW_BRAND_WATERMARK=false`,
+    `interfaceConfig.SHOW_CHROME_EXTENSION_BANNER=false`,
+    `interfaceConfig.MOBILE_APP_PROMO=false`,
+    `interfaceConfig.HIDE_INVITE_MORE_HEADER=true`,
+    `interfaceConfig.DISABLE_JOIN_LEAVE_NOTIFICATIONS=true`,
+    `interfaceConfig.MOBILE_DOWNLOAD_LINK_ANDROID=""`,
+    `interfaceConfig.MOBILE_DOWNLOAD_LINK_IOS=""`,
+    `userInfo.displayName="${displayName}"`,
+  ].join("&");
 
-  useEffect(() => {
-    if (jitsiApiRef.current || !jitsiContainerRef.current) return;
-
-    const loadJitsiScript = () => {
-      return new Promise<void>((resolve) => {
-        if ((window as any).JitsiMeetExternalAPI) {
-          resolve();
-          return;
-        }
-        const script = document.createElement("script");
-        script.src = "https://meet.jit.si/external_api.js";
-        script.onload = () => resolve();
-        script.onerror = () => resolve(); // fallback
-        document.head.appendChild(script);
-      });
-    };
-
-    loadJitsiScript().then(() => {
-      const JitsiMeetExternalAPI = (window as any).JitsiMeetExternalAPI;
-      if (!JitsiMeetExternalAPI || !jitsiContainerRef.current) return;
-
-      const api = new JitsiMeetExternalAPI("meet.jit.si", {
-        roomName,
-        parentNode: jitsiContainerRef.current,
-        width: "100%",
-        height: "100%",
-        userInfo: { displayName },
-        configOverwrite: {
-          prejoinPageEnabled: false,
-          prejoinConfig: { enabled: false },
-          startWithAudioMuted: false,
-          startWithVideoMuted: false,
-          disableInviteFunctions: true,
-          hideConferenceSubject: true,
-          hideConferenceTimer: true,
-          disableDeepLinking: true,
-          disableThirdPartyRequests: true,
-          enableWelcomePage: false,
-          deeplinking: {
-            disabled: true,
-            desktop: { enabled: false },
-            android: { enabled: false },
-            ios: { enabled: false },
-          },
-          toolbarButtons: [
-            "microphone", "camera", "desktop", "chat",
-            "raisehand", "tileview", "hangup"
-          ],
-        },
-        interfaceConfigOverwrite: {
-          SHOW_JITSI_WATERMARK: false,
-          SHOW_WATERMARK_FOR_GUESTS: false,
-          SHOW_BRAND_WATERMARK: false,
-          SHOW_CHROME_EXTENSION_BANNER: false,
-          MOBILE_APP_PROMO: false,
-          HIDE_INVITE_MORE_HEADER: true,
-          DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
-          DISABLE_PRESENCE_STATUS: true,
-          filmStripOnly: false,
-          MOBILE_DOWNLOAD_LINK_ANDROID: "",
-          MOBILE_DOWNLOAD_LINK_IOS: "",
-          MOBILE_DOWNLOAD_LINK_F_DROID: "",
-        },
-      });
-
-      jitsiApiRef.current = api;
-
-      api.addEventListener("videoConferenceJoined", () => {
-        setLoading(false);
-      });
-    });
-
-    return () => {
-      jitsiApiRef.current?.dispose();
-      jitsiApiRef.current = null;
-    };
-  }, [roomName, displayName]);
+  
+  
 
   return (
     <div
@@ -279,11 +227,14 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
       onClick={resetControlsTimer}
       onTouchStart={resetControlsTimer}
     >
-      {/* ===== REMOTE VIDEO via Jitsi API ===== */}
-      <div
-        ref={jitsiContainerRef}
-        className="absolute inset-0 w-full h-full z-[1]"
+      {/* ===== REMOTE VIDEO via Jitsi iframe ===== */}
+      <iframe
+        src={jitsiUrl}
+        allow="camera; microphone; display-capture; autoplay; clipboard-write; fullscreen"
+        className="absolute inset-0 w-full h-full border-none z-[1]"
+        title="Videochamada"
         style={{ minHeight: 400 }}
+        onLoad={() => setLoading(false)}
       />
 
       {/* ===== LOCAL VIDEO PiP (WhatsApp style corner) ===== */}
