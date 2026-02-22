@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Phone, Maximize2, Minimize2, Clock, Wifi, WifiOff, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { supabase } from "@/integrations/supabase/client";
+// Jitsi Meet - no external SDK needed, uses iframe
 
 interface VideoConsultationProps {
   appointmentId: string;
@@ -85,75 +85,58 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     return () => document.removeEventListener("fullscreenchange", handleFsChange);
   }, []);
 
-  // Initialize Metered video room
+  // Initialize Jitsi Meet via iframe
   useEffect(() => {
     if (frameInitialized.current) return;
     frameInitialized.current = true;
 
-    const initRoom = async () => {
-      try {
-        const { data, error: fnError } = await supabase.functions.invoke("metered-room", {
-          body: { appointmentId },
-        });
+    try {
+      if (!frameContainerRef.current) return;
 
-        if (fnError || !data?.roomURL) {
-          console.error("Failed to create room:", fnError, data);
-          setError("Não foi possível criar a sala de vídeo. Tente novamente.");
-          setLoading(false);
-          return;
-        }
+      const roomName = `allo-medico-${appointmentId.replace(/-/g, "").slice(0, 20)}`;
+      const displayName = encodeURIComponent(userName || "Participante");
+      
+      const iframeSrc = `https://meet.jit.si/${roomName}#config.prejoinPageEnabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false&config.disableInviteFunctions=true&userInfo.displayName=${displayName}`;
 
-        const roomURL = data.roomURL;
+      const iframe = document.createElement("iframe");
+      iframe.src = iframeSrc;
+      iframe.allow = "camera; microphone; display-capture; autoplay; clipboard-write; clipboard-read; fullscreen";
+      iframe.style.cssText = "width:100%;height:100%;border:none;min-height:400px;";
+      iframe.title = "Videochamada";
 
-        if (!frameContainerRef.current) return;
-
-        // Use direct iframe approach — more reliable than MeteredFrame SDK
-        const displayName = encodeURIComponent(userName || "Participante");
-        const iframeSrc = `https://${roomURL}?autoJoin=true&name=${displayName}&joinVideoOn=true&joinAudioOn=true&showInviteBox=false&showJoinForm=false&showLeaveBtn=false`;
-
-        const iframe = document.createElement("iframe");
-        iframe.src = iframeSrc;
-        iframe.allow = "camera; microphone; display-capture; autoplay; clipboard-write; clipboard-read; fullscreen";
-        iframe.style.cssText = "width:100%;height:100%;border:none;min-height:400px;";
-        iframe.title = "Videochamada";
-
-        iframe.onload = () => {
-          setLoading(false);
-          // Play notification sound
-          try {
-            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
-            oscillator.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.1);
-            oscillator.frequency.setValueAtTime(1320, audioCtx.currentTime + 0.2);
-            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
-            oscillator.start(audioCtx.currentTime);
-            oscillator.stop(audioCtx.currentTime + 0.4);
-          } catch {}
-        };
-
-        iframe.onerror = () => {
-          setError("Erro ao carregar a sala de vídeo.");
-          setLoading(false);
-        };
-
-        frameContainerRef.current.innerHTML = "";
-        frameContainerRef.current.appendChild(iframe);
-
-        // Fallback timeout
-        setTimeout(() => setLoading(false), 8000);
-      } catch (err) {
-        console.error("Video init error:", err);
-        setError("Erro ao inicializar a videochamada.");
+      iframe.onload = () => {
         setLoading(false);
-      }
-    };
+        // Play notification sound
+        try {
+          const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const oscillator = audioCtx.createOscillator();
+          const gainNode = audioCtx.createGain();
+          oscillator.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+          oscillator.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.1);
+          gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+          oscillator.start(audioCtx.currentTime);
+          oscillator.stop(audioCtx.currentTime + 0.4);
+        } catch {}
+      };
 
-    initRoom();
+      iframe.onerror = () => {
+        setError("Erro ao carregar a sala de vídeo.");
+        setLoading(false);
+      };
+
+      frameContainerRef.current.innerHTML = "";
+      frameContainerRef.current.appendChild(iframe);
+
+      // Fallback timeout
+      setTimeout(() => setLoading(false), 8000);
+    } catch (err) {
+      console.error("Video init error:", err);
+      setError("Erro ao inicializar a videochamada.");
+      setLoading(false);
+    }
   }, [appointmentId, userName]);
 
   const handleEndCall = () => {
