@@ -267,6 +267,12 @@ const PlansCheckout = () => {
     });
   };
 
+  // Asaas payment state
+  const [pixQrCode, setPixQrCode] = useState<string | null>(null);
+  const [pixCopyPasteCode, setPixCopyPasteCode] = useState<string | null>(null);
+  const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
+  const [asaasPaymentId, setAsaasPaymentId] = useState<string | null>(null);
+
   const handleCheckout = async () => {
     if (paymentMethod === "card" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
       toast({ title: "Preencha todos os campos do cartão", variant: "destructive" });
@@ -274,35 +280,145 @@ const PlansCheckout = () => {
     }
     setProcessing(true);
 
-    // If avulsa, also create the appointment
-    if (selectedPlan === "avulsa" && selectedDoctor && selectedDate && selectedTime && user) {
-      const [h, m] = selectedTime.split(":").map(Number);
-      const scheduledAt = setMinutes(setHours(new Date(selectedDate), h), m);
-      const { error } = await supabase.from("appointments").insert({
-        patient_id: user.id,
-        doctor_id: selectedDoctor.id,
-        scheduled_at: scheduledAt.toISOString(),
-        status: "scheduled",
-        payment_status: "approved",
-      });
-      if (error) {
-        toast({ title: "Erro ao agendar", description: "Tente novamente.", variant: "destructive" });
+    try {
+      // Get user profile for CPF
+      let customerCpf = "";
+      let customerName = "";
+      let customerEmail = user?.email || "";
+      let customerPhone = "";
+
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("first_name, last_name, cpf, phone")
+          .eq("user_id", user.id)
+          .single();
+
+        if (profile) {
+          customerName = `${profile.first_name} ${profile.last_name}`.trim();
+          customerCpf = profile.cpf || "";
+          customerPhone = profile.phone || "";
+        }
+      }
+
+      if (!customerCpf) {
+        toast({ title: "CPF obrigatório", description: "Complete seu perfil com o CPF antes de pagar.", variant: "destructive" });
         setProcessing(false);
         return;
       }
-    }
 
-    // Simulate payment processing
-    const delay = paymentMethod === "pix" ? 3000 : paymentMethod === "boleto" ? 2000 : 2500;
-    setTimeout(() => {
+      // Create appointment first for avulsa
+      let appointmentId: string | undefined;
+      if (selectedPlan === "avulsa" && selectedDoctor && selectedDate && selectedTime && user) {
+        const [h, m] = selectedTime.split(":").map(Number);
+        const scheduledAt = setMinutes(setHours(new Date(selectedDate), h), m);
+        const { data: appt, error } = await supabase.from("appointments").insert({
+          patient_id: user.id,
+          doctor_id: selectedDoctor.id,
+          scheduled_at: scheduledAt.toISOString(),
+          status: "scheduled",
+          payment_status: "pending",
+        }).select("id").single();
+
+        if (error || !appt) {
+          toast({ title: "Erro ao agendar", description: "Tente novamente.", variant: "destructive" });
+          setProcessing(false);
+          return;
+        }
+        appointmentId = appt.id;
+      }
+
+      const billingTypeMap: Record<PaymentMethod, string> = {
+        pix: "PIX",
+        card: "CREDIT_CARD",
+        boleto: "BOLETO",
+      };
+
+      const [expiryMonth, expiryYear] = cardExpiry.split("/");
+
+      const payload: Record<string, any> = {
+        customerName,
+        customerCpf,
+        customerEmail,
+        customerPhone,
+        billingType: billingTypeMap[paymentMethod],
+        value: totalPrice,
+        description: selectedPlan === "avulsa"
+          ? `Consulta Médica - AloClinica`
+          : `Plano ${currentPlan?.name} - AloClinica`,
+        appointmentId,
+        ...(selectedPlan === "mensal" ? { cycle: "MONTHLY", planId: selectedPlan } : {}),
+      };
+
+      // Add card data if credit card
+      if (paymentMethod === "card") {
+        payload.cardHolderName = cardName;
+        payload.cardNumber = cardNumber;
+        payload.cardExpiryMonth = expiryMonth;
+        payload.cardExpiryYear = `20${expiryYear}`;
+        payload.cardCcv = cardCvv;
+        payload.cardHolderCpf = customerCpf;
+        payload.cardHolderPhone = customerPhone;
+      }
+
+      const { data, error } = await supabase.functions.invoke("create-asaas-payment", {
+        body: payload,
+      });
+
+      if (error || !data?.success) {
+        toast({
+          title: "Erro no pagamento",
+          description: data?.error || "Tente novamente.",
+          variant: "destructive",
+        });
+
+        // Cancel the appointment if payment failed
+        if (appointmentId) {
+          await supabase.from("appointments").update({ status: "cancelled", cancel_reason: "payment_failed" }).eq("id", appointmentId);
+        }
+        setProcessing(false);
+        return;
+      }
+
+      setAsaasPaymentId(data.paymentId || data.subscriptionId);
+
+      if (paymentMethod === "pix") {
+        setPixQrCode(data.pixQrCode || null);
+        setPixCopyPasteCode(data.pixCopyPaste || null);
+        setProcessing(false);
+        // Don't go to success yet — user needs to pay
+        toast({ title: "PIX gerado! 🎉", description: "Escaneie o QR Code ou copie o código para pagar." });
+        return;
+      }
+
+      if (paymentMethod === "boleto") {
+        setBoletoUrl(data.bankSlipUrl || data.invoiceUrl || null);
+        setProcessing(false);
+        setStep("success");
+        clearCheckoutDraft();
+        return;
+      }
+
+      // Card payment — usually confirmed immediately
+      if (data.status === "CONFIRMED" || data.status === "RECEIVED") {
+        if (appointmentId) {
+          await supabase.from("appointments").update({ payment_status: "approved", payment_confirmed_at: new Date().toISOString() }).eq("id", appointmentId);
+        }
+      }
+
       setProcessing(false);
       setStep("success");
       clearCheckoutDraft();
-    }, delay);
+    } catch (err: any) {
+      console.error("Payment error:", err);
+      toast({ title: "Erro", description: err.message || "Erro inesperado.", variant: "destructive" });
+      setProcessing(false);
+    }
   };
 
   const handleCopyPix = () => {
-    navigator.clipboard.writeText("00020126580014br.gov.bcb.pix0136aloclinica-demo-pix-key-simulated5204000053039865802BR5925ALOCLINICA SAUDE LTDA6009SAO PAULO62070503***6304ABCD");
+    const code = pixCopyPasteCode || "";
+    navigator.clipboard.writeText(code);
     setPixCopied(true);
     toast({ title: "Código PIX copiado!" });
     setTimeout(() => setPixCopied(false), 3000);
@@ -611,7 +727,7 @@ const PlansCheckout = () => {
             <div className="text-center mb-8">
               <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-2" />
               <h1 className="text-2xl font-bold text-foreground">Checkout Seguro</h1>
-              <p className="text-muted-foreground text-sm">Ambiente protegido • Pagamento simulado</p>
+              <p className="text-muted-foreground text-sm">Ambiente protegido • Pagamento via Asaas</p>
             </div>
 
             <div className="grid md:grid-cols-5 gap-6">
@@ -685,7 +801,7 @@ const PlansCheckout = () => {
                     <div className="mt-4 p-2.5 rounded-lg bg-secondary/10 border border-secondary/20">
                       <div className="flex items-center gap-2 text-xs text-secondary">
                         <Shield className="w-3.5 h-3.5 flex-shrink-0" />
-                        <span>Pagamento simulado — nenhuma cobrança será realizada</span>
+                        <span>Pagamento seguro via Asaas • Dados protegidos</span>
                       </div>
                     </div>
                   </CardContent>
@@ -728,48 +844,56 @@ const PlansCheckout = () => {
                     <motion.div key="pix" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
                       <Card className="border-border">
                         <CardContent className="p-6 text-center">
-                          <div className="mb-4">
-                            <Badge variant="outline" className="text-xs mb-3">
-                              Expira em {formatPixTime(pixCountdown)}
-                            </Badge>
-                          </div>
-                          {/* Simulated QR Code */}
-                          <div className="w-48 h-48 mx-auto rounded-2xl bg-card border-2 border-border p-3 mb-4 relative overflow-hidden">
-                            <div className="w-full h-full rounded-xl bg-foreground/5 grid grid-cols-8 grid-rows-8 gap-px">
-                              {Array.from({ length: 64 }).map((_, i) => (
-                                <div key={i} className={`rounded-[2px] ${Math.random() > 0.45 ? "bg-foreground" : "bg-card"}`} />
-                              ))}
-                            </div>
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="w-10 h-10 rounded-lg bg-card border-2 border-primary flex items-center justify-center">
-                                <QrCode className="w-5 h-5 text-primary" />
+                          {pixQrCode ? (
+                            <>
+                              <div className="mb-4">
+                                <Badge variant="outline" className="text-xs mb-3">
+                                  Expira em {formatPixTime(pixCountdown)}
+                                </Badge>
                               </div>
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground mb-3">Escaneie o QR Code ou copie o código</p>
-                          <Button
-                            variant="outline"
-                            className="w-full mb-4 font-mono text-xs"
-                            onClick={handleCopyPix}
-                          >
-                            {pixCopied ? (
-                              <><CheckCircle2 className="w-4 h-4 mr-2 text-secondary" /> Copiado!</>
-                            ) : (
-                              <><Copy className="w-4 h-4 mr-2" /> Copiar código PIX</>
-                            )}
-                          </Button>
-                          <Button
-                            className="w-full bg-gradient-hero text-primary-foreground h-12 text-base"
-                            onClick={handleCheckout}
-                            disabled={processing}
-                          >
-                            {processing ? (
-                              <motion.div className="flex items-center gap-2" animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-                                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                                Confirmando pagamento...
-                              </motion.div>
-                            ) : `Já paguei • R$ ${totalPrice.toFixed(2)}`}
-                          </Button>
+                              <div className="w-48 h-48 mx-auto rounded-2xl bg-card border-2 border-border p-2 mb-4">
+                                <img
+                                  src={`data:image/png;base64,${pixQrCode}`}
+                                  alt="QR Code PIX"
+                                  className="w-full h-full object-contain rounded-xl"
+                                />
+                              </div>
+                              <p className="text-xs text-muted-foreground mb-3">Escaneie o QR Code ou copie o código</p>
+                              <Button
+                                variant="outline"
+                                className="w-full mb-4 font-mono text-xs"
+                                onClick={handleCopyPix}
+                              >
+                                {pixCopied ? (
+                                  <><CheckCircle2 className="w-4 h-4 mr-2 text-secondary" /> Copiado!</>
+                                ) : (
+                                  <><Copy className="w-4 h-4 mr-2" /> Copiar código PIX</>
+                                )}
+                              </Button>
+                              <p className="text-xs text-muted-foreground">
+                                Após o pagamento, a confirmação será automática via webhook.
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <QrCode className="w-12 h-12 mx-auto text-primary/60 mb-4" />
+                              <p className="text-sm text-muted-foreground mb-4">
+                                Clique abaixo para gerar o QR Code PIX
+                              </p>
+                              <Button
+                                className="w-full bg-gradient-hero text-primary-foreground h-12 text-base"
+                                onClick={handleCheckout}
+                                disabled={processing}
+                              >
+                                {processing ? (
+                                  <motion.div className="flex items-center gap-2" animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+                                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                                    Gerando PIX...
+                                  </motion.div>
+                                ) : `Gerar PIX • R$ ${totalPrice.toFixed(2)}`}
+                              </Button>
+                            </>
+                          )}
                         </CardContent>
                       </Card>
                     </motion.div>
@@ -850,22 +974,6 @@ const PlansCheckout = () => {
                           <p className="text-sm text-muted-foreground mb-4">
                             O boleto será gerado e pode levar até 2 dias úteis para compensação.
                           </p>
-                          <div className="p-4 rounded-xl bg-muted/50 border border-border mb-4">
-                            <p className="text-xs text-muted-foreground mb-1">Linha digitável (simulada)</p>
-                            <p className="font-mono text-xs text-foreground break-all">
-                              23793.38128 60000.000003 00000.000400 1 93670000{String(Math.round(totalPrice * 100)).padStart(8, "0")}
-                            </p>
-                          </div>
-                          <Button
-                            variant="outline"
-                            className="w-full mb-3"
-                            onClick={() => {
-                              navigator.clipboard.writeText("23793.38128 60000.000003 00000.000400 1 93670000" + String(Math.round(totalPrice * 100)).padStart(8, "0"));
-                              toast({ title: "Código de barras copiado!" });
-                            }}
-                          >
-                            <Copy className="w-4 h-4 mr-2" /> Copiar código
-                          </Button>
                           <Button
                             className="w-full bg-gradient-hero text-primary-foreground h-12 text-base"
                             onClick={handleCheckout}
@@ -921,9 +1029,14 @@ const PlansCheckout = () => {
                 : `Seu plano ${currentPlan?.name} foi ativado com sucesso.`
               }
             </p>
-            <p className="text-xs text-muted-foreground mb-6">
-              Pagamento via {paymentMethod === "pix" ? "PIX" : paymentMethod === "card" ? "Cartão de Crédito" : "Boleto"} • Simulado
+            <p className="text-xs text-muted-foreground mb-2">
+              Pagamento via {paymentMethod === "pix" ? "PIX" : paymentMethod === "card" ? "Cartão de Crédito" : "Boleto"} • Asaas
             </p>
+            {boletoUrl && paymentMethod === "boleto" && (
+              <a href={boletoUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline mb-4 inline-block">
+                📄 Abrir boleto para pagamento
+              </a>
+            )}
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Button onClick={() => navigate("/dashboard")} className="bg-gradient-hero text-primary-foreground h-11">
                 <CalIcon className="w-4 h-4 mr-2" /> Ir para o Dashboard
