@@ -320,7 +320,7 @@ const VideoRoom = () => {
   const saveNotes = async (silent = false) => {
     if (!appointmentId || !appointment) return;
     const { data: doc } = await supabase
-      .from("doctor_profiles").select("id").eq("user_id", user!.id).single();
+      .from("doctor_profiles").select("id, crm, crm_state").eq("user_id", user!.id).single();
     if (!doc) return;
 
     const { data: existing } = await supabase
@@ -333,7 +333,152 @@ const VideoRoom = () => {
         appointment_id: appointmentId, doctor_id: doc.id, content: notes,
       });
     }
-    if (!silent) toast({ title: "✅ Anotações salvas!" });
+
+    // Generate PDF only on manual save (not silent auto-save)
+    if (!silent) {
+      try {
+        const { jsPDF } = await import("jspdf");
+
+        // Fetch doctor and patient names
+        const { data: doctorProfile } = await supabase
+          .from("profiles").select("first_name, last_name").eq("user_id", user!.id).single();
+        
+        const patientId = appointment.patient_id;
+        let patientName = "Paciente";
+        if (patientId) {
+          const { data: patientProfile } = await supabase
+            .from("profiles").select("first_name, last_name, cpf").eq("user_id", patientId).single();
+          if (patientProfile) patientName = `${patientProfile.first_name} ${patientProfile.last_name}`.trim();
+        }
+
+        const doctorName = doctorProfile ? `Dr(a). ${doctorProfile.first_name} ${doctorProfile.last_name}`.trim() : "Médico";
+        const now = new Date();
+        const dateStr = format(now, "dd/MM/yyyy 'às' HH:mm");
+
+        const pdf = new jsPDF();
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        let y = 20;
+
+        // Header
+        pdf.setFontSize(18);
+        pdf.setFont("helvetica", "bold");
+        pdf.setTextColor(33, 115, 70);
+        pdf.text("Allo Médico", pageWidth / 2, y, { align: "center" });
+        y += 8;
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "normal");
+        pdf.setTextColor(120, 120, 120);
+        pdf.text("Prontuário Eletrônico - Teleconsulta", pageWidth / 2, y, { align: "center" });
+        y += 6;
+
+        // Divider
+        pdf.setDrawColor(33, 115, 70);
+        pdf.setLineWidth(0.5);
+        pdf.line(20, y, pageWidth - 20, y);
+        y += 10;
+
+        // Info block
+        pdf.setFontSize(10);
+        pdf.setTextColor(60, 60, 60);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Médico:", 20, y);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(`${doctorName}  |  CRM ${doc.crm}/${doc.crm_state}`, 45, y);
+        y += 6;
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Paciente:", 20, y);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(patientName, 45, y);
+        y += 6;
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Data:", 20, y);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(dateStr, 45, y);
+        y += 6;
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Consulta:", 20, y);
+        pdf.setFont("helvetica", "normal");
+        pdf.text(appointmentId!.slice(0, 8).toUpperCase(), 45, y);
+        y += 12;
+
+        // SOAP sections
+        const soapSections = [
+          { title: "S - Subjetivo (Queixa do Paciente)", content: soapNotes.subjective },
+          { title: "O - Objetivo (Exame/Observações)", content: soapNotes.objective },
+          { title: "A - Avaliação (Diagnóstico)", content: soapNotes.assessment },
+          { title: "P - Plano (Conduta)", content: soapNotes.plan },
+        ];
+
+        for (const section of soapSections) {
+          // Section header
+          pdf.setFillColor(240, 247, 243);
+          pdf.rect(20, y - 4, pageWidth - 40, 8, "F");
+          pdf.setFontSize(11);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(33, 115, 70);
+          pdf.text(section.title, 24, y + 1);
+          y += 10;
+
+          // Section content
+          pdf.setFontSize(10);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(40, 40, 40);
+          const content = section.content?.trim() || "(Não preenchido)";
+          const lines = pdf.splitTextToSize(content, pageWidth - 50);
+          
+          for (const line of lines) {
+            if (y > 270) {
+              pdf.addPage();
+              y = 20;
+            }
+            pdf.text(line, 24, y);
+            y += 5;
+          }
+          y += 8;
+        }
+
+        // Footer
+        if (y > 260) { pdf.addPage(); y = 20; }
+        pdf.setDrawColor(200, 200, 200);
+        pdf.line(20, y, pageWidth - 20, y);
+        y += 6;
+        pdf.setFontSize(8);
+        pdf.setTextColor(150, 150, 150);
+        pdf.text("Documento gerado eletronicamente pela plataforma Allo Médico.", pageWidth / 2, y, { align: "center" });
+        y += 4;
+        pdf.text(`Gerado em: ${dateStr}`, pageWidth / 2, y, { align: "center" });
+
+        // Upload to Supabase Storage
+        const pdfBlob = pdf.output("blob");
+        const fileName = `soap-${appointmentId!.slice(0, 8)}-${Date.now()}.pdf`;
+        const filePath = `${user!.id}/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("patient-documents")
+          .upload(filePath, pdfBlob, { contentType: "application/pdf", upsert: true });
+
+        if (!uploadError) {
+          // Save reference in patient_documents table
+          const { data: urlData } = supabase.storage.from("patient-documents").getPublicUrl(filePath);
+          
+          await supabase.from("patient_documents").insert({
+            patient_id: patientId || user!.id,
+            uploaded_by: user!.id,
+            file_name: `Prontuário SOAP - ${dateStr}`,
+            file_url: filePath,
+            file_type: "application/pdf",
+            file_size: pdfBlob.size,
+            appointment_id: appointmentId,
+            description: `Prontuário SOAP gerado na teleconsulta de ${dateStr}`,
+          });
+        }
+
+        toast({ title: "✅ SOAP salvo e PDF gerado!", description: "Documento salvo no prontuário do paciente." });
+      } catch (pdfErr) {
+        console.error("PDF generation error:", pdfErr);
+        toast({ title: "✅ Anotações salvas!", description: "Não foi possível gerar o PDF." });
+      }
+    }
   };
 
   // Auto-save SOAP notes every 30 seconds
