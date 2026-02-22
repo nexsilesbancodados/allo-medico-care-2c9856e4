@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { notifyAppointmentCancelled } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -49,6 +50,8 @@ const CancelRescheduleDialog = ({ appointmentId, currentDate, doctorName, onSucc
     if (error) {
       toast.error("Erro ao cancelar consulta");
     } else {
+      const cancellerName = `Paciente`;
+      notifyAppointmentCancelled(appointmentId, cancellerName, finalReason).catch(console.error);
       toast.success("Consulta cancelada com sucesso");
       setOpen(false);
       onSuccess();

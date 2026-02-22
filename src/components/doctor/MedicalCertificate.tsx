@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { notifyCertificateSent } from "@/lib/notifications";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -175,6 +176,12 @@ const MedicalCertificate = () => {
     setGenerating(false);
     setHistory(prev => [{ name: patientName, date: today, type: certConfig.label }, ...prev.slice(0, 9)]);
     toast({ title: "Documento gerado! ✅", description: `Código de verificação: ${verificationCode}` });
+
+    // Notify patient about certificate
+    notifyCertificateSent(
+      patientName, patientCpf, doctorName, certConfig.label, verificationCode,
+      certType === "absence" ? days : undefined
+    ).catch(console.error);
   };
 
   return (

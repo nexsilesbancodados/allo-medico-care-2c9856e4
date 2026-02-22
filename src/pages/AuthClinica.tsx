@@ -81,6 +81,11 @@ const AuthClinica = () => {
       await supabase.functions.invoke("assign-role", {
         body: { user_id: data.user.id, role: "clinic" },
       }).catch(console.error);
+
+      // Send welcome email for clinic
+      supabase.functions.invoke("send-email", {
+        body: { type: "welcome_clinic", to: email, data: { name: `${firstName} ${lastName}`, clinic_name: clinicName } },
+      }).catch(console.error);
     }
 
     setLoading(false);

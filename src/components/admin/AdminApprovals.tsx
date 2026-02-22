@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { notifyDoctorApproval } from "@/lib/notifications";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -142,6 +143,14 @@ const AdminApprovals = () => {
   const approve = async (id: string, type: "doctor" | "clinic" | "partner") => {
     const table = type === "doctor" ? "doctor_profiles" : type === "clinic" ? "clinic_profiles" : "partner_profiles";
     await supabase.from(table).update({ is_approved: true }).eq("id", id);
+
+    if (type === "doctor") {
+      const doc = [...pendingDoctors, ...approvedDoctors].find(d => d.id === id);
+      if (doc) {
+        notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, true).catch(console.error);
+      }
+    }
+
     toast({ title: `${type === "doctor" ? "Médico" : type === "clinic" ? "Clínica" : "Parceiro"} aprovado! ✅` });
     fetchAll();
   };
@@ -161,8 +170,6 @@ const AdminApprovals = () => {
     
     if (rejectTarget.type === "affiliate") {
       await (supabase as any).from("affiliate_profiles").update({ is_approved: false }).eq("id", rejectTarget.id);
-      
-      // Send rejection notification in-app
       const item = [...pendingAffiliates, ...approvedAffiliates].find(a => a.id === rejectTarget.id);
       if (item) {
         await supabase.from("notifications").insert({
@@ -175,6 +182,13 @@ const AdminApprovals = () => {
     } else {
       const table = rejectTarget.type === "doctor" ? "doctor_profiles" : rejectTarget.type === "clinic" ? "clinic_profiles" : "partner_profiles";
       await supabase.from(table).update({ is_approved: false }).eq("id", rejectTarget.id);
+
+      if (rejectTarget.type === "doctor") {
+        const doc = [...pendingDoctors, ...approvedDoctors].find(d => d.id === rejectTarget.id);
+        if (doc) {
+          notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, false, rejectReason).catch(console.error);
+        }
+      }
     }
     
     toast({ title: "Cadastro rejeitado", description: rejectReason || undefined });

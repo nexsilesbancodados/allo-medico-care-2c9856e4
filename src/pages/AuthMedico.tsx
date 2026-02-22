@@ -85,6 +85,11 @@ const AuthMedico = () => {
           profile_data: { crm, crm_state: crmState, invite_code_id: validatedCodeId },
         },
       });
+
+      // Send welcome email for doctor
+      supabase.functions.invoke("send-email", {
+        body: { type: "welcome_doctor", to: email, data: { name: `${firstName} ${lastName}`, crm: `${crm}/${crmState}` } },
+      }).catch(console.error);
     }
     setLoading(false);
     toast({ title: "Cadastro realizado!", description: "Aguarde a aprovação do seu CRM." });
