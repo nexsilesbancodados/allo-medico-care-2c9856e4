@@ -139,6 +139,7 @@ const NotificationBell = () => {
 
   const typeIcons: Record<string, string> = {
     appointment: "📅", reminder: "⏰", message: "💬", system: "🔔", info: "ℹ️",
+    waitlist: "🔔", approval: "✅", consultation: "🩺", document: "📄", certificate: "📋",
   };
 
   if (!user) return null;
@@ -146,8 +147,8 @@ const NotificationBell = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="w-5 h-5" />
+        <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl">
+          <Bell className="w-4.5 h-4.5" />
           <AnimatePresence>
             {unreadCount > 0 && (
               <motion.span
@@ -162,7 +163,7 @@ const NotificationBell = () => {
                   ? { scale: { duration: 0.6, repeat: 3, ease: "easeInOut" } }
                   : { duration: 0.2 }
                 }
-                className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold"
+                className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold shadow-sm"
               >
                 {unreadCount > 9 ? "9+" : unreadCount}
               </motion.span>
@@ -170,47 +171,77 @@ const NotificationBell = () => {
           </AnimatePresence>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <h3 className="font-semibold text-sm text-foreground">Notificações</h3>
+      <PopoverContent align="end" className="w-[340px] p-0 rounded-2xl border-border/50 shadow-elevated overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border/30">
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-sm text-foreground">Notificações</h3>
+            {unreadCount > 0 && (
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                {unreadCount} nova{unreadCount !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllRead} className="text-xs h-7">
-              <Check className="w-3 h-3 mr-1" /> Marcar todas
+            <Button variant="ghost" size="sm" onClick={markAllRead} className="text-xs h-7 rounded-lg text-primary hover:text-primary hover:bg-primary/10">
+              <Check className="w-3 h-3 mr-1" /> Ler todas
             </Button>
           )}
         </div>
-        <ScrollArea className="max-h-80">
+
+        <ScrollArea className="max-h-[360px]">
           {notifications.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">Nenhuma notificação.</p>
+            <div className="py-12 text-center">
+              <Bell className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+              <p className="text-sm text-muted-foreground">Nenhuma notificação</p>
+              <p className="text-[11px] text-muted-foreground/60 mt-0.5">Você será notificado sobre consultas e atualizações</p>
+            </div>
           ) : (
-            notifications.map(n => (
-              <div
-                key={n.id}
-                className={`flex items-start gap-3 px-4 py-3 border-b border-border cursor-pointer hover:bg-muted/50 transition-colors ${
-                  !n.is_read ? "bg-primary/5" : ""
-                }`}
-                onClick={() => handleClick(n)}
-              >
-                <span className="text-lg mt-0.5">{typeIcons[n.type] ?? "🔔"}</span>
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm ${!n.is_read ? "font-semibold text-foreground" : "text-foreground"}`}>{n.title}</p>
-                  <p className="text-xs text-muted-foreground line-clamp-2">{n.message}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">
-                    {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost" size="icon" className="h-6 w-6 shrink-0"
-                  onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
+            <div className="divide-y divide-border/30">
+              {notifications.map(n => (
+                <motion.div
+                  key={n.id}
+                  initial={{ opacity: 0, x: -5 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors duration-200 group ${
+                    !n.is_read ? "bg-primary/[0.03] hover:bg-primary/[0.06]" : "hover:bg-muted/40"
+                  }`}
+                  onClick={() => handleClick(n)}
                 >
-                  <Trash2 className="w-3 h-3" />
-                </Button>
-              </div>
-            ))
+                  <span className="text-base mt-0.5 shrink-0">{typeIcons[n.type] ?? "🔔"}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start gap-1.5">
+                      <p className={`text-sm leading-tight ${!n.is_read ? "font-semibold text-foreground" : "text-foreground/80"}`}>
+                        {n.title}
+                      </p>
+                      {!n.is_read && (
+                        <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1" />
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">{n.message}</p>
+                    <p className="text-[10px] text-muted-foreground/60 mt-1">
+                      {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost" size="icon"
+                    className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
+                    onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
+                  >
+                    <Trash2 className="w-3 h-3 text-muted-foreground" />
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
           )}
         </ScrollArea>
-        <div className="px-4 py-2 border-t border-border flex justify-center">
+
+        {/* Footer */}
+        <div className="px-4 py-2.5 border-t border-border/30 bg-card/50 flex items-center justify-between">
           <PushNotificationToggle />
+          {notifications.length > 0 && (
+            <span className="text-[10px] text-muted-foreground">{notifications.length} notificação{notifications.length !== 1 ? "ões" : ""}</span>
+          )}
         </div>
       </PopoverContent>
     </Popover>

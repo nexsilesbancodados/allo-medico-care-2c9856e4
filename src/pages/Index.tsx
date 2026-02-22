@@ -41,6 +41,37 @@ const Index = () => {
         title="Consultas Médicas Online por Vídeo 24h"
         description="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades. Sua saúde na palma da mão."
         canonical="https://allo-medico-care.lovable.app/"
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "MedicalOrganization",
+          name: "AloClinica",
+          url: "https://allo-medico-care.lovable.app",
+          logo: "https://allo-medico-care.lovable.app/pwa-512x512.png",
+          description: "Plataforma de telemedicina com consultas online por vídeo 24h, receitas digitais válidas e mais de 30 especialidades médicas.",
+          medicalSpecialty: [
+            "Cardiologia", "Dermatologia", "Endocrinologia", "Neurologia",
+            "Oftalmologia", "Ortopedia", "Pediatria", "Clínica Geral",
+          ],
+          areaServed: { "@type": "Country", name: "BR" },
+          contactPoint: {
+            "@type": "ContactPoint",
+            contactType: "customer service",
+            availableLanguage: ["Portuguese"],
+          },
+          sameAs: [],
+          potentialAction: {
+            "@type": "ReserveAction",
+            target: {
+              "@type": "EntryPoint",
+              urlTemplate: "https://allo-medico-care.lovable.app/paciente",
+              actionPlatform: ["http://schema.org/DesktopWebPlatform", "http://schema.org/MobileWebPlatform"],
+            },
+            result: {
+              "@type": "Reservation",
+              name: "Consulta Médica Online",
+            },
+          },
+        }}
       />
       <Header />
 
