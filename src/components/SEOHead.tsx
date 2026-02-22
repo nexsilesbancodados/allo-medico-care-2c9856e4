@@ -5,6 +5,7 @@ interface SEOHeadProps {
   description?: string;
   canonical?: string;
   ogImage?: string;
+  jsonLd?: Record<string, any>;
 }
 
 const SITE_NAME = "AloClinica – Telemedicina Online";
@@ -31,7 +32,23 @@ const upsertLink = (rel: string, href: string) => {
   el.href = href;
 };
 
-const SEOHead = ({ title, description, canonical, ogImage }: SEOHeadProps) => {
+const upsertJsonLd = (data: Record<string, any>) => {
+  const id = "seo-jsonld";
+  let el = document.getElementById(id) as HTMLScriptElement | null;
+  if (!el) {
+    el = document.createElement("script");
+    el.id = id;
+    el.type = "application/ld+json";
+    document.head.appendChild(el);
+  }
+  el.textContent = JSON.stringify(data);
+};
+
+const removeJsonLd = () => {
+  document.getElementById("seo-jsonld")?.remove();
+};
+
+const SEOHead = ({ title, description, canonical, ogImage, jsonLd }: SEOHeadProps) => {
   useEffect(() => {
     const fullTitle = title ? `${title} | ${SITE_NAME}` : SITE_NAME;
     document.title = fullTitle;
@@ -42,21 +59,29 @@ const SEOHead = ({ title, description, canonical, ogImage }: SEOHeadProps) => {
       upsertMeta("name", "twitter:description", description);
     }
 
-    // OG tags
     upsertMeta("property", "og:title", fullTitle);
     upsertMeta("name", "twitter:title", fullTitle);
+    upsertMeta("property", "og:type", "website");
+    upsertMeta("property", "og:site_name", "AloClinica");
     upsertMeta("property", "og:image", ogImage || DEFAULT_OG_IMAGE);
     upsertMeta("name", "twitter:image", ogImage || DEFAULT_OG_IMAGE);
+    upsertMeta("name", "twitter:card", "summary_large_image");
     upsertMeta("property", "og:url", canonical || `${BASE_URL}${window.location.pathname}`);
+    upsertMeta("property", "og:locale", "pt_BR");
 
     if (canonical) {
       upsertLink("canonical", canonical);
     }
 
+    if (jsonLd) {
+      upsertJsonLd(jsonLd);
+    }
+
     return () => {
       document.title = SITE_NAME;
+      removeJsonLd();
     };
-  }, [title, description, canonical, ogImage]);
+  }, [title, description, canonical, ogImage, jsonLd]);
 
   return null;
 };
