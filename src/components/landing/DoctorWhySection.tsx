@@ -1,7 +1,8 @@
 import { motion, useInView } from "framer-motion";
-import { Plus, Shield, Clock, TrendingUp, Users } from "lucide-react";
+import { Plus, Shield, Clock, TrendingUp, Users, ArrowRight, Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef, useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import doctorImg1 from "@/assets/doctor-signup-1.png";
 import doctorImg2 from "@/assets/doctor-signup-2.png";
 
@@ -21,10 +22,17 @@ const cards = [
 ];
 
 const stats = [
-  { icon: Shield, label: "Certificação CFM", value: "100%" },
-  { icon: Clock, label: "Setup em", value: "5min" },
-  { icon: TrendingUp, label: "Crescimento médio", value: "+40%" },
-  { icon: Users, label: "Médicos ativos", value: "500+" },
+  { icon: Shield, label: "Certificação CFM", value: "100%", color: "bg-medical-green/15 text-medical-green" },
+  { icon: Clock, label: "Setup em", value: "5min", color: "bg-primary/15 text-primary" },
+  { icon: TrendingUp, label: "Crescimento médio", value: "+40%", color: "bg-secondary/15 text-secondary" },
+  { icon: Users, label: "Médicos ativos", value: "500+", color: "bg-accent/15 text-accent-foreground" },
+];
+
+const benefits = [
+  "Receba pacientes de todo o Brasil",
+  "Ferramentas de prontuário e prescrição",
+  "Saques via PIX semanais",
+  "Perfil público otimizado para SEO",
 ];
 
 const AnimatedCounter = ({ target, suffix = "" }: { target: string; suffix?: string }) => {
@@ -67,20 +75,70 @@ const DoctorWhySection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-block px-4 py-1.5 rounded-full border border-primary/30 text-primary text-sm font-semibold mb-6">
+            <motion.span
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 text-primary text-sm font-semibold mb-6"
+            >
+              <Users className="w-3.5 h-3.5" />
               Médicos generalistas e especialistas
-            </span>
+            </motion.span>
 
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-foreground leading-tight mb-6">
-              <span className="text-primary">O futuro</span> da saúde está aqui
+              <span className="text-gradient">O futuro</span> da saúde está aqui
             </h2>
 
             <p className="text-muted-foreground text-lg max-w-md mb-6 leading-relaxed">
-              Confira as oportunidades disponíveis para todas as especialidades médicas na plataforma AloClinica, ou acesse o cadastro específico para sua categoria.
+              Confira as oportunidades disponíveis para todas as especialidades médicas na plataforma AloClinica.
             </p>
 
+            {/* Benefits */}
+            <ul className="space-y-2.5 mb-8">
+              {benefits.map((b, i) => (
+                <motion.li
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.2 + i * 0.06 }}
+                  className="flex items-center gap-2 text-sm text-foreground/80"
+                >
+                  <div className="w-5 h-5 rounded-full bg-medical-green/15 flex items-center justify-center shrink-0">
+                    <Check className="w-3 h-3 text-medical-green" />
+                  </div>
+                  {b}
+                </motion.li>
+              ))}
+            </ul>
+
+            {/* CTA */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="flex gap-3 mb-8"
+            >
+              <Button
+                size="lg"
+                className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-6 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                onClick={() => navigate("/medico")}
+              >
+                Cadastre-se <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full px-6"
+                onClick={() => navigate("/clinica")}
+              >
+                Sou Clínica
+              </Button>
+            </motion.div>
+
             {/* Stats grid */}
-            <div className="grid grid-cols-2 gap-3 mt-8">
+            <div className="grid grid-cols-2 gap-3">
               {stats.map((s, i) => (
                 <motion.div
                   key={s.label}
@@ -88,10 +146,11 @@ const DoctorWhySection = () => {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.3 + i * 0.08, duration: 0.5 }}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/40 border border-border/40"
+                  whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-elevated transition-all duration-300"
                 >
-                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    <s.icon className="w-4.5 h-4.5 text-primary" />
+                  <div className={`w-9 h-9 rounded-lg ${s.color} flex items-center justify-center shrink-0`}>
+                    <s.icon className="w-4 h-4" />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-foreground leading-tight">
@@ -113,7 +172,7 @@ const DoctorWhySection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 + i * 0.15, duration: 0.6 }}
-                whileHover={{ y: -6, scale: 1.02 }}
+                whileHover={{ y: -8, scale: 1.02 }}
                 onClick={() => navigate(card.link)}
                 className="relative flex-1 rounded-2xl overflow-hidden shadow-elevated cursor-pointer group min-h-[320px]"
               >
@@ -125,7 +184,7 @@ const DoctorWhySection = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute top-4 left-4 z-10">
-                  <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-semibold border border-white/20">
+                  <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-semibold border border-white/20 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300">
                     {card.badge}
                   </span>
                 </div>
@@ -133,9 +192,13 @@ const DoctorWhySection = () => {
                   <h3 className="text-white font-bold text-lg leading-snug max-w-[75%]">
                     {card.title}
                   </h3>
-                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20 group-hover:bg-white/30 transition-colors flex-shrink-0">
+                  <motion.div
+                    whileHover={{ rotate: 90 }}
+                    transition={{ duration: 0.2 }}
+                    className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20 group-hover:bg-primary group-hover:border-primary transition-colors flex-shrink-0"
+                  >
                     <Plus className="w-5 h-5 text-white" />
-                  </div>
+                  </motion.div>
                 </div>
               </motion.div>
             ))}
