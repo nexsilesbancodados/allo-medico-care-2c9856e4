@@ -9,12 +9,45 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Camera, Save, User } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { getDoctorNav } from "@/components/doctor/doctorNav";
+import { getPatientNav } from "@/components/patient/patientNav";
+import { getAdminNav } from "@/components/admin/adminNav";
+import { getReceptionNav } from "@/components/reception/receptionNav";
+
+const roleLabels: Record<string, string> = {
+  patient: "Paciente", doctor: "Médico", admin: "Administração",
+  receptionist: "Recepção", support: "Suporte", clinic: "Clínica",
+  partner: "Parceiro", affiliate: "Afiliado",
+};
+
+function getNavForRole(role: string) {
+  switch (role) {
+    case "doctor": return getDoctorNav("profile");
+    case "patient": return getPatientNav("profile");
+    case "admin": return getAdminNav("profile");
+    case "receptionist": return getReceptionNav("profile");
+    default: return [];
+  }
+}
 
 const UserProfile = () => {
   const { user, profile, roles } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
+
+  const forceRole = searchParams.get("role");
+  const isAdmin = roles.includes("admin");
+  const activeRole = isAdmin && forceRole ? forceRole
+    : roles.includes("doctor") ? "doctor"
+    : roles.includes("receptionist") ? "receptionist"
+    : roles.includes("support") ? "support"
+    : roles.includes("clinic") ? "clinic"
+    : roles.includes("partner") ? "partner"
+    : roles.includes("affiliate") ? "affiliate"
+    : "patient";
+  const nav = getNavForRole(activeRole);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -105,7 +138,7 @@ const UserProfile = () => {
   const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
 
   return (
-    <DashboardLayout title="Perfil" nav={[]}>
+    <DashboardLayout title={roleLabels[activeRole] ?? "Perfil"} nav={nav} role={activeRole}>
       <div className="max-w-2xl mx-auto">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="w-4 h-4" /> Voltar
