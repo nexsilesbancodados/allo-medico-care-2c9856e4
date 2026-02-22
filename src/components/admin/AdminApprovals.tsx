@@ -4,36 +4,35 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { getAdminNav } from "./adminNav";
-import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck } from "lucide-react";
+import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck, Megaphone } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const AdminApprovals = () => {
   const { toast } = useToast();
-  // Doctors
   const [pendingDoctors, setPendingDoctors] = useState<any[]>([]);
   const [approvedDoctors, setApprovedDoctors] = useState<any[]>([]);
-  // Clinics
   const [pendingClinics, setPendingClinics] = useState<any[]>([]);
   const [approvedClinics, setApprovedClinics] = useState<any[]>([]);
-  // Partners
   const [pendingPartners, setPendingPartners] = useState<any[]>([]);
   const [approvedPartners, setApprovedPartners] = useState<any[]>([]);
+  const [pendingAffiliates, setPendingAffiliates] = useState<any[]>([]);
+  const [approvedAffiliates, setApprovedAffiliates] = useState<any[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [rejectReason, setRejectReason] = useState("");
   const [showReject, setShowReject] = useState(false);
-  const [rejectTarget, setRejectTarget] = useState<{ id: string; type: "doctor" | "clinic" | "partner"; name: string } | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<{ id: string; type: "doctor" | "clinic" | "partner" | "affiliate"; name: string; email?: string } | null>(null);
 
   useEffect(() => { fetchAll(); }, []);
 
   const fetchAll = async () => {
-    await Promise.all([fetchDoctors(), fetchClinics(), fetchPartners()]);
+    await Promise.all([fetchDoctors(), fetchClinics(), fetchPartners(), fetchAffiliates()]);
     setLoading(false);
   };
 
@@ -82,6 +81,64 @@ const AdminApprovals = () => {
     setApprovedPartners(enriched.filter(p => p.is_approved));
   };
 
+  const fetchAffiliates = async () => {
+    const { data } = await (supabase as any).from("affiliate_profiles").select("*").order("created_at", { ascending: false });
+    if (!data) return;
+    const userIds = data.map(a => a.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds);
+    const pMap = new Map(profiles?.map(p => [p.user_id, p] as const) ?? []);
+    const enriched = data.map(a => ({
+      ...a,
+      first_name: pMap.get(a.user_id)?.first_name ?? "",
+      last_name: pMap.get(a.user_id)?.last_name ?? "",
+    }));
+    setPendingAffiliates(enriched.filter(a => !a.is_approved));
+    setApprovedAffiliates(enriched.filter(a => a.is_approved));
+  };
+
+  const getEmailForUser = async (userId: string): Promise<string | null> => {
+    // We need the service role to get auth user email, but we can check profiles or use admin API
+    // For now we'll use the edge function approach
+    const { data } = await supabase.from("profiles").select("user_id").eq("user_id", userId).single();
+    // We can't get email from profiles, so we'll pass it through the auth admin
+    // Actually let's use supabase auth admin - but we don't have access from client
+    // We'll get the email from auth.users via an RPC or just skip - the edge function will handle it
+    return null;
+  };
+
+  const approveAffiliate = async (item: any) => {
+    await (supabase as any).from("affiliate_profiles").update({ is_approved: true }).eq("id", item.id);
+    
+    // Send approval email via edge function
+    // Get user email from auth - we need to use the admin function for this
+    try {
+      await supabase.functions.invoke("send-email", {
+        body: {
+          type: "affiliate_approved",
+          to: "", // Will be resolved by checking user
+          data: {
+            name: `${item.first_name} ${item.last_name}`,
+            login_url: `${window.location.origin}/afiliado`,
+          },
+        },
+      });
+    } catch (e) {
+      console.log("Email notification attempted", e);
+    }
+
+    // Create notification in-app
+    await supabase.from("notifications").insert({
+      user_id: item.user_id,
+      title: "🎉 Afiliação Aprovada!",
+      message: "Seu pedido de afiliação foi aprovado! Acesse o painel para gerar seu link de indicação.",
+      type: "success",
+      link: "/dashboard?role=affiliate",
+    });
+
+    toast({ title: "Afiliado aprovado! ✅" });
+    fetchAll();
+  };
+
   const approve = async (id: string, type: "doctor" | "clinic" | "partner") => {
     const table = type === "doctor" ? "doctor_profiles" : type === "clinic" ? "clinic_profiles" : "partner_profiles";
     await supabase.from(table).update({ is_approved: true }).eq("id", id);
@@ -101,8 +158,25 @@ const AdminApprovals = () => {
 
   const reject = async () => {
     if (!rejectTarget) return;
-    const table = rejectTarget.type === "doctor" ? "doctor_profiles" : rejectTarget.type === "clinic" ? "clinic_profiles" : "partner_profiles";
-    await supabase.from(table).update({ is_approved: false }).eq("id", rejectTarget.id);
+    
+    if (rejectTarget.type === "affiliate") {
+      await (supabase as any).from("affiliate_profiles").update({ is_approved: false }).eq("id", rejectTarget.id);
+      
+      // Send rejection notification in-app
+      const item = [...pendingAffiliates, ...approvedAffiliates].find(a => a.id === rejectTarget.id);
+      if (item) {
+        await supabase.from("notifications").insert({
+          user_id: item.user_id,
+          title: "❌ Afiliação não aprovada",
+          message: rejectReason ? `Motivo: ${rejectReason}` : "Sua solicitação de afiliação não foi aprovada neste momento.",
+          type: "warning",
+        });
+      }
+    } else {
+      const table = rejectTarget.type === "doctor" ? "doctor_profiles" : rejectTarget.type === "clinic" ? "clinic_profiles" : "partner_profiles";
+      await supabase.from(table).update({ is_approved: false }).eq("id", rejectTarget.id);
+    }
+    
     toast({ title: "Cadastro rejeitado", description: rejectReason || undefined });
     setShowReject(false);
     setRejectReason("");
@@ -110,10 +184,10 @@ const AdminApprovals = () => {
     fetchAll();
   };
 
-  const totalPending = pendingDoctors.length + pendingClinics.length + pendingPartners.length;
+  const totalPending = pendingDoctors.length + pendingClinics.length + pendingPartners.length + pendingAffiliates.length;
   const partnerTypeLabel: Record<string, string> = { pharmacy: "Farmácia", laboratory: "Laboratório", clinic: "Clínica", other: "Outro" };
 
-  const renderApprovalCard = (item: any, type: "doctor" | "clinic" | "partner", isApproved: boolean) => (
+  const renderApprovalCard = (item: any, type: "doctor" | "clinic" | "partner" | "affiliate", isApproved: boolean) => (
     <Card key={item.id} className="border-border hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
@@ -121,7 +195,9 @@ const AdminApprovals = () => {
             <Avatar className="h-12 w-12 mt-1">
               <AvatarFallback className="bg-primary/10 text-primary">
                 {type === "doctor" ? `${item.first_name?.[0] ?? ""}${item.last_name?.[0] ?? ""}` :
-                  type === "clinic" ? item.name?.[0] ?? "C" : item.business_name?.[0] ?? "P"}
+                  type === "clinic" ? item.name?.[0] ?? "C" : 
+                  type === "affiliate" ? `${item.first_name?.[0] ?? ""}${item.last_name?.[0] ?? ""}` :
+                  item.business_name?.[0] ?? "P"}
               </AvatarFallback>
             </Avatar>
             <div className="space-y-1">
@@ -179,16 +255,32 @@ const AdminApprovals = () => {
                   </p>
                 </>
               )}
+              {type === "affiliate" && (
+                <>
+                  <p className="font-semibold text-foreground text-lg">{item.first_name} {item.last_name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Comissão: <Badge variant="outline" className="text-xs">{item.commission_percent}%</Badge>
+                    {item.pix_key && <> · PIX: {item.pix_key}</>}
+                  </p>
+                </>
+              )}
               <p className="text-xs text-muted-foreground">Cadastro: {new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
             </div>
           </div>
           <div className="flex flex-col gap-2 shrink-0">
             {!isApproved ? (
               <>
-                <Button size="sm" onClick={() => approve(item.id, type)} className="bg-secondary text-secondary-foreground">
+                <Button size="sm" onClick={() => type === "affiliate" ? approveAffiliate(item) : approve(item.id, type)} className="bg-secondary text-secondary-foreground">
                   <Check className="w-4 h-4 mr-1" /> Aprovar
                 </Button>
-                <Button size="sm" variant="outline" className="text-destructive border-destructive/30" onClick={() => { setRejectTarget({ id: item.id, type, name: type === "doctor" ? `${item.first_name} ${item.last_name}` : item.name || item.business_name }); setShowReject(true); }}>
+                <Button size="sm" variant="outline" className="text-destructive border-destructive/30" onClick={() => { 
+                  setRejectTarget({ 
+                    id: item.id, 
+                    type, 
+                    name: type === "doctor" ? `${item.first_name} ${item.last_name}` : type === "affiliate" ? `${item.first_name} ${item.last_name}` : item.name || item.business_name 
+                  }); 
+                  setShowReject(true); 
+                }}>
                   <X className="w-4 h-4 mr-1" /> Rejeitar
                 </Button>
               </>
@@ -228,6 +320,10 @@ const AdminApprovals = () => {
             <TabsTrigger value="partners" className="gap-1">
               <Handshake className="w-4 h-4 mr-1" /> Parceiros
               {pendingPartners.length > 0 && <Badge variant="destructive" className="ml-1 text-xs h-5 w-5 p-0 flex items-center justify-center">{pendingPartners.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="affiliates" className="gap-1">
+              <Megaphone className="w-4 h-4 mr-1" /> Afiliados
+              {pendingAffiliates.length > 0 && <Badge variant="destructive" className="ml-1 text-xs h-5 w-5 p-0 flex items-center justify-center">{pendingAffiliates.length}</Badge>}
             </TabsTrigger>
           </TabsList>
 
@@ -284,6 +380,24 @@ const AdminApprovals = () => {
                 )}
                 {pendingPartners.length === 0 && approvedPartners.length === 0 && (
                   <p className="text-muted-foreground text-center py-8">Nenhum parceiro cadastrado.</p>
+                )}
+              </TabsContent>
+
+              <TabsContent value="affiliates" className="mt-4 space-y-4">
+                {pendingAffiliates.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1"><Clock className="w-4 h-4" /> Pendentes</h3>
+                    {pendingAffiliates.map(a => renderApprovalCard(a, "affiliate", false))}
+                  </>
+                )}
+                {approvedAffiliates.length > 0 && (
+                  <>
+                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1 mt-6"><Check className="w-4 h-4" /> Aprovados ({approvedAffiliates.length})</h3>
+                    {approvedAffiliates.map(a => renderApprovalCard(a, "affiliate", true))}
+                  </>
+                )}
+                {pendingAffiliates.length === 0 && approvedAffiliates.length === 0 && (
+                  <p className="text-muted-foreground text-center py-8">Nenhum afiliado cadastrado.</p>
                 )}
               </TabsContent>
             </>

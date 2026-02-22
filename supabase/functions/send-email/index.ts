@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 interface EmailRequest {
-  type: "appointment_confirmation" | "appointment_reminder" | "prescription_sent" | "welcome";
+  type: string;
   to: string;
   data: Record<string, string>;
 }
@@ -77,6 +77,36 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
       </div>
     `,
   }),
+  affiliate_approved: (d) => ({
+    subject: "✅ Afiliação Aprovada — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#22c55e;">🎉 Parabéns, ${d.name}!</h2>
+        <p>Sua solicitação de afiliação à <strong>AloClinica</strong> foi <strong style="color:#22c55e;">APROVADA</strong>!</p>
+        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;border:1px solid #e2e8f0;">
+          <p><strong>💰 Comissão:</strong> 2% sobre todos os ganhos dos pacientes indicados por você</p>
+          <p><strong>🔄 Recorrência:</strong> Comissão em assinaturas mensais e consultas avulsas</p>
+          <p><strong>💳 Saque:</strong> Solicite saques diretamente pelo painel</p>
+        </div>
+        <p>Acesse o portal de afiliados para gerar seu link de indicação e começar a ganhar!</p>
+        <a href="${d.login_url}" style="display:inline-block;background:#1a6fc4;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:8px;">Acessar Painel de Afiliado</a>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Programa de Afiliados</p>
+      </div>
+    `,
+  }),
+  affiliate_rejected: (d) => ({
+    subject: "❌ Solicitação de Afiliação — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#ef4444;">Solicitação não aprovada</h2>
+        <p>Olá <strong>${d.name}</strong>,</p>
+        <p>Infelizmente, sua solicitação de afiliação à AloClinica <strong style="color:#ef4444;">não foi aprovada</strong> neste momento.</p>
+        ${d.reason ? `<div style="background:#fef2f2;padding:12px;border-radius:8px;margin:12px 0;"><strong>Motivo:</strong> ${d.reason}</div>` : ""}
+        <p>Se você acredita que houve um engano, entre em contato com nosso suporte.</p>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Programa de Afiliados</p>
+      </div>
+    `,
+  }),
 };
 
 serve(async (req) => {
@@ -87,7 +117,6 @@ serve(async (req) => {
   try {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (!RESEND_API_KEY) {
-      // If no API key, log the email that would be sent (dev mode)
       const body: EmailRequest = await req.json();
       console.log("[DEV] Email would be sent:", JSON.stringify(body));
       return new Response(
