@@ -300,6 +300,14 @@ const GuestCheckout = () => {
           description: payData?.error || "Você receberá instruções de pagamento por email.",
         });
       } else {
+        // Handle fallback from PIX to BOLETO
+        if (payData.fallbackUsed) {
+          toast({
+            title: "📋 Boleto gerado automaticamente",
+            description: payData.fallbackMessage || "PIX indisponível no momento. Um boleto foi gerado.",
+          });
+          setPaymentMethod("boleto");
+        }
         // Store payment results
         if (payData.pixQrCode) setPixQrCode(payData.pixQrCode);
         if (payData.pixCopyPaste) setPixCopyPaste(payData.pixCopyPaste);
