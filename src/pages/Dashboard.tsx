@@ -145,7 +145,7 @@ const Dashboard = () => {
       <Route path="patient" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientDashboard /></RoleGuard>} />
       <Route path="doctor" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorDashboard /></RoleGuard>} />
       <Route path="clinic" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
-      <Route path="admin" element={<RoleGuard allowed={[]} roles={roles}><AdminDashboard /></RoleGuard>} />
+      <Route path="admin" element={<RoleGuard allowed={[]} roles={roles}><Navigate to="/dashboard/admin/panel-center" replace /></RoleGuard>} />
       <Route path="receptionist" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
       <Route path="support" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
       <Route path="partner" element={<RoleGuard allowed={["partner"]} roles={roles}><PartnerDashboard /></RoleGuard>} />
