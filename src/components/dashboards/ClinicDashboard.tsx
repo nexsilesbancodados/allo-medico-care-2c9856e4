@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Calendar, BarChart3, Settings, Stethoscope, Clock, DollarSign, TrendingUp, FileText, Sparkles, SlidersHorizontal } from "lucide-react";
+import { Users, Calendar, BarChart3, Settings, Stethoscope, Clock, DollarSign, TrendingUp, FileText, Sparkles, SlidersHorizontal, Download } from "lucide-react";
+import jsPDF from "jspdf";
+import { toast } from "sonner";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
@@ -89,6 +91,66 @@ const ClinicDashboard = () => {
 
   const pendingDoctors = doctors.filter(d => d.status !== "active").length;
 
+  const exportClinicPDF = () => {
+    const doc = new jsPDF();
+    const today = format(now, "dd/MM/yyyy HH:mm");
+    doc.setFillColor(0, 105, 146);
+    doc.rect(0, 0, 210, 20, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(16);
+    doc.text(`${clinicProfile?.name ?? "Clínica"} — Relatório`, 105, 13, { align: "center" });
+    doc.setTextColor(50, 50, 50);
+    doc.setFontSize(10);
+    doc.text(`Gerado em: ${today}`, 105, 30, { align: "center" });
+    doc.setFontSize(12);
+    doc.text("Indicadores do Mês", 20, 45);
+    doc.setFontSize(10);
+    const kpis = [
+      `Médicos Ativos: ${activeDoctors}`,
+      `Consultas do Mês: ${thisMonthAppts.length}`,
+      `Receita do Mês: R$ ${revenue.toLocaleString("pt-BR")}`,
+      `Ocupação: ${occupancy}%`,
+      `Consultas Concluídas: ${completed.length}`,
+      `Ticket Médio: R$ ${completed.length > 0 ? Math.round(revenue / completed.length) : 0}`,
+    ];
+    kpis.forEach((k, i) => doc.text(`• ${k}`, 25, 55 + i * 7));
+    if (doctorPerformance.length > 0) {
+      const startY = 55 + kpis.length * 7 + 10;
+      doc.setFontSize(12);
+      doc.text("Ranking de Médicos", 20, startY);
+      doc.setFontSize(9);
+      doctorPerformance.forEach((d, i) => {
+        doc.text(`#${i + 1} ${d.name} — ${d.completadas}/${d.consultas} consultas`, 25, startY + 10 + i * 6);
+      });
+    }
+    doc.setFillColor(0, 105, 146);
+    doc.rect(0, 290, 210, 7, "F");
+    doc.setFontSize(7);
+    doc.setTextColor(255, 255, 255);
+    doc.text("AloClínica — Relatório Confidencial", 105, 294, { align: "center" });
+    doc.save(`relatorio-clinica-${format(now, "yyyy-MM-dd")}.pdf`);
+    toast.success("Relatório PDF exportado!");
+  };
+
+  const exportClinicCSV = () => {
+    const rows = [
+      ["Métrica", "Valor"],
+      ["Médicos Ativos", String(activeDoctors)],
+      ["Consultas do Mês", String(thisMonthAppts.length)],
+      ["Receita do Mês", `R$ ${revenue}`],
+      ["Ocupação", `${occupancy}%`],
+      ["Concluídas", String(completed.length)],
+      ["Ticket Médio", `R$ ${completed.length > 0 ? Math.round(revenue / completed.length) : 0}`],
+    ];
+    const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const el = document.createElement("a");
+    el.href = url; el.download = `relatorio-clinica-${format(now, "yyyy-MM-dd")}.csv`; el.click();
+    URL.revokeObjectURL(url);
+    toast.success("CSV exportado!");
+  };
+
   return (
     <DashboardLayout title="Clínica" nav={getClinicNav("overview")} role="clinic">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
@@ -97,7 +159,13 @@ const ClinicDashboard = () => {
             <h1 className="text-2xl font-bold text-foreground tracking-tight">{clinicProfile?.name ?? "Minha Clínica"}</h1>
             <p className="text-sm text-muted-foreground mt-1">Painel de gestão · {format(now, "dd 'de' MMMM", { locale: ptBR })}</p>
           </div>
-          <div className="flex gap-2 shrink-0">
+          <div className="flex gap-2 shrink-0 flex-wrap">
+            <Button size="sm" variant="outline" className="rounded-xl gap-1.5 h-9" onClick={exportClinicPDF}>
+              <FileText className="w-3.5 h-3.5" /> PDF
+            </Button>
+            <Button size="sm" variant="outline" className="rounded-xl gap-1.5 h-9" onClick={exportClinicCSV}>
+              <Download className="w-3.5 h-3.5" /> CSV
+            </Button>
             <Button size="sm" variant="outline" className="rounded-xl gap-1.5 h-9" onClick={() => navigate("/dashboard/clinic/doctors")}>
               <Users className="w-3.5 h-3.5" /> Médicos
               {pendingDoctors > 0 && <span className="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-warning text-warning-foreground">{pendingDoctors}</span>}
