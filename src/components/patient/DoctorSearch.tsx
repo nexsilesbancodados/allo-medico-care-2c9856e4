@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart, ChevronRight, MapPin } from "lucide-react";
+import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart, ChevronRight, MapPin, Clock } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,6 +34,19 @@ const fadeUp = {
   show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.05, duration: 0.3, ease: [0.22, 1, 0.36, 1] as const } }),
 };
 
+const RECENT_SEARCHES_KEY = "aloclinica_recent_searches";
+const MAX_RECENT = 5;
+
+const getRecentSearches = (): string[] => {
+  try { return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || "[]"); } catch { return []; }
+};
+const saveRecentSearch = (term: string) => {
+  if (!term.trim() || term.length < 2) return;
+  const recent = getRecentSearches().filter(s => s !== term);
+  recent.unshift(term);
+  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
+};
+
 const DoctorSearch = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
@@ -46,6 +59,8 @@ const DoctorSearch = () => {
   const [selectedSpecialty, setSelectedSpecialty] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [recentSearches, setRecentSearches] = useState<string[]>(getRecentSearches());
+  const [showRecent, setShowRecent] = useState(false);
 
   // Advanced filters
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
@@ -277,9 +292,28 @@ const DoctorSearch = () => {
             <Input
               placeholder="Nome ou CRM..."
               value={search}
-              onChange={e => setSearch(e.target.value)}
+              onChange={e => { setSearch(e.target.value); setShowRecent(false); }}
+              onFocus={() => { if (!search && recentSearches.length > 0) setShowRecent(true); }}
+              onBlur={() => setTimeout(() => setShowRecent(false), 200)}
+              onKeyDown={e => { if (e.key === "Enter" && search.trim()) { saveRecentSearch(search.trim()); setRecentSearches(getRecentSearches()); } }}
               className="pl-10 h-12 rounded-2xl text-base bg-muted/50 border-transparent focus:border-primary/30"
             />
+            {/* Recent searches dropdown */}
+            {showRecent && recentSearches.length > 0 && (
+              <div className="absolute top-14 left-0 right-0 bg-card border border-border rounded-2xl shadow-elevated z-20 overflow-hidden">
+                <p className="text-[11px] text-muted-foreground/60 uppercase tracking-wider font-semibold px-4 pt-3 pb-1">Buscas recentes</p>
+                {recentSearches.map((term, i) => (
+                  <button
+                    key={i}
+                    className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-muted/50 flex items-center gap-2 transition-colors"
+                    onMouseDown={() => { setSearch(term); setShowRecent(false); }}
+                  >
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground/50" />
+                    {term}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>

@@ -1,6 +1,6 @@
-import { motion } from "framer-motion";
-import { Star, Quote } from "lucide-react";
-import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import avatarMaria from "@/assets/avatar-maria.png";
 import avatarCarlos from "@/assets/avatar-carlos.png";
@@ -14,6 +14,29 @@ const fallbackTestimonials = [
 
 const TestimonialsSection = () => {
   const [testimonials, setTestimonials] = useState(fallbackTestimonials);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
+
+  const goTo = useCallback((idx: number) => {
+    setDirection(idx > activeIndex ? 1 : -1);
+    setActiveIndex(idx);
+  }, [activeIndex]);
+
+  const next = useCallback(() => {
+    setDirection(1);
+    setActiveIndex(prev => (prev + 1) % testimonials.length);
+  }, [testimonials.length]);
+
+  const prev = useCallback(() => {
+    setDirection(-1);
+    setActiveIndex(prev => (prev - 1 + testimonials.length) % testimonials.length);
+  }, [testimonials.length]);
+
+  // Auto-play
+  useEffect(() => {
+    const timer = setInterval(next, 5000);
+    return () => clearInterval(timer);
+  }, [next]);
 
   useEffect(() => {
     const fetchRealTestimonials = async () => {
@@ -26,7 +49,7 @@ const TestimonialsSection = () => {
           .order("created_at", { ascending: false })
           .limit(3);
 
-        if (!data || data.length < 2) return; // Keep fallbacks if not enough real data
+        if (!data || data.length < 2) return;
 
         const patientIds = [...new Set(data.map(d => d.patient_id))];
         const doctorIds = [...new Set(data.map(d => d.doctor_id))];
@@ -65,6 +88,12 @@ const TestimonialsSection = () => {
     fetchRealTestimonials();
   }, []);
 
+  const variants = {
+    enter: (dir: number) => ({ x: dir > 0 ? 80 : -80, opacity: 0 }),
+    center: { x: 0, opacity: 1 },
+    exit: (dir: number) => ({ x: dir > 0 ? -80 : 80, opacity: 0 }),
+  };
+
   return (
     <section id="depoimentos" className="py-12 md:py-24">
       <div className="container mx-auto px-4">
@@ -83,7 +112,8 @@ const TestimonialsSection = () => {
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        {/* Desktop: grid / Mobile: carousel */}
+        <div className="hidden md:grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
           {testimonials.map((t, i) => (
             <motion.div
               key={i}
@@ -99,30 +129,14 @@ const TestimonialsSection = () => {
               className="bg-card rounded-2xl p-6 border border-border shadow-card transition-colors duration-300 hover:border-primary/30 cursor-default"
             >
               <Quote className="w-8 h-8 text-primary/30 mb-4" />
-
               <p className="text-foreground mb-6 leading-relaxed">"{t.text}"</p>
-
               <div className="flex items-center gap-1 mb-3">
                 {Array.from({ length: t.rating }).map((_, j) => (
-                  <motion.div
-                    key={j}
-                    initial={{ opacity: 0, scale: 0 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.15 + j * 0.08 + 0.3 }}
-                  >
-                    <Star className="w-4 h-4 fill-medical-green text-medical-green" />
-                  </motion.div>
+                  <Star key={j} className="w-4 h-4 fill-medical-green text-medical-green" />
                 ))}
               </div>
-
               <div className="flex items-center gap-3">
-                <img
-                  src={t.avatar}
-                  alt={t.name}
-                  className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/10"
-                  loading="lazy"
-                />
+                <img src={t.avatar} alt={t.name} className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/10" loading="lazy" />
                 <div>
                   <p className="text-sm font-bold text-foreground">{t.name}</p>
                   <p className="text-xs text-muted-foreground">{t.role}</p>
@@ -130,6 +144,58 @@ const TestimonialsSection = () => {
               </div>
             </motion.div>
           ))}
+        </div>
+
+        {/* Mobile carousel */}
+        <div className="md:hidden relative max-w-md mx-auto">
+          <div className="overflow-hidden rounded-2xl">
+            <AnimatePresence custom={direction} mode="wait">
+              <motion.div
+                key={activeIndex}
+                custom={direction}
+                variants={variants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className="bg-card rounded-2xl p-6 border border-border shadow-card"
+              >
+                <Quote className="w-7 h-7 text-primary/30 mb-3" />
+                <p className="text-foreground mb-5 leading-relaxed text-sm">"{testimonials[activeIndex].text}"</p>
+                <div className="flex items-center gap-1 mb-3">
+                  {Array.from({ length: testimonials[activeIndex].rating }).map((_, j) => (
+                    <Star key={j} className="w-3.5 h-3.5 fill-medical-green text-medical-green" />
+                  ))}
+                </div>
+                <div className="flex items-center gap-3">
+                  <img src={testimonials[activeIndex].avatar} alt={testimonials[activeIndex].name} className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/10" loading="lazy" />
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{testimonials[activeIndex].name}</p>
+                    <p className="text-xs text-muted-foreground">{testimonials[activeIndex].role}</p>
+                  </div>
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Navigation */}
+          <div className="flex items-center justify-center gap-4 mt-5">
+            <button onClick={prev} className="w-9 h-9 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors active:scale-95">
+              <ChevronLeft className="w-4 h-4 text-foreground" />
+            </button>
+            <div className="flex gap-1.5">
+              {testimonials.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => goTo(i)}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${i === activeIndex ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/20"}`}
+                />
+              ))}
+            </div>
+            <button onClick={next} className="w-9 h-9 rounded-full bg-muted/50 flex items-center justify-center hover:bg-muted transition-colors active:scale-95">
+              <ChevronRight className="w-4 h-4 text-foreground" />
+            </button>
+          </div>
         </div>
       </div>
     </section>
