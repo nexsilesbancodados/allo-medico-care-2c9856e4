@@ -9,16 +9,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Link2, DollarSign, Users, TrendingUp, Copy, UserCog, Sparkles, Wallet, ArrowUpRight, Clock } from "lucide-react";
+import { Link2, DollarSign, Users, TrendingUp, Copy, UserCog, Sparkles, Wallet, ArrowUpRight, Clock, BarChart3, Settings, HelpCircle } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { motion } from "framer-motion";
+import { useLocation } from "react-router-dom";
 
-const affiliateNav = [
-  { label: "Indicações", href: "/dashboard", icon: <Link2 className="w-4 h-4" />, active: true },
-  { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" /> },
+const getAffiliateNav = (active: string) => [
+  { label: "Painel", href: "/dashboard?role=affiliate", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview" },
+  { label: "Indicações", href: "/dashboard/affiliate/referrals", icon: <Link2 className="w-4 h-4" />, active: active === "referrals" },
+  { label: "Ganhos", href: "/dashboard/affiliate/earnings", icon: <DollarSign className="w-4 h-4" />, active: active === "earnings" },
+  { label: "Saques", href: "/dashboard/affiliate/withdrawals", icon: <Wallet className="w-4 h-4" />, active: active === "withdrawals" },
+  { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" />, active: active === "profile" },
+  { label: "Configurações", href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, active: active === "settings" },
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
@@ -140,7 +145,7 @@ const AffiliateDashboard = () => {
   const formatCurrency = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
   return (
-    <DashboardLayout title="Afiliados" nav={affiliateNav}>
+    <DashboardLayout title="Afiliados" nav={getAffiliateNav("overview")}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl space-y-6">
         <motion.div variants={fadeUp}>
           <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel de Afiliado</h1>
