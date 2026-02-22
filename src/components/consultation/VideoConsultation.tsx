@@ -130,7 +130,24 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
           frameContainerRef.current
         );
 
-        frame.on("participantJoined", () => setLoading(false));
+        frame.on("participantJoined", () => {
+          setLoading(false);
+          // Play notification sound when other participant joins
+          try {
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.setValueAtTime(880, audioCtx.currentTime);
+            oscillator.frequency.setValueAtTime(1100, audioCtx.currentTime + 0.1);
+            oscillator.frequency.setValueAtTime(1320, audioCtx.currentTime + 0.2);
+            gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + 0.4);
+          } catch {}
+        });
         frame.on("meetingEnded", () => onEndCallRef.current());
         setTimeout(() => setLoading(false), 5000);
       } catch (err) {
