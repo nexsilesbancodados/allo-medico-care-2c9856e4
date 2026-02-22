@@ -8,19 +8,22 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Calendar, BarChart3, Settings, Stethoscope, Clock, DollarSign, TrendingUp, FileText, Sparkles } from "lucide-react";
+import { Users, Calendar, BarChart3, Settings, Stethoscope, Clock, DollarSign, TrendingUp, FileText, Sparkles, SlidersHorizontal } from "lucide-react";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { motion } from "framer-motion";
 
 const getClinicNav = (active: string) => [
-  { label: "Visão Geral", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview" },
-  { label: "Médicos", href: "/dashboard/clinic/doctors", icon: <Stethoscope className="w-4 h-4" />, active: active === "doctors" },
-  { label: "Agendamentos", href: "/dashboard/clinic/schedules", icon: <Calendar className="w-4 h-4" />, active: active === "schedules" },
-  { label: "Financeiro", href: "/dashboard/clinic/finance", icon: <DollarSign className="w-4 h-4" />, active: active === "finance" },
-  { label: "Relatórios", href: "/dashboard/clinic/reports", icon: <FileText className="w-4 h-4" />, active: active === "reports" },
-  { label: "Perfil", href: "/dashboard/profile", icon: <Settings className="w-4 h-4" /> },
+  { label: "Visão Geral", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview", group: "Principal" },
+  { label: "Médicos", href: "/dashboard/clinic/doctors", icon: <Stethoscope className="w-4 h-4" />, active: active === "doctors", group: "Principal" },
+  { label: "Agendamentos", href: "/dashboard/clinic/schedules", icon: <Calendar className="w-4 h-4" />, active: active === "schedules", group: "Principal" },
+  { label: "Pacientes", href: "/dashboard/clinic/patients", icon: <Users className="w-4 h-4" />, active: active === "patients", group: "Atendimento" },
+  { label: "Sala de Espera", href: "/dashboard/clinic/waiting-room", icon: <Clock className="w-4 h-4" />, active: active === "waiting-room", group: "Atendimento" },
+  { label: "Financeiro", href: "/dashboard/clinic/finance", icon: <DollarSign className="w-4 h-4" />, active: active === "finance", group: "Gestão" },
+  { label: "Relatórios", href: "/dashboard/clinic/reports", icon: <FileText className="w-4 h-4" />, active: active === "reports", group: "Gestão" },
+  { label: "Perfil", href: "/dashboard/profile", icon: <Settings className="w-4 h-4" />, active: active === "profile", group: "Conta" },
+  { label: "Configurações", href: "/dashboard/settings?role=clinic", icon: <SlidersHorizontal className="w-4 h-4" />, active: active === "settings", group: "Conta" },
 ];
 
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--warning))", "hsl(var(--destructive))"];

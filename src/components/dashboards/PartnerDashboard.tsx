@@ -13,9 +13,13 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
-const partnerNav = [
-  { label: "Validação", href: "/dashboard", icon: <Pill className="w-4 h-4" />, active: true },
-  { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" /> },
+const getPartnerNav = (active: string) => [
+  { label: "Visão Geral", href: "/dashboard?role=partner", icon: <TrendingUp className="w-4 h-4" />, active: active === "overview", group: "Principal" },
+  { label: "Validar Receitas", href: "/dashboard/partner/validate", icon: <Pill className="w-4 h-4" />, active: active === "validate", group: "Principal" },
+  { label: "Histórico", href: "/dashboard/partner/history", icon: <FileText className="w-4 h-4" />, active: active === "history", group: "Operações" },
+  { label: "Conversão", href: "/dashboard/partner/conversion", icon: <FlaskConical className="w-4 h-4" />, active: active === "conversion", group: "Operações" },
+  { label: "Perfil", href: "/dashboard/profile", icon: <UserCog className="w-4 h-4" />, active: active === "profile", group: "Conta" },
+  { label: "Configurações", href: "/dashboard/settings?role=partner", icon: <Search className="w-4 h-4" />, active: active === "settings", group: "Conta" },
 ];
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
@@ -89,7 +93,7 @@ const PartnerDashboard = () => {
   const conversionRate = validations.length > 0 ? Math.round((dispensedCount / validations.length) * 100) : 0;
 
   return (
-    <DashboardLayout title="Portal do Parceiro" nav={partnerNav}>
+    <DashboardLayout title="Portal do Parceiro" nav={getPartnerNav("overview")}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-3xl space-y-6">
         <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div>
