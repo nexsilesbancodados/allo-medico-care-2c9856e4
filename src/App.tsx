@@ -12,6 +12,7 @@ const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import PingoChatbot from "./components/PingoChatbot";
+import OfflineIndicator from "./components/OfflineIndicator";
 import AccessibilityToggle from "./components/AccessibilityToggle";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CookieConsent from "./components/CookieConsent";
@@ -125,6 +126,7 @@ const App = () => (
           <AccessibilityToggle />
           <CookieConsent />
           <BackToTop />
+          <OfflineIndicator />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
