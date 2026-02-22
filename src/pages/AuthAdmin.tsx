@@ -24,7 +24,7 @@ const AuthAdmin = () => {
     if (error) {
       toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
     } else {
-      navigate("/dashboard");
+      navigate("/dashboard/admin/panel-center");
     }
   };
 
