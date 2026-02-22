@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -87,6 +87,10 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } 
 const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
 
 const SupportDashboard = () => {
+  const location = useLocation();
+  const pathSegment = location.pathname.split("/").pop() || "";
+  const activeNav = ["inbox", "chat", "logs", "users", "online", "audit"].includes(pathSegment) ? pathSegment : "overview";
+  const defaultTab = ["inbox", "chat", "logs", "users", "online", "audit"].includes(pathSegment) ? pathSegment : "inbox";
   const [logs, setLogs] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
@@ -224,7 +228,7 @@ const SupportDashboard = () => {
   };
 
   return (
-    <DashboardLayout title="Suporte Técnico" nav={getSupportNav("overview")}>
+    <DashboardLayout title="Suporte Técnico" nav={getSupportNav(activeNav)}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
 
         {/* Header */}
@@ -309,7 +313,7 @@ const SupportDashboard = () => {
         )}
 
         <motion.div variants={fadeUp}>
-          <Tabs defaultValue="inbox">
+          <Tabs defaultValue={defaultTab}>
             <TabsList className="bg-muted/50 border border-border/40 h-10 rounded-xl p-1 w-full sm:w-auto flex-wrap">
               <TabsTrigger value="inbox" className="flex-1 sm:flex-none text-xs gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
                 <Inbox className="w-3.5 h-3.5" /> Inbox

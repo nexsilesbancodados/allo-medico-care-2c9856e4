@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "./DashboardLayout";
@@ -36,10 +36,16 @@ const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transi
 const ClinicDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [clinicProfile, setClinicProfile] = useState<any>(null);
   const [doctors, setDoctors] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Route-based active nav detection
+  const pathSegment = location.pathname.split("/").pop() || "";
+  const activeNav = ["schedules", "patients", "waiting-room", "finance", "reports", "doctors"].includes(pathSegment) ? pathSegment : "overview";
+  const defaultTab = pathSegment === "finance" ? "finance" : pathSegment === "reports" ? "performance" : "overview";
 
   useEffect(() => { if (user) fetchData(); }, [user]);
 
@@ -152,7 +158,7 @@ const ClinicDashboard = () => {
   };
 
   return (
-    <DashboardLayout title="Clínica" nav={getClinicNav("overview")} role="clinic">
+    <DashboardLayout title="Clínica" nav={getClinicNav(activeNav)} role="clinic">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -233,7 +239,7 @@ const ClinicDashboard = () => {
         </motion.div>
 
         <motion.div variants={fadeUp}>
-          <Tabs defaultValue="overview" className="w-full">
+          <Tabs defaultValue={defaultTab} className="w-full">
             <TabsList className="bg-muted/50 border border-border/40 h-10 rounded-xl p-1 w-full max-w-md">
               <TabsTrigger value="overview" className="text-xs rounded-lg flex-1">Visão Geral</TabsTrigger>
               <TabsTrigger value="performance" className="text-xs rounded-lg flex-1">Performance</TabsTrigger>

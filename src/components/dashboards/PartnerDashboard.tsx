@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "./DashboardLayout";
@@ -27,6 +28,7 @@ const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transi
 
 const PartnerDashboard = () => {
   const { user } = useAuth();
+  const location = useLocation();
   const [prescriptionCode, setPrescriptionCode] = useState("");
   const [foundPrescription, setFoundPrescription] = useState<any>(null);
   const [validations, setValidations] = useState<any[]>([]);
@@ -92,8 +94,11 @@ const PartnerDashboard = () => {
   const dispensedCount = validations.filter(v => v.status === "dispensed").length;
   const conversionRate = validations.length > 0 ? Math.round((dispensedCount / validations.length) * 100) : 0;
 
+  const pathSegment = location.pathname.split("/").pop() || "";
+  const activeNav = ["validate", "history", "conversion"].includes(pathSegment) ? pathSegment : "overview";
+
   return (
-    <DashboardLayout title="Portal do Parceiro" nav={getPartnerNav("overview")}>
+    <DashboardLayout title="Portal do Parceiro" nav={getPartnerNav(activeNav)}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-3xl space-y-6">
         <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div>
