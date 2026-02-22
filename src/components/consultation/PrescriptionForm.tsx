@@ -15,6 +15,7 @@ import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import MemedPrescription from "./MemedPrescription";
+import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 
 const doctorNav = [
   { label: "Início", href: "/dashboard", icon: <Clock className="w-4 h-4" /> },
@@ -358,6 +359,21 @@ const PrescriptionForm = () => {
 
     setSaving(true);
 
+    // Generate digital hash for document integrity
+    const docContent = JSON.stringify({
+      appointment_id: appointmentId,
+      doctor: `${doctorInfo?.first_name} ${doctorInfo?.last_name}`,
+      crm: `${doctorInfo?.crm}/${doctorInfo?.crm_state}`,
+      patient: patientName,
+      patient_cpf: patientCpf,
+      medications: validMeds,
+      diagnosis,
+      observations,
+      timestamp: new Date().toISOString(),
+    });
+    const documentHash = await gerarHashDocumento(docContent);
+    const verificationCode = gerarCodigoVerificacao();
+
     const { error } = await supabase.from("prescriptions").insert({
       appointment_id: appointmentId,
       doctor_id: doctorInfo.id,
@@ -365,7 +381,22 @@ const PrescriptionForm = () => {
       medications: validMeds as any,
       diagnosis: diagnosis || null,
       observations: observations || null,
+      document_hash: documentHash,
     } as any);
+
+    // Also persist verification record
+    supabase.from("document_verifications").insert({
+      verification_code: verificationCode,
+      document_type: "prescription",
+      patient_name: patientName,
+      patient_cpf: patientCpf || null,
+      doctor_name: `Dr(a). ${doctorInfo?.first_name} ${doctorInfo?.last_name}`,
+      doctor_crm: `CRM ${doctorInfo?.crm}/${doctorInfo?.crm_state}`,
+      document_hash: documentHash,
+      details: { medications: validMeds.length, diagnosis: diagnosis || null },
+    } as any).then(({ error: verErr }) => {
+      if (verErr) console.error("Failed to persist verification:", verErr);
+    });
 
     setSaving(false);
 

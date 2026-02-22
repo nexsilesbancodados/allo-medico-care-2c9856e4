@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check, MessageCircle, LogIn } from "lucide-react";
+import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
+import { registerConsent } from "@/lib/consent";
 import doctorPortalBg from "@/assets/doctor-portal-bg.png";
 import DoctorWhySection from "@/components/landing/DoctorWhySection";
 import SEOHead from "@/components/SEOHead";
@@ -26,6 +28,7 @@ const AuthMedico = () => {
   const [crm, setCrm] = useState("");
   const [crmState, setCrmState] = useState("SP");
   const [loading, setLoading] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -67,6 +70,10 @@ const AuthMedico = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      toast({ title: "Aceite os termos", description: "Você precisa aceitar os Termos de Uso e Política de Privacidade.", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email, password,
@@ -85,6 +92,9 @@ const AuthMedico = () => {
           profile_data: { crm, crm_state: crmState, invite_code_id: validatedCodeId },
         },
       });
+
+      // Register consent
+      await registerConsent(data.user.id, "terms_and_privacy_doctor");
 
       // Send welcome email for doctor
       supabase.functions.invoke("send-email", {
@@ -248,7 +258,8 @@ const AuthMedico = () => {
                     🔍 Validar CRM no Portal CFM
                   </Button>
                 )}
-                <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={loading}>
+                <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
+                <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={loading || !termsAccepted}>
                   {loading ? "Criando conta..." : "Cadastrar como Médico"}
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">

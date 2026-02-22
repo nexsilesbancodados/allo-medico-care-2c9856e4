@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, User, ArrowLeft, Stethoscope, Building2, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
+import { registerConsent } from "@/lib/consent";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
@@ -36,6 +38,7 @@ const Auth = () => {
   const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -90,6 +93,10 @@ const Auth = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!termsAccepted) {
+      toast({ title: "Aceite os termos", description: "Você precisa aceitar os Termos de Uso e Política de Privacidade.", variant: "destructive" });
+      return;
+    }
     const eErr = validateEmail(email);
     const pErr = validatePassword(password);
     setEmailError(eErr);
@@ -113,6 +120,9 @@ const Auth = () => {
     }
 
     if (data.user) {
+      // Register consent
+      await registerConsent(data.user.id, `terms_and_privacy_${userType}`);
+
       if (userType === "doctor") {
         await supabase.from("doctor_profiles").insert({ user_id: data.user.id, crm, crm_state: crmState });
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: "doctor" });
@@ -422,16 +432,11 @@ const Auth = () => {
                     </>
                   )}
 
-                  <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading}>
+                  <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} className="mt-2" />
+
+                  <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading || !termsAccepted}>
                     {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Criando conta...</> : "Criar conta grátis"}
                   </Button>
-
-                  <p className="text-xs text-center text-muted-foreground">
-                    Ao criar conta você concorda com os{" "}
-                    <Link to="/terms" className="text-primary hover:underline">Termos de Uso</Link>
-                    {" "}e{" "}
-                    <Link to="/privacy" className="text-primary hover:underline">Política de Privacidade</Link>
-                  </p>
                 </form>
 
                 <p className="text-center text-sm text-muted-foreground mt-4">
