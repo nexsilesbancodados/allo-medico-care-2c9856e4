@@ -47,7 +47,7 @@ const VideoRoom = () => {
   const [hasConsent, setHasConsent] = useState(false);
   const [checkingConsent, setCheckingConsent] = useState(true);
   const [crmBlocked, setCrmBlocked] = useState(false);
-  const [deviceChecked, setDeviceChecked] = useState(false);
+  const [deviceChecked, setDeviceChecked] = useState(true);
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [doctorBusy, setDoctorBusy] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
