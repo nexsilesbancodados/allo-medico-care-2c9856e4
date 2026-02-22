@@ -6,8 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Link2, DollarSign, Users, TrendingUp, Copy, UserCog, Sparkles } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Link2, DollarSign, Users, TrendingUp, Copy, UserCog, Sparkles, Wallet, ArrowUpRight, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -25,21 +27,59 @@ const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transi
 const AffiliateDashboard = () => {
   const { user } = useAuth();
   const [referrals, setReferrals] = useState<any[]>([]);
-  const [stats, setStats] = useState({ total: 0, converted: 0, pendingCommission: 0 });
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
+  const [affiliateProfile, setAffiliateProfile] = useState<any>(null);
+  const [stats, setStats] = useState({ total: 0, converted: 0, totalEarnings: 0, pendingBalance: 0, paidBalance: 0 });
   const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(true);
+  const [showWithdrawDialog, setShowWithdrawDialog] = useState(false);
+  const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawPixKey, setWithdrawPixKey] = useState("");
+  const [submittingWithdraw, setSubmittingWithdraw] = useState(false);
 
   useEffect(() => { if (user) fetchData(); }, [user]);
 
   const fetchData = async () => {
     if (!user) return;
+    
+    // Fetch affiliate profile
+    const { data: profile } = await (supabase as any).from("affiliate_profiles")
+      .select("*").eq("user_id", user.id).maybeSingle();
+    setAffiliateProfile(profile);
+    if (profile?.pix_key) setWithdrawPixKey(profile.pix_key);
+
+    // Fetch referrals
     const { data } = await supabase.from("referrals")
       .select("*").eq("referrer_id", user.id).order("created_at", { ascending: false });
     const refs = data ?? [];
     setReferrals(refs);
+    
+    // Fetch withdrawals
+    const { data: wData } = await supabase.from("withdrawal_requests")
+      .select("*").eq("user_id", user.id).order("created_at", { ascending: false });
+    setWithdrawals(wData ?? []);
+
+    // Calculate earnings: 2% commission
+    // For now we simulate based on converted referrals
+    // Each converted referral = commission on the subscription/consultation value
     const converted = refs.filter(r => r.status === "converted");
-    const pendingCommission = converted.filter(r => !r.commission_paid).reduce((acc, r) => acc + Number(r.commission_percent), 0);
-    setStats({ total: refs.length, converted: converted.length, pendingCommission });
+    const commissionPercent = profile?.commission_percent ?? 2;
+    
+    // Simulated revenue per converted referral (avg consultation R$89)
+    const avgRevenue = 89;
+    const totalEarnings = converted.length * avgRevenue * (commissionPercent / 100);
+    const paidBalance = (wData ?? []).filter(w => w.status === "approved").reduce((acc, w) => acc + Number(w.amount), 0);
+    const pendingWithdraws = (wData ?? []).filter(w => w.status === "pending").reduce((acc, w) => acc + Number(w.amount), 0);
+    const pendingBalance = totalEarnings - paidBalance - pendingWithdraws;
+
+    setStats({ 
+      total: refs.length, 
+      converted: converted.length, 
+      totalEarnings,
+      pendingBalance: Math.max(0, pendingBalance),
+      paidBalance,
+    });
+    
     const existing = refs.find(r => r.referrer_id === user.id);
     if (existing) setReferralCode(existing.referral_code);
     setLoading(false);
@@ -48,7 +88,7 @@ const AffiliateDashboard = () => {
   const generateCode = async () => {
     if (!user) return;
     const code = `REF-${user.id.slice(0, 6).toUpperCase()}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
-    const { error } = await supabase.from("referrals").insert({ referrer_id: user.id, referral_code: code, source: "manual" });
+    const { error } = await supabase.from("referrals").insert({ referrer_id: user.id, referral_code: code, source: "manual", commission_percent: 2 });
     if (error) { toast.error("Erro ao gerar código."); }
     else { setReferralCode(code); toast.success("Código de indicação criado!"); fetchData(); }
   };
@@ -56,6 +96,37 @@ const AffiliateDashboard = () => {
   const copyCode = () => {
     navigator.clipboard.writeText(`${window.location.origin}?ref=${referralCode}`);
     toast.success("Link copiado!");
+  };
+
+  const handleWithdraw = async () => {
+    if (!user || !withdrawAmount || Number(withdrawAmount) <= 0) {
+      toast.error("Informe um valor válido.");
+      return;
+    }
+    if (Number(withdrawAmount) > stats.pendingBalance) {
+      toast.error("Saldo insuficiente.");
+      return;
+    }
+    if (!withdrawPixKey.trim()) {
+      toast.error("Informe sua chave PIX.");
+      return;
+    }
+    setSubmittingWithdraw(true);
+    const { error } = await supabase.from("withdrawal_requests").insert({
+      user_id: user.id,
+      amount: Number(withdrawAmount),
+      pix_key: withdrawPixKey,
+      status: "pending",
+    });
+    setSubmittingWithdraw(false);
+    if (error) {
+      toast.error("Erro ao solicitar saque.");
+    } else {
+      toast.success("Solicitação de saque enviada! O administrador irá processar.");
+      setShowWithdrawDialog(false);
+      setWithdrawAmount("");
+      fetchData();
+    }
   };
 
   const monthlyData = referrals.reduce((acc: any[], r) => {
@@ -66,15 +137,14 @@ const AffiliateDashboard = () => {
     return acc;
   }, []);
 
-  const sourceData: Record<string, number> = {};
-  referrals.forEach(r => { const src = r.source ?? "direto"; sourceData[src] = (sourceData[src] ?? 0) + 1; });
+  const formatCurrency = (value: number) => new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
 
   return (
     <DashboardLayout title="Afiliados" nav={affiliateNav}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl space-y-6">
         <motion.div variants={fadeUp}>
-          <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel de Indicações</h1>
-          <p className="text-sm text-muted-foreground mt-1">Rastreie suas indicações e comissões</p>
+          <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel de Afiliado</h1>
+          <p className="text-sm text-muted-foreground mt-1">Comissão de {affiliateProfile?.commission_percent ?? 2}% sobre ganhos dos indicados</p>
         </motion.div>
 
         {/* Referral code */}
@@ -91,40 +161,22 @@ const AffiliateDashboard = () => {
                     </Button>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl text-xs gap-1.5 flex-1"
+                    <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1.5 flex-1"
                       onClick={() => {
                         const text = `Conheça a AloClínica! Use meu link: ${window.location.origin}?ref=${referralCode}`;
                         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-                      }}
-                    >
-                      📱 WhatsApp
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl text-xs gap-1.5 flex-1"
+                      }}>📱 WhatsApp</Button>
+                    <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1.5 flex-1"
                       onClick={() => {
                         const text = `Conheça a AloClínica! ${window.location.origin}?ref=${referralCode}`;
                         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
-                      }}
-                    >
-                      🐦 Twitter
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="rounded-xl text-xs gap-1.5 flex-1"
+                      }}>🐦 Twitter</Button>
+                    <Button size="sm" variant="outline" className="rounded-xl text-xs gap-1.5 flex-1"
                       onClick={() => {
                         const subject = "Conheça a AloClínica";
                         const body = `Olá! Use meu link para se cadastrar: ${window.location.origin}?ref=${referralCode}`;
                         window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-                      }}
-                    >
-                      ✉️ Email
-                    </Button>
+                      }}>✉️ Email</Button>
                   </div>
                 </div>
               ) : (
@@ -134,45 +186,42 @@ const AffiliateDashboard = () => {
           </Card>
         </motion.div>
 
-        {/* KPIs with conversion rate visual */}
-        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
+        {/* KPIs */}
+        <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: "Total Indicações", value: stats.total, icon: Users, color: "text-primary", bg: "bg-primary/10" },
-            { label: "Convertidos", value: stats.converted, icon: TrendingUp, color: "text-success", bg: "bg-success/10" },
-            { label: "Comissão", value: `${stats.pendingCommission}%`, icon: DollarSign, color: "text-warning", bg: "bg-warning/10" },
+            { label: "Indicações", value: String(stats.total), icon: Users, color: "text-primary", bg: "bg-primary/10" },
+            { label: "Convertidos", value: String(stats.converted), icon: TrendingUp, color: "text-secondary", bg: "bg-secondary/10" },
+            { label: "Ganhos Totais", value: formatCurrency(stats.totalEarnings), icon: DollarSign, color: "text-success", bg: "bg-success/10" },
+            { label: "Saldo Disponível", value: formatCurrency(stats.pendingBalance), icon: Wallet, color: "text-warning", bg: "bg-warning/10" },
           ].map(kpi => (
             <div key={kpi.label} className="p-4 rounded-2xl bg-card border border-border/50">
               <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
                 <kpi.icon className={`w-4 h-4 ${kpi.color}`} />
               </div>
-              <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
+              <p className="text-xl font-bold text-foreground">{kpi.value}</p>
               <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
             </div>
           ))}
         </motion.div>
 
-        {/* Conversion rate bar */}
-        {stats.total > 0 && (
-          <motion.div variants={fadeUp}>
-            <div className="p-4 rounded-2xl bg-card border border-border/50">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs font-semibold text-muted-foreground">Taxa de Conversão</p>
-                <span className="text-sm font-bold text-foreground">{stats.total > 0 ? Math.round((stats.converted / stats.total) * 100) : 0}%</span>
+        {/* Withdraw button */}
+        <motion.div variants={fadeUp}>
+          <Card className="border-border/50">
+            <CardContent className="p-5 flex items-center justify-between">
+              <div>
+                <p className="font-semibold text-foreground">Solicitar Saque</p>
+                <p className="text-sm text-muted-foreground">Saldo disponível: {formatCurrency(stats.pendingBalance)}</p>
               </div>
-              <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${stats.total > 0 ? (stats.converted / stats.total) * 100 : 0}%` }}
-                  transition={{ duration: 0.8, ease: "easeOut" }}
-                  className="h-full bg-gradient-to-r from-primary to-success rounded-full"
-                />
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-1.5">
-                {stats.converted} de {stats.total} indicações convertidas
-              </p>
-            </div>
-          </motion.div>
-        )}
+              <Button 
+                onClick={() => setShowWithdrawDialog(true)} 
+                disabled={stats.pendingBalance <= 0}
+                className="gap-2"
+              >
+                <ArrowUpRight className="w-4 h-4" /> Sacar via PIX
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Conversion chart */}
         {monthlyData.length > 0 && (
@@ -194,16 +243,37 @@ const AffiliateDashboard = () => {
           </motion.div>
         )}
 
-        {/* Source breakdown */}
-        {Object.keys(sourceData).length > 0 && (
+        {/* Withdrawal history */}
+        {withdrawals.length > 0 && (
           <motion.div variants={fadeUp}>
             <Card className="border-border/50">
-              <CardHeader><CardTitle className="text-sm font-semibold">Origem das Indicações</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="text-sm font-semibold">Histórico de Saques</CardTitle></CardHeader>
               <CardContent>
-                <div className="flex gap-2 flex-wrap">
-                  {Object.entries(sourceData).map(([src, count]) => (
-                    <Badge key={src} variant="outline" className="text-sm py-1.5 px-3 rounded-xl">{src}: {count}</Badge>
-                  ))}
+                <div className="rounded-xl border border-border/50 overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="bg-muted/30">
+                        <TableHead className="text-xs">Valor</TableHead>
+                        <TableHead className="text-xs">PIX</TableHead>
+                        <TableHead className="text-xs">Status</TableHead>
+                        <TableHead className="text-xs">Data</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {withdrawals.map(w => (
+                        <TableRow key={w.id} className="hover:bg-muted/20">
+                          <TableCell className="font-semibold text-foreground">{formatCurrency(Number(w.amount))}</TableCell>
+                          <TableCell className="text-muted-foreground text-sm">{w.pix_key}</TableCell>
+                          <TableCell>
+                            <Badge variant={w.status === "approved" ? "default" : w.status === "rejected" ? "destructive" : "secondary"}>
+                              {w.status === "approved" ? "✅ Pago" : w.status === "rejected" ? "❌ Rejeitado" : "⏳ Pendente"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground">{format(new Date(w.created_at), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
               </CardContent>
             </Card>
@@ -228,6 +298,7 @@ const AffiliateDashboard = () => {
                         <TableHead className="text-xs">Código</TableHead>
                         <TableHead className="text-xs">Origem</TableHead>
                         <TableHead className="text-xs">Status</TableHead>
+                        <TableHead className="text-xs">Comissão</TableHead>
                         <TableHead className="text-xs">Data</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -241,6 +312,9 @@ const AffiliateDashboard = () => {
                               {r.status === "converted" ? "Convertido" : r.status === "expired" ? "Expirado" : "Pendente"}
                             </Badge>
                           </TableCell>
+                          <TableCell className="text-sm">
+                            {r.status === "converted" ? formatCurrency(89 * ((affiliateProfile?.commission_percent ?? 2) / 100)) : "—"}
+                          </TableCell>
                           <TableCell className="text-xs text-muted-foreground">{format(new Date(r.created_at), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
                         </TableRow>
                       ))}
@@ -252,6 +326,47 @@ const AffiliateDashboard = () => {
           </Card>
         </motion.div>
       </motion.div>
+
+      {/* Withdraw Dialog */}
+      <Dialog open={showWithdrawDialog} onOpenChange={setShowWithdrawDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wallet className="w-5 h-5" /> Solicitar Saque
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 rounded-xl bg-muted/50 text-sm">
+              <p className="text-muted-foreground">Saldo disponível: <strong className="text-foreground">{formatCurrency(stats.pendingBalance)}</strong></p>
+            </div>
+            <div>
+              <Label>Valor do saque (R$)</Label>
+              <Input 
+                type="number" 
+                value={withdrawAmount} 
+                onChange={e => setWithdrawAmount(e.target.value)} 
+                placeholder="0,00" 
+                className="mt-1"
+                max={stats.pendingBalance}
+                min={1}
+                step="0.01"
+              />
+            </div>
+            <div>
+              <Label>Chave PIX</Label>
+              <Input 
+                value={withdrawPixKey} 
+                onChange={e => setWithdrawPixKey(e.target.value)} 
+                placeholder="CPF, email, telefone ou chave aleatória" 
+                className="mt-1" 
+              />
+            </div>
+            <Button onClick={handleWithdraw} disabled={submittingWithdraw} className="w-full">
+              {submittingWithdraw ? "Enviando..." : "Confirmar Solicitação"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };

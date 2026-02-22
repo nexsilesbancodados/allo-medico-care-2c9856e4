@@ -6,8 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowLeft, Megaphone, LogIn, UserPlus } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Megaphone, LogIn, UserPlus, AlertCircle } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Step = "welcome" | "register" | "login";
 
@@ -17,6 +18,7 @@ const AuthAfiliado = () => {
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+  const [pixKey, setPixKey] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -29,6 +31,27 @@ const AuthAfiliado = () => {
     if (error) {
       toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
     } else {
+      // Check if affiliate is approved
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: affiliateProfile } = await (supabase as any)
+          .from("affiliate_profiles")
+          .select("is_approved")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        
+        if (!affiliateProfile) {
+          toast({ title: "Conta não encontrada", description: "Você não possui um perfil de afiliado.", variant: "destructive" });
+          await supabase.auth.signOut();
+          return;
+        }
+        
+        if (!affiliateProfile.is_approved) {
+          toast({ title: "Aguardando aprovação", description: "Seu cadastro ainda está em análise. Você receberá um e-mail quando for aprovado.", variant: "destructive" });
+          await supabase.auth.signOut();
+          return;
+        }
+      }
       navigate("/dashboard?role=affiliate");
     }
   };
@@ -47,12 +70,13 @@ const AuthAfiliado = () => {
     }
     if (data.user) {
       await supabase.functions.invoke("assign-role", {
-        body: { user_id: data.user.id, role: "affiliate" },
+        body: { user_id: data.user.id, role: "affiliate", profile_data: { pix_key: pixKey } },
       });
     }
     setLoading(false);
-    toast({ title: "Cadastro realizado!", description: "Você já pode gerar seu link de indicação." });
-    navigate("/dashboard?role=affiliate");
+    await supabase.auth.signOut();
+    toast({ title: "Cadastro realizado!", description: "Seu pedido de afiliação foi enviado. O administrador irá analisar e você receberá um e-mail com o resultado." });
+    setStep("welcome");
   };
 
   return (
@@ -71,10 +95,10 @@ const AuthAfiliado = () => {
             Indique pacientes para a AloClinica e ganhe comissões por cada conversão.
           </p>
           <div className="mt-8 space-y-3 opacity-80 text-sm">
-            <p>✓ Link de indicação exclusivo</p>
-            <p>✓ Comissão por conversão</p>
-            <p>✓ Dashboard com métricas em tempo real</p>
-            <p>✓ Rastreamento completo de indicações</p>
+            <p>✓ Comissão de 2% sobre todos os ganhos dos indicados</p>
+            <p>✓ Comissão recorrente em assinaturas mensais</p>
+            <p>✓ Dashboard com ganhos em tempo real</p>
+            <p>✓ Solicitação de saque via PIX</p>
           </div>
         </div>
       </div>
@@ -93,15 +117,18 @@ const AuthAfiliado = () => {
               <h2 className="text-2xl font-bold text-foreground">
                 {step === "welcome" ? "Programa de Afiliados" : step === "login" ? "Entrar" : "Cadastro de Afiliado"}
               </h2>
-              <p className="text-sm text-muted-foreground">Indique e ganhe</p>
+              <p className="text-sm text-muted-foreground">Indique e ganhe 2% de comissão</p>
             </div>
           </div>
 
           {step === "welcome" && (
             <div className="space-y-4">
-              <p className="text-muted-foreground text-sm mb-2">
-                Ganhe comissões indicando pacientes. Escolha uma opção:
-              </p>
+              <Alert className="border-primary/30 bg-primary/5">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  Após o cadastro, um administrador irá analisar seu pedido. Você receberá um e-mail informando se foi aprovado ou não.
+                </AlertDescription>
+              </Alert>
               <Button className="w-full bg-gradient-hero text-primary-foreground" size="lg" onClick={() => setStep("login")}>
                 <LogIn className="w-4 h-4 mr-2" /> Entrar na minha conta
               </Button>
@@ -125,14 +152,24 @@ const AuthAfiliado = () => {
                 </div>
               </div>
               <div>
+                <Label>Chave PIX (para receber comissões)</Label>
+                <Input value={pixKey} onChange={e => setPixKey(e.target.value)} placeholder="CPF, email, telefone ou chave aleatória" className="mt-1" />
+              </div>
+              <div>
                 <Label>Senha</Label>
                 <div className="relative mt-1">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="pl-10" required minLength={6} />
                 </div>
               </div>
+              <Alert className="border-warning/30 bg-warning/5">
+                <AlertCircle className="h-4 w-4 text-warning" />
+                <AlertDescription className="text-xs text-muted-foreground">
+                  Após o cadastro, sua conta ficará pendente até a aprovação do administrador.
+                </AlertDescription>
+              </Alert>
               <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading}>
-                {loading ? "Criando conta..." : "Cadastrar como Afiliado"}
+                {loading ? "Enviando pedido..." : "Solicitar Afiliação"}
               </Button>
               <p className="text-center text-sm text-muted-foreground">
                 <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>

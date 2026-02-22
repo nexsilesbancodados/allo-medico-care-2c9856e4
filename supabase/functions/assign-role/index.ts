@@ -79,6 +79,15 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (role === "affiliate") {
+      await supabase.from("affiliate_profiles").insert({
+        user_id,
+        pix_key: profile_data?.pix_key || null,
+        is_approved: false,
+        commission_percent: 2,
+      });
+    }
+
     // Mark invite code as used if provided
     if (profile_data?.invite_code_id) {
       await supabase.from("doctor_invite_codes").update({
