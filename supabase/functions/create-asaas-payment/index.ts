@@ -14,17 +14,12 @@ async function asaasFetch(url: string, options: RequestInit, attempt = 1): Promi
       ...options,
       signal: AbortSignal.timeout(PAYMENT_TIMEOUT),
     });
-
-    // Don't retry client errors (4xx)
     if (res.status >= 400 && res.status < 500) return res;
-
-    // Retry server errors (5xx)
     if (!res.ok && attempt < 3) {
       console.warn(`Asaas API ${res.status}, retrying (${attempt}/3)...`);
       await new Promise(r => setTimeout(r, 2000 * Math.pow(2, attempt - 1)));
       return asaasFetch(url, options, attempt + 1);
     }
-
     return res;
   } catch (error: any) {
     console.error(`Asaas fetch error (attempt ${attempt}/3):`, error.message);
@@ -44,6 +39,23 @@ async function safeJson(res: Response): Promise<any> {
   return res.json();
 }
 
+/**
+ * Resolve Asaas base URL based on API key prefix.
+ * Production keys start with "$aact_", sandbox keys with "$aact_" too but
+ * the sandbox URL changed to api-sandbox.asaas.com per official docs.
+ * We use a simple heuristic: if key contains "sandbox" treat as sandbox,
+ * otherwise production. Users can also set ASAAS_ENVIRONMENT secret.
+ */
+function getBaseUrl(apiKey: string): string {
+  const env = Deno.env.get("ASAAS_ENVIRONMENT"); // "production" or "sandbox"
+  if (env === "production") return "https://api.asaas.com/v3";
+  if (env === "sandbox") return "https://api-sandbox.asaas.com/v3";
+  // Auto-detect: production keys start with $aact_
+  return apiKey.startsWith("$aact_")
+    ? "https://api.asaas.com/v3"
+    : "https://api-sandbox.asaas.com/v3";
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -58,21 +70,24 @@ serve(async (req) => {
       );
     }
 
-    // Detect sandbox vs production based on key prefix
-    const baseUrl = ASAAS_API_KEY.startsWith("$aact_")
-      ? "https://api.asaas.com/v3"
-      : "https://sandbox.asaas.com/api/v3";
+    const baseUrl = getBaseUrl(ASAAS_API_KEY);
 
     const {
       customerName,
       customerCpf,
       customerEmail,
       customerPhone,
+      customerMobilePhone,
+      customerPostalCode,
+      customerAddress,
+      customerAddressNumber,
+      customerProvince,
       billingType,
       value,
       description,
       appointmentId,
       planId,
+      // Credit card fields
       cardHolderName,
       cardNumber,
       cardExpiryMonth,
@@ -80,9 +95,22 @@ serve(async (req) => {
       cardCcv,
       cardHolderCpf,
       cardHolderPhone,
+      cardHolderEmail,
       cardHolderPostalCode,
       cardHolderAddressNumber,
+      cardHolderAddress,
+      cardHolderProvince,
+      // Subscription fields
       cycle,
+      nextDueDate,
+      maxPayments,
+      endDate,
+      // Installment fields (parcelamento)
+      installmentCount,
+      installmentValue,
+      totalValue,
+      // Notification
+      notificationDisabled,
     } = await req.json();
 
     if (!customerName || !customerCpf || !billingType || !value) {
@@ -94,11 +122,13 @@ serve(async (req) => {
 
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      "access_token": ASAAS_API_KEY,
+      accept: "application/json",
+      access_token: ASAAS_API_KEY,
     };
 
-    // Step 1: Find or create customer
-    const searchRes = await asaasFetch(`${baseUrl}/customers?cpfCnpj=${customerCpf.replace(/\D/g, "")}`, { headers });
+    // ─── Step 1: Find or create customer (per docs: POST /v3/customers) ───
+    const cleanCpf = customerCpf.replace(/\D/g, "");
+    const searchRes = await asaasFetch(`${baseUrl}/customers?cpfCnpj=${cleanCpf}`, { headers });
     const searchData = await safeJson(searchRes);
 
     let customerId: string;
@@ -106,15 +136,26 @@ serve(async (req) => {
     if (searchData.data && searchData.data.length > 0) {
       customerId = searchData.data[0].id;
     } else {
+      // Per docs: name and cpfCnpj required. mobilePhone for cell, phone for landline.
+      const customerBody: Record<string, any> = {
+        name: customerName,
+        cpfCnpj: cleanCpf,
+      };
+      if (customerEmail) customerBody.email = customerEmail;
+      // Per docs: "mobilePhone" is the correct field for cell phone
+      if (customerMobilePhone || customerPhone) {
+        customerBody.mobilePhone = (customerMobilePhone || customerPhone).replace(/\D/g, "");
+      }
+      if (customerPostalCode) customerBody.postalCode = customerPostalCode.replace(/\D/g, "");
+      if (customerAddress) customerBody.address = customerAddress;
+      if (customerAddressNumber) customerBody.addressNumber = customerAddressNumber;
+      if (customerProvince) customerBody.province = customerProvince;
+      if (notificationDisabled !== undefined) customerBody.notificationDisabled = notificationDisabled;
+
       const createCustomerRes = await asaasFetch(`${baseUrl}/customers`, {
         method: "POST",
         headers,
-        body: JSON.stringify({
-          name: customerName,
-          cpfCnpj: customerCpf.replace(/\D/g, ""),
-          email: customerEmail || undefined,
-          phone: customerPhone || undefined,
-        }),
+        body: JSON.stringify(customerBody),
       });
       const customerData = await safeJson(createCustomerRes);
       if (!createCustomerRes.ok) {
@@ -127,17 +168,23 @@ serve(async (req) => {
       customerId = customerData.id;
     }
 
-    // Step 2: Create payment or subscription
+    // ─── Step 2: Create subscription (POST /v3/subscriptions) ───
     if (cycle) {
+      // Per docs: customer, billingType, value, nextDueDate, cycle are required
+      const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
       const subBody: Record<string, any> = {
         customer: customerId,
         billingType,
         value,
         cycle,
-        description: description || "Assinatura AloClinica",
-        externalReference: planId || undefined,
+        nextDueDate: nextDueDate || tomorrow,
+        description: description || "Assinatura AloClínica",
       };
+      if (planId) subBody.externalReference = planId;
+      if (maxPayments) subBody.maxPayments = maxPayments;
+      if (endDate) subBody.endDate = endDate;
 
+      // Credit card inline for subscriptions
       if (billingType === "CREDIT_CARD" && cardNumber) {
         subBody.creditCard = {
           holderName: cardHolderName,
@@ -148,10 +195,13 @@ serve(async (req) => {
         };
         subBody.creditCardHolderInfo = {
           name: cardHolderName || customerName,
+          email: cardHolderEmail || customerEmail || "",
           cpfCnpj: (cardHolderCpf || customerCpf).replace(/\D/g, ""),
-          phone: cardHolderPhone || customerPhone || "",
-          postalCode: cardHolderPostalCode || "",
-          addressNumber: cardHolderAddressNumber || "",
+          phone: (cardHolderPhone || customerMobilePhone || customerPhone || "").replace(/\D/g, ""),
+          postalCode: (cardHolderPostalCode || customerPostalCode || "").replace(/\D/g, ""),
+          addressNumber: cardHolderAddressNumber || customerAddressNumber || "",
+          address: cardHolderAddress || customerAddress || "",
+          province: cardHolderProvince || customerProvince || "",
         };
       }
 
@@ -180,33 +230,32 @@ serve(async (req) => {
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
-    } else {
-      const paymentBody: Record<string, any> = {
-        customer: customerId,
-        billingType,
-        value,
-        dueDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-        description: description || "Consulta AloClinica",
-        externalReference: appointmentId || undefined,
-      };
+    }
 
-      if (billingType === "CREDIT_CARD" && cardNumber) {
-        paymentBody.creditCard = {
-          holderName: cardHolderName,
-          number: cardNumber.replace(/\s/g, ""),
-          expiryMonth: cardExpiryMonth,
-          expiryYear: cardExpiryYear,
-          ccv: cardCcv,
-        };
-        paymentBody.creditCardHolderInfo = {
-          name: cardHolderName || customerName,
-          cpfCnpj: (cardHolderCpf || customerCpf).replace(/\D/g, ""),
-          phone: cardHolderPhone || customerPhone || "",
-          postalCode: cardHolderPostalCode || "",
-          addressNumber: cardHolderAddressNumber || "",
-        };
+    // ─── Step 3: Create single payment (POST /v3/payments) ───
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
+    const paymentBody: Record<string, any> = {
+      customer: customerId,
+      billingType,
+      value,
+      dueDate: tomorrow,
+      description: description || "Consulta AloClínica",
+    };
+    if (appointmentId) paymentBody.externalReference = appointmentId;
+
+    // Per docs: installment fields for parcelamento (2+ parcelas only)
+    if (installmentCount && installmentCount >= 2) {
+      paymentBody.installmentCount = installmentCount;
+      if (totalValue) {
+        paymentBody.totalValue = totalValue;
+      } else if (installmentValue) {
+        paymentBody.installmentValue = installmentValue;
       }
+    }
 
+    // For CREDIT_CARD: create payment first, then pay with card via /payWithCreditCard
+    if (billingType === "CREDIT_CARD" && cardNumber) {
+      // Step 3a: Create the payment without card info
       const payRes = await asaasFetch(`${baseUrl}/payments`, {
         method: "POST",
         headers,
@@ -222,18 +271,40 @@ serve(async (req) => {
         );
       }
 
-      // If PIX, get QR code
-      let pixData = null;
-      if (billingType === "PIX" && payData.id) {
-        await new Promise(r => setTimeout(r, 1500));
-        try {
-          const pixRes = await asaasFetch(`${baseUrl}/payments/${payData.id}/pixQrCode`, { headers });
-          if (pixRes.ok) {
-            pixData = await safeJson(pixRes);
-          }
-        } catch (e) {
-          console.warn("PIX QR code fetch failed, payment still created:", e);
-        }
+      // Step 3b: Pay with credit card (POST /v3/payments/{id}/payWithCreditCard)
+      const cardBody: Record<string, any> = {
+        creditCard: {
+          holderName: cardHolderName,
+          number: cardNumber.replace(/\s/g, ""),
+          expiryMonth: cardExpiryMonth,
+          expiryYear: cardExpiryYear,
+          ccv: cardCcv,
+        },
+        creditCardHolderInfo: {
+          name: cardHolderName || customerName,
+          email: cardHolderEmail || customerEmail || "",
+          cpfCnpj: (cardHolderCpf || customerCpf).replace(/\D/g, ""),
+          phone: (cardHolderPhone || customerMobilePhone || customerPhone || "").replace(/\D/g, ""),
+          postalCode: (cardHolderPostalCode || customerPostalCode || "").replace(/\D/g, ""),
+          addressNumber: cardHolderAddressNumber || customerAddressNumber || "",
+          address: cardHolderAddress || customerAddress || "",
+          province: cardHolderProvince || customerProvince || "",
+        },
+      };
+
+      const cardRes = await asaasFetch(`${baseUrl}/payments/${payData.id}/payWithCreditCard`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(cardBody),
+      });
+      const cardData = await safeJson(cardRes);
+
+      if (!cardRes.ok) {
+        console.error("Asaas credit card error:", cardData);
+        return new Response(
+          JSON.stringify({ error: cardData.errors?.[0]?.description || "Error processing credit card" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
       return new Response(
@@ -241,16 +312,58 @@ serve(async (req) => {
           success: true,
           type: "payment",
           paymentId: payData.id,
-          status: payData.status,
+          status: cardData.status || payData.status,
           invoiceUrl: payData.invoiceUrl,
-          bankSlipUrl: payData.bankSlipUrl,
-          pixQrCode: pixData?.encodedImage || null,
-          pixCopyPaste: pixData?.payload || null,
-          ...payData,
+          ...cardData,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Step 3 (PIX / BOLETO / UNDEFINED): create payment directly
+    const payRes = await asaasFetch(`${baseUrl}/payments`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(paymentBody),
+    });
+    const payData = await safeJson(payRes);
+
+    if (!payRes.ok) {
+      console.error("Asaas payment error:", payData);
+      return new Response(
+        JSON.stringify({ error: payData.errors?.[0]?.description || "Error creating payment" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // If PIX, get QR code (GET /v3/payments/{id}/pixQrCode)
+    let pixData = null;
+    if (billingType === "PIX" && payData.id) {
+      await new Promise(r => setTimeout(r, 1500));
+      try {
+        const pixRes = await asaasFetch(`${baseUrl}/payments/${payData.id}/pixQrCode`, { headers });
+        if (pixRes.ok) {
+          pixData = await safeJson(pixRes);
+        }
+      } catch (e) {
+        console.warn("PIX QR code fetch failed, payment still created:", e);
+      }
+    }
+
+    return new Response(
+      JSON.stringify({
+        success: true,
+        type: "payment",
+        paymentId: payData.id,
+        status: payData.status,
+        invoiceUrl: payData.invoiceUrl,
+        bankSlipUrl: payData.bankSlipUrl,
+        pixQrCode: pixData?.encodedImage || null,
+        pixCopyPaste: pixData?.payload || null,
+        ...payData,
+      }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (error) {
     console.error("Error:", error);
     return new Response(

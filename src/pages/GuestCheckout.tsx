@@ -255,7 +255,7 @@ const GuestCheckout = () => {
         customerName: guestName,
         customerCpf: guestCpf,
         customerEmail: guestEmail,
-        customerPhone: guestPhone,
+        customerMobilePhone: guestPhone,
         billingType: billingTypeMap[paymentMethod],
         value: totalPrice,
         description: `Consulta Avulsa - AloClinica`,

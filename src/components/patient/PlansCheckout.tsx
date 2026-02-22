@@ -340,7 +340,7 @@ const PlansCheckout = () => {
         customerName,
         customerCpf,
         customerEmail,
-        customerPhone,
+        customerMobilePhone: customerPhone,
         billingType: billingTypeMap[paymentMethod],
         value: totalPrice,
         description: selectedPlan === "avulsa"
