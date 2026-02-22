@@ -1,9 +1,24 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Check, TrendingUp, Calendar, Shield, Wallet } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import doctorImg1 from "@/assets/doctor-premium-1.png";
 import doctorImg2 from "@/assets/doctor-premium-2.png";
+
+const benefits = [
+  "Agenda inteligente e personalizada",
+  "Receitas e atestados digitais com assinatura",
+  "Prontuário eletrônico completo",
+  "Saques semanais via PIX",
+  "Suporte dedicado para médicos",
+  "Perfil público com SEO otimizado",
+];
+
+const floatingStats = [
+  { icon: TrendingUp, label: "Crescimento", value: "+40%", color: "bg-medical-green/15 text-medical-green" },
+  { icon: Calendar, label: "Setup", value: "5 min", color: "bg-primary/15 text-primary" },
+  { icon: Wallet, label: "Saque", value: "PIX", color: "bg-secondary/15 text-secondary" },
+];
 
 const DoctorPremiumSection = () => {
   const navigate = useNavigate();
@@ -16,8 +31,11 @@ const DoctorPremiumSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="relative overflow-hidden rounded-3xl bg-muted/60 dark:bg-muted/30 p-10 md:p-16"
+          className="relative overflow-hidden rounded-3xl bg-muted/60 dark:bg-muted/30 p-10 md:p-16 border border-border/30"
         >
+          {/* Decorative gradient */}
+          <div className="absolute top-0 right-0 w-96 h-96 rounded-full bg-primary/5 blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Text */}
             <div className="relative z-10">
@@ -26,8 +44,9 @@ const DoctorPremiumSection = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.1 }}
-                className="inline-block px-4 py-1.5 rounded-full border border-primary/30 text-primary text-sm font-semibold mb-6"
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 text-primary text-sm font-semibold mb-6"
               >
+                <Shield className="w-3.5 h-3.5" />
                 AloClinica Premium
               </motion.span>
 
@@ -42,7 +61,7 @@ const DoctorPremiumSection = () => {
                 <br />
                 para profissionais
                 <br />
-                da <span className="text-primary">saúde digital</span>
+                da <span className="text-gradient">saúde digital</span>
               </motion.h2>
 
               <motion.p
@@ -55,11 +74,37 @@ const DoctorPremiumSection = () => {
                 Um <strong className="text-foreground">formato exclusivo para médicos</strong> conectarem suas carreiras a novas possibilidades com a AloClinica.
               </motion.p>
 
+              {/* Benefits checklist */}
+              <motion.ul
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.35 }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-8"
+              >
+                {benefits.map((b, i) => (
+                  <motion.li
+                    key={i}
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4 + i * 0.05 }}
+                    className="flex items-center gap-2 text-sm text-foreground/80"
+                  >
+                    <div className="w-5 h-5 rounded-full bg-medical-green/15 flex items-center justify-center shrink-0">
+                      <Check className="w-3 h-3 text-medical-green" />
+                    </div>
+                    {b}
+                  </motion.li>
+                ))}
+              </motion.ul>
+
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.5 }}
+                className="flex flex-wrap gap-3"
               >
                 <Button
                   size="lg"
@@ -68,10 +113,18 @@ const DoctorPremiumSection = () => {
                 >
                   Cadastre-se <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full px-6"
+                  onClick={() => navigate("/clinica")}
+                >
+                  Sou Clínica
+                </Button>
               </motion.div>
             </div>
 
-            {/* Images */}
+            {/* Images + floating badges */}
             <div className="relative flex justify-center items-center min-h-[300px] lg:min-h-[400px]">
               <motion.div
                 initial={{ opacity: 0, x: 20, rotate: -3 }}
@@ -102,6 +155,30 @@ const DoctorPremiumSection = () => {
                   loading="lazy"
                 />
               </motion.div>
+
+              {/* Floating stat badges */}
+              {floatingStats.map((stat, i) => (
+                <motion.div
+                  key={stat.label}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.6 + i * 0.12, type: "spring", stiffness: 200 }}
+                  animate={{ y: [0, -6, 0] }}
+                  className={`absolute z-30 backdrop-blur-lg bg-card/90 rounded-xl shadow-card border border-border/50 px-3 py-2 flex items-center gap-2 ${
+                    i === 0 ? "top-2 right-0" : i === 1 ? "bottom-16 left-0" : "bottom-0 right-12"
+                  }`}
+                  style={{ animationDelay: `${i * 0.5}s` }}
+                >
+                  <div className={`w-8 h-8 rounded-lg ${stat.color} flex items-center justify-center`}>
+                    <stat.icon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-foreground leading-none">{stat.value}</p>
+                    <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </motion.div>
