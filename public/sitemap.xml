@@ -8,6 +8,9 @@
   <url><loc>https://allo-medico-care.lovable.app/afiliado</loc><priority>0.6</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://allo-medico-care.lovable.app/consulta-avulsa</loc><priority>0.8</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://allo-medico-care.lovable.app/auth</loc><priority>0.7</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/recepcionista</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/suporte</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
+  <url><loc>https://allo-medico-care.lovable.app/validar</loc><priority>0.5</priority><changefreq>monthly</changefreq></url>
   <url><loc>https://allo-medico-care.lovable.app/terms</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
   <url><loc>https://allo-medico-care.lovable.app/privacy</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
   <url><loc>https://allo-medico-care.lovable.app/lgpd</loc><priority>0.3</priority><changefreq>yearly</changefreq></url>
