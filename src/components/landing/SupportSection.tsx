@@ -1,7 +1,37 @@
-import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { HelpCircle, Headphones, MessageCircle } from "lucide-react";
-import supportImage from "@/assets/mascot-thumbsup.png";
+import { HelpCircle, Headphones, MessageCircle, Mail, Clock, Shield } from "lucide-react";
+import mascotImg from "@/assets/mascot-thumbsup.png";
+
+const channels = [
+  {
+    icon: HelpCircle,
+    title: "Central de dúvidas",
+    description: "Encontre respostas rápidas para as perguntas mais comuns.",
+    action: () => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" }),
+    color: "bg-primary/10 text-primary",
+  },
+  {
+    icon: Headphones,
+    title: "Suporte geral",
+    description: "Atendimento humanizado via WhatsApp para todos os usuários.",
+    action: () => window.open("https://wa.me/5511999999999?text=Olá! Preciso de suporte.", "_blank"),
+    color: "bg-medical-green/10 text-medical-green",
+  },
+  {
+    icon: MessageCircle,
+    title: "Suporte médico",
+    description: "Canal exclusivo para profissionais de saúde da plataforma.",
+    action: () => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e preciso de suporte.", "_blank"),
+    color: "bg-secondary/10 text-secondary",
+  },
+  {
+    icon: Mail,
+    title: "E-mail",
+    description: "Envie sua solicitação e respondemos em até 24h úteis.",
+    action: () => window.open("mailto:contato@aloclinica.com.br"),
+    color: "bg-accent/10 text-accent-foreground",
+  },
+];
 
 const SupportSection = () => {
   return (
@@ -16,57 +46,71 @@ const SupportSection = () => {
         >
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-4"
+              >
+                <Shield className="w-3 h-3" />
+                Suporte humano + IA
+              </motion.span>
+
               <motion.h2
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="text-3xl md:text-4xl font-extrabold text-foreground mb-4 leading-tight"
+                className="text-3xl md:text-4xl font-extrabold text-foreground mb-3 leading-tight"
               >
-                Ficou com alguma dúvida?
+                Ficou com alguma <span className="text-gradient">dúvida?</span>
               </motion.h2>
               <motion.p
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.3 }}
-                className="text-muted-foreground text-lg mb-8 max-w-md"
+                className="text-muted-foreground text-base md:text-lg mb-8 max-w-md"
               >
-                Acesse nossa central de dúvidas ou conte com o suporte exclusivo para profissionais.
+                Estamos sempre disponíveis para te ajudar. Escolha o canal que preferir.
               </motion.p>
+
+              {/* Support channel cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {channels.map((ch, i) => (
+                  <motion.button
+                    key={ch.title}
+                    initial={{ opacity: 0, y: 12 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.35 + i * 0.08 }}
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={ch.action}
+                    className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-elevated hover:border-primary/20 transition-all duration-300 text-left cursor-pointer"
+                  >
+                    <div className={`w-10 h-10 rounded-xl ${ch.color} flex items-center justify-center shrink-0`}>
+                      <ch.icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-foreground mb-0.5">{ch.title}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{ch.description}</p>
+                    </div>
+                  </motion.button>
+                ))}
+              </div>
+
+              {/* Availability indicator */}
               <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.4 }}
-                className="flex flex-wrap gap-3"
+                transition={{ delay: 0.7 }}
+                className="flex items-center gap-2 mt-6 text-xs text-muted-foreground"
               >
-                <Button
-                  size="lg"
-                  className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-full px-6 transition-all duration-300 hover:scale-105 hover:shadow-lg"
-                  onClick={() => document.getElementById("faq")?.scrollIntoView({ behavior: "smooth" })}
-                >
-                  <HelpCircle className="w-4 h-4 mr-2" />
-                  Central de dúvidas
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="rounded-full px-6 transition-all duration-300 hover:scale-105"
-                  onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Preciso de suporte.", "_blank")}
-                >
-                  <Headphones className="w-4 h-4 mr-2" />
-                  Suporte geral
-                </Button>
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="rounded-full px-6 transition-all duration-300 hover:scale-105"
-                  onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e preciso de suporte.", "_blank")}
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Suporte para médicos
-                </Button>
+                <Clock className="w-3.5 h-3.5" />
+                <span>Tempo médio de resposta: <strong className="text-foreground">menos de 5 min</strong></span>
+                <span className="w-2 h-2 rounded-full bg-medical-green animate-pulse ml-1" />
               </motion.div>
             </div>
 
@@ -80,9 +124,9 @@ const SupportSection = () => {
               <motion.img
                 whileHover={{ scale: 1.05, rotate: 2 }}
                 transition={{ duration: 0.3 }}
-                src={supportImage}
+                src={mascotImg}
                 alt="Pingo - Suporte"
-                className="w-full max-w-sm rounded-2xl object-cover shadow-card"
+                className="w-full max-w-xs rounded-2xl object-cover drop-shadow-2xl"
               />
             </motion.div>
           </div>
