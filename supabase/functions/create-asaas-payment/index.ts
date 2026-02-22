@@ -6,6 +6,44 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const PAYMENT_TIMEOUT = 30000;
+
+async function asaasFetch(url: string, options: RequestInit, attempt = 1): Promise<Response> {
+  try {
+    const res = await fetch(url, {
+      ...options,
+      signal: AbortSignal.timeout(PAYMENT_TIMEOUT),
+    });
+
+    // Don't retry client errors (4xx)
+    if (res.status >= 400 && res.status < 500) return res;
+
+    // Retry server errors (5xx)
+    if (!res.ok && attempt < 3) {
+      console.warn(`Asaas API ${res.status}, retrying (${attempt}/3)...`);
+      await new Promise(r => setTimeout(r, 2000 * Math.pow(2, attempt - 1)));
+      return asaasFetch(url, options, attempt + 1);
+    }
+
+    return res;
+  } catch (error: any) {
+    console.error(`Asaas fetch error (attempt ${attempt}/3):`, error.message);
+    if (attempt >= 3) throw error;
+    await new Promise(r => setTimeout(r, 2000 * Math.pow(2, attempt - 1)));
+    return asaasFetch(url, options, attempt + 1);
+  }
+}
+
+async function safeJson(res: Response): Promise<any> {
+  const contentType = res.headers.get("content-type");
+  if (!contentType?.includes("application/json")) {
+    const text = await res.text();
+    console.error("Asaas returned non-JSON:", text.substring(0, 300));
+    throw new Error("Asaas API returned an invalid response");
+  }
+  return res.json();
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -30,12 +68,11 @@ serve(async (req) => {
       customerCpf,
       customerEmail,
       customerPhone,
-      billingType, // PIX, BOLETO, CREDIT_CARD
+      billingType,
       value,
       description,
       appointmentId,
       planId,
-      // Card fields (only for CREDIT_CARD)
       cardHolderName,
       cardNumber,
       cardExpiryMonth,
@@ -45,8 +82,7 @@ serve(async (req) => {
       cardHolderPhone,
       cardHolderPostalCode,
       cardHolderAddressNumber,
-      // Subscription
-      cycle, // MONTHLY, WEEKLY, etc.
+      cycle,
     } = await req.json();
 
     if (!customerName || !customerCpf || !billingType || !value) {
@@ -56,21 +92,21 @@ serve(async (req) => {
       );
     }
 
-    const headers = {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "access_token": ASAAS_API_KEY,
     };
 
     // Step 1: Find or create customer
-    const searchRes = await fetch(`${baseUrl}/customers?cpfCnpj=${customerCpf}`, { headers });
-    const searchData = await searchRes.json();
+    const searchRes = await asaasFetch(`${baseUrl}/customers?cpfCnpj=${customerCpf.replace(/\D/g, "")}`, { headers });
+    const searchData = await safeJson(searchRes);
 
     let customerId: string;
 
     if (searchData.data && searchData.data.length > 0) {
       customerId = searchData.data[0].id;
     } else {
-      const createCustomerRes = await fetch(`${baseUrl}/customers`, {
+      const createCustomerRes = await asaasFetch(`${baseUrl}/customers`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -80,7 +116,7 @@ serve(async (req) => {
           phone: customerPhone || undefined,
         }),
       });
-      const customerData = await createCustomerRes.json();
+      const customerData = await safeJson(createCustomerRes);
       if (!createCustomerRes.ok) {
         console.error("Asaas customer error:", customerData);
         return new Response(
@@ -93,7 +129,6 @@ serve(async (req) => {
 
     // Step 2: Create payment or subscription
     if (cycle) {
-      // Subscription
       const subBody: Record<string, any> = {
         customer: customerId,
         billingType,
@@ -120,12 +155,12 @@ serve(async (req) => {
         };
       }
 
-      const subRes = await fetch(`${baseUrl}/subscriptions`, {
+      const subRes = await asaasFetch(`${baseUrl}/subscriptions`, {
         method: "POST",
         headers,
         body: JSON.stringify(subBody),
       });
-      const subData = await subRes.json();
+      const subData = await safeJson(subRes);
 
       if (!subRes.ok) {
         console.error("Asaas subscription error:", subData);
@@ -146,12 +181,11 @@ serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else {
-      // Single payment
       const paymentBody: Record<string, any> = {
         customer: customerId,
         billingType,
         value,
-        dueDate: new Date(Date.now() + 86400000).toISOString().split("T")[0], // tomorrow
+        dueDate: new Date(Date.now() + 86400000).toISOString().split("T")[0],
         description: description || "Consulta AloClinica",
         externalReference: appointmentId || undefined,
       };
@@ -173,12 +207,12 @@ serve(async (req) => {
         };
       }
 
-      const payRes = await fetch(`${baseUrl}/payments`, {
+      const payRes = await asaasFetch(`${baseUrl}/payments`, {
         method: "POST",
         headers,
         body: JSON.stringify(paymentBody),
       });
-      const payData = await payRes.json();
+      const payData = await safeJson(payRes);
 
       if (!payRes.ok) {
         console.error("Asaas payment error:", payData);
@@ -191,11 +225,14 @@ serve(async (req) => {
       // If PIX, get QR code
       let pixData = null;
       if (billingType === "PIX" && payData.id) {
-        // Wait a moment for PIX to be generated
-        await new Promise(r => setTimeout(r, 1000));
-        const pixRes = await fetch(`${baseUrl}/payments/${payData.id}/pixQrCode`, { headers });
-        if (pixRes.ok) {
-          pixData = await pixRes.json();
+        await new Promise(r => setTimeout(r, 1500));
+        try {
+          const pixRes = await asaasFetch(`${baseUrl}/payments/${payData.id}/pixQrCode`, { headers });
+          if (pixRes.ok) {
+            pixData = await safeJson(pixRes);
+          }
+        } catch (e) {
+          console.warn("PIX QR code fetch failed, payment still created:", e);
         }
       }
 
