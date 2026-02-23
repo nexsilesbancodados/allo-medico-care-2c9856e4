@@ -73,7 +73,8 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
   }, []);
 
   // Build Jitsi iframe URL — all config in hash to bypass deep linking & prejoin
-  const roomName = `allo-medico-${appointmentId.replace(/-/g, "").slice(0, 20)}`;
+  const roomName = `AlloMedicoConsulta${appointmentId.replace(/-/g, "")}`;
+  // Long unique room name avoids Jitsi's auto-lobby for "insecure" short names
   const displayName = userName || "Participante";
 
   const jitsiUrl = `https://meet.jit.si/${roomName}#` + [
@@ -87,6 +88,11 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     `config.hideConferenceTimer=true`,
     `config.enableWelcomePage=false`,
     `config.disableThirdPartyRequests=true`,
+    `config.enableLobbyChat=false`,
+    `config.hideLobbyButton=true`,
+    `config.requireDisplayName=false`,
+    `config.lobbyModeEnabled=false`,
+    `config.enableInsecureRoomNameWarning=false`,
     `config.deeplinking.disabled=true`,
     `config.deeplinking.desktop.enabled=false`,
     `config.deeplinking.android.enabled=false`,
