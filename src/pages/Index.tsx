@@ -3,7 +3,6 @@ import { useTheme } from "next-themes";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
-import SocialProofBar from "@/components/landing/SocialProofBar";
 import StatsSection from "@/components/landing/StatsSection";
 import HowItWorksSection from "@/components/landing/HowItWorksSection";
 import SpecialtiesSection from "@/components/landing/SpecialtiesSection";
@@ -83,10 +82,8 @@ const Index = () => {
       />
       <Header />
 
-      {/* 1. Impacto inicial — sem animação (above the fold) */}
+      {/* Hero — above the fold */}
       <HeroSection />
-
-      <SocialProofBar />
 
       <AnimateSection delay={0.05}>
         <StatsSection />

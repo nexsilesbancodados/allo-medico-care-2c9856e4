@@ -17,10 +17,7 @@ vi.mock("framer-motion", () => ({
 }));
 
 vi.mock("@/assets/hero-doctor.png", () => ({ default: "hero.png" }));
-vi.mock("@/assets/mascot-wave.png", () => ({ default: "wave.png" }));
-vi.mock("@/assets/mascot-thumbsup.png", () => ({ default: "thumbs.png" }));
-vi.mock("@/assets/mascot-reading.png", () => ({ default: "reading.png" }));
-vi.mock("@/assets/mascot-welcome.png", () => ({ default: "welcome.png" }));
+vi.mock("@/assets/logo.png", () => ({ default: "logo.png" }));
 vi.mock("@/assets/logo.png", () => ({ default: "logo.png" }));
 
 import { I18nProvider } from "@/i18n";
