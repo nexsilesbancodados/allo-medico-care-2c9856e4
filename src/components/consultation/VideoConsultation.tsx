@@ -25,6 +25,12 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
   const [showTopBar, setShowTopBar] = useState(true);
   const topBarTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const elapsedTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const jitsiContainerRef = useRef<HTMLDivElement>(null);
+  const jitsiApiRef = useRef<any>(null);
+
+  // Deterministic room name from appointmentId — same for doctor & patient
+  const roomName = `AlloMedicoConsulta${appointmentId.replace(/-/g, "")}`;
+  const displayName = userName || "Participante";
 
   // Elapsed timer
   useEffect(() => {
@@ -72,43 +78,104 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     } catch {}
   }, []);
 
-  // Build Jitsi iframe URL — all config in hash to bypass deep linking & prejoin
-  const roomName = `AlloMedicoConsulta${appointmentId.replace(/-/g, "")}`;
-  // Long unique room name avoids Jitsi's auto-lobby for "insecure" short names
-  const displayName = userName || "Participante";
+  // Initialize Jitsi Meet External API
+  useEffect(() => {
+    if (jitsiApiRef.current) return;
 
-  const jitsiUrl = `https://meet.jit.si/${roomName}#` + [
-    `config.prejoinPageEnabled=false`,
-    `config.prejoinConfig.enabled=false`,
-    `config.startWithAudioMuted=false`,
-    `config.startWithVideoMuted=false`,
-    `config.disableDeepLinking=true`,
-    `config.disableInviteFunctions=true`,
-    `config.hideConferenceSubject=true`,
-    `config.hideConferenceTimer=true`,
-    `config.enableWelcomePage=false`,
-    `config.disableThirdPartyRequests=true`,
-    `config.enableLobbyChat=false`,
-    `config.hideLobbyButton=true`,
-    `config.requireDisplayName=false`,
-    `config.lobbyModeEnabled=false`,
-    `config.enableInsecureRoomNameWarning=false`,
-    `config.deeplinking.disabled=true`,
-    `config.deeplinking.desktop.enabled=false`,
-    `config.deeplinking.android.enabled=false`,
-    `config.deeplinking.ios.enabled=false`,
-    `config.toolbarButtons=["microphone","camera","desktop","chat","raisehand","tileview","hangup","fullscreen"]`,
-    `interfaceConfig.SHOW_JITSI_WATERMARK=false`,
-    `interfaceConfig.SHOW_WATERMARK_FOR_GUESTS=false`,
-    `interfaceConfig.SHOW_BRAND_WATERMARK=false`,
-    `interfaceConfig.SHOW_CHROME_EXTENSION_BANNER=false`,
-    `interfaceConfig.MOBILE_APP_PROMO=false`,
-    `interfaceConfig.HIDE_INVITE_MORE_HEADER=true`,
-    `interfaceConfig.DISABLE_JOIN_LEAVE_NOTIFICATIONS=true`,
-    `interfaceConfig.MOBILE_DOWNLOAD_LINK_ANDROID=""`,
-    `interfaceConfig.MOBILE_DOWNLOAD_LINK_IOS=""`,
-    `userInfo.displayName="${displayName}"`,
-  ].join("&");
+    const loadAndInit = () => {
+      const JitsiMeetExternalAPI = (window as any).JitsiMeetExternalAPI;
+      if (!JitsiMeetExternalAPI || !jitsiContainerRef.current) return;
+
+      const api = new JitsiMeetExternalAPI("meet.jit.si", {
+        roomName,
+        parentNode: jitsiContainerRef.current,
+        width: "100%",
+        height: "100%",
+        userInfo: {
+          displayName,
+          email: "",
+        },
+        configOverwrite: {
+          prejoinPageEnabled: false,
+          prejoinConfig: { enabled: false },
+          startWithAudioMuted: false,
+          startWithVideoMuted: false,
+          disableDeepLinking: true,
+          disableInviteFunctions: true,
+          hideConferenceSubject: true,
+          hideConferenceTimer: true,
+          enableWelcomePage: false,
+          disableThirdPartyRequests: true,
+          enableLobbyChat: false,
+          hideLobbyButton: true,
+          requireDisplayName: false,
+          enableInsecureRoomNameWarning: false,
+          // These are the critical settings to disable lobby/moderator requirement
+          lobby: { autoKnock: true, enableChat: false },
+          // Disable all notifications about lobby
+          notifications: [],
+          // Security settings
+          enableClosePage: false,
+          // Toolbar
+          toolbarButtons: [
+            "microphone", "camera", "desktop", "chat",
+            "raisehand", "tileview", "hangup", "fullscreen",
+          ],
+        },
+        interfaceConfigOverwrite: {
+          SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
+          SHOW_BRAND_WATERMARK: false,
+          SHOW_CHROME_EXTENSION_BANNER: false,
+          MOBILE_APP_PROMO: false,
+          HIDE_INVITE_MORE_HEADER: true,
+          DISABLE_JOIN_LEAVE_NOTIFICATIONS: true,
+          MOBILE_DOWNLOAD_LINK_ANDROID: "",
+          MOBILE_DOWNLOAD_LINK_IOS: "",
+          DISABLE_PRESENCE_STATUS: false,
+          GENERATE_ROOMNAMES_ON_WELCOME_PAGE: false,
+          APP_NAME: "Allo Médico",
+          PROVIDER_NAME: "Allo Médico",
+          LANG_DETECTION: false,
+          DEFAULT_LANGUAGE: "ptBR",
+        },
+      });
+
+      api.addEventListener("videoConferenceJoined", () => {
+        setLoading(false);
+      });
+
+      api.addEventListener("readyToClose", () => {
+        onEndCall();
+      });
+
+      jitsiApiRef.current = api;
+    };
+
+    // Check if script already loaded
+    if ((window as any).JitsiMeetExternalAPI) {
+      loadAndInit();
+      return;
+    }
+
+    // Load the Jitsi External API script
+    const script = document.createElement("script");
+    script.src = "https://meet.jit.si/external_api.js";
+    script.async = true;
+    script.onload = () => loadAndInit();
+    script.onerror = () => {
+      console.error("Failed to load Jitsi API");
+      setLoading(false);
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      if (jitsiApiRef.current) {
+        jitsiApiRef.current.dispose();
+        jitsiApiRef.current = null;
+      }
+    };
+  }, [roomName, displayName]);
 
   return (
     <div
@@ -117,14 +184,11 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
       onClick={resetTopBar}
       onTouchStart={resetTopBar}
     >
-      {/* ===== JITSI IFRAME — full screen, handles everything ===== */}
-      <iframe
-        src={jitsiUrl}
-        allow="camera; microphone; display-capture; autoplay; clipboard-write; fullscreen"
-        className="absolute inset-0 w-full h-full border-none z-[1]"
-        title="Videochamada"
+      {/* ===== JITSI CONTAINER — External API renders here ===== */}
+      <div
+        ref={jitsiContainerRef}
+        className="absolute inset-0 w-full h-full z-[1]"
         style={{ minHeight: "100dvh" }}
-        onLoad={() => setLoading(false)}
       />
 
       {/* ===== TOP STATUS BAR (overlay) ===== */}
