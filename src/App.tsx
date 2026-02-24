@@ -6,8 +6,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
+import SplashScreen from "./components/SplashScreen";
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -66,7 +67,13 @@ const SubdomainRedirectProvider = () => {
   return null;
 };
 
-const App = () => (
+const App = () => {
+  const [splashDone, setSplashDone] = useState(false);
+  const handleSplashFinish = useCallback(() => setSplashDone(true), []);
+
+  return (
+  <>
+  {!splashDone && <SplashScreen onFinish={handleSplashFinish} />}
   <ErrorBoundary>
   <I18nProvider>
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
@@ -139,6 +146,8 @@ const App = () => (
   </ThemeProvider>
   </I18nProvider>
   </ErrorBoundary>
-);
+  </>
+  );
+};
 
 export default App;
