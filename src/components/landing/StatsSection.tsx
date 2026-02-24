@@ -97,19 +97,22 @@ const StatsSection = () => {
           {stats.map((stat, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              initial={{ opacity: 0, y: 30, scale: 0.8 }}
               whileInView={{ opacity: 1, y: 0, scale: 1 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.12, duration: 0.5, type: "spring", stiffness: 100 }}
-              whileHover={{ y: -6, transition: { duration: 0.25 } }}
+              transition={{ delay: i * 0.1, duration: 0.5, type: "spring", stiffness: 200, damping: 15 }}
+              whileHover={{ y: -8, scale: 1.04, boxShadow: "0 16px 40px -12px hsl(210 90% 45% / 0.12)" }}
+              whileTap={{ scale: 0.98 }}
               className="relative text-center group cursor-default rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-card hover:shadow-elevated hover:border-primary/20 transition-all duration-300 overflow-hidden"
             >
               {/* Gradient glow behind */}
               <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500 rounded-2xl`} />
 
               <div className="relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:bg-primary/20 group-hover:shadow-lg group-hover:shadow-primary/10 group-hover:scale-110">
-                  <stat.icon className="w-7 h-7 text-primary transition-transform duration-300 group-hover:scale-110" />
+                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:bg-primary/20 group-hover:shadow-lg group-hover:shadow-primary/10">
+                  <motion.div whileHover={{ rotate: 8, scale: 1.15 }} transition={{ type: "spring", stiffness: 300 }}>
+                    <stat.icon className="w-7 h-7 text-primary" />
+                  </motion.div>
                 </div>
                 <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mb-1">
                   <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={(stat as any).decimals} />
