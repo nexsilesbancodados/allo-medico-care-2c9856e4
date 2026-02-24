@@ -15,7 +15,7 @@ import {
   Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp,
   Bell, CheckCircle2, AlertCircle, Star, Activity, RefreshCw,
   Gift, Share2, Copy, ClipboardList, Stethoscope, Smile, ChevronRight,
-  Pill, User, CreditCard, ArrowRight, Sparkles
+  Pill, User, CreditCard, ArrowRight, Sparkles, CalendarPlus
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import MedicalHistoryExport from "@/components/patient/MedicalHistoryExport";
@@ -511,7 +511,7 @@ const PatientDashboard = () => {
                     transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
                     className="relative w-[72px] h-[72px] mx-auto rounded-[20px] bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/15 flex items-center justify-center mb-5 ring-1 ring-primary/10"
                   >
-                    <Sparkles className="w-8 h-8 text-primary drop-shadow-sm" />
+                    <CalendarPlus className="w-8 h-8 text-primary drop-shadow-sm" />
                     <motion.div
                       className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-success ring-2 ring-card"
                       initial={{ scale: 0 }}
