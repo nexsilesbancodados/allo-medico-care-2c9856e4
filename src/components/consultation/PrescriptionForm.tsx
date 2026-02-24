@@ -15,6 +15,7 @@ import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import MemedPrescription from "./MemedPrescription";
+import CfmPrescription from "./CfmPrescription";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 
 const doctorNav = [
@@ -452,6 +453,22 @@ const PrescriptionForm = () => {
 
         <h1 className="text-2xl font-bold text-foreground mb-1">Receita Médica</h1>
         <p className="text-muted-foreground mb-6">Prescreva medicamentos para o paciente</p>
+
+        {/* CFM Official Prescription */}
+        {doctorInfo && (
+          <div className="mb-4">
+            <CfmPrescription
+              doctorCrm={doctorInfo.crm}
+              doctorCrmState={doctorInfo.crm_state}
+              doctorName={`${doctorInfo.first_name} ${doctorInfo.last_name}`}
+              patientName={patientName}
+              patientCpf={patientCpf}
+              onDocumentCreated={(docType) => {
+                toast({ title: "Documento CFM emitido! ✅", description: `${docType} criado na plataforma oficial do CFM.` });
+              }}
+            />
+          </div>
+        )}
 
         {/* Memed Digital Prescription */}
         {appointmentId && patientId && (
