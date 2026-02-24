@@ -339,7 +339,7 @@ const PingoChatbot = () => {
               <div className="flex-1">
                 <p className="font-bold text-sm">Pingo 🐧</p>
                 <p className="text-xs opacity-80">
-                  {user ? `Olá, ${profile?.first_name ?? ""}!` : "Assistente virtual"}
+                  {user && profile?.first_name ? `Olá, ${profile.first_name}!` : "Assistente virtual"}
                 </p>
               </div>
               <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-white/20 transition-colors">
@@ -353,7 +353,7 @@ const PingoChatbot = () => {
                 <div className="text-center py-6">
                   <img src={mascotImg} alt="Pingo" className="w-16 h-16 mx-auto mb-3 opacity-80" />
                   <p className="text-sm font-semibold text-foreground">
-                    {user ? `Olá, ${profile?.first_name}! 🐧` : "Olá! Eu sou o Pingo! 🐧"}
+                    {user && profile?.first_name ? `Olá, ${profile.first_name}! 🐧` : "Olá! Eu sou o Pingo! 🐧"}
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">Como posso te ajudar hoje?</p>
                   
