@@ -171,10 +171,27 @@ const AuthPaciente = () => {
   const [mode, setMode] = useState<"register" | "login">("register");
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--landing-bg)' }}>
+    <div className="min-h-screen relative overflow-hidden flex flex-col" style={{ background: 'var(--landing-bg)' }}>
       <SEOHead title="Cadastro de Paciente" description="Crie sua conta de paciente na AloClinica e agende consultas online com médicos especialistas." />
-      {/* Header */}
-      <div className="border-b border-border bg-card/50">
+      
+      {/* Mobile gradient header */}
+      <div className="lg:hidden bg-gradient-to-br from-primary to-secondary px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-6">
+        <Link to="/" className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-3">
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </Link>
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+            <Heart className="w-5 h-5 text-primary-foreground" />
+          </div>
+          <div>
+            <h1 className="text-lg font-bold text-primary-foreground">Portal do Paciente</h1>
+            <p className="text-xs text-primary-foreground/70">Cuide da sua saúde online</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Desktop header */}
+      <div className="hidden lg:block border-b border-border bg-card/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition text-sm">
             <ArrowLeft className="w-4 h-4" /> Voltar ao início
@@ -362,7 +379,7 @@ const AuthPaciente = () => {
                   {password && <PasswordStrength password={password} />}
                 </div>
                 <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
-                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground cta-shimmer" size="lg" disabled={loading || !termsAccepted}>
+                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground cta-shimmer h-12" size="lg" disabled={loading || !termsAccepted}>
                   {loading ? (
                     <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 animate-spin" /> Criando conta...
@@ -403,7 +420,7 @@ const AuthPaciente = () => {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground cta-shimmer" size="lg" disabled={loading}>
+                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground cta-shimmer h-12" size="lg" disabled={loading}>
                   {loading ? (
                     <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
                       <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
@@ -423,11 +440,11 @@ const AuthPaciente = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              className="mt-8 flex items-center justify-center gap-4 text-xs text-muted-foreground"
+              className="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground pb-[max(env(safe-area-inset-bottom,8px),8px)]"
             >
-              <span className="flex items-center gap-1"><Shield className="w-3.5 h-3.5 text-primary" /> Dados protegidos</span>
-              <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-warning" /> 4.9/5 avaliação</span>
-              <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 text-destructive" /> 12k+ pacientes</span>
+              <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary shrink-0" /> Dados protegidos</span>
+              <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-warning shrink-0" /> 4.9/5</span>
+              <span className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 text-destructive shrink-0" /> 12k+ pacientes</span>
             </motion.div>
           </motion.div>
         )}
