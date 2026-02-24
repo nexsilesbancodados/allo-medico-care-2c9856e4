@@ -257,6 +257,55 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
       </div>
     `,
   }),
+  clinic_approved: (d) => ({
+    subject: "✅ Clínica Aprovada! — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#22c55e;">🏥 Clínica Aprovada!</h2>
+        <p>Olá <strong>${d.name}</strong>,</p>
+        <p>Sua clínica <strong>${d.clinic_name || ""}</strong> foi <strong style="color:#22c55e;">APROVADA</strong> na AloClinica!</p>
+        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;border:1px solid #e2e8f0;">
+          <p>Agora você pode:</p>
+          <ul>
+            <li>Vincular médicos à sua clínica</li>
+            <li>Gerenciar agendas e recepção</li>
+            <li>Acompanhar financeiro e relatórios</li>
+          </ul>
+        </div>
+        <a href="${d.login_url}" style="display:inline-block;background:#1a6fc4;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">Acessar Painel da Clínica</a>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  clinic_rejected: (d) => ({
+    subject: "❌ Clínica Não Aprovada — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#ef4444;">Clínica Não Aprovada</h2>
+        <p>Olá <strong>${d.name}</strong>,</p>
+        <p>Infelizmente, sua clínica <strong>${d.clinic_name || ""}</strong> <strong style="color:#ef4444;">não foi aprovada</strong> neste momento.</p>
+        ${d.reason ? `<div style="background:#fef2f2;padding:12px;border-radius:8px;margin:12px 0;"><strong>Motivo:</strong> ${d.reason}</div>` : ""}
+        <p>Se acredita que houve um engano, entre em contato com o suporte.</p>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  consultation_completed: (d) => ({
+    subject: "🎉 Consulta Finalizada — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#22c55e;">Consulta Finalizada!</h2>
+        <p>Olá <strong>${d.patient_name}</strong>,</p>
+        <p>Sua consulta com <strong>${d.doctor_name}</strong> foi concluída com sucesso!</p>
+        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;">
+          <p>📋 Receitas e documentos já estão disponíveis no seu painel.</p>
+          <p>⭐ Avalie sua experiência para ajudar outros pacientes!</p>
+        </div>
+        <p>Obrigado por usar a AloClinica! 💚</p>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
 };
 
 serve(async (req) => {

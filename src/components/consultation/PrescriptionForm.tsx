@@ -426,16 +426,11 @@ const PrescriptionForm = () => {
         }
       }).catch(console.error);
 
-      // Send push notification
+      // In-app + Push notification for prescription
       if (patientId) {
-        supabase.functions.invoke("send-push-notification", {
-          body: {
-            user_id: patientId,
-            title: "Nova Receita Médica 💊",
-            message: `${doctorFullName} emitiu uma receita para você.`,
-            link: "/dashboard/medical-history",
-          },
-        }).catch(console.error);
+        const { notifyPrescriptionSent } = await import("@/lib/notifications");
+        const medsSummary = validMeds.map(m => `${m.name} ${m.dosage}`).join(", ");
+        notifyPrescriptionSent(patientId, doctorFullName, diagnosis || undefined, medsSummary).catch(console.error);
       }
       store.clearDraft();
       toast({ title: "Receita salva com sucesso! ✅" });

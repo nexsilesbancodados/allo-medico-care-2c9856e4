@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { notifyConsultationStarted } from "@/lib/notifications";
+import { notifyConsultationStarted, notifyConsultationCompleted } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -527,6 +527,13 @@ const VideoRoom = () => {
     }
     if (isDoctor && notesRef.current) await saveNotes(true);
     await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId);
+    
+    // Notify patient that consultation is completed
+    if (isDoctor) {
+      const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
+      notifyConsultationCompleted(appointmentId!, docName).catch(console.error);
+    }
+    
     toast({ title: "Consulta encerrada" });
     setShowSummary(true);
   }, [isDoctor, appointmentId]);
