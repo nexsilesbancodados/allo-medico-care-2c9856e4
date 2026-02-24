@@ -128,7 +128,7 @@ async function sendWebPush(
 
   const jwt = await createJWT(
     audience,
-    "mailto:servicosplenasaude@gmail.com",
+    "mailto:lopesgustavo4377@gmail.com",
     vapidPrivateKey
   );
 
@@ -153,7 +153,7 @@ serve(async (req) => {
 
   try {
     const VAPID_PUBLIC_KEY =
-      "BFvbFqkrOeDEtpXSkK87rSdhOVxNcrT5u8M3j1c42pWVyGXeOVFad_uOKiBGmVZ9za1y5sZz1g7qPbM2FP1b7cc";
+      "BAcxZjzip4n-k1ifUoCKTHN8s2fo9woakP0bT1_2bim88q4vvDDFhrm5Ydg2Q_dg8-paX0lg39E6fq0KysNKkmg";
     const VAPID_PRIVATE_KEY = Deno.env.get("VAPID_PRIVATE_KEY");
 
     if (!VAPID_PRIVATE_KEY) {
@@ -205,7 +205,7 @@ serve(async (req) => {
         const audience = `${url.protocol}//${url.host}`;
 
         const { privateKey } = await importVapidKeys(VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
-        const jwt = await createJWT(audience, "mailto:servicosplenasaude@gmail.com", privateKey);
+        const jwt = await createJWT(audience, "mailto:lopesgustavo4377@gmail.com", privateKey);
 
         const res = await fetch(sub.endpoint, {
           method: "POST",
