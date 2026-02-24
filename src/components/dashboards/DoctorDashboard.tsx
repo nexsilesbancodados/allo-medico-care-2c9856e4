@@ -119,28 +119,33 @@ const DoctorDashboard = () => {
           </motion.div>
         )}
 
-        {/* KPI Cards — clean card style */}
+        {/* KPI Cards — animated */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {loading ? (
             Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" />)
           ) : (
             [
-              { label: "Hoje", value: stats.today, icon: Calendar, color: "text-primary", bg: "bg-primary/10" },
-              { label: "Pacientes", value: stats.total_patients, icon: Users, color: "text-secondary", bg: "bg-secondary/10", path: "/dashboard/patients" },
-              { label: "Receitas", value: stats.prescriptions, icon: FileText, color: "text-warning", bg: "bg-warning/10", path: "/dashboard/prescriptions" },
-              { label: "Ganhos", value: `R$ ${stats.totalEarnings.toFixed(0)}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", path: "/dashboard/earnings" },
-            ].map((kpi) => (
-              <button
+              { label: "Hoje", value: stats.today, icon: Calendar, color: "text-primary", bg: "bg-primary/10", glow: "group-hover:shadow-primary/15" },
+              { label: "Pacientes", value: stats.total_patients, icon: Users, color: "text-secondary", bg: "bg-secondary/10", path: "/dashboard/patients", glow: "group-hover:shadow-secondary/15" },
+              { label: "Receitas", value: stats.prescriptions, icon: FileText, color: "text-warning", bg: "bg-warning/10", path: "/dashboard/prescriptions", glow: "group-hover:shadow-warning/15" },
+              { label: "Ganhos", value: `R$ ${stats.totalEarnings.toFixed(0)}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", path: "/dashboard/earnings", glow: "group-hover:shadow-success/15" },
+            ].map((kpi, i) => (
+              <motion.button
                 key={kpi.label}
+                initial={{ opacity: 0, scale: 0.85, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: i * 0.08, type: "spring", stiffness: 200, damping: 15 }}
+                whileHover={{ y: -4, scale: 1.03 }}
+                whileTap={{ scale: 0.97 }}
                 onClick={() => kpi.path && navigate(kpi.path)}
-                className="p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md transition-all text-left"
+                className={`group p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-lg ${kpi.glow} transition-all text-left`}
               >
-                <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-3`}>
-                  <kpi.icon className={`w-4.5 h-4.5 ${kpi.color}`} />
+                <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-md`}>
+                  <kpi.icon className={`w-4.5 h-4.5 ${kpi.color} transition-transform duration-300 group-hover:rotate-6`} />
                 </div>
                 <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
                 <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
-              </button>
+              </motion.button>
             ))
           )}
         </motion.div>
@@ -218,12 +223,17 @@ const DoctorDashboard = () => {
                     </div>
                   ) : todayAppts.length === 0 ? (
                     <div className="text-center py-12">
-                      <div className="w-16 h-16 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
-                        <Sparkles className="w-8 h-8 text-muted-foreground/40" />
-                      </div>
-                      <p className="text-sm font-medium text-foreground mb-1">Agenda livre hoje</p>
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                        className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mb-4 shadow-lg shadow-primary/5"
+                      >
+                        <Sparkles className="w-8 h-8 text-primary" />
+                      </motion.div>
+                      <p className="text-sm font-semibold text-foreground mb-1">Agenda livre hoje</p>
                       <p className="text-xs text-muted-foreground mb-5">Nenhuma consulta agendada 🎉</p>
-                      <Button size="sm" variant="outline" onClick={() => navigate("/dashboard/availability")}>Configurar horários</Button>
+                      <Button size="sm" variant="outline" className="rounded-xl" onClick={() => navigate("/dashboard/availability")}>Configurar horários</Button>
                     </div>
                   ) : (
                     <div className="space-y-2">
@@ -313,18 +323,27 @@ const DoctorDashboard = () => {
                   { label: "Receitas", sub: "Prescrições", icon: FileText, color: "bg-warning/10", iconColor: "text-warning", path: "/dashboard/prescriptions" },
                   { label: "Sala de Espera", sub: "Fila ao vivo", icon: Video, color: "bg-success/10", iconColor: "text-success", path: "/dashboard/doctor/waiting-room" },
                   { label: "Calendário", sub: "Agenda semanal", icon: Calendar, color: "bg-secondary/10", iconColor: "text-secondary", path: "/dashboard/doctor/calendar" },
-                ].map(item => (
-                  <Card key={item.label} className="border-border/50 hover:shadow-md hover:border-border transition-all duration-200 cursor-pointer hover:-translate-y-0.5" onClick={() => navigate(item.path)}>
-                    <CardContent className="p-4 flex flex-col items-start gap-3">
-                      <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center`}>
-                        <item.icon className={`w-5 h-5 ${item.iconColor}`} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                        <p className="text-xs text-muted-foreground">{item.sub}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
+                ].map((item, i) => (
+                  <motion.div
+                    key={item.label}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 }}
+                    whileHover={{ y: -3, scale: 1.02 }}
+                    whileTap={{ scale: 0.97 }}
+                  >
+                    <Card className="border-border/50 hover:shadow-md hover:border-border transition-all duration-200 cursor-pointer group" onClick={() => navigate(item.path)}>
+                      <CardContent className="p-4 flex flex-col items-start gap-3">
+                        <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-md`}>
+                          <item.icon className={`w-5 h-5 ${item.iconColor}`} />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                          <p className="text-xs text-muted-foreground">{item.sub}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
                 ))}
               </div>
 
