@@ -1,12 +1,20 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Heart, Brain, Bone, Eye, Baby, Stethoscope, Droplets, Sun, ArrowRight } from "lucide-react";
+import { Stethoscope, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import cardSpecialties from "@/assets/card-specialties.png";
 import cardMultidisciplinary from "@/assets/card-multidisciplinary.png";
 import cardAi from "@/assets/card-ai.png";
 import cardTrained from "@/assets/card-trained.png";
+import specCardiology from "@/assets/spec-cardiology.png";
+import specNeurology from "@/assets/spec-neurology.png";
+import specPediatrics from "@/assets/spec-pediatrics.png";
+import specDermatology from "@/assets/spec-dermatology.png";
+import specOrthopedics from "@/assets/spec-orthopedics.png";
+import specOphthalmology from "@/assets/spec-ophthalmology.png";
+import specEndocrinology from "@/assets/spec-endocrinology.png";
+import specGeneral from "@/assets/spec-general.png";
 
 const highlights = [
   { badge: "Cuidado completo", title: "Mais de 8 especialidades médicas disponíveis", image: cardSpecialties },
@@ -16,14 +24,14 @@ const highlights = [
 ];
 
 const specialtyGrid = [
-  { icon: Heart, name: "Cardiologia", color: "bg-red-500/10 text-red-500" },
-  { icon: Brain, name: "Neurologia", color: "bg-purple-500/10 text-purple-500" },
-  { icon: Baby, name: "Pediatria", color: "bg-pink-500/10 text-pink-500" },
-  { icon: Sun, name: "Dermatologia", color: "bg-amber-500/10 text-amber-500" },
-  { icon: Bone, name: "Ortopedia", color: "bg-blue-500/10 text-blue-500" },
-  { icon: Eye, name: "Oftalmologia", color: "bg-cyan-500/10 text-cyan-500" },
-  { icon: Droplets, name: "Endocrinologia", color: "bg-emerald-500/10 text-emerald-500" },
-  { icon: Stethoscope, name: "Clínico Geral", color: "bg-primary/10 text-primary" },
+  { name: "Cardiologia", image: specCardiology },
+  { name: "Neurologia", image: specNeurology },
+  { name: "Pediatria", image: specPediatrics },
+  { name: "Dermatologia", image: specDermatology },
+  { name: "Ortopedia", image: specOrthopedics },
+  { name: "Oftalmologia", image: specOphthalmology },
+  { name: "Endocrinologia", image: specEndocrinology },
+  { name: "Clínico Geral", image: specGeneral },
 ];
 
 const SpecialtiesSection = () => {
@@ -70,8 +78,8 @@ const SpecialtiesSection = () => {
               onClick={() => navigate("/paciente")}
               className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-elevated hover:border-primary/30 transition-all duration-300 cursor-pointer group"
             >
-              <div className={`w-10 h-10 rounded-xl ${spec.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}>
-                <spec.icon className="w-5 h-5 transition-transform duration-300 group-hover:rotate-6" />
+              <div className="w-14 h-14 rounded-xl overflow-hidden transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
+                <img src={spec.image} alt={spec.name} className="w-full h-full object-cover" loading="lazy" />
               </div>
               <span className="text-[10px] md:text-xs font-semibold text-foreground text-center leading-tight">{spec.name}</span>
             </motion.div>
