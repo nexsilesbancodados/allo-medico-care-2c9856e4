@@ -19,7 +19,7 @@ import SupportSection from "@/components/landing/SupportSection";
 import Footer from "@/components/landing/Footer";
 
 import AnimateSection from "@/components/ui/animate-section";
-import EmergencyButton from "@/components/EmergencyButton";
+
 import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import { Button } from "@/components/ui/button";
@@ -168,7 +168,7 @@ const Index = () => {
       </AnimateSection>
 
       <Footer />
-      <EmergencyButton />
+      
       <FloatingMobileCTA />
       {showQuiz && <SpecialtyQuiz onClose={() => setShowQuiz(false)} />}
     </div>
