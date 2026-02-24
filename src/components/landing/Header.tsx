@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, LayoutDashboard } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
@@ -8,7 +8,16 @@ import { useAuth } from "@/contexts/AuthContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import logo from "@/assets/logo.png";
 
-const Header = () => {
+// Pre-compute rain drops outside component to avoid re-creation on every render
+const RAIN_DROPS = Array.from({ length: 20 }, (_, i) => ({
+  key: i,
+  left: `${(i / 20) * 100 + Math.random() * 2}%`,
+  height: `${8 + Math.random() * 14}px`,
+  duration: `${0.5 + Math.random() * 0.7}s`,
+  delay: `${Math.random() * 2}s`,
+}));
+
+const Header = memo(() => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t } = useTranslation();
@@ -222,18 +231,18 @@ const Header = () => {
         </AnimatePresence>
       </motion.header>
 
-      {/* Rain effect */}
+      {/* Rain effect — reduced DOM nodes */}
       <div className="fixed top-[30px] left-0 right-0 z-40 h-24 pointer-events-none overflow-hidden" style={{ maskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 0%, transparent 100%)' }}>
-        {Array.from({ length: 40 }).map((_, i) => (
+        {RAIN_DROPS.map((drop) => (
           <div
-            key={i}
+            key={drop.key}
             className="absolute w-[1px] bg-primary/20 dark:bg-primary/30 rounded-full"
             style={{
-              left: `${(i / 40) * 100 + Math.random() * 2}%`,
-              height: `${8 + Math.random() * 14}px`,
+              left: drop.left,
+              height: drop.height,
               animationName: 'rain-drop',
-              animationDuration: `${0.5 + Math.random() * 0.7}s`,
-              animationDelay: `${Math.random() * 2}s`,
+              animationDuration: drop.duration,
+              animationDelay: drop.delay,
               animationIterationCount: 'infinite',
               animationTimingFunction: 'linear',
             }}
@@ -242,6 +251,8 @@ const Header = () => {
       </div>
     </>
   );
-};
+});
+
+Header.displayName = "Header";
 
 export default Header;
