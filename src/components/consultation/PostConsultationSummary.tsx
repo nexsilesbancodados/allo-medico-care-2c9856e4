@@ -9,8 +9,6 @@ import {
   CheckCircle2, Clock, FileText, Pill, Star, ArrowRight,
   MessageSquare, Download, Shield
 } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 interface PostConsultationSummaryProps {
   appointmentId: string;
@@ -69,7 +67,7 @@ const PostConsultationSummary = ({
   };
 
   return (
-    <div className="min-h-screen bg-[hsl(220,30%,4%)] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -77,64 +75,64 @@ const PostConsultationSummary = ({
         className="w-full max-w-lg"
       >
         {/* Success icon */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6 sm:mb-8">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 300, delay: 0.2 }}
-            className="w-20 h-20 rounded-full bg-[hsl(150,60%,40%,0.15)] flex items-center justify-center mx-auto mb-4"
+            className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-success/15 flex items-center justify-center mx-auto mb-3 sm:mb-4"
           >
-            <CheckCircle2 className="w-10 h-10 text-[hsl(150,60%,50%)]" />
+            <CheckCircle2 className="w-8 h-8 sm:w-10 sm:h-10 text-success" />
           </motion.div>
-          <h1 className="text-2xl font-bold text-white mb-2">Consulta Encerrada</h1>
-          <p className="text-sm text-[hsl(220,15%,55%)]">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-1 sm:mb-2">Consulta Encerrada</h1>
+          <p className="text-sm text-muted-foreground">
             {isDoctor ? `Atendimento com ${otherPartyName}` : `Consulta com ${otherPartyName}`}
           </p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <Card className="bg-[hsl(220,20%,8%)] border-[hsl(220,15%,15%)]">
-            <CardContent className="p-3 text-center">
-              <Clock className="w-5 h-5 text-primary mx-auto mb-1" />
-              <p className="text-lg font-bold text-white">{formatDuration(elapsed)}</p>
-              <p className="text-[10px] text-[hsl(220,15%,45%)]">Duração</p>
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-6">
+          <Card className="bg-card border-border">
+            <CardContent className="p-2.5 sm:p-3 text-center">
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1" />
+              <p className="text-base sm:text-lg font-bold text-foreground">{formatDuration(elapsed)}</p>
+              <p className="text-[10px] text-muted-foreground">Duração</p>
             </CardContent>
           </Card>
-          <Card className="bg-[hsl(220,20%,8%)] border-[hsl(220,15%,15%)]">
-            <CardContent className="p-3 text-center">
-              <MessageSquare className="w-5 h-5 text-primary mx-auto mb-1" />
-              <p className="text-lg font-bold text-white">{messageCount}</p>
-              <p className="text-[10px] text-[hsl(220,15%,45%)]">Mensagens</p>
+          <Card className="bg-card border-border">
+            <CardContent className="p-2.5 sm:p-3 text-center">
+              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1" />
+              <p className="text-base sm:text-lg font-bold text-foreground">{messageCount}</p>
+              <p className="text-[10px] text-muted-foreground">Mensagens</p>
             </CardContent>
           </Card>
-          <Card className="bg-[hsl(220,20%,8%)] border-[hsl(220,15%,15%)]">
-            <CardContent className="p-3 text-center">
-              <Shield className="w-5 h-5 text-[hsl(150,60%,45%)] mx-auto mb-1" />
-              <p className="text-lg font-bold text-[hsl(150,60%,55%)]">E2E</p>
-              <p className="text-[10px] text-[hsl(220,15%,45%)]">Criptografada</p>
+          <Card className="bg-card border-border">
+            <CardContent className="p-2.5 sm:p-3 text-center">
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-success mx-auto mb-1" />
+              <p className="text-base sm:text-lg font-bold text-success">E2E</p>
+              <p className="text-[10px] text-muted-foreground">Criptografada</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Checklist */}
-        <Card className="bg-[hsl(220,20%,8%)] border-[hsl(220,15%,15%)] mb-6">
+        <Card className="bg-card border-border mb-5 sm:mb-6">
           <CardContent className="p-4 space-y-3">
-            <p className="text-xs font-semibold text-[hsl(220,15%,55%)] uppercase tracking-wider">Resumo</p>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Resumo</p>
             <div className="space-y-2.5">
               <div className="flex items-center gap-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${hasNotes ? "bg-[hsl(150,60%,40%,0.15)]" : "bg-[hsl(220,20%,15%)]"}`}>
-                  <FileText className={`w-3.5 h-3.5 ${hasNotes ? "text-[hsl(150,60%,50%)]" : "text-[hsl(220,15%,35%)]"}`} />
+                <div className={`w-7 h-7 sm:w-6 sm:h-6 rounded-full flex items-center justify-center shrink-0 ${hasNotes ? "bg-success/15" : "bg-muted"}`}>
+                  <FileText className={`w-3.5 h-3.5 ${hasNotes ? "text-success" : "text-muted-foreground"}`} />
                 </div>
-                <span className={`text-sm ${hasNotes ? "text-white" : "text-[hsl(220,15%,45%)]"}`}>
+                <span className={`text-sm ${hasNotes ? "text-foreground" : "text-muted-foreground"}`}>
                   {hasNotes ? "Prontuário SOAP preenchido" : "Prontuário não preenchido"}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${hasPrescription ? "bg-[hsl(150,60%,40%,0.15)]" : "bg-[hsl(220,20%,15%)]"}`}>
-                  <Pill className={`w-3.5 h-3.5 ${hasPrescription ? "text-[hsl(150,60%,50%)]" : "text-[hsl(220,15%,35%)]"}`} />
+                <div className={`w-7 h-7 sm:w-6 sm:h-6 rounded-full flex items-center justify-center shrink-0 ${hasPrescription ? "bg-success/15" : "bg-muted"}`}>
+                  <Pill className={`w-3.5 h-3.5 ${hasPrescription ? "text-success" : "text-muted-foreground"}`} />
                 </div>
-                <span className={`text-sm ${hasPrescription ? "text-white" : "text-[hsl(220,15%,45%)]"}`}>
+                <span className={`text-sm ${hasPrescription ? "text-foreground" : "text-muted-foreground"}`}>
                   {hasPrescription ? "Receita emitida" : "Nenhuma receita emitida"}
                 </span>
               </div>
@@ -147,7 +145,7 @@ const PostConsultationSummary = ({
           {isDoctor && !hasPrescription && (
             <Button
               onClick={() => navigate(`/dashboard/prescribe/${appointmentId}`)}
-              className="w-full h-12 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-semibold gap-2"
+              className="w-full h-12 rounded-xl font-semibold gap-2"
             >
               <Pill className="w-5 h-5" />
               Emitir Receita
@@ -157,18 +155,14 @@ const PostConsultationSummary = ({
           <Button
             onClick={onContinue}
             variant={isDoctor && !hasPrescription ? "outline" : "default"}
-            className={`w-full h-12 rounded-xl font-semibold gap-2 ${
-              isDoctor && !hasPrescription
-                ? "border-[hsl(220,15%,18%)] text-[hsl(220,15%,65%)] hover:bg-[hsl(220,20%,10%)]"
-                : "bg-primary hover:bg-primary/90 text-primary-foreground"
-            }`}
+            className="w-full h-12 rounded-xl font-semibold gap-2"
           >
             {isDoctor ? "Voltar ao Dashboard" : "Avaliar Consulta"}
             <ArrowRight className="w-4 h-4" />
           </Button>
         </div>
 
-        <p className="text-[10px] text-[hsl(220,15%,35%)] text-center mt-6">
+        <p className="text-[10px] text-muted-foreground text-center mt-6">
           Consulta registrada em conformidade com a Resolução CFM 2.314/2022
         </p>
       </motion.div>
