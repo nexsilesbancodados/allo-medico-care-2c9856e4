@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -56,6 +56,8 @@ const AuthPaciente = () => {
   const [processing, setProcessing] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [attempts, setAttempts] = useState(0);
+  const lockoutUntil = useRef<number>(0);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -96,6 +98,11 @@ const AuthPaciente = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (Date.now() < lockoutUntil.current) {
+      const secs = Math.ceil((lockoutUntil.current - Date.now()) / 1000);
+      toast({ title: "Aguarde", description: `Tente novamente em ${secs}s`, variant: "destructive" });
+      return;
+    }
     if (!termsAccepted) {
       toast({ title: "Aceite os termos", description: "Você precisa aceitar os Termos de Uso e Política de Privacidade para continuar.", variant: "destructive" });
       return;
@@ -137,12 +144,26 @@ const AuthPaciente = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (Date.now() < lockoutUntil.current) {
+      const secs = Math.ceil((lockoutUntil.current - Date.now()) / 1000);
+      toast({ title: "Aguarde", description: `Tente novamente em ${secs}s`, variant: "destructive" });
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
+      if (newAttempts >= 5) {
+        lockoutUntil.current = Date.now() + 30000; // 30s lockout
+        setAttempts(0);
+        toast({ title: "Muitas tentativas", description: "Conta bloqueada por 30 segundos.", variant: "destructive" });
+      } else {
+        toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
+      }
     } else {
+      setAttempts(0);
       navigate("/dashboard");
     }
   };

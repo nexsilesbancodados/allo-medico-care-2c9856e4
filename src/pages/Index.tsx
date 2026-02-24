@@ -7,6 +7,7 @@ import SocialProofBar from "@/components/landing/SocialProofBar";
 import AnimateSection from "@/components/ui/animate-section";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import patientPortalBg from "@/assets/patient-portal-bg.png";
+import { SectionSkeleton, StatsSkeleton, TestimonialsSkeleton } from "@/components/landing/SectionSkeleton";
 import { Button } from "@/components/ui/button";
 import { Stethoscope } from "lucide-react";
 import { useState } from "react";
@@ -26,12 +27,6 @@ const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
 const SupportSection = lazy(() => import("@/components/landing/SupportSection"));
 const Footer = lazy(() => import("@/components/landing/Footer"));
 const SpecialtyQuiz = lazy(() => import("@/components/landing/SpecialtyQuiz"));
-
-const SectionFallback = () => (
-  <div className="py-16 flex items-center justify-center">
-    <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-  </div>
-);
 
 const Index = () => {
   const { setTheme, theme } = useTheme();
@@ -97,7 +92,7 @@ const Index = () => {
       <SocialProofBar />
 
       {/* Below the fold — lazy loaded */}
-      <Suspense fallback={<SectionFallback />}>
+      <Suspense fallback={<><StatsSkeleton /><SectionSkeleton /><SectionSkeleton /><TestimonialsSkeleton /></>}>
         <AnimateSection delay={0.05}>
           <StatsSection />
         </AnimateSection>
