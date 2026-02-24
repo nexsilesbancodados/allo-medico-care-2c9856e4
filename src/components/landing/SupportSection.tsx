@@ -80,18 +80,22 @@ const SupportSection = () => {
                 {channels.map((ch, i) => (
                   <motion.button
                     key={ch.title}
-                    initial={{ opacity: 0, y: 12 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.85, y: 15 }}
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.35 + i * 0.08 }}
-                    whileHover={{ y: -4, scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    transition={{ delay: 0.35 + i * 0.08, type: "spring", stiffness: 200, damping: 15 }}
+                    whileHover={{ y: -6, scale: 1.04, boxShadow: "0 12px 30px -8px hsl(210 90% 45% / 0.12)" }}
+                    whileTap={{ scale: 0.97 }}
                     onClick={ch.action}
-                    className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:shadow-elevated hover:border-primary/20 transition-all duration-300 text-left cursor-pointer"
+                    className="flex items-start gap-3 p-4 rounded-xl bg-card border border-border shadow-card hover:border-primary/20 transition-colors text-left cursor-pointer group"
                   >
-                    <div className={`w-10 h-10 rounded-xl ${ch.color} flex items-center justify-center shrink-0`}>
-                      <ch.icon className="w-5 h-5" />
-                    </div>
+                    <motion.div
+                      className={`w-10 h-10 rounded-xl ${ch.color} flex items-center justify-center shrink-0`}
+                      whileHover={{ rotate: 8 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <ch.icon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                    </motion.div>
                     <div>
                       <p className="text-sm font-bold text-foreground mb-0.5">{ch.title}</p>
                       <p className="text-xs text-muted-foreground leading-relaxed">{ch.description}</p>
