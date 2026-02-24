@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { motion, useMotionValue, useTransform, useSpring, AnimatePresence, useScroll } from "framer-motion";
 import { Video, Shield, Clock, ArrowRight, Stethoscope, CalendarCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, memo, useCallback } from "react";
 import heroDoctor from "@/assets/hero-doctor.png";
 import mascotWave from "@/assets/mascot-wave.png";
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
@@ -62,7 +62,7 @@ const useAnimatedCounter = (end: number, duration = 2000) => {
   return count;
 };
 
-const HeroSection = () => {
+const HeroSection = memo(() => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
@@ -144,15 +144,15 @@ const HeroSection = () => {
 
   return (
     <section ref={sectionRef} aria-label="Início" className="relative min-h-[85vh] sm:min-h-[90vh] lg:min-h-screen flex items-center pt-20 sm:pt-24 overflow-hidden">
-      {/* Floating particles */}
-      {Array.from({ length: 8 }).map((_, i) => (
+      {/* Floating particles — reduced count */}
+      {Array.from({ length: 5 }).map((_, i) => (
         <motion.div
           key={i}
           className="absolute rounded-full bg-primary/15 pointer-events-none"
           style={{
             width: `${6 + (i % 3) * 4}px`,
             height: `${6 + (i % 3) * 4}px`,
-            left: `${10 + i * 11}%`,
+            left: `${10 + i * 18}%`,
             top: `${15 + (i % 4) * 20}%`,
             y: bgParallax,
           }}
@@ -420,6 +420,8 @@ const HeroSection = () => {
       </div>
     </section>
   );
-};
+});
+
+HeroSection.displayName = "HeroSection";
 
 export default HeroSection;
