@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { notifyDoctorApproval } from "@/lib/notifications";
+import { notifyDoctorApproval, notifyClinicApproval } from "@/lib/notifications";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -149,6 +149,11 @@ const AdminApprovals = () => {
       if (doc) {
         notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, true).catch(console.error);
       }
+    } else if (type === "clinic") {
+      const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === id);
+      if (clinic) {
+        notifyClinicApproval(clinic.user_id, clinic.name, true).catch(console.error);
+      }
     }
 
     toast({ title: `${type === "doctor" ? "Médico" : type === "clinic" ? "Clínica" : "Parceiro"} aprovado! ✅` });
@@ -209,6 +214,11 @@ const AdminApprovals = () => {
         const doc = [...pendingDoctors, ...approvedDoctors].find(d => d.id === rejectTarget.id);
         if (doc) {
           notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, false, rejectReason).catch(console.error);
+        }
+      } else if (rejectTarget.type === "clinic") {
+        const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === rejectTarget.id);
+        if (clinic) {
+          notifyClinicApproval(clinic.user_id, clinic.name, false, rejectReason).catch(console.error);
         }
       }
     }

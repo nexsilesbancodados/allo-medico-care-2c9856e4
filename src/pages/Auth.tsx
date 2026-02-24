@@ -12,6 +12,7 @@ import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import { notifyWelcomePatient, notifyWelcomeDoctor } from "@/lib/notifications";
 
 type UserType = "patient" | "doctor" | "clinic";
 type AuthMode = "login" | "register" | "select-type";
@@ -126,9 +127,13 @@ const Auth = () => {
       if (userType === "doctor") {
         await supabase.from("doctor_profiles").insert({ user_id: data.user.id, crm, crm_state: crmState });
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: "doctor" });
+        notifyWelcomeDoctor(`${firstName} ${lastName}`, email, crm).catch(console.error);
       } else if (userType === "clinic") {
         await supabase.from("clinic_profiles").insert({ user_id: data.user.id, name: clinicName, cnpj });
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: "clinic" });
+      } else {
+        // Patient welcome
+        notifyWelcomePatient(`${firstName} ${lastName}`, email).catch(console.error);
       }
     }
 
