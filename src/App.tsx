@@ -6,20 +6,22 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
-import { lazy, Suspense, useState, useCallback } from "react";
+import { lazy, Suspense, useState, useCallback, memo } from "react";
 import { Loader2 } from "lucide-react";
 import SplashScreen from "./components/SplashScreen";
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import PingoChatbot from "./components/PingoChatbot";
-import OfflineIndicator from "./components/OfflineIndicator";
 import ErrorBoundary from "./components/ErrorBoundary";
-import CookieConsent from "./components/CookieConsent";
 import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
 import { useSubdomainRedirect } from "./hooks/use-subdomain-redirect";
 import ScrollToTop from "./components/ScrollToTop";
-import BackToTop from "./components/BackToTop";
+
+// Lazy-loaded overlay components (not needed on initial render)
+const PingoChatbot = lazy(() => import("./components/PingoChatbot"));
+const OfflineIndicator = lazy(() => import("./components/OfflineIndicator"));
+const CookieConsent = lazy(() => import("./components/CookieConsent"));
+const BackToTop = lazy(() => import("./components/BackToTop"));
 
 // Lazy-loaded pages for code splitting
 const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
@@ -49,13 +51,22 @@ const ValidateDocument = lazy(() => import("./pages/ValidateDocument"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const DoctorPublicProfilePage = lazy(() => import("./pages/DoctorPublicProfilePage"));
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 min
+      gcTime: 10 * 60 * 1000, // 10 min garbage collection
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
-const PageLoader = () => (
+const PageLoader = memo(() => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <Loader2 className="w-8 h-8 animate-spin text-primary" />
   </div>
-);
+));
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();
@@ -135,10 +146,12 @@ const App = () => {
           </Routes>
           </Suspense>
           </main>
-          <PingoChatbot />
-          <CookieConsent />
-          <BackToTop />
-          <OfflineIndicator />
+          <Suspense fallback={null}>
+            <PingoChatbot />
+            <CookieConsent />
+            <BackToTop />
+            <OfflineIndicator />
+          </Suspense>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
