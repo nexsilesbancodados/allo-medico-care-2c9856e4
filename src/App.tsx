@@ -11,9 +11,7 @@ import { Loader2 } from "lucide-react";
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
-import PingoChatbot from "./components/PingoChatbot";
 import OfflineIndicator from "./components/OfflineIndicator";
-import AccessibilityToggle from "./components/AccessibilityToggle";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CookieConsent from "./components/CookieConsent";
 import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
@@ -122,8 +120,6 @@ const App = () => (
           </Routes>
           </Suspense>
           </main>
-          <PingoChatbot />
-          <AccessibilityToggle />
           <CookieConsent />
           <BackToTop />
           <OfflineIndicator />
