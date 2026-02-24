@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "@/i18n";
+import { useAuth } from "@/contexts/AuthContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import logo from "@/assets/logo.png";
 
@@ -11,6 +12,7 @@ const Header = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t } = useTranslation();
+  const { user, profile, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("");
   const { scrollY } = useScroll();
@@ -129,15 +131,30 @@ const Header = () => {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-2">
             <LanguageSwitcher />
-            <Button variant="ghost" size="sm" onClick={() => navigate("/medico")}>
-              {t("nav.imDoctor")}
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate("/consulta-avulsa")}>
-              {t("nav.buyConsultation")}
-            </Button>
-            <Button size="sm" className="bg-gradient-hero hover:opacity-90 transition-opacity" onClick={() => navigate("/paciente")}>
-              {t("nav.imPatient")}
-            </Button>
+            {user ? (
+              <>
+                <Button variant="outline" size="sm" onClick={() => navigate("/dashboard")}>
+                  <LayoutDashboard className="w-4 h-4 mr-1.5" />
+                  {profile?.first_name ? `Olá, ${profile.first_name}` : "Meu Painel"}
+                </Button>
+                <Button variant="ghost" size="sm" onClick={async () => { await signOut(); navigate("/"); }}>
+                  <LogOut className="w-4 h-4 mr-1.5" />
+                  Sair
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" size="sm" onClick={() => navigate("/medico")}>
+                  {t("nav.imDoctor")}
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => navigate("/consulta-avulsa")}>
+                  {t("nav.buyConsultation")}
+                </Button>
+                <Button size="sm" className="bg-gradient-hero hover:opacity-90 transition-opacity" onClick={() => navigate("/paciente")}>
+                  {t("nav.imPatient")}
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile toggle */}
@@ -180,9 +197,24 @@ const Header = () => {
                 ))}
                 <div className="flex flex-col gap-2 pt-2 border-t border-border">
                   <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
-                  <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/medico"); }}>{t("nav.imDoctor")}</Button>
-                  <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/consulta-avulsa"); }}>{t("nav.buyConsultation")}</Button>
-                  <Button size="sm" className="bg-gradient-hero text-primary-foreground" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>{t("nav.imPatient")}</Button>
+                  {user ? (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/dashboard"); }}>
+                        <LayoutDashboard className="w-4 h-4 mr-1.5" />
+                        {profile?.first_name ? `Olá, ${profile.first_name}` : "Meu Painel"}
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={async () => { setMobileOpen(false); await signOut(); navigate("/"); }}>
+                        <LogOut className="w-4 h-4 mr-1.5" />
+                        Sair
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/medico"); }}>{t("nav.imDoctor")}</Button>
+                      <Button variant="outline" size="sm" onClick={() => { setMobileOpen(false); navigate("/consulta-avulsa"); }}>{t("nav.buyConsultation")}</Button>
+                      <Button size="sm" className="bg-gradient-hero text-primary-foreground" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>{t("nav.imPatient")}</Button>
+                    </>
+                  )}
                 </div>
               </nav>
             </motion.div>
