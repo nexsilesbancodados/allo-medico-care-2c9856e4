@@ -71,3 +71,6 @@ verify_jwt = false
 
 [functions.verify-crm]
 verify_jwt = false
+
+[functions.rate-limiter]
+verify_jwt = false
