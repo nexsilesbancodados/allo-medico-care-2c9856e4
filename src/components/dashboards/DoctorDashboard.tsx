@@ -12,7 +12,7 @@ import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity, Pill, ExternalLink, ArrowRight, Sparkles } from "lucide-react";
+import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity, Pill, ExternalLink, ArrowRight, Sparkles, Star, ShieldCheck } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
 import DoctorOnboarding from "@/components/doctor/DoctorOnboarding";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
@@ -77,14 +77,35 @@ const DoctorDashboard = () => {
         </SectionErrorBoundary>
 
         {/* Header */}
-        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel Médico</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Visão geral · {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel Médico</h1>
+              {data?.crmVerified && (
+                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-success/10 border border-success/20">
+                  <ShieldCheck className="w-3.5 h-3.5 text-success" />
+                  <span className="text-[10px] font-semibold text-success">CRM Verificado</span>
+                </div>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+              {data?.crm && <span className="ml-2 text-muted-foreground/60">· CRM {data.crm}/{data.crmState}</span>}
             </p>
+            {/* Rating display */}
+            {!loading && (data?.rating ?? 0) > 0 && (
+              <div className="flex items-center gap-2 mt-2">
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <Star key={i} className={`w-3.5 h-3.5 ${i <= Math.round(data?.rating ?? 0) ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"}`} />
+                  ))}
+                </div>
+                <span className="text-sm font-semibold text-foreground">{(data?.rating ?? 0).toFixed(1)}</span>
+                <span className="text-xs text-muted-foreground">({data?.totalReviews ?? 0} avaliações)</span>
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {waitingCount > 0 && (
               <Button size="sm" className="bg-warning/10 text-warning border border-warning/30 hover:bg-warning/20 h-9 gap-1.5" onClick={() => navigate("/dashboard/doctor/waiting-room")}>
                 <Clock className="w-3.5 h-3.5" /> {waitingCount} esperando

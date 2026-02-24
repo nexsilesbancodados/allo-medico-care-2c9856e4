@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "../dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +24,7 @@ import UpsellBanner from "@/components/patient/UpsellBanner";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import CheckoutRecoveryBanner from "@/components/patient/CheckoutRecoveryBanner";
-import { usePatientStats, usePatientUpcoming, useReturnAppointments, useFavoriteDoctors } from "@/hooks/usePatientDashboard";
+import { usePatientStats, usePatientUpcoming, useReturnAppointments, useFavoriteDoctors, useRecentHealthMetrics } from "@/hooks/usePatientDashboard";
 import { useActiveSubscription, useUserCredits } from "@/hooks/useProfile";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -56,6 +57,7 @@ const PatientDashboard = () => {
   const { data: upcoming = [], isLoading: upcomingLoading } = usePatientUpcoming();
   const { data: returnAppts = [] } = useReturnAppointments();
   const { data: favDoctors = [] } = useFavoriteDoctors();
+  const { data: healthMetrics = [] } = useRecentHealthMetrics();
   const { data: activeSub } = useActiveSubscription();
   const { data: credits = 0 } = useUserCredits();
 
@@ -155,10 +157,16 @@ const PatientDashboard = () => {
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-2xl mx-auto space-y-6">
-        {/* Header greeting — enhanced */}
-        <motion.div variants={fadeUp} className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+        {/* Header greeting — enhanced with avatar */}
+        <motion.div variants={fadeUp} className="flex items-center gap-4">
+          <Avatar className="h-14 w-14 shrink-0 ring-2 ring-primary/20 shadow-lg shadow-primary/10">
+            {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-lg font-bold">
+              {(profile?.first_name?.[0] ?? "") + (profile?.last_name?.[0] ?? "")}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight truncate">
               {greeting()}, {profile?.first_name || "Paciente"}
             </h1>
             <p className="text-sm text-muted-foreground mt-0.5">
@@ -166,7 +174,7 @@ const PatientDashboard = () => {
             </p>
             <p className="text-xs text-muted-foreground/70 mt-0.5">{greetingSubtext()}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             <MedicalHistoryExport />
             <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl" onClick={handleRefresh} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
@@ -200,6 +208,47 @@ const PatientDashboard = () => {
               <Button size="sm" variant="ghost" className="text-xs text-primary h-8 rounded-xl shrink-0" onClick={() => navigate("/dashboard/patient/health")}>
                 Ver mais
               </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Health metrics mini-cards */}
+        {healthMetrics.length > 0 && (
+          <motion.div variants={fadeUp}>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {healthMetrics.map((m: any, i: number) => {
+                const typeIcons: Record<string, { icon: string; color: string }> = {
+                  "pressao_arterial": { icon: "🫀", color: "text-destructive" },
+                  "peso": { icon: "⚖️", color: "text-primary" },
+                  "glicemia": { icon: "🩸", color: "text-warning" },
+                  "frequencia_cardiaca": { icon: "💓", color: "text-destructive" },
+                  "temperatura": { icon: "🌡️", color: "text-warning" },
+                  "saturacao": { icon: "🫁", color: "text-secondary" },
+                };
+                const meta = typeIcons[m.type] ?? { icon: "📊", color: "text-muted-foreground" };
+                const typeLabels: Record<string, string> = {
+                  "pressao_arterial": "Pressão",
+                  "peso": "Peso",
+                  "glicemia": "Glicemia",
+                  "frequencia_cardiaca": "Freq. Card.",
+                  "temperatura": "Temp.",
+                  "saturacao": "SpO₂",
+                };
+                return (
+                  <motion.div
+                    key={m.type}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 15 }}
+                    className="p-3 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-sm transition-all cursor-pointer"
+                    onClick={() => navigate("/dashboard/patient/health")}
+                  >
+                    <span className="text-base">{meta.icon}</span>
+                    <p className={`text-lg font-bold ${meta.color} mt-1`}>{m.value}<span className="text-xs font-normal text-muted-foreground ml-0.5">{m.unit}</span></p>
+                    <p className="text-[10px] text-muted-foreground">{typeLabels[m.type] ?? m.type}</p>
+                  </motion.div>
+                );
+              })}
             </div>
           </motion.div>
         )}

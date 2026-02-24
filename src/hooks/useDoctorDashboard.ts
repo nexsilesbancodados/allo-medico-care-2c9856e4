@@ -10,7 +10,7 @@ export const useDoctorStats = () => {
       if (!user) return null;
       const { data: docProfile } = await supabase
         .from("doctor_profiles")
-        .select("id, consultation_price")
+        .select("id, consultation_price, rating, total_reviews, crm, crm_state, crm_verified")
         .eq("user_id", user.id)
         .single();
       if (!docProfile) return null;
@@ -62,6 +62,11 @@ export const useDoctorStats = () => {
 
       return {
         doctorId,
+        rating: Number(docProfile.rating) || 0,
+        totalReviews: Number(docProfile.total_reviews) || 0,
+        crm: docProfile.crm,
+        crmState: docProfile.crm_state,
+        crmVerified: docProfile.crm_verified,
         stats: {
           today: todayRes.data?.length ?? 0,
           total_patients: uniquePatients.size,
