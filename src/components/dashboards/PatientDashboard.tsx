@@ -498,34 +498,76 @@ const PatientDashboard = () => {
         {/* No appointments CTA */}
         {!loading && upcoming.length === 0 && (
           <motion.div variants={fadeUp}>
-            <Card className="border-dashed border-border/60 overflow-hidden">
+            <Card className="border border-border/40 overflow-hidden rounded-3xl shadow-lg shadow-primary/5">
               <CardContent className="p-0">
-                <div className="bg-gradient-to-br from-primary/5 via-card to-secondary/5 p-8 text-center">
+                <div className="relative bg-gradient-to-b from-primary/[0.06] via-card to-card p-8 sm:p-10 text-center">
+                  {/* Decorative blurred circles */}
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+                  <div className="absolute bottom-0 right-0 w-28 h-28 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
+
                   <motion.div
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                    className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center mb-4 shadow-lg shadow-primary/10"
+                    initial={{ scale: 0.6, opacity: 0, rotate: -10 }}
+                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
+                    className="relative w-[72px] h-[72px] mx-auto rounded-[20px] bg-gradient-to-br from-primary/20 via-primary/10 to-secondary/15 flex items-center justify-center mb-5 ring-1 ring-primary/10"
                   >
-                    <Sparkles className="w-9 h-9 text-primary" />
+                    <Sparkles className="w-8 h-8 text-primary drop-shadow-sm" />
+                    <motion.div
+                      className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-success ring-2 ring-card"
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.5, type: "spring", stiffness: 300 }}
+                    />
                   </motion.div>
-                  <h3 className="text-lg font-bold text-foreground mb-1">Nenhuma consulta agendada</h3>
-                  <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
-                    Encontre o médico ideal e agende sua primeira consulta por vídeo
-                  </p>
-                  <Button 
-                    className="bg-gradient-hero text-primary-foreground rounded-xl h-12 px-8 text-sm cta-shimmer group" 
-                    onClick={() => navigate("/dashboard/schedule")}
+
+                  <motion.h3
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="text-xl font-bold text-foreground mb-2 tracking-tight"
                   >
-                    <Calendar className="w-4 h-4 mr-2" /> 
-                    Agendar consulta
-                    <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
-                  </Button>
-                  <div className="flex items-center justify-center gap-4 mt-5 text-xs text-muted-foreground/70">
-                    <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-success" /> Sem fila</span>
-                    <span className="flex items-center gap-1"><Video className="w-3 h-3 text-primary" /> HD</span>
-                    <span className="flex items-center gap-1"><Star className="w-3 h-3 text-warning" /> 4.9★</span>
-                  </div>
+                    Nenhuma consulta agendada
+                  </motion.h3>
+                  <motion.p
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className="text-sm text-muted-foreground mb-7 max-w-[280px] mx-auto leading-relaxed"
+                  >
+                    Encontre o médico ideal e agende sua primeira consulta por vídeo
+                  </motion.p>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <Button 
+                      className="bg-gradient-hero text-primary-foreground rounded-2xl h-13 px-8 text-sm font-semibold cta-shimmer group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 transition-shadow" 
+                      onClick={() => navigate("/dashboard/schedule")}
+                    >
+                      <Calendar className="w-4 h-4 mr-2" /> 
+                      Agendar consulta
+                      <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1.5" />
+                    </Button>
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.6 }}
+                    className="flex items-center justify-center gap-5 mt-6"
+                  >
+                    {[
+                      { icon: <CheckCircle2 className="w-3.5 h-3.5 text-success" />, label: "Sem fila" },
+                      { icon: <Video className="w-3.5 h-3.5 text-primary" />, label: "HD" },
+                      { icon: <Star className="w-3.5 h-3.5 text-warning" />, label: "4.9★" },
+                    ].map((item, i) => (
+                      <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/80">
+                        {item.icon} {item.label}
+                      </span>
+                    ))}
+                  </motion.div>
                 </div>
               </CardContent>
             </Card>
