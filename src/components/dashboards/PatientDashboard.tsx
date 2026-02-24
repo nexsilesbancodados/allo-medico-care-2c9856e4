@@ -276,54 +276,57 @@ const PatientDashboard = () => {
           </SectionErrorBoundary>
         </motion.div>
 
-        {/* Quick Actions — spring animated */}
-        <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2 sm:gap-3">
+        {/* Quick Actions — refined cards */}
+        <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2.5 sm:gap-3">
           {quickActions.map((item, i) => (
             <motion.button
               key={item.label}
               initial={{ opacity: 0, scale: 0.85, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.96 }}
+              whileHover={{ y: -2 }}
               onClick={() => navigate(item.path)}
-              className="flex flex-col items-center gap-1.5 sm:gap-2.5 p-3 sm:p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 group min-h-[76px]"
+              className="flex flex-col items-center gap-2 sm:gap-2.5 py-4 sm:py-5 px-2 rounded-2xl bg-card border border-border/40 shadow-sm hover:shadow-md hover:border-border transition-all duration-200 group"
             >
-              <motion.div
-                className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${item.color} flex items-center justify-center`}
-                transition={{ type: "spring", stiffness: 300 }}
+              <div
+                className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${item.color} flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform`}
               >
-                <item.icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
-              </motion.div>
-              <span className="text-[11px] sm:text-xs font-semibold text-foreground leading-tight text-center">{item.label}</span>
+                <item.icon className="w-5 h-5 sm:w-[22px] sm:h-[22px]" />
+              </div>
+              <span className="text-[11px] sm:text-xs font-semibold text-foreground/80 leading-tight text-center">{item.label}</span>
             </motion.button>
           ))}
         </motion.div>
 
-        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-2 sm:gap-3">
+        {/* KPI Stats */}
+        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-2.5 sm:gap-3">
           {loading ? (
-            [1, 2, 3].map(i => <div key={i} className="h-20 animate-pulse bg-muted/50 rounded-2xl" />)
+            [1, 2, 3].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" />)
           ) : (
             <>
               {[
-                { onClick: () => navigate("/dashboard/appointments"), icon: Calendar, color: "text-primary", hoverBorder: "hover:border-primary/30 hover:shadow-primary/10", label: "Consultas", value: stats?.total ?? 0 },
-                { onClick: () => navigate("/dashboard/patient/health"), icon: FileText, color: "text-warning", hoverBorder: "hover:border-warning/30 hover:shadow-warning/10", label: "Receitas", value: stats?.prescriptions ?? 0 },
-                { onClick: () => navigate("/dashboard/patient/documents"), icon: Upload, color: "text-secondary", hoverBorder: "hover:border-secondary/30 hover:shadow-secondary/10", label: "Documentos", value: stats?.documents ?? 0 },
+                { onClick: () => navigate("/dashboard/appointments"), icon: Calendar, bg: "bg-primary/8", color: "text-primary", label: "Consultas", value: stats?.total ?? 0 },
+                { onClick: () => navigate("/dashboard/patient/health"), icon: FileText, bg: "bg-warning/8", color: "text-warning", label: "Receitas", value: stats?.prescriptions ?? 0 },
+                { onClick: () => navigate("/dashboard/patient/documents"), icon: Upload, bg: "bg-secondary/8", color: "text-secondary", label: "Documentos", value: stats?.documents ?? 0 },
               ].map((kpi, i) => (
                 <motion.button
                   key={kpi.label}
                   initial={{ opacity: 0, y: 15, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ delay: 0.15 + i * 0.08, type: "spring", stiffness: 180, damping: 14 }}
-                  whileHover={{ y: -3, scale: 1.03 }}
+                  whileHover={{ y: -2 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={kpi.onClick}
-                  className={`p-3 sm:p-4 rounded-2xl bg-card border border-border/50 ${kpi.hoverBorder} hover:shadow-md transition-all text-left group`}
+                  className="p-3.5 sm:p-4 rounded-2xl bg-card border border-border/40 shadow-sm hover:shadow-md hover:border-border transition-all text-left group"
                 >
-                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
-                    <kpi.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${kpi.color} group-hover:scale-110 transition-transform`} />
+                  <div className="flex items-center gap-1.5 mb-2 sm:mb-3">
+                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg ${kpi.bg} flex items-center justify-center`}>
+                      <kpi.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${kpi.color}`} />
+                    </div>
                     <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">{kpi.label}</span>
                   </div>
-                  <p className="text-xl sm:text-2xl font-bold text-foreground">{kpi.value}</p>
+                  <p className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">{kpi.value}</p>
                 </motion.button>
               ))}
             </>
