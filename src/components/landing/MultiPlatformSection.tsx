@@ -119,14 +119,17 @@ const MultiPlatformSection = () => {
                 {pwaFeatures.map((feat, i) => (
                   <motion.div
                     key={feat.title}
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.75, y: 15 }}
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.4 + i * 0.08 }}
-                    whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10 text-center hover:bg-white/15 transition-all"
+                    transition={{ delay: 0.4 + i * 0.08, type: "spring", stiffness: 200, damping: 15 }}
+                    whileHover={{ y: -5, scale: 1.08, boxShadow: "0 12px 30px -8px rgba(255,255,255,0.15)" }}
+                    whileTap={{ scale: 0.96 }}
+                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/10 text-center hover:bg-white/15 transition-colors cursor-default group"
                   >
-                    <feat.icon className="w-5 h-5 mx-auto mb-1.5" />
+                    <motion.div whileHover={{ rotate: 10 }} transition={{ type: "spring", stiffness: 300 }}>
+                      <feat.icon className="w-5 h-5 mx-auto mb-1.5 transition-transform duration-300 group-hover:scale-110" />
+                    </motion.div>
                     <p className="text-xs font-bold leading-tight">{feat.title}</p>
                     <p className="text-[10px] opacity-60 mt-0.5">{feat.desc}</p>
                     <p className="text-sm font-extrabold mt-1.5">{feat.stat}</p>

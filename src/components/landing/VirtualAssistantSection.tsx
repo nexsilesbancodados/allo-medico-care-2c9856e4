@@ -211,16 +211,21 @@ const VirtualAssistantSection = () => {
                 {capabilities.map((cap, i) => (
                   <motion.div
                     key={i}
-                    initial={{ opacity: 0, y: 8 }}
-                    whileInView={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, scale: 0.8, y: 15 }}
+                    whileInView={{ opacity: 1, scale: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.4 + i * 0.05 }}
-                    whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                    className="p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-all cursor-default"
+                    transition={{ delay: 0.4 + i * 0.06, type: "spring", stiffness: 200, damping: 15 }}
+                    whileHover={{ y: -5, scale: 1.06, boxShadow: "0 8px 25px -8px hsl(210 90% 45% / 0.15)" }}
+                    whileTap={{ scale: 0.97 }}
+                    className="p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-colors cursor-default group"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
-                      <cap.icon className="w-4 h-4 text-primary" />
-                    </div>
+                    <motion.div
+                      className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center mb-2"
+                      whileHover={{ rotate: 8 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <cap.icon className="w-4 h-4 text-primary transition-transform duration-300 group-hover:scale-110" />
+                    </motion.div>
                     <p className="text-xs font-semibold text-foreground mb-0.5">{cap.label}</p>
                     <p className="text-[10px] text-muted-foreground leading-relaxed">{cap.desc}</p>
                   </motion.div>
