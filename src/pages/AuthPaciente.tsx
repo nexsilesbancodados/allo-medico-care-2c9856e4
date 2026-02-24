@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,13 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
-import { Phone, Mail, Lock, User, ArrowLeft, Heart, Check, Star, CreditCard, Shield } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Phone, Mail, Lock, User, ArrowLeft, Heart, Check, Star, CreditCard, Shield, Eye, EyeOff, Sparkles } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
 import { formatMask, unmask } from "@/hooks/use-mask";
 import patientPortalBg from "@/assets/patient-portal-bg.png";
 import SEOHead from "@/components/SEOHead";
+import PasswordStrength from "@/components/ui/password-strength";
 
 const plans = [
   {
@@ -54,6 +55,7 @@ const AuthPaciente = () => {
   const [loading, setLoading] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -148,10 +150,10 @@ const AuthPaciente = () => {
   const [mode, setMode] = useState<"register" | "login">("register");
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-hidden">
       <SEOHead title="Cadastro de Paciente" description="Crie sua conta de paciente na AloClinica e agende consultas online com médicos especialistas." />
-      <img src={patientPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover -z-10" loading="lazy" />
-      <div className="absolute inset-0 bg-background/70 -z-10" />
+      <img src={patientPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover -z-10 scale-105" loading="lazy" />
+      <div className="absolute inset-0 bg-background/75 backdrop-blur-sm -z-10" />
       {/* Header */}
       <div className="border-b border-border bg-card/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -176,13 +178,26 @@ const AuthPaciente = () => {
             const isDone = i < currentIndex;
             return (
               <div key={label} className="flex items-center gap-2">
-                {i > 0 && <div className={`w-8 h-px ${isDone ? "bg-primary" : "bg-border"}`} />}
-                <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
-                  isActive ? "bg-primary text-primary-foreground" : isDone ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                }`}>
+                {i > 0 && (
+                  <div className="w-8 h-px bg-border overflow-hidden">
+                    <motion.div
+                      className="h-full bg-primary"
+                      initial={{ width: "0%" }}
+                      animate={{ width: isDone ? "100%" : "0%" }}
+                      transition={{ duration: 0.5 }}
+                    />
+                  </div>
+                )}
+                <motion.div
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                    isActive ? "bg-primary text-primary-foreground" : isDone ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                  }`}
+                  animate={isActive ? { scale: [1, 1.05, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                >
                   {isDone ? <Check className="w-3 h-3" /> : <span>{i + 1}</span>}
                   {label}
-                </div>
+                </motion.div>
               </div>
             );
           })}
@@ -308,12 +323,32 @@ const AuthPaciente = () => {
                   <Label>Senha</Label>
                   <div className="relative mt-1">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="pl-10" required minLength={6} />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className="pl-10 pr-10"
+                      required
+                      minLength={6}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
+                  {password && <PasswordStrength password={password} />}
                 </div>
                 <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
-                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading || !termsAccepted}>
-                  {loading ? "Criando conta..." : "Criar conta"}
+                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground cta-shimmer" size="lg" disabled={loading || !termsAccepted}>
+                  {loading ? (
+                    <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-spin" /> Criando conta...
+                    </motion.span>
+                  ) : "Criar conta"}
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
                   Já tem conta? <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
@@ -332,11 +367,29 @@ const AuthPaciente = () => {
                   <Label>Senha</Label>
                   <div className="relative mt-1">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-10" required />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading}>
-                  {loading ? "Entrando..." : "Entrar"}
+                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground cta-shimmer" size="lg" disabled={loading}>
+                  {loading ? (
+                    <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
+                    </motion.span>
+                  ) : "Entrar"}
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
                   <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
@@ -346,6 +399,17 @@ const AuthPaciente = () => {
                 </p>
               </form>
             )}
+            {/* Social proof */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="mt-8 flex items-center justify-center gap-4 text-xs text-muted-foreground"
+            >
+              <span className="flex items-center gap-1"><Shield className="w-3.5 h-3.5 text-primary" /> Dados protegidos</span>
+              <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-warning" /> 4.9/5 avaliação</span>
+              <span className="flex items-center gap-1"><Heart className="w-3.5 h-3.5 text-destructive" /> 12k+ pacientes</span>
+            </motion.div>
           </motion.div>
         )}
       </div>
