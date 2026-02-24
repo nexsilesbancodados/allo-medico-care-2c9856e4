@@ -620,31 +620,43 @@ const PatientDashboard = () => {
         {/* Referral card */}
         {referralCode && (
           <motion.div variants={fadeUp}>
-            <Card className="border-border/40 overflow-hidden bg-gradient-to-r from-primary/3 to-secondary/3">
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="flex items-center gap-2">
-                    <Share2 className="w-4 h-4 text-primary" />
-                    <p className="text-sm font-semibold text-foreground">Indique e Ganhe</p>
+            <Card className="relative border border-border/40 overflow-hidden rounded-2xl">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] via-transparent to-secondary/[0.05] pointer-events-none" />
+              <CardContent className="relative p-5">
+                <div className="flex items-start gap-3 mb-4">
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/15 to-primary/5 flex items-center justify-center shrink-0 ring-1 ring-primary/10"
+                  >
+                    <Share2 className="w-5 h-5 text-primary" />
+                  </motion.div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="text-sm font-bold text-foreground tracking-tight">Indique e Ganhe</p>
+                      {credits > 0 && (
+                        <Badge className="text-[10px] font-bold bg-success/15 text-success border-0 px-2 py-0.5">
+                          R$ {credits.toFixed(2)}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Convide amigos e ganhe <span className="font-semibold text-foreground">R$ 10</span> de crédito por cadastro.
+                    </p>
                   </div>
-                  {credits > 0 && (
-                    <Badge variant="outline" className="text-xs text-success border-success/30 bg-success/10">
-                      R$ {credits.toFixed(2)}
-                    </Badge>
-                  )}
                 </div>
-                <p className="text-xs text-muted-foreground mb-3">
-                  Convide amigos e ganhe R$ 10 de crédito por cadastro.
-                </p>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 text-xs bg-muted/50 border border-border/40 rounded-xl px-3 py-2.5 truncate font-mono">
+                  <div className="flex-1 text-[11px] bg-muted/40 border border-border/50 rounded-xl px-3.5 py-3 truncate font-mono text-muted-foreground select-all">
                     {window.location.origin}/convite/{referralCode}
                   </div>
                   <Button
                     size="icon"
                     variant="outline"
-                    className="h-10 w-10 shrink-0 rounded-xl"
-                    onClick={() => navigator.clipboard.writeText(`${window.location.origin}/convite/${referralCode}`)}
+                    className="h-11 w-11 shrink-0 rounded-xl border-border/50 hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-colors"
+                    onClick={() => {
+                      navigator.clipboard.writeText(`${window.location.origin}/convite/${referralCode}`);
+                    }}
                   >
                     <Copy className="w-4 h-4" />
                   </Button>
