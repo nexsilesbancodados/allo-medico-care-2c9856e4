@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { triggerAppointmentConfirmed } from "@/lib/whatsapp";
+import { notifyNewAppointment } from "@/lib/notifications";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -184,6 +185,14 @@ const BookAppointment = () => {
       toast({ title: "Erro", description: "Não foi possível agendar. Tente novamente.", variant: "destructive" });
     } else {
       triggerAppointmentConfirmed(insertedAppt.id).catch(console.error);
+
+      // Notify doctor about new appointment
+      const patientProfile = user.user_metadata;
+      const pName = `${patientProfile?.first_name || ""} ${patientProfile?.last_name || ""}`.trim() || "Paciente";
+      const dateStr = format(scheduledAt, "dd/MM/yyyy", { locale: ptBR });
+      const timeStr = format(scheduledAt, "HH:mm");
+      notifyNewAppointment(insertedAppt.id, doctor.id, pName, dateStr, timeStr).catch(console.error);
+
       toast({ title: "Consulta agendada! ✅", description: `${format(scheduledAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} com Dr(a). ${doctor.first_name}` });
       navigate("/dashboard/appointments");
     }
