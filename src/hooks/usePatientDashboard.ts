@@ -90,6 +90,31 @@ export const useReturnAppointments = () => {
   });
 };
 
+export const useRecentHealthMetrics = () => {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ["patient-recent-metrics", user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data } = await supabase
+        .from("health_metrics")
+        .select("type, value, unit, measured_at")
+        .eq("patient_id", user.id)
+        .order("measured_at", { ascending: false })
+        .limit(10);
+      if (!data || data.length === 0) return [];
+      // Get latest of each type
+      const latest = new Map<string, typeof data[0]>();
+      data.forEach(m => {
+        if (!latest.has(m.type)) latest.set(m.type, m);
+      });
+      return Array.from(latest.values()).slice(0, 4);
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
 export const useFavoriteDoctors = () => {
   const { user } = useAuth();
   return useQuery({
