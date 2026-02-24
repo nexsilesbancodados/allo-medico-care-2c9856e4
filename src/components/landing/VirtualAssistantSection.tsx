@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, ChevronRight, Sparkles, Send, Clock, Brain, Zap, Shield, FileText, Stethoscope } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
-import mascotWave from "@/assets/mascot-wave.png";
+import pingoAssistant from "@/assets/pingo-virtual-assistant.png";
 
 const chatDemo = [
   { role: "user", text: "Olá, preciso de ajuda!" },
@@ -78,7 +78,7 @@ const VirtualAssistantSection = () => {
                 {/* Chat header */}
                 <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted/30">
                   <div className="relative">
-                    <img src={mascotWave} alt="Pingo" className="w-9 h-9 rounded-full object-contain bg-primary/10 p-0.5" />
+                    <img src={pingoAssistant} alt="Pingo" className="w-9 h-9 rounded-full object-contain bg-primary/10 p-0.5" />
                     <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-medical-green border-2 border-card" />
                   </div>
                   <div className="flex-1">
@@ -150,21 +150,24 @@ const VirtualAssistantSection = () => {
                 </div>
               </div>
 
-              {/* Pingo stats below chat */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.5 }}
-                className="flex justify-center gap-4 mt-4 max-w-sm mx-auto"
-              >
-                {pingoStats.map((stat, i) => (
-                  <div key={i} className="text-center">
-                    <p className="text-sm font-extrabold text-foreground">{stat.value}</p>
-                    <p className="text-[10px] text-muted-foreground">{stat.label}</p>
-                  </div>
-                ))}
-              </motion.div>
+              {/* Pingo mascot + stats below chat */}
+              <div className="flex items-center gap-4 mt-6 max-w-sm mx-auto">
+                <motion.img
+                  src={pingoAssistant}
+                  alt="Pingo - Assistente Virtual"
+                  className="w-20 h-20 object-contain drop-shadow-lg"
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <div className="flex-1 flex gap-4">
+                  {pingoStats.map((stat, i) => (
+                    <div key={i} className="text-center">
+                      <p className="text-sm font-extrabold text-foreground">{stat.value}</p>
+                      <p className="text-[10px] text-muted-foreground">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </motion.div>
 
             {/* Text + Capabilities */}
