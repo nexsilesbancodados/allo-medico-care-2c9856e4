@@ -44,7 +44,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background" style={{ background: 'var(--landing-bg)' }}>
+    <div className="min-h-screen" style={{ background: 'var(--landing-bg)' }}>
       <SEOHead
         title="Consultas Médicas Online por Vídeo 24h"
         description="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades. Sua saúde na palma da mão."
