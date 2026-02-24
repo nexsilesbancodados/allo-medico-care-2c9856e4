@@ -1,10 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Stethoscope } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-const FloatingMobileCTA = () => {
+const FloatingMobileCTA = forwardRef<HTMLDivElement>((_, ref) => {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -58,6 +58,8 @@ const FloatingMobileCTA = () => {
       )}
     </AnimatePresence>
   );
-};
+});
+
+FloatingMobileCTA.displayName = "FloatingMobileCTA";
 
 export default FloatingMobileCTA;
