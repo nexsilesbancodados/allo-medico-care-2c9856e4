@@ -117,11 +117,11 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
         <Icon className="w-3.5 h-3.5 text-muted-foreground" />
         <p className="text-sm font-medium text-foreground">{label}</p>
       </div>
-      <div className="flex gap-0.5">
+      <div className="flex gap-1">
         {[1, 2, 3, 4, 5].map(i => (
           <Star
             key={i}
-            className={`w-7 h-7 cursor-pointer transition-all ${i <= value ? "text-yellow-500 fill-yellow-500 scale-110" : "text-muted-foreground/30 hover:text-yellow-400"}`}
+            className={`w-8 h-8 sm:w-7 sm:h-7 cursor-pointer transition-all ${i <= value ? "text-yellow-500 fill-yellow-500 scale-110" : "text-muted-foreground/30 hover:text-yellow-400"}`}
             onClick={() => onChange(i)}
           />
         ))}
@@ -133,7 +133,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
 
   return (
     <Dialog open onOpenChange={() => onClose()}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Star className="w-5 h-5 text-yellow-500" />
@@ -162,12 +162,12 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
               {/* NPS */}
               <div>
                 <p className="text-sm font-medium text-foreground mb-2">De 0 a 10, o quanto recomendaria a AloClinica?</p>
-                <div className="flex gap-1 flex-wrap">
+                <div className="grid grid-cols-6 sm:flex sm:flex-wrap gap-1.5 sm:gap-1">
                   {Array.from({ length: 11 }, (_, i) => (
                     <button
                       key={i}
                       onClick={() => setNps(i)}
-                      className={`w-9 h-9 rounded-lg border text-sm font-bold transition-all ${npsColors(i)} ${nps === i ? "scale-110 shadow-md" : ""}`}
+                      className={`h-11 sm:h-9 sm:w-9 rounded-lg border text-sm font-bold transition-all ${npsColors(i)} ${nps === i ? "scale-105 shadow-md ring-2 ring-primary/30" : ""}`}
                     >
                       {i}
                     </button>
@@ -180,7 +180,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
               </div>
 
               {/* Star ratings */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <StarRow label="Qualidade" value={quality} onChange={setQuality} icon={Stethoscope} />
                 <StarRow label="Facilidade" value={ease} onChange={setEase} icon={MessageSquare} />
                 <StarRow label="Pontualidade" value={punctuality} onChange={setPunctuality} icon={Clock} />
@@ -188,7 +188,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
               </div>
 
               <Button
-                className="w-full"
+                className="w-full h-11"
                 disabled={nps === null}
                 onClick={() => setStep(1)}
               >
@@ -202,12 +202,12 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
               {/* Quick tags */}
               <div>
                 <p className="text-sm font-medium text-foreground mb-2">O que foi bom? (opcional)</p>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {positiveTags.map(tag => (
                     <Badge
                       key={tag}
                       variant={selectedTags.includes(tag) ? "default" : "outline"}
-                      className={`cursor-pointer transition-all text-xs ${
+                      className={`cursor-pointer transition-all text-xs py-1.5 px-3 ${
                         selectedTags.includes(tag) ? "bg-success text-success-foreground" : "hover:bg-success/10"
                       }`}
                       onClick={() => toggleTag(tag)}
@@ -220,12 +220,12 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
 
               <div>
                 <p className="text-sm font-medium text-foreground mb-2">O que pode melhorar? (opcional)</p>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="flex flex-wrap gap-2">
                   {negativeTags.map(tag => (
                     <Badge
                       key={tag}
                       variant={selectedTags.includes(tag) ? "default" : "outline"}
-                      className={`cursor-pointer transition-all text-xs ${
+                      className={`cursor-pointer transition-all text-xs py-1.5 px-3 ${
                         selectedTags.includes(tag) ? "bg-destructive text-destructive-foreground" : "hover:bg-destructive/10"
                       }`}
                       onClick={() => toggleTag(tag)}
@@ -240,18 +240,18 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
               <div>
                 <p className="text-sm font-medium text-foreground mb-2">Recomendaria este médico?</p>
                 <div className="flex gap-2">
-                  <Button size="sm" variant={recommend === true ? "default" : "outline"} onClick={() => setRecommend(true)} className="gap-2">
+                  <Button size="sm" variant={recommend === true ? "default" : "outline"} onClick={() => setRecommend(true)} className="gap-2 h-11 flex-1 sm:flex-none">
                     <ThumbsUp className="w-4 h-4" /> Sim
                   </Button>
-                  <Button size="sm" variant={recommend === false ? "destructive" : "outline"} onClick={() => setRecommend(false)} className="gap-2">
+                  <Button size="sm" variant={recommend === false ? "destructive" : "outline"} onClick={() => setRecommend(false)} className="gap-2 h-11 flex-1 sm:flex-none">
                     <ThumbsDown className="w-4 h-4" /> Não
                   </Button>
                 </div>
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(0)} className="flex-1">← Voltar</Button>
-                <Button onClick={() => setStep(2)} className="flex-1">Próximo →</Button>
+                <Button variant="outline" onClick={() => setStep(0)} className="flex-1 h-11">← Voltar</Button>
+                <Button onClick={() => setStep(2)} className="flex-1 h-11">Próximo →</Button>
               </div>
             </>
           )}
@@ -269,6 +269,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
                     : "Conte-nos mais sobre sua experiência..."
                   }
                   rows={4}
+                  className="text-base"
                 />
               </div>
 
@@ -282,7 +283,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
                       size="sm"
                       variant={recommend === (opt === "Sim") ? "default" : "outline"}
                       onClick={() => setRecommend(opt === "Sim" ? true : opt === "Não" ? false : null)}
-                      className="flex-1"
+                      className="flex-1 h-11"
                     >
                       {opt}
                     </Button>
@@ -291,7 +292,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
               </div>
 
               <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">← Voltar</Button>
+                <Button variant="outline" onClick={() => setStep(1)} className="flex-1 h-11">← Voltar</Button>
                 <Button onClick={submit} disabled={submitting} className="flex-1 h-11">
                   {submitting ? "Enviando..." : "⭐ Enviar Avaliação"}
                 </Button>
