@@ -74,3 +74,15 @@ verify_jwt = false
 
 [functions.rate-limiter]
 verify_jwt = false
+
+[functions.metered-room]
+verify_jwt = false
+
+[functions.ai-assistant]
+verify_jwt = false
+
+[functions.send-prescription]
+verify_jwt = false
+
+[functions.seed-test-users]
+verify_jwt = false
