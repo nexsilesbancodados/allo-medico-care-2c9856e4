@@ -3,6 +3,7 @@ import { motion, useMotionValue, useTransform, useSpring, AnimatePresence, useSc
 import { Video, Shield, Clock, ArrowRight, Stethoscope, CalendarCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect, memo, useCallback } from "react";
+import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
 import heroDoctor from "@/assets/hero-doctor.png";
 import mascotWave from "@/assets/mascot-wave.png";
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
@@ -64,6 +65,8 @@ const useAnimatedCounter = (end: number, duration = 2000) => {
 
 const HeroSection = memo(() => {
   const navigate = useNavigate();
+  const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
+  const prefetchConsulta = usePrefetchRoute(() => import("@/pages/GuestCheckout"));
   const containerRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -267,6 +270,7 @@ const HeroSection = memo(() => {
                 size="lg"
                 className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-6 relative overflow-hidden group h-12 sm:h-11 text-base sm:text-sm cta-shimmer"
                 onClick={() => navigate("/paciente")}
+                onMouseEnter={prefetchPaciente}
               >
                 <span className="relative z-10 flex items-center gap-1">
                   Começar Agora <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
@@ -277,6 +281,7 @@ const HeroSection = memo(() => {
                 variant="outline"
                 className="rounded-full px-6 h-12 sm:h-11 text-base sm:text-sm hover:bg-primary/5 transition-colors"
                 onClick={() => navigate("/consulta-avulsa")}
+                onMouseEnter={prefetchConsulta}
               >
                 Consulta Avulsa
               </Button>
