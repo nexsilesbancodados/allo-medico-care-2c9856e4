@@ -350,7 +350,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             <motion.div
               key={location.pathname}
               {...pageTransition}
-              className="p-4 sm:p-6"
+              className="px-3 py-3 sm:p-6"
             >
               <DashboardBreadcrumbs />
               {children}

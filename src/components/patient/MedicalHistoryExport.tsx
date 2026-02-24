@@ -170,10 +170,11 @@ const MedicalHistoryExport = () => {
       size="sm"
       onClick={handleExport}
       disabled={exporting}
-      className="gap-2 text-xs"
+      className="gap-2 text-xs h-9 px-2.5 sm:px-3"
+      title="Exportar Prontuário"
     >
       {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
-      {exporting ? "Exportando..." : "Exportar Prontuário"}
+      <span className="hidden sm:inline">{exporting ? "Exportando..." : "Exportar Prontuário"}</span>
     </Button>
   );
 };
