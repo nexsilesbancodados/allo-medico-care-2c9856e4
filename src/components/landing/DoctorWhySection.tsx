@@ -142,16 +142,21 @@ const DoctorWhySection = () => {
               {stats.map((s, i) => (
                 <motion.div
                   key={s.label}
-                  initial={{ opacity: 0, y: 12 }}
-                  whileInView={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0, y: 15, scale: 0.9 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.3 + i * 0.08, duration: 0.5 }}
-                  whileHover={{ y: -3, transition: { duration: 0.2 } }}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-elevated transition-all duration-300"
+                  transition={{ delay: 0.3 + i * 0.08, type: "spring", stiffness: 200, damping: 14 }}
+                  whileHover={{ y: -5, scale: 1.04, boxShadow: "0 12px 30px -8px hsl(var(--primary) / 0.15)" }}
+                  whileTap={{ scale: 0.97 }}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/50 shadow-card hover:border-primary/20 transition-all duration-300 cursor-default"
                 >
-                  <div className={`w-9 h-9 rounded-lg ${s.color} flex items-center justify-center shrink-0`}>
+                  <motion.div
+                    className={`w-9 h-9 rounded-lg ${s.color} flex items-center justify-center shrink-0`}
+                    whileHover={{ rotate: 8 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
                     <s.icon className="w-4 h-4" />
-                  </div>
+                  </motion.div>
                   <div>
                     <p className="text-sm font-bold text-foreground leading-tight">
                       <AnimatedCounter target={s.value} />
