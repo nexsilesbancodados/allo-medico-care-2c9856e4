@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { notifyDoctorApproval } from "@/lib/notifications";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -165,6 +165,28 @@ const AdminApprovals = () => {
     fetchAll();
   };
 
+  const [verifyingCrmId, setVerifyingCrmId] = useState<string | null>(null);
+
+  const autoVerifyCrm = useCallback(async (item: any) => {
+    setVerifyingCrmId(item.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("verify-crm", {
+        body: { crm: item.crm, uf: item.crm_state, doctor_profile_id: item.id },
+      });
+      if (error) throw error;
+      if (data?.valid) {
+        toast({ title: "✅ CRM verificado automaticamente!", description: `${data.doctor?.nome} — ${data.doctor?.situacao}` });
+      } else {
+        toast({ title: "⚠️ Verificação falhou", description: data?.message || "CRM não encontrado ou irregular", variant: "destructive" });
+      }
+      fetchAll();
+    } catch (e: any) {
+      toast({ title: "Erro na verificação", description: e.message, variant: "destructive" });
+    } finally {
+      setVerifyingCrmId(null);
+    }
+  }, [toast]);
+
   const reject = async () => {
     if (!rejectTarget) return;
     
@@ -228,6 +250,18 @@ const AdminApprovals = () => {
                     >
                       <ExternalLink className="w-3 h-3 mr-1" /> Validar no CFM
                     </Button>
+                    {!item.crm_verified && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-6 px-2 text-xs text-secondary border-secondary/30 hover:bg-secondary/10"
+                        disabled={verifyingCrmId === item.id}
+                        onClick={() => autoVerifyCrm(item)}
+                      >
+                        <ShieldCheck className="w-3 h-3 mr-1" />
+                        {verifyingCrmId === item.id ? "Verificando..." : "Auto-verificar"}
+                      </Button>
+                    )}
                     <span>· Tel: {item.phone || "—"}</span>
                   </div>
                   <div className="flex items-center gap-2 mt-1">
