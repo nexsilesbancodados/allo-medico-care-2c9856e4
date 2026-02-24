@@ -7,12 +7,33 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+async function checkRateLimit(identifier: string, endpoint: string, maxReqs: number, windowMin: number): Promise<boolean> {
+  try {
+    const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    const since = new Date(Date.now() - windowMin * 60000).toISOString();
+    const { count } = await sb.from("rate_limits").select("id", { count: "exact", head: true })
+      .eq("identifier", identifier).eq("endpoint", endpoint).gte("window_start", since);
+    if ((count ?? 0) >= maxReqs) return false;
+    await sb.from("rate_limits").insert({ identifier, endpoint, window_start: new Date().toISOString() });
+    return true;
+  } catch { return true; }
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Rate limit: 5 checkouts per 15 minutes per IP
+    const clientIP = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+    const allowed = await checkRateLimit(clientIP, "guest-checkout", 5, 15);
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: "Muitas tentativas. Aguarde." }), {
+        status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
