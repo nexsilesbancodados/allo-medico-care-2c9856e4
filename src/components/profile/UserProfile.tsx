@@ -147,20 +147,20 @@ const UserProfile = () => {
 
         {/* Avatar */}
         <Card className="border-border mb-6">
-          <CardContent className="pt-6 flex items-center gap-6">
-            <div className="relative">
+          <CardContent className="pt-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+            <div className="relative shrink-0">
               <Avatar className="w-20 h-20">
                 <AvatarImage src={avatarUrl ?? undefined} />
                 <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
               </Avatar>
-              <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer hover:opacity-90 transition">
+              <label className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer hover:opacity-90 transition active:scale-95">
                 <Camera className="w-4 h-4" />
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploading} />
               </label>
             </div>
-            <div>
+            <div className="text-center sm:text-left">
               <p className="font-semibold text-foreground">{firstName} {lastName}</p>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <p className="text-sm text-muted-foreground break-all">{user?.email}</p>
               {uploading && <p className="text-xs text-primary mt-1">Enviando foto...</p>}
             </div>
           </CardContent>
@@ -170,13 +170,13 @@ const UserProfile = () => {
         <Card className="border-border mb-6">
           <CardHeader><CardTitle className="text-lg">Dados Pessoais</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} className="mt-1" /></div>
-              <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} className="mt-1" /></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} className="mt-1 h-11" /></div>
+              <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} className="mt-1 h-11" /></div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div><Label>Telefone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" className="mt-1" /></div>
-              <div><Label>CPF</Label><Input value={cpf} onChange={e => setCpf(e.target.value)} placeholder="000.000.000-00" className="mt-1" /></div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div><Label>Telefone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" className="mt-1 h-11" /></div>
+              <div><Label>CPF</Label><Input value={cpf} onChange={e => setCpf(e.target.value)} placeholder="000.000.000-00" className="mt-1 h-11" /></div>
             </div>
             <div>
               <Label>Data de Nascimento</Label>
@@ -189,17 +189,17 @@ const UserProfile = () => {
         <Card className="border-border mb-6">
           <CardHeader><CardTitle className="text-lg">Dados de Saúde</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label>Tipo Sanguíneo</Label>
-                <select value={bloodType} onChange={e => setBloodType(e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                <select value={bloodType} onChange={e => setBloodType(e.target.value)} className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3 py-2 text-sm">
                   <option value="">Selecione</option>
                   {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
               <div>
                 <Label>Alergias</Label>
-                <Input value={allergies} onChange={e => setAllergies(e.target.value)} placeholder="Ex: Dipirona, Penicilina" className="mt-1" />
+                <Input value={allergies} onChange={e => setAllergies(e.target.value)} placeholder="Ex: Dipirona, Penicilina" className="mt-1 h-11" />
                 <p className="text-[10px] text-muted-foreground mt-0.5">Separe por vírgula</p>
               </div>
             </div>
@@ -218,15 +218,15 @@ const UserProfile = () => {
             <CardContent className="space-y-4">
               <div><Label>Bio / Descrição</Label><textarea value={bio} onChange={e => setBio(e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" rows={3} placeholder="Conte sobre sua experiência..." /></div>
               <div><Label>Formação</Label><Input value={education} onChange={e => setEducation(e.target.value)} placeholder="Ex: USP, Residência em Cardiologia" className="mt-1" /></div>
-              <div className="grid grid-cols-2 gap-4">
-                <div><Label>Anos de Experiência</Label><Input type="number" value={experienceYears} onChange={e => setExperienceYears(Number(e.target.value))} className="mt-1" min={0} /></div>
-                <div><Label>Preço da Consulta (R$)</Label><Input type="number" value={consultationPrice} onChange={e => setConsultationPrice(Number(e.target.value))} className="mt-1" min={0} step={0.01} /></div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div><Label>Anos de Experiência</Label><Input type="number" value={experienceYears} onChange={e => setExperienceYears(Number(e.target.value))} className="mt-1 h-11" min={0} /></div>
+                <div><Label>Preço da Consulta (R$)</Label><Input type="number" value={consultationPrice} onChange={e => setConsultationPrice(Number(e.target.value))} className="mt-1 h-11" min={0} step={0.01} /></div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        <Button onClick={handleSave} disabled={saving} className="bg-gradient-hero text-primary-foreground" size="lg">
+        <Button onClick={handleSave} disabled={saving} className="bg-gradient-hero text-primary-foreground w-full sm:w-auto h-12 rounded-xl" size="lg">
           <Save className="w-4 h-4 mr-2" />
           {saving ? "Salvando..." : "Salvar Alterações"}
         </Button>
