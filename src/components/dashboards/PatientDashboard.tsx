@@ -437,16 +437,35 @@ const PatientDashboard = () => {
         {/* No appointments CTA */}
         {!loading && upcoming.length === 0 && (
           <motion.div variants={fadeUp}>
-            <Card className="border-dashed border-border/60">
-              <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                  <Sparkles className="w-8 h-8 text-primary" />
+            <Card className="border-dashed border-border/60 overflow-hidden">
+              <CardContent className="p-0">
+                <div className="bg-gradient-to-br from-primary/5 via-card to-secondary/5 p-8 text-center">
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 15 }}
+                    className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center mb-4 shadow-lg shadow-primary/10"
+                  >
+                    <Sparkles className="w-9 h-9 text-primary" />
+                  </motion.div>
+                  <h3 className="text-lg font-bold text-foreground mb-1">Nenhuma consulta agendada</h3>
+                  <p className="text-sm text-muted-foreground mb-6 max-w-xs mx-auto">
+                    Encontre o médico ideal e agende sua primeira consulta por vídeo
+                  </p>
+                  <Button 
+                    className="bg-gradient-hero text-primary-foreground rounded-xl h-12 px-8 text-sm cta-shimmer group" 
+                    onClick={() => navigate("/dashboard/schedule")}
+                  >
+                    <Calendar className="w-4 h-4 mr-2" /> 
+                    Agendar consulta
+                    <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                  </Button>
+                  <div className="flex items-center justify-center gap-4 mt-5 text-xs text-muted-foreground/70">
+                    <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3 text-success" /> Sem fila</span>
+                    <span className="flex items-center gap-1"><Video className="w-3 h-3 text-primary" /> HD</span>
+                    <span className="flex items-center gap-1"><Star className="w-3 h-3 text-warning" /> 4.9★</span>
+                  </div>
                 </div>
-                <p className="text-base font-semibold text-foreground mb-1">Sem consultas agendadas</p>
-                <p className="text-sm text-muted-foreground mb-5">Agende agora com um de nossos especialistas</p>
-                <Button className="bg-primary text-primary-foreground rounded-xl h-11 px-8 text-sm" onClick={() => navigate("/dashboard/schedule")}>
-                  <Calendar className="w-4 h-4 mr-2" /> Agendar consulta
-                </Button>
               </CardContent>
             </Card>
           </motion.div>

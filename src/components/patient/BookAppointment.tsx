@@ -255,7 +255,7 @@ const BookAppointment = () => {
           </div>
         </div>
 
-        {/* Step indicator - mobile optimized */}
+        {/* Step indicator - animated */}
         <div className="flex items-center justify-between px-4 mb-6">
           {STEPS.map((step, i) => {
             const Icon = step.icon;
@@ -264,14 +264,22 @@ const BookAppointment = () => {
             return (
               <div key={step.key} className="flex items-center flex-1">
                 <div className="flex flex-col items-center flex-1">
-                  <div className={cn(
-                    "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                    isDone ? "bg-primary text-primary-foreground" :
-                    isActive ? "bg-primary/15 text-primary ring-2 ring-primary/30" :
-                    "bg-muted text-muted-foreground"
-                  )}>
-                    {isDone ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-                  </div>
+                  <motion.div
+                    className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                      isDone ? "bg-primary text-primary-foreground" :
+                      isActive ? "bg-primary/15 text-primary ring-2 ring-primary/30" :
+                      "bg-muted text-muted-foreground"
+                    )}
+                    animate={isActive ? { scale: [1, 1.1, 1] } : {}}
+                    transition={{ duration: 0.4 }}
+                  >
+                    {isDone ? (
+                      <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300 }}>
+                        <Check className="w-5 h-5" />
+                      </motion.div>
+                    ) : <Icon className="w-5 h-5" />}
+                  </motion.div>
                   <span className={cn(
                     "text-[11px] mt-1.5 font-medium",
                     isActive ? "text-primary" : isDone ? "text-foreground" : "text-muted-foreground"
@@ -280,10 +288,14 @@ const BookAppointment = () => {
                   </span>
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={cn(
-                    "w-full h-0.5 -mt-4",
-                    i < currentStep ? "bg-primary" : "bg-muted"
-                  )} />
+                  <div className="w-full h-0.5 -mt-4 bg-muted overflow-hidden rounded-full">
+                    <motion.div
+                      className="h-full bg-primary rounded-full"
+                      initial={{ width: "0%" }}
+                      animate={{ width: i < currentStep ? "100%" : "0%" }}
+                      transition={{ duration: 0.5, ease: "easeInOut" }}
+                    />
+                  </div>
                 )}
               </div>
             );
