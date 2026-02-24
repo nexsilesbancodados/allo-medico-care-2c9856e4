@@ -16,6 +16,7 @@ import OfflineIndicator from "./components/OfflineIndicator";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CookieConsent from "./components/CookieConsent";
 import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
+import { useSubdomainRedirect } from "./hooks/use-subdomain-redirect";
 import ScrollToTop from "./components/ScrollToTop";
 import BackToTop from "./components/BackToTop";
 
@@ -60,6 +61,11 @@ const KeyboardShortcutsProvider = () => {
   return null;
 };
 
+const SubdomainRedirectProvider = () => {
+  useSubdomainRedirect();
+  return null;
+};
+
 const App = () => (
   <ErrorBoundary>
   <I18nProvider>
@@ -71,6 +77,7 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <KeyboardShortcutsProvider />
+          <SubdomainRedirectProvider />
           <ScrollToTop />
           <a
             href="#main-content"
