@@ -185,11 +185,11 @@ const DoctorAvailability = () => {
         <Card className="border-border mb-6">
           <CardHeader><CardTitle className="text-base">Adicionar Horário</CardTitle></CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-3 items-end">
-              <div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 items-end">
+              <div className="col-span-2 sm:col-span-1">
                 <p className="text-xs text-muted-foreground mb-1">Dia</p>
                 <Select value={newDay} onValueChange={setNewDay}>
-                  <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {daysOfWeek.map((d, i) => (
                       <SelectItem key={i} value={String(i)}>{d}</SelectItem>
@@ -200,7 +200,7 @@ const DoctorAvailability = () => {
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Início</p>
                 <Select value={newStart} onValueChange={setNewStart}>
-                  <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {timeOptions.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                   </SelectContent>
@@ -209,13 +209,13 @@ const DoctorAvailability = () => {
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Fim</p>
                 <Select value={newEnd} onValueChange={setNewEnd}>
-                  <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
+                  <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     {timeOptions.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={addSlot} className="bg-gradient-hero text-primary-foreground">
+              <Button onClick={addSlot} className="bg-gradient-hero text-primary-foreground h-11 col-span-2 sm:col-span-1">
                 <Plus className="w-4 h-4 mr-1" /> Adicionar
               </Button>
             </div>
@@ -230,7 +230,7 @@ const DoctorAvailability = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-3 items-end mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-[auto_1fr_auto] gap-3 items-end mb-4">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">Data</p>
                 <Input
@@ -238,18 +238,19 @@ const DoctorAvailability = () => {
                   value={absenceDate}
                   onChange={e => setAbsenceDate(e.target.value)}
                   min={new Date().toISOString().split("T")[0]}
-                  className="w-40"
+                  className="h-11"
                 />
               </div>
-              <div className="flex-1 min-w-[120px]">
+              <div>
                 <p className="text-xs text-muted-foreground mb-1">Motivo (opcional)</p>
                 <Input
                   placeholder="Ex: Feriado, Congresso..."
                   value={absenceReason}
                   onChange={e => setAbsenceReason(e.target.value)}
+                  className="h-11"
                 />
               </div>
-              <Button onClick={addAbsence} variant="outline" className="gap-1 border-destructive/30 text-destructive hover:bg-destructive/10">
+              <Button onClick={addAbsence} variant="outline" className="gap-1 h-11 border-destructive/30 text-destructive hover:bg-destructive/10">
                 <CalendarOff className="w-4 h-4" /> Marcar Folga
               </Button>
             </div>

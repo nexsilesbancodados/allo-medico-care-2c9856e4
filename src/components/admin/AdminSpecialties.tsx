@@ -52,16 +52,16 @@ const AdminSpecialties = () => {
         <Card className="border-border mb-6">
           <CardHeader><CardTitle className="text-base">Adicionar Especialidade</CardTitle></CardHeader>
           <CardContent>
-            <div className="flex gap-2">
-              <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Nome" className="flex-1" onKeyDown={e => e.key === "Enter" && addSpecialty()} />
-              <Input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Descrição (opcional)" className="flex-1" />
-              <Input value={newPrice} onChange={e => setNewPrice(e.target.value)} placeholder="Preço (R$)" className="w-28" type="number" min={0} step={0.01} />
-              <Button onClick={addSpecialty} className="bg-gradient-hero text-primary-foreground"><Plus className="w-4 h-4 mr-1" /> Adicionar</Button>
+            <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto_auto] gap-2">
+              <Input value={newName} onChange={e => setNewName(e.target.value)} placeholder="Nome" className="h-11" onKeyDown={e => e.key === "Enter" && addSpecialty()} />
+              <Input value={newDesc} onChange={e => setNewDesc(e.target.value)} placeholder="Descrição (opcional)" className="h-11" />
+              <Input value={newPrice} onChange={e => setNewPrice(e.target.value)} placeholder="Preço (R$)" className="h-11 w-full sm:w-28" type="number" min={0} step={0.01} />
+              <Button onClick={addSpecialty} className="bg-gradient-hero text-primary-foreground h-11"><Plus className="w-4 h-4 mr-1" /> Adicionar</Button>
             </div>
           </CardContent>
         </Card>
 
-        <div className="rounded-lg border border-border overflow-hidden">
+        <div className="rounded-lg border border-border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
