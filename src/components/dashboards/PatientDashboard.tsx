@@ -157,24 +157,26 @@ const PatientDashboard = () => {
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-2xl mx-auto space-y-6">
-        {/* Header greeting — enhanced with avatar */}
-        <motion.div variants={fadeUp} className="flex items-center gap-4">
-          <Avatar className="h-14 w-14 shrink-0 ring-2 ring-primary/20 shadow-lg shadow-primary/10">
-            {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-            <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-lg font-bold">
-              {(profile?.first_name?.[0] ?? "") + (profile?.last_name?.[0] ?? "")}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight truncate">
-              {greeting()}, {profile?.first_name || "Paciente"}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-            </p>
-            <p className="text-xs text-muted-foreground/70 mt-0.5">{greetingSubtext()}</p>
+        {/* Header greeting — mobile optimized */}
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Avatar className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 ring-2 ring-primary/20 shadow-lg shadow-primary/10">
+              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+              <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-base sm:text-lg font-bold">
+                {(profile?.first_name?.[0] ?? "") + (profile?.last_name?.[0] ?? "")}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold text-foreground tracking-tight leading-tight">
+                {greeting()}, {profile?.first_name || "Paciente"}
+              </h1>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
+                {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+              </p>
+              <p className="text-[11px] text-muted-foreground/70 mt-0.5 hidden sm:block">{greetingSubtext()}</p>
+            </div>
           </div>
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <MedicalHistoryExport />
             <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl" onClick={handleRefresh} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
@@ -275,32 +277,29 @@ const PatientDashboard = () => {
         </motion.div>
 
         {/* Quick Actions — spring animated */}
-        <motion.div variants={fadeUp} className="grid grid-cols-4 gap-3">
+        <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2 sm:gap-3">
           {quickActions.map((item, i) => (
             <motion.button
               key={item.label}
               initial={{ opacity: 0, scale: 0.85, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
-              whileHover={{ y: -4, scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate(item.path)}
-              className="flex flex-col items-center gap-2.5 p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 group"
+              className="flex flex-col items-center gap-1.5 sm:gap-2.5 p-3 sm:p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-lg hover:shadow-primary/5 transition-all duration-200 group min-h-[76px]"
             >
               <motion.div
-                className={`w-11 h-11 rounded-xl ${item.color} flex items-center justify-center`}
-                whileHover={{ rotate: 6 }}
+                className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl ${item.color} flex items-center justify-center`}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <item.icon className="w-5 h-5" />
+                <item.icon className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
               </motion.div>
-              <span className="text-xs font-semibold text-foreground">{item.label}</span>
+              <span className="text-[11px] sm:text-xs font-semibold text-foreground leading-tight text-center">{item.label}</span>
             </motion.button>
           ))}
         </motion.div>
 
-        {/* KPI Stats — spring animated cards */}
-        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
+        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-2 sm:gap-3">
           {loading ? (
             [1, 2, 3].map(i => <div key={i} className="h-20 animate-pulse bg-muted/50 rounded-2xl" />)
           ) : (
@@ -318,13 +317,13 @@ const PatientDashboard = () => {
                   whileHover={{ y: -3, scale: 1.03 }}
                   whileTap={{ scale: 0.97 }}
                   onClick={kpi.onClick}
-                  className={`p-4 rounded-2xl bg-card border border-border/50 ${kpi.hoverBorder} hover:shadow-md transition-all text-left group`}
+                  className={`p-3 sm:p-4 rounded-2xl bg-card border border-border/50 ${kpi.hoverBorder} hover:shadow-md transition-all text-left group`}
                 >
-                  <div className="flex items-center gap-2 mb-2">
-                    <kpi.icon className={`w-4 h-4 ${kpi.color} group-hover:scale-110 transition-transform`} />
-                    <span className="text-xs font-medium text-muted-foreground">{kpi.label}</span>
+                  <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+                    <kpi.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${kpi.color} group-hover:scale-110 transition-transform`} />
+                    <span className="text-[10px] sm:text-xs font-medium text-muted-foreground">{kpi.label}</span>
                   </div>
-                  <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
+                  <p className="text-xl sm:text-2xl font-bold text-foreground">{kpi.value}</p>
                 </motion.button>
               ))}
             </>
