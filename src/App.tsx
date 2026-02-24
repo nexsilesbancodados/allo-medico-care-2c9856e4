@@ -21,7 +21,7 @@ import ScrollToTop from "./components/ScrollToTop";
 const PingoChatbot = lazy(() => import("./components/PingoChatbot"));
 const OfflineIndicator = lazy(() => import("./components/OfflineIndicator"));
 const CookieConsent = lazy(() => import("./components/CookieConsent"));
-const BackToTop = lazy(() => import("./components/BackToTop"));
+
 
 // Lazy-loaded pages for code splitting
 const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
@@ -149,7 +149,7 @@ const App = () => {
           <Suspense fallback={null}>
             <PingoChatbot />
             <CookieConsent />
-            <BackToTop />
+            
             <OfflineIndicator />
           </Suspense>
         </AuthProvider>
