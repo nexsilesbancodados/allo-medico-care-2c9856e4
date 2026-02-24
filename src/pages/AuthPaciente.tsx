@@ -150,10 +150,8 @@ const AuthPaciente = () => {
   const [mode, setMode] = useState<"register" | "login">("register");
 
   return (
-    <div className="min-h-screen relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--landing-bg)' }}>
       <SEOHead title="Cadastro de Paciente" description="Crie sua conta de paciente na AloClinica e agende consultas online com médicos especialistas." />
-      <img src={patientPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover -z-10 scale-105" loading="lazy" />
-      <div className="absolute inset-0 bg-background/75 backdrop-blur-sm -z-10" />
       {/* Header */}
       <div className="border-b border-border bg-card/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">

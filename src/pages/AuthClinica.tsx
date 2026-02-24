@@ -119,10 +119,8 @@ const AuthClinica = () => {
   };
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative" style={{ background: 'var(--landing-bg)' }}>
       <SEOHead title="Portal da Clínica" description="Cadastre sua clínica na AloClinica e gerencie médicos e atendimentos online." />
-      <img src={doctorPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover -z-10" />
-      <div className="absolute inset-0 bg-background/70 -z-10" />
 
       <div className="border-b border-border bg-card/50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
