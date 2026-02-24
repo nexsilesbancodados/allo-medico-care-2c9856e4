@@ -69,17 +69,29 @@ const DoctorAvailability = () => {
   };
 
   const toggleAvailableNow = async () => {
-    if (!doctorProfileId) return;
+    if (!doctorProfileId) {
+      toast({ title: "Perfil médico não encontrado", description: "Atualize a página e tente novamente.", variant: "destructive" });
+      return;
+    }
     setTogglingAvailability(true);
-    const newVal = !availableNow;
-    const { error } = await supabase.from("doctor_profiles").update({
-      available_now: newVal,
-      available_now_since: newVal ? new Date().toISOString() : null,
-    }).eq("id", doctorProfileId);
-    setTogglingAvailability(false);
-    if (!error) {
-      setAvailableNow(newVal);
-      toast({ title: newVal ? "🟢 Você está disponível para consultas imediatas!" : "Modo plantão desativado." });
+    try {
+      const newVal = !availableNow;
+      const { error } = await supabase.from("doctor_profiles").update({
+        available_now: newVal,
+        available_now_since: newVal ? new Date().toISOString() : null,
+      }).eq("id", doctorProfileId);
+      if (error) {
+        console.error("Toggle available_now error:", error);
+        toast({ title: "Erro ao atualizar disponibilidade", description: error.message, variant: "destructive" });
+      } else {
+        setAvailableNow(newVal);
+        toast({ title: newVal ? "🟢 Você está disponível para consultas imediatas!" : "Modo plantão desativado." });
+      }
+    } catch (err) {
+      console.error("Toggle available_now exception:", err);
+      toast({ title: "Erro inesperado", variant: "destructive" });
+    } finally {
+      setTogglingAvailability(false);
     }
   };
 
