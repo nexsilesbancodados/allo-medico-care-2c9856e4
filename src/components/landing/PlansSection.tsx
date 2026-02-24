@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, Star, ShieldCheck, Zap, Crown, X, ChevronDown, ChevronUp, Users } from "lucide-react";
+import { Check, Star, ShieldCheck, Zap, Crown, X, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -71,16 +71,11 @@ const plans = [
   },
 ];
 
-const miniFAQ = [
-  { q: "Posso cancelar a qualquer momento?", a: "Sim! Sem multa ou fidelidade. Cancele direto pelo painel." },
-  { q: "Como funciona a garantia de 7 dias?", a: "Se não gostar, devolvemos 100% do valor. Sem perguntas." },
-  { q: "Posso trocar de plano depois?", a: "Sim, upgrade ou downgrade a qualquer momento pelo painel." },
-];
 
 const PlansSection = () => {
   const navigate = useNavigate();
   const [yearly, setYearly] = useState(false);
-  const [openFAQ, setOpenFAQ] = useState<number | null>(null);
+  
 
   return (
     <section id="planos" className="py-12 md:py-24">
@@ -288,41 +283,6 @@ const PlansSection = () => {
           <span>Retorno gratuito em 15 dias</span>
         </motion.div>
 
-        {/* Mini FAQ */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.6 }}
-          className="max-w-lg mx-auto mt-12 space-y-2"
-        >
-          <p className="text-center text-xs font-semibold text-muted-foreground mb-3">Dúvidas sobre planos</p>
-          {miniFAQ.map((item, i) => (
-            <button
-              key={i}
-              onClick={() => setOpenFAQ(openFAQ === i ? null : i)}
-              className="w-full text-left p-3.5 rounded-xl bg-card border border-border hover:border-primary/20 transition-all"
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground">{item.q}</span>
-                {openFAQ === i ? <ChevronUp className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />}
-              </div>
-              <AnimatePresence>
-                {openFAQ === i && (
-                  <motion.p
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="text-xs text-muted-foreground mt-2 leading-relaxed overflow-hidden"
-                  >
-                    {item.a}
-                  </motion.p>
-                )}
-              </AnimatePresence>
-            </button>
-          ))}
-        </motion.div>
       </div>
     </section>
   );
