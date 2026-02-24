@@ -775,15 +775,15 @@ const VideoRoom = () => {
     </div>
   );
 
-  // Toolbar button component
+  // Toolbar button component — 44px minimum touch target
   const ToolbarBtn = ({ active, icon, label, badge, onClick }: {
     active?: boolean; icon: React.ReactNode; label: string; badge?: number; onClick: () => void;
   }) => (
     <button
-      className={`relative flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
+      className={`relative flex items-center justify-center gap-1.5 min-w-[44px] min-h-[44px] px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
         active
           ? "bg-primary/15 text-primary border border-primary/25 shadow-[0_0_12px_hsl(var(--primary)/0.15)]"
-          : "text-[hsl(220,15%,55%)] hover:text-white hover:bg-[hsl(220,20%,12%)] border border-transparent"
+          : "text-[hsl(220,15%,55%)] hover:text-white hover:bg-[hsl(220,20%,12%)] active:bg-[hsl(220,20%,16%)] border border-transparent"
       }`}
       onClick={onClick}
     >
@@ -798,7 +798,7 @@ const VideoRoom = () => {
   );
 
   return (
-    <div className="min-h-screen bg-[hsl(220,30%,4%)] flex flex-col">
+    <div className="h-[100dvh] bg-[hsl(220,30%,4%)] flex flex-col overflow-hidden">
       <ConnectionStatus onReconnect={handleReconnect} />
 
       {/* Queue banner */}
@@ -820,97 +820,49 @@ const VideoRoom = () => {
         )}
       </AnimatePresence>
 
-      {/* Top bar - redesigned */}
-      <div className="flex items-center justify-between px-3 md:px-5 py-2.5 bg-[hsl(220,25%,6%)] border-b border-[hsl(220,15%,10%)]">
+      {/* Top bar — compact on mobile */}
+      <div
+        className="flex items-center justify-between px-3 md:px-5 py-2 md:py-2.5 bg-[hsl(220,25%,6%)] border-b border-[hsl(220,15%,10%)] shrink-0"
+        style={{ paddingTop: isMobile ? "max(env(safe-area-inset-top, 0px), 8px)" : undefined }}
+      >
         {/* Left: participant info */}
-        <div className="flex items-center gap-3 min-w-0">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0">
           <div className="relative">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+            <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
               <span className="text-xs font-bold text-primary">
                 {(otherPartyName || "C").charAt(0)}
               </span>
             </div>
-            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[hsl(150,60%,45%)] border-2 border-[hsl(220,25%,6%)]" />
+            <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-[hsl(150,60%,45%)] border-2 border-[hsl(220,25%,6%)]" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-white truncate">{otherPartyName || "Consulta"}</p>
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1">
-                <Shield className="w-2.5 h-2.5 text-[hsl(150,60%,45%)]" />
-                <span className="text-[10px] text-[hsl(220,15%,40%)]">E2E</span>
+            <p className="text-xs md:text-sm font-semibold text-white truncate max-w-[120px] md:max-w-none">{otherPartyName || "Consulta"}</p>
+            {!isMobile && (
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  <Shield className="w-2.5 h-2.5 text-[hsl(150,60%,45%)]" />
+                  <span className="text-[10px] text-[hsl(220,15%,40%)]">E2E</span>
+                </div>
+                <span className="text-[10px] text-[hsl(220,15%,20%)]">•</span>
+                <span className="text-[10px] text-[hsl(220,15%,40%)]">CFM 2.314/22</span>
               </div>
-              <span className="text-[10px] text-[hsl(220,15%,20%)]">•</span>
-              <span className="text-[10px] text-[hsl(220,15%,40%)]">CFM 2.314/22</span>
-            </div>
+            )}
           </div>
         </div>
 
-        {/* Center: tools */}
-        <div className="flex items-center gap-1 md:gap-1.5">
-          <ToolbarBtn
-            active={showChat}
-            icon={<MessageSquare className="w-3.5 h-3.5" />}
-            label="Chat"
-            badge={showChat ? 0 : unreadCount}
-            onClick={() => openPanel("chat")}
-          />
-
-          {isDoctor && (
-            <>
-              <ToolbarBtn
-                active={showNotes}
-                icon={<FileText className="w-3.5 h-3.5" />}
-                label="Prontuário"
-                onClick={() => openPanel("notes")}
-              />
-              {!isMobile && (
-                <ToolbarBtn
-                  active={splitMode}
-                  icon={splitMode ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeft className="w-3.5 h-3.5" />}
-                  label="Split"
-                  onClick={() => setSplitMode(!splitMode)}
-                />
-              )}
-            </>
-          )}
-
-          <ToolbarBtn
-            active={showInfo}
-            icon={<UserRound className="w-3.5 h-3.5" />}
-            label={isDoctor ? "Paciente" : "Médico"}
-            onClick={() => openPanel("info")}
-          />
-
-          {isDoctor && (
-            <ToolbarBtn
-              icon={<Pill className="w-3.5 h-3.5" />}
-              label="Receita"
-              onClick={() => window.open(`/dashboard/prescribe/${appointmentId}`, '_blank')}
-            />
-          )}
-
-          {isDoctor && (
-            <ToolbarBtn
-              icon={<FileBadge className="w-3.5 h-3.5" />}
-              label="Atestado"
-              onClick={() => window.open('/dashboard/certificates', '_blank')}
-            />
-          )}
+        {/* Center: Timer (always visible) */}
+        <div className="flex items-center gap-1.5 px-2.5 md:px-3 py-1 md:py-1.5 rounded-xl bg-[hsl(220,20%,8%)] border border-[hsl(220,15%,12%)]">
+          <div className={`w-2 h-2 rounded-full animate-pulse ${
+            elapsed > 3600 ? "bg-destructive" : elapsed > 1800 ? "bg-amber-400" : "bg-[hsl(150,60%,45%)]"
+          }`} />
+          <span className={`text-xs font-mono font-bold tracking-wider ${timerColor}`}>
+            {formatTime(elapsed)}
+          </span>
         </div>
 
-        {/* Right: timer & controls */}
+        {/* Right: End call (always visible) */}
         <div className="flex items-center gap-2 shrink-0">
-          {/* Timer */}
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[hsl(220,20%,8%)] border border-[hsl(220,15%,12%)]">
-            <div className={`w-2 h-2 rounded-full animate-pulse ${
-              elapsed > 3600 ? "bg-destructive" : elapsed > 1800 ? "bg-amber-400" : "bg-[hsl(150,60%,45%)]"
-            }`} />
-            <span className={`text-xs font-mono font-bold tracking-wider ${timerColor}`}>
-              {formatTime(elapsed)}
-            </span>
-          </div>
-
-          {/* Fullscreen */}
+          {/* Fullscreen — desktop only */}
           {!isMobile && (
             <button
               onClick={toggleFullscreen}
@@ -925,13 +877,62 @@ const VideoRoom = () => {
           <Button
             onClick={endCall}
             size="sm"
-            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl gap-1.5 shadow-lg shadow-destructive/20 hover:shadow-destructive/30 transition-all hover:scale-105 active:scale-95 h-9 px-4"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl gap-1.5 shadow-lg shadow-destructive/20 hover:shadow-destructive/30 transition-all hover:scale-105 active:scale-95 h-9 md:h-9 px-3 md:px-4 min-w-[44px]"
           >
             <PhoneOff className="w-4 h-4" />
             {!isMobile && <span className="text-xs font-semibold">Encerrar</span>}
           </Button>
         </div>
       </div>
+
+      {/* Desktop toolbar — below top bar, above video */}
+      {!isMobile && (
+        <div className="flex items-center justify-center gap-1.5 px-5 py-2 bg-[hsl(220,25%,6%)] border-b border-[hsl(220,15%,10%)] shrink-0">
+          <ToolbarBtn
+            active={showChat}
+            icon={<MessageSquare className="w-3.5 h-3.5" />}
+            label="Chat"
+            badge={showChat ? 0 : unreadCount}
+            onClick={() => openPanel("chat")}
+          />
+          {isDoctor && (
+            <>
+              <ToolbarBtn
+                active={showNotes}
+                icon={<FileText className="w-3.5 h-3.5" />}
+                label="Prontuário"
+                onClick={() => openPanel("notes")}
+              />
+              <ToolbarBtn
+                active={splitMode}
+                icon={splitMode ? <PanelLeftClose className="w-3.5 h-3.5" /> : <PanelLeft className="w-3.5 h-3.5" />}
+                label="Split"
+                onClick={() => setSplitMode(!splitMode)}
+              />
+            </>
+          )}
+          <ToolbarBtn
+            active={showInfo}
+            icon={<UserRound className="w-3.5 h-3.5" />}
+            label={isDoctor ? "Paciente" : "Médico"}
+            onClick={() => openPanel("info")}
+          />
+          {isDoctor && (
+            <>
+              <ToolbarBtn
+                icon={<Pill className="w-3.5 h-3.5" />}
+                label="Receita"
+                onClick={() => window.open(`/dashboard/prescribe/${appointmentId}`, '_blank')}
+              />
+              <ToolbarBtn
+                icon={<FileBadge className="w-3.5 h-3.5" />}
+                label="Atestado"
+                onClick={() => window.open('/dashboard/certificates', '_blank')}
+              />
+            </>
+          )}
+        </div>
+      )}
 
       {/* Main content */}
       <div className="flex-1 flex overflow-hidden relative">
@@ -1029,7 +1030,10 @@ const VideoRoom = () => {
                 exit={{ y: "100%" }}
                 transition={{ type: "spring", stiffness: 400, damping: 35 }}
                 className="absolute bottom-0 left-0 right-0 z-40 bg-[hsl(220,25%,6%)] rounded-t-3xl border-t border-[hsl(220,15%,12%)] flex flex-col shadow-2xl"
-                style={{ maxHeight: "75vh" }}
+                style={{
+                  maxHeight: "85dvh",
+                  paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)",
+                }}
               >
                 <div className="flex justify-center pt-3 pb-1">
                   <div className="w-10 h-1 rounded-full bg-[hsl(220,15%,20%)]" />
@@ -1049,9 +1053,9 @@ const VideoRoom = () => {
                   </div>
                   <button
                     onClick={closeAllPanels}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center text-[hsl(220,15%,40%)] hover:text-white"
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-[hsl(220,15%,40%)] hover:text-white active:bg-[hsl(220,20%,16%)]"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
                 <div className="flex-1 flex flex-col overflow-hidden">
@@ -1069,6 +1073,43 @@ const VideoRoom = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Mobile bottom toolbar — fixed at bottom */}
+      {isMobile && (
+        <div
+          className="shrink-0 flex items-center justify-around gap-1 px-2 py-2 bg-[hsl(220,25%,6%)] border-t border-[hsl(220,15%,10%)]"
+          style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)" }}
+        >
+          <ToolbarBtn
+            active={showChat}
+            icon={<MessageSquare className="w-5 h-5" />}
+            label="Chat"
+            badge={showChat ? 0 : unreadCount}
+            onClick={() => openPanel("chat")}
+          />
+          {isDoctor && (
+            <ToolbarBtn
+              active={showNotes}
+              icon={<FileText className="w-5 h-5" />}
+              label="SOAP"
+              onClick={() => openPanel("notes")}
+            />
+          )}
+          <ToolbarBtn
+            active={showInfo}
+            icon={<UserRound className="w-5 h-5" />}
+            label="Info"
+            onClick={() => openPanel("info")}
+          />
+          {isDoctor && (
+            <ToolbarBtn
+              icon={<Pill className="w-5 h-5" />}
+              label="Rx"
+              onClick={() => window.open(`/dashboard/prescribe/${appointmentId}`, '_blank')}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Phone, Clock, Wifi, WifiOff, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface VideoConsultationProps {
   appointmentId: string;
@@ -27,6 +28,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
   const elapsedTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const jitsiContainerRef = useRef<HTMLDivElement>(null);
   const jitsiApiRef = useRef<any>(null);
+  const isMobile = useIsMobile();
 
   // Deterministic room name from appointmentId — same for doctor & patient
   const roomName = `AlloMedicoConsulta${appointmentId.replace(/-/g, "")}`;
@@ -86,6 +88,15 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
       const JitsiMeetExternalAPI = (window as any).JitsiMeetExternalAPI;
       if (!JitsiMeetExternalAPI || !jitsiContainerRef.current) return;
 
+      // Mobile-optimized toolbar — fewer buttons, bigger targets
+      const mobileToolbar = [
+        "microphone", "camera", "hangup", "chat",
+      ];
+      const desktopToolbar = [
+        "microphone", "camera", "desktop", "chat",
+        "raisehand", "tileview", "hangup", "fullscreen",
+      ];
+
       const api = new JitsiMeetExternalAPI("meet.jit.si", {
         roomName,
         parentNode: jitsiContainerRef.current,
@@ -110,17 +121,21 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
           hideLobbyButton: true,
           requireDisplayName: false,
           enableInsecureRoomNameWarning: false,
-          // These are the critical settings to disable lobby/moderator requirement
           lobby: { autoKnock: true, enableChat: false },
-          // Disable all notifications about lobby
           notifications: [],
-          // Security settings
           enableClosePage: false,
-          // Toolbar
-          toolbarButtons: [
-            "microphone", "camera", "desktop", "chat",
-            "raisehand", "tileview", "hangup", "fullscreen",
-          ],
+          // Mobile-specific optimizations
+          disableSimulcast: isMobile, // Reduce bandwidth on mobile
+          resolution: isMobile ? 360 : 720, // Lower resolution on mobile
+          constraints: {
+            video: {
+              height: { ideal: isMobile ? 360 : 720, max: isMobile ? 480 : 720 },
+              width: { ideal: isMobile ? 640 : 1280, max: isMobile ? 854 : 1280 },
+            },
+          },
+          toolbarButtons: isMobile ? mobileToolbar : desktopToolbar,
+          // Disable filmstrip on mobile for fullscreen experience
+          filmstrip: { disableStageFilmstrip: isMobile },
         },
         interfaceConfigOverwrite: {
           SHOW_JITSI_WATERMARK: false,
@@ -138,6 +153,12 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
           PROVIDER_NAME: "Allo Médico",
           LANG_DETECTION: false,
           DEFAULT_LANGUAGE: "ptBR",
+          // Mobile-optimized toolbar
+          TOOLBAR_ALWAYS_VISIBLE: isMobile,
+          TOOLBAR_TIMEOUT: isMobile ? 8000 : 4000,
+          FILM_STRIP_MAX_HEIGHT: isMobile ? 80 : 120,
+          VERTICAL_FILMSTRIP: !isMobile,
+          TILE_VIEW_MAX_COLUMNS: isMobile ? 1 : 5,
         },
       });
 
@@ -175,11 +196,11 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
         jitsiApiRef.current = null;
       }
     };
-  }, [roomName, displayName]);
+  }, [roomName, displayName, isMobile]);
 
   return (
     <div
-      className="relative w-full h-full overflow-hidden select-none"
+      className="relative w-full h-full overflow-hidden select-none touch-none"
       style={{ background: "hsl(220, 25%, 4%)", minHeight: "100dvh" }}
       onClick={resetTopBar}
       onTouchStart={resetTopBar}
@@ -198,8 +219,11 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-2 pointer-events-none"
-            style={{ background: "linear-gradient(to bottom, hsla(220,25%,4%,0.7), transparent)" }}
+            className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-3 md:px-4 py-2 pointer-events-none"
+            style={{
+              background: "linear-gradient(to bottom, hsla(220,25%,4%,0.7), transparent)",
+              paddingTop: "max(env(safe-area-inset-top, 0px), 8px)",
+            }}
           >
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="bg-black/40 border-white/10 text-white gap-1.5 font-mono text-xs backdrop-blur-md">
