@@ -237,7 +237,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
     <div className="min-h-screen bg-background flex flex-col">
 
       {/* ══ Header ══ */}
-      <header className="sticky top-0 z-50 h-14 border-b border-border/40 bg-card/95 backdrop-blur-xl flex items-center px-4 gap-3 shadow-sm">
+      <header className="sticky top-0 z-50 h-14 border-b border-border/40 bg-card/95 backdrop-blur-xl flex items-center px-4 gap-3 shadow-sm safe-area-pt">
 
         {/* Mobile hamburger */}
         {nav && nav.length > 0 && (
