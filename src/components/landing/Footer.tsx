@@ -38,15 +38,20 @@ const Footer = () => {
             {trustBadges.map((badge, i) => (
               <motion.div
                 key={badge.label}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="flex items-center gap-2 group"
+                transition={{ delay: i * 0.08, type: "spring", stiffness: 200, damping: 15 }}
+                whileHover={{ scale: 1.08, y: -2 }}
+                className="flex items-center gap-2 group cursor-default"
               >
-                <div className="w-8 h-8 rounded-lg bg-background/8 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <badge.icon className="w-4 h-4 text-primary" />
-                </div>
+                <motion.div
+                  className="w-8 h-8 rounded-lg bg-background/8 flex items-center justify-center group-hover:bg-primary/20 transition-colors"
+                  whileHover={{ rotate: 8 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  <badge.icon className="w-4 h-4 text-primary transition-transform duration-300 group-hover:scale-110" />
+                </motion.div>
                 <span className="text-xs font-semibold opacity-60 group-hover:opacity-100 transition-opacity">{badge.label}</span>
               </motion.div>
             ))}
@@ -101,15 +106,18 @@ const Footer = () => {
                 { icon: Instagram, label: "Instagram", href: "#" },
                 { icon: Linkedin, label: "LinkedIn", href: "#" },
                 { icon: Youtube, label: "YouTube", href: "#" },
-              ].map((social) => (
-                <a
+              ].map((social, i) => (
+                <motion.a
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  className="w-9 h-9 rounded-lg bg-background/10 flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-all duration-200"
+                  whileHover={{ scale: 1.15, y: -3 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                  className="w-9 h-9 rounded-lg bg-background/10 flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                 >
                   <social.icon className="w-4 h-4" />
-                </a>
+                </motion.a>
               ))}
             </div>
 
