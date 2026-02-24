@@ -124,7 +124,7 @@ const HeroSection = () => {
   const currentBooking = recentBookings[bookingIndex];
 
   return (
-    <section ref={sectionRef} aria-label="Início" className="relative min-h-[90vh] lg:min-h-screen flex items-center pt-28 sm:pt-24 overflow-hidden">
+    <section ref={sectionRef} aria-label="Início" className="relative min-h-[85vh] sm:min-h-[90vh] lg:min-h-screen flex items-center pt-20 sm:pt-24 overflow-hidden">
       {/* Floating particles */}
       {Array.from({ length: 8 }).map((_, i) => (
         <motion.div
@@ -231,7 +231,7 @@ const HeroSection = () => {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.5 }}
               >
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight text-foreground mb-4 sm:mb-6">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.15] text-foreground mb-3 sm:mb-6">
                   {poseContent[poseIndex].title}{" "}
                   <span className="text-gradient">{poseContent[poseIndex].highlight}</span>
                 </h1>
@@ -243,10 +243,10 @@ const HeroSection = () => {
             </AnimatePresence>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 mb-5">
               <Button
                 size="lg"
-                className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-6 relative overflow-hidden group"
+                className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-6 relative overflow-hidden group h-12 sm:h-11 text-base sm:text-sm"
                 onClick={() => navigate("/paciente")}
               >
                 <span className="relative z-10 flex items-center gap-1">
@@ -256,7 +256,7 @@ const HeroSection = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="rounded-full px-6"
+                className="rounded-full px-6 h-12 sm:h-11 text-base sm:text-sm"
                 onClick={() => navigate("/consulta-avulsa")}
               >
                 Consulta Avulsa
@@ -296,7 +296,7 @@ const HeroSection = () => {
             onMouseLeave={handleMouseLeave}
             style={{ perspective: 800 }}
           >
-            <div className="relative w-full max-w-[200px] sm:max-w-xs md:max-w-sm lg:max-w-lg mx-auto">
+            <div className="relative w-full max-w-[180px] sm:max-w-[240px] md:max-w-sm lg:max-w-lg mx-auto">
               {/* Mascot with 3D tilt + pose transitions */}
               <motion.div
                 style={{
