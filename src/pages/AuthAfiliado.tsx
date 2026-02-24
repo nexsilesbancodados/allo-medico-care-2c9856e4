@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowLeft, Megaphone, LogIn, UserPlus, AlertCircle } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Megaphone, LogIn, UserPlus, AlertCircle, Sparkles } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -31,7 +31,6 @@ const AuthAfiliado = () => {
     if (error) {
       toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
     } else {
-      // Check if affiliate is approved
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: affiliateProfile } = await (supabase as any)
@@ -47,7 +46,7 @@ const AuthAfiliado = () => {
         }
         
         if (!affiliateProfile.is_approved) {
-          toast({ title: "Aguardando aprovação", description: "Seu cadastro ainda está em análise. Você receberá um e-mail quando for aprovado.", variant: "destructive" });
+          toast({ title: "Aguardando aprovação", description: "Seu cadastro ainda está em análise.", variant: "destructive" });
           await supabase.auth.signOut();
           return;
         }
@@ -75,7 +74,7 @@ const AuthAfiliado = () => {
     }
     setLoading(false);
     await supabase.auth.signOut();
-    toast({ title: "Cadastro realizado!", description: "Seu pedido de afiliação foi enviado. O administrador irá analisar e você receberá um e-mail com o resultado." });
+    toast({ title: "Cadastro realizado!", description: "Seu pedido de afiliação foi enviado. O administrador irá analisar." });
     setStep("welcome");
   };
 
@@ -103,108 +102,145 @@ const AuthAfiliado = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-          <Link to="/" className="lg:hidden inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition">
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Mobile gradient header */}
+        <div className="lg:hidden bg-gradient-to-br from-secondary/80 to-accent/80 px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8">
+          <Link to="/" className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
-
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center">
-              <Megaphone className="w-5 h-5 text-primary-foreground" />
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <Megaphone className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-foreground">
-                {step === "welcome" ? "Programa de Afiliados" : step === "login" ? "Entrar" : "Cadastro de Afiliado"}
-              </h2>
-              <p className="text-sm text-muted-foreground">Indique e ganhe 2% de comissão</p>
+              <h1 className="text-xl font-bold text-primary-foreground">Programa de Afiliados</h1>
+              <p className="text-xs text-primary-foreground/70">Indique e ganhe 2%</p>
             </div>
           </div>
+        </div>
 
-          {step === "welcome" && (
-            <div className="space-y-4">
-              <Alert className="border-primary/30 bg-primary/5">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription className="text-sm">
-                  Após o cadastro, um administrador irá analisar seu pedido. Você receberá um e-mail informando se foi aprovado ou não.
-                </AlertDescription>
-              </Alert>
-              <Button className="w-full bg-gradient-hero text-primary-foreground" size="lg" onClick={() => setStep("login")}>
-                <LogIn className="w-4 h-4 mr-2" /> Entrar na minha conta
-              </Button>
-              <Button variant="outline" className="w-full" size="lg" onClick={() => setStep("register")}>
-                <UserPlus className="w-4 h-4 mr-2" /> Quero ser afiliado
-              </Button>
+        {/* Form */}
+        <div className="flex-1 flex flex-col justify-center px-6 py-6 lg:items-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
+            <Link to="/" className="hidden lg:inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition">
+              <ArrowLeft className="w-4 h-4" /> Voltar
+            </Link>
+
+            <div className="hidden lg:flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary to-accent flex items-center justify-center">
+                <Megaphone className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-foreground">
+                  {step === "welcome" ? "Programa de Afiliados" : step === "login" ? "Entrar" : "Cadastro de Afiliado"}
+                </h2>
+                <p className="text-sm text-muted-foreground">Indique e ganhe 2% de comissão</p>
+              </div>
             </div>
-          )}
 
-          {step === "register" && (
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1" /></div>
-                <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1" /></div>
-              </div>
-              <div>
-                <Label>Email</Label>
-                <div className="relative mt-1">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
-                </div>
-              </div>
-              <div>
-                <Label>Chave PIX (para receber comissões)</Label>
-                <Input value={pixKey} onChange={e => setPixKey(e.target.value)} placeholder="CPF, email, telefone ou chave aleatória" className="mt-1" />
-              </div>
-              <div>
-                <Label>Senha</Label>
-                <div className="relative mt-1">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="pl-10" required minLength={6} />
-                </div>
-              </div>
-              <Alert className="border-warning/30 bg-warning/5">
-                <AlertCircle className="h-4 w-4 text-warning" />
-                <AlertDescription className="text-xs text-muted-foreground">
-                  Após o cadastro, sua conta ficará pendente até a aprovação do administrador.
-                </AlertDescription>
-              </Alert>
-              <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading}>
-                {loading ? "Enviando pedido..." : "Solicitar Afiliação"}
-              </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
-              </p>
-            </form>
-          )}
+            <h2 className="lg:hidden text-lg font-bold text-foreground mb-4">
+              {step === "welcome" ? "Bem-vindo" : step === "login" ? "Entrar" : "Cadastro"}
+            </h2>
 
-          {step === "login" && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label>Email</Label>
-                <div className="relative mt-1">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
-                </div>
+            {step === "welcome" && (
+              <div className="space-y-3">
+                <Alert className="border-primary/30 bg-primary/5">
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription className="text-sm">
+                    Após o cadastro, um administrador irá analisar seu pedido.
+                  </AlertDescription>
+                </Alert>
+                <Button className="w-full bg-gradient-hero text-primary-foreground h-12" size="lg" onClick={() => setStep("login")}>
+                  <LogIn className="w-4 h-4 mr-2" /> Entrar na minha conta
+                </Button>
+                <Button variant="outline" className="w-full h-12" size="lg" onClick={() => setStep("register")}>
+                  <UserPlus className="w-4 h-4 mr-2" /> Quero ser afiliado
+                </Button>
               </div>
-              <div>
-                <Label>Senha</Label>
-                <div className="relative mt-1">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-10" required />
+            )}
+
+            {step === "register" && (
+              <form onSubmit={handleRegister} className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1" /></div>
+                  <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1" /></div>
                 </div>
-              </div>
-              <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading}>
-                {loading ? "Entrando..." : "Entrar"}
-              </Button>
-              <p className="text-center text-sm text-muted-foreground">
-                <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
-              </p>
-              <p className="text-center text-sm text-muted-foreground">
-                <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
-              </p>
-            </form>
-          )}
-        </motion.div>
+                <div>
+                  <Label>Email</Label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
+                  </div>
+                </div>
+                <div>
+                  <Label>Chave PIX (para receber comissões)</Label>
+                  <Input value={pixKey} onChange={e => setPixKey(e.target.value)} placeholder="CPF, email, telefone ou chave aleatória" className="mt-1" />
+                </div>
+                <div>
+                  <Label>Senha</Label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="pl-10" required minLength={6} />
+                  </div>
+                </div>
+                <Alert className="border-warning/30 bg-warning/5">
+                  <AlertCircle className="h-4 w-4 text-warning" />
+                  <AlertDescription className="text-xs text-muted-foreground">
+                    Após o cadastro, sua conta ficará pendente até a aprovação do administrador.
+                  </AlertDescription>
+                </Alert>
+                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground h-12" size="lg" disabled={loading}>
+                  {loading ? (
+                    <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-spin" /> Enviando...
+                    </motion.span>
+                  ) : "Solicitar Afiliação"}
+                </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                </p>
+              </form>
+            )}
+
+            {step === "login" && (
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <Label>Email</Label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
+                  </div>
+                </div>
+                <div>
+                  <Label>Senha</Label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-10" required />
+                  </div>
+                </div>
+                <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground h-12" size="lg" disabled={loading}>
+                  {loading ? (
+                    <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
+                    </motion.span>
+                  ) : "Entrar"}
+                </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
+                </p>
+                <p className="text-center text-sm text-muted-foreground">
+                  <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                </p>
+              </form>
+            )}
+          </motion.div>
+        </div>
+
+        {/* Bottom bar */}
+        <div className="px-6 py-4 pb-[max(env(safe-area-inset-bottom,8px),8px)] border-t border-border bg-muted/30 flex items-center justify-center gap-5 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5"><Megaphone className="w-3.5 h-3.5 text-secondary shrink-0" /> Afiliados</span>
+          <span className="flex items-center gap-1.5">💰 Comissão 2%</span>
+        </div>
       </div>
     </div>
   );
