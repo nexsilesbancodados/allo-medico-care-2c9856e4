@@ -7,14 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import {
   Camera, Mic, MicOff, CameraOff, CheckCircle2, AlertTriangle,
   Loader2, Users, Volume2, MessageCircle, Clock, Send, RefreshCw,
-  PhoneCall, Settings, ChevronDown, Wifi, Shield
+  PhoneCall, ChevronDown, Wifi, Shield
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import mascotImg from "@/assets/mascot-wave.png";
 import { format, differenceInSeconds } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import PreConsultationForm from "@/components/patient/PreConsultationForm";
-import HealthTipsCarousel from "./HealthTipsCarousel";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PreCallCheckProps {
   appointmentId?: string;
@@ -35,6 +35,7 @@ interface WaitingMessage {
 const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt, onReady, isDoctor = false }: PreCallCheckProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const videoRef = useRef<HTMLVideoElement>(null);
   const animFrameRef = useRef<number | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -215,7 +216,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
   }, [stream]);
 
   const handleEnter = useCallback(async () => {
-    // Update appointment status to "waiting" so the doctor knows patient arrived
     if (appointmentId && !isDoctor) {
       await supabase.from("appointments").update({ status: "waiting" }).eq("id", appointmentId);
     }
@@ -249,6 +249,327 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
   const allGood = cameraOk === true && micOk === true;
   const userName = user?.user_metadata?.first_name || (isDoctor ? "Médico" : "Paciente");
 
+  /* ─── Status pill helper ─── */
+  const StatusPill = ({ ok, label }: { ok: boolean | null; label: string }) => (
+    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
+      ok ? 'bg-[hsl(150,60%,40%,0.12)] text-[hsl(150,60%,55%)] border border-[hsl(150,60%,40%,0.2)]'
+         : ok === false ? 'bg-destructive/10 text-destructive border border-destructive/20'
+         : 'bg-[hsl(220,20%,15%)] text-[hsl(220,15%,55%)] border border-[hsl(220,15%,22%)]'
+    }`}>
+      {ok ? <CheckCircle2 className="w-3.5 h-3.5" /> : ok === false ? <AlertTriangle className="w-3.5 h-3.5" /> : <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+      {label} {ok ? 'OK' : ok === false ? 'Erro' : '...'}
+    </div>
+  );
+
+  /* ─── MOBILE LAYOUT ─── */
+  if (isMobile) {
+    return (
+      <div className="fixed inset-0 bg-[hsl(220,20%,6%)] flex flex-col" style={{ height: '100dvh' }}>
+        {/* Compact top bar */}
+        <div className="flex items-center justify-between px-4 pt-[max(env(safe-area-inset-top,8px),8px)] pb-2 bg-[hsl(220,20%,8%)] border-b border-[hsl(220,15%,15%)]">
+          <div className="flex items-center gap-2 min-w-0">
+            <img src={mascotImg} alt="Mascot" className="w-7 h-7 shrink-0" />
+            <h1 className="text-sm font-bold text-white truncate">
+              {isDoctor ? "Preparar" : "Pré-consulta"}
+            </h1>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(150,60%,40%,0.15)] border border-[hsl(150,60%,40%,0.25)]">
+              <Wifi className="w-2.5 h-2.5 text-[hsl(150,60%,45%)]" />
+              <span className="text-[10px] text-[hsl(150,60%,55%)] font-medium">Boa</span>
+            </div>
+            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(220,20%,15%)] border border-[hsl(220,15%,25%)]">
+              <Shield className="w-2.5 h-2.5 text-[hsl(220,15%,55%)]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Vertical video preview — takes available space */}
+        <div className="flex-1 relative overflow-hidden">
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className={`w-full h-full object-cover ${!cameraOn ? 'hidden' : ''}`}
+            style={{ transform: 'scaleX(-1)' }}
+          />
+
+          {/* Camera off / error state */}
+          {(!cameraOn || (!cameraOk && !testing)) && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[hsl(220,20%,10%)]">
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-20 h-20 rounded-full bg-[hsl(220,20%,20%)] flex items-center justify-center">
+                  <span className="text-3xl font-bold text-[hsl(220,15%,55%)]">
+                    {userName.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <p className="text-sm text-[hsl(220,15%,55%)]">
+                  {!cameraOk && !testing ? "Câmera não detectada" : "Câmera desligada"}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Loading overlay */}
+          {testing && (
+            <div className="absolute inset-0 flex items-center justify-center bg-[hsl(220,20%,8%,0.7)] backdrop-blur-sm">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                <p className="text-sm text-[hsl(220,15%,65%)]">Verificando dispositivos...</p>
+              </div>
+            </div>
+          )}
+
+          {/* User name + volume badge */}
+          <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[hsl(220,20%,8%,0.75)] backdrop-blur-md border border-[hsl(220,15%,20%)]">
+              <span className="text-sm font-medium text-white">{userName}</span>
+            </div>
+            {micOn && micOk && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[hsl(220,20%,8%,0.75)] backdrop-blur-md border border-[hsl(220,15%,20%)]">
+                <Volume2 className="w-3.5 h-3.5 text-[hsl(150,60%,50%)]" />
+                <div className="flex gap-0.5 items-end h-3">
+                  {[0.2, 0.4, 0.6, 0.8, 1].map((threshold, i) => (
+                    <motion.div
+                      key={i}
+                      className={`w-1 rounded-full ${volume >= threshold ? 'bg-[hsl(150,60%,50%)]' : 'bg-[hsl(220,15%,30%)]'}`}
+                      animate={{ height: volume >= threshold ? `${60 + i * 10}%` : '30%' }}
+                      transition={{ duration: 0.1 }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Doctor info overlay (top of video) */}
+          {!isDoctor && (doctorName || scheduledAt) && (
+            <div className="absolute top-3 left-3 right-3">
+              <div className="rounded-xl bg-[hsl(220,20%,8%,0.85)] backdrop-blur-md border border-[hsl(220,15%,20%)] px-3 py-2.5 flex items-center gap-3">
+                {doctorName && (
+                  <div className="w-9 h-9 rounded-full bg-primary/15 flex items-center justify-center shrink-0">
+                    <span className="text-xs font-bold text-primary">{doctorName.charAt(0)}</span>
+                  </div>
+                )}
+                <div className="flex-1 min-w-0">
+                  {doctorName && <p className="text-xs font-semibold text-white truncate">{doctorName}</p>}
+                  {doctorSpecialty && <p className="text-[10px] text-[hsl(220,15%,50%)]">{doctorSpecialty}</p>}
+                </div>
+                {scheduledAt && countdown !== null && (
+                  <div className="shrink-0">
+                    {countdown > 0 ? (
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 text-primary" />
+                        <span className="text-[11px] font-mono font-bold text-primary">{formatCountdown(countdown)}</span>
+                      </div>
+                    ) : (
+                      <Badge className="bg-[hsl(150,60%,40%,0.15)] text-[hsl(150,60%,55%)] border-[hsl(150,60%,40%,0.25)] text-[9px]">
+                        Agora!
+                      </Badge>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Bottom panel: controls + status + CTA */}
+        <div className="bg-[hsl(220,20%,8%)] border-t border-[hsl(220,15%,15%)] px-4 pb-[max(env(safe-area-inset-bottom,8px),8px)]">
+          {/* Device status + controls row */}
+          <div className="flex items-center justify-center gap-4 py-3">
+            <button
+              onClick={toggleMic}
+              disabled={!micOk}
+              className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 ${
+                micOn && micOk
+                  ? 'bg-[hsl(220,20%,18%)] hover:bg-[hsl(220,20%,23%)] text-white'
+                  : 'bg-destructive/90 text-destructive-foreground'
+              }`}
+            >
+              {micOn && micOk ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+              {micOk === false && (
+                <div className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
+                  <AlertTriangle className="w-2.5 h-2.5 text-destructive-foreground" />
+                </div>
+              )}
+            </button>
+
+            <button
+              onClick={toggleCamera}
+              disabled={!cameraOk}
+              className={`relative w-14 h-14 rounded-full flex items-center justify-center transition-all duration-200 ${
+                cameraOn && cameraOk
+                  ? 'bg-[hsl(220,20%,18%)] hover:bg-[hsl(220,20%,23%)] text-white'
+                  : 'bg-destructive/90 text-destructive-foreground'
+              }`}
+            >
+              {cameraOn && cameraOk ? <Camera className="w-6 h-6" /> : <CameraOff className="w-6 h-6" />}
+              {cameraOk === false && (
+                <div className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-destructive flex items-center justify-center">
+                  <AlertTriangle className="w-2.5 h-2.5 text-destructive-foreground" />
+                </div>
+              )}
+            </button>
+
+            <button
+              onClick={testDevices}
+              disabled={testing}
+              className="w-11 h-11 rounded-full flex items-center justify-center bg-[hsl(220,20%,18%)] hover:bg-[hsl(220,20%,23%)] text-[hsl(220,15%,60%)] transition-all"
+            >
+              <RefreshCw className={`w-5 h-5 ${testing ? 'animate-spin' : ''}`} />
+            </button>
+
+            {/* Chat toggle */}
+            {!isDoctor && appointmentId && (
+              <button
+                onClick={() => setShowChat(!showChat)}
+                className="relative w-11 h-11 rounded-full flex items-center justify-center bg-[hsl(220,20%,18%)] hover:bg-[hsl(220,20%,23%)] text-[hsl(220,15%,60%)] transition-all"
+              >
+                <MessageCircle className="w-5 h-5" />
+                {chatMessages.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] flex items-center justify-center font-bold">
+                    {chatMessages.length}
+                  </span>
+                )}
+              </button>
+            )}
+          </div>
+
+          {/* Device status pills */}
+          <div className="flex items-center justify-center gap-2 pb-2">
+            <StatusPill ok={cameraOk} label="Câmera" />
+            <StatusPill ok={micOk} label="Microfone" />
+          </div>
+
+          {/* Doctor presence status */}
+          {!isDoctor && appointmentId && (
+            <div className={`rounded-xl border p-3 flex items-center gap-3 mb-2 ${
+              doctorPresent
+                ? 'bg-[hsl(150,60%,40%,0.08)] border-[hsl(150,60%,40%,0.2)]'
+                : 'bg-[hsl(220,20%,10%)] border-[hsl(220,15%,18%)]'
+            }`}>
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
+                doctorPresent ? 'bg-[hsl(150,60%,40%,0.15)]' : 'bg-primary/10'
+              }`}>
+                {doctorPresent ? (
+                  <CheckCircle2 className="w-5 h-5 text-[hsl(150,60%,50%)]" />
+                ) : (
+                  <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: "linear" }}>
+                    <Loader2 className="w-5 h-5 text-primary" />
+                  </motion.div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-medium text-white">
+                  {doctorPresent ? "Médico na sala!" : "Aguardando o médico..."}
+                </p>
+                {waitingPosition !== null && waitingPosition > 0 && !doctorPresent && (
+                  <p className="text-[10px] text-[hsl(220,15%,50%)] flex items-center gap-1">
+                    <Users className="w-3 h-3" /> Posição: #{waitingPosition}
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Enter button */}
+          <Button
+            className={`w-full h-14 rounded-xl text-base font-semibold shadow-lg transition-all duration-200 active:scale-[0.97] gap-2 ${
+              doctorPresent
+                ? 'bg-[hsl(150,60%,40%)] hover:bg-[hsl(150,60%,35%)] text-white'
+                : 'bg-primary hover:bg-primary/90 text-primary-foreground'
+            }`}
+            onClick={handleEnter}
+            disabled={testing}
+          >
+            <PhoneCall className="w-5 h-5" />
+            {doctorPresent ? "Entrar na Consulta" : allGood ? "Entrar na Consulta" : "Entrar mesmo assim"}
+          </Button>
+
+          {/* Support link */}
+          <div className="text-center pt-2 pb-1">
+            <button
+              className="text-[11px] text-[hsl(220,15%,45%)] hover:text-primary transition-colors flex items-center gap-1.5 mx-auto"
+              onClick={() => navigate("/dashboard/patient/support")}
+            >
+              <MessageCircle className="w-3 h-3" />
+              Problemas? Fale com o Suporte
+            </button>
+          </div>
+        </div>
+
+        {/* Chat bottom sheet */}
+        <AnimatePresence>
+          {showChat && (
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              className="fixed inset-x-0 bottom-0 z-50 bg-[hsl(220,20%,8%)] border-t border-[hsl(220,15%,18%)] rounded-t-2xl"
+              style={{ maxHeight: '60dvh', paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-[hsl(220,15%,15%)]">
+                <p className="text-sm font-medium text-white">Chat da sala de espera</p>
+                <button onClick={() => setShowChat(false)} className="text-[hsl(220,15%,55%)] hover:text-white">
+                  <ChevronDown className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="h-40 overflow-y-auto px-4 py-2 space-y-2">
+                {chatMessages.length === 0 && (
+                  <p className="text-xs text-[hsl(220,15%,40%)] text-center mt-10">
+                    Envie uma mensagem enquanto espera...
+                  </p>
+                )}
+                {chatMessages.map(msg => (
+                  <div key={msg.id} className={`flex ${msg.sender === (isDoctor ? "doctor" : "patient") ? "justify-end" : "justify-start"}`}>
+                    <div className={`max-w-[80%] rounded-2xl px-3 py-1.5 text-xs ${
+                      msg.sender === (isDoctor ? "doctor" : "patient")
+                        ? "bg-primary text-primary-foreground rounded-br-sm"
+                        : "bg-[hsl(220,20%,18%)] text-white rounded-bl-sm"
+                    }`}>
+                      <p>{msg.text}</p>
+                      <p className="text-[9px] opacity-50 mt-0.5">{msg.time}</p>
+                    </div>
+                  </div>
+                ))}
+                <div ref={chatEndRef} />
+              </div>
+              <div className="flex gap-2 px-4 py-2">
+                <input
+                  value={chatInput}
+                  onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && sendChatMessage()}
+                  placeholder="Digite uma mensagem..."
+                  className="flex-1 bg-[hsl(220,20%,15%)] border border-[hsl(220,15%,22%)] rounded-xl px-3 py-3 text-sm text-white placeholder:text-[hsl(220,15%,40%)] outline-none focus:border-primary/50 transition-colors"
+                />
+                <button onClick={sendChatMessage} className="text-primary hover:text-primary/80 px-3 min-h-[44px]">
+                  <Send className="w-5 h-5" />
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Symptom form bottom sheet */}
+        {!isDoctor && appointmentId && showSymptomForm && !symptomsSubmitted && (
+          <div className="fixed inset-x-0 bottom-0 z-40 bg-[hsl(220,20%,8%)] border-t border-[hsl(220,15%,18%)] rounded-t-2xl max-h-[70dvh] overflow-y-auto"
+               style={{ paddingBottom: 'max(env(safe-area-inset-bottom, 8px), 8px)' }}>
+            <div className="px-4 py-3">
+              <PreConsultationForm
+                appointmentId={appointmentId}
+                onComplete={() => { setSymptomsSubmitted(true); setShowSymptomForm(false); }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  /* ─── DESKTOP LAYOUT ─── */
   return (
     <div className="min-h-screen bg-[hsl(220,20%,6%)] flex flex-col items-center justify-center p-4">
       <motion.div
@@ -287,7 +608,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
           {/* Left: Video preview */}
           <div className="space-y-4">
             <div className="relative rounded-2xl overflow-hidden bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,18%)] shadow-2xl">
-              {/* Video aspect ratio container */}
               <div className="relative aspect-[4/3]">
                 <video
                   ref={videoRef}
@@ -298,7 +618,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
                   style={{ transform: 'scaleX(-1)' }}
                 />
 
-                {/* Camera off state */}
                 {(!cameraOn || (!cameraOk && !testing)) && (
                   <div className="absolute inset-0 flex items-center justify-center bg-[hsl(220,20%,12%)]">
                     <div className="flex flex-col items-center gap-3">
@@ -314,7 +633,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
                   </div>
                 )}
 
-                {/* Loading overlay */}
                 {testing && (
                   <div className="absolute inset-0 flex items-center justify-center bg-[hsl(220,20%,8%,0.7)] backdrop-blur-sm">
                     <div className="flex flex-col items-center gap-3">
@@ -324,14 +642,12 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
                   </div>
                 )}
 
-                {/* User name badge */}
                 <div className="absolute bottom-3 left-3">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[hsl(220,20%,8%,0.75)] backdrop-blur-md border border-[hsl(220,15%,20%)]">
                     <span className="text-sm font-medium text-white">{userName}</span>
                   </div>
                 </div>
 
-                {/* Mic volume indicator */}
                 {micOn && micOk && (
                   <div className="absolute bottom-3 right-3">
                     <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[hsl(220,20%,8%,0.75)] backdrop-blur-md border border-[hsl(220,15%,20%)]">
@@ -404,22 +720,8 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
 
             {/* Device status pills */}
             <div className="flex items-center gap-2 flex-wrap">
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
-                cameraOk ? 'bg-[hsl(150,60%,40%,0.12)] text-[hsl(150,60%,55%)] border border-[hsl(150,60%,40%,0.2)]'
-                         : cameraOk === false ? 'bg-destructive/10 text-destructive border border-destructive/20'
-                         : 'bg-[hsl(220,20%,15%)] text-[hsl(220,15%,55%)] border border-[hsl(220,15%,22%)]'
-              }`}>
-                {cameraOk ? <CheckCircle2 className="w-3.5 h-3.5" /> : cameraOk === false ? <AlertTriangle className="w-3.5 h-3.5" /> : <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                Câmera {cameraOk ? 'OK' : cameraOk === false ? 'Erro' : '...'}
-              </div>
-              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium ${
-                micOk ? 'bg-[hsl(150,60%,40%,0.12)] text-[hsl(150,60%,55%)] border border-[hsl(150,60%,40%,0.2)]'
-                      : micOk === false ? 'bg-destructive/10 text-destructive border border-destructive/20'
-                      : 'bg-[hsl(220,20%,15%)] text-[hsl(220,15%,55%)] border border-[hsl(220,15%,22%)]'
-              }`}>
-                {micOk ? <CheckCircle2 className="w-3.5 h-3.5" /> : micOk === false ? <AlertTriangle className="w-3.5 h-3.5" /> : <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                Microfone {micOk ? 'OK' : micOk === false ? 'Erro' : '...'}
-              </div>
+              <StatusPill ok={cameraOk} label="Câmera" />
+              <StatusPill ok={micOk} label="Microfone" />
               {!allGood && !testing && (
                 <p className="text-[11px] text-[hsl(220,15%,45%)]">
                   Dispositivos com erro não impedirão sua entrada.
@@ -430,7 +732,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
 
           {/* Right: Info panel */}
           <div className="space-y-4">
-            {/* Appointment details */}
             {!isDoctor && (doctorName || scheduledAt) && (
               <div className="rounded-xl bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,18%)] p-4 space-y-3">
                 {doctorName && (
@@ -475,7 +776,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
               </div>
             )}
 
-            {/* Doctor status */}
             {!isDoctor && appointmentId && (
               <div className={`rounded-xl border p-4 flex items-center gap-3 ${
                 doctorPresent
@@ -511,7 +811,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
               </div>
             )}
 
-            {/* Enter button */}
             <Button
               className={`w-full h-12 rounded-xl text-sm font-semibold shadow-lg transition-all duration-200 active:scale-[0.98] gap-2 ${
                 doctorPresent
@@ -525,7 +824,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
               {doctorPresent ? "Entrar na Consulta" : allGood ? "Entrar na Consulta" : "Entrar mesmo assim"}
             </Button>
 
-            {/* Waiting room chat */}
             {!isDoctor && appointmentId && (
               <div>
                 <button
@@ -589,7 +887,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
               </div>
             )}
 
-            {/* Pre-consultation questionnaire (patient only) */}
             {!isDoctor && appointmentId && showSymptomForm && !symptomsSubmitted && (
               <PreConsultationForm
                 appointmentId={appointmentId}
@@ -606,7 +903,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
               </div>
             )}
 
-            {/* Tips toggle */}
             <button
               onClick={() => setShowTips(!showTips)}
               className="flex items-center gap-2 text-xs text-[hsl(220,15%,55%)] hover:text-white transition-colors w-full"
@@ -638,7 +934,6 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
               )}
             </AnimatePresence>
 
-            {/* Support link */}
             <div className="text-center pt-2">
               <button
                 className="text-[11px] text-[hsl(220,15%,45%)] hover:text-primary transition-colors flex items-center gap-1.5 mx-auto"
