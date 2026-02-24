@@ -46,6 +46,22 @@ const recentBookings = [
   { name: "Carlos R.", specialty: "Ortopedia", time: "8 min atrás" },
 ];
 
+// Animated counter hook
+const useAnimatedCounter = (end: number, duration = 2000) => {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    let start = 0;
+    const increment = end / (duration / 16);
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= end) { setCount(end); clearInterval(timer); }
+      else setCount(Math.floor(start));
+    }, 16);
+    return () => clearInterval(timer);
+  }, [end, duration]);
+  return count;
+};
+
 const HeroSection = () => {
   const navigate = useNavigate();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -55,6 +71,9 @@ const HeroSection = () => {
   const [doctorsOnline, setDoctorsOnline] = useState(23);
   const [bookingIndex, setBookingIndex] = useState(0);
   const [showBookingNotif, setShowBookingNotif] = useState(false);
+
+  const consultationsCount = useAnimatedCounter(12500, 2500);
+  const satisfactionCount = useAnimatedCounter(98, 2000);
 
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -246,22 +265,44 @@ const HeroSection = () => {
             <div className="flex flex-col sm:flex-row gap-3 mb-5">
               <Button
                 size="lg"
-                className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-6 relative overflow-hidden group h-12 sm:h-11 text-base sm:text-sm"
+                className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-6 relative overflow-hidden group h-12 sm:h-11 text-base sm:text-sm cta-shimmer"
                 onClick={() => navigate("/paciente")}
               >
                 <span className="relative z-10 flex items-center gap-1">
-                  Começar Agora <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-0.5" />
+                  Começar Agora <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
                 </span>
               </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="rounded-full px-6 h-12 sm:h-11 text-base sm:text-sm"
+                className="rounded-full px-6 h-12 sm:h-11 text-base sm:text-sm hover:bg-primary/5 transition-colors"
                 onClick={() => navigate("/consulta-avulsa")}
               >
                 Consulta Avulsa
               </Button>
             </div>
+
+            {/* Stats counters */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="flex items-center gap-6 mb-4"
+            >
+              <div className="text-left">
+                <p className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
+                  {consultationsCount.toLocaleString("pt-BR")}+
+                </p>
+                <p className="text-[11px] text-muted-foreground font-medium">Consultas realizadas</p>
+              </div>
+              <div className="w-px h-8 bg-border/60" />
+              <div className="text-left">
+                <p className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">
+                  {satisfactionCount}%
+                </p>
+                <p className="text-[11px] text-muted-foreground font-medium">Satisfação dos pacientes</p>
+              </div>
+            </motion.div>
 
             {/* Trust indicators */}
             <div className="flex flex-wrap gap-6">

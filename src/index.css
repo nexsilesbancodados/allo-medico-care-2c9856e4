@@ -161,7 +161,30 @@
     @apply bg-clip-text text-transparent;
     background-image: var(--gradient-hero);
     background-size: 200% 100%;
-    animation: gradient-shimmer 4s ease-in-out infinite;
+    animation: gradient-shimmer 3s ease-in-out infinite;
+  }
+
+  .text-gradient-glow {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-hero);
+    background-size: 200% 100%;
+    animation: gradient-shimmer 3s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px hsl(210 90% 45% / 0.3));
+  }
+
+  .cta-shimmer {
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-shimmer::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsl(0 0% 100% / 0.2), transparent);
+    animation: cta-shimmer-slide 3s ease-in-out infinite;
   }
 
   .bg-gradient-hero {
@@ -252,6 +275,11 @@
 .stagger-children > *:nth-child(7) { animation-delay: 330ms; }
 .stagger-children > *:nth-child(8) { animation-delay: 385ms; }
 
+
+@keyframes cta-shimmer-slide {
+  0% { left: -100%; }
+  50%, 100% { left: 100%; }
+}
 
 @keyframes rain-drop {
   0% { transform: translateY(-20px); opacity: 0; }
