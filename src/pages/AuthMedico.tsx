@@ -6,12 +6,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check, MessageCircle, LogIn } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check, MessageCircle, LogIn, Eye, EyeOff, Shield, Star, Sparkles } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
 import doctorPortalBg from "@/assets/doctor-portal-bg.png";
 import DoctorWhySection from "@/components/landing/DoctorWhySection";
 import SEOHead from "@/components/SEOHead";
+import PasswordStrength from "@/components/ui/password-strength";
 
 type Step = "welcome" | "code" | "register" | "login";
 
@@ -29,6 +30,7 @@ const AuthMedico = () => {
   const [crmState, setCrmState] = useState("SP");
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -240,8 +242,24 @@ const AuthMedico = () => {
                   <Label>Senha</Label>
                   <div className="relative mt-1">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="pl-10" required minLength={6} />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className="pl-10 pr-10"
+                      required
+                      minLength={6}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
+                  {password && <PasswordStrength password={password} />}
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1" /></div>
@@ -259,8 +277,12 @@ const AuthMedico = () => {
                   </Button>
                 )}
                 <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
-                <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={loading || !termsAccepted}>
-                  {loading ? "Criando conta..." : "Cadastrar como Médico"}
+                <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground cta-shimmer" size="lg" disabled={loading || !termsAccepted}>
+                  {loading ? (
+                    <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-spin" /> Criando conta...
+                    </motion.span>
+                  ) : "Cadastrar como Médico"}
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
                   Já tem conta? <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Entrar</button>
@@ -282,11 +304,29 @@ const AuthMedico = () => {
                   <Label>Senha</Label>
                   <div className="relative mt-1">
                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-10" required />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-10 pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground" size="lg" disabled={loading}>
-                  {loading ? "Entrando..." : "Entrar"}
+                <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground cta-shimmer" size="lg" disabled={loading}>
+                  {loading ? (
+                    <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
+                    </motion.span>
+                  ) : "Entrar"}
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
                   <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
@@ -296,6 +336,18 @@ const AuthMedico = () => {
                 </p>
               </form>
             )}
+          </motion.div>
+
+          {/* Social proof */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="mt-8 flex items-center justify-center gap-4 text-xs text-muted-foreground"
+          >
+            <span className="flex items-center gap-1"><Shield className="w-3.5 h-3.5 text-secondary" /> CFM Verificado</span>
+            <span className="flex items-center gap-1"><Star className="w-3.5 h-3.5 text-warning" /> 4.9/5 avaliação</span>
+            <span className="flex items-center gap-1"><Stethoscope className="w-3.5 h-3.5 text-primary" /> 500+ médicos</span>
           </motion.div>
         </div>
       </div>

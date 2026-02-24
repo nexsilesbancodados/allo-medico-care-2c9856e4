@@ -61,16 +61,17 @@ const SpecialtiesSection = () => {
           {specialtyGrid.map((spec, i) => (
             <motion.div
               key={spec.name}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, scale: 0.7, y: 20 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.05, duration: 0.4 }}
-              whileHover={{ y: -6, scale: 1.08 }}
+              transition={{ delay: i * 0.06, duration: 0.5, type: "spring", stiffness: 200 }}
+              whileHover={{ y: -8, scale: 1.12 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => navigate("/paciente")}
-              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-elevated hover:border-primary/20 transition-all duration-300 cursor-pointer group"
+              className="flex flex-col items-center gap-2 p-3 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-elevated hover:border-primary/30 transition-all duration-300 cursor-pointer group"
             >
-              <div className={`w-10 h-10 rounded-xl ${spec.color} flex items-center justify-center transition-transform group-hover:scale-110`}>
-                <spec.icon className="w-5 h-5" />
+              <div className={`w-10 h-10 rounded-xl ${spec.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}>
+                <spec.icon className="w-5 h-5 transition-transform duration-300 group-hover:rotate-6" />
               </div>
               <span className="text-[10px] md:text-xs font-semibold text-foreground text-center leading-tight">{spec.name}</span>
             </motion.div>
@@ -130,10 +131,10 @@ const SpecialtiesSection = () => {
         >
           <Button
             size="lg"
-            className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105"
+            className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 cta-shimmer group"
             onClick={() => navigate("/paciente")}
           >
-            Ver todas especialidades <ArrowRight className="w-4 h-4 ml-1" />
+            Ver todas especialidades <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
           </Button>
         </motion.div>
       </div>
