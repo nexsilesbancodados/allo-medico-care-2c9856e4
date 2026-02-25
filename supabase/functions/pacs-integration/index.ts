@@ -13,220 +13,222 @@ serve(async (req) => {
   }
 
   try {
-    const ORTHANC_URL = Deno.env.get("ORTHANC_URL");
-    const ORTHANC_USERNAME = Deno.env.get("ORTHANC_USERNAME") || "orthanc";
-    const ORTHANC_PASSWORD = Deno.env.get("ORTHANC_PASSWORD") || "orthanc";
-
-    if (!ORTHANC_URL) {
-      return new Response(
-        JSON.stringify({
-          error: "PACS (Orthanc) não configurado. Adicione ORTHANC_URL nas secrets.",
-          configured: false,
-        }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const authHeader = "Basic " + btoa(`${ORTHANC_USERNAME}:${ORTHANC_PASSWORD}`);
-
-    const { action, study_id, series_id, patient_name, modality, date_from, date_to, exam_request_id } =
-      await req.json();
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
+    const { action, exam_request_id, search_query, file_category } = await req.json();
+
+    // ── search_studies: lista exames no bucket exam-files ──
     if (action === "search_studies") {
-      // DICOMweb QIDO-RS: Search for studies
-      const params = new URLSearchParams();
-      if (patient_name) params.set("PatientName", patient_name);
-      if (modality) params.set("ModalitiesInStudy", modality);
-      if (date_from && date_to) params.set("StudyDate", `${date_from}-${date_to}`);
+      const { data: exams, error } = await supabase
+        .from("exam_requests")
+        .select(`
+          id, exam_type, status, priority, clinical_info, created_at, file_urls,
+          requesting_doctor_id,
+          assigned_to
+        `)
+        .order("created_at", { ascending: false })
+        .limit(50);
 
-      const res = await fetch(
-        `${ORTHANC_URL}/dicom-web/studies?${params.toString()}`,
-        {
-          headers: {
-            Authorization: authHeader,
-            Accept: "application/dicom+json",
-          },
-        }
-      );
-
-      if (!res.ok) {
-        const text = await res.text();
+      if (error) {
         return new Response(
-          JSON.stringify({ error: `Erro ao buscar estudos PACS: ${res.status}`, details: text }),
+          JSON.stringify({ error: error.message }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const studies = await res.json();
-
-      // Map DICOM JSON to friendly format
-      const mapped = studies.map((s: any) => ({
-        study_uid: s["0020000D"]?.Value?.[0] || "",
-        patient_name: s["00100010"]?.Value?.[0]?.Alphabetic || "",
-        patient_id: s["00100020"]?.Value?.[0] || "",
-        study_date: s["00080020"]?.Value?.[0] || "",
-        study_description: s["00081030"]?.Value?.[0] || "",
-        modality: s["00080061"]?.Value?.[0] || "",
-        accession_number: s["00080050"]?.Value?.[0] || "",
-        num_series: s["00201206"]?.Value?.[0] || 0,
-        num_instances: s["00201208"]?.Value?.[0] || 0,
-      }));
+      // Optional text filter
+      let filtered = exams || [];
+      if (search_query) {
+        const q = search_query.toLowerCase();
+        filtered = filtered.filter((e: any) =>
+          e.exam_type?.toLowerCase().includes(q) ||
+          e.clinical_info?.toLowerCase().includes(q) ||
+          e.id?.toLowerCase().includes(q)
+        );
+      }
 
       return new Response(
-        JSON.stringify({ studies: mapped }),
+        JSON.stringify({ studies: filtered, configured: true }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (action === "get_series") {
-      // Get series list for a study
-      if (!study_id) {
+    // ── get_files: lista arquivos de um exam_request no storage ──
+    if (action === "get_files") {
+      if (!exam_request_id) {
         return new Response(
-          JSON.stringify({ error: "study_id é obrigatório." }),
+          JSON.stringify({ error: "exam_request_id é obrigatório." }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const res = await fetch(
-        `${ORTHANC_URL}/dicom-web/studies/${study_id}/series`,
-        {
-          headers: {
-            Authorization: authHeader,
-            Accept: "application/dicom+json",
-          },
-        }
-      );
+      const folder = `exams/${exam_request_id}`;
+      const { data: files, error } = await supabase.storage
+        .from("exam-files")
+        .list(folder, { limit: 100, sortBy: { column: "created_at", order: "desc" } });
 
-      const series = await res.json();
-      const mapped = series.map((s: any) => ({
-        series_uid: s["0020000E"]?.Value?.[0] || "",
-        modality: s["00080060"]?.Value?.[0] || "",
-        description: s["0008103E"]?.Value?.[0] || "",
-        num_instances: s["00201209"]?.Value?.[0] || 0,
-      }));
-
-      return new Response(
-        JSON.stringify({ series: mapped }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    if (action === "get_instances") {
-      // Get WADO-RS URLs for instances in a series
-      if (!study_id || !series_id) {
+      if (error) {
         return new Response(
-          JSON.stringify({ error: "study_id e series_id são obrigatórios." }),
+          JSON.stringify({ error: error.message }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      const res = await fetch(
-        `${ORTHANC_URL}/dicom-web/studies/${study_id}/series/${series_id}/instances`,
-        {
-          headers: {
-            Authorization: authHeader,
-            Accept: "application/dicom+json",
-          },
-        }
-      );
+      const mapped = (files || []).map((f: any) => {
+        const filePath = `${folder}/${f.name}`;
+        const { data: urlData } = supabase.storage
+          .from("exam-files")
+          .getPublicUrl(filePath);
 
-      const instances = await res.json();
-      const mapped = instances.map((inst: any) => {
-        const sopUid = inst["00080018"]?.Value?.[0] || "";
+        // For private buckets, generate signed URL
         return {
-          sop_instance_uid: sopUid,
-          instance_number: inst["00200013"]?.Value?.[0] || 0,
-          wado_url: `${ORTHANC_URL}/dicom-web/studies/${study_id}/series/${series_id}/instances/${sopUid}`,
-          rendered_url: `${ORTHANC_URL}/dicom-web/studies/${study_id}/series/${series_id}/instances/${sopUid}/rendered`,
+          name: f.name,
+          size: f.metadata?.size || 0,
+          type: f.metadata?.mimetype || "application/octet-stream",
+          created_at: f.created_at,
+          path: filePath,
+          // We'll generate signed URLs below
         };
       });
 
+      // Generate signed URLs for all files (private bucket)
+      const withUrls = await Promise.all(
+        mapped.map(async (f: any) => {
+          const { data: signedData } = await supabase.storage
+            .from("exam-files")
+            .createSignedUrl(f.path, 3600); // 1 hour
+          return { ...f, url: signedData?.signedUrl || null };
+        })
+      );
+
       return new Response(
-        JSON.stringify({ instances: mapped }),
+        JSON.stringify({ files: withUrls }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    if (action === "import_to_exam") {
-      // Import a PACS study as files for an exam_request
-      if (!study_id || !exam_request_id) {
+    // ── upload_file: faz upload de arquivo DICOM/imagem para o exam ──
+    if (action === "upload_file") {
+      if (!exam_request_id) {
         return new Response(
-          JSON.stringify({ error: "study_id e exam_request_id são obrigatórios." }),
+          JSON.stringify({ error: "exam_request_id é obrigatório." }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      // Get rendered images from the study
-      const seriesRes = await fetch(
-        `${ORTHANC_URL}/dicom-web/studies/${study_id}/series`,
-        { headers: { Authorization: authHeader, Accept: "application/dicom+json" } }
-      );
-      const seriesList = await seriesRes.json();
+      // This action expects the file as base64 in the body
+      const { file_name, file_base64, content_type } = await req.json().catch(() => ({}));
 
-      const importedFiles: string[] = [];
-
-      for (const s of seriesList.slice(0, 5)) {
-        const seriesUid = s["0020000E"]?.Value?.[0];
-        if (!seriesUid) continue;
-
-        // Get rendered image (PNG) for first instance
-        const instancesRes = await fetch(
-          `${ORTHANC_URL}/dicom-web/studies/${study_id}/series/${seriesUid}/instances`,
-          { headers: { Authorization: authHeader, Accept: "application/dicom+json" } }
+      if (!file_name || !file_base64) {
+        return new Response(
+          JSON.stringify({ error: "file_name e file_base64 são obrigatórios." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
-        const instancesList = await instancesRes.json();
-
-        for (const inst of instancesList.slice(0, 3)) {
-          const sopUid = inst["00080018"]?.Value?.[0];
-          if (!sopUid) continue;
-
-          const renderedRes = await fetch(
-            `${ORTHANC_URL}/dicom-web/studies/${study_id}/series/${seriesUid}/instances/${sopUid}/rendered`,
-            { headers: { Authorization: authHeader, Accept: "image/png" } }
-          );
-
-          if (renderedRes.ok) {
-            const imageBlob = await renderedRes.blob();
-            const filePath = `exams/${exam_request_id}/${seriesUid}_${sopUid}.png`;
-
-            const { error: uploadError } = await supabase.storage
-              .from("exam-files")
-              .upload(filePath, imageBlob, { contentType: "image/png" });
-
-            if (!uploadError) {
-              importedFiles.push(filePath);
-            }
-          }
-        }
       }
 
-      // Update exam_request with imported files
-      if (importedFiles.length > 0) {
-        const { data: existingReq } = await supabase
-          .from("exam_requests")
-          .select("file_urls")
-          .eq("id", exam_request_id)
-          .single();
+      // Decode base64
+      const binaryStr = atob(file_base64);
+      const bytes = new Uint8Array(binaryStr.length);
+      for (let i = 0; i < binaryStr.length; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
+      }
 
-        const currentFiles = (existingReq?.file_urls as string[]) || [];
+      const filePath = `exams/${exam_request_id}/${file_name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("exam-files")
+        .upload(filePath, bytes, {
+          contentType: content_type || "application/dicom",
+          upsert: true,
+        });
+
+      if (uploadError) {
+        return new Response(
+          JSON.stringify({ error: uploadError.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Update exam_request file_urls
+      const { data: existing } = await supabase
+        .from("exam_requests")
+        .select("file_urls")
+        .eq("id", exam_request_id)
+        .single();
+
+      const currentFiles = (existing?.file_urls as string[]) || [];
+      if (!currentFiles.includes(filePath)) {
         await supabase
           .from("exam_requests")
-          .update({ file_urls: [...currentFiles, ...importedFiles] })
+          .update({ file_urls: [...currentFiles, filePath] })
           .eq("id", exam_request_id);
       }
 
       return new Response(
-        JSON.stringify({ success: true, imported_files: importedFiles.length }),
+        JSON.stringify({ success: true, path: filePath }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ── delete_file: remove arquivo do storage ──
+    if (action === "delete_file") {
+      const { file_path } = await req.json().catch(() => ({}));
+      if (!file_path) {
+        return new Response(
+          JSON.stringify({ error: "file_path é obrigatório." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const { error } = await supabase.storage
+        .from("exam-files")
+        .remove([file_path]);
+
+      if (error) {
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ success: true }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ── get_signed_url: gera URL assinada para visualizar arquivo ──
+    if (action === "get_signed_url") {
+      const { file_path, expires_in } = await req.json().catch(() => ({}));
+      if (!file_path) {
+        return new Response(
+          JSON.stringify({ error: "file_path é obrigatório." }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const { data, error } = await supabase.storage
+        .from("exam-files")
+        .createSignedUrl(file_path, expires_in || 3600);
+
+      if (error) {
+        return new Response(
+          JSON.stringify({ error: error.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({ url: data.signedUrl }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     return new Response(
-      JSON.stringify({ error: "Ação inválida. Use: search_studies, get_series, get_instances, import_to_exam" }),
+      JSON.stringify({
+        error: "Ação inválida. Use: search_studies, get_files, upload_file, delete_file, get_signed_url",
+      }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
