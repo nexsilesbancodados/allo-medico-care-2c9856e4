@@ -52,6 +52,13 @@ const ReportTemplateManager = lazy(() => import("@/components/doctor/ReportTempl
 const UrgentCareQueue = lazy(() => import("@/components/patient/UrgentCareQueue"));
 const PrescriptionRenewalForm = lazy(() => import("@/components/patient/PrescriptionRenewalForm"));
 const DoctorOnDutyPanel = lazy(() => import("@/components/doctor/DoctorOnDutyPanel"));
+
+// Laudista
+const LaudistaDashboard = lazy(() => import("@/components/dashboards/LaudistaDashboard"));
+const LaudistaReportQueue = lazy(() => import("@/components/laudista/LaudistaReportQueue"));
+const LaudistaMyReports = lazy(() => import("@/components/laudista/LaudistaMyReports"));
+const LaudistaStats = lazy(() => import("@/components/laudista/LaudistaStats"));
+const LaudistaTemplates = lazy(() => import("@/components/doctor/ReportTemplateManager"));
 const RenewalQueue = lazy(() => import("@/components/doctor/RenewalQueue"));
 
 // Consultation
@@ -265,6 +272,13 @@ const Dashboard = () => {
       <Route path="admin/live" element={<RoleGuard allowed={[]} roles={roles}><AdminLiveConsultations /></RoleGuard>} />
       <Route path="admin/panel-center" element={<RoleGuard allowed={[]} roles={roles}><PanelCenter /></RoleGuard>} />
       <Route path="admin/financial" element={<RoleGuard allowed={[]} roles={roles}><AdminFinancial /></RoleGuard>} />
+
+      {/* Laudista routes */}
+      <Route path="laudista" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaDashboard /></RoleGuard>} />
+      <Route path="laudista/queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaReportQueue /></RoleGuard>} />
+      <Route path="laudista/my-reports" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaMyReports /></RoleGuard>} />
+      <Route path="laudista/templates" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaTemplates /></RoleGuard>} />
+      <Route path="laudista/stats" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaStats /></RoleGuard>} />
 
       {/* Fallback: redirect to role-appropriate dashboard */}
       <Route
