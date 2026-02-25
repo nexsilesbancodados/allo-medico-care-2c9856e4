@@ -2240,6 +2240,7 @@ export type Database = {
       fn_expire_available_now: { Args: never; Returns: undefined }
       fn_expire_discount_cards: { Args: never; Returns: undefined }
       fn_expire_invite_codes: { Args: never; Returns: undefined }
+      fn_expire_queue_entries: { Args: never; Returns: undefined }
       get_clinic_profile_id: { Args: { _user_id: string }; Returns: string }
       get_doctor_profile_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
