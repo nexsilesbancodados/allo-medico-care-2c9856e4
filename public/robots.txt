@@ -3,5 +3,11 @@ Allow: /
 Disallow: /dashboard/
 Disallow: /reset-password
 Disallow: /consulta
+Disallow: /auth
+Disallow: /forgot-password
+Disallow: /payment-success
+
+User-agent: Googlebot
+Allow: /
 
 Sitemap: https://allo-medico-care.lovable.app/sitemap.xml
