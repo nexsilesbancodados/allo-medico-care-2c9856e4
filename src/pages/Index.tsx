@@ -74,23 +74,28 @@ const Index = () => {
       <SocialProofBar />
 
       {/* Plantão 24h Banner */}
-      <section className="py-8 px-4 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
-        <div className="container mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2 justify-center sm:justify-start">
-              <Stethoscope className="w-6 h-6 text-primary" />
-              Plantão Clínico 24h
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">Atendimento médico imediato, sem agendamento. Disponível dia e noite.</p>
+      <section className="py-6 px-4 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary opacity-[0.06]" />
+        <div className="container mx-auto max-w-4xl relative">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl shadow-primary/20">
+            <div className="text-center sm:text-left">
+              <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2 justify-center sm:justify-start">
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                  <Stethoscope className="w-4 h-4" />
+                </div>
+                Plantão Clínico 24h
+              </h2>
+              <p className="text-sm opacity-80 mt-1">Atendimento médico imediato, sem agendamento.</p>
+            </div>
+            <Button
+              size="lg"
+              className="bg-white text-primary hover:bg-white/90 rounded-full px-7 gap-2 shadow-lg font-semibold shrink-0"
+              onClick={() => window.location.href = "/paciente"}
+            >
+              <Stethoscope className="w-4 h-4" />
+              Acessar Plantão
+            </Button>
           </div>
-          <Button
-            size="lg"
-            className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 shadow-elevated shrink-0"
-            onClick={() => window.location.href = "/paciente"}
-          >
-            <Stethoscope className="w-5 h-5" />
-            Acessar Plantão
-          </Button>
         </div>
       </section>
 
