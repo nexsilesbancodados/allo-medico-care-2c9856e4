@@ -24,12 +24,17 @@ const Header = memo(() => {
     { label: t("nav.howItWorks"), href: "#como-funciona" },
     { label: t("nav.specialties"), href: "#especialidades" },
     { label: t("nav.plans"), href: "#planos" },
-    { label: t("nav.testimonials"), href: "#depoimentos" },
+    { label: "Plantão 24h", href: "/paciente", isRoute: true },
     { label: t("nav.faq"), href: "#faq" },
   ];
 
-  const smoothScroll = (href: string) => {
-    const id = href.replace("#", "");
+  const handleNavClick = (link: { href: string; isRoute?: boolean }) => {
+    if (link.isRoute) {
+      navigate(link.href);
+      setMobileOpen(false);
+      return;
+    }
+    const id = link.href.replace("#", "");
     const el = document.getElementById(id);
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -95,7 +100,7 @@ const Header = memo(() => {
               {navLinks.map((link) => (
                 <button
                   key={link.href}
-                  onClick={() => smoothScroll(link.href)}
+                  onClick={() => handleNavClick(link)}
                   className="text-[13px] font-medium px-3.5 py-1.5 rounded-full transition-all text-muted-foreground hover:text-foreground hover:bg-background/80"
                 >
                   {link.label}
@@ -197,7 +202,7 @@ const Header = memo(() => {
                     initial={{ opacity: 0, x: -12 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: i * 0.04 }}
-                    onClick={() => smoothScroll(link.href)}
+                    onClick={() => handleNavClick(link)}
                     className="text-sm font-medium py-3 px-4 rounded-xl transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted"
                   >
                     {link.label}
