@@ -1,6 +1,6 @@
 import { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LayoutDashboard, Stethoscope, UserRound, ShoppingBag } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, UserRound, ShoppingBag } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "@/i18n";
@@ -127,15 +127,6 @@ const Header = memo(() => {
             ) : (
               <>
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  className="rounded-full gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-                  onClick={() => navigate("/medico")}
-                >
-                  <Stethoscope className="w-3.5 h-3.5" />
-                  {t("nav.imDoctor")}
-                </Button>
-                <Button
                   size="sm"
                   className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-[hsl(160,60%,40%)] to-[hsl(170,70%,45%)] text-white shadow-md shadow-[hsl(160,60%,40%)/0.2] hover:shadow-lg hover:opacity-90 transition-all px-5"
                   onClick={() => navigate("/consulta-avulsa")}
@@ -213,9 +204,6 @@ const Header = memo(() => {
                     </>
                   ) : (
                     <>
-                      <Button variant="ghost" size="sm" className="rounded-xl justify-start gap-2 text-muted-foreground" onClick={() => { setMobileOpen(false); navigate("/medico"); }}>
-                        <Stethoscope className="w-4 h-4" /> {t("nav.imDoctor")}
-                      </Button>
                       <Button variant="outline" size="sm" className="rounded-xl justify-start gap-2 border-primary/20 text-primary" onClick={() => { setMobileOpen(false); navigate("/consulta-avulsa"); }}>
                         <ShoppingBag className="w-4 h-4" /> {t("nav.buyConsultation")}
                       </Button>
