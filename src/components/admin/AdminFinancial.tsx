@@ -31,6 +31,7 @@ interface AppointmentPayment {
   guest_patient_id: string | null;
   doctor_name?: string;
   patient_name?: string;
+  consultation_price?: number;
 }
 
 const statusColors: Record<string, string> = {
@@ -83,12 +84,13 @@ const AdminFinancial = () => {
 
     if (!appts) { setLoading(false); return; }
 
-    // Fetch doctor names
+    // Fetch doctor names and prices
     const doctorIds = [...new Set(appts.map(a => a.doctor_id))];
     const { data: docProfiles } = await supabase
       .from("doctor_profiles")
-      .select("id, user_id")
+      .select("id, user_id, consultation_price")
       .in("id", doctorIds);
+    const docPriceMap = new Map(docProfiles?.map(d => [d.id, Number(d.consultation_price) || 89]) ?? []);
 
     const userIds = [...new Set([
       ...(docProfiles?.map(d => d.user_id) ?? []),
@@ -116,6 +118,7 @@ const AdminFinancial = () => {
 
     const enriched: AppointmentPayment[] = appts.map(a => ({
       ...a,
+      consultation_price: docPriceMap.get(a.doctor_id) ?? 89,
       doctor_name: profileMap.get(docUserMap.get(a.doctor_id) ?? "") ?? "—",
       patient_name: a.patient_id
         ? profileMap.get(a.patient_id) ?? "—"
@@ -130,9 +133,10 @@ const AdminFinancial = () => {
     const doctorRevenue = new Map<string, { name: string; count: number; revenue: number }>();
     enriched.forEach(a => {
       if (a.payment_status === "approved" || a.payment_status === "confirmed") {
+        const price = a.consultation_price ?? 89;
         const existing = doctorRevenue.get(a.doctor_id) || { name: a.doctor_name || "—", count: 0, revenue: 0 };
         existing.count++;
-        existing.revenue += 89.9;
+        existing.revenue += price;
         doctorRevenue.set(a.doctor_id, existing);
       }
     });
@@ -151,7 +155,8 @@ const AdminFinancial = () => {
       const monthKey = format(d, "yyyy-MM");
       const monthLabel = format(d, "MMM/yy", { locale: ptBR });
       const monthAppts = enriched.filter(a => a.created_at.startsWith(monthKey) && (a.payment_status === "approved" || a.payment_status === "confirmed"));
-      months.push({ month: monthLabel, revenue: monthAppts.length * 89.9, count: monthAppts.length });
+      const monthRevenue = monthAppts.reduce((sum, a) => sum + (a.consultation_price ?? 89), 0);
+      months.push({ month: monthLabel, revenue: monthRevenue, count: monthAppts.length });
     }
     setMonthlyTrend(months);
 
@@ -161,7 +166,7 @@ const AdminFinancial = () => {
   // KPIs
   const totalRevenue = appointments
     .filter(a => a.payment_status === "approved" || a.payment_status === "confirmed")
-    .length * 89.9; // Estimated average
+    .reduce((sum, a) => sum + (a.consultation_price ?? 89), 0);
 
   const pendingPayments = appointments.filter(a => a.payment_status === "pending").length;
   const overduePayments = appointments.filter(a => a.payment_status === "overdue").length;
