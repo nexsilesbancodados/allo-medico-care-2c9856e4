@@ -78,6 +78,14 @@ const PatientDashboard = () => {
         queryClient.invalidateQueries({ queryKey: ["patient-upcoming-enriched"] });
         queryClient.invalidateQueries({ queryKey: ["patient-dashboard-stats"] });
       })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "appointments", filter: `patient_id=eq.${user.id}` }, () => {
+        queryClient.invalidateQueries({ queryKey: ["patient-upcoming-enriched"] });
+        queryClient.invalidateQueries({ queryKey: ["patient-dashboard-stats"] });
+      })
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => {
+        // Trigger notification bell refresh
+        queryClient.invalidateQueries({ queryKey: ["notifications"] });
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [user, queryClient]);

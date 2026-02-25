@@ -12,7 +12,7 @@ import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity, Pill, ExternalLink, ArrowRight, Sparkles, Star, ShieldCheck } from "lucide-react";
+import { Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight, TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity, Pill, ExternalLink, ArrowRight, Sparkles, Star, ShieldCheck, Target, AlertTriangle } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
 import DoctorOnboarding from "@/components/doctor/DoctorOnboarding";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
@@ -170,6 +170,69 @@ const DoctorDashboard = () => {
             ))
           )}
         </motion.div>
+
+        {/* Daily Summary Card */}
+        {!loading && todayAppts.length > 0 && (
+          <motion.div variants={fadeUp}>
+            <Card className="border-border/50 bg-gradient-to-r from-card to-muted/20">
+              <CardContent className="p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Target className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-foreground">Meta do Dia</p>
+                      <p className="text-[10px] text-muted-foreground">Progresso das consultas</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-black text-foreground">{done}<span className="text-sm text-muted-foreground font-normal">/{todayAppts.length}</span></p>
+                    <p className="text-[10px] text-muted-foreground">concluídas</p>
+                  </div>
+                </div>
+                <div className="w-full h-3 rounded-full bg-muted overflow-hidden mb-3">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${pct}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className={`h-full rounded-full transition-colors ${
+                      pct >= 100 ? "bg-success" : pct >= 60 ? "bg-gradient-to-r from-primary to-secondary" : "bg-primary/70"
+                    }`}
+                  />
+                </div>
+                <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> {done} concluída{done !== 1 ? "s" : ""}</span>
+                  {inProg > 0 && <span className="flex items-center gap-1.5"><Video className="w-3 h-3 text-primary" /> {inProg} em andamento</span>}
+                  {waitingCount > 0 && <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-warning" /> {waitingCount} aguardando</span>}
+                  {pct >= 100 && <span className="flex items-center gap-1.5 text-success font-semibold">🎉 Meta atingida!</span>}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Pending Patients Alert */}
+        {!loading && waitingCount > 1 && (
+          <motion.div
+            variants={fadeUp}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-warning/5 border border-warning/20">
+              <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-5 h-5 text-warning" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-foreground">⚠️ {waitingCount} pacientes aguardando</p>
+                <p className="text-xs text-muted-foreground">Acesse a sala de espera para iniciar os atendimentos</p>
+              </div>
+              <Button size="sm" variant="outline" className="border-warning/30 text-warning hover:bg-warning/10 rounded-xl shrink-0" onClick={() => navigate("/dashboard/doctor/waiting-room")}>
+                Atender
+              </Button>
+            </div>
+          </motion.div>
+        )}
 
         {/* Tabs */}
         <motion.div variants={fadeUp}>
