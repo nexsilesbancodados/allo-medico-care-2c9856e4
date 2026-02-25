@@ -49,6 +49,10 @@ const ExamRequestForm = lazy(() => import("@/components/doctor/ExamRequestForm")
 const ExamReportQueue = lazy(() => import("@/components/doctor/ExamReportQueue"));
 const ExamReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
 const ReportTemplateManager = lazy(() => import("@/components/doctor/ReportTemplateManager"));
+const UrgentCareQueue = lazy(() => import("@/components/patient/UrgentCareQueue"));
+const PrescriptionRenewalForm = lazy(() => import("@/components/patient/PrescriptionRenewalForm"));
+const DoctorOnDutyPanel = lazy(() => import("@/components/doctor/DoctorOnDutyPanel"));
+const RenewalQueue = lazy(() => import("@/components/doctor/RenewalQueue"));
 
 // Consultation
 const VideoRoom = lazy(() => import("@/components/consultation/VideoRoom"));
@@ -183,6 +187,8 @@ const Dashboard = () => {
       <Route path="medical-records" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><MedicalRecords /></RoleGuard>} />
       <Route path="timeline" element={<RoleGuard allowed={["patient"]} roles={roles}><HealthTimeline /></RoleGuard>} />
       <Route path="patient/diary" element={<RoleGuard allowed={["patient"]} roles={roles}><SymptomDiary /></RoleGuard>} />
+      <Route path="urgent-care" element={<RoleGuard allowed={["patient"]} roles={roles}><UrgentCareQueue /></RoleGuard>} />
+      <Route path="prescription-renewal" element={<RoleGuard allowed={["patient"]} roles={roles}><PrescriptionRenewalForm /></RoleGuard>} />
 
       {/* Doctor routes */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />
@@ -198,6 +204,8 @@ const Dashboard = () => {
       <Route path="doctor/report-queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportQueue /></RoleGuard>} />
       <Route path="doctor/report-editor/:examId" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportEditor /></RoleGuard>} />
       <Route path="doctor/report-templates" element={<RoleGuard allowed={["doctor"]} roles={roles}><ReportTemplateManager /></RoleGuard>} />
+      <Route path="doctor/on-duty" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorOnDutyPanel /></RoleGuard>} />
+      <Route path="doctor/renewal-queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><RenewalQueue /></RoleGuard>} />
 
       {/* Consultation routes */}
       <Route path="consultation/:appointmentId" element={<RoleGuard allowed={["doctor", "patient"]} roles={roles}><VideoRoom /></RoleGuard>} />

@@ -142,8 +142,9 @@ const Footer = () => {
                 { label: "Como funciona", href: "#como-funciona" },
                 { label: "Especialidades", href: "#especialidades" },
                 { label: "Planos", href: "#planos" },
+                { label: "Cartão de Desconto", to: "/cartao-desconto" },
+                { label: "Para Empresas", to: "/para-empresas" },
                 { label: "FAQ", href: "#faq" },
-                { label: "Blog de saúde", href: "#", external: true },
               ],
             },
             {

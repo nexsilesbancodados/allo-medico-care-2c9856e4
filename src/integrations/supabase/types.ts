@@ -249,6 +249,51 @@ export type Database = {
           },
         ]
       }
+      b2b_leads: {
+        Row: {
+          cnpj: string | null
+          company_name: string
+          company_type: string
+          contact_name: string
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          notes: string | null
+          phone: string | null
+          services_interested: Json
+          status: string
+        }
+        Insert: {
+          cnpj?: string | null
+          company_name: string
+          company_type?: string
+          contact_name: string
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          notes?: string | null
+          phone?: string | null
+          services_interested?: Json
+          status?: string
+        }
+        Update: {
+          cnpj?: string | null
+          company_name?: string
+          company_type?: string
+          contact_name?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          notes?: string | null
+          phone?: string | null
+          services_interested?: Json
+          status?: string
+        }
+        Relationships: []
+      }
       clinic_affiliations: {
         Row: {
           clinic_id: string
@@ -435,6 +480,45 @@ export type Database = {
           name?: string
           relationship?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      discount_cards: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          discount_percent: number
+          id: string
+          payment_id: string | null
+          plan_type: string
+          price_monthly: number
+          status: string
+          user_id: string
+          valid_until: string | null
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          payment_id?: string | null
+          plan_type?: string
+          price_monthly?: number
+          status?: string
+          user_id: string
+          valid_until?: string | null
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          discount_percent?: number
+          id?: string
+          payment_id?: string | null
+          plan_type?: string
+          price_monthly?: number
+          status?: string
+          user_id?: string
+          valid_until?: string | null
         }
         Relationships: []
       }
@@ -1014,6 +1098,69 @@ export type Database = {
         }
         Relationships: []
       }
+      on_demand_queue: {
+        Row: {
+          appointment_id: string | null
+          assigned_at: string | null
+          assigned_doctor_id: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          patient_id: string
+          payment_id: string | null
+          position: number | null
+          price: number
+          shift: string
+          started_at: string | null
+          status: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          assigned_at?: string | null
+          assigned_doctor_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          patient_id: string
+          payment_id?: string | null
+          position?: number | null
+          price?: number
+          shift?: string
+          started_at?: string | null
+          status?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          assigned_at?: string | null
+          assigned_doctor_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          patient_id?: string
+          payment_id?: string | null
+          position?: number | null
+          price?: number
+          shift?: string
+          started_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "on_demand_queue_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "on_demand_queue_assigned_doctor_id_fkey"
+            columns: ["assigned_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_profiles: {
         Row: {
           address: string | null
@@ -1103,6 +1250,7 @@ export type Database = {
       patient_documents: {
         Row: {
           appointment_id: string | null
+          category: string
           created_at: string
           description: string | null
           file_name: string
@@ -1115,6 +1263,7 @@ export type Database = {
         }
         Insert: {
           appointment_id?: string | null
+          category?: string
           created_at?: string
           description?: string | null
           file_name: string
@@ -1127,6 +1276,7 @@ export type Database = {
         }
         Update: {
           appointment_id?: string | null
+          category?: string
           created_at?: string
           description?: string | null
           file_name?: string
@@ -1229,6 +1379,69 @@ export type Database = {
             columns: ["appointment_id"]
             isOneToOne: false
             referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prescription_renewals: {
+        Row: {
+          assigned_doctor_id: string | null
+          created_at: string
+          health_questionnaire: Json
+          id: string
+          new_prescription_id: string | null
+          original_prescription_url: string | null
+          paid_at: string | null
+          patient_id: string
+          payment_id: string | null
+          rejection_reason: string | null
+          reviewed_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_doctor_id?: string | null
+          created_at?: string
+          health_questionnaire?: Json
+          id?: string
+          new_prescription_id?: string | null
+          original_prescription_url?: string | null
+          paid_at?: string | null
+          patient_id: string
+          payment_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_doctor_id?: string | null
+          created_at?: string
+          health_questionnaire?: Json
+          id?: string
+          new_prescription_id?: string | null
+          original_prescription_url?: string | null
+          paid_at?: string | null
+          patient_id?: string
+          payment_id?: string | null
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_renewals_assigned_doctor_id_fkey"
+            columns: ["assigned_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescription_renewals_new_prescription_id_fkey"
+            columns: ["new_prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
             referencedColumns: ["id"]
           },
         ]

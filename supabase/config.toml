@@ -86,3 +86,9 @@ verify_jwt = false
 
 [functions.seed-test-users]
 verify_jwt = false
+
+[functions.calculate-shift-price]
+verify_jwt = false
+
+[functions.b2b-lead-notification]
+verify_jwt = false
