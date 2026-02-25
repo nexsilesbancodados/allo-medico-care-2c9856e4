@@ -101,7 +101,7 @@ const AdminLiveConsultations = lazy(() => import("@/components/admin/AdminLiveCo
 const SystemHealth = lazy(() => import("@/components/admin/SystemHealth"));
 const PanelCenter = lazy(() => import("@/components/admin/PanelCenter"));
 const AdminFinancial = lazy(() => import("@/components/admin/AdminFinancial"));
-
+const AdminCoupons = lazy(() => import("@/components/admin/AdminCoupons"));
 const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: string[]; children: ReactNode }) => {
   const isAdmin = roles.includes("admin");
   if (isAdmin) return <>{children}</>;
@@ -270,6 +270,7 @@ const Dashboard = () => {
       <Route path="admin/live" element={<RoleGuard allowed={[]} roles={roles}><AdminLiveConsultations /></RoleGuard>} />
       <Route path="admin/panel-center" element={<RoleGuard allowed={[]} roles={roles}><PanelCenter /></RoleGuard>} />
       <Route path="admin/financial" element={<RoleGuard allowed={[]} roles={roles}><AdminFinancial /></RoleGuard>} />
+      <Route path="admin/coupons" element={<RoleGuard allowed={[]} roles={roles}><AdminCoupons /></RoleGuard>} />
 
       {/* Laudista routes */}
       <Route path="laudista" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaDashboard /></RoleGuard>} />

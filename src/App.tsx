@@ -9,6 +9,7 @@ import { I18nProvider } from "@/i18n";
 import { lazy, Suspense, useState, useCallback, memo } from "react";
 import { Loader2 } from "lucide-react";
 import SplashScreen from "./components/SplashScreen";
+const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -157,6 +158,7 @@ const App = () => {
           </Suspense>
           </main>
           <Suspense fallback={null}>
+            <AnalyticsScripts />
             <PingoChatbot />
             <CookieConsent />
             

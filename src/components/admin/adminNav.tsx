@@ -1,4 +1,4 @@
-import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet } from "lucide-react";
+import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet, Tag } from "lucide-react";
 
 export const getAdminNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard/admin/panel-center?role=admin", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview" || active === "panel-center", group: "Principal" },
@@ -17,6 +17,7 @@ export const getAdminNav = (active: string) => [
   { label: "Assinaturas", href: "/dashboard/admin/subscriptions?role=admin", icon: <FileText className="w-4 h-4" />, active: active === "subscriptions", group: "Operações" },
   { label: "Especialidades", href: "/dashboard/admin/specialties?role=admin", icon: <Shield className="w-4 h-4" />, active: active === "specialties", group: "Operações" },
   { label: "Códigos de Convite", href: "/dashboard/admin/invite-codes?role=admin", icon: <KeyRound className="w-4 h-4" />, active: active === "invite-codes", group: "Sistema" },
+  { label: "Cupons", href: "/dashboard/admin/coupons?role=admin", icon: <Tag className="w-4 h-4" />, active: active === "coupons", group: "Operações" },
   { label: "Histórico", href: "/dashboard/admin/logs?role=admin", icon: <History className="w-4 h-4" />, active: active === "logs", group: "Sistema" },
   { label: "WhatsApp", href: "/dashboard/admin/whatsapp?role=admin", icon: <MessageCircle className="w-4 h-4" />, active: active === "whatsapp", group: "Sistema" },
   { label: "Configurações", href: "/dashboard/settings?role=admin", icon: <SlidersHorizontal className="w-4 h-4" />, active: active === "settings", group: "Sistema" },
