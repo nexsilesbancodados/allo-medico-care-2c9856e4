@@ -146,12 +146,49 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
     if (!input.trim() || !user || sending) return;
     setSending(true);
     setIsTyping(false);
+    const content = input.trim();
     const { error } = await supabase.from("messages").insert({
       appointment_id: appointmentId,
       sender_id: user.id,
-      content: input.trim(),
+      content,
     });
-    if (!error) setInput("");
+    if (!error) {
+      setInput("");
+      // Send push notification to the other participant
+      try {
+        const { data: appt } = await supabase
+          .from("appointments")
+          .select("patient_id, doctor_id")
+          .eq("id", appointmentId)
+          .single();
+        if (appt) {
+          // Determine recipient
+          let recipientUserId: string | null = null;
+          if (appt.patient_id === user.id) {
+            // Sender is patient → notify doctor
+            const { data: doc } = await supabase
+              .from("doctor_profiles")
+              .select("user_id")
+              .eq("id", appt.doctor_id)
+              .single();
+            recipientUserId = doc?.user_id ?? null;
+          } else {
+            // Sender is doctor → notify patient
+            recipientUserId = appt.patient_id;
+          }
+          if (recipientUserId) {
+            supabase.functions.invoke("send-push-notification", {
+              body: {
+                user_id: recipientUserId,
+                title: `💬 Nova mensagem${otherUserName ? "" : ""}`,
+                body: content.length > 80 ? content.slice(0, 80) + "…" : content,
+                url: `/dashboard/chat/${appointmentId}`,
+              },
+            }).catch(() => {});
+          }
+        }
+      } catch {}
+    }
     setSending(false);
   };
 
