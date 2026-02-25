@@ -5,16 +5,30 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { motion } from "framer-motion";
-import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check, MessageCircle, LogIn, Eye, EyeOff, Shield, Star, Sparkles } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Lock, ArrowLeft, Stethoscope, KeyRound, Check, MessageCircle, LogIn, Eye, EyeOff, Shield, Star, Sparkles, Award, Video, FileText, Users, ChevronRight } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
-import doctorPortalBg from "@/assets/doctor-portal-bg.png";
-import DoctorWhySection from "@/components/landing/DoctorWhySection";
 import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 
 type Step = "welcome" | "code" | "register" | "login";
+
+const benefits = [
+  { icon: Video, label: "Videochamadas HD", desc: "Atenda de qualquer lugar" },
+  { icon: FileText, label: "Receitas Digitais", desc: "Assinatura com validade legal" },
+  { icon: Users, label: "Gestão de Pacientes", desc: "Prontuários organizados" },
+  { icon: Award, label: "Selo CFM Verificado", desc: "Credibilidade garantida" },
+];
+
+const stagger = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const fadeUp = {
+  hidden: { opacity: 0, y: 18 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } },
+};
 
 const AuthMedico = () => {
   const [step, setStep] = useState<Step>("welcome");
@@ -37,12 +51,10 @@ const AuthMedico = () => {
   const handleValidateCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidating(true);
-
     try {
       const res = await supabase.functions.invoke("validate-invite-code", {
         body: { code: inviteCode.trim().toUpperCase() },
       });
-
       const data = res.data;
       if (data?.valid) {
         setValidatedCodeId(data.code_id);
@@ -54,7 +66,6 @@ const AuthMedico = () => {
     } catch {
       toast({ title: "Erro", description: "Não foi possível validar o código.", variant: "destructive" });
     }
-
     setValidating(false);
   };
 
@@ -94,11 +105,7 @@ const AuthMedico = () => {
           profile_data: { crm, crm_state: crmState, invite_code_id: validatedCodeId },
         },
       });
-
-      // Register consent
       await registerConsent(data.user.id, "terms_and_privacy_doctor");
-
-      // Send welcome email for doctor
       supabase.functions.invoke("send-email", {
         body: { type: "welcome_doctor", to: email, data: { name: `${firstName} ${lastName}`, crm: `${crm}/${crmState}` } },
       }).catch(console.error);
@@ -112,28 +119,71 @@ const AuthMedico = () => {
     <div className="min-h-screen bg-background">
       <SEOHead title="Portal do Médico" description="Cadastre-se como médico na AloClinica. Atenda pacientes por vídeo e emita receitas digitais." />
       <div className="flex min-h-screen">
-        {/* Desktop left panel */}
-        <div className="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 overflow-hidden">
-          <img src={doctorPortalBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary/80 to-primary/80" />
-          <div className="relative text-primary-foreground max-w-md">
-            <Link to="/" className="inline-flex items-center gap-2 mb-8 opacity-80 hover:opacity-100 transition">
-              <ArrowLeft className="w-4 h-4" /> Voltar ao início
-            </Link>
-            <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
-              <Stethoscope className="w-8 h-8" />
-            </div>
-            <h1 className="text-4xl font-extrabold mb-4">Portal do Médico</h1>
-            <p className="text-lg opacity-90">
+        {/* Desktop left panel — immersive gradient with floating cards */}
+        <div className="hidden lg:flex lg:w-[48%] relative items-center justify-center overflow-hidden">
+          {/* Layered gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary via-primary/90 to-primary" />
+          <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '28px 28px' }} />
+          {/* Floating glow orbs */}
+          <motion.div
+            className="absolute w-72 h-72 rounded-full bg-white/10 blur-3xl"
+            animate={{ x: [0, 30, 0], y: [0, -20, 0] }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            style={{ top: '10%', right: '5%' }}
+          />
+          <motion.div
+            className="absolute w-56 h-56 rounded-full bg-secondary/20 blur-3xl"
+            animate={{ x: [0, -20, 0], y: [0, 30, 0] }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+            style={{ bottom: '15%', left: '10%' }}
+          />
+
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={stagger}
+            className="relative z-10 text-primary-foreground max-w-md px-12"
+          >
+            <motion.div variants={fadeUp}>
+              <Link to="/" className="inline-flex items-center gap-2 mb-10 text-sm opacity-70 hover:opacity-100 transition-opacity">
+                <ArrowLeft className="w-4 h-4" /> Voltar ao início
+              </Link>
+            </motion.div>
+            <motion.div variants={fadeUp} className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-6 ring-1 ring-white/20">
+              <Stethoscope className="w-7 h-7" />
+            </motion.div>
+            <motion.h1 variants={fadeUp} className="text-4xl font-extrabold tracking-tight mb-3 leading-tight">
+              Portal do<br />Médico
+            </motion.h1>
+            <motion.p variants={fadeUp} className="text-base opacity-80 leading-relaxed mb-10">
               Atenda seus pacientes por videochamada, emita receitas digitais e gerencie sua agenda online.
-            </p>
-            <div className="mt-8 space-y-3 opacity-80 text-sm">
-              <p>✓ Agenda online flexível</p>
-              <p>✓ Videochamadas com qualidade</p>
-              <p>✓ Receitas e prontuários digitais</p>
-              <p>✓ Gestão completa de pacientes</p>
-            </div>
-          </div>
+            </motion.p>
+
+            {/* Benefit cards */}
+            <motion.div variants={fadeUp} className="grid grid-cols-2 gap-3">
+              {benefits.map(({ icon: Icon, label, desc }) => (
+                <motion.div
+                  key={label}
+                  variants={fadeUp}
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  className="p-3.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-colors cursor-default"
+                >
+                  <Icon className="w-5 h-5 mb-2 opacity-90" />
+                  <p className="text-sm font-semibold leading-tight">{label}</p>
+                  <p className="text-xs opacity-60 mt-0.5">{desc}</p>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            {/* Counter */}
+            <motion.div variants={fadeUp} className="mt-10 flex items-center gap-4 text-xs opacity-70">
+              <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5" /> CFM Verificado</span>
+              <span className="w-px h-3 bg-white/30" />
+              <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5" /> 4.9/5</span>
+              <span className="w-px h-3 bg-white/30" />
+              <span>500+ médicos</span>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* Right / mobile panel */}
@@ -144,7 +194,7 @@ const AuthMedico = () => {
               <ArrowLeft className="w-4 h-4" /> Voltar
             </Link>
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/20">
                 <Stethoscope className="w-6 h-6 text-primary-foreground" />
               </div>
               <div>
@@ -155,221 +205,237 @@ const AuthMedico = () => {
           </div>
 
           {/* Form area */}
-          <div className="flex-1 flex flex-col justify-center px-6 py-6 lg:items-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
-              {/* Desktop-only back link */}
-              <Link to="/" className="hidden lg:inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition">
-                <ArrowLeft className="w-4 h-4" /> Voltar
-              </Link>
+          <div className="flex-1 flex flex-col justify-center px-6 py-8 lg:items-center lg:px-12">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+                animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                className="w-full max-w-md"
+              >
+                {/* Desktop-only back link */}
+                <Link to="/" className="hidden lg:inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition text-sm">
+                  <ArrowLeft className="w-4 h-4" /> Voltar
+                </Link>
 
-              {/* Desktop header */}
-              <div className="hidden lg:flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center">
-                  <Stethoscope className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground">
-                    {step === "welcome" ? "Portal do Médico" : step === "code" ? "Código de Acesso" : step === "login" ? "Entrar" : "Cadastro Médico"}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">Portal do Médico</p>
-                </div>
-              </div>
-
-              {/* Mobile step title */}
-              <h2 className="lg:hidden text-lg font-bold text-foreground mb-4">
-                {step === "welcome" ? "Bem-vindo" : step === "code" ? "Código de Acesso" : step === "login" ? "Entrar" : "Cadastro Médico"}
-              </h2>
-
-              {/* Welcome step */}
-              {step === "welcome" && (
-                <div className="space-y-3">
-                  <p className="text-muted-foreground text-sm mb-2">
-                    Escolha uma opção abaixo para continuar:
-                  </p>
-                  <Button
-                    className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12"
-                    size="lg"
-                    onClick={() => setStep("login")}
-                  >
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Entrar na minha conta
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full h-12"
-                    size="lg"
-                    onClick={() => setStep("code")}
-                  >
-                    <KeyRound className="w-4 h-4 mr-2" />
-                    Tenho um código de convite
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="w-full h-12"
-                    size="lg"
-                    onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma AloClinica.", "_blank")}
-                  >
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Contactar suporte para cadastro
-                  </Button>
-                </div>
-              )}
-
-              {/* Step 1: Validate invite code */}
-              {step === "code" && (
-                <form onSubmit={handleValidateCode} className="space-y-4">
-                  <div className="p-4 rounded-lg bg-muted/50 border border-border mb-2">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-                      <KeyRound className="w-4 h-4" />
-                      <span className="font-medium">Cadastro por convite</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Para se cadastrar como médico, você precisa de um código de autenticação fornecido pelo administrador da plataforma.
+                {/* Desktop header */}
+                <div className="hidden lg:flex items-center gap-3 mb-8">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                    <Stethoscope className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                      {step === "welcome" ? "Portal do Médico" : step === "code" ? "Código de Acesso" : step === "login" ? "Bem-vindo de volta" : "Cadastro Médico"}
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      {step === "welcome" ? "Escolha uma opção para continuar" : step === "code" ? "Valide seu convite" : step === "login" ? "Acesse sua conta" : "Crie sua conta profissional"}
                     </p>
                   </div>
-                  <div>
-                    <Label>Código de Convite</Label>
-                    <Input
-                      value={inviteCode}
-                      onChange={e => setInviteCode(e.target.value.toUpperCase())}
-                      placeholder="Ex: MED-XXXX-XXXX"
-                      required
-                      className="mt-1 font-mono text-center text-lg tracking-widest"
-                      maxLength={20}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12" size="lg" disabled={validating}>
-                    {validating ? "Validando..." : "Validar Código"}
-                  </Button>
-                  <p className="text-center text-sm text-muted-foreground">
-                    <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
-                  </p>
-                </form>
-              )}
+                </div>
 
-              {/* Step 2: Register (only after valid code) */}
-              {step === "register" && (
-                <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/10 text-secondary text-sm mb-2">
-                    <Check className="w-4 h-4" />
-                    <span>Código validado com sucesso</span>
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1" /></div>
-                    <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1" /></div>
-                  </div>
-                  <div>
-                    <Label>Email</Label>
-                    <div className="relative mt-1">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
+                {/* Mobile step title */}
+                <h2 className="lg:hidden text-lg font-bold text-foreground mb-1">
+                  {step === "welcome" ? "Bem-vindo" : step === "code" ? "Código de Acesso" : step === "login" ? "Entrar" : "Cadastro Médico"}
+                </h2>
+                <p className="lg:hidden text-sm text-muted-foreground mb-5">
+                  {step === "welcome" ? "Escolha uma opção abaixo:" : step === "code" ? "Valide seu convite" : step === "login" ? "Acesse sua conta" : "Crie sua conta profissional"}
+                </p>
+
+                {/* Welcome step */}
+                {step === "welcome" && (
+                  <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-3">
+                    {[
+                      { icon: LogIn, label: "Entrar na minha conta", desc: "Acesse seu painel de atendimento", action: () => setStep("login"), variant: "primary" as const },
+                      { icon: KeyRound, label: "Tenho um código de convite", desc: "Primeiro acesso com código do admin", action: () => setStep("code"), variant: "outline" as const },
+                      { icon: MessageCircle, label: "Solicitar cadastro via WhatsApp", desc: "Fale com nossa equipe", action: () => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma AloClinica.", "_blank"), variant: "ghost" as const },
+                    ].map(({ icon: Icon, label, desc, action, variant }) => (
+                      <motion.div key={label} variants={fadeUp}>
+                        <Button
+                          className={`w-full h-auto py-4 px-5 justify-start text-left ${
+                            variant === "primary" ? "bg-gradient-to-r from-secondary to-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30" : ""
+                          }`}
+                          variant={variant === "primary" ? "default" : variant}
+                          size="lg"
+                          onClick={action}
+                        >
+                          <div className="flex items-center gap-3 w-full">
+                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                              variant === "primary" ? "bg-white/20" : "bg-muted"
+                            }`}>
+                              <Icon className="w-5 h-5" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-sm">{label}</p>
+                              <p className={`text-xs mt-0.5 ${variant === "primary" ? "opacity-70" : "text-muted-foreground"}`}>{desc}</p>
+                            </div>
+                            <ChevronRight className="w-4 h-4 opacity-50 shrink-0" />
+                          </div>
+                        </Button>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                )}
+
+                {/* Step 1: Validate invite code */}
+                {step === "code" && (
+                  <form onSubmit={handleValidateCode} className="space-y-4">
+                    <div className="p-4 rounded-xl bg-muted/50 border border-border">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+                        <KeyRound className="w-4 h-4 text-primary" />
+                        <span className="font-medium">Cadastro por convite</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Para se cadastrar como médico, você precisa de um código fornecido pelo administrador.
+                      </p>
                     </div>
-                  </div>
-                  <div>
-                    <Label>Senha</Label>
-                    <div className="relative mt-1">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <Label>Código de Convite</Label>
                       <Input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="Mínimo 6 caracteres"
-                        className="pl-10 pr-10"
+                        value={inviteCode}
+                        onChange={e => setInviteCode(e.target.value.toUpperCase())}
+                        placeholder="Ex: MED-XXXX-XXXX"
                         required
-                        minLength={6}
+                        className="mt-1 font-mono text-center text-lg tracking-widest h-12"
+                        maxLength={20}
                       />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
                     </div>
-                    {password && <PasswordStrength password={password} />}
-                  </div>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1" /></div>
-                    <div><Label>UF</Label><Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1" maxLength={2} /></div>
-                  </div>
-                  {crm && crmState.length === 2 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="w-full text-primary border-primary/30 hover:bg-primary/10"
-                      onClick={() => window.open(`https://portal.cfm.org.br/busca-medicos/?crm=${encodeURIComponent(crm)}&uf=${encodeURIComponent(crmState)}`, "_blank")}
-                    >
-                      🔍 Validar CRM no Portal CFM
+                    <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg shadow-primary/20" size="lg" disabled={validating}>
+                      {validating ? (
+                        <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 animate-spin" /> Validando...
+                        </motion.span>
+                      ) : "Validar Código"}
                     </Button>
-                  )}
-                  <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
-                  <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground cta-shimmer h-12" size="lg" disabled={loading || !termsAccepted}>
-                    {loading ? (
-                      <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 animate-spin" /> Criando conta...
-                      </motion.span>
-                    ) : "Cadastrar como Médico"}
-                  </Button>
-                  <p className="text-center text-sm text-muted-foreground">
-                    Já tem conta? <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Entrar</button>
-                  </p>
-                </form>
-              )}
+                    <p className="text-center text-sm text-muted-foreground">
+                      <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                    </p>
+                  </form>
+                )}
 
-              {/* Login */}
-              {step === "login" && (
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div>
-                    <Label>Email</Label>
-                    <div className="relative mt-1">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10" required />
+                {/* Step 2: Register */}
+                {step === "register" && (
+                  <form onSubmit={handleRegister} className="space-y-4">
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 text-secondary text-sm border border-secondary/20"
+                    >
+                      <div className="w-6 h-6 rounded-full bg-secondary/20 flex items-center justify-center">
+                        <Check className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="font-medium">Código validado com sucesso</span>
+                    </motion.div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1 h-11" /></div>
+                      <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1 h-11" /></div>
                     </div>
-                  </div>
-                  <div>
-                    <Label>Senha</Label>
-                    <div className="relative mt-1">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="pl-10 pr-10"
-                        required
-                      />
-                      <button
+                    <div>
+                      <Label>Email</Label>
+                      <div className="relative mt-1">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Senha</Label>
+                      <div className="relative mt-1">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          placeholder="Mínimo 6 caracteres"
+                          className="pl-10 pr-10 h-11"
+                          required
+                          minLength={6}
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {password && <PasswordStrength password={password} />}
+                    </div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1 h-11" /></div>
+                      <div><Label>UF</Label><Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1 h-11" maxLength={2} /></div>
+                    </div>
+                    {crm && crmState.length === 2 && (
+                      <Button
                         type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-primary border-primary/30 hover:bg-primary/10"
+                        onClick={() => window.open(`https://portal.cfm.org.br/busca-medicos/?crm=${encodeURIComponent(crm)}&uf=${encodeURIComponent(crmState)}`, "_blank")}
                       >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
+                        🔍 Validar CRM no Portal CFM
+                      </Button>
+                    )}
+                    <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
+                    <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground cta-shimmer h-12 shadow-lg shadow-primary/20" size="lg" disabled={loading || !termsAccepted}>
+                      {loading ? (
+                        <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 animate-spin" /> Criando conta...
+                        </motion.span>
+                      ) : "Cadastrar como Médico"}
+                    </Button>
+                    <p className="text-center text-sm text-muted-foreground">
+                      Já tem conta? <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Entrar</button>
+                    </p>
+                  </form>
+                )}
+
+                {/* Login */}
+                {step === "login" && (
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div>
+                      <Label>Email</Label>
+                      <div className="relative mt-1">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required />
+                      </div>
                     </div>
-                  </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground cta-shimmer h-12" size="lg" disabled={loading}>
-                    {loading ? (
-                      <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
-                      </motion.span>
-                    ) : "Entrar"}
-                  </Button>
-                  <p className="text-center text-sm text-muted-foreground">
-                    <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
-                  </p>
-                  <p className="text-center text-sm text-muted-foreground">
-                    <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
-                  </p>
-                </form>
-              )}
-            </motion.div>
+                    <div>
+                      <Label>Senha</Label>
+                      <div className="relative mt-1">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="pl-10 pr-10 h-11"
+                          required
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground cta-shimmer h-12 shadow-lg shadow-primary/20" size="lg" disabled={loading}>
+                      {loading ? (
+                        <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
+                        </motion.span>
+                      ) : "Entrar"}
+                    </Button>
+                    <p className="text-center text-sm text-muted-foreground">
+                      <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
+                    </p>
+                    <p className="text-center text-sm text-muted-foreground">
+                      <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                    </p>
+                  </form>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Social proof - fixed at bottom on mobile */}
+          {/* Social proof bar */}
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
             className="px-6 py-4 pb-[max(env(safe-area-inset-bottom,8px),8px)] border-t border-border bg-muted/30 flex items-center justify-center gap-5 text-xs text-muted-foreground"
           >
@@ -379,9 +445,6 @@ const AuthMedico = () => {
           </motion.div>
         </div>
       </div>
-
-      {/* Why section */}
-      <DoctorWhySection />
     </div>
   );
 };
