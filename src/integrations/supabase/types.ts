@@ -644,6 +644,120 @@ export type Database = {
         }
         Relationships: []
       }
+      exam_reports: {
+        Row: {
+          content_text: string
+          created_at: string
+          document_hash: string | null
+          exam_request_id: string
+          id: string
+          pdf_url: string | null
+          reporter_id: string
+          signed_at: string | null
+          template_id: string | null
+          updated_at: string
+          verification_code: string | null
+        }
+        Insert: {
+          content_text?: string
+          created_at?: string
+          document_hash?: string | null
+          exam_request_id: string
+          id?: string
+          pdf_url?: string | null
+          reporter_id: string
+          signed_at?: string | null
+          template_id?: string | null
+          updated_at?: string
+          verification_code?: string | null
+        }
+        Update: {
+          content_text?: string
+          created_at?: string
+          document_hash?: string | null
+          exam_request_id?: string
+          id?: string
+          pdf_url?: string | null
+          reporter_id?: string
+          signed_at?: string | null
+          template_id?: string | null
+          updated_at?: string
+          verification_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_reports_exam_request_id_fkey"
+            columns: ["exam_request_id"]
+            isOneToOne: false
+            referencedRelation: "exam_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exam_requests: {
+        Row: {
+          assigned_to: string | null
+          clinical_info: string | null
+          created_at: string
+          exam_type: string
+          file_urls: Json
+          id: string
+          patient_id: string | null
+          priority: string
+          requesting_doctor_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          clinical_info?: string | null
+          created_at?: string
+          exam_type: string
+          file_urls?: Json
+          id?: string
+          patient_id?: string | null
+          priority?: string
+          requesting_doctor_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          clinical_info?: string | null
+          created_at?: string
+          exam_type?: string
+          file_urls?: Json
+          id?: string
+          patient_id?: string | null
+          priority?: string
+          requesting_doctor_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exam_requests_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_requests_requesting_doctor_id_fkey"
+            columns: ["requesting_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       favorite_doctors: {
         Row: {
           created_at: string
@@ -1362,6 +1476,36 @@ export type Database = {
           referrer_id?: string
           source?: string | null
           status?: string
+        }
+        Relationships: []
+      }
+      report_templates: {
+        Row: {
+          body_text: string
+          created_at: string
+          created_by: string
+          exam_type: string
+          id: string
+          is_active: boolean
+          title: string
+        }
+        Insert: {
+          body_text?: string
+          created_at?: string
+          created_by: string
+          exam_type: string
+          id?: string
+          is_active?: boolean
+          title: string
+        }
+        Update: {
+          body_text?: string
+          created_at?: string
+          created_by?: string
+          exam_type?: string
+          id?: string
+          is_active?: boolean
+          title?: string
         }
         Relationships: []
       }
