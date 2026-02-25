@@ -81,6 +81,49 @@ const ptBR = {
   // Common
   "common.learnMore": "Saiba mais",
   "common.language": "Idioma",
+
+  // Auth
+  "auth.welcomeBack": "Bem-vindo de volta",
+  "auth.enterAccount": "Entre na sua conta para continuar",
+  "auth.email": "Email",
+  "auth.password": "Senha",
+  "auth.forgotPassword": "Esqueci minha senha",
+  "auth.login": "Entrar",
+  "auth.loggingIn": "Entrando...",
+  "auth.noAccount": "Não tem conta?",
+  "auth.signUpFree": "Cadastre-se grátis",
+  "auth.createAccount": "Criar conta",
+  "auth.selectType": "Selecione o tipo de cadastro",
+  "auth.hasAccount": "Já tem conta?",
+  "auth.orContinueWith": "ou continue com",
+  "auth.patient": "Paciente",
+  "auth.doctor": "Médico",
+  "auth.clinic": "Clínica",
+
+  // Dashboard
+  "dashboard.overview": "Visão Geral",
+  "dashboard.appointments": "Consultas",
+  "dashboard.settings": "Configurações",
+  "dashboard.profile": "Perfil",
+  "dashboard.notifications": "Notificações",
+  "dashboard.noData": "Nenhum dado encontrado",
+  "dashboard.loading": "Carregando...",
+
+  // MFA
+  "mfa.title": "Autenticação em Duas Etapas (2FA)",
+  "mfa.active": "MFA Ativo",
+  "mfa.setup": "Configurar 2FA",
+  "mfa.disable": "Desativar",
+  "mfa.verifyCode": "Digite o código de 6 dígitos",
+  "mfa.scanQR": "Escaneie o QR Code",
+  "mfa.verify": "Verificar",
+
+  // Accessibility
+  "a11y.skipToContent": "Pular para o conteúdo",
+  "a11y.openMenu": "Abrir menu",
+  "a11y.closeMenu": "Fechar menu",
+  "a11y.darkMode": "Modo escuro",
+  "a11y.lightMode": "Modo claro",
 } as const;
 
 export default ptBR;

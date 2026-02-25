@@ -8,6 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Bell, Globe, Shield, Clock, Monitor, Volume2, Palette } from "lucide-react";
+import { MFASetup } from "@/components/auth/MFASetup";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { getAdminNav } from "@/components/admin/adminNav";
@@ -218,6 +219,9 @@ const PanelSettings = () => {
           {activeRole === "admin" && <AdminSettings />}
           {activeRole === "receptionist" && <ReceptionSettings />}
           {!["patient", "doctor", "admin", "receptionist"].includes(activeRole) && <GenericSettings role={activeRole} />}
+
+          {/* MFA para médicos e admins */}
+          {(activeRole === "doctor" || activeRole === "admin") && <MFASetup />}
         </div>
 
         <div className="mt-6">
