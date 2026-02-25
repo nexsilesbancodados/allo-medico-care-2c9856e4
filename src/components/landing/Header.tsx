@@ -101,11 +101,11 @@ const Header = memo(() => {
             <Button size="sm" onClick={() => navigate("/telelaudo")} className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-[hsl(200,80%,45%)] to-[hsl(210,90%,55%)] text-white shadow-md shadow-[hsl(210,90%,55%)/0.2] hover:shadow-lg hover:opacity-90 transition-all">
               Telelaudo
             </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate("/para-empresas")} className="rounded-full px-5 text-xs font-bold border-border/60 hover:bg-muted/50 transition-all">
+            <Button size="sm" variant="ghost" onClick={() => navigate("/para-empresas")} className="rounded-full px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all">
               Para Empresas
             </Button>
-            <Button size="sm" variant="outline" onClick={() => navigate("/cartao-desconto")} className="rounded-full px-5 text-xs font-bold border-primary/30 text-primary hover:bg-primary/5 transition-all">
-              Cartão de Desconto
+            <Button size="sm" onClick={() => navigate("/cartao-desconto")} className="rounded-full px-4 text-xs font-bold border border-amber-400/50 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all gap-1">
+              💳 Cartão Desconto
             </Button>
           </nav>
 
