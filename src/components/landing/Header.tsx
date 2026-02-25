@@ -92,18 +92,17 @@ const Header = memo(() => {
           </a>
 
           {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center" aria-label="Navegação principal">
-            <div className="flex items-center bg-muted/40 rounded-full px-1 py-1 gap-0.5">
-              {navLinks.map((link) => (
-                <button
-                  key={link.href}
-                  onClick={() => handleNavClick(link)}
-                  className="text-[13px] font-medium px-3.5 py-1.5 rounded-full transition-all text-muted-foreground hover:text-foreground hover:bg-background/80"
-                >
-                  {link.label}
-                </button>
-              ))}
-            </div>
+          <nav className="hidden lg:flex items-center gap-2" aria-label="Navegação principal">
+            {navLinks.map((link) => (
+              <Button
+                key={link.href}
+                size="sm"
+                onClick={() => handleNavClick(link)}
+                className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:opacity-90 transition-all"
+              >
+                {link.label}
+              </Button>
+            ))}
           </nav>
 
           {/* Desktop actions */}
