@@ -32,8 +32,8 @@ const statusColor: Record<string, string> = {
   cancelled: "bg-destructive/10 text-destructive border-destructive/20",
 };
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } } };
 
 const DoctorDashboard = () => {
   const { user } = useAuth();
@@ -64,122 +64,128 @@ const DoctorDashboard = () => {
   const inProg = todayAppts.filter(a => a.status === "in_progress").length;
   const pct = todayAppts.length > 0 ? Math.round((done / todayAppts.length) * 100) : 0;
   
-  // Next patient info
   const nextPatient = todayAppts.find(a => a.status === "scheduled" || a.status === "waiting");
   const nextPatientTime = nextPatient ? format(new Date(nextPatient.scheduled_at), "HH:mm") : null;
   const minutesUntilNext = nextPatient ? Math.max(0, Math.round((new Date(nextPatient.scheduled_at).getTime() - Date.now()) / 60000)) : null;
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("home")} role="doctor">
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
+      <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
         <SectionErrorBoundary fallbackTitle="Erro no checklist de ativação">
           <DoctorOnboarding />
         </SectionErrorBoundary>
 
-        {/* Header */}
-        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel Médico</h1>
-              {data?.crmVerified && (
-                <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-success/10 border border-success/20">
-                  <ShieldCheck className="w-3.5 h-3.5 text-success" />
-                  <span className="text-[10px] font-semibold text-success">CRM Verificado</span>
+        {/* ═══ Hero Header — gradient card ═══ */}
+        <motion.div variants={fadeUp}>
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-secondary/90 to-primary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-secondary/20">
+            <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
+
+            <div className="relative flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Painel Médico</h1>
+                  {data?.crmVerified && (
+                    <div className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white/15 border border-white/20 backdrop-blur-sm">
+                      <ShieldCheck className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-bold">CRM Verificado</span>
+                    </div>
+                  )}
                 </div>
+                <p className="text-sm text-white/70">
+                  {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                  {data?.crm && <span className="ml-2 text-white/50">· CRM {data.crm}/{data.crmState}</span>}
+                </p>
+                {!loading && (data?.rating ?? 0) > 0 && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <div className="flex items-center gap-0.5">
+                      {[1, 2, 3, 4, 5].map(i => (
+                        <Star key={i} className={`w-3.5 h-3.5 ${i <= Math.round(data?.rating ?? 0) ? "text-yellow-300 fill-yellow-300" : "text-white/20"}`} />
+                      ))}
+                    </div>
+                    <span className="text-sm font-bold">{(data?.rating ?? 0).toFixed(1)}</span>
+                    <span className="text-xs text-white/60">({data?.totalReviews ?? 0})</span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2 shrink-0">
+                {waitingCount > 0 && (
+                  <Button size="sm" className="bg-white/15 text-white border border-white/20 hover:bg-white/25 h-9 gap-1.5 backdrop-blur-sm rounded-xl" onClick={() => navigate("/dashboard/doctor/waiting-room")}>
+                    <Clock className="w-3.5 h-3.5" /> {waitingCount} esperando
+                  </Button>
+                )}
+                <Button size="sm" className="bg-white/15 text-white border border-white/20 hover:bg-white/25 h-9 gap-1.5 backdrop-blur-sm rounded-xl" onClick={() => queryClient.refetchQueries({ queryKey: ["doctor-dashboard-stats"] })} disabled={refreshing}>
+                  <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+                </Button>
+              </div>
+            </div>
+
+            {/* Inline KPIs */}
+            <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+              {loading ? (
+                Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl bg-white/10 animate-pulse" />)
+              ) : (
+                [
+                  { label: "Hoje", value: stats.today, icon: Calendar },
+                  { label: "Pacientes", value: stats.total_patients, icon: Users },
+                  { label: "Receitas", value: stats.prescriptions, icon: FileText },
+                  { label: "Ganhos", value: `R$ ${stats.totalEarnings.toFixed(0)}`, icon: DollarSign },
+                ].map((kpi, i) => (
+                  <motion.div
+                    key={kpi.label}
+                    initial={{ opacity: 0, scale: 0.85 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
+                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10 hover:bg-white/15 transition-colors cursor-pointer"
+                    onClick={() => {
+                      const paths = [null, "/dashboard/patients", "/dashboard/prescriptions", "/dashboard/earnings"];
+                      if (paths[i]) navigate(paths[i]!);
+                    }}
+                  >
+                    <kpi.icon className="w-4 h-4 text-white/70 mb-2" />
+                    <p className="text-2xl font-bold leading-none">{kpi.value}</p>
+                    <p className="text-[10px] text-white/60 mt-1">{kpi.label}</p>
+                  </motion.div>
+                ))
               )}
             </div>
-            <p className="text-sm text-muted-foreground">
-              {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-              {data?.crm && <span className="ml-2 text-muted-foreground/60">· CRM {data.crm}/{data.crmState}</span>}
-            </p>
-            {/* Rating display */}
-            {!loading && (data?.rating ?? 0) > 0 && (
-              <div className="flex items-center gap-2 mt-2">
-                <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <Star key={i} className={`w-3.5 h-3.5 ${i <= Math.round(data?.rating ?? 0) ? "text-yellow-500 fill-yellow-500" : "text-muted-foreground/20"}`} />
-                  ))}
-                </div>
-                <span className="text-sm font-semibold text-foreground">{(data?.rating ?? 0).toFixed(1)}</span>
-                <span className="text-xs text-muted-foreground">({data?.totalReviews ?? 0} avaliações)</span>
-              </div>
-            )}
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {waitingCount > 0 && (
-              <Button size="sm" className="bg-warning/10 text-warning border border-warning/30 hover:bg-warning/20 h-9 gap-1.5" onClick={() => navigate("/dashboard/doctor/waiting-room")}>
-                <Clock className="w-3.5 h-3.5" /> {waitingCount} esperando
-              </Button>
-            )}
-            <Button size="sm" variant="outline" className="h-9 gap-1.5" onClick={() => queryClient.refetchQueries({ queryKey: ["doctor-dashboard-stats"] })} disabled={refreshing}>
-              <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-              Atualizar
-            </Button>
           </div>
         </motion.div>
 
         {/* Next patient banner */}
         {!loading && nextPatient && (
           <motion.div variants={fadeUp}>
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-gradient-to-r from-primary/5 to-secondary/5 border border-primary/20 cursor-pointer active:scale-[0.99] transition-all" onClick={() => navigate(`/dashboard/consultation/${nextPatient.id}`)}>
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex flex-col items-center justify-center shrink-0">
-                <span className="text-sm font-bold text-primary leading-none">{nextPatientTime}</span>
+            <div 
+              className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-primary/20 cursor-pointer active:scale-[0.99] transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30" 
+              onClick={() => navigate(`/dashboard/consultation/${nextPatient.id}`)}
+            >
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex flex-col items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+                <span className="text-sm font-bold text-white leading-none">{nextPatientTime}</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">Próximo: {nextPatient.patient_name}</p>
+                <p className="text-sm font-bold text-foreground truncate">Próximo: {nextPatient.patient_name}</p>
                 <p className="text-xs text-muted-foreground">
                   {minutesUntilNext !== null && minutesUntilNext <= 60
                     ? `⏰ Em ${minutesUntilNext}min`
                     : `${nextPatient.duration_minutes || 30}min de consulta`}
                 </p>
               </div>
-              <Button size="sm" className="bg-primary text-primary-foreground text-xs h-9 px-4 rounded-xl gap-1.5 shrink-0">
+              <Button size="sm" className="bg-gradient-to-r from-primary to-secondary text-white text-xs h-10 px-5 rounded-xl gap-1.5 shrink-0 shadow-lg shadow-primary/20 hover:shadow-xl transition-shadow font-semibold">
                 <Video className="w-3.5 h-3.5" /> {nextPatient.status === "waiting" ? "Atender" : "Iniciar"}
               </Button>
             </div>
           </motion.div>
         )}
 
-        {/* KPI Cards — animated */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {loading ? (
-            Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" />)
-          ) : (
-            [
-              { label: "Hoje", value: stats.today, icon: Calendar, color: "text-primary", bg: "bg-primary/10", glow: "group-hover:shadow-primary/15" },
-              { label: "Pacientes", value: stats.total_patients, icon: Users, color: "text-secondary", bg: "bg-secondary/10", path: "/dashboard/patients", glow: "group-hover:shadow-secondary/15" },
-              { label: "Receitas", value: stats.prescriptions, icon: FileText, color: "text-warning", bg: "bg-warning/10", path: "/dashboard/prescriptions", glow: "group-hover:shadow-warning/15" },
-              { label: "Ganhos", value: `R$ ${stats.totalEarnings.toFixed(0)}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", path: "/dashboard/earnings", glow: "group-hover:shadow-success/15" },
-            ].map((kpi, i) => (
-              <motion.button
-                key={kpi.label}
-                initial={{ opacity: 0, scale: 0.85, y: 15 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                transition={{ delay: i * 0.08, type: "spring", stiffness: 200, damping: 15 }}
-                whileHover={{ y: -4, scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => kpi.path && navigate(kpi.path)}
-                className={`group p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-lg ${kpi.glow} transition-all text-left`}
-              >
-                <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-3 transition-all duration-300 group-hover:scale-110 group-hover:shadow-md`}>
-                  <kpi.icon className={`w-4.5 h-4.5 ${kpi.color} transition-transform duration-300 group-hover:rotate-6`} />
-                </div>
-                <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
-                <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
-              </motion.button>
-            ))
-          )}
-        </motion.div>
-
-        {/* Daily Summary Card */}
+        {/* Daily Summary Card — compact */}
         {!loading && todayAppts.length > 0 && (
           <motion.div variants={fadeUp}>
-            <Card className="border-border/50 bg-gradient-to-r from-card to-muted/20">
+            <Card className="border-border/50 overflow-hidden">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      <Target className="w-4 h-4 text-primary" />
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md shadow-primary/15">
+                      <Target className="w-4.5 h-4.5 text-white" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-foreground">Meta do Dia</p>
@@ -191,13 +197,13 @@ const DoctorDashboard = () => {
                     <p className="text-[10px] text-muted-foreground">concluídas</p>
                   </div>
                 </div>
-                <div className="w-full h-3 rounded-full bg-muted overflow-hidden mb-3">
+                <div className="w-full h-3.5 rounded-full bg-muted overflow-hidden mb-3">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${pct}%` }}
                     transition={{ duration: 1, ease: "easeOut" }}
-                    className={`h-full rounded-full transition-colors ${
-                      pct >= 100 ? "bg-success" : pct >= 60 ? "bg-gradient-to-r from-primary to-secondary" : "bg-primary/70"
+                    className={`h-full rounded-full ${
+                      pct >= 100 ? "bg-gradient-to-r from-success to-success/70" : "bg-gradient-to-r from-primary to-secondary"
                     }`}
                   />
                 </div>
@@ -214,20 +220,16 @@ const DoctorDashboard = () => {
 
         {/* Pending Patients Alert */}
         {!loading && waitingCount > 1 && (
-          <motion.div
-            variants={fadeUp}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-warning/5 border border-warning/20">
-              <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
-                <AlertTriangle className="w-5 h-5 text-warning" />
+          <motion.div variants={fadeUp}>
+            <div className="flex items-center gap-3 p-4 rounded-2xl bg-warning/5 border border-warning/20">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-warning to-warning/70 flex items-center justify-center shrink-0 shadow-md shadow-warning/15">
+                <AlertTriangle className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">⚠️ {waitingCount} pacientes aguardando</p>
+                <p className="text-sm font-bold text-foreground">⚠️ {waitingCount} pacientes aguardando</p>
                 <p className="text-xs text-muted-foreground">Acesse a sala de espera para iniciar os atendimentos</p>
               </div>
-              <Button size="sm" variant="outline" className="border-warning/30 text-warning hover:bg-warning/10 rounded-xl shrink-0" onClick={() => navigate("/dashboard/doctor/waiting-room")}>
+              <Button size="sm" className="bg-gradient-to-r from-warning to-warning/80 text-white rounded-xl shrink-0 shadow-md shadow-warning/20 hover:shadow-lg transition-shadow">
                 Atender
               </Button>
             </div>
@@ -237,59 +239,33 @@ const DoctorDashboard = () => {
         {/* Tabs */}
         <motion.div variants={fadeUp}>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="bg-muted/50 border border-border/40 h-10 rounded-xl p-1">
-              <TabsTrigger value="overview" className="text-xs gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
+            <TabsList className="bg-muted/50 border border-border/40 h-11 rounded-xl p-1">
+              <TabsTrigger value="overview" className="text-xs gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm font-semibold">
                 <BarChart2 className="w-3.5 h-3.5" /> Visão Geral
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="text-xs gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
+              <TabsTrigger value="analytics" className="text-xs gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm font-semibold">
                 <TrendingUp className="w-3.5 h-3.5" /> Análises
               </TabsTrigger>
-              <TabsTrigger value="activity" className="text-xs gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
+              <TabsTrigger value="activity" className="text-xs gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm font-semibold">
                 <Activity className="w-3.5 h-3.5" /> Atividade
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="mt-6 space-y-5">
-              {/* Progress bar */}
-              {!loading && todayAppts.length > 0 && (
-                <Card className="border-border/50">
-                  <CardContent className="p-5">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-primary" />
-                        <p className="text-sm font-semibold text-foreground">Progresso de hoje</p>
-                      </div>
-                      <span className="text-lg font-bold text-foreground">{pct}%</span>
-                    </div>
-                    <div className="w-full h-2.5 rounded-full bg-muted overflow-hidden mb-3">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${pct}%` }}
-                        transition={{ duration: 0.8, ease: "easeOut" }}
-                        className="h-full bg-gradient-to-r from-primary to-secondary rounded-full"
-                      />
-                    </div>
-                    <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3 h-3 text-success" /> {done} concluída{done !== 1 ? "s" : ""}</span>
-                      {inProg > 0 && <span className="flex items-center gap-1.5"><Video className="w-3 h-3 text-primary" /> {inProg} em andamento</span>}
-                      {waitingCount > 0 && <span className="flex items-center gap-1.5"><Clock className="w-3 h-3 text-warning" /> {waitingCount} aguardando</span>}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
               {/* Today's schedule */}
               <Card className="border-border/50">
                 <CardHeader className="pb-3 pt-5">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-primary" />
+                    <CardTitle className="text-sm font-bold flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+                        <Calendar className="w-3.5 h-3.5 text-white" />
+                      </div>
                       Agenda de Hoje
                       {!loading && todayAppts.length > 0 && (
-                        <Badge variant="outline" className="ml-1 text-[10px] h-5 px-2">{todayAppts.length}</Badge>
+                        <Badge className="ml-1 text-[10px] h-5 px-2 bg-primary/10 text-primary border-0">{todayAppts.length}</Badge>
                       )}
                     </CardTitle>
-                    <Button size="sm" variant="ghost" className="text-xs text-primary h-8 gap-1" onClick={() => navigate("/dashboard/availability")}>
+                    <Button size="sm" variant="ghost" className="text-xs text-primary h-8 gap-1 font-semibold" onClick={() => navigate("/dashboard/availability")}>
                       Configurar <ArrowRight className="w-3 h-3" />
                     </Button>
                   </div>
@@ -299,9 +275,9 @@ const DoctorDashboard = () => {
                     <div className="space-y-2">
                       {[1, 2, 3].map(i => (
                         <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl border border-border/40">
-                          <Skeleton className="h-10 w-10 rounded-lg" />
+                          <Skeleton className="h-11 w-11 rounded-xl" />
                           <div className="space-y-1.5 flex-1"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-20" /></div>
-                          <Skeleton className="h-8 w-20 rounded-lg" />
+                          <Skeleton className="h-9 w-20 rounded-xl" />
                         </div>
                       ))}
                     </div>
@@ -311,29 +287,29 @@ const DoctorDashboard = () => {
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ type: "spring", stiffness: 200, damping: 15 }}
-                        className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mb-4 shadow-lg shadow-primary/5"
+                        className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center mb-4 shadow-lg shadow-primary/5"
                       >
                         <Sparkles className="w-8 h-8 text-primary" />
                       </motion.div>
                       <p className="text-sm font-semibold text-foreground mb-1">Agenda livre hoje</p>
                       <p className="text-xs text-muted-foreground mb-5">Nenhuma consulta agendada 🎉</p>
-                      <Button size="sm" variant="outline" className="rounded-xl" onClick={() => navigate("/dashboard/availability")}>Configurar horários</Button>
+                      <Button size="sm" className="rounded-xl bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/20" onClick={() => navigate("/dashboard/availability")}>Configurar horários</Button>
                     </div>
                   ) : (
                     <div className="space-y-2">
                       {todayAppts.map(a => (
                         <div
                           key={a.id}
-                          className={`flex items-center justify-between p-3.5 rounded-xl border transition-all ${
-                            a.status === "in_progress" ? "border-success/30 bg-success/5" : a.status === "waiting" ? "border-warning/30 bg-warning/5" : "border-border/50 hover:bg-muted/30"
+                          className={`flex items-center justify-between p-3.5 rounded-xl border transition-all hover:shadow-md ${
+                            a.status === "in_progress" ? "border-success/30 bg-success/5 hover:shadow-success/10" : a.status === "waiting" ? "border-warning/30 bg-warning/5 hover:shadow-warning/10" : "border-border/50 hover:bg-muted/30"
                           }`}
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <div className={`w-11 h-11 rounded-xl flex flex-col items-center justify-center shrink-0 ${
-                              a.status === "in_progress" ? "bg-success/15" : a.status === "waiting" ? "bg-warning/15" : "bg-muted/60"
+                              a.status === "in_progress" ? "bg-gradient-to-br from-success to-success/70 text-white" : a.status === "waiting" ? "bg-gradient-to-br from-warning to-warning/70 text-white" : "bg-muted/60"
                             }`}>
-                              <p className="text-sm font-bold text-foreground leading-none">{format(new Date(a.scheduled_at), "HH")}</p>
-                              <p className="text-[9px] text-muted-foreground">{format(new Date(a.scheduled_at), "mm")}</p>
+                              <p className={`text-sm font-bold leading-none ${a.status === "in_progress" || a.status === "waiting" ? "" : "text-foreground"}`}>{format(new Date(a.scheduled_at), "HH")}</p>
+                              <p className={`text-[9px] ${a.status === "in_progress" || a.status === "waiting" ? "text-white/70" : "text-muted-foreground"}`}>{format(new Date(a.scheduled_at), "mm")}</p>
                             </div>
                             <div className="min-w-0">
                               <p className="text-sm font-semibold text-foreground truncate">{a.patient_name}</p>
@@ -347,12 +323,12 @@ const DoctorDashboard = () => {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             {(a.status === "scheduled" || a.status === "waiting") && (
-                              <Button size="sm" className="bg-primary text-primary-foreground text-xs h-9 px-4 rounded-xl gap-1.5" onClick={() => navigate(`/dashboard/consultation/${a.id}`)}>
+                              <Button size="sm" className="bg-gradient-to-r from-primary to-secondary text-white text-xs h-9 px-4 rounded-xl gap-1.5 shadow-md shadow-primary/15 hover:shadow-lg transition-shadow font-semibold" onClick={() => navigate(`/dashboard/consultation/${a.id}`)}>
                                 <Video className="w-3.5 h-3.5" /> Iniciar
                               </Button>
                             )}
                             {a.status === "completed" && (
-                              <Button size="sm" variant="outline" className="text-xs h-9 rounded-xl gap-1.5" onClick={() => navigate(`/dashboard/prescribe/${a.id}`)}>
+                              <Button size="sm" variant="outline" className="text-xs h-9 rounded-xl gap-1.5 font-semibold" onClick={() => navigate(`/dashboard/prescribe/${a.id}`)}>
                                 <FileText className="w-3.5 h-3.5" /> Receita
                               </Button>
                             )}
@@ -369,10 +345,13 @@ const DoctorDashboard = () => {
                 <Card className="border-border/50">
                   <CardHeader className="pb-3 pt-5">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                        <Clock className="w-4 h-4 text-muted-foreground" /> Próximas Consultas
+                      <CardTitle className="text-sm font-bold flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center">
+                          <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+                        </div>
+                        Próximas Consultas
                       </CardTitle>
-                      <Button size="sm" variant="ghost" className="text-xs text-primary h-8 gap-1" onClick={() => navigate("/dashboard/doctor/consultations")}>
+                      <Button size="sm" variant="ghost" className="text-xs text-primary h-8 gap-1 font-semibold" onClick={() => navigate("/dashboard/doctor/consultations")}>
                         Ver todas <ArrowRight className="w-3 h-3" />
                       </Button>
                     </div>
@@ -380,10 +359,10 @@ const DoctorDashboard = () => {
                   <CardContent className="pt-0">
                     <div className="space-y-1.5">
                       {upcomingAppts.map(a => (
-                        <div key={a.id} className="flex items-center justify-between p-3.5 rounded-xl border border-border/40 hover:bg-muted/30 transition-colors">
+                        <div key={a.id} className="flex items-center justify-between p-3.5 rounded-xl border border-border/40 hover:bg-muted/30 hover:border-border/60 transition-all">
                           <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
-                              <Users className="w-4 h-4 text-muted-foreground" />
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/5 flex items-center justify-center shrink-0">
+                              <Users className="w-4 h-4 text-primary" />
                             </div>
                             <div className="min-w-0">
                               <p className="text-sm font-medium text-foreground truncate">{a.patient_name}</p>
@@ -400,13 +379,13 @@ const DoctorDashboard = () => {
                 </Card>
               )}
 
-              {/* Quick access */}
+              {/* Quick access — gradient icons */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label: "Consultas", sub: "Histórico", icon: Clock, color: "bg-primary/10", iconColor: "text-primary", path: "/dashboard/doctor/consultations" },
-                  { label: "Receitas", sub: "Prescrições", icon: FileText, color: "bg-warning/10", iconColor: "text-warning", path: "/dashboard/prescriptions" },
-                  { label: "Sala de Espera", sub: "Fila ao vivo", icon: Video, color: "bg-success/10", iconColor: "text-success", path: "/dashboard/doctor/waiting-room" },
-                  { label: "Calendário", sub: "Agenda semanal", icon: Calendar, color: "bg-secondary/10", iconColor: "text-secondary", path: "/dashboard/doctor/calendar" },
+                  { label: "Consultas", sub: "Histórico", icon: Clock, gradient: "from-primary to-primary/70", path: "/dashboard/doctor/consultations" },
+                  { label: "Receitas", sub: "Prescrições", icon: FileText, gradient: "from-warning to-warning/70", path: "/dashboard/prescriptions" },
+                  { label: "Sala de Espera", sub: "Fila ao vivo", icon: Video, gradient: "from-success to-success/70", path: "/dashboard/doctor/waiting-room" },
+                  { label: "Calendário", sub: "Agenda semanal", icon: Calendar, gradient: "from-secondary to-secondary/70", path: "/dashboard/doctor/calendar" },
                 ].map((item, i) => (
                   <motion.div
                     key={item.label}
@@ -416,13 +395,13 @@ const DoctorDashboard = () => {
                     whileHover={{ y: -3, scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <Card className="border-border/50 hover:shadow-md hover:border-border transition-all duration-200 cursor-pointer group" onClick={() => navigate(item.path)}>
+                    <Card className="border-border/50 hover:shadow-lg hover:border-border transition-all duration-200 cursor-pointer group overflow-hidden" onClick={() => navigate(item.path)}>
                       <CardContent className="p-4 flex flex-col items-start gap-3">
-                        <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-md`}>
-                          <item.icon className={`w-5 h-5 ${item.iconColor}`} />
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}>
+                          <item.icon className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                          <p className="text-sm font-bold text-foreground">{item.label}</p>
                           <p className="text-xs text-muted-foreground">{item.sub}</p>
                         </div>
                       </CardContent>
@@ -431,27 +410,28 @@ const DoctorDashboard = () => {
                 ))}
               </div>
 
-              {/* Memed */}
-              <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5 hover:shadow-md transition-all">
-                <CardContent className="p-5">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              {/* Memed — gradient accent */}
+              <Card className="border-border/50 hover:shadow-lg transition-all overflow-hidden">
+                <CardContent className="p-5 relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-secondary/[0.03]" />
+                  <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shrink-0">
-                        <Pill className="w-6 h-6 text-primary-foreground" />
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-xl shadow-primary/20 shrink-0">
+                        <Pill className="w-6 h-6 text-white" />
                       </div>
                       <div className="min-w-0">
                         <h3 className="font-bold text-sm text-foreground flex items-center gap-2 flex-wrap">
                           Memed — Receita Digital
-                          <Badge variant="outline" className="text-[10px] border-primary/30 text-primary">Integrado</Badge>
+                          <Badge className="text-[10px] bg-success/10 text-success border-0 font-bold">Integrado</Badge>
                         </h3>
                         <p className="text-xs text-muted-foreground mt-0.5 truncate">Base de medicamentos completa do Brasil</p>
                       </div>
                     </div>
                     <div className="flex gap-2 shrink-0">
-                      <Button variant="outline" size="sm" className="gap-1.5 text-xs" onClick={() => window.open("https://memed.com.br/login", "_blank")}>
+                      <Button variant="outline" size="sm" className="gap-1.5 text-xs rounded-xl font-semibold" onClick={() => window.open("https://memed.com.br/login", "_blank")}>
                         <ExternalLink className="w-3.5 h-3.5" /> Portal
                       </Button>
-                      <Button size="sm" className="bg-primary text-primary-foreground gap-1.5 text-xs" onClick={() => navigate("/dashboard/prescriptions")}>
+                      <Button size="sm" className="bg-gradient-to-r from-primary to-secondary text-white gap-1.5 text-xs rounded-xl shadow-md shadow-primary/15 font-semibold" onClick={() => navigate("/dashboard/prescriptions")}>
                         <FileText className="w-3.5 h-3.5" /> Receitas
                       </Button>
                     </div>
@@ -465,29 +445,40 @@ const DoctorDashboard = () => {
             </TabsContent>
 
             <TabsContent value="activity" className="mt-6 space-y-4">
-              {/* Quick stats summary */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label: "Realizadas hoje", value: done, color: "text-success" },
-                  { label: "Em andamento", value: inProg, color: "text-primary" },
-                  { label: "Aguardando", value: waitingCount, color: "text-warning" },
-                  { label: "Taxa conclusão", value: `${pct}%`, color: "text-foreground" },
+                  { label: "Realizadas hoje", value: done, gradient: "from-success to-success/70" },
+                  { label: "Em andamento", value: inProg, gradient: "from-primary to-primary/70" },
+                  { label: "Aguardando", value: waitingCount, gradient: "from-warning to-warning/70" },
+                  { label: "Taxa conclusão", value: `${pct}%`, gradient: "from-secondary to-secondary/70" },
                 ].map(s => (
-                  <div key={s.label} className="p-3 rounded-xl bg-muted/30 border border-border/40 text-center">
-                    <p className={`text-lg font-bold ${s.color}`}>{s.value}</p>
+                  <div key={s.label} className="p-4 rounded-xl bg-card border border-border/40 text-center hover:shadow-md transition-all">
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${s.gradient} flex items-center justify-center mx-auto mb-2 shadow-sm`}>
+                      <span className="text-xs font-bold text-white">{typeof s.value === 'number' && s.value > 0 ? '✓' : '–'}</span>
+                    </div>
+                    <p className="text-lg font-bold text-foreground">{s.value}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
                   </div>
                 ))}
               </div>
 
               <Card className="border-border/50">
-                <CardHeader><CardTitle className="text-sm font-semibold">Consultas Recentes</CardTitle></CardHeader>
+                <CardHeader>
+                  <CardTitle className="text-sm font-bold flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center">
+                      <Activity className="w-3.5 h-3.5 text-muted-foreground" />
+                    </div>
+                    Consultas Recentes
+                  </CardTitle>
+                </CardHeader>
                 <CardContent>
                   {todayAppts.length === 0 && upcomingAppts.length === 0 ? (
                     <div className="text-center py-8">
-                      <Sparkles className="w-8 h-8 text-muted-foreground/40 mx-auto mb-3" />
+                      <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mb-3">
+                        <Sparkles className="w-7 h-7 text-primary" />
+                      </div>
                       <p className="text-sm text-muted-foreground mb-4">Nenhuma atividade recente</p>
-                      <Button variant="outline" className="rounded-xl" onClick={() => navigate("/dashboard/doctor/consultations")}>
+                      <Button className="rounded-xl bg-gradient-to-r from-primary to-secondary text-white shadow-md" onClick={() => navigate("/dashboard/doctor/consultations")}>
                         Ver Histórico Completo
                       </Button>
                     </div>
@@ -511,7 +502,7 @@ const DoctorDashboard = () => {
                           </span>
                         </div>
                       ))}
-                      <Button variant="outline" className="w-full rounded-xl mt-2" onClick={() => navigate("/dashboard/doctor/consultations")}>
+                      <Button className="w-full rounded-xl mt-2 bg-gradient-to-r from-primary to-secondary text-white shadow-md" onClick={() => navigate("/dashboard/doctor/consultations")}>
                         Ver Histórico Completo
                       </Button>
                     </div>
