@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, MessageCircle, Headphones, Sparkles, CalendarDays, CreditCard, Stethoscope } from "lucide-react";
+import { X, Send, MessageCircle, Headphones, Sparkles, CalendarDays, CreditCard, Stethoscope, RotateCcw, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import mascotImg from "@/assets/mascot.png";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -86,9 +87,15 @@ const PingoChatbot = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showLiveSupport, setShowLiveSupport] = useState(false);
   const [userContext, setUserContext] = useState<string>("");
+  const [typingSpeed, setTypingSpeed] = useState<"normal" | "fast">("normal");
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
+
+  const clearChat = useCallback(() => {
+    setMessages([]);
+    setShowLiveSupport(false);
+  }, []);
 
   // Hide on consultation/video pages
   const isConsultationPage = location.pathname.includes("/consultation");
@@ -342,6 +349,11 @@ const PingoChatbot = () => {
                   {user && profile?.first_name ? `Olá, ${profile.first_name}!` : "Assistente virtual"}
                 </p>
               </div>
+              {messages.length > 0 && (
+                <button onClick={clearChat} className="p-1 rounded-lg hover:bg-white/20 transition-colors" title="Nova conversa">
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              )}
               <button onClick={() => setOpen(false)} className="p-1 rounded-lg hover:bg-white/20 transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -383,17 +395,29 @@ const PingoChatbot = () => {
               )}
 
               {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
+                >
                   <div
-                    className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                    className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed ${
                       msg.role === "user"
                         ? "bg-primary text-primary-foreground rounded-br-md"
                         : "bg-muted text-foreground rounded-bl-md"
                     }`}
                   >
-                    {msg.content}
+                    {msg.role === "assistant" ? (
+                      <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:my-0.5 [&>ul]:my-1 [&>ol]:my-1">
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <span className="whitespace-pre-wrap">{msg.content}</span>
+                    )}
                   </div>
-                </div>
+                </motion.div>
               ))}
 
               {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
