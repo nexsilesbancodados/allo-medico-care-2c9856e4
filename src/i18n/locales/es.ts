@@ -71,6 +71,49 @@ const es: Record<TranslationKeys, string> = {
 
   "common.learnMore": "Saber más",
   "common.language": "Idioma",
+
+  // Auth
+  "auth.welcomeBack": "Bienvenido de vuelta",
+  "auth.enterAccount": "Inicia sesión para continuar",
+  "auth.email": "Correo electrónico",
+  "auth.password": "Contraseña",
+  "auth.forgotPassword": "Olvidé mi contraseña",
+  "auth.login": "Iniciar sesión",
+  "auth.loggingIn": "Iniciando sesión...",
+  "auth.noAccount": "¿No tienes cuenta?",
+  "auth.signUpFree": "Regístrate gratis",
+  "auth.createAccount": "Crear cuenta",
+  "auth.selectType": "Selecciona el tipo de registro",
+  "auth.hasAccount": "¿Ya tienes cuenta?",
+  "auth.orContinueWith": "o continúa con",
+  "auth.patient": "Paciente",
+  "auth.doctor": "Médico",
+  "auth.clinic": "Clínica",
+
+  // Dashboard
+  "dashboard.overview": "Resumen",
+  "dashboard.appointments": "Consultas",
+  "dashboard.settings": "Configuraciones",
+  "dashboard.profile": "Perfil",
+  "dashboard.notifications": "Notificaciones",
+  "dashboard.noData": "No se encontraron datos",
+  "dashboard.loading": "Cargando...",
+
+  // MFA
+  "mfa.title": "Autenticación de Dos Factores (2FA)",
+  "mfa.active": "MFA Activo",
+  "mfa.setup": "Configurar 2FA",
+  "mfa.disable": "Desactivar",
+  "mfa.verifyCode": "Ingresa el código de 6 dígitos",
+  "mfa.scanQR": "Escanea el código QR",
+  "mfa.verify": "Verificar",
+
+  // Accessibility
+  "a11y.skipToContent": "Ir al contenido",
+  "a11y.openMenu": "Abrir menú",
+  "a11y.closeMenu": "Cerrar menú",
+  "a11y.darkMode": "Modo oscuro",
+  "a11y.lightMode": "Modo claro",
 };
 
 export default es;
