@@ -225,9 +225,79 @@ serve(async (req) => {
       );
     }
 
+    // ── seed_test_exam: cria dados de teste (médico + exame) ──
+    if (action === "seed_test_exam") {
+      const { doctor_user_id } = await req.json().catch(() => ({}));
+      const targetUserId = doctor_user_id || "38dae434-500c-43db-b0c1-a1f4d0a4ad67";
+
+      // Ensure doctor_profile exists
+      const { data: existingDoc } = await supabase
+        .from("doctor_profiles")
+        .select("id")
+        .eq("user_id", targetUserId)
+        .maybeSingle();
+
+      let doctorProfileId = existingDoc?.id;
+
+      if (!doctorProfileId) {
+        const { data: newDoc, error: docErr } = await supabase
+          .from("doctor_profiles")
+          .insert({
+            user_id: targetUserId,
+            crm: "654321",
+            crm_state: "RR",
+            bio: "Médico laudista de teste",
+            consultation_price: 89,
+            is_approved: true,
+            crm_verified: true,
+          })
+          .select("id")
+          .single();
+
+        if (docErr) {
+          return new Response(
+            JSON.stringify({ error: "Erro ao criar doctor_profile: " + docErr.message }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        doctorProfileId = newDoc.id;
+      }
+
+      // Create test exam_request
+      const { data: exam, error: examErr } = await supabase
+        .from("exam_requests")
+        .insert({
+          requesting_doctor_id: doctorProfileId,
+          exam_type: "Raio-X Tórax PA",
+          clinical_info: "Paciente com tosse persistente há 3 semanas. Exame de rotina para descartar pneumonia.",
+          priority: "normal",
+          status: "pending",
+          patient_id: targetUserId,
+        })
+        .select("id")
+        .single();
+
+      if (examErr) {
+        return new Response(
+          JSON.stringify({ error: "Erro ao criar exam_request: " + examErr.message }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          doctor_profile_id: doctorProfileId,
+          exam_request_id: exam.id,
+          message: "Exame de teste criado com sucesso!",
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
       JSON.stringify({
-        error: "Ação inválida. Use: search_studies, get_files, upload_file, delete_file, get_signed_url",
+        error: "Ação inválida. Use: search_studies, get_files, upload_file, delete_file, get_signed_url, seed_test_exam",
       }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
