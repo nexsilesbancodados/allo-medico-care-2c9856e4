@@ -1,256 +1,202 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Sparkles, Shield, Clock, Star, Users, MessageCircle, Check, X } from "lucide-react";
+import { ArrowRight, Shield, Clock, Star, Check, X, Heart, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-
-const trustBadges = [
-  { icon: Shield, text: "Dados criptografados" },
-  { icon: Clock, text: "Atendimento 24h" },
-  { icon: Star, text: "4.9★ avaliação" },
-];
+import mascotThumbsup from "@/assets/mascot-thumbsup.png";
 
 const comparisonRows = [
-  { feature: "Espera", us: "~15 min", them: "2-5 horas" },
-  { feature: "Receita digital", us: true, them: false },
-  { feature: "Acesso 24h", us: true, them: false },
-  { feature: "Preço", us: "A partir de R$89", them: "R$200-400" },
+  { feature: "Tempo de espera", us: "~15 min", them: "2-5 horas" },
+  { feature: "Receita digital válida", us: true, them: false },
+  { feature: "Disponível 24h", us: true, them: false },
+  { feature: "Preço médio", us: "R$89", them: "R$200-400" },
+  { feature: "Atestado digital", us: true, them: false },
+];
+
+const benefits = [
+  { icon: Zap, text: "Consulta em minutos" },
+  { icon: Shield, text: "Dados criptografados" },
+  { icon: Clock, text: "Disponível 24/7" },
+  { icon: Star, text: "4.9★ de avaliação" },
+  { icon: Heart, text: "Mais de 50 especialidades" },
 ];
 
 const CTABanner = () => {
   const navigate = useNavigate();
-  const [onlineNow, setOnlineNow] = useState(47);
-
-  // Countdown for urgency (resets every day)
-  const getTimeLeft = () => {
-    const now = new Date();
-    const endOfDay = new Date(now);
-    endOfDay.setHours(23, 59, 59, 999);
-    const diff = endOfDay.getTime() - now.getTime();
-    const hours = Math.floor(diff / 3600000);
-    const minutes = Math.floor((diff % 3600000) / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-    return { hours, minutes, seconds };
-  };
-
-  const [timeLeft, setTimeLeft] = useState(getTimeLeft);
-
-  useEffect(() => {
-    const timer = setInterval(() => setTimeLeft(getTimeLeft()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Fake fluctuating online counter
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setOnlineNow((prev) => Math.max(30, Math.min(80, prev + Math.floor(Math.random() * 7) - 3)));
-    }, 4000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const pad = (n: number) => n.toString().padStart(2, "0");
 
   return (
-    <section className="py-10 md:py-20 px-4">
-      <div className="container mx-auto">
+    <section className="py-12 md:py-24 px-4">
+      <div className="container mx-auto max-w-5xl">
         <motion.div
-          initial={{ opacity: 0, scale: 0.92 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, type: "spring", stiffness: 80 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-hero p-10 md:p-16 text-center shadow-elevated"
+          transition={{ duration: 0.5, type: "spring", stiffness: 120, damping: 20 }}
+          className="relative overflow-hidden rounded-[2rem] bg-gradient-hero shadow-elevated"
         >
-          {/* Animated orbs */}
-          <motion.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.05, 0.1, 0.05] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/5 -translate-y-1/2 translate-x-1/2"
-          />
-          <motion.div
-            animate={{ scale: [1, 1.15, 1], opacity: [0.05, 0.08, 0.05] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-0 left-0 w-48 h-48 rounded-full bg-white/5 translate-y-1/2 -translate-x-1/2"
-          />
+          {/* Decorative shapes */}
+          <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-white/5 -translate-y-1/3 translate-x-1/3" />
+          <div className="absolute bottom-0 left-0 w-56 h-56 rounded-full bg-white/5 translate-y-1/3 -translate-x-1/3" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-white/[0.02]" />
 
-          {/* Floating sparkle particles */}
-          {Array.from({ length: 6 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 rounded-full bg-white/30"
-              style={{ left: `${15 + i * 14}%`, top: `${20 + (i % 3) * 25}%` }}
-              animate={{
-                y: [0, -20, 0],
-                opacity: [0.2, 0.7, 0.2],
-                scale: [0.8, 1.4, 0.8],
-              }}
-              transition={{ duration: 3 + i * 0.5, repeat: Infinity, delay: i * 0.6 }}
-            />
-          ))}
-
-          <div className="relative z-10">
-            {/* Social proof + countdown row */}
-            <div className="flex flex-wrap justify-center gap-3 mb-5">
+          <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 gap-0">
+            {/* Left column — CTA content */}
+            <div className="lg:col-span-3 p-8 md:p-12 lg:p-16 flex flex-col justify-center">
+              {/* Badge */}
               <motion.div
+                initial={{ opacity: 0, x: -15 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-primary-foreground text-xs font-semibold w-fit mb-6"
+              >
+                <span className="w-2 h-2 rounded-full bg-medical-green animate-pulse" />
+                Médicos disponíveis agora
+              </motion.div>
+
+              <motion.h2
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.15 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-primary-foreground text-sm font-medium backdrop-blur-sm"
+                className="text-3xl md:text-4xl lg:text-[2.75rem] font-extrabold text-primary-foreground leading-[1.15] mb-4 tracking-tight"
               >
-                <Users className="w-4 h-4" />
-                <motion.span
-                  key={onlineNow}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {onlineNow} pessoas online agora
-                </motion.span>
-                <span className="w-2 h-2 rounded-full bg-medical-green animate-pulse" />
-              </motion.div>
+                Comece a cuidar da
+                <br />
+                sua saúde{" "}
+                <span className="relative">
+                  <span className="relative z-10">hoje mesmo</span>
+                  <span className="absolute bottom-1 left-0 right-0 h-3 bg-white/15 rounded-full -z-0" />
+                </span>
+              </motion.h2>
 
-              <motion.div
+              <motion.p
                 initial={{ opacity: 0, y: 15 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/15 text-primary-foreground text-sm font-medium backdrop-blur-sm"
+                className="text-primary-foreground/75 text-base md:text-lg max-w-md mb-8 leading-relaxed"
               >
-                <Sparkles className="w-4 h-4" />
-                Primeira consulta com desconto
+                Cadastre-se gratuitamente e agende sua primeira consulta com um especialista em minutos.
+              </motion.p>
+
+              {/* Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.25 }}
+                className="flex flex-wrap gap-3 mb-8"
+              >
+                <Button
+                  size="lg"
+                  className="bg-card text-primary hover:bg-card/90 rounded-full px-8 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-[1.03] active:scale-[0.98]"
+                  onClick={() => navigate("/paciente")}
+                >
+                  Criar minha conta
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-white/25 text-primary-foreground hover:bg-white/10 rounded-full px-8 transition-all hover:scale-[1.03] active:scale-[0.98]"
+                  onClick={() => navigate("/consulta-avulsa")}
+                >
+                  Consulta avulsa
+                </Button>
+              </motion.div>
+
+              {/* Benefits row */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.35 }}
+                className="flex flex-wrap gap-x-5 gap-y-2"
+              >
+                {benefits.map((b, i) => (
+                  <div key={i} className="flex items-center gap-1.5 text-primary-foreground/65 text-[11px] font-medium">
+                    <b.icon className="w-3.5 h-3.5" />
+                    {b.text}
+                  </div>
+                ))}
               </motion.div>
             </div>
 
-            {/* Countdown timer */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.25 }}
-              className="flex items-center justify-center gap-1.5 mb-6"
-            >
-              <span className="text-primary-foreground/60 text-xs font-medium">Oferta expira em:</span>
-              <div className="flex gap-1">
-                {[
-                  { val: pad(timeLeft.hours), label: "h" },
-                  { val: pad(timeLeft.minutes), label: "m" },
-                  { val: pad(timeLeft.seconds), label: "s" },
-                ].map((t, i) => (
-                  <div key={i} className="flex items-center gap-0.5">
-                    <span className="bg-white/20 backdrop-blur-sm rounded-lg px-2 py-1 text-sm font-bold text-primary-foreground tabular-nums">
-                      {t.val}
+            {/* Right column — comparison + mascot */}
+            <div className="lg:col-span-2 flex flex-col items-center justify-center p-6 md:p-8 lg:p-10">
+              {/* Mascot */}
+              <motion.img
+                src={mascotThumbsup}
+                alt="Pingo mascote"
+                className="w-24 h-24 md:w-28 md:h-28 object-contain drop-shadow-2xl mb-4 hidden lg:block"
+                initial={{ opacity: 0, y: -15, rotate: -5 }}
+                whileInView={{ opacity: 1, y: 0, rotate: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 200, damping: 15 }}
+              />
+
+              {/* Comparison card */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.35 }}
+                className="w-full max-w-xs rounded-2xl bg-white/[0.12] backdrop-blur-md border border-white/10 overflow-hidden"
+              >
+                <div className="grid grid-cols-3 text-[10px] uppercase tracking-wider font-bold text-primary-foreground/70 px-4 py-3 border-b border-white/10">
+                  <span></span>
+                  <span className="text-center text-primary-foreground">AloClinica</span>
+                  <span className="text-center text-primary-foreground/40">Tradicional</span>
+                </div>
+                {comparisonRows.map((row, i) => (
+                  <div
+                    key={i}
+                    className={`grid grid-cols-3 items-center text-[11px] text-primary-foreground/70 px-4 py-2.5 ${
+                      i < comparisonRows.length - 1 ? "border-b border-white/[0.06]" : ""
+                    }`}
+                  >
+                    <span className="font-medium text-primary-foreground/80">{row.feature}</span>
+                    <span className="text-center font-bold text-primary-foreground">
+                      {typeof row.us === "boolean" ? (
+                        row.us ? (
+                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-medical-green/20">
+                            <Check className="w-3 h-3 text-medical-green" />
+                          </span>
+                        ) : (
+                          <X className="w-3.5 h-3.5 opacity-40 mx-auto" />
+                        )
+                      ) : (
+                        row.us
+                      )}
                     </span>
-                    <span className="text-primary-foreground/50 text-[10px]">{t.label}</span>
+                    <span className="text-center text-primary-foreground/35">
+                      {typeof row.them === "boolean" ? (
+                        row.them ? (
+                          <Check className="w-3.5 h-3.5 mx-auto" />
+                        ) : (
+                          <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/10 mx-auto">
+                            <X className="w-3 h-3 opacity-60" />
+                          </span>
+                        )
+                      ) : (
+                        row.them
+                      )}
+                    </span>
                   </div>
                 ))}
-              </div>
-            </motion.div>
+              </motion.div>
 
-            <motion.h2
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="text-2xl md:text-5xl font-extrabold text-primary-foreground mb-4 leading-tight max-w-2xl mx-auto"
-            >
-              Comece a cuidar da sua saúde hoje mesmo
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-              className="text-primary-foreground/80 text-base md:text-lg max-w-lg mx-auto mb-8"
-            >
-              Cadastre-se gratuitamente e agende sua primeira consulta com um especialista em minutos.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5 }}
-              className="flex flex-wrap justify-center gap-3 mb-6"
-            >
-              <Button
-                size="lg"
-                className="bg-card text-primary hover:bg-card/90 rounded-full px-8 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-                onClick={() => navigate("/paciente")}
+              {/* Trust note */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5 }}
+                className="text-[10px] text-primary-foreground/40 mt-3 text-center"
               >
-                Criar minha conta <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white/30 text-primary-foreground hover:bg-white/10 rounded-full px-8 transition-all duration-300 hover:scale-105"
-                onClick={() => navigate("/consulta-avulsa")}
-              >
-                Consulta sem cadastro
-              </Button>
-            </motion.div>
-
-            {/* WhatsApp CTA */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.55 }}
-              className="mb-8"
-            >
-              <button
-                onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Quero saber mais sobre a AloClinica.", "_blank")}
-                className="inline-flex items-center gap-2 text-primary-foreground/70 hover:text-primary-foreground text-sm transition-colors"
-              >
-                <MessageCircle className="w-4 h-4" />
-                Prefere WhatsApp? Fale com a gente
-              </button>
-            </motion.div>
-
-            {/* Mini comparison table */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.6 }}
-              className="max-w-sm mx-auto mb-8 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 overflow-hidden"
-            >
-              <div className="grid grid-cols-3 text-[11px] font-bold text-primary-foreground/80 p-3 border-b border-white/10">
-                <span></span>
-                <span className="text-center">AloClinica</span>
-                <span className="text-center opacity-50">Consulta Tradicional</span>
-              </div>
-              {comparisonRows.map((row, i) => (
-                <div key={i} className={`grid grid-cols-3 text-[11px] text-primary-foreground/70 p-2.5 ${i < comparisonRows.length - 1 ? "border-b border-white/5" : ""}`}>
-                  <span className="font-medium">{row.feature}</span>
-                  <span className="text-center font-semibold text-primary-foreground">
-                    {typeof row.us === "boolean" ? (
-                      row.us ? <Check className="w-3.5 h-3.5 text-medical-green mx-auto" /> : <X className="w-3.5 h-3.5 opacity-40 mx-auto" />
-                    ) : row.us}
-                  </span>
-                  <span className="text-center opacity-50">
-                    {typeof row.them === "boolean" ? (
-                      row.them ? <Check className="w-3.5 h-3.5 mx-auto" /> : <X className="w-3.5 h-3.5 mx-auto" />
-                    ) : row.them}
-                  </span>
-                </div>
-              ))}
-            </motion.div>
-
-            {/* Trust badges */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.65 }}
-              className="flex flex-wrap justify-center gap-4 md:gap-6"
-            >
-              {trustBadges.map((badge) => (
-                <div key={badge.text} className="flex items-center gap-1.5 text-primary-foreground/70 text-xs font-medium">
-                  <badge.icon className="w-3.5 h-3.5" />
-                  {badge.text}
-                </div>
-              ))}
-            </motion.div>
+                Mais de 10.000 pacientes atendidos com satisfação
+              </motion.p>
+            </div>
           </div>
         </motion.div>
       </div>
