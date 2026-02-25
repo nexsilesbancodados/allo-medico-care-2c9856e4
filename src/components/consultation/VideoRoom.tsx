@@ -8,7 +8,8 @@ import { useToast } from "@/hooks/use-toast";
 import {
   MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft,
   UserRound, Pill, PhoneOff, Mic, MicOff, Video, VideoOff, Shield,
-  MoreVertical, Maximize2, Minimize2, Copy, Share2, FileBadge, Paperclip, Image
+  MoreVertical, Maximize2, Minimize2, Copy, Share2, FileBadge, Paperclip, Image,
+  Sparkles, Loader2
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation from "./VideoConsultation";
@@ -67,6 +68,8 @@ const VideoRoom = () => {
   const [notes, setNotes] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const [aiFillingSOAP, setAiFillingSOAP] = useState(false);
 
   const isDoctor = roles.includes("doctor") || roles.includes("admin");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -717,6 +720,76 @@ const VideoRoom = () => {
     setNotes(JSON.stringify(updated));
   };
 
+  const handleAIFillSOAP = async () => {
+    if (!appointmentId || !appointment) return;
+    setAiFillingSOAP(true);
+    try {
+      // Gather pre-consultation symptoms
+      const { data: symptoms } = await supabase
+        .from("pre_consultation_symptoms")
+        .select("main_complaint, symptoms, severity, duration, additional_notes")
+        .eq("appointment_id", appointmentId)
+        .maybeSingle();
+
+      // Gather chat messages for context
+      const chatContext = messages.slice(-10).map(m => `${m.sender}: ${m.text}`).join("\n");
+
+      const { data, error } = await supabase.functions.invoke("ai-assistant", {
+        body: {
+          messages: [
+            {
+              role: "system",
+              content: `Você é um assistente médico. Com base nos dados da pré-consulta e chat, preencha um prontuário SOAP estruturado.
+Responda APENAS em JSON válido com as chaves: subjective, objective, assessment, plan.
+- subjective: queixa do paciente em linguagem clínica
+- objective: dados objetivos observáveis (se não houver, coloque "Teleconsulta - exame físico não realizado")
+- assessment: hipóteses diagnósticas baseadas nos sintomas
+- plan: conduta sugerida (medicamentos, exames, retorno)
+Seja conciso, máx 3 linhas por campo.`,
+            },
+            {
+              role: "user",
+              content: `Queixa principal: ${symptoms?.main_complaint || "Não informada"}
+Sintomas: ${(symptoms?.symptoms as string[])?.join(", ") || "Não informados"}
+Severidade: ${symptoms?.severity || "Não informada"}
+Duração: ${symptoms?.duration || "Não informada"}
+Notas adicionais: ${symptoms?.additional_notes || ""}
+Chat médico-paciente: ${chatContext || "Sem mensagens"}
+SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.assessment}, P=${soapNotes.plan}`,
+            },
+          ],
+          role_context: "doctor",
+        },
+      });
+
+      if (data?.response) {
+        try {
+          // Try to extract JSON from the response
+          const jsonMatch = data.response.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const parsed = JSON.parse(jsonMatch[0]);
+            const updated = {
+              subjective: parsed.subjective || soapNotes.subjective,
+              objective: parsed.objective || soapNotes.objective,
+              assessment: parsed.assessment || soapNotes.assessment,
+              plan: parsed.plan || soapNotes.plan,
+            };
+            setSoapNotes(updated);
+            setNotes(JSON.stringify(updated));
+            toast({ title: "🤖 SOAP preenchido pela IA", description: "Revise e ajuste antes de salvar." });
+          }
+        } catch {
+          toast({ title: "IA respondeu", description: "Não foi possível interpretar o formato. Tente novamente.", variant: "destructive" });
+        }
+      }
+    } catch (err) {
+      console.error("AI SOAP fill error:", err);
+      toast({ title: "Erro ao preencher", description: "Tente novamente em alguns segundos.", variant: "destructive" });
+    } finally {
+      setAiFillingSOAP(false);
+    }
+  };
+
   const notesPanel = (
     <div className="flex-1 flex flex-col p-4 gap-3 overflow-auto">
       <div className="flex items-center justify-between">
@@ -724,7 +797,19 @@ const VideoRoom = () => {
           <p className="text-xs font-medium text-[hsl(220,15%,65%)]">Prontuário SOAP</p>
           <p className="text-[10px] text-[hsl(220,15%,40%)] mt-0.5">Estruturado · Salvo automaticamente</p>
         </div>
-        <SpeechToText onTranscript={(text) => updateSOAPField(soapTabs.find(t => t.key === activeSOAP)!.field, soapNotes[soapTabs.find(t => t.key === activeSOAP)!.field] + " " + text)} />
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 text-[10px] text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 rounded-lg gap-1 px-2"
+            disabled={aiFillingSOAP}
+            onClick={handleAIFillSOAP}
+          >
+            {aiFillingSOAP ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
+            {aiFillingSOAP ? "Gerando..." : "IA"}
+          </Button>
+          <SpeechToText onTranscript={(text) => updateSOAPField(soapTabs.find(t => t.key === activeSOAP)!.field, soapNotes[soapTabs.find(t => t.key === activeSOAP)!.field] + " " + text)} />
+        </div>
       </div>
 
       {/* SOAP Tabs */}

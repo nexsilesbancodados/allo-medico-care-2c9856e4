@@ -22,20 +22,37 @@ const PatientWaitingCard = ({ appointment }: Props) => {
   const [position, setPosition] = useState<number | null>(null);
   const [healthTip, setHealthTip] = useState<string | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  const [avgConsultDuration, setAvgConsultDuration] = useState(20);
 
   useEffect(() => {
-    // Fetch queue position
+    // Fetch queue position with estimated wait based on real consultation durations
     const fetchPosition = async () => {
-      const { data } = await supabase
-        .from("appointments")
-        .select("id, scheduled_at")
-        .eq("doctor_id", appointment.doctor_id)
-        .eq("status", "waiting")
-        .order("scheduled_at", { ascending: true });
+      const [queueRes, durationRes] = await Promise.all([
+        supabase
+          .from("appointments")
+          .select("id, scheduled_at, duration_minutes")
+          .eq("doctor_id", appointment.doctor_id)
+          .eq("status", "waiting")
+          .order("scheduled_at", { ascending: true }),
+        // Get average actual consultation duration from recent completed appointments
+        supabase
+          .from("video_presence_logs")
+          .select("duration_seconds")
+          .gt("duration_seconds", 0)
+          .order("joined_at", { ascending: false })
+          .limit(20),
+      ]);
 
-      if (data) {
-        const idx = data.findIndex(a => a.id === appointment.id);
+      if (queueRes.data) {
+        const idx = queueRes.data.findIndex(a => a.id === appointment.id);
         setPosition(idx >= 0 ? idx + 1 : null);
+
+        // Calculate dynamic wait time
+        const durations = (durationRes.data ?? []).map(d => d.duration_seconds ?? 0).filter(d => d > 60);
+        const avgDurationMin = durations.length > 0
+          ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length / 60)
+          : 20; // fallback 20min
+        setAvgConsultDuration(avgDurationMin);
       }
     };
 
@@ -80,7 +97,7 @@ const PatientWaitingCard = ({ appointment }: Props) => {
     return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
-  const estimatedWait = position ? (position - 1) * 20 : 0;
+  const estimatedWait = position ? (position - 1) * avgConsultDuration : 0;
   const isReady = appointment.status === "in_progress";
 
   return (
