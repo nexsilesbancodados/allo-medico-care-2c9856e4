@@ -53,6 +53,7 @@ const DoctorPublicProfilePage = lazy(() => import("./pages/DoctorPublicProfilePa
 const DiscountCard = lazy(() => import("./pages/DiscountCard"));
 const B2BLanding = lazy(() => import("./pages/B2BLanding"));
 const Teleconsulta = lazy(() => import("./pages/Teleconsulta"));
+const Telelaudo = lazy(() => import("./pages/Telelaudo"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -140,6 +141,7 @@ const App = () => {
             <Route path="/cartao-desconto" element={<DiscountCard />} />
             <Route path="/para-empresas" element={<B2BLanding />} />
             <Route path="/teleconsulta" element={<Teleconsulta />} />
+            <Route path="/telelaudo" element={<Telelaudo />} />
             <Route
               path="/dashboard/*"
               element={
