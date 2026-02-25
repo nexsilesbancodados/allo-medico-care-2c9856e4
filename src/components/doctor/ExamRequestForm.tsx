@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
+import { getLaudistaNav } from "@/components/laudista/laudistaNav";
+import { getReceptionNav } from "@/components/reception/receptionNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,11 +13,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2, Upload, FileImage, X } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
 const EXAM_TYPES = [
-  "Raio-X de Tórax",
+  "Raio-X Tórax PA",
+  "Raio-X Tórax Perfil",
+  "Raio-X Coluna",
+  "Raio-X Membros",
   "Tomografia Computadorizada",
   "Ressonância Magnética",
   "Ultrassonografia",
@@ -30,13 +35,25 @@ const EXAM_TYPES = [
 const ExamRequestForm = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const roleParam = searchParams.get("role") || "";
+
+  // Determine context from URL
+  const isLaudista = location.pathname.includes("/laudista/");
+  const isClinic = location.pathname.includes("/clinic/") || roleParam === "clinic";
+  const isReception = location.pathname.includes("/reception/") || roleParam === "receptionist";
+
   const [examType, setExamType] = useState("");
+  const [customExamType, setCustomExamType] = useState("");
   const [clinicalInfo, setClinicalInfo] = useState("");
   const [priority, setPriority] = useState("normal");
+  const [patientName, setPatientName] = useState("");
   const [patientId, setPatientId] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
+  // Get or create a doctor_profile for the current user (needed for requesting_doctor_id FK)
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-for-exam", user?.id],
     queryFn: async () => {
@@ -49,6 +66,62 @@ const ExamRequestForm = () => {
     },
     enabled: !!user,
   });
+
+  // For clinic/reception: find the clinic's associated doctor profile to use as requesting_doctor_id
+  const { data: clinicDoctorProfile } = useQuery({
+    queryKey: ["clinic-doctor-profile", user?.id],
+    queryFn: async () => {
+      // First try to find a doctor profile for the user
+      const { data: dp } = await supabase
+        .from("doctor_profiles")
+        .select("id")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (dp) return dp;
+
+      // If clinic/reception user, find the first affiliated doctor
+      const { data: clinic } = await supabase
+        .from("clinic_profiles")
+        .select("id")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      if (clinic) {
+        const { data: affiliation } = await supabase
+          .from("clinic_affiliations")
+          .select("doctor_id")
+          .eq("clinic_id", clinic.id)
+          .eq("status", "active")
+          .limit(1)
+          .maybeSingle();
+        if (affiliation) return { id: affiliation.doctor_id };
+      }
+      return null;
+    },
+    enabled: !!user && (isClinic || isReception),
+  });
+
+  const effectiveDoctorProfileId = isClinic || isReception
+    ? clinicDoctorProfile?.id || doctorProfile?.id
+    : doctorProfile?.id;
+
+  const getNav = () => {
+    if (isClinic) {
+      // Import inline to avoid circular deps
+      return [
+        { label: "Voltar", href: "/dashboard?role=clinic", icon: <FileImage className="w-4 h-4" />, active: false, group: "Principal" },
+      ];
+    }
+    if (isReception) return getReceptionNav("exam-request");
+    if (isLaudista) return getLaudistaNav("queue");
+    return getDoctorNav("exam-request");
+  };
+
+  const getBackRoute = () => {
+    if (isClinic) return "/dashboard?role=clinic";
+    if (isReception) return "/dashboard?role=receptionist";
+    if (isLaudista) return "/dashboard/laudista/queue?role=doctor";
+    return "/dashboard/doctor/report-queue?role=doctor";
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -63,12 +136,23 @@ const ExamRequestForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!doctorProfile?.id) {
-      toast({ title: "Erro", description: "Perfil de médico não encontrado.", variant: "destructive" });
+
+    if (!effectiveDoctorProfileId) {
+      toast({
+        title: "Erro",
+        description: "Perfil de médico não encontrado. Certifique-se de que há um médico vinculado à sua clínica.",
+        variant: "destructive",
+      });
       return;
     }
-    if (!examType || files.length === 0) {
-      toast({ title: "Campos obrigatórios", description: "Selecione o tipo de exame e envie pelo menos um arquivo.", variant: "destructive" });
+
+    const finalExamType = examType === "Outro" ? customExamType : examType;
+    if (!finalExamType || files.length === 0) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Selecione o tipo de exame e envie pelo menos um arquivo.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -88,10 +172,10 @@ const ExamRequestForm = () => {
 
       // Create exam request
       const { error } = await supabase.from("exam_requests" as any).insert({
-        requesting_doctor_id: doctorProfile.id,
+        requesting_doctor_id: effectiveDoctorProfileId,
         patient_id: patientId || null,
-        exam_type: examType,
-        clinical_info: clinicalInfo,
+        exam_type: finalExamType,
+        clinical_info: `${patientName ? `Paciente: ${patientName}\n` : ""}${clinicalInfo}`,
         file_urls: fileUrls,
         priority,
         status: "pending",
@@ -100,7 +184,7 @@ const ExamRequestForm = () => {
       if (error) throw error;
 
       toast({ title: "Solicitação enviada!", description: "O exame foi enviado para a fila de laudos." });
-      navigate("/dashboard/doctor/report-queue?role=doctor");
+      navigate(getBackRoute());
     } catch (err: any) {
       toast({ title: "Erro ao enviar", description: err.message, variant: "destructive" });
     } finally {
@@ -108,8 +192,10 @@ const ExamRequestForm = () => {
     }
   };
 
+  const roleLabel = isClinic ? "clinic" : isReception ? "receptionist" : undefined;
+
   return (
-    <DashboardLayout nav={getDoctorNav("exam-request")} title="Solicitar Laudo">
+    <DashboardLayout nav={getNav()} title="Solicitar Laudo" role={roleLabel}>
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>
@@ -120,6 +206,19 @@ const ExamRequestForm = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Patient info - shown for clinic/reception */}
+              {(isClinic || isReception) && (
+                <div className="space-y-2">
+                  <Label htmlFor="patientName">Nome do Paciente</Label>
+                  <Input
+                    id="patientName"
+                    value={patientName}
+                    onChange={(e) => setPatientName(e.target.value)}
+                    placeholder="Nome completo do paciente"
+                  />
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="examType">Tipo de Exame *</Label>
                 <Select value={examType} onValueChange={setExamType}>
@@ -132,17 +231,27 @@ const ExamRequestForm = () => {
                     ))}
                   </SelectContent>
                 </Select>
+                {examType === "Outro" && (
+                  <Input
+                    value={customExamType}
+                    onChange={(e) => setCustomExamType(e.target.value)}
+                    placeholder="Digite o tipo de exame"
+                    className="mt-2"
+                  />
+                )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="patientId">ID do Paciente (opcional)</Label>
-                <Input
-                  id="patientId"
-                  value={patientId}
-                  onChange={(e) => setPatientId(e.target.value)}
-                  placeholder="UUID do paciente (se aplicável)"
-                />
-              </div>
+              {!(isClinic || isReception) && (
+                <div className="space-y-2">
+                  <Label htmlFor="patientId">ID do Paciente (opcional)</Label>
+                  <Input
+                    id="patientId"
+                    value={patientId}
+                    onChange={(e) => setPatientId(e.target.value)}
+                    placeholder="UUID do paciente (se aplicável)"
+                  />
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label htmlFor="priority">Prioridade</Label>
@@ -152,7 +261,7 @@ const ExamRequestForm = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="urgent">Urgente</SelectItem>
+                    <SelectItem value="urgent">🚨 Urgente</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -174,7 +283,7 @@ const ExamRequestForm = () => {
                   <input
                     type="file"
                     multiple
-                    accept=".pdf,.jpg,.jpeg,.png,.dcm"
+                    accept=".pdf,.jpg,.jpeg,.png,.dcm,.dicom"
                     onChange={handleFileChange}
                     className="hidden"
                     id="file-upload"
@@ -183,6 +292,9 @@ const ExamRequestForm = () => {
                     <Upload className="w-8 h-8 text-muted-foreground" />
                     <span className="text-sm text-muted-foreground">
                       Clique para enviar PDF, imagens ou DICOM
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      Formatos: .pdf, .jpg, .png, .dcm
                     </span>
                   </label>
                 </div>
