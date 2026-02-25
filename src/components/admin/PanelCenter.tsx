@@ -9,7 +9,7 @@ import { getAdminNav } from "@/components/admin/adminNav";
 import {
   Users, Stethoscope, Building2, Headphones, LayoutGrid,
   Handshake, Megaphone, Bot, ShieldCheck, ArrowRight,
-  Activity, RefreshCw, Monitor, Globe,
+  Activity, RefreshCw, Monitor, Globe, FileSearch,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
@@ -33,6 +33,7 @@ interface PanelInfo {
 const PANELS: Omit<PanelInfo, "onlineCount" | "totalUsers" | "recentUsers">[] = [
   { id: "patient", label: "Paciente", description: "Agendamentos, consultas e saúde", icon: Users, emoji: "👤", color: "text-blue-500", bgColor: "bg-blue-500/10", route: "/dashboard?role=patient", roleKey: "patient" },
   { id: "doctor", label: "Médico", description: "Consultas, prontuários e receitas", icon: Stethoscope, emoji: "🩺", color: "text-emerald-500", bgColor: "bg-emerald-500/10", route: "/dashboard?role=doctor", roleKey: "doctor" },
+  { id: "laudista", label: "Médico Laudista", description: "Fila de exames, laudos e templates", icon: FileSearch, emoji: "🔬", color: "text-cyan-500", bgColor: "bg-cyan-500/10", route: "/dashboard?role=laudista", roleKey: "doctor" },
   { id: "clinic", label: "Clínica", description: "Gestão de médicos e afiliações", icon: Building2, emoji: "🏢", color: "text-violet-500", bgColor: "bg-violet-500/10", route: "/dashboard?role=clinic", roleKey: "clinic" },
   { id: "receptionist", label: "Recepção", description: "Agendas, check-in e cobranças", icon: Monitor, emoji: "🏥", color: "text-amber-500", bgColor: "bg-amber-500/10", route: "/dashboard?role=receptionist", roleKey: "receptionist" },
   { id: "support", label: "Suporte", description: "Tickets, logs e monitoramento", icon: Headphones, emoji: "🎧", color: "text-rose-500", bgColor: "bg-rose-500/10", route: "/dashboard?role=support", roleKey: "support" },
@@ -122,6 +123,7 @@ const PanelCenter = () => {
         let panelId = "patient";
         if (page.includes("ai-assistant")) panelId = "ai-assistant";
         else if (page.includes("role=admin") || page.includes("/admin/")) panelId = "admin";
+        else if (page.includes("role=laudista") || page.includes("/laudista/")) panelId = "laudista";
         else if (page.includes("role=doctor") || page.includes("/doctor/") || page.includes("/availability") || page.includes("/prescriptions") || page.includes("/earnings") || page.includes("/patients") || page.includes("/certificates")) panelId = "doctor";
         else if (page.includes("role=receptionist") || page.includes("/reception/")) panelId = "receptionist";
         else if (page.includes("role=support")) panelId = "support";
