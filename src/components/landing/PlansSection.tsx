@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, Star, ShieldCheck, Zap, Crown, X, Users } from "lucide-react";
+import { Check, Star, ShieldCheck, Zap, Crown, X, Users, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 
@@ -24,6 +24,7 @@ const plans = [
     icon: Zap,
     badge: null,
     spots: null,
+    gradient: "from-primary/80 to-primary",
   },
   {
     name: "Plano Completo",
@@ -46,6 +47,7 @@ const plans = [
     icon: Star,
     badge: "Mais popular",
     spots: 12,
+    gradient: "from-secondary to-primary",
   },
   {
     name: "Plano Família+",
@@ -68,25 +70,24 @@ const plans = [
     icon: Crown,
     badge: "Novo",
     spots: null,
+    gradient: "from-warning to-orange-400",
   },
 ];
-
 
 const PlansSection = () => {
   const navigate = useNavigate();
   const [yearly, setYearly] = useState(false);
-  
 
   return (
-    <section id="planos" className="py-12 md:py-24">
+    <section id="planos" className="py-12 md:py-20">
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-10 md:mb-16"
+          className="text-center mb-10 md:mb-14"
         >
-          <h2 className="text-2xl md:text-4xl font-extrabold text-foreground mb-3">
+          <h2 className="text-2xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight">
             Planos que cabem no seu{" "}
             <span className="text-gradient">bolso</span>
           </h2>
@@ -95,12 +96,12 @@ const PlansSection = () => {
           </p>
 
           {/* Toggle mensal/anual */}
-          <div className="inline-flex items-center gap-3 bg-muted/50 rounded-full p-1.5 border border-border">
+          <div className="inline-flex items-center gap-1 bg-muted/60 rounded-full p-1 border border-border/50">
             <button
               onClick={() => setYearly(false)}
               className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 ${
                 !yearly
-                  ? "bg-primary text-primary-foreground shadow-card"
+                  ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/20"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -110,7 +111,7 @@ const PlansSection = () => {
               onClick={() => setYearly(true)}
               className={`px-5 py-2 rounded-full text-sm font-semibold transition-all duration-300 relative ${
                 yearly
-                  ? "bg-primary text-primary-foreground shadow-card"
+                  ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-lg shadow-primary/20"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -122,7 +123,7 @@ const PlansSection = () => {
           </div>
         </motion.div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-3 gap-5 max-w-5xl mx-auto">
           {plans.map((plan, i) => {
             const price = yearly ? plan.priceYearly : plan.priceMonthly;
             const showSavings = yearly && plan.priceYearly < plan.priceMonthly;
@@ -131,18 +132,14 @@ const PlansSection = () => {
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                whileInView={{ opacity: 1, y: 0, scale: plan.highlighted ? 1.03 : 1 }}
+                whileInView={{ opacity: 1, y: 0, scale: plan.highlighted ? 1.02 : 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.12, duration: 0.6, type: "spring", stiffness: 80 }}
-                whileHover={{
-                  y: -8,
-                  scale: plan.highlighted ? 1.05 : 1.02,
-                  transition: { duration: 0.25 },
-                }}
-                className={`relative rounded-3xl p-7 border transition-all duration-300 cursor-default ${
+                transition={{ delay: i * 0.1, duration: 0.5, type: "spring", stiffness: 80 }}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className={`relative rounded-2xl p-6 border transition-all duration-300 cursor-default ${
                   plan.highlighted
-                    ? "bg-gradient-hero text-primary-foreground border-transparent shadow-elevated"
-                    : "bg-card border-border shadow-card hover:border-primary/30 hover:shadow-elevated"
+                    ? "bg-gradient-to-br from-secondary via-primary to-primary text-primary-foreground border-transparent shadow-xl shadow-primary/25"
+                    : "bg-card border-border/50 shadow-sm hover:border-primary/20 hover:shadow-lg hover:shadow-primary/[0.06]"
                 }`}
               >
                 {plan.badge && (
@@ -150,29 +147,29 @@ const PlansSection = () => {
                     initial={{ opacity: 0, y: -10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: 0.4 }}
-                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-card ${
+                    transition={{ delay: 0.4, type: "spring" }}
+                    className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-md ${
                       plan.highlighted
                         ? "bg-card text-primary"
-                        : "bg-primary text-primary-foreground"
+                        : "bg-gradient-to-r from-primary to-secondary text-primary-foreground"
                     }`}
                   >
-                    {plan.highlighted ? <Star className="w-3 h-3" /> : <Crown className="w-3 h-3" />}
+                    {plan.highlighted ? <Star className="w-3 h-3 fill-current" /> : <Crown className="w-3 h-3" />}
                     {plan.badge}
                   </motion.div>
                 )}
 
                 {/* Plan icon */}
-                <div className={`w-11 h-11 rounded-2xl flex items-center justify-center mb-4 ${
-                  plan.highlighted ? "bg-white/15" : "bg-primary/10"
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${
+                  plan.highlighted ? "bg-white/15" : `bg-gradient-to-br ${plan.gradient} shadow-md`
                 }`}>
-                  <plan.icon className={`w-5 h-5 ${plan.highlighted ? "text-primary-foreground" : "text-primary"}`} />
+                  <plan.icon className={`w-5 h-5 ${plan.highlighted ? "text-primary-foreground" : "text-white"}`} />
                 </div>
 
                 <h3 className={`text-lg font-bold mb-1 ${plan.highlighted ? "" : "text-foreground"}`}>
                   {plan.name}
                 </h3>
-                <p className={`text-xs mb-5 ${plan.highlighted ? "opacity-80" : "text-muted-foreground"}`}>
+                <p className={`text-xs mb-4 ${plan.highlighted ? "opacity-80" : "text-muted-foreground"}`}>
                   {plan.description}
                 </p>
 
@@ -185,7 +182,7 @@ const PlansSection = () => {
                       exit={{ opacity: 0, y: -8 }}
                       transition={{ duration: 0.25 }}
                     >
-                      <span className="text-3xl font-extrabold">R${price}</span>
+                      <span className="text-3xl font-extrabold tracking-tight">R${price}</span>
                       <span className={`text-xs ml-1 ${plan.highlighted ? "opacity-70" : "text-muted-foreground"}`}>
                         {plan.period}
                       </span>
@@ -197,7 +194,7 @@ const PlansSection = () => {
                   <motion.p
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className={`text-[11px] mb-4 font-medium ${plan.highlighted ? "text-primary-foreground/70" : "text-medical-green"}`}
+                    className={`text-[11px] mb-4 font-medium ${plan.highlighted ? "text-primary-foreground/70" : "text-success"}`}
                   >
                     <span className="line-through opacity-60">R${plan.priceMonthly}</span> → Economia de R${(plan.priceMonthly - plan.priceYearly) * 12}/ano
                   </motion.p>
@@ -218,17 +215,21 @@ const PlansSection = () => {
                   </motion.div>
                 )}
 
-                <ul className="space-y-2.5 mb-4">
+                <ul className="space-y-2 mb-4">
                   {plan.features.map((feat, j) => (
                     <motion.li
                       key={j}
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
-                      transition={{ delay: i * 0.08 + j * 0.04 + 0.3 }}
+                      transition={{ delay: i * 0.06 + j * 0.03 + 0.3 }}
                       className="flex items-start gap-2 text-xs"
                     >
-                      <Check className={`w-3.5 h-3.5 mt-0.5 flex-shrink-0 ${plan.highlighted ? "" : "text-medical-green"}`} />
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center mt-0.5 shrink-0 ${
+                        plan.highlighted ? "bg-white/20" : "bg-success/10"
+                      }`}>
+                        <Check className={`w-2.5 h-2.5 ${plan.highlighted ? "" : "text-success"}`} />
+                      </div>
                       {feat}
                     </motion.li>
                   ))}
@@ -236,7 +237,7 @@ const PlansSection = () => {
 
                 {/* Not included */}
                 {plan.notIncluded.length > 0 && (
-                  <ul className="space-y-1.5 mb-6">
+                  <ul className="space-y-1.5 mb-5">
                     {plan.notIncluded.map((item, j) => (
                       <li key={j} className="flex items-center gap-2 text-[11px] text-muted-foreground/60">
                         <X className="w-3 h-3" />
@@ -245,18 +246,21 @@ const PlansSection = () => {
                     ))}
                   </ul>
                 )}
-                {plan.notIncluded.length === 0 && <div className="mb-6" />}
+                {plan.notIncluded.length === 0 && <div className="mb-5" />}
 
                 <Button
-                  className={`w-full transition-all duration-300 ${
+                  className={`w-full h-11 font-semibold transition-all duration-300 ${
                     plan.highlighted
-                      ? "bg-card text-primary hover:bg-card/90 hover:shadow-lg"
-                      : "bg-gradient-hero text-primary-foreground hover:opacity-90 hover:shadow-lg"
+                      ? "bg-white text-primary hover:bg-white/90 hover:shadow-lg shadow-md"
+                      : "bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:opacity-90 hover:shadow-lg shadow-md shadow-primary/15"
                   }`}
                   size="lg"
                   onClick={() => navigate(plan.route)}
                 >
-                  {plan.buttonText}
+                  <span className="flex items-center gap-2">
+                    {plan.buttonText}
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
                 </Button>
               </motion.div>
             );
@@ -272,7 +276,7 @@ const PlansSection = () => {
           className="flex flex-wrap items-center justify-center gap-4 mt-10 text-sm text-muted-foreground"
         >
           <div className="flex items-center gap-1.5">
-            <ShieldCheck className="w-4 h-4 text-medical-green" />
+            <ShieldCheck className="w-4 h-4 text-success" />
             Garantia de 7 dias
           </div>
           <span className="hidden sm:inline opacity-30">|</span>
@@ -282,7 +286,6 @@ const PlansSection = () => {
           <span className="hidden sm:inline opacity-30">|</span>
           <span>Retorno gratuito em 15 dias</span>
         </motion.div>
-
       </div>
     </section>
   );
