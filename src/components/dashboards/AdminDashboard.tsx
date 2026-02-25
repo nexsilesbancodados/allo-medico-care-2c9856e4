@@ -46,6 +46,7 @@ const AdminDashboard = () => {
     total_revenue: 0, active_subs: 0, overdue_subs: 0, total_patients: 0,
     total_doctors: 0, monthly_appts: 0,
     live_now: 0, waiting_now: 0, no_show_rate: 0, cancel_rate: 0, avg_rating: 0,
+    total_laudos: 0, avg_nps: 0,
   });
   const [recentSubs, setRecentSubs] = useState<any[]>([]);
   const [overdueSubs, setOverdueSubs] = useState<any[]>([]);
@@ -114,7 +115,7 @@ const AdminDashboard = () => {
     else if (periodFilter === "last6") { periodStart = startOfMonth(subMonths(now, 5)); }
     else { periodStart = new Date("2020-01-01"); }
 
-    const [patientsRes, doctorsRes, activeSubsRes, expiredSubsRes, monthApptsRes, pendingRes, allSubsRes, cancelledRes, noShowRes, totalMonthRes, ratingsRes] = await Promise.all([
+    const [patientsRes, doctorsRes, activeSubsRes, expiredSubsRes, monthApptsRes, pendingRes, allSubsRes, cancelledRes, noShowRes, totalMonthRes, ratingsRes, laudosRes, npsRes] = await Promise.all([
       supabase.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "patient"),
       supabase.from("doctor_profiles").select("id", { count: "exact", head: true }),
       supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
@@ -133,6 +134,10 @@ const AdminDashboard = () => {
       supabase.from("appointments").select("id", { count: "exact", head: true })
         .gte("scheduled_at", periodStart.toISOString()),
       supabase.from("doctor_profiles").select("rating").gt("rating", 0),
+      supabase.from("exam_reports").select("id", { count: "exact", head: true })
+        .gte("created_at", periodStart.toISOString()),
+      supabase.from("satisfaction_surveys").select("nps_score")
+        .gte("created_at", periodStart.toISOString()),
     ]);
 
     const totalMonth = totalMonthRes.count ?? 0;
@@ -140,6 +145,8 @@ const AdminDashboard = () => {
     const noShowRate = totalMonth > 0 ? ((noShowRes.count ?? 0) / totalMonth) * 100 : 0;
     const ratings = (ratingsRes.data ?? []).map(d => Number(d.rating)).filter(r => r > 0);
     const avgRating = ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : 0;
+    const npsScores = (npsRes.data ?? []).map(s => Number(s.nps_score));
+    const avgNps = npsScores.length > 0 ? npsScores.reduce((a, b) => a + b, 0) / npsScores.length : 0;
 
     const activePlansRes = await supabase.from("subscriptions").select("plan_id").eq("status", "active");
     let totalRevenue = 0;
@@ -154,6 +161,7 @@ const AdminDashboard = () => {
       overdue_subs: expiredSubsRes.data?.length ?? 0, total_patients: patientsRes.count ?? 0,
       total_doctors: doctorsRes.count ?? 0, monthly_appts: monthApptsRes.count ?? 0,
       live_now: 0, waiting_now: 0, cancel_rate: cancelRate, no_show_rate: noShowRate, avg_rating: avgRating,
+      total_laudos: laudosRes.count ?? 0, avg_nps: avgNps,
     });
 
     const allSubs = [...(allSubsRes.data ?? []), ...(expiredSubsRes.data ?? [])];
@@ -357,7 +365,7 @@ const AdminDashboard = () => {
         )}
 
         {/* KPI Cards with trend indicators */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-28 animate-pulse bg-muted/50 rounded-2xl" />)
           ) : (
@@ -368,6 +376,8 @@ const AdminDashboard = () => {
               { label: "Pacientes", value: stats.total_patients, icon: Users, color: "text-secondary", bg: "bg-secondary/10", path: "/dashboard/admin/patients", trend: "↑" },
               { label: "Médicos", value: stats.total_doctors, icon: FileText, color: "text-warning", bg: "bg-warning/10", path: "/dashboard/admin/doctors" },
               { label: "Consultas", value: stats.monthly_appts, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10", path: "/dashboard/admin/appointments" },
+              { label: "Laudos", value: stats.total_laudos, icon: FileText, color: "text-secondary", bg: "bg-secondary/10" },
+              { label: "NPS Médio", value: stats.avg_nps.toFixed(1), icon: Star, color: "text-warning", bg: "bg-warning/10" },
             ].map((kpi) => (
               <button
                 key={kpi.label}

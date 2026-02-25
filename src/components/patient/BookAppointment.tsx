@@ -42,6 +42,15 @@ const STEPS = [
   { key: "confirm", label: "Confirmar", icon: CheckCircle2 },
 ];
 
+const RECURRENCE_OPTIONS = [
+  { value: "none", label: "Sem recorrência" },
+  { value: "weekly", label: "Semanal (mesmo dia/hora)" },
+  { value: "biweekly", label: "Quinzenal" },
+  { value: "monthly", label: "Mensal" },
+];
+
+const RECURRENCE_WEEKS: Record<string, number> = { weekly: 1, biweekly: 2, monthly: 4 };
+
 const BookAppointment = () => {
   const { doctorId } = useParams();
   const { user } = useAuth();
@@ -57,6 +66,8 @@ const BookAppointment = () => {
   const [dependents, setDependents] = useState<{ id: string; name: string; relationship: string }[]>([]);
   const [bookingFor, setBookingFor] = useState<string>("self");
   const [feriados, setFeriados] = useState<Date[]>([]);
+  const [recurrence, setRecurrence] = useState("none");
+  const [recurrenceCount, setRecurrenceCount] = useState(4);
 
   const currentStep = !selectedDate ? 0 : !selectedTime ? 1 : 2;
 
@@ -170,30 +181,53 @@ const BookAppointment = () => {
     const dependentInfo = bookingFor !== "self" ? dependents.find(d => d.id === bookingFor) : null;
     const notesText = dependentInfo ? `Consulta para dependente: ${dependentInfo.name} (${dependentInfo.relationship})` : null;
 
-    const { data: insertedAppt, error } = await supabase.from("appointments").insert({
-      patient_id: user.id,
-      doctor_id: doctor.id,
-      scheduled_at: scheduledAt.toISOString(),
-      status: "scheduled",
-      appointment_type: appointmentType,
-      notes: notesText,
-    }).select("id").single();
+    // Build list of dates (single or recurring)
+    const datesToBook: Date[] = [scheduledAt];
+    if (recurrence !== "none") {
+      const weeksGap = RECURRENCE_WEEKS[recurrence] ?? 1;
+      for (let i = 1; i < recurrenceCount; i++) {
+        datesToBook.push(addDays(scheduledAt, weeksGap * 7 * i));
+      }
+    }
+
+    let firstApptId: string | null = null;
+    let errorOccurred = false;
+
+    for (const dt of datesToBook) {
+      const { data: insertedAppt, error } = await supabase.from("appointments").insert({
+        patient_id: user.id,
+        doctor_id: doctor.id,
+        scheduled_at: dt.toISOString(),
+        status: "scheduled",
+        appointment_type: firstApptId ? "return" : appointmentType,
+        notes: notesText ? notesText + (firstApptId ? ` | Recorrente` : "") : (firstApptId ? "Agendamento recorrente" : null),
+        original_appointment_id: firstApptId || null,
+      }).select("id").single();
+
+      if (error || !insertedAppt) {
+        errorOccurred = true;
+        break;
+      }
+
+      if (!firstApptId) firstApptId = insertedAppt.id;
+      triggerAppointmentConfirmed(insertedAppt.id).catch(console.error);
+    }
 
     setBooking(false);
 
-    if (error || !insertedAppt) {
+    if (errorOccurred || !firstApptId) {
       toast({ title: "Erro", description: "Não foi possível agendar. Tente novamente.", variant: "destructive" });
     } else {
-      triggerAppointmentConfirmed(insertedAppt.id).catch(console.error);
-
-      // Notify doctor about new appointment
       const patientProfile = user.user_metadata;
       const pName = `${patientProfile?.first_name || ""} ${patientProfile?.last_name || ""}`.trim() || "Paciente";
       const dateStr = format(scheduledAt, "dd/MM/yyyy", { locale: ptBR });
       const timeStr = format(scheduledAt, "HH:mm");
-      notifyNewAppointment(insertedAppt.id, doctor.id, pName, dateStr, timeStr).catch(console.error);
+      notifyNewAppointment(firstApptId, doctor.id, pName, dateStr, timeStr).catch(console.error);
 
-      toast({ title: "Consulta agendada! ✅", description: `${format(scheduledAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} com Dr(a). ${doctor.first_name}` });
+      const msg = recurrence !== "none"
+        ? `${datesToBook.length} consultas agendadas com Dr(a). ${doctor.first_name}`
+        : `${format(scheduledAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} com Dr(a). ${doctor.first_name}`;
+      toast({ title: "Consulta agendada! ✅", description: msg });
       navigate("/dashboard/appointments");
     }
   };
@@ -478,6 +512,35 @@ const BookAppointment = () => {
                     <Check className="w-4 h-4 text-primary shrink-0" />
                     R${doctor.consultation_price}
                   </div>
+                </div>
+
+                {/* Recurrence selector */}
+                <div className="mb-4">
+                  <p className="text-xs text-muted-foreground mb-1.5">Agendamento recorrente</p>
+                  <Select value={recurrence} onValueChange={setRecurrence}>
+                    <SelectTrigger className="h-11 rounded-xl"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {RECURRENCE_OPTIONS.map(o => (
+                        <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {recurrence !== "none" && (
+                    <div className="mt-2">
+                      <p className="text-xs text-muted-foreground mb-1">Quantas consultas?</p>
+                      <Select value={String(recurrenceCount)} onValueChange={v => setRecurrenceCount(Number(v))}>
+                        <SelectTrigger className="h-9 rounded-xl w-24"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {[2, 3, 4, 6, 8, 12].map(n => (
+                            <SelectItem key={n} value={String(n)}>{n} consultas</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-[10px] text-primary mt-1">
+                        Serão agendadas {recurrenceCount} consultas no mesmo horário ({selectedTime}h), {recurrence === "weekly" ? "toda semana" : recurrence === "biweekly" ? "a cada 2 semanas" : "a cada 4 semanas"}.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Return policy notice */}

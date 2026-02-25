@@ -232,6 +232,45 @@ const ExamReportEditor = () => {
         }
       }
 
+      // Notify patient via WhatsApp + Email
+      if (examRequest?.patient_id) {
+        const { data: patientProfile } = await supabase
+          .from("profiles")
+          .select("user_id, first_name, phone")
+          .eq("user_id", examRequest.patient_id)
+          .maybeSingle();
+
+        if (patientProfile) {
+          // In-app notification
+          await supabase.from("notifications").insert({
+            user_id: patientProfile.user_id,
+            title: "📋 Seu laudo está pronto!",
+            message: `O laudo do exame ${examRequest.exam_type} foi concluído. Acesse sua área de saúde para visualizar.`,
+            type: "exam_report",
+            link: "/dashboard/health",
+          });
+
+          // WhatsApp notification via edge function
+          if (patientProfile.phone) {
+            supabase.functions.invoke("send-whatsapp", {
+              body: {
+                phone: patientProfile.phone,
+                message: `🩺 *Allo Médico* — Laudo Pronto!\n\nOlá, ${patientProfile.first_name}!\nSeu laudo de *${examRequest.exam_type}* foi finalizado pelo Dr(a). ${doctorName}.\n\n📄 Acesse sua área de saúde para visualizar e baixar o PDF.\n\nCódigo de verificação: ${verificationCode}`,
+              },
+            }).catch(console.error);
+          }
+
+          // Email notification via edge function
+          supabase.functions.invoke("send-email", {
+            body: {
+              to: examRequest.patient_id,
+              subject: `Seu laudo de ${examRequest.exam_type} está pronto`,
+              html: `<h2>Laudo Médico Finalizado</h2><p>Olá ${patientProfile.first_name},</p><p>Seu laudo de <strong>${examRequest.exam_type}</strong> foi concluído pelo Dr(a). ${doctorName}.</p><p>Código de verificação: <strong>${verificationCode}</strong></p><p>Acesse a plataforma para visualizar e baixar o PDF.</p>`,
+            },
+          }).catch(console.error);
+        }
+      }
+
       toast({ title: "Laudo assinado e finalizado!", description: `Código: ${verificationCode}` });
       queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
       navigate("/dashboard/doctor/report-queue?role=doctor");
