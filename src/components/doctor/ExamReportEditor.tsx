@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
+import { getLaudistaNav } from "@/components/laudista/laudistaNav";
+import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,6 +22,10 @@ const ExamReportEditor = () => {
   const { examId } = useParams<{ examId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isLaudista = location.pathname.includes("/laudista/");
+  const nav = isLaudista ? getLaudistaNav("queue") : getDoctorNav("report-queue");
+  const backRoute = isLaudista ? "/dashboard/laudista/queue?role=doctor" : "/dashboard/doctor/report-queue?role=doctor";
   const queryClient = useQueryClient();
   const [content, setContent] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
@@ -273,7 +279,7 @@ const ExamReportEditor = () => {
 
       toast({ title: "Laudo assinado e finalizado!", description: `Código: ${verificationCode}` });
       queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
-      navigate("/dashboard/doctor/report-queue?role=doctor");
+      navigate(backRoute);
     } catch (err: any) {
       toast({ title: "Erro ao assinar", description: err.message, variant: "destructive" });
     } finally {
@@ -283,7 +289,7 @@ const ExamReportEditor = () => {
 
   if (loadingExam) {
     return (
-      <DashboardLayout nav={getDoctorNav("report-queue")} title="Editor de Laudo">
+      <DashboardLayout nav={nav} title="Editor de Laudo">
         <div className="flex justify-center py-16">
           <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
         </div>
@@ -294,7 +300,7 @@ const ExamReportEditor = () => {
   const isReported = examRequest?.status === "reported" && existingReport?.signed_at;
 
   return (
-    <DashboardLayout nav={getDoctorNav("report-queue")} title="Editor de Laudo">
+    <DashboardLayout nav={nav} title="Editor de Laudo">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Left: File Viewer */}
         <Card className="h-[calc(100vh-12rem)]">
