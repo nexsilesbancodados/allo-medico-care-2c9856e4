@@ -23,6 +23,8 @@ const Header = memo(() => {
   const navLinks = [
     { label: "Teleconsulta", href: "/teleconsulta", isRoute: true },
     { label: "Telelaudo", href: "/telelaudo", isRoute: true },
+    { label: "Para Empresas", href: "/para-empresas", isRoute: true },
+    { label: "Cartão de Desconto", href: "/cartao-desconto", isRoute: true },
   ];
 
   const handleNavClick = (link: { href: string; isRoute?: boolean }) => {
@@ -98,6 +100,12 @@ const Header = memo(() => {
             </Button>
             <Button size="sm" onClick={() => navigate("/telelaudo")} className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-[hsl(200,80%,45%)] to-[hsl(210,90%,55%)] text-white shadow-md shadow-[hsl(210,90%,55%)/0.2] hover:shadow-lg hover:opacity-90 transition-all">
               Telelaudo
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => navigate("/para-empresas")} className="rounded-full px-5 text-xs font-bold border-border/60 hover:bg-muted/50 transition-all">
+              Para Empresas
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => navigate("/cartao-desconto")} className="rounded-full px-5 text-xs font-bold border-primary/30 text-primary hover:bg-primary/5 transition-all">
+              Cartão de Desconto
             </Button>
           </nav>
 
