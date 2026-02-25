@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getAdminNav } from "@/components/admin/adminNav";
-import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, Video, Star, LayoutGrid, Download, RefreshCw } from "lucide-react";
+import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, Video, Star, LayoutGrid, Download, RefreshCw, UserPlus } from "lucide-react";
 import AdminAnalyticsCharts from "./AdminAnalyticsCharts";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -275,6 +275,19 @@ const AdminDashboard = () => {
             </Button>
             <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportAdminPDF} disabled={loading}>
               <FileText className="w-4 h-4" /> PDF
+            </Button>
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={async () => {
+              toast.loading("Criando usuários de teste...");
+              try {
+                const { data, error } = await supabase.functions.invoke("seed-test-users");
+                toast.dismiss();
+                if (error) { toast.error("Erro: " + error.message); return; }
+                const created = data?.users?.filter((u: any) => u.status === "created").length ?? 0;
+                const existing = data?.users?.filter((u: any) => u.status === "already_exists").length ?? 0;
+                toast.success(`${created} criados, ${existing} já existiam`);
+              } catch (e: any) { toast.dismiss(); toast.error(e.message); }
+            }}>
+              <UserPlus className="w-4 h-4" /> Seed
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
