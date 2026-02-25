@@ -24,6 +24,7 @@ const Header = memo(() => {
     { label: t("nav.howItWorks"), href: "#como-funciona" },
     { label: t("nav.specialties"), href: "#especialidades" },
     { label: t("nav.plans"), href: "#planos" },
+    { label: "Teleconsulta", href: "/teleconsulta", isRoute: true },
     { label: "Plantão 24h", href: "/paciente", isRoute: true },
     { label: t("nav.faq"), href: "#faq" },
   ];
