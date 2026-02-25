@@ -14,6 +14,7 @@ const TEST_USERS = [
   { email: "suporte@teste.com", password: "Teste123!", role: "support", first_name: "Paula", last_name: "Suporte" },
   { email: "parceiro@teste.com", password: "Teste123!", role: "partner", first_name: "Pedro", last_name: "Parceiro" },
   { email: "afiliado@teste.com", password: "Teste123!", role: "affiliate", first_name: "Lucas", last_name: "Afiliado" },
+  { email: "laudista@teste.com", password: "Teste123!", role: "laudista", first_name: "Fernanda", last_name: "Laudista" },
 ];
 
 serve(async (req) => {
@@ -28,19 +29,18 @@ serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
+    // Get all existing users once (instead of per-user)
+    const { data: existing } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+    const existingEmails = new Set((existing?.users ?? []).map((u: any) => u.email));
+
     const results: any[] = [];
 
     for (const u of TEST_USERS) {
-      // Check if user already exists
-      const { data: existing } = await supabase.auth.admin.listUsers();
-      const found = existing?.users?.find((eu: any) => eu.email === u.email);
-
-      if (found) {
+      if (existingEmails.has(u.email)) {
         results.push({ email: u.email, role: u.role, status: "already_exists" });
         continue;
       }
 
-      // Create user
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email: u.email,
         password: u.password,
@@ -55,19 +55,18 @@ serve(async (req) => {
 
       const userId = newUser.user.id;
 
-      // The handle_new_user trigger will create profile and default 'patient' role.
-      // We need to add the specific role if it's not patient.
+      // handle_new_user trigger creates profile + default 'patient' role
       if (u.role !== "patient") {
         await supabase.from("user_roles").insert({ user_id: userId, role: u.role });
       }
 
-      // Create role-specific profiles
-      if (u.role === "doctor") {
+      // Role-specific profiles
+      if (u.role === "doctor" || u.role === "laudista") {
         await supabase.from("doctor_profiles").insert({
           user_id: userId,
-          crm: "123456",
+          crm: u.role === "laudista" ? "654321" : "123456",
           crm_state: "SP",
-          bio: "Médico de teste para validação do sistema.",
+          bio: u.role === "laudista" ? "Médica laudista para validação do sistema." : "Médico de teste para validação do sistema.",
           consultation_price: 89,
           is_approved: true,
           crm_verified: true,
