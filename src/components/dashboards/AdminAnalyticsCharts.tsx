@@ -382,34 +382,71 @@ const AdminAnalyticsCharts = () => {
 
         {/* ── NPS Tab ── */}
         <TabsContent value="nps" className="mt-0">
-          <Card className="border-border">
-            <CardHeader><CardTitle className="text-base sm:text-lg">⭐ Tendência de NPS</CardTitle></CardHeader>
-            <CardContent>
-              {npsTrend.length === 0 ? (
-                <div className="text-center py-10">
-                  <p className="text-sm text-muted-foreground">Sem dados de NPS ainda. As avaliações aparecerão aqui.</p>
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">⭐ Tendência de NPS</CardTitle></CardHeader>
+              <CardContent>
+                {npsTrend.length === 0 ? (
+                  <div className="text-center py-10">
+                    <p className="text-sm text-muted-foreground">Sem dados de NPS ainda. As avaliações aparecerão aqui.</p>
+                  </div>
+                ) : (
+                  <div className="h-48 sm:h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={npsTrend}>
+                        <defs>
+                          <linearGradient id="npsGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="hsl(var(--warning))" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="hsl(var(--warning))" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="date" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                        <YAxis domain={[0, 10]} fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                        <Tooltip contentStyle={ts} formatter={(v: number) => [v.toFixed(1), "NPS médio"]} />
+                        <Area type="monotone" dataKey="nps" stroke="hsl(var(--warning))" fill="url(#npsGrad)" strokeWidth={2} name="NPS" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Churn Rate */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">📉 Churn & LTV</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {(() => {
+                    const totalPatients = retentionData.find(r => r.name === "Primeira consulta")?.value ?? 0;
+                    const returning = retentionData.find(r => r.name === "Retorno (2+)")?.value ?? 0;
+                    const loyal = retentionData.find(r => r.name === "Fiel (4+)")?.value ?? 0;
+                    const churnRate = totalPatients > 0 ? ((totalPatients - returning) / totalPatients * 100) : 0;
+                    const retentionRate = totalPatients > 0 ? (returning / totalPatients * 100) : 0;
+                    const avgRevenue = revenueData.length > 0 ? revenueData.reduce((a, r) => a + r.revenue, 0) / revenueData.length : 0;
+                    const ltv = churnRate > 0 ? (avgRevenue / (churnRate / 100)) : avgRevenue * 12;
+
+                    const metrics = [
+                      { label: "Taxa de Churn", value: `${churnRate.toFixed(1)}%`, desc: "Pacientes que não retornaram", color: churnRate > 50 ? "text-destructive" : churnRate > 30 ? "text-warning" : "text-success" },
+                      { label: "Taxa de Retenção", value: `${retentionRate.toFixed(1)}%`, desc: "Pacientes que voltaram 2+ vezes", color: "text-primary" },
+                      { label: "Pacientes Fiéis", value: loyal.toString(), desc: "4+ consultas realizadas", color: "text-secondary" },
+                      { label: "LTV Estimado", value: `R$ ${ltv.toFixed(0)}`, desc: "Lifetime Value médio por paciente", color: "text-success" },
+                    ];
+
+                    return metrics.map((m) => (
+                      <div key={m.label} className="flex items-center justify-between">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">{m.label}</p>
+                          <p className="text-xs text-muted-foreground">{m.desc}</p>
+                        </div>
+                        <p className={`text-xl font-bold ${m.color}`}>{m.value}</p>
+                      </div>
+                    ));
+                  })()}
                 </div>
-              ) : (
-                <div className="h-48 sm:h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={npsTrend}>
-                      <defs>
-                        <linearGradient id="npsGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="hsl(var(--warning))" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="hsl(var(--warning))" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis dataKey="date" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                      <YAxis domain={[0, 10]} fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
-                      <Tooltip contentStyle={ts} formatter={(v: number) => [v.toFixed(1), "NPS médio"]} />
-                      <Area type="monotone" dataKey="nps" stroke="hsl(var(--warning))" fill="url(#npsGrad)" strokeWidth={2} name="NPS" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,10 +6,14 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CreditCard, CheckCircle2, Clock, XCircle, ChevronLeft, Star, Zap, Shield, Download } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CreditCard, CheckCircle2, Clock, XCircle, ChevronLeft, Star, Zap, Shield, Download, Filter, CalendarDays, X } from "lucide-react";
 import { jsPDF } from "jspdf";
-import { format, differenceInDays } from "date-fns";
+import { format, differenceInDays, isAfter, isBefore, startOfDay, endOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import { getPatientNav } from "./patientNav";
 
 const statusConfig: Record<string, { label: string; icon: React.ReactNode; className: string }> = {
@@ -35,6 +39,13 @@ const PaymentHistory = () => {
   const navigate = useNavigate();
   const [subs, setSubs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filters
+  const [filterMethod, setFilterMethod] = useState<string>("all");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
     if (user) fetchPayments();
@@ -72,8 +83,27 @@ const PaymentHistory = () => {
     setLoading(false);
   };
 
+  const filteredSubs = useMemo(() => {
+    return subs.filter((s) => {
+      if (filterMethod !== "all" && s.payment_method !== filterMethod) return false;
+      if (filterStatus !== "all" && s.status !== filterStatus) return false;
+      if (dateFrom && isBefore(new Date(s.created_at), startOfDay(dateFrom))) return false;
+      if (dateTo && isAfter(new Date(s.created_at), endOfDay(dateTo))) return false;
+      return true;
+    });
+  }, [subs, filterMethod, filterStatus, dateFrom, dateTo]);
+
+  const hasActiveFilters = filterMethod !== "all" || filterStatus !== "all" || dateFrom || dateTo;
+
+  const clearFilters = () => {
+    setFilterMethod("all");
+    setFilterStatus("all");
+    setDateFrom(undefined);
+    setDateTo(undefined);
+  };
+
   const activeSub = subs.find((s) => s.status === "active");
-  const totalSpent = subs
+  const totalSpent = filteredSubs
     .filter((s) => s.status !== "cancelled")
     .reduce((acc, s) => acc + Number(s.plan_price), 0);
 
@@ -81,7 +111,6 @@ const PaymentHistory = () => {
     const doc = new jsPDF();
     const w = doc.internal.pageSize.getWidth();
 
-    // Header
     doc.setFillColor(0, 168, 120);
     doc.rect(0, 0, w, 40, "F");
     doc.setTextColor(255, 255, 255);
@@ -90,7 +119,6 @@ const PaymentHistory = () => {
     doc.setFontSize(10);
     doc.text("Recibo de Pagamento", 20, 32);
 
-    // Body
     doc.setTextColor(40, 40, 40);
     let y = 55;
     const line = (label: string, value: string) => {
@@ -111,7 +139,6 @@ const PaymentHistory = () => {
     if (s.expires_at) line("Expiração:", format(new Date(s.expires_at), "dd/MM/yyyy", { locale: ptBR }));
     line("ID Transação:", s.id.slice(0, 8).toUpperCase());
 
-    // Divider
     y += 5;
     doc.setDrawColor(200, 200, 200);
     doc.line(20, y, w - 20, y);
@@ -133,7 +160,6 @@ const PaymentHistory = () => {
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("payments")}>
       <div className="max-w-3xl space-y-6">
-        {/* Back button */}
         <button
           onClick={() => navigate("/dashboard?role=patient")}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
@@ -142,11 +168,108 @@ const PaymentHistory = () => {
           Voltar ao painel
         </button>
 
-        {/* Header */}
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Histórico de Pagamentos</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">Suas assinaturas e pagamentos realizados</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Histórico de Pagamentos</h1>
+            <p className="text-muted-foreground text-sm mt-0.5">Suas assinaturas e pagamentos realizados</p>
+          </div>
+          <Button
+            variant={showFilters ? "default" : "outline"}
+            size="sm"
+            className="gap-1.5"
+            onClick={() => setShowFilters(!showFilters)}
+          >
+            <Filter className="w-4 h-4" />
+            Filtros
+            {hasActiveFilters && (
+              <span className="w-2 h-2 rounded-full bg-primary-foreground" />
+            )}
+          </Button>
         </div>
+
+        {/* Filters panel */}
+        {showFilters && (
+          <Card className="border-border">
+            <CardContent className="pt-4 pb-4">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* Payment method */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">Método</label>
+                  <Select value={filterMethod} onValueChange={setFilterMethod}>
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="pix">⚡ PIX</SelectItem>
+                      <SelectItem value="credit_card">💳 Cartão</SelectItem>
+                      <SelectItem value="boleto">📄 Boleto</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Status */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">Status</label>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Todos</SelectItem>
+                      <SelectItem value="active">Ativa</SelectItem>
+                      <SelectItem value="cancelled">Cancelada</SelectItem>
+                      <SelectItem value="expired">Vencida</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Date from */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">De</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("h-9 w-full text-xs justify-start", !dateFrom && "text-muted-foreground")}>
+                        <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
+                        {dateFrom ? format(dateFrom, "dd/MM/yy") : "Início"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={dateFrom} onSelect={setDateFrom} className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                {/* Date to */}
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-muted-foreground">Até</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" className={cn("h-9 w-full text-xs justify-start", !dateTo && "text-muted-foreground")}>
+                        <CalendarDays className="w-3.5 h-3.5 mr-1.5" />
+                        {dateTo ? format(dateTo, "dd/MM/yy") : "Fim"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar mode="single" selected={dateTo} onSelect={setDateTo} className="p-3 pointer-events-auto" />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+
+              {hasActiveFilters && (
+                <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
+                  <p className="text-xs text-muted-foreground">
+                    {filteredSubs.length} de {subs.length} resultado{subs.length !== 1 ? "s" : ""}
+                  </p>
+                  <Button variant="ghost" size="sm" className="text-xs gap-1 h-7" onClick={clearFilters}>
+                    <X className="w-3 h-3" /> Limpar filtros
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Summary KPIs */}
         {!loading && (
@@ -161,7 +284,7 @@ const PaymentHistory = () => {
               },
               {
                 label: "Assinaturas",
-                value: subs.length,
+                value: filteredSubs.length,
                 icon: Star,
                 color: "text-secondary",
                 bg: "bg-secondary/10",
@@ -262,13 +385,13 @@ const PaymentHistory = () => {
         )}
 
         {/* Payment history list */}
-        {!loading && subs.length > 0 && (
+        {!loading && filteredSubs.length > 0 && (
           <div>
             <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
               <Clock className="w-4 h-4 text-muted-foreground" /> Histórico completo
             </h2>
             <div className="space-y-3">
-              {subs.map((s) => {
+              {filteredSubs.map((s) => {
                 const cfg = statusConfig[s.status] ?? statusConfig.expired;
                 return (
                   <Card key={s.id} className="border-border hover:shadow-sm transition-shadow">
@@ -324,6 +447,18 @@ const PaymentHistory = () => {
               })}
             </div>
           </div>
+        )}
+
+        {/* No results after filter */}
+        {!loading && subs.length > 0 && filteredSubs.length === 0 && (
+          <Card className="border-border">
+            <CardContent className="py-10 text-center">
+              <Filter className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
+              <p className="font-medium text-foreground mb-1">Nenhum resultado</p>
+              <p className="text-sm text-muted-foreground mb-3">Nenhum pagamento encontrado com os filtros selecionados</p>
+              <Button variant="outline" size="sm" onClick={clearFilters}>Limpar filtros</Button>
+            </CardContent>
+          </Card>
         )}
 
         {/* Loading skeleton */}
