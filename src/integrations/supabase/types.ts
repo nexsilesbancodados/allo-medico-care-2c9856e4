@@ -2234,6 +2234,7 @@ export type Database = {
     }
     Functions: {
       cleanup_rate_limits: { Args: never; Returns: undefined }
+      fn_expire_available_now: { Args: never; Returns: undefined }
       get_clinic_profile_id: { Args: { _user_id: string }; Returns: string }
       get_doctor_profile_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
