@@ -136,6 +136,15 @@ const HeroSection = memo(() => {
               >
                 Consulta Avulsa — R$89
               </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="rounded-full px-7 h-12 text-base font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 hover:border-destructive/50 transition-all"
+                onClick={() => navigate("/paciente")}
+              >
+                <Clock className="w-4 h-4 mr-1" />
+                Plantão 24h
+              </Button>
             </div>
 
             {/* Live activity + Trust */}
