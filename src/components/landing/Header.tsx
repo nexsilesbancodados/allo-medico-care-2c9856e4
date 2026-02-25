@@ -22,6 +22,7 @@ const Header = memo(() => {
 
   const navLinks = [
     { label: "Teleconsulta", href: "/teleconsulta", isRoute: true },
+    { label: "Telelaudo", href: "/telelaudo", isRoute: true },
   ];
 
   const handleNavClick = (link: { href: string; isRoute?: boolean }) => {
