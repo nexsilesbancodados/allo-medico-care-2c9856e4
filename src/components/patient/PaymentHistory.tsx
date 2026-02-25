@@ -6,7 +6,8 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CreditCard, CheckCircle2, Clock, XCircle, ChevronLeft, Star, Zap, Shield } from "lucide-react";
+import { CreditCard, CheckCircle2, Clock, XCircle, ChevronLeft, Star, Zap, Shield, Download } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getPatientNav } from "./patientNav";
@@ -75,6 +76,55 @@ const PaymentHistory = () => {
   const totalSpent = subs
     .filter((s) => s.status !== "cancelled")
     .reduce((acc, s) => acc + Number(s.plan_price), 0);
+
+  const generateReceipt = (s: any) => {
+    const doc = new jsPDF();
+    const w = doc.internal.pageSize.getWidth();
+
+    // Header
+    doc.setFillColor(0, 168, 120);
+    doc.rect(0, 0, w, 40, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.text("AloClínica", 20, 22);
+    doc.setFontSize(10);
+    doc.text("Recibo de Pagamento", 20, 32);
+
+    // Body
+    doc.setTextColor(40, 40, 40);
+    let y = 55;
+    const line = (label: string, value: string) => {
+      doc.setFontSize(9);
+      doc.setFont("helvetica", "normal");
+      doc.text(label, 20, y);
+      doc.setFont("helvetica", "bold");
+      doc.text(value, 90, y);
+      y += 10;
+    };
+
+    line("Plano:", s.plan_name);
+    line("Valor:", `R$ ${Number(s.plan_price).toFixed(2)}`);
+    line("Status:", s.status === "active" ? "Ativa" : s.status === "cancelled" ? "Cancelada" : "Vencida");
+    line("Método:", s.payment_method === "credit_card" ? "Cartão de Crédito" : s.payment_method === "pix" ? "PIX" : s.payment_method === "boleto" ? "Boleto" : s.payment_method ?? "—");
+    line("Data:", format(new Date(s.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR }));
+    if (s.starts_at) line("Início:", format(new Date(s.starts_at), "dd/MM/yyyy", { locale: ptBR }));
+    if (s.expires_at) line("Expiração:", format(new Date(s.expires_at), "dd/MM/yyyy", { locale: ptBR }));
+    line("ID Transação:", s.id.slice(0, 8).toUpperCase());
+
+    // Divider
+    y += 5;
+    doc.setDrawColor(200, 200, 200);
+    doc.line(20, y, w - 20, y);
+    y += 12;
+
+    doc.setFontSize(8);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(120, 120, 120);
+    doc.text("Este documento é um comprovante de pagamento gerado automaticamente.", 20, y);
+    doc.text(`Gerado em ${format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}`, 20, y + 6);
+
+    doc.save(`recibo-aloclinica-${s.id.slice(0, 8)}.pdf`);
+  };
 
   const daysLeft = activeSub?.expires_at
     ? differenceInDays(new Date(activeSub.expires_at), new Date())
@@ -258,6 +308,14 @@ const PaymentHistory = () => {
                           <span className={`flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${cfg.className}`}>
                             {cfg.icon} {cfg.label}
                           </span>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="text-xs gap-1 text-muted-foreground hover:text-foreground"
+                            onClick={(e) => { e.stopPropagation(); generateReceipt(s); }}
+                          >
+                            <Download className="w-3.5 h-3.5" /> Recibo
+                          </Button>
                         </div>
                       </div>
                     </CardContent>
