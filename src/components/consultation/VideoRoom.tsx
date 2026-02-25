@@ -70,6 +70,9 @@ const VideoRoom = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [aiFillingSOAP, setAiFillingSOAP] = useState(false);
+  const [lastAutoSave, setLastAutoSave] = useState<Date | null>(null);
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
 
   const isDoctor = roles.includes("doctor") || roles.includes("admin");
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -484,11 +487,14 @@ const VideoRoom = () => {
     }
   };
 
-  // Auto-save SOAP notes every 30 seconds
+  // Auto-save SOAP notes every 30 seconds with visual indicator
   useEffect(() => {
     if (!isDoctor || !deviceChecked || !notes) return;
-    const autoSaveInterval = setInterval(() => {
-      saveNotes(true);
+    const autoSaveInterval = setInterval(async () => {
+      setAutoSaving(true);
+      await saveNotes(true);
+      setLastAutoSave(new Date());
+      setTimeout(() => setAutoSaving(false), 1500);
     }, 30000);
     return () => clearInterval(autoSaveInterval);
   }, [isDoctor, deviceChecked, notes, appointmentId, appointment]);
@@ -547,8 +553,14 @@ const VideoRoom = () => {
   }, [isDoctor, appointmentId]);
 
   const handleReconnect = useCallback(() => {
+    setReconnecting(true);
+    toast({ title: "🔄 Reconectando...", description: "Restabelecendo conexão com a sala." });
     setDeviceChecked(false);
-    setTimeout(() => setDeviceChecked(true), 500);
+    setTimeout(() => {
+      setDeviceChecked(true);
+      setReconnecting(false);
+      toast({ title: "✅ Reconectado!", description: "Conexão restabelecida com sucesso." });
+    }, 1500);
   }, []);
 
   if (loading || checkingConsent) {
@@ -798,6 +810,17 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
           <p className="text-[10px] text-[hsl(220,15%,40%)] mt-0.5">Estruturado · Salvo automaticamente</p>
         </div>
         <div className="flex items-center gap-1.5">
+          {/* Auto-save indicator */}
+          {autoSaving && (
+            <span className="text-[10px] text-[hsl(150,60%,45%)] flex items-center gap-1 animate-pulse">
+              <Loader2 className="w-2.5 h-2.5 animate-spin" /> Salvando...
+            </span>
+          )}
+          {!autoSaving && lastAutoSave && (
+            <span className="text-[10px] text-[hsl(220,15%,35%)]">
+              Salvo {format(lastAutoSave, "HH:mm")}
+            </span>
+          )}
           <Button
             size="sm"
             variant="ghost"
