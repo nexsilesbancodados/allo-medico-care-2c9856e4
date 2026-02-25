@@ -54,6 +54,7 @@ const DiscountCard = lazy(() => import("./pages/DiscountCard"));
 const B2BLanding = lazy(() => import("./pages/B2BLanding"));
 const Teleconsulta = lazy(() => import("./pages/Teleconsulta"));
 const Telelaudo = lazy(() => import("./pages/Telelaudo"));
+const AuthLaudista = lazy(() => import("./pages/AuthLaudista"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -142,6 +143,7 @@ const App = () => {
             <Route path="/para-empresas" element={<B2BLanding />} />
             <Route path="/teleconsulta" element={<Teleconsulta />} />
             <Route path="/telelaudo" element={<Telelaudo />} />
+            <Route path="/laudista" element={<AuthLaudista />} />
             <Route
               path="/dashboard/*"
               element={
