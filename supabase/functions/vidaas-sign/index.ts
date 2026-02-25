@@ -54,7 +54,7 @@ serve(async (req) => {
           name: app_name || "Allo Médico",
           comments: "Plataforma de telemedicina Allo Médico - assinatura digital ICP-Brasil",
           redirect_uris: redirect_uris || [
-            `${supabaseUrl}/functions/v1/vidaas-sign?action=callback`,
+            `${supabaseUrl}/functions/v1/vidaas-callback`,
           ],
           email: email || "plenasaudebv@gmail.com",
         }),
@@ -155,7 +155,7 @@ serve(async (req) => {
       const { login_hint, scope, lifetime, redirect_uri } = body;
       const { codeVerifier, codeChallenge } = await generatePKCE();
 
-      const callbackUri = redirect_uri || `${supabaseUrl}/functions/v1/vidaas-sign?action=callback`;
+      const callbackUri = redirect_uri || `${supabaseUrl}/functions/v1/vidaas-callback`;
 
       const params = new URLSearchParams({
         client_id: VIDAAS_CLIENT_ID,
@@ -228,7 +228,7 @@ serve(async (req) => {
           client_secret: VIDAAS_CLIENT_SECRET,
           code,
           code_verifier: code_verifier || "",
-          redirect_uri: `${supabaseUrl}/functions/v1/vidaas-sign?action=callback`,
+          redirect_uri: `${supabaseUrl}/functions/v1/vidaas-callback`,
         }),
       });
 

@@ -96,5 +96,8 @@ verify_jwt = false
 [functions.vidaas-sign]
 verify_jwt = false
 
+[functions.vidaas-callback]
+verify_jwt = false
+
 [functions.pacs-integration]
 verify_jwt = false
