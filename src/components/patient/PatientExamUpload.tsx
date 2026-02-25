@@ -8,7 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Upload, FileText, Trash2, Eye, Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Upload, FileText, Trash2, Eye, Plus, Search, FolderLock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +24,9 @@ const PatientExamUpload = () => {
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [description, setDescription] = useState("");
+  const [category, setCategory] = useState("exam");
+  const [filterCategory, setFilterCategory] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => { if (user) fetchDocuments(); }, [user]);
 
@@ -66,13 +71,15 @@ const PatientExamUpload = () => {
       file_type: file.type,
       file_size: file.size,
       description: description || file.name,
+      category,
     });
 
     if (dbError) {
       toast({ title: "Erro ao salvar", description: dbError.message, variant: "destructive" });
     } else {
-      toast({ title: "Exame enviado! ✅" });
+      toast({ title: "Documento enviado! ✅" });
       setDescription("");
+      setCategory("exam");
       fetchDocuments();
     }
     setUploading(false);
@@ -98,6 +105,32 @@ const PatientExamUpload = () => {
     return "📎";
   };
 
+  const categoryIcon = (cat: string) => {
+    switch (cat) {
+      case "exam": return "🔬";
+      case "prescription": return "💊";
+      case "certificate": return "📋";
+      case "history": return "📁";
+      default: return "📎";
+    }
+  };
+
+  const categoryLabel = (cat: string) => {
+    switch (cat) {
+      case "exam": return "Exame";
+      case "prescription": return "Receita";
+      case "certificate": return "Atestado";
+      case "history": return "Histórico";
+      default: return "Outro";
+    }
+  };
+
+  const filteredDocs = documents.filter(d => {
+    if (filterCategory !== "all" && d.category !== filterCategory) return false;
+    if (searchQuery && !(d.description || d.file_name || "").toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    return true;
+  });
+
   const formatSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -107,15 +140,15 @@ const PatientExamUpload = () => {
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("documents")}>
       <div className="max-w-4xl">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Meus Exames</h1>
-        <p className="text-muted-foreground text-sm mb-6">Envie exames e documentos para seus médicos visualizarem</p>
+        <h1 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2"><FolderLock className="w-6 h-6" /> Cofre de Documentos</h1>
+        <p className="text-muted-foreground text-sm mb-6">Guarde exames, receitas e documentos médicos com segurança</p>
 
         {/* Upload area */}
         <Card className="border-border border-dashed mb-6">
           <CardContent className="p-6">
             <div className="text-center">
               <Upload className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
-              <p className="text-sm font-medium text-foreground mb-1">Enviar novo exame</p>
+              <p className="text-sm font-medium text-foreground mb-1">Enviar novo documento</p>
               <p className="text-xs text-muted-foreground mb-4">PDF, imagens (JPG, PNG) — máx. 10MB</p>
               <div className="flex flex-col sm:flex-row gap-3 items-center justify-center">
                 <Input
@@ -124,6 +157,16 @@ const PatientExamUpload = () => {
                   onChange={e => setDescription(e.target.value)}
                   className="max-w-xs"
                 />
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger className="w-[140px]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="exam">🔬 Exame</SelectItem>
+                    <SelectItem value="prescription">💊 Receita</SelectItem>
+                    <SelectItem value="certificate">📋 Atestado</SelectItem>
+                    <SelectItem value="history">📁 Histórico</SelectItem>
+                    <SelectItem value="other">📎 Outro</SelectItem>
+                  </SelectContent>
+                </Select>
                 <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" className="hidden" onChange={handleUpload} />
                 <Button onClick={() => fileRef.current?.click()} disabled={uploading} className="bg-gradient-hero text-primary-foreground">
                   <Plus className="w-4 h-4 mr-1" /> {uploading ? "Enviando..." : "Escolher Arquivo"}
@@ -134,6 +177,25 @@ const PatientExamUpload = () => {
         </Card>
 
         {/* Documents list */}
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Buscar documentos..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9" />
+          </div>
+          <Select value={filterCategory} onValueChange={setFilterCategory}>
+            <SelectTrigger className="w-[160px]"><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos ({documents.length})</SelectItem>
+              <SelectItem value="exam">🔬 Exames</SelectItem>
+              <SelectItem value="prescription">💊 Receitas</SelectItem>
+              <SelectItem value="certificate">📋 Atestados</SelectItem>
+              <SelectItem value="history">📁 Histórico</SelectItem>
+              <SelectItem value="other">📎 Outros</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
           <div className="rounded-lg border border-border overflow-hidden">
             <Table>
@@ -146,14 +208,17 @@ const PatientExamUpload = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {documents.map(d => (
+              {filteredDocs.map(d => (
                   <TableRow key={d.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{fileIcon(d.file_type)}</span>
+                        <span className="text-lg">{categoryIcon(d.category || "exam")}</span>
                         <div>
                           <p className="text-sm font-medium text-foreground">{d.description || d.file_name}</p>
-                          <p className="text-xs text-muted-foreground">{d.file_name}</p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs text-muted-foreground">{d.file_name}</p>
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">{categoryLabel(d.category || "exam")}</Badge>
+                          </div>
                         </div>
                       </div>
                     </TableCell>
@@ -171,7 +236,7 @@ const PatientExamUpload = () => {
                     </TableCell>
                   </TableRow>
                 ))}
-                {documents.length === 0 && (
+                {filteredDocs.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
                       <FileText className="w-8 h-8 mx-auto text-muted-foreground/20 mb-2" />

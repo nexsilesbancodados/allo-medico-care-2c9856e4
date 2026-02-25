@@ -50,6 +50,8 @@ const LinkRedirect = lazy(() => import("./pages/LinkRedirect"));
 const ValidateDocument = lazy(() => import("./pages/ValidateDocument"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const DoctorPublicProfilePage = lazy(() => import("./pages/DoctorPublicProfilePage"));
+const DiscountCard = lazy(() => import("./pages/DiscountCard"));
+const B2BLanding = lazy(() => import("./pages/B2BLanding"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -134,6 +136,8 @@ const App = () => {
             <Route path="/l/:id" element={<LinkRedirect />} />
             <Route path="/validar/:id" element={<ValidateDocument />} />
             <Route path="/validar" element={<ValidateDocument />} />
+            <Route path="/cartao-desconto" element={<DiscountCard />} />
+            <Route path="/para-empresas" element={<B2BLanding />} />
             <Route
               path="/dashboard/*"
               element={
