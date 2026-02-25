@@ -78,71 +78,64 @@ const StatsSection = () => {
   }, []);
 
   return (
-    <section className="py-8 md:py-16 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-hero opacity-[0.03]" />
+    <section className="py-10 md:py-20 relative overflow-hidden">
       <div className="container mx-auto px-4">
-        {/* Live indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="flex items-center justify-center gap-2 mb-6"
-        >
-          <Activity className="w-4 h-4 text-medical-green" />
-          <span className="text-xs font-semibold text-muted-foreground">Dados em tempo real</span>
-          <span className="w-2 h-2 rounded-full bg-medical-green animate-pulse" />
-        </motion.div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           {stats.map((stat, i) => (
             <motion.div
               key={i}
-              initial={{ opacity: 0, y: 30, scale: 0.8 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.5, type: "spring", stiffness: 200, damping: 15 }}
-              whileHover={{ y: -8, scale: 1.04, boxShadow: "0 16px 40px -12px hsl(210 90% 45% / 0.12)" }}
-              whileTap={{ scale: 0.98 }}
-              className="relative text-center group cursor-default rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-card hover:shadow-elevated hover:border-primary/20 transition-all duration-300 overflow-hidden"
+              transition={{ delay: i * 0.08, type: "spring", stiffness: 200, damping: 15 }}
+              whileHover={{ y: -6, transition: { duration: 0.25 } }}
+              className="relative group rounded-2xl border border-border/40 bg-card/60 backdrop-blur-md p-5 sm:p-6 overflow-hidden transition-shadow duration-300 hover:shadow-lg hover:shadow-primary/[0.06]"
             >
-              {/* Gradient glow behind */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-[0.08] transition-opacity duration-500 rounded-2xl`} />
+              {/* Subtle diagonal gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-secondary/[0.03] pointer-events-none rounded-2xl" />
 
-              <div className="relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 transition-all duration-300 group-hover:bg-primary/20 group-hover:shadow-lg group-hover:shadow-primary/10">
-                  <motion.div whileHover={{ rotate: 8, scale: 1.15 }} transition={{ type: "spring", stiffness: 300 }}>
-                    <stat.icon className="w-7 h-7 text-primary" />
-                  </motion.div>
+              <div className="relative z-10 flex flex-col items-start gap-4">
+                {/* Icon pill */}
+                <div className="w-12 h-12 rounded-xl bg-muted/70 flex items-center justify-center transition-colors duration-300 group-hover:bg-primary/10">
+                  <stat.icon className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-foreground mb-1">
-                  <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={(stat as any).decimals} />
-                </p>
-                <p className="text-sm text-muted-foreground mb-2">{stat.label}</p>
 
-                {/* Growth badge */}
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.12 + 0.4 }}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-medical-green/10 text-medical-green text-[10px] font-semibold"
-                >
-                  <TrendingUp className="w-2.5 h-2.5" />
-                  {stat.growth}
-                </motion.div>
+                {/* Value */}
+                <div>
+                  <p className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground leading-none">
+                    <AnimatedCounter value={stat.value} suffix={stat.suffix} decimals={(stat as any).decimals} />
+                  </p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">{stat.label}</p>
+                </div>
 
-                {/* Mini sparkline visual */}
-                <div className="flex items-end justify-center gap-0.5 mt-3 h-4">
-                  {[3, 5, 4, 7, 6, 8, 7, 9, 8, 10].map((h, j) => (
-                    <motion.div
-                      key={j}
-                      initial={{ height: 0 }}
-                      whileInView={{ height: `${h * 10}%` }}
-                      viewport={{ once: true }}
-                      transition={{ delay: i * 0.12 + j * 0.03 + 0.5, duration: 0.3 }}
-                      className={`w-1 rounded-full ${j >= 8 ? "bg-primary" : "bg-primary/20"}`}
-                    />
-                  ))}
+                {/* Growth + Sparkline row */}
+                <div className="flex items-center justify-between w-full">
+                  <motion.span
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 + 0.4 }}
+                    className={`inline-flex items-center gap-1 text-[11px] font-semibold ${
+                      stat.growth.startsWith("-") ? "text-primary" : "text-medical-green"
+                    }`}
+                  >
+                    <TrendingUp className="w-3 h-3" />
+                    {stat.growth}
+                  </motion.span>
+
+                  {/* Mini bar chart */}
+                  <div className="flex items-end gap-[2px] h-5">
+                    {[3, 5, 4, 7, 5, 8, 6, 9, 8, 10].map((h, j) => (
+                      <motion.div
+                        key={j}
+                        initial={{ height: 0 }}
+                        whileInView={{ height: `${h * 10}%` }}
+                        viewport={{ once: true }}
+                        transition={{ delay: i * 0.1 + j * 0.025 + 0.5, duration: 0.25 }}
+                        className={`w-[3px] rounded-full ${j >= 8 ? "bg-primary" : "bg-primary/25"}`}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
             </motion.div>
