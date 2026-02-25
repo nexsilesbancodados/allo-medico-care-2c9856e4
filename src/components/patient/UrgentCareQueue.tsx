@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, Zap, Phone, RefreshCw, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { notifyDoctorsNewQueueEntry } from "@/lib/notifications-queue";
 
 const UrgentCareQueue = () => {
   const { user } = useAuth();
@@ -104,6 +105,9 @@ const UrgentCareQueue = () => {
       toast.error("Erro ao entrar na fila: " + error.message);
     } else {
       toast.success("Você entrou na fila! Aguarde um médico.");
+      // Notify on-duty doctors
+      const { data: profile } = await supabase.from("profiles").select("first_name").eq("user_id", user.id).maybeSingle();
+      notifyDoctorsNewQueueEntry(profile?.first_name || "Paciente", shiftInfo.shift, finalPrice);
       fetchMyEntry();
     }
     setJoining(false);

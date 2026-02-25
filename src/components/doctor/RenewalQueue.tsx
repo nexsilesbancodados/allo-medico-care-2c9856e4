@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { notifyRenewalApproved, notifyRenewalRejected } from "@/lib/notifications-queue";
 
 const RenewalQueue = () => {
   const { user } = useAuth();
@@ -53,6 +54,12 @@ const RenewalQueue = () => {
     fetchRenewals();
   };
 
+  const getDoctorName = async () => {
+    if (!user) return "Médico";
+    const { data } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", user.id).maybeSingle();
+    return data ? `Dr(a). ${data.first_name} ${data.last_name}` : "Médico";
+  };
+
   const handleApprove = async () => {
     if (!selectedRenewal || !doctorProfileId) return;
     setProcessing(true);
@@ -60,6 +67,11 @@ const RenewalQueue = () => {
       status: "approved",
       reviewed_at: new Date().toISOString(),
     }).eq("id", selectedRenewal.id);
+    
+    // Notify patient
+    const docName = await getDoctorName();
+    notifyRenewalApproved(selectedRenewal.patient_id, docName);
+    
     toast.success("Renovação aprovada!");
     setSelectedRenewal(null);
     setProcessing(false);
@@ -69,11 +81,17 @@ const RenewalQueue = () => {
   const handleReject = async () => {
     if (!selectedRenewal) return;
     setProcessing(true);
+    const reason = rejectionReason || "Não aprovada pelo médico";
     await supabase.from("prescription_renewals").update({
       status: "rejected",
       reviewed_at: new Date().toISOString(),
-      rejection_reason: rejectionReason || "Não aprovada pelo médico",
+      rejection_reason: reason,
     }).eq("id", selectedRenewal.id);
+    
+    // Notify patient
+    const docName = await getDoctorName();
+    notifyRenewalRejected(selectedRenewal.patient_id, docName, reason);
+    
     toast.success("Renovação rejeitada.");
     setSelectedRenewal(null);
     setRejectionReason("");
