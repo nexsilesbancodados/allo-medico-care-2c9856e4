@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
+import { getLaudistaNav } from "@/components/laudista/laudistaNav";
+import { useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +33,9 @@ const EXAM_TYPES = [
 
 const ReportTemplateManager = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const isLaudista = location.pathname.includes("/laudista/");
+  const nav = isLaudista ? getLaudistaNav("templates") : getDoctorNav("report-templates");
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -115,7 +120,7 @@ const ReportTemplateManager = () => {
   };
 
   return (
-    <DashboardLayout nav={getDoctorNav("report-templates")} title="Modelos de Laudo">
+    <DashboardLayout nav={nav} title="Modelos de Laudo">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2">

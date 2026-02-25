@@ -312,7 +312,7 @@ const LaudistaDashboard = () => {
                           <Button
                             size="sm"
                             className="bg-gradient-to-r from-secondary to-primary text-white rounded-xl h-9 px-4 text-xs gap-1.5 shadow-md"
-                            onClick={() => navigate(`/dashboard/doctor/report-editor/${exam.id}?role=doctor`)}
+                            onClick={() => navigate(`/dashboard/laudista/report-editor/${exam.id}?role=doctor`)}
                           >
                             <Eye className="w-3 h-3" />
                             Laudar

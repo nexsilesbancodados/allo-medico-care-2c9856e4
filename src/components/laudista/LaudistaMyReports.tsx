@@ -88,14 +88,15 @@ const LaudistaMyReports = () => {
                         {report.verification_code || "—"}
                       </TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/doctor/report-editor/${report.exam_request_id}?role=doctor`)}>
+                        <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/laudista/report-editor/${report.exam_request_id}?role=doctor`)}>
                           <Eye className="w-3 h-3 mr-1" /> Ver
                         </Button>
                         {report.pdf_url && (
-                          <Button size="sm" variant="ghost" asChild>
-                            <a href={report.pdf_url} target="_blank" rel="noopener noreferrer">
-                              <Download className="w-3 h-3 mr-1" /> PDF
-                            </a>
+                          <Button size="sm" variant="ghost" onClick={async () => {
+                            const { data } = await supabase.storage.from("prescriptions").createSignedUrl(report.pdf_url, 3600);
+                            if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                          }}>
+                            <Download className="w-3 h-3 mr-1" /> PDF
                           </Button>
                         )}
                       </TableCell>

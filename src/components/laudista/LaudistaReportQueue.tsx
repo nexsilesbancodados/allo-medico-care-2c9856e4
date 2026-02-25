@@ -151,7 +151,7 @@ const LaudistaReportQueue = () => {
                           </Button>
                         )}
                         {(exam.status === "in_review" || exam.status === "reported") && (
-                          <Button size="sm" onClick={() => navigate(`/dashboard/doctor/report-editor/${exam.id}?role=doctor`)}>
+                          <Button size="sm" onClick={() => navigate(`/dashboard/laudista/report-editor/${exam.id}?role=doctor`)}>
                             <Eye className="w-3 h-3 mr-1" />
                             {exam.status === "in_review" ? "Laudar" : "Ver Laudo"}
                           </Button>
