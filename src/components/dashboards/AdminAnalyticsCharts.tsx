@@ -26,10 +26,14 @@ const AdminAnalyticsCharts = () => {
   const [funnelData, setFunnelData] = useState<any[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
   const [npsTrend, setNpsTrend] = useState<any[]>([]);
+  const [urgentCareData, setUrgentCareData] = useState<any[]>([]);
+  const [renewalData, setRenewalData] = useState<any[]>([]);
+  const [urgentCareKPIs, setUrgentCareKPIs] = useState({ total: 0, waiting: 0, completed: 0, refunded: 0, avgWait: 0, revenue: 0 });
+  const [renewalKPIs, setRenewalKPIs] = useState({ total: 0, pending: 0, approved: 0, rejected: 0, avgReviewDays: 0 });
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("overview");
 
-  useEffect(() => { fetchChartData(); }, []);
+  useEffect(() => { fetchChartData(); fetchNewFlowsData(); }, []);
 
   const fetchChartData = async () => {
     const days = 14;
@@ -149,6 +153,60 @@ const AdminAnalyticsCharts = () => {
     setLoading(false);
   };
 
+  const fetchNewFlowsData = async () => {
+    // Urgent care (on_demand_queue)
+    const { data: queueData } = await supabase.from("on_demand_queue").select("*").order("created_at", { ascending: true });
+    const queueItems = queueData ?? [];
+    
+    // KPIs
+    const ucTotal = queueItems.length;
+    const ucWaiting = queueItems.filter(q => q.status === "waiting").length;
+    const ucCompleted = queueItems.filter(q => q.status === "in_progress" || q.status === "completed").length;
+    const ucRefunded = queueItems.filter(q => q.status === "refunded").length;
+    const ucRevenue = queueItems.filter(q => q.status !== "refunded").reduce((sum, q) => sum + Number(q.price), 0);
+    
+    // Avg wait time (from created_at to assigned_at)
+    const assignedItems = queueItems.filter(q => q.assigned_at && q.created_at);
+    const avgWaitMs = assignedItems.length > 0
+      ? assignedItems.reduce((sum, q) => sum + (new Date(q.assigned_at).getTime() - new Date(q.created_at).getTime()), 0) / assignedItems.length
+      : 0;
+    
+    setUrgentCareKPIs({ total: ucTotal, waiting: ucWaiting, completed: ucCompleted, refunded: ucRefunded, avgWait: Math.round(avgWaitMs / 60000), revenue: ucRevenue });
+
+    // Daily urgent care by shift
+    const shiftCount: Record<string, { day: number; night: number; dawn: number }> = {};
+    queueItems.forEach(q => {
+      const d = format(new Date(q.created_at), "dd/MM", { locale: ptBR });
+      if (!shiftCount[d]) shiftCount[d] = { day: 0, night: 0, dawn: 0 };
+      if (q.shift === "day") shiftCount[d].day++;
+      else if (q.shift === "night") shiftCount[d].night++;
+      else shiftCount[d].dawn++;
+    });
+    setUrgentCareData(Object.entries(shiftCount).slice(-14).map(([date, shifts]) => ({ date, ...shifts })));
+
+    // Prescription renewals
+    const { data: renewals } = await supabase.from("prescription_renewals").select("*").order("created_at", { ascending: true });
+    const renewalItems = renewals ?? [];
+    
+    const rnTotal = renewalItems.length;
+    const rnPending = renewalItems.filter(r => r.status === "pending" || r.status === "in_review").length;
+    const rnApproved = renewalItems.filter(r => r.status === "approved").length;
+    const rnRejected = renewalItems.filter(r => r.status === "rejected").length;
+    
+    const reviewedItems = renewalItems.filter(r => r.reviewed_at && r.created_at);
+    const avgReviewMs = reviewedItems.length > 0
+      ? reviewedItems.reduce((sum, r) => sum + (new Date(r.reviewed_at).getTime() - new Date(r.created_at).getTime()), 0) / reviewedItems.length
+      : 0;
+    
+    setRenewalKPIs({ total: rnTotal, pending: rnPending, approved: rnApproved, rejected: rnRejected, avgReviewDays: +(avgReviewMs / 86400000).toFixed(1) });
+
+    setRenewalData([
+      { name: "Pendentes", value: rnPending, fill: "hsl(var(--muted-foreground))" },
+      { name: "Aprovadas", value: rnApproved, fill: "hsl(var(--secondary))" },
+      { name: "Rejeitadas", value: rnRejected, fill: "hsl(var(--destructive))" },
+    ].filter(d => d.value > 0));
+  };
+
   if (loading) return null;
 
   const ts = {
@@ -161,8 +219,9 @@ const AdminAnalyticsCharts = () => {
   return (
     <div className="mb-6" role="region" aria-label="Gráficos de análise">
       <Tabs value={tab} onValueChange={setTab} className="w-full">
-        <TabsList className="bg-muted/50 border border-border/40 h-9 mb-4">
+        <TabsList className="bg-muted/50 border border-border/40 h-9 mb-4 flex-wrap">
           <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">📊 Visão Geral</TabsTrigger>
+          <TabsTrigger value="newflows" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">🚨 Plantão & Renovação</TabsTrigger>
           <TabsTrigger value="funnel" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">🎯 Funil & Retenção</TabsTrigger>
           <TabsTrigger value="heatmap" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">🗓️ Mapa de Calor</TabsTrigger>
           <TabsTrigger value="nps" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">⭐ NPS & Satisfação</TabsTrigger>
@@ -266,6 +325,90 @@ const AdminAnalyticsCharts = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* ── New Flows Tab (Plantão & Renovação) ── */}
+        <TabsContent value="newflows" className="mt-0">
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* Urgent Care KPIs */}
+            <Card className="border-border lg:col-span-2">
+              <CardHeader><CardTitle className="text-base sm:text-lg">🚨 Plantão 24h — KPIs</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                  {[
+                    { label: "Total", value: urgentCareKPIs.total, color: "text-foreground" },
+                    { label: "Aguardando", value: urgentCareKPIs.waiting, color: "text-warning" },
+                    { label: "Atendidos", value: urgentCareKPIs.completed, color: "text-secondary" },
+                    { label: "Reembolsados", value: urgentCareKPIs.refunded, color: "text-destructive" },
+                    { label: "Espera Média", value: `${urgentCareKPIs.avgWait} min`, color: "text-primary" },
+                    { label: "Receita", value: `R$ ${urgentCareKPIs.revenue.toFixed(0)}`, color: "text-secondary" },
+                  ].map(kpi => (
+                    <div key={kpi.label} className="text-center">
+                      <p className={`text-2xl font-bold ${kpi.color}`}>{kpi.value}</p>
+                      <p className="text-xs text-muted-foreground">{kpi.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Urgent Care by Shift */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">☀️ Plantão por Turno (14 dias)</CardTitle></CardHeader>
+              <CardContent>
+                {urgentCareData.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-10">Sem dados de plantão ainda.</p>
+                ) : (
+                  <div className="h-48 sm:h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={urgentCareData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="date" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                        <YAxis fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                        <Tooltip contentStyle={ts} />
+                        <Legend />
+                        <Bar dataKey="day" stackId="a" fill="hsl(var(--primary))" name="Diurno" radius={[0, 0, 0, 0]} />
+                        <Bar dataKey="night" stackId="a" fill="hsl(var(--secondary))" name="Noturno" />
+                        <Bar dataKey="dawn" stackId="a" fill="hsl(var(--destructive))" name="Madrugada" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Renewal KPIs + Pie */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">💊 Renovações de Receita</CardTitle></CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  {[
+                    { label: "Total", value: renewalKPIs.total, color: "text-foreground" },
+                    { label: "Pendentes", value: renewalKPIs.pending, color: "text-warning" },
+                    { label: "Aprovadas", value: renewalKPIs.approved, color: "text-secondary" },
+                    { label: "Tempo Médio", value: `${renewalKPIs.avgReviewDays}d`, color: "text-primary" },
+                  ].map(kpi => (
+                    <div key={kpi.label} className="text-center">
+                      <p className={`text-xl font-bold ${kpi.color}`}>{kpi.value}</p>
+                      <p className="text-xs text-muted-foreground">{kpi.label}</p>
+                    </div>
+                  ))}
+                </div>
+                {renewalData.length > 0 && (
+                  <div className="h-40">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie data={renewalData} cx="50%" cy="50%" outerRadius={55} dataKey="value" label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} fontSize={10}>
+                          {renewalData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                        </Pie>
+                        <Tooltip contentStyle={ts} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
