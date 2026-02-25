@@ -28,12 +28,15 @@ const AdminAnalyticsCharts = () => {
   const [npsTrend, setNpsTrend] = useState<any[]>([]);
   const [urgentCareData, setUrgentCareData] = useState<any[]>([]);
   const [renewalData, setRenewalData] = useState<any[]>([]);
+  const [specialtyRevenueData, setSpecialtyRevenueData] = useState<any[]>([]);
+  const [specialtyConversionData, setSpecialtyConversionData] = useState<any[]>([]);
+  const [doctorPerformanceData, setDoctorPerformanceData] = useState<any[]>([]);
   const [urgentCareKPIs, setUrgentCareKPIs] = useState({ total: 0, waiting: 0, completed: 0, refunded: 0, avgWait: 0, revenue: 0 });
   const [renewalKPIs, setRenewalKPIs] = useState({ total: 0, pending: 0, approved: 0, rejected: 0, avgReviewDays: 0 });
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("overview");
 
-  useEffect(() => { fetchChartData(); fetchNewFlowsData(); }, []);
+  useEffect(() => { fetchChartData(); fetchNewFlowsData(); fetchSpecialtyReports(); }, []);
 
   const fetchChartData = async () => {
     const days = 14;
@@ -207,6 +210,75 @@ const AdminAnalyticsCharts = () => {
     ].filter(d => d.value > 0));
   };
 
+  const fetchSpecialtyReports = async () => {
+    // Specialty revenue: appointments by specialty with revenue estimation
+    const [apptsRes, docSpecsRes, specsRes, surveysRes, docsRes, profilesRes] = await Promise.all([
+      supabase.from("appointments").select("id, doctor_id, status, scheduled_at").order("scheduled_at", { ascending: false }).limit(1000),
+      supabase.from("doctor_specialties").select("doctor_id, specialty_id"),
+      supabase.from("specialties").select("id, name, consultation_price"),
+      supabase.from("satisfaction_surveys").select("doctor_id, nps_score, quality_score, ease_score"),
+      supabase.from("doctor_profiles").select("id, user_id, consultation_price, rating, total_reviews"),
+      supabase.from("profiles").select("user_id, first_name, last_name"),
+    ]);
+
+    const appts = apptsRes.data ?? [];
+    const docSpecs = docSpecsRes.data ?? [];
+    const specs = specsRes.data ?? [];
+    const surveys = surveysRes.data ?? [];
+    const docs = docsRes.data ?? [];
+    const profiles = profilesRes.data ?? [];
+
+    const specMap = new Map(specs.map(s => [s.id, { name: s.name, price: Number(s.consultation_price ?? 89) }]));
+    const docSpecMap = new Map<string, string[]>();
+    docSpecs.forEach(ds => {
+      const existing = docSpecMap.get(ds.doctor_id) ?? [];
+      existing.push(ds.specialty_id);
+      docSpecMap.set(ds.doctor_id, existing);
+    });
+
+    // Revenue by specialty
+    const specRevenue: Record<string, { name: string; total: number; completed: number; cancelled: number; revenue: number }> = {};
+    appts.forEach(a => {
+      const specIds = docSpecMap.get(a.doctor_id) ?? [];
+      specIds.forEach(sid => {
+        const spec = specMap.get(sid);
+        if (!spec) return;
+        if (!specRevenue[sid]) specRevenue[sid] = { name: spec.name, total: 0, completed: 0, cancelled: 0, revenue: 0 };
+        specRevenue[sid].total++;
+        if (a.status === "completed") { specRevenue[sid].completed++; specRevenue[sid].revenue += spec.price; }
+        if (a.status === "cancelled") specRevenue[sid].cancelled++;
+      });
+    });
+    setSpecialtyRevenueData(Object.values(specRevenue).sort((a, b) => b.revenue - a.revenue).slice(0, 8));
+
+    // Conversion by specialty (completed / total)
+    setSpecialtyConversionData(
+      Object.values(specRevenue)
+        .filter(s => s.total >= 1)
+        .map(s => ({
+          name: s.name,
+          taxa: s.total > 0 ? +((s.completed / s.total) * 100).toFixed(1) : 0,
+          total: s.total,
+          concluidas: s.completed,
+        }))
+        .sort((a, b) => b.taxa - a.taxa)
+        .slice(0, 8)
+    );
+
+    // Doctor performance (top 10 by completed)
+    const nameMap = new Map(profiles.map(p => [p.user_id, `${p.first_name} ${p.last_name}`]));
+    const docAppts: Record<string, number> = {};
+    appts.filter(a => a.status === "completed").forEach(a => { docAppts[a.doctor_id] = (docAppts[a.doctor_id] ?? 0) + 1; });
+
+    const docPerf = docs.map(d => ({
+      name: nameMap.get(d.user_id) ?? "Dr(a).",
+      consultas: docAppts[d.id] ?? 0,
+      rating: Number(d.rating ?? 0),
+      reviews: d.total_reviews ?? 0,
+    })).sort((a, b) => b.consultas - a.consultas).slice(0, 10);
+    setDoctorPerformanceData(docPerf);
+  };
+
   if (loading) return null;
 
   const ts = {
@@ -221,6 +293,7 @@ const AdminAnalyticsCharts = () => {
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="bg-muted/50 border border-border/40 h-9 mb-4 flex-wrap">
           <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">📊 Visão Geral</TabsTrigger>
+          <TabsTrigger value="specialty" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">🩺 Especialidades</TabsTrigger>
           <TabsTrigger value="newflows" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">🚨 Plantão & Renovação</TabsTrigger>
           <TabsTrigger value="funnel" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">🎯 Funil & Retenção</TabsTrigger>
           <TabsTrigger value="heatmap" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">🗓️ Mapa de Calor</TabsTrigger>
@@ -325,6 +398,96 @@ const AdminAnalyticsCharts = () => {
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        {/* ── Specialty Reports Tab ── */}
+        <TabsContent value="specialty" className="mt-0">
+          <div className="grid lg:grid-cols-2 gap-4 sm:gap-6">
+            {/* Revenue by Specialty */}
+            <Card className="border-border lg:col-span-2">
+              <CardHeader><CardTitle className="text-base sm:text-lg">💰 Receita por Especialidade</CardTitle></CardHeader>
+              <CardContent>
+                {specialtyRevenueData.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-10">Sem dados suficientes ainda.</p>
+                ) : (
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={specialtyRevenueData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                        <XAxis dataKey="name" fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} angle={-20} textAnchor="end" height={60} />
+                        <YAxis fontSize={10} tick={{ fill: "hsl(var(--muted-foreground))" }} tickFormatter={(v) => `R$${v}`} />
+                        <Tooltip contentStyle={ts} formatter={(v: number, name: string) => [name === "revenue" ? `R$ ${v.toFixed(0)}` : v, name === "revenue" ? "Receita" : name === "completed" ? "Concluídas" : "Canceladas"]} />
+                        <Legend />
+                        <Bar dataKey="revenue" fill="hsl(var(--secondary))" name="Receita (R$)" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Conversion by Specialty */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">🎯 Taxa de Conversão por Especialidade</CardTitle></CardHeader>
+              <CardContent>
+                {specialtyConversionData.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-10">Sem dados.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {specialtyConversionData.map((s) => (
+                      <div key={s.name} className="space-y-1">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">{s.name}</span>
+                          <span className="font-semibold text-foreground">
+                            {s.taxa}%
+                            <span className="text-xs text-muted-foreground ml-1">({s.concluidas}/{s.total})</span>
+                          </span>
+                        </div>
+                        <div className="h-3 rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-full rounded-full transition-all duration-700"
+                            style={{
+                              width: `${Math.max(s.taxa, 2)}%`,
+                              background: s.taxa >= 70 ? "hsl(var(--secondary))" : s.taxa >= 40 ? "hsl(var(--primary))" : "hsl(var(--destructive))",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Doctor Performance Ranking */}
+            <Card className="border-border">
+              <CardHeader><CardTitle className="text-base sm:text-lg">🏆 Ranking de Médicos</CardTitle></CardHeader>
+              <CardContent>
+                {doctorPerformanceData.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-10">Sem dados.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {doctorPerformanceData.map((d, i) => (
+                      <div key={i} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
+                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                          i === 0 ? "bg-yellow-500/20 text-yellow-600" :
+                          i === 1 ? "bg-gray-400/20 text-gray-500" :
+                          i === 2 ? "bg-orange-500/20 text-orange-600" :
+                          "bg-muted text-muted-foreground"
+                        }`}>
+                          {i + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-foreground truncate">{d.name}</p>
+                          <p className="text-xs text-muted-foreground">{d.consultas} consultas • ⭐ {d.rating.toFixed(1)} ({d.reviews})</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
