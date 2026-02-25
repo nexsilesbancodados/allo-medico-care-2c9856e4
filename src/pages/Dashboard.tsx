@@ -45,6 +45,10 @@ const DoctorCalendar = lazy(() => import("@/components/doctor/DoctorCalendar"));
 const DoctorWaitingRoom = lazy(() => import("@/components/doctor/DoctorWaitingRoom"));
 const PatientDocuments = lazy(() => import("@/components/doctor/PatientDocuments"));
 const DoctorPublicProfile = lazy(() => import("@/components/doctor/DoctorPublicProfile"));
+const ExamRequestForm = lazy(() => import("@/components/doctor/ExamRequestForm"));
+const ExamReportQueue = lazy(() => import("@/components/doctor/ExamReportQueue"));
+const ExamReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
+const ReportTemplateManager = lazy(() => import("@/components/doctor/ReportTemplateManager"));
 
 // Consultation
 const VideoRoom = lazy(() => import("@/components/consultation/VideoRoom"));
@@ -190,6 +194,10 @@ const Dashboard = () => {
       <Route path="doctor/calendar" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorCalendar /></RoleGuard>} />
       <Route path="doctor/waiting-room" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorWaitingRoom /></RoleGuard>} />
       <Route path="doctor/documents" element={<RoleGuard allowed={["doctor"]} roles={roles}><PatientDocuments /></RoleGuard>} />
+      <Route path="doctor/exam-request" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamRequestForm /></RoleGuard>} />
+      <Route path="doctor/report-queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportQueue /></RoleGuard>} />
+      <Route path="doctor/report-editor/:examId" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportEditor /></RoleGuard>} />
+      <Route path="doctor/report-templates" element={<RoleGuard allowed={["doctor"]} roles={roles}><ReportTemplateManager /></RoleGuard>} />
 
       {/* Consultation routes */}
       <Route path="consultation/:appointmentId" element={<RoleGuard allowed={["doctor", "patient"]} roles={roles}><VideoRoom /></RoleGuard>} />
