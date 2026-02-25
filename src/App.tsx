@@ -22,6 +22,7 @@ import ScrollToTop from "./components/ScrollToTop";
 const PingoChatbot = lazy(() => import("./components/PingoChatbot"));
 const OfflineIndicator = lazy(() => import("./components/OfflineIndicator"));
 const CookieConsent = lazy(() => import("./components/CookieConsent"));
+const TermsReconsentDialog = lazy(() => import("./components/auth/TermsReconsentDialog"));
 
 
 // Lazy-loaded pages for code splitting
@@ -161,7 +162,7 @@ const App = () => {
             <AnalyticsScripts />
             <PingoChatbot />
             <CookieConsent />
-            
+            <TermsReconsentDialog />
             <OfflineIndicator />
           </Suspense>
         </AuthProvider>
