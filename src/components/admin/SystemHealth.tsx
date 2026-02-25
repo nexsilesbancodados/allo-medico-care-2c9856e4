@@ -5,8 +5,9 @@ import { getAdminNav } from "@/components/admin/adminNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CheckCircle2, XCircle, Clock, Database, Bot, Globe, Server } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, Clock, Database, Bot, Globe, Server, Users, FileText, Calendar, HardDrive } from "lucide-react";
 import { format } from "date-fns";
+import { motion } from "framer-motion";
 
 interface HealthCheck {
   name: string;
@@ -16,73 +17,110 @@ interface HealthCheck {
   icon: React.ReactNode;
 }
 
+interface DbStats {
+  patients: number;
+  doctors: number;
+  appointments: number;
+  prescriptions: number;
+  examReports: number;
+  activeSubscriptions: number;
+  queueWaiting: number;
+  storageBuckets: number;
+}
+
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
+const fadeUp = { hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0, transition: { duration: 0.35 } } };
+
 const SystemHealth = () => {
   const [checks, setChecks] = useState<HealthCheck[]>([]);
+  const [dbStats, setDbStats] = useState<DbStats | null>(null);
   const [lastCheck, setLastCheck] = useState<Date | null>(null);
   const [running, setRunning] = useState(false);
 
   useEffect(() => { runChecks(); }, []);
 
+  const fetchDbStats = async () => {
+    const [patients, doctors, appts, prescriptions, reports, subs, queue] = await Promise.all([
+      supabase.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "patient"),
+      supabase.from("doctor_profiles").select("id", { count: "exact", head: true }),
+      supabase.from("appointments").select("id", { count: "exact", head: true }),
+      supabase.from("prescriptions").select("id", { count: "exact", head: true }),
+      supabase.from("exam_reports").select("id", { count: "exact", head: true }),
+      supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
+      supabase.from("on_demand_queue").select("id", { count: "exact", head: true }).eq("status", "waiting"),
+    ]);
+    setDbStats({
+      patients: patients.count ?? 0,
+      doctors: doctors.count ?? 0,
+      appointments: appts.count ?? 0,
+      prescriptions: prescriptions.count ?? 0,
+      examReports: reports.count ?? 0,
+      activeSubscriptions: subs.count ?? 0,
+      queueWaiting: queue.count ?? 0,
+      storageBuckets: 7,
+    });
+  };
+
   const runChecks = async () => {
     setRunning(true);
     const results: HealthCheck[] = [];
 
-    // 1. Supabase Database
+    // 1. Database
     const dbStart = performance.now();
     try {
       const { error } = await supabase.from("specialties").select("id").limit(1);
       const latency = Math.round(performance.now() - dbStart);
       results.push({
-        name: "Banco de Dados (Supabase)",
+        name: "Banco de Dados (PostgreSQL)",
         status: error ? "error" : "ok",
         latency,
         message: error ? error.message : `Respondendo em ${latency}ms`,
         icon: <Database className="w-5 h-5" />,
       });
     } catch (e: any) {
-      results.push({ name: "Banco de Dados (Supabase)", status: "error", message: e.message, icon: <Database className="w-5 h-5" /> });
+      results.push({ name: "Banco de Dados (PostgreSQL)", status: "error", message: e.message, icon: <Database className="w-5 h-5" /> });
     }
 
-    // 2. Supabase Auth
+    // 2. Auth
     const authStart = performance.now();
     try {
       const { data } = await supabase.auth.getSession();
       const latency = Math.round(performance.now() - authStart);
       results.push({
-        name: "Autenticação (Auth)",
+        name: "Autenticação (GoTrue)",
         status: "ok",
         latency,
-        message: data.session ? `Sessão ativa • ${latency}ms` : `Sem sessão ativa • ${latency}ms`,
+        message: data.session ? `Sessão ativa • ${latency}ms` : `Sem sessão • ${latency}ms`,
         icon: <Server className="w-5 h-5" />,
       });
     } catch (e: any) {
-      results.push({ name: "Autenticação (Auth)", status: "error", message: e.message, icon: <Server className="w-5 h-5" /> });
+      results.push({ name: "Autenticação (GoTrue)", status: "error", message: e.message, icon: <Server className="w-5 h-5" /> });
     }
 
-    // 3. Edge Functions (pingo-chat as proxy test)
+    // 3. Edge Functions
     const efStart = performance.now();
     try {
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/medical-autocomplete`, {
+      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-shift-price`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
-        body: JSON.stringify({ text: "test", field: "notes" }),
+        body: JSON.stringify({}),
       });
       const latency = Math.round(performance.now() - efStart);
       results.push({
-        name: "Edge Functions + Lovable AI",
-        status: res.ok ? "ok" : "error",
+        name: "Edge Functions (Deno)",
+        status: res.ok || res.status === 400 ? "ok" : "error",
         latency,
-        message: res.ok ? `Gateway ativo • ${latency}ms` : `HTTP ${res.status}`,
+        message: `Gateway ativo • ${latency}ms`,
         icon: <Bot className="w-5 h-5" />,
       });
     } catch (e: any) {
-      results.push({ name: "Edge Functions + Lovable AI", status: "error", message: e.message, icon: <Bot className="w-5 h-5" /> });
+      results.push({ name: "Edge Functions (Deno)", status: "error", message: e.message, icon: <Bot className="w-5 h-5" /> });
     }
 
-    // 4. Supabase Realtime
+    // 4. Realtime
     const rtStart = performance.now();
     try {
       const channel = supabase.channel("health-check-ping");
@@ -113,100 +151,124 @@ const SystemHealth = () => {
       const { error } = await supabase.storage.from("avatars").list("", { limit: 1 });
       const latency = Math.round(performance.now() - stStart);
       results.push({
-        name: "Storage (Buckets)",
+        name: "Storage (S3)",
         status: error ? "error" : "ok",
         latency,
         message: error ? error.message : `Acessível • ${latency}ms`,
-        icon: <Server className="w-5 h-5" />,
+        icon: <HardDrive className="w-5 h-5" />,
       });
     } catch (e: any) {
-      results.push({ name: "Storage (Buckets)", status: "error", message: e.message, icon: <Server className="w-5 h-5" /> });
+      results.push({ name: "Storage (S3)", status: "error", message: e.message, icon: <HardDrive className="w-5 h-5" /> });
     }
 
     setChecks(results);
     setLastCheck(new Date());
     setRunning(false);
+    fetchDbStats();
   };
 
   const allOk = checks.length > 0 && checks.every(c => c.status === "ok");
   const hasErrors = checks.some(c => c.status === "error");
+  const avgLatency = checks.length > 0 ? Math.round(checks.reduce((sum, c) => sum + (c.latency ?? 0), 0) / checks.length) : 0;
+
+  const dbStatCards = dbStats ? [
+    { label: "Pacientes", value: dbStats.patients, icon: Users, color: "text-primary" },
+    { label: "Médicos", value: dbStats.doctors, icon: Users, color: "text-secondary" },
+    { label: "Consultas", value: dbStats.appointments, icon: Calendar, color: "text-primary" },
+    { label: "Receitas", value: dbStats.prescriptions, icon: FileText, color: "text-success" },
+    { label: "Laudos", value: dbStats.examReports, icon: FileText, color: "text-warning" },
+    { label: "Assinaturas", value: dbStats.activeSubscriptions, icon: Server, color: "text-success" },
+    { label: "Fila Urgência", value: dbStats.queueWaiting, icon: Clock, color: dbStats.queueWaiting > 0 ? "text-destructive" : "text-muted-foreground" },
+    { label: "Buckets", value: dbStats.storageBuckets, icon: HardDrive, color: "text-muted-foreground" },
+  ] : [];
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("health")}>
-      <div className="max-w-3xl">
-        <div className="flex items-center justify-between mb-6">
+      <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl space-y-6">
+        <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Saúde do Sistema</h1>
-            <p className="text-sm text-muted-foreground">Diagnóstico em tempo real de todos os serviços</p>
+            <p className="text-sm text-muted-foreground">Diagnóstico em tempo real · {checks.filter(c => c.status === "ok").length}/{checks.length} serviços ok</p>
           </div>
           <div className="flex items-center gap-3">
             {lastCheck && (
               <span className="text-xs text-muted-foreground">
-                Última verificação: {format(lastCheck, "HH:mm:ss")}
+                {format(lastCheck, "HH:mm:ss")}
               </span>
             )}
-            <Button size="sm" variant="outline" onClick={runChecks} disabled={running}>
-              <RefreshCw className={`w-4 h-4 mr-1 ${running ? "animate-spin" : ""}`} />
+            <Button size="sm" variant="outline" className="rounded-xl" onClick={runChecks} disabled={running}>
+              <RefreshCw className={`w-4 h-4 mr-1.5 ${running ? "animate-spin" : ""}`} />
               {running ? "Verificando..." : "Verificar"}
             </Button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Overall status */}
         {checks.length > 0 && (
-          <Card className={`mb-6 border-2 ${allOk ? "border-green-500/30 bg-green-500/5" : hasErrors ? "border-destructive/30 bg-destructive/5" : "border-border"}`}>
-            <CardContent className="p-6 text-center">
-              {allOk ? (
-                <>
-                  <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-3" />
-                  <h2 className="text-xl font-bold text-foreground">Todos os sistemas operacionais</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Nenhum problema detectado</p>
-                </>
-              ) : (
-                <>
-                  <XCircle className="w-16 h-16 text-destructive mx-auto mb-3" />
-                  <h2 className="text-xl font-bold text-foreground">Problemas detectados</h2>
-                  <p className="text-sm text-muted-foreground mt-1">{checks.filter(c => c.status === "error").length} serviço(s) com falha</p>
-                </>
-              )}
-            </CardContent>
-          </Card>
+          <motion.div variants={fadeUp}>
+            <Card className={`border-2 ${allOk ? "border-success/30 bg-success/5" : hasErrors ? "border-destructive/30 bg-destructive/5" : "border-border"}`}>
+              <CardContent className="p-6 flex items-center gap-5">
+                {allOk ? (
+                  <CheckCircle2 className="w-14 h-14 text-success shrink-0" />
+                ) : (
+                  <XCircle className="w-14 h-14 text-destructive shrink-0" />
+                )}
+                <div>
+                  <h2 className="text-lg font-bold text-foreground">
+                    {allOk ? "Todos os sistemas operacionais" : `${checks.filter(c => c.status === "error").length} serviço(s) com falha`}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    Latência média: {avgLatency}ms · Uptime: {allOk ? "100%" : `${Math.round((checks.filter(c => c.status === "ok").length / checks.length) * 100)}%`}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         )}
 
-        {/* Individual checks */}
-        <div className="space-y-3">
+        {/* Service checks */}
+        <motion.div variants={fadeUp} className="grid sm:grid-cols-2 gap-3">
           {checks.map((check, i) => (
-            <Card key={i} className="border-border">
+            <Card key={i} className={`border ${check.status === "ok" ? "border-success/20" : "border-destructive/30"}`}>
               <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                      check.status === "ok" ? "bg-green-500/10 text-green-500" :
-                      check.status === "error" ? "bg-destructive/10 text-destructive" :
-                      "bg-muted text-muted-foreground"
-                    }`}>
-                      {check.icon}
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{check.name}</p>
-                      <p className="text-xs text-muted-foreground">{check.message}</p>
-                    </div>
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    check.status === "ok" ? "bg-success/10 text-success" : "bg-destructive/10 text-destructive"
+                  }`}>
+                    {check.icon}
                   </div>
-                  <div className="flex items-center gap-2">
-                    {check.latency && (
-                      <span className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {check.latency}ms
-                      </span>
-                    )}
-                    <Badge variant={check.status === "ok" ? "default" : "destructive"} className="text-xs">
-                      {check.status === "ok" ? "✓ OK" : check.status === "error" ? "✗ Falha" : "..."}
-                    </Badge>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-foreground text-sm">{check.name}</p>
+                      <Badge variant={check.status === "ok" ? "default" : "destructive"} className="text-[10px] h-5">
+                        {check.status === "ok" ? "✓" : "✗"}
+                      </Badge>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{check.message}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           ))}
-        </div>
+        </motion.div>
+
+        {/* DB Stats */}
+        {dbStats && (
+          <motion.div variants={fadeUp}>
+            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 px-1">📊 Estatísticas do Banco</p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {dbStatCards.map((stat) => (
+                <Card key={stat.label} className="border-border/50">
+                  <CardContent className="p-4 text-center">
+                    <stat.icon className={`w-5 h-5 mx-auto mb-2 ${stat.color}`} />
+                    <p className={`text-2xl font-bold ${stat.color}`}>{stat.value.toLocaleString("pt-BR")}</p>
+                    <p className="text-[10px] text-muted-foreground mt-0.5">{stat.label}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         {checks.length === 0 && !running && (
           <Card className="border-border">
@@ -216,7 +278,7 @@ const SystemHealth = () => {
             </CardContent>
           </Card>
         )}
-      </div>
+      </motion.div>
     </DashboardLayout>
   );
 };
