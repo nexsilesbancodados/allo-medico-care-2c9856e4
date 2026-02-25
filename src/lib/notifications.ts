@@ -694,3 +694,73 @@ export const notifyWelcomeDoctor = async (
     console.error("notifyWelcomeDoctor error:", err);
   }
 };
+
+/**
+ * Notify exam report ready via WhatsApp + Email + In-App
+ */
+export const notifyExamReportReady = async (
+  examRequestId: string,
+  reporterName: string,
+  examType: string,
+  verificationCode?: string
+) => {
+  try {
+    // Get exam request to find requesting doctor and patient
+    const { data: examReq } = await supabase
+      .from("exam_requests")
+      .select("requesting_doctor_id, patient_id")
+      .eq("id", examRequestId)
+      .single();
+    if (!examReq) return;
+
+    // Notify requesting doctor
+    const { data: reqDoc } = await supabase
+      .from("doctor_profiles").select("user_id").eq("id", examReq.requesting_doctor_id).single();
+    if (reqDoc) {
+      const { data: docProfile } = await supabase
+        .from("profiles").select("first_name, phone").eq("user_id", reqDoc.user_id).single();
+
+      if (docProfile?.phone) {
+        supabase.functions.invoke("send-whatsapp", {
+          body: {
+            phone: docProfile.phone,
+            message: `📋 *Laudo Pronto*\n\nOlá Dr(a). ${docProfile.first_name},\nO laudo de ${examType} solicitado foi finalizado por ${reporterName}.\n${verificationCode ? `🔐 Código: ${verificationCode}\n` : ""}\nAcesse a plataforma para visualizar. 💚`,
+          },
+        }).catch(console.error);
+      }
+
+      supabase.from("notifications").insert({
+        user_id: reqDoc.user_id,
+        title: "📋 Laudo Finalizado",
+        message: `O laudo de ${examType} foi finalizado por ${reporterName}.`,
+        type: "document",
+        link: "/dashboard/doctor/report-queue?role=doctor",
+      }).then(() => {});
+    }
+
+    // Notify patient if exists
+    if (examReq.patient_id) {
+      const { data: patProfile } = await supabase
+        .from("profiles").select("first_name, phone").eq("user_id", examReq.patient_id).single();
+
+      if (patProfile?.phone) {
+        supabase.functions.invoke("send-whatsapp", {
+          body: {
+            phone: patProfile.phone,
+            message: `📋 *Resultado de Exame*\n\nOlá ${patProfile.first_name},\nO laudo do seu exame de ${examType} está pronto!\n\nAcesse a plataforma para visualizar. 💚`,
+          },
+        }).catch(console.error);
+      }
+
+      supabase.from("notifications").insert({
+        user_id: examReq.patient_id,
+        title: "📋 Laudo do Exame Pronto",
+        message: `O resultado do seu exame de ${examType} está disponível.`,
+        type: "document",
+        link: "/dashboard/patient/documents?role=patient",
+      }).then(() => {});
+    }
+  } catch (err) {
+    console.error("notifyExamReportReady error:", err);
+  }
+};

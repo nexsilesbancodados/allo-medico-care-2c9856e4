@@ -14,7 +14,7 @@ import {
   DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Download,
   CreditCard, Receipt, Clock, CheckCircle2, XCircle, RefreshCw
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, Area, AreaChart } from "recharts";
 
 const adminNav = getAdminNav("financial");
 
@@ -58,6 +58,8 @@ const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "#f59e0b", "#
 
 const AdminFinancial = () => {
   const [appointments, setAppointments] = useState<AppointmentPayment[]>([]);
+  const [commissionData, setCommissionData] = useState<{ doctor_name: string; count: number; revenue: number; commission: number }[]>([]);
+  const [monthlyTrend, setMonthlyTrend] = useState<{ month: string; revenue: number; count: number }[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
@@ -123,6 +125,36 @@ const AdminFinancial = () => {
     }));
 
     setAppointments(enriched);
+
+    // Calculate commission breakdown per doctor
+    const doctorRevenue = new Map<string, { name: string; count: number; revenue: number }>();
+    enriched.forEach(a => {
+      if (a.payment_status === "approved" || a.payment_status === "confirmed") {
+        const existing = doctorRevenue.get(a.doctor_id) || { name: a.doctor_name || "—", count: 0, revenue: 0 };
+        existing.count++;
+        existing.revenue += 89.9;
+        doctorRevenue.set(a.doctor_id, existing);
+      }
+    });
+    setCommissionData(
+      Array.from(doctorRevenue.values())
+        .map(d => ({ doctor_name: d.name, count: d.count, revenue: d.revenue, commission: d.revenue * 0.7 }))
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 10)
+    );
+
+    // Monthly trend (last 6 months)
+    const months: { month: string; revenue: number; count: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthKey = format(d, "yyyy-MM");
+      const monthLabel = format(d, "MMM/yy", { locale: ptBR });
+      const monthAppts = enriched.filter(a => a.created_at.startsWith(monthKey) && (a.payment_status === "approved" || a.payment_status === "confirmed"));
+      months.push({ month: monthLabel, revenue: monthAppts.length * 89.9, count: monthAppts.length });
+    }
+    setMonthlyTrend(months);
+
     setLoading(false);
   };
 
@@ -330,6 +362,71 @@ const AdminFinancial = () => {
                   <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                     Nenhum dado disponível
                   </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Monthly Trend + Commission Breakdown */}
+        <div className="grid md:grid-cols-2 gap-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-primary" /> Tendência Mensal (6 meses)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[220px]">
+                {monthlyTrend.length > 0 ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={monthlyTrend}>
+                      <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                      <XAxis dataKey="month" className="text-xs" />
+                      <YAxis className="text-xs" />
+                      <Tooltip
+                        formatter={(value: number, name: string) => [
+                          name === "revenue" ? `R$ ${value.toFixed(2)}` : value,
+                          name === "revenue" ? "Receita" : "Consultas"
+                        ]}
+                        contentStyle={{ borderRadius: "8px", border: "1px solid hsl(var(--border))" }}
+                      />
+                      <Area type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" fill="hsl(var(--primary))" fillOpacity={0.1} strokeWidth={2} />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground text-sm">Sem dados</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-primary" /> Comissões por Médico (Top 10)
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[220px] overflow-y-auto">
+                {commissionData.length > 0 ? (
+                  <div className="space-y-2">
+                    {commissionData.map((d, i) => (
+                      <div key={i} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-bold text-primary w-5">{i + 1}.</span>
+                          <span className="text-sm font-medium truncate">{d.doctor_name}</span>
+                          <Badge variant="outline" className="text-[10px] shrink-0">{d.count} consultas</Badge>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-sm font-bold text-foreground">R$ {d.commission.toFixed(0)}</p>
+                          <p className="text-[10px] text-muted-foreground">de R$ {d.revenue.toFixed(0)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center h-full text-muted-foreground text-sm">Sem dados</div>
                 )}
               </div>
             </CardContent>

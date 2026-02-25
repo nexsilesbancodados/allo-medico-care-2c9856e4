@@ -27,6 +27,7 @@ const DoctorWaitingRoom = () => {
   const [doctorId, setDoctorId] = useState<string | null>(null);
   const [waitingPatients, setWaitingPatients] = useState<any[]>([]);
   const [triageAlerts, setTriageAlerts] = useState<Map<string, any>>(new Map());
+  const [avgDuration, setAvgDuration] = useState(20);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -78,6 +79,17 @@ const DoctorWaitingRoom = () => {
     if (data) {
       setDoctorId(data.id);
       fetchWaitingPatients(data.id);
+      // Fetch average consultation duration for this doctor
+      const { data: durations } = await supabase
+        .from("video_presence_logs")
+        .select("duration_seconds")
+        .gt("duration_seconds", 60)
+        .order("joined_at", { ascending: false })
+        .limit(30);
+      if (durations && durations.length > 0) {
+        const avg = Math.round(durations.reduce((a, d) => a + (d.duration_seconds ?? 0), 0) / durations.length / 60);
+        setAvgDuration(Math.max(5, Math.min(avg, 60)));
+      }
     }
     setLoading(false);
   };
@@ -202,8 +214,8 @@ const DoctorWaitingRoom = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Sala de Espera Virtual</h1>
-            <p className="text-sm text-muted-foreground">
-              {waitingCount} aguardando · {inProgressCount} em atendimento
+          <p className="text-sm text-muted-foreground">
+              {waitingCount} aguardando · {inProgressCount} em atendimento · ~{avgDuration}min/consulta
               {criticalCount > 0 && (
                 <span className="text-destructive font-semibold ml-2">· {criticalCount} alerta(s) crítico(s)</span>
               )}
