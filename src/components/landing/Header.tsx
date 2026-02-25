@@ -93,16 +93,12 @@ const Header = memo(() => {
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-2" aria-label="Navegação principal">
-            {navLinks.map((link) => (
-              <Button
-                key={link.href}
-                size="sm"
-                onClick={() => handleNavClick(link)}
-                className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:opacity-90 transition-all"
-              >
-                {link.label}
-              </Button>
-            ))}
+            <Button size="sm" onClick={() => navigate("/teleconsulta")} className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:opacity-90 transition-all">
+              Teleconsulta
+            </Button>
+            <Button size="sm" onClick={() => navigate("/telelaudo")} className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-[hsl(200,80%,45%)] to-[hsl(210,90%,55%)] text-white shadow-md shadow-[hsl(210,90%,55%)/0.2] hover:shadow-lg hover:opacity-90 transition-all">
+              Telelaudo
+            </Button>
           </nav>
 
           {/* Desktop actions */}
@@ -140,9 +136,8 @@ const Header = memo(() => {
                   {t("nav.imDoctor")}
                 </Button>
                 <Button
-                  variant="outline"
                   size="sm"
-                  className="rounded-full gap-1.5 text-xs font-semibold border-primary/20 text-primary hover:bg-primary/5"
+                  className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-[hsl(160,60%,40%)] to-[hsl(170,70%,45%)] text-white shadow-md shadow-[hsl(160,60%,40%)/0.2] hover:shadow-lg hover:opacity-90 transition-all px-5"
                   onClick={() => navigate("/consulta-avulsa")}
                 >
                   <ShoppingBag className="w-3.5 h-3.5" />
@@ -150,7 +145,7 @@ const Header = memo(() => {
                 </Button>
                 <Button
                   size="sm"
-                  className="rounded-full gap-1.5 text-xs font-bold bg-gradient-hero hover:opacity-90 transition-opacity px-5 shadow-sm"
+                  className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-[hsl(145,65%,38%)] to-[hsl(155,75%,45%)] text-white shadow-md shadow-[hsl(145,65%,38%)/0.2] hover:shadow-lg hover:opacity-90 transition-all px-5"
                   onClick={() => navigate("/paciente")}
                 >
                   <UserRound className="w-3.5 h-3.5" />
