@@ -45,10 +45,7 @@ const DoctorCalendar = lazy(() => import("@/components/doctor/DoctorCalendar"));
 const DoctorWaitingRoom = lazy(() => import("@/components/doctor/DoctorWaitingRoom"));
 const PatientDocuments = lazy(() => import("@/components/doctor/PatientDocuments"));
 const DoctorPublicProfile = lazy(() => import("@/components/doctor/DoctorPublicProfile"));
-const ExamRequestForm = lazy(() => import("@/components/doctor/ExamRequestForm"));
-const ExamReportQueue = lazy(() => import("@/components/doctor/ExamReportQueue"));
-const ExamReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
-const ReportTemplateManager = lazy(() => import("@/components/doctor/ReportTemplateManager"));
+
 const UrgentCareQueue = lazy(() => import("@/components/patient/UrgentCareQueue"));
 const PrescriptionRenewalForm = lazy(() => import("@/components/patient/PrescriptionRenewalForm"));
 const DoctorOnDutyPanel = lazy(() => import("@/components/doctor/DoctorOnDutyPanel"));
@@ -59,6 +56,8 @@ const LaudistaReportQueue = lazy(() => import("@/components/laudista/LaudistaRep
 const LaudistaMyReports = lazy(() => import("@/components/laudista/LaudistaMyReports"));
 const LaudistaStats = lazy(() => import("@/components/laudista/LaudistaStats"));
 const LaudistaTemplates = lazy(() => import("@/components/doctor/ReportTemplateManager"));
+const LaudistaExamRequest = lazy(() => import("@/components/doctor/ExamRequestForm"));
+const LaudistaReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
 const RenewalQueue = lazy(() => import("@/components/doctor/RenewalQueue"));
 
 // Consultation
@@ -207,10 +206,6 @@ const Dashboard = () => {
       <Route path="doctor/calendar" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorCalendar /></RoleGuard>} />
       <Route path="doctor/waiting-room" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorWaitingRoom /></RoleGuard>} />
       <Route path="doctor/documents" element={<RoleGuard allowed={["doctor"]} roles={roles}><PatientDocuments /></RoleGuard>} />
-      <Route path="doctor/exam-request" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamRequestForm /></RoleGuard>} />
-      <Route path="doctor/report-queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportQueue /></RoleGuard>} />
-      <Route path="doctor/report-editor/:examId" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportEditor /></RoleGuard>} />
-      <Route path="doctor/report-templates" element={<RoleGuard allowed={["doctor"]} roles={roles}><ReportTemplateManager /></RoleGuard>} />
       <Route path="doctor/on-duty" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorOnDutyPanel /></RoleGuard>} />
       <Route path="doctor/renewal-queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><RenewalQueue /></RoleGuard>} />
 
@@ -279,6 +274,8 @@ const Dashboard = () => {
       <Route path="laudista/my-reports" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaMyReports /></RoleGuard>} />
       <Route path="laudista/templates" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaTemplates /></RoleGuard>} />
       <Route path="laudista/stats" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaStats /></RoleGuard>} />
+      <Route path="laudista/exam-request" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
+      <Route path="laudista/report-editor/:examId" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaReportEditor /></RoleGuard>} />
 
       {/* Fallback: redirect to role-appropriate dashboard */}
       <Route
