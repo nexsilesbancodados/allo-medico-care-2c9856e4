@@ -1,10 +1,14 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Check, CreditCard, Heart, Shield, Star, Users, Zap, ArrowRight, Sparkles } from "lucide-react";
+import { Check, CreditCard, Heart, Shield, Star, Users, Zap, ArrowRight, Sparkles, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 const plans = [
@@ -26,6 +30,78 @@ const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transi
 
 const DiscountCard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [subscribing, setSubscribing] = useState<string | null>(null);
+
+  const handleSubscribe = async (planId: string, price: number) => {
+    if (!user) {
+      toast.info("Faça login para assinar o cartão de desconto");
+      navigate("/paciente");
+      return;
+    }
+
+    setSubscribing(planId);
+    try {
+      // Check if user already has an active card
+      const { data: existing } = await supabase
+        .from("discount_cards")
+        .select("id, status")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .maybeSingle();
+
+      if (existing) {
+        toast.info("Você já possui um cartão de desconto ativo!");
+        setSubscribing(null);
+        return;
+      }
+
+      // Create payment via Asaas
+      const { data: paymentData, error: paymentError } = await supabase.functions.invoke("create-asaas-payment", {
+        body: {
+          customer_email: user.email,
+          customer_name: user.user_metadata?.first_name || "Paciente",
+          amount: price,
+          description: `Cartão de Desconto - ${planId === "individual" ? "Individual" : planId === "couple" ? "Casal" : "Família"}`,
+          billing_type: "PIX",
+        },
+      });
+
+      if (paymentError) throw paymentError;
+
+      // Create discount card record
+      const validUntil = new Date();
+      validUntil.setMonth(validUntil.getMonth() + 1);
+
+      const { error: cardError } = await supabase.from("discount_cards").insert({
+        user_id: user.id,
+        plan_type: planId,
+        price_monthly: price,
+        discount_percent: 30,
+        status: "active",
+        valid_until: validUntil.toISOString(),
+        payment_id: paymentData?.payment?.id || null,
+      });
+
+      if (cardError) throw cardError;
+
+      toast.success("Cartão de desconto ativado com sucesso! 🎉", {
+        description: "Você já pode aproveitar 30% de desconto em todos os serviços.",
+      });
+
+      // If Asaas returned a PIX payment link, open it
+      if (paymentData?.payment?.invoiceUrl) {
+        window.open(paymentData.payment.invoiceUrl, "_blank");
+      }
+
+      navigate("/dashboard");
+    } catch (err: any) {
+      console.error("Subscription error:", err);
+      toast.error("Erro ao processar assinatura", { description: err.message || "Tente novamente." });
+    } finally {
+      setSubscribing(null);
+    }
+  };
 
   return (
     <>
@@ -42,7 +118,7 @@ const DiscountCard = () => {
           </div>
         </header>
 
-        {/* Hero — gradient */}
+        {/* Hero */}
         <section className="relative overflow-hidden py-24 sm:py-32">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
@@ -71,7 +147,7 @@ const DiscountCard = () => {
           </div>
         </section>
 
-        {/* Plans — gradient accents */}
+        {/* Plans */}
         <section className="py-20 -mt-8 relative z-10">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
@@ -104,9 +180,14 @@ const DiscountCard = () => {
                             : ""
                         }`} 
                         variant={plan.highlighted ? "default" : "outline"} 
-                        onClick={() => navigate("/paciente")}
+                        onClick={() => handleSubscribe(plan.id, plan.price)}
+                        disabled={subscribing === plan.id}
                       >
-                        Assinar agora <ArrowRight className="w-4 h-4 ml-1.5" />
+                        {subscribing === plan.id ? (
+                          <><Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> Processando...</>
+                        ) : (
+                          <>Assinar agora <ArrowRight className="w-4 h-4 ml-1.5" /></>
+                        )}
                       </Button>
                       <p className="text-xs text-muted-foreground mt-3">Cancele quando quiser</p>
                     </CardContent>

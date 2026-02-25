@@ -8,12 +8,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Camera, Save, User } from "lucide-react";
+import { ArrowLeft, Camera, Save, User, Trash2, AlertTriangle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { getAdminNav } from "@/components/admin/adminNav";
 import { getReceptionNav } from "@/components/reception/receptionNav";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
 
 const roleLabels: Record<string, string> = {
   patient: "Paciente", doctor: "Médico", admin: "Administração",
@@ -59,6 +63,7 @@ const UserProfile = () => {
   const [chronicConditions, setChronicConditions] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Doctor fields
   const [bio, setBio] = useState("");
@@ -132,6 +137,50 @@ const UserProfile = () => {
       toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
     } else {
       toast({ title: "Perfil atualizado!" });
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    setDeleting(true);
+    try {
+      // Log the deletion request for LGPD compliance
+      await supabase.from("activity_logs").insert({
+        action: "account_deletion_request",
+        entity_type: "user",
+        entity_id: user.id,
+        user_id: user.id,
+        details: { email: user.email, requested_at: new Date().toISOString() },
+      } as any);
+
+      // Anonymize profile data
+      await supabase.from("profiles").update({
+        first_name: "Usuário",
+        last_name: "Removido",
+        phone: null,
+        cpf: null,
+        date_of_birth: null,
+        avatar_url: null,
+        allergies: null,
+        blood_type: null,
+        chronic_conditions: null,
+      } as any).eq("user_id", user.id);
+
+      // Cancel active discount cards
+      await supabase.from("discount_cards")
+        .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
+      // Sign out
+      await supabase.auth.signOut();
+      
+      toast({ title: "Conta excluída", description: "Seus dados foram anonimizados conforme a LGPD." });
+      navigate("/");
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -226,10 +275,54 @@ const UserProfile = () => {
           </Card>
         )}
 
-        <Button onClick={handleSave} disabled={saving} className="bg-gradient-hero text-primary-foreground w-full sm:w-auto h-12 rounded-xl" size="lg">
-          <Save className="w-4 h-4 mr-2" />
-          {saving ? "Salvando..." : "Salvar Alterações"}
-        </Button>
+        <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          <Button onClick={handleSave} disabled={saving} className="bg-gradient-hero text-primary-foreground sm:w-auto h-12 rounded-xl flex-1" size="lg">
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? "Salvando..." : "Salvar Alterações"}
+          </Button>
+        </div>
+
+        {/* Delete Account - LGPD */}
+        <Card className="border-destructive/30 mb-8">
+          <CardHeader>
+            <CardTitle className="text-lg text-destructive flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5" /> Zona de Perigo
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Conforme a LGPD (Lei nº 13.709/2018), você tem o direito de solicitar a exclusão dos seus dados pessoais. 
+              Esta ação irá anonimizar seus dados e encerrar sua conta.
+            </p>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" className="rounded-xl">
+                  <Trash2 className="w-4 h-4 mr-2" /> Excluir minha conta
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Tem certeza que deseja excluir sua conta?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta ação é irreversível. Seus dados pessoais serão anonimizados conforme a LGPD. 
+                    Histórico médico será mantido de forma anônima para fins legais.
+                    Cartões de desconto e assinaturas ativas serão cancelados.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {deleting ? "Excluindo..." : "Sim, excluir minha conta"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
