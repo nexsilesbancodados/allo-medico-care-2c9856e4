@@ -99,8 +99,17 @@ const PlansCheckout = () => {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponValid, setCouponValid] = useState<boolean | null>(null);
   const [checkingCoupon, setCheckingCoupon] = useState(false);
+  const [cardDiscount, setCardDiscount] = useState(0);
 
   const currentPlan = plans.find(p => p.id === selectedPlan);
+
+  // Check if user has active discount card
+  useEffect(() => {
+    if (!user) return;
+    supabase.from("discount_cards").select("discount_percent").eq("user_id", user.id).eq("status", "active").maybeSingle().then(({ data }) => {
+      if (data) setCardDiscount(Number(data.discount_percent));
+    });
+  }, [user]);
 
   // PIX countdown
   useEffect(() => {
@@ -454,8 +463,9 @@ const PlansCheckout = () => {
   const availableTimes = selectedDate ? getAvailableTimesForDate(selectedDate) : [];
   const selectedSpecialtyName = specialties.find(s => s.id === selectedSpecialty)?.name;
   const basePrice = selectedPlan === "avulsa" ? (selectedDoctor?.consultation_price ?? 89) : (currentPlan?.price ?? 149);
-  const discountAmount = basePrice * (couponDiscount / 100);
-  const totalPrice = basePrice - discountAmount;
+  const totalDiscountPercent = Math.min(couponDiscount + cardDiscount, 100);
+  const discountAmount = basePrice * (totalDiscountPercent / 100);
+  const totalPrice = Math.max(basePrice - discountAmount, 0);
 
   const applyCoupon = async () => {
     if (!couponCode.trim()) return;
@@ -779,6 +789,11 @@ const PlansCheckout = () => {
                         {couponValid === true && (
                           <div className="flex items-center gap-1 text-xs text-green-600 mb-2">
                             <CheckCircle2 className="w-3 h-3" /> Cupom {couponCode} — {couponDiscount}% off
+                          </div>
+                        )}
+                        {cardDiscount > 0 && (
+                          <div className="flex items-center gap-1 text-xs text-primary mb-2">
+                            <CheckCircle2 className="w-3 h-3" /> Cartão de Desconto — {cardDiscount}% off
                           </div>
                         )}
                         {couponValid === false && (

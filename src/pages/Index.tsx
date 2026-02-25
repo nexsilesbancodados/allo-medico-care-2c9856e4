@@ -73,6 +73,27 @@ const Index = () => {
       <HeroSection />
       <SocialProofBar />
 
+      {/* Plantão 24h Banner */}
+      <section className="py-8 px-4 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/5">
+        <div className="container mx-auto max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-foreground flex items-center gap-2 justify-center sm:justify-start">
+              <Stethoscope className="w-6 h-6 text-primary" />
+              Plantão Clínico 24h
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">Atendimento médico imediato, sem agendamento. Disponível dia e noite.</p>
+          </div>
+          <Button
+            size="lg"
+            className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 shadow-elevated shrink-0"
+            onClick={() => window.location.href = "/paciente"}
+          >
+            <Stethoscope className="w-5 h-5" />
+            Acessar Plantão
+          </Button>
+        </div>
+      </section>
+
       <Suspense fallback={<><StatsSkeleton /><SectionSkeleton /><SectionSkeleton /><TestimonialsSkeleton /></>}>
         <StatsSection />
         <HowItWorksSection />
