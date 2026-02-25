@@ -108,18 +108,22 @@ const ExamReportEditor = () => {
     }
   }, [existingReport]);
 
-  // Generate signed URLs for exam files
+  // Generate signed URLs for exam files (or use directly if external URL)
   useEffect(() => {
     if (!examRequest?.file_urls) return;
     const urls = examRequest.file_urls as string[];
+    if (!urls.length) return;
     Promise.all(
       urls.map(async (path: string) => {
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+          return path;
+        }
         const { data } = await supabase.storage
           .from("exam-files")
           .createSignedUrl(path, 3600);
         return data?.signedUrl || "";
       })
-    ).then(setFileUrls);
+    ).then((resolved) => setFileUrls(resolved.filter(Boolean)));
   }, [examRequest]);
 
   const handleTemplateSelect = (templateId: string) => {
