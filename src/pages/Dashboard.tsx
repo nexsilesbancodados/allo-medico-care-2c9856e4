@@ -224,6 +224,7 @@ const Dashboard = () => {
       <Route path="clinic/waiting-room" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
       <Route path="clinic/finance" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
       <Route path="clinic/reports" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
+      <Route path="clinic/exam-request" element={<RoleGuard allowed={["clinic"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
 
       {/* Support routes */}
       <Route path="support/inbox" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
@@ -247,6 +248,7 @@ const Dashboard = () => {
       <Route path="reception/calls" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
       <Route path="reception/records" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
       <Route path="reception/messages" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
+      <Route path="reception/exam-request" element={<RoleGuard allowed={["receptionist"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
 
       {/* Admin routes */}
       <Route path="admin/doctors" element={<RoleGuard allowed={[]} roles={roles}><AdminDoctors /></RoleGuard>} />
