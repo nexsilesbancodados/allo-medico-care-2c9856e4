@@ -32,27 +32,35 @@ const FloatingMobileCTA = forwardRef<HTMLDivElement>((_, ref) => {
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
           className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom,8px)+6px)] pt-2 bg-gradient-to-t from-background via-background/95 to-transparent"
         >
-          <div className="flex gap-2">
-            <Button
-              size="lg"
-              className="flex-1 bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-2xl h-12 text-sm font-bold shadow-elevated gap-1.5 relative overflow-hidden"
-              onClick={() => navigate("/paciente")}
+          <div className="space-y-1.5">
+            {/* Urgency text */}
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-[10px] text-center text-muted-foreground font-medium"
             >
-              {/* Pulse ring */}
-              <span className="absolute inset-0 rounded-2xl animate-ping bg-primary/20 pointer-events-none" style={{ animationDuration: "3s" }} />
-              <span className="relative z-10 flex items-center gap-1.5">
-                Agendar Consulta <ArrowRight className="w-4 h-4" />
-              </span>
-            </Button>
-            <Button
-              size="icon"
-              variant="outline"
-              className="rounded-2xl h-12 w-12 shrink-0 border-primary/30"
-              onClick={openQuiz}
-              aria-label="Triagem de especialidade"
-            >
-              <Stethoscope className="w-5 h-5 text-primary" />
-            </Button>
+              🔥 <span className="text-warning font-bold">3 vagas</span> restantes para hoje
+            </motion.p>
+            <div className="flex gap-2">
+              <Button
+                size="lg"
+                className="flex-1 bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-2xl h-12 text-sm font-bold shadow-elevated gap-1.5 relative overflow-hidden cta-shimmer"
+                onClick={() => navigate("/paciente")}
+              >
+                <span className="relative z-10 flex items-center gap-1.5">
+                  Agendar Consulta <ArrowRight className="w-4 h-4" />
+                </span>
+              </Button>
+              <Button
+                size="icon"
+                variant="outline"
+                className="rounded-2xl h-12 w-12 shrink-0 border-primary/30"
+                onClick={openQuiz}
+                aria-label="Triagem de especialidade"
+              >
+                <Stethoscope className="w-5 h-5 text-primary" />
+              </Button>
+            </div>
           </div>
         </motion.div>
       )}

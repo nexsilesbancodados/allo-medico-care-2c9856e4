@@ -12,6 +12,36 @@ const poseContent = [
   { title: "Receitas e laudos", highlight: "100% digitais", description: "Receba prescrições, atestados e laudos médicos direto no seu celular. Tudo organizado e acessível." },
 ];
 
+const LiveActivityIndicator = memo(() => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    // Simulated live activity — randomized realistic number
+    const base = 14 + Math.floor(Math.random() * 8);
+    setCount(base);
+    const interval = setInterval(() => {
+      setCount(prev => prev + (Math.random() > 0.5 ? 1 : -1));
+    }, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.8 }}
+      className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-success/10 border border-success/20 text-xs font-medium text-success"
+    >
+      <span className="relative flex h-2 w-2">
+        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+        <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
+      </span>
+      {count} pessoas agendando agora
+    </motion.div>
+  );
+});
+LiveActivityIndicator.displayName = "LiveActivityIndicator";
+
 const HeroSection = memo(() => {
   const navigate = useNavigate();
   const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
@@ -94,8 +124,9 @@ const HeroSection = memo(() => {
               </Button>
             </div>
 
-            {/* Trust */}
-            <div className="flex flex-wrap gap-6">
+            {/* Live activity + Trust */}
+            <LiveActivityIndicator />
+            <div className="flex flex-wrap gap-6 mt-3">
               {[
                 { icon: Shield, text: "Dados protegidos" },
                 { icon: Clock, text: "Atendimento 24h" },
