@@ -1,86 +1,137 @@
 
 
-## Plano: Sistema de Telelaudo (Workflow de Laudos Médicos)
-
-Este plano implementa um fluxo completo de telelaudo: upload de exames, fila para laudistas, edição de laudos com templates, assinatura digital SHA-256, geração de PDF e notificações.
+## Plano de Implementacao: 5 Features Morsch (Plantao 24h, Renovacao de Receita, Cartao de Desconto, Cofre de Documentos, Landing B2B)
 
 ---
 
-### Escopo Funcional
+### 1. Plantao Clinico 24h (Pronto-Atendimento Digital)
 
-1. **Solicitação** - Médico assistente faz upload de exame (PDF/imagem) e preenche anamnese
-2. **Triagem** - Exame aparece na fila de laudos pendentes para médicos laudistas
-3. **Execução** - Laudista visualiza o arquivo, seleciona template, edita o laudo e assina digitalmente
-4. **Entrega** - PDF gerado automaticamente, paciente/médico solicitante notificados
+**Banco de Dados:**
+- Nova tabela `on_demand_queue` com colunas: `id`, `patient_id`, `shift` (day/night/dawn), `price`, `payment_id`, `status` (waiting/assigned/in_progress/completed/refunded), `assigned_doctor_id`, `position`, `created_at`, `assigned_at`, `started_at`, `completed_at`
+- RLS: paciente ve propria fila; medicos com role doctor veem filas waiting; admin ve tudo
 
----
+**Edge Function:**
+- `calculate-shift-price/index.ts` - retorna preco baseado na hora atual:
+  - 07h-19h: R$75 (Diurno)
+  - 19h-00h: R$100 (Noturno)
+  - 00h-07h: R$120 (Madrugada)
 
-### Detalhes Técnicos
+**Componentes Frontend:**
+- `src/components/patient/UrgentCareQueue.tsx` - Tela do paciente: paga via Asaas, entra na fila, ve posicao em tempo real (Realtime subscription), timer de 15 min com botao de reembolso
+- `src/components/doctor/DoctorOnDutyPanel.tsx` - Painel do plantonista: lista fila ordenada por created_at, botao "Atender Proximo" que atribui paciente e redireciona para VideoRoom
+- Rota `/dashboard/urgent-care` (paciente) e `/dashboard/doctor/on-duty` (medico)
+- Nav items adicionados em `patientNav.tsx` e `doctorNav.tsx`
+- Link na landing page (HeroSection ou PlansSection) para `/dashboard/urgent-care`
 
-#### A. Banco de Dados (3 tabelas novas + 1 bucket)
-
-**Tabela `exam_requests`** (Solicitações de exame para laudo):
-- `id`, `patient_id` (uuid), `requesting_doctor_id` (uuid, ref doctor_profiles), `exam_type` (text), `clinical_info` (text - anamnese), `file_urls` (jsonb - array de URLs no storage), `status` (enum: pending, in_review, reported, delivered), `priority` (text: normal, urgent), `assigned_to` (uuid, nullable - laudista atribuído), `created_at`, `updated_at`
-
-**Tabela `exam_reports`** (Laudos):
-- `id`, `exam_request_id` (uuid, FK exam_requests), `reporter_id` (uuid, FK doctor_profiles - laudista), `content_text` (text - corpo do laudo), `template_id` (uuid, nullable), `pdf_url` (text), `document_hash` (text - SHA-256), `verification_code` (text), `signed_at` (timestamptz), `created_at`, `updated_at`
-
-**Tabela `report_templates`** (Modelos de laudo):
-- `id`, `title` (text), `exam_type` (text), `body_text` (text - template base), `created_by` (uuid), `is_active` (boolean), `created_at`
-
-**Bucket `exam-files`** (privado) para armazenar arquivos DICOM/PDF/imagem dos exames.
-
-**RLS:**
-- `exam_requests`: médicos solicitantes veem os próprios, laudistas veem pendentes/atribuídos, admin vê tudo
-- `exam_reports`: laudista autor + médico solicitante + admin
-- `report_templates`: qualquer médico pode ler templates ativos, admin gerencia
-
-#### B. Componentes Frontend (4 novos)
-
-1. **`src/components/doctor/ExamRequestForm.tsx`** - Formulário para solicitar laudo: upload de arquivo, tipo de exame, anamnese, prioridade. Usa o bucket `exam-files`.
-
-2. **`src/components/doctor/ExamReportQueue.tsx`** - Fila de exames pendentes para o laudista. Tabela com filtros por status, tipo e prioridade. Botão "Assumir" para atribuir a si.
-
-3. **`src/components/doctor/ExamReportEditor.tsx`** - Tela split-view: esquerda = visualizador do arquivo (iframe para PDF, `<img>` para imagem), direita = editor de texto com seleção de template. Botão "Assinar e Finalizar" gera hash SHA-256 + código de verificação, cria PDF via jsPDF, salva no bucket `prescriptions` e atualiza status para "reported".
-
-4. **`src/components/doctor/ReportTemplateManager.tsx`** - CRUD de templates de laudo (admin/médico). Lista de modelos com título, tipo de exame e corpo editável.
-
-#### C. Rotas e Navegação
-
-- Adicionar ao `doctorNav.tsx` um item "Laudos" no grupo "Documentos"
-- Adicionar 4 rotas ao `Dashboard.tsx`:
-  - `/dashboard/doctor/exam-request` - ExamRequestForm
-  - `/dashboard/doctor/report-queue` - ExamReportQueue
-  - `/dashboard/doctor/report-editor/:examId` - ExamReportEditor
-  - `/dashboard/doctor/report-templates` - ReportTemplateManager
-
-#### D. Assinatura Digital
-
-Reutilizar `src/lib/signature.ts` (já existe `gerarHashDocumento` SHA-256 e `gerarCodigoVerificacao`). Ao finalizar o laudo:
-1. Gerar hash do conteúdo do laudo
-2. Gerar código de verificação de 8 caracteres
-3. Registrar na tabela `document_verifications` (já existente)
-4. Gerar PDF com jsPDF (já instalado) incluindo hash e código no rodapé
-
-#### E. Notificações
-
-Ao marcar como "reported", inserir notificação na tabela `notifications` para o médico solicitante e, se houver `patient_id`, para o paciente.
-
-#### F. Visualização de Arquivos
-
-- PDFs: renderizados via `<iframe>` com URL assinada do Supabase Storage
-- Imagens (JPG/PNG): exibidas via `<img>` com URL assinada
-- DICOM: fora do escopo inicial (requer cornerstone.js ou integração PACS), mas o campo `exam_type` permite extensão futura
+**Realtime:**
+- Channel `on-demand-queue` com postgres_changes INSERT/UPDATE para atualizar posicao e status em tempo real
 
 ---
 
-### Ordem de Implementação
+### 2. Renovacao de Receita Assincrona
 
-1. Migration SQL (tabelas + bucket + RLS)
-2. ExamRequestForm (upload + solicitação)
-3. ExamReportQueue (fila do laudista)
-4. ExamReportEditor (split-view + templates + assinatura + PDF)
-5. ReportTemplateManager (CRUD de modelos)
-6. Rotas + navegação
-7. Notificações na finalização
+**Banco de Dados:**
+- Nova tabela `prescription_renewals` com colunas: `id`, `patient_id`, `original_prescription_url`, `health_questionnaire` (jsonb), `status` (pending/in_review/approved/rejected), `assigned_doctor_id`, `new_prescription_id`, `payment_id`, `paid_at`, `reviewed_at`, `rejection_reason`, `created_at`, `updated_at`
+- RLS: paciente gerencia proprias; medicos veem as que estao assigned ou pending; admin ve tudo
+
+**Componentes Frontend:**
+- `src/components/patient/PrescriptionRenewalForm.tsx` - Upload da receita vencida (bucket patient-documents), questionario de saude (alergias, condicoes cronicas, medicamentos atuais, efeitos colaterais), pagamento via Asaas (R$80)
+- `src/components/doctor/RenewalQueue.tsx` - Fila de renovacoes pendentes, botao "Assumir", formulario de aprovacao/rejeicao com emissao de nova receita digital
+- Rotas: `/dashboard/prescription-renewal` (paciente), `/dashboard/doctor/renewal-queue` (medico)
+- Nav items adicionados
+
+---
+
+### 3. Cartao de Desconto (Programa de Fidelidade)
+
+**Banco de Dados:**
+- Nova tabela `discount_cards` com colunas: `id`, `user_id`, `plan_type` (individual/couple/family), `discount_percent` (default 30), `price_monthly`, `status` (active/cancelled/expired), `valid_until`, `payment_id`, `created_at`, `cancelled_at`
+- RLS: usuario gerencia proprio cartao; admin ve todos
+
+**Componentes Frontend:**
+- `src/pages/DiscountCard.tsx` - Landing page publica dedicada com 3 planos:
+  - Individual: R$24.90/mes
+  - Casal: R$39.90/mes
+  - Familia (ate 4): R$54.90/mes
+  - Beneficios: 30% off em teleconsultas, plantao 24h e renovacao de receita
+- Integracao no checkout (`PlansCheckout.tsx` e `UrgentCareQueue.tsx`): verificar se usuario tem `discount_cards` ativo e aplicar desconto automaticamente
+- Rota publica `/cartao-desconto` adicionada ao App.tsx
+- Link no Footer e Header da landing
+
+---
+
+### 4. Cofre de Documentos do Paciente (Aprimoramento)
+
+O `PatientExamUpload.tsx` ja existe e permite upload/visualizacao/exclusao. O que falta:
+
+**Melhorias no componente existente:**
+- Adicionar campo `category` (select) para categorizar: Exame, Receita, Atestado, Historico, Outro
+- Adicionar filtro por categoria e busca por nome
+- Adicionar organizacao visual por pastas/categorias com icones distintos
+- Renomear na nav de "Meus Exames" para "Cofre de Documentos"
+- Adicionar badge de contagem total na sidebar
+
+**Banco de Dados:**
+- Adicionar coluna `category` (text, default 'exam') na tabela `patient_documents`
+
+---
+
+### 5. Landing Page B2B + Formulario de Orcamento
+
+**Banco de Dados:**
+- Nova tabela `b2b_leads` com colunas: `id`, `company_name`, `cnpj`, `contact_name`, `email`, `phone`, `company_type` (clinic/hospital/health_plan/other), `services_interested` (jsonb array), `message`, `status` (new/contacted/proposal_sent/converted), `created_at`, `notes` (text)
+- RLS: INSERT publico (anon); SELECT/UPDATE apenas admin
+
+**Edge Function:**
+- `b2b-lead-notification/index.ts` - Envia email via Resend para o admin quando um novo lead B2B e criado
+
+**Componentes Frontend:**
+- `src/pages/B2BLanding.tsx` - Pagina dedicada com:
+  - Hero B2B (titulo: "Telemedicina para sua Clinica ou Hospital")
+  - Lista de servicos (Telelaudo, Teleconsulta, Plantao 24h, White Label)
+  - Depoimentos de clinicas
+  - Formulario de orcamento (nome, empresa, CNPJ, telefone, email, servicos de interesse, mensagem)
+  - CTA forte
+- Rota publica `/para-empresas` no App.tsx
+- Link no Footer e Header
+
+---
+
+### Resumo de Arquivos
+
+```text
+NOVOS ARQUIVOS:
+  supabase/migrations/XXXXX.sql          (tabelas: on_demand_queue, prescription_renewals, discount_cards, b2b_leads + coluna category em patient_documents)
+  supabase/functions/calculate-shift-price/index.ts
+  supabase/functions/b2b-lead-notification/index.ts
+  src/components/patient/UrgentCareQueue.tsx
+  src/components/patient/PrescriptionRenewalForm.tsx
+  src/components/doctor/DoctorOnDutyPanel.tsx
+  src/components/doctor/RenewalQueue.tsx
+  src/pages/DiscountCard.tsx
+  src/pages/B2BLanding.tsx
+
+ARQUIVOS EDITADOS:
+  src/pages/Dashboard.tsx                (novas rotas)
+  src/App.tsx                            (rotas publicas: /cartao-desconto, /para-empresas)
+  src/components/patient/patientNav.tsx   (Plantao, Renovar Receita, Cofre)
+  src/components/doctor/doctorNav.tsx     (Plantao, Renovacoes)
+  src/components/patient/PatientExamUpload.tsx  (categorias, filtros, rename)
+  src/components/patient/PlansCheckout.tsx      (verificar discount_card ativo)
+  src/components/landing/Footer.tsx       (links B2B e Cartao)
+  src/pages/Index.tsx                     (secao ou link para Plantao 24h)
+  supabase/config.toml                    (verify_jwt config)
+  src/integrations/supabase/types.ts      (auto-atualizado)
+```
+
+### Ordem de Execucao
+
+1. Migration SQL (todas as tabelas de uma vez)
+2. Edge Functions (calculate-shift-price, b2b-lead-notification)
+3. Componentes do Plantao 24h (UrgentCareQueue + DoctorOnDutyPanel)
+4. Componentes da Renovacao de Receita (PrescriptionRenewalForm + RenewalQueue)
+5. Pagina do Cartao de Desconto + integracao no checkout
+6. Aprimoramento do Cofre de Documentos
+7. Landing B2B
+8. Rotas, navs e links
 
