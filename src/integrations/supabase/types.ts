@@ -86,6 +86,24 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       appointment_waitlist: {
         Row: {
           created_at: string
@@ -963,6 +981,47 @@ export type Database = {
           title?: string
         }
         Relationships: []
+      }
+      medical_record_access_logs: {
+        Row: {
+          access_type: string
+          accessed_by: string
+          created_at: string
+          id: string
+          ip_address: string | null
+          patient_id: string
+          record_id: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          access_type?: string
+          accessed_by: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          patient_id: string
+          record_id?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          access_type?: string
+          accessed_by?: string
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          patient_id?: string
+          record_id?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_record_access_logs_record_id_fkey"
+            columns: ["record_id"]
+            isOneToOne: false
+            referencedRelation: "medical_records"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       medical_records: {
         Row: {

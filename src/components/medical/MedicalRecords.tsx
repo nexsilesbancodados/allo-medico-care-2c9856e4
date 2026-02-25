@@ -70,7 +70,20 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
   const targetPatientId = patientId ?? user?.id;
   const isDoctorRole = isDoctor || roles.includes("doctor");
 
-  useEffect(() => { if (targetPatientId) fetchRecords(); }, [targetPatientId]);
+  useEffect(() => {
+    if (targetPatientId) {
+      fetchRecords();
+      // Log access for CFM compliance
+      if (user && patientId && isDoctorRole) {
+        supabase.from("medical_record_access_logs" as any).insert({
+          patient_id: patientId,
+          accessed_by: user.id,
+          access_type: "view",
+          user_agent: navigator.userAgent,
+        } as any).then(() => {});
+      }
+    }
+  }, [targetPatientId]);
 
   const fetchRecords = async () => {
     const { data } = await supabase
