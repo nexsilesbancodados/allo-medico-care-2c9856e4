@@ -8,6 +8,7 @@ import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getLaudistaNav } from "@/components/laudista/laudistaNav";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -35,6 +36,7 @@ const ExamReportEditor = () => {
   const [icpStatus, setIcpStatus] = useState<"idle" | "loading" | "signed" | "unavailable">("idle");
   const [pacsStatus, setPacsStatus] = useState<"idle" | "loading" | "connected" | "unavailable">("idle");
   const [activeDicomUrl, setActiveDicomUrl] = useState<string | null>(null);
+  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
 
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-editor", user?.id],
@@ -374,8 +376,9 @@ const ExamReportEditor = () => {
                       <img
                         src={url}
                         alt={`Exame ${i + 1}`}
-                        className="w-full object-contain max-h-96 cursor-pointer"
-                        onClick={() => setActiveDicomUrl(url)}
+                        className="w-full object-contain max-h-96 cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setFullscreenImageUrl(url)}
+                        title="Clique para ver em tela cheia"
                       />
                     )}
                   </div>
@@ -457,6 +460,18 @@ const ExamReportEditor = () => {
           </CardContent>
         </Card>
       </div>
+      {/* Fullscreen image dialog */}
+      <Dialog open={!!fullscreenImageUrl} onOpenChange={() => setFullscreenImageUrl(null)}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-2 flex items-center justify-center">
+          {fullscreenImageUrl && (
+            <img
+              src={fullscreenImageUrl}
+              alt="Exame em tela cheia"
+              className="max-w-full max-h-[90vh] object-contain"
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
