@@ -13,10 +13,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, FileSignature, Download, Eye } from "lucide-react";
+import { Loader2, FileSignature, Download, Eye, Shield, Database, ImageIcon } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import jsPDF from "jspdf";
+import DicomViewer from "@/components/consultation/DicomViewer";
 
 const ExamReportEditor = () => {
   const { examId } = useParams<{ examId: string }>();
@@ -31,6 +32,9 @@ const ExamReportEditor = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [signing, setSigning] = useState(false);
   const [fileUrls, setFileUrls] = useState<string[]>([]);
+  const [icpStatus, setIcpStatus] = useState<"idle" | "loading" | "signed" | "unavailable">("idle");
+  const [pacsStatus, setPacsStatus] = useState<"idle" | "loading" | "connected" | "unavailable">("idle");
+  const [activeDicomUrl, setActiveDicomUrl] = useState<string | null>(null);
 
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-editor", user?.id],
@@ -210,6 +214,25 @@ const ExamReportEditor = () => {
         .update({ status: "reported" } as any)
         .eq("id", examId);
 
+      // Try ICP-Brasil signature via VIDaaS (optional enhancement)
+      try {
+        const icpRes = await supabase.functions.invoke("vidaas-sign", {
+          body: {
+            action: "sign",
+            document_hash: documentHash,
+            document_type: "exam_report",
+            doctor_name: doctorName,
+            doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`,
+            verification_code: verificationCode,
+          },
+        });
+        if (icpRes.data?.success) {
+          setIcpStatus("signed");
+        }
+      } catch {
+        // ICP-Brasil is optional — SHA-256 signature is always applied
+      }
+
       // Register in document_verifications
       await supabase.from("document_verifications").insert({
         doctor_name: doctorName,
@@ -319,16 +342,37 @@ const ExamReportEditor = () => {
                 <strong>Anamnese:</strong> {examRequest.clinical_info}
               </div>
             )}
-            <div className="space-y-2 overflow-y-auto" style={{ maxHeight: "calc(100% - 6rem)" }}>
+            {/* DICOM Viewer */}
+            {activeDicomUrl && (
+              <div className="mb-3 h-80">
+                <DicomViewer fileUrl={activeDicomUrl} fileName="Exame DICOM" />
+              </div>
+            )}
+
+            <div className="space-y-2 overflow-y-auto" style={{ maxHeight: activeDicomUrl ? "calc(100% - 28rem)" : "calc(100% - 6rem)" }}>
               {fileUrls.map((url, i) => {
                 const originalPath = (examRequest?.file_urls as string[])?.[i] || "";
                 const isPdf = originalPath.toLowerCase().endsWith(".pdf");
+                const isDicom = originalPath.toLowerCase().endsWith(".dcm") || originalPath.toLowerCase().endsWith(".dicom");
                 return (
                   <div key={i} className="border rounded-md overflow-hidden">
-                    {isPdf ? (
+                    {isDicom ? (
+                      <Button
+                        variant="outline"
+                        className="w-full h-16"
+                        onClick={() => setActiveDicomUrl(url)}
+                      >
+                        <ImageIcon className="w-4 h-4 mr-2" /> Abrir DICOM #{i + 1} no Visualizador
+                      </Button>
+                    ) : isPdf ? (
                       <iframe src={url} className="w-full h-96" title={`Exame ${i + 1}`} />
                     ) : (
-                      <img src={url} alt={`Exame ${i + 1}`} className="w-full object-contain max-h-96" />
+                      <img
+                        src={url}
+                        alt={`Exame ${i + 1}`}
+                        className="w-full object-contain max-h-96 cursor-pointer"
+                        onClick={() => setActiveDicomUrl(url)}
+                      />
                     )}
                   </div>
                 );
