@@ -259,33 +259,34 @@ const BookAppointment = () => {
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
 
-        {/* Doctor card - compact */}
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border mb-5">
-          <Avatar className="w-12 h-12 rounded-xl shrink-0">
-            <AvatarFallback className="rounded-xl bg-primary/10 text-primary font-bold">
+        {/* Doctor card - compact with gradient */}
+        <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50 mb-5 hover:shadow-lg transition-shadow">
+          <Avatar className="w-14 h-14 rounded-xl shrink-0">
+            <AvatarFallback className="rounded-xl bg-gradient-to-br from-primary to-secondary text-white font-bold text-lg">
               {doctor.first_name[0]}{doctor.last_name[0]}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <h2 className="font-semibold text-foreground text-[15px] truncate">Dr(a). {doctor.first_name} {doctor.last_name}</h2>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <h2 className="font-bold text-foreground text-[15px] truncate">Dr(a). {doctor.first_name} {doctor.last_name}</h2>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
               <span>CRM {doctor.crm}/{doctor.crm_state}</span>
               {doctor.rating > 0 && (
                 <span className="flex items-center gap-0.5">
-                  <Star className="w-3 h-3 text-amber-500 fill-amber-500" /> {doctor.rating.toFixed(1)}
+                  <Star className="w-3 h-3 text-warning fill-warning" /> {doctor.rating.toFixed(1)}
                 </span>
               )}
             </div>
             {doctor.specialties.length > 0 && (
-              <div className="flex gap-1 mt-1">
+              <div className="flex gap-1 mt-1.5">
                 {doctor.specialties.slice(0, 2).map(s => (
-                  <span key={s} className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/8 text-primary font-medium">{s}</span>
+                  <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">{s}</span>
                 ))}
               </div>
             )}
           </div>
           <div className="text-right shrink-0">
-            <p className="text-lg font-bold text-foreground">R${doctor.consultation_price}</p>
+            <p className="text-xl font-black text-foreground">R${doctor.consultation_price}</p>
+            <p className="text-[10px] text-muted-foreground">por consulta</p>
           </div>
         </div>
 
@@ -545,16 +546,16 @@ const BookAppointment = () => {
 
                 {/* Return policy notice */}
                 {appointmentType === "return" && (
-                  <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 mb-4">
-                    <AlertTriangle className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
-                    <p className="text-[11px] text-amber-700 dark:text-amber-400">
+                  <div className="flex items-start gap-2 p-3 rounded-xl bg-warning/10 border border-warning/20 mb-4">
+                    <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
+                    <p className="text-[11px] text-foreground/80">
                       Retornos são gratuitos dentro de 15 dias da consulta original. Fora desse prazo, será cobrado o valor integral.
                     </p>
                   </div>
                 )}
 
                 <Button
-                  className="w-full h-14 rounded-xl bg-gradient-hero text-primary-foreground text-base font-semibold active:scale-[0.98] transition-transform"
+                  className="w-full h-14 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground text-base font-bold shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow active:scale-[0.98]"
                   onClick={handleBook}
                   disabled={booking}
                 >

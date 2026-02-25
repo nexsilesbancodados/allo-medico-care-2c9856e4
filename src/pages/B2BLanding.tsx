@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Monitor, FileText, Stethoscope, Phone, CheckCircle2, ArrowRight } from "lucide-react";
+import { Building2, Monitor, FileText, Stethoscope, Phone, CheckCircle2, ArrowRight, Shield, Users, Zap, BarChart2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -27,11 +27,14 @@ const leadSchema = z.object({
 });
 
 const services = [
-  { id: "telelaudo", label: "Telelaudo", icon: <FileText className="w-5 h-5" /> },
-  { id: "teleconsulta", label: "Teleconsulta", icon: <Monitor className="w-5 h-5" /> },
-  { id: "plantao24h", label: "Plantão 24h", icon: <Phone className="w-5 h-5" /> },
-  { id: "whitelabel", label: "White Label", icon: <Building2 className="w-5 h-5" /> },
+  { id: "telelaudo", label: "Telelaudo", icon: <FileText className="w-5 h-5" />, desc: "Laudos a distância" },
+  { id: "teleconsulta", label: "Teleconsulta", icon: <Monitor className="w-5 h-5" />, desc: "Vídeo consultas" },
+  { id: "plantao24h", label: "Plantão 24h", icon: <Phone className="w-5 h-5" />, desc: "SLA 15min" },
+  { id: "whitelabel", label: "White Label", icon: <Building2 className="w-5 h-5" />, desc: "Sua marca" },
 ];
+
+const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } } };
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
 
 const B2BLanding = () => {
   const [form, setForm] = useState({ company_name: "", contact_name: "", email: "", phone: "", cnpj: "", company_type: "clinic", message: "" });
@@ -46,136 +49,129 @@ const B2BLanding = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = leadSchema.safeParse(form);
-    if (!result.success) {
-      toast.error(result.error.errors[0].message);
-      return;
-    }
+    if (!result.success) { toast.error(result.error.errors[0].message); return; }
     setSubmitting(true);
-
-    const { error } = await supabase.from("b2b_leads").insert({
-      ...form,
-      services_interested: selectedServices,
-    });
-
-    if (error) {
-      toast.error("Erro ao enviar: " + error.message);
-      setSubmitting(false);
-      return;
-    }
-
-    // Notify admin
-    await supabase.functions.invoke("b2b-lead-notification", {
-      body: { ...form, services_interested: selectedServices },
-    }).catch(() => {});
-
+    const { error } = await supabase.from("b2b_leads").insert({ ...form, services_interested: selectedServices });
+    if (error) { toast.error("Erro ao enviar: " + error.message); setSubmitting(false); return; }
+    await supabase.functions.invoke("b2b-lead-notification", { body: { ...form, services_interested: selectedServices } }).catch(() => {});
     setSubmitted(true);
     setSubmitting(false);
   };
 
   return (
     <>
-      <SEOHead title="Telemedicina para Empresas | AloClinica" description="Soluções de teleconsulta, telelaudo e plantão 24h para clínicas e hospitais. Solicite um orçamento." />
+      <SEOHead title="Telemedicina para Empresas | AloClinica" description="Soluções de teleconsulta, telelaudo e plantão 24h para clínicas e hospitais." />
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
+        <header className="border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-50">
           <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2">
-              <img src={logo} alt="AloClinica" className="w-8 h-8 rounded-lg" />
-              <span className="font-bold text-foreground">AloClinica</span>
+            <Link to="/" className="flex items-center gap-2.5">
+              <img src={logo} alt="AloClinica" className="w-9 h-9 rounded-xl" />
+              <span className="font-bold text-foreground text-lg tracking-tight">AloClínica</span>
             </Link>
-            <Button variant="outline" asChild><Link to="/clinica">Acesso Clínica</Link></Button>
+            <Button variant="outline" className="rounded-xl font-semibold" asChild><Link to="/clinica">Acesso Clínica</Link></Button>
           </div>
         </header>
 
-        {/* Hero */}
-        <section className="py-20 bg-gradient-to-b from-primary/5 to-background">
-          <div className="container mx-auto px-4 text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <Badge className="mb-4 text-sm px-4 py-1">🏢 Para Empresas</Badge>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-                Telemedicina para sua <span className="text-primary">Clínica ou Hospital</span>
+        {/* Hero — gradient */}
+        <section className="relative overflow-hidden py-24 sm:py-32">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
+          <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute -bottom-16 -left-16 w-60 h-60 rounded-full bg-white/5 blur-3xl" />
+          <div className="container mx-auto px-4 text-center relative">
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">🏢 Para Empresas</Badge>
+              <h1 className="text-4xl md:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
+                Telemedicina para sua<br /><span className="text-white/90">Clínica ou Hospital</span>
               </h1>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+              <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
                 Teleconsulta, telelaudo e pronto-atendimento digital. Integre nossa plataforma ao seu fluxo de trabalho.
               </p>
-              <Button size="lg" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
-                Solicitar Orçamento <ArrowRight className="w-4 h-4 ml-2" />
+              <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
+                Solicitar Orçamento <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
+
+              {/* Trust metrics */}
+              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
+                {[
+                  { icon: <Shield className="w-4 h-4" />, label: "CFM Regulado" },
+                  { icon: <Users className="w-4 h-4" />, label: "500+ Clínicas" },
+                  { icon: <Zap className="w-4 h-4" />, label: "SLA 15min" },
+                  { icon: <BarChart2 className="w-4 h-4" />, label: "99.9% Uptime" },
+                ].map((item, i) => (
+                  <span key={i} className="flex items-center gap-2 text-white/60 text-sm font-medium">
+                    {item.icon} {item.label}
+                  </span>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
 
-        {/* Services */}
-        <section className="py-16">
+        {/* Services — gradient icon cards */}
+        <section className="py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-foreground text-center mb-10">Nossos Serviços B2B</h2>
-            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-              {[
-                { icon: <Stethoscope className="w-8 h-8" />, title: "Teleconsulta", desc: "Consultas médicas por videochamada com receita digital" },
-                { icon: <FileText className="w-8 h-8" />, title: "Telelaudo", desc: "Laudos médicos a distância com assinatura digital" },
-                { icon: <Phone className="w-8 h-8" />, title: "Plantão 24h", desc: "Pronto-atendimento digital com SLA de 15 minutos" },
-                { icon: <Building2 className="w-8 h-8" />, title: "White Label", desc: "Plataforma personalizada com a marca da sua empresa" },
-              ].map((s, i) => (
-                <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}>
-                  <Card className="h-full text-center">
-                    <CardContent className="p-6">
-                      <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4 text-primary">{s.icon}</div>
-                      <h3 className="font-bold text-foreground mb-2">{s.title}</h3>
-                      <p className="text-sm text-muted-foreground">{s.desc}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+            <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
+              <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-black text-foreground text-center mb-4 tracking-tight">Nossos Serviços B2B</motion.h2>
+              <motion.p variants={fadeUp} className="text-muted-foreground text-center mb-12 max-w-lg mx-auto">Soluções completas de telemedicina para sua operação</motion.p>
+              <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5 max-w-5xl mx-auto">
+                {[
+                  { icon: <Stethoscope className="w-7 h-7 text-white" />, title: "Teleconsulta", desc: "Consultas por videochamada com receita digital", gradient: "from-primary to-primary/70" },
+                  { icon: <FileText className="w-7 h-7 text-white" />, title: "Telelaudo", desc: "Laudos a distância com assinatura digital", gradient: "from-warning to-warning/70" },
+                  { icon: <Phone className="w-7 h-7 text-white" />, title: "Plantão 24h", desc: "Pronto-atendimento digital SLA 15 min", gradient: "from-destructive to-destructive/70" },
+                  { icon: <Building2 className="w-7 h-7 text-white" />, title: "White Label", desc: "Plataforma personalizada com sua marca", gradient: "from-secondary to-secondary/70" },
+                ].map((s, i) => (
+                  <motion.div key={i} variants={fadeUp}>
+                    <Card className="h-full border-border/50 hover:shadow-xl hover:border-border hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
+                      <CardContent className="p-6">
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                          {s.icon}
+                        </div>
+                        <h3 className="font-bold text-foreground text-lg mb-2">{s.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </section>
 
         {/* Form */}
-        <section id="form" className="py-16 bg-muted/30">
+        <section id="form" className="py-20 bg-muted/30">
           <div className="container mx-auto px-4 max-w-2xl">
-            <h2 className="text-3xl font-bold text-foreground text-center mb-8">Solicite um Orçamento</h2>
+            <h2 className="text-3xl font-black text-foreground text-center mb-3 tracking-tight">Solicite um Orçamento</h2>
+            <p className="text-muted-foreground text-center mb-10">Entraremos em contato em até 24h úteis</p>
 
             {submitted ? (
-              <Card>
+              <Card className="border-success/30 shadow-xl">
                 <CardContent className="p-12 text-center">
-                  <CheckCircle2 className="w-16 h-16 mx-auto text-primary mb-4" />
-                  <h3 className="text-xl font-bold mb-2">Orçamento solicitado!</h3>
-                  <p className="text-muted-foreground">Entraremos em contato em até 24h úteis.</p>
+                  <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-success to-success/70 flex items-center justify-center mx-auto mb-5 shadow-lg">
+                    <CheckCircle2 className="w-10 h-10 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 text-foreground">Orçamento solicitado!</h3>
+                  <p className="text-muted-foreground">Nossa equipe entrará em contato em breve.</p>
                 </CardContent>
               </Card>
             ) : (
-              <Card>
-                <CardContent className="p-6">
-                  <form onSubmit={handleSubmit} className="space-y-4">
+              <Card className="shadow-xl border-border/50">
+                <CardContent className="p-6 sm:p-8">
+                  <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Empresa *</Label>
-                        <Input required value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} />
-                      </div>
-                      <div>
-                        <Label>CNPJ</Label>
-                        <Input value={form.cnpj} onChange={e => setForm(f => ({ ...f, cnpj: e.target.value }))} placeholder="00.000.000/0001-00" />
-                      </div>
+                      <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Empresa *</Label><Input required value={form.company_name} onChange={e => setForm(f => ({ ...f, company_name: e.target.value }))} className="mt-1.5 h-11 rounded-xl" /></div>
+                      <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">CNPJ</Label><Input value={form.cnpj} onChange={e => setForm(f => ({ ...f, cnpj: e.target.value }))} placeholder="00.000.000/0001-00" className="mt-1.5 h-11 rounded-xl" /></div>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <div>
-                        <Label>Nome do Contato *</Label>
-                        <Input required value={form.contact_name} onChange={e => setForm(f => ({ ...f, contact_name: e.target.value }))} />
-                      </div>
-                      <div>
-                        <Label>Email *</Label>
-                        <Input type="email" required value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} />
-                      </div>
+                      <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contato *</Label><Input required value={form.contact_name} onChange={e => setForm(f => ({ ...f, contact_name: e.target.value }))} className="mt-1.5 h-11 rounded-xl" /></div>
+                      <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email *</Label><Input type="email" required value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="mt-1.5 h-11 rounded-xl" /></div>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
+                      <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Telefone</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="mt-1.5 h-11 rounded-xl" /></div>
                       <div>
-                        <Label>Telefone</Label>
-                        <Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} />
-                      </div>
-                      <div>
-                        <Label>Tipo de Empresa *</Label>
+                        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tipo *</Label>
                         <Select value={form.company_type} onValueChange={v => setForm(f => ({ ...f, company_type: v }))}>
-                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectTrigger className="mt-1.5 h-11 rounded-xl"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="clinic">Clínica</SelectItem>
                             <SelectItem value="hospital">Hospital</SelectItem>
@@ -186,24 +182,23 @@ const B2BLanding = () => {
                       </div>
                     </div>
                     <div>
-                      <Label>Serviços de Interesse</Label>
-                      <div className="grid grid-cols-2 gap-2 mt-2">
+                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Serviços de Interesse</Label>
+                      <div className="grid grid-cols-2 gap-2.5 mt-2">
                         {services.map(s => (
                           <div key={s.id} onClick={() => toggleService(s.id)}
-                            className={`flex items-center gap-2 p-3 rounded-lg border cursor-pointer transition-colors ${selectedServices.includes(s.id) ? "border-primary bg-primary/5" : "border-border"}`}>
-                            <Checkbox checked={selectedServices.includes(s.id)} />
-                            {s.icon}
-                            <span className="text-sm">{s.label}</span>
+                            className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${selectedServices.includes(s.id) ? "border-primary bg-primary/5 shadow-sm" : "border-border/50 hover:border-border"}`}>
+                            <Checkbox checked={selectedServices.includes(s.id)} className="shrink-0" />
+                            <div className="min-w-0">
+                              <span className="text-sm font-semibold text-foreground block">{s.label}</span>
+                              <span className="text-[10px] text-muted-foreground">{s.desc}</span>
+                            </div>
                           </div>
                         ))}
                       </div>
                     </div>
-                    <div>
-                      <Label>Mensagem</Label>
-                      <Textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Conte mais sobre as necessidades da sua empresa..." rows={3} />
-                    </div>
-                    <Button type="submit" className="w-full h-12" disabled={submitting}>
-                      {submitting ? "Enviando..." : "Enviar Solicitação de Orçamento"}
+                    <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mensagem</Label><Textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Conte sobre as necessidades..." rows={3} className="mt-1.5 rounded-xl" /></div>
+                    <Button type="submit" className="w-full h-13 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-white font-bold text-base shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow" disabled={submitting}>
+                      {submitting ? "Enviando..." : "Enviar Solicitação"}
                     </Button>
                   </form>
                 </CardContent>
@@ -212,8 +207,8 @@ const B2BLanding = () => {
           </div>
         </section>
 
-        <footer className="py-8 border-t border-border text-center text-xs text-muted-foreground">
-          <p>© 2026 AloClinica • <Link to="/terms" className="underline">Termos</Link> • <Link to="/privacy" className="underline">Privacidade</Link></p>
+        <footer className="py-8 border-t border-border/40 text-center text-xs text-muted-foreground">
+          <p>© 2026 AloClinica · <Link to="/terms" className="hover:text-foreground transition-colors">Termos</Link> · <Link to="/privacy" className="hover:text-foreground transition-colors">Privacidade</Link></p>
         </footer>
       </div>
     </>

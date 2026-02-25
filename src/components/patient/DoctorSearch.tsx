@@ -402,10 +402,10 @@ const DoctorSearch = () => {
                   variants={fadeUp}
                   initial="hidden"
                   animate="show"
-                  className={`relative p-4 rounded-2xl border bg-card active:scale-[0.98] transition-transform cursor-pointer ${
+                  className={`relative p-4 rounded-2xl border bg-card active:scale-[0.98] transition-all cursor-pointer hover:shadow-lg ${
                     (doctor as any).available_now
-                      ? "border-secondary/40 shadow-[0_0_0_1px_hsl(var(--secondary)/0.2)]"
-                      : "border-border"
+                      ? "border-secondary/40 shadow-md shadow-secondary/10"
+                      : "border-border/50 hover:border-border"
                   }`}
                   onClick={() => navigate(`/dashboard/schedule/${doctor.id}`)}
                 >
@@ -414,20 +414,19 @@ const DoctorSearch = () => {
                     onClick={(e) => toggleFavorite(doctor.id, e)}
                     className="absolute top-3 right-3 p-2 rounded-full hover:bg-muted/50 transition-colors z-10"
                   >
-                    <Heart className={`w-5 h-5 transition-colors ${favoriteIds.has(doctor.id) ? "fill-red-500 text-red-500" : "text-muted-foreground/40"}`} />
+                    <Heart className={`w-5 h-5 transition-colors ${favoriteIds.has(doctor.id) ? "fill-destructive text-destructive" : "text-muted-foreground/40"}`} />
                   </button>
 
                   <div className="flex items-start gap-3">
-                    {/* Avatar */}
+                    {/* Avatar — gradient */}
                     <Avatar className="w-14 h-14 rounded-2xl shrink-0">
-                      <AvatarFallback className="rounded-2xl bg-primary/10 text-primary font-bold text-base">
+                      <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-secondary text-white font-bold text-base">
                         {doctor.profile?.first_name?.[0]}{doctor.profile?.last_name?.[0]}
                       </AvatarFallback>
                     </Avatar>
 
                     <div className="flex-1 min-w-0 pr-8">
-                      {/* Name */}
-                      <h3 className="font-semibold text-foreground text-[15px] leading-tight truncate">
+                      <h3 className="font-bold text-foreground text-[15px] leading-tight truncate">
                         Dr(a). {doctor.profile?.first_name} {doctor.profile?.last_name}
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
@@ -435,11 +434,10 @@ const DoctorSearch = () => {
                         {doctor.experience_years > 0 && ` · ${doctor.experience_years}a exp.`}
                       </p>
 
-                      {/* Specialties */}
                       {doctor.specialties.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-2">
                           {doctor.specialties.slice(0, 2).map(s => (
-                            <span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/8 text-primary font-medium">{s}</span>
+                            <span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">{s}</span>
                           ))}
                           {doctor.specialties.length > 2 && (
                             <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">+{doctor.specialties.length - 2}</span>
@@ -447,7 +445,6 @@ const DoctorSearch = () => {
                         </div>
                       )}
 
-                      {/* Status badges */}
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
                         {(doctor as any).available_now && (
                           <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/15 text-secondary font-semibold flex items-center gap-1">
@@ -462,7 +459,7 @@ const DoctorSearch = () => {
                         )}
                         {doctor.rating > 0 && (
                           <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                            <Star className="w-3.5 h-3.5 text-warning fill-warning" />
                             {doctor.rating.toFixed(1)}
                             <span className="text-muted-foreground/60">({doctor.total_reviews})</span>
                           </span>
@@ -471,15 +468,15 @@ const DoctorSearch = () => {
                     </div>
                   </div>
 
-                  {/* Bottom bar: price + CTA */}
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/60">
+                  {/* Bottom bar: price + gradient CTA */}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/40">
                     <div>
-                      <span className="text-lg font-bold text-foreground">R${doctor.consultation_price}</span>
+                      <span className="text-xl font-black text-foreground">R${doctor.consultation_price}</span>
                       <span className="text-xs text-muted-foreground ml-1">/consulta</span>
                     </div>
                     <Button
                       size="sm"
-                      className="h-10 px-5 rounded-xl bg-gradient-hero text-primary-foreground text-sm font-medium gap-1.5"
+                      className="h-10 px-5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-bold gap-1.5 shadow-lg shadow-primary/20 hover:shadow-xl transition-shadow"
                       onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/schedule/${doctor.id}`); }}
                     >
                       <Calendar className="w-4 h-4" />
