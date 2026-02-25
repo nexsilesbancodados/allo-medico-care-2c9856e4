@@ -22,6 +22,7 @@ const SUBDOMAIN_ROUTES: Record<string, string> = {
   afiliado: "/afiliado",
   recepcionista: "/recepcionista",
   suporte: "/suporte",
+  laudista: "/laudista",
 };
 
 function getSubdomain(): string | null {
