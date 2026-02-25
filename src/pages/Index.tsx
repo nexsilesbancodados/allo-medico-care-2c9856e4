@@ -22,6 +22,7 @@ const MultiPlatformSection = lazy(() => import("@/components/landing/MultiPlatfo
 const ClinicPresentialSection = lazy(() => import("@/components/landing/ClinicPresentialSection"));
 const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
 const SupportSection = lazy(() => import("@/components/landing/SupportSection"));
+const TeleLaudoSection = lazy(() => import("@/components/landing/TeleLaudoSection"));
 const Footer = lazy(() => import("@/components/landing/Footer"));
 const SpecialtyQuiz = lazy(() => import("@/components/landing/SpecialtyQuiz"));
 
@@ -81,6 +82,7 @@ const Index = () => {
         <ClinicPresentialSection />
         <PlansSection />
         <DoctorPremiumSection />
+        <TeleLaudoSection />
         <TestimonialsSection />
         <CTABanner />
         <FAQSection />
