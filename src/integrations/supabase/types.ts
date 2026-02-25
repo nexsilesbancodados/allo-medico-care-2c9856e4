@@ -2234,7 +2234,12 @@ export type Database = {
     }
     Functions: {
       cleanup_rate_limits: { Args: never; Returns: undefined }
+      fn_auto_cancel_unpaid: { Args: never; Returns: undefined }
+      fn_auto_close_resolved_tickets: { Args: never; Returns: undefined }
+      fn_auto_complete_stale_consultations: { Args: never; Returns: undefined }
       fn_expire_available_now: { Args: never; Returns: undefined }
+      fn_expire_discount_cards: { Args: never; Returns: undefined }
+      fn_expire_invite_codes: { Args: never; Returns: undefined }
       get_clinic_profile_id: { Args: { _user_id: string }; Returns: string }
       get_doctor_profile_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
