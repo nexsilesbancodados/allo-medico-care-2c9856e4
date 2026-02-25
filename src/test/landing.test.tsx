@@ -2,19 +2,19 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 
-vi.mock("framer-motion", () => ({
-  motion: new Proxy({}, {
-    get: () => ({ children, ...p }: any) => {
-      const { initial, animate, exit, whileInView, whileHover, whileTap, transition, viewport, variants, ...rest } = p;
-      return <div {...rest}>{children}</div>;
-    },
-  }),
-  AnimatePresence: ({ children }: any) => <>{children}</>,
-  useMotionValue: () => ({ set: vi.fn() }),
-  useTransform: () => ({ set: vi.fn() }),
-  useSpring: (v: any) => v,
-  useInView: () => true,
-}));
+vi.mock("framer-motion", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("framer-motion")>();
+  return {
+    ...actual,
+    motion: new Proxy({}, {
+      get: () => ({ children, ...p }: any) => {
+        const { initial, animate, exit, whileInView, whileHover, whileTap, transition, viewport, variants, ...rest } = p;
+        return <div {...rest}>{children}</div>;
+      },
+    }),
+    AnimatePresence: ({ children }: any) => <>{children}</>,
+  };
+});
 
 vi.mock("@/assets/hero-doctor.png", () => ({ default: "hero.png" }));
 vi.mock("@/assets/mascot-wave.png", () => ({ default: "wave.png" }));
@@ -40,8 +40,8 @@ describe("Header", () => {
         </I18nProvider>
       </BrowserRouter>
     );
-    expect(screen.getByText("Sou Médico")).toBeInTheDocument();
-    expect(screen.getByText("Sou Paciente")).toBeInTheDocument();
+    expect(screen.getByText("Alo")).toBeInTheDocument();
+    expect(screen.getByText("Teleconsulta")).toBeInTheDocument();
   });
 });
 
