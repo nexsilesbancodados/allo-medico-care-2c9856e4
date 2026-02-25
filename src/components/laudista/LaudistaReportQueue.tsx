@@ -70,7 +70,10 @@ const LaudistaReportQueue = () => {
   });
 
   const handleClaim = async (examId: string) => {
-    if (!doctorProfile?.id) return;
+    if (!doctorProfile?.id) {
+      toast({ title: "Erro", description: "Perfil de médico não encontrado. Você precisa ter um perfil de médico para assumir exames.", variant: "destructive" });
+      return;
+    }
     setClaimingId(examId);
     try {
       const { error } = await supabase
