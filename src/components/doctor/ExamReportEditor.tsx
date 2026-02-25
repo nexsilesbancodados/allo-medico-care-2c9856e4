@@ -117,9 +117,15 @@ const ExamReportEditor = () => {
     if (!urls.length) return;
     Promise.all(
       urls.map(async (path: string) => {
+        // Full external URL
         if (path.startsWith("http://") || path.startsWith("https://")) {
           return path;
         }
+        // Relative URL (served from same origin, e.g. /images/sample.jpg)
+        if (path.startsWith("/")) {
+          return path;
+        }
+        // Storage path — generate signed URL
         const { data } = await supabase.storage
           .from("exam-files")
           .createSignedUrl(path, 3600);
