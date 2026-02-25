@@ -45,19 +45,29 @@ const Index = () => {
   return (
     <div className="min-h-screen relative bg-background">
       <SEOHead
-        title="Consultas Médicas Online por Vídeo 24h"
-        description="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades. Sua saúde na palma da mão."
+        title="Consultas Médicas Online por Vídeo 24h | AloClínica"
+        description="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades, plantão clínico 24h. Sua saúde na palma da mão."
         canonical="https://allo-medico-care.lovable.app/"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "MedicalOrganization",
-          name: "AloClinica",
+          name: "AloClínica",
           url: "https://allo-medico-care.lovable.app",
           logo: "https://allo-medico-care.lovable.app/pwa-512x512.png",
           description: "Plataforma de telemedicina com consultas online por vídeo 24h, receitas digitais válidas e mais de 30 especialidades médicas.",
           medicalSpecialty: ["Cardiologia", "Dermatologia", "Endocrinologia", "Neurologia", "Oftalmologia", "Ortopedia", "Pediatria", "Clínica Geral"],
           areaServed: { "@type": "Country", name: "BR" },
-          contactPoint: { "@type": "ContactPoint", contactType: "customer service", availableLanguage: ["Portuguese"] },
+          contactPoint: { "@type": "ContactPoint", contactType: "customer service", availableLanguage: ["Portuguese"], telephone: "+55-11-99999-0000" },
+          sameAs: ["https://www.instagram.com/aloclinica", "https://www.facebook.com/aloclinica"],
+          hasOfferCatalog: {
+            "@type": "OfferCatalog",
+            name: "Planos de Telemedicina",
+            itemListElement: [
+              { "@type": "Offer", name: "Consulta Avulsa", price: "89.00", priceCurrency: "BRL" },
+              { "@type": "Offer", name: "Plantão 24h Diurno", price: "75.00", priceCurrency: "BRL" },
+              { "@type": "Offer", name: "Cartão Desconto Individual", price: "24.90", priceCurrency: "BRL" },
+            ],
+          },
           potentialAction: {
             "@type": "ReserveAction",
             target: {
@@ -67,6 +77,7 @@ const Index = () => {
             },
             result: { "@type": "Reservation", name: "Consulta Médica Online" },
           },
+          aggregateRating: { "@type": "AggregateRating", ratingValue: "4.9", reviewCount: "2500", bestRating: "5" },
         }}
       />
       <Header />

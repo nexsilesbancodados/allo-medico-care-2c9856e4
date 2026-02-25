@@ -431,6 +431,29 @@ const PatientDashboard = () => {
           </motion.div>
         )}
 
+        {/* ═══ Health alerts ═══ */}
+        {!loading && (
+          <motion.div variants={fadeUp}>
+            {(() => {
+              const alerts: { icon: string; text: string; color: string }[] = [];
+              if ((stats?.total ?? 0) > 0 && upcoming.length === 0) alerts.push({ icon: "📅", text: "Sem consultas agendadas — cuide da sua saúde!", color: "text-warning" });
+              if ((stats?.prescriptions ?? 0) > 0 && (stats?.documents ?? 0) === 0) alerts.push({ icon: "📄", text: "Envie seus exames para o cofre de documentos", color: "text-primary" });
+              if (!activeSub) alerts.push({ icon: "💳", text: "Assine um plano e economize até 30% nas consultas", color: "text-secondary" });
+              if (alerts.length === 0) return null;
+              return (
+                <div className="space-y-2">
+                  {alerts.map((alert, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border/40 hover:border-primary/20 transition-colors">
+                      <span className="text-base">{alert.icon}</span>
+                      <p className={`text-xs font-medium ${alert.color}`}>{alert.text}</p>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </motion.div>
+        )}
+
         {/* ═══ Shortcuts — compact grid ═══ */}
         <motion.div variants={fadeUp}>
           <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 px-1">Acesso rápido</p>
