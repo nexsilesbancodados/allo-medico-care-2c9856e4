@@ -98,13 +98,13 @@ const Header = memo(() => {
             <Button size="sm" onClick={() => navigate("/teleconsulta")} className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:opacity-90 transition-all">
               Teleconsulta
             </Button>
-            <Button size="sm" onClick={() => navigate("/telelaudo")} className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-[hsl(200,80%,45%)] to-[hsl(210,90%,55%)] text-white shadow-md shadow-[hsl(210,90%,55%)/0.2] hover:shadow-lg hover:opacity-90 transition-all">
+            <Button size="sm" onClick={() => navigate("/telelaudo")} className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:opacity-90 transition-all">
               Telelaudo
             </Button>
             <Button size="sm" variant="ghost" onClick={() => navigate("/para-empresas")} className="rounded-full px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all">
               Para Empresas
             </Button>
-            <Button size="sm" onClick={() => navigate("/cartao-desconto")} className="rounded-full px-4 text-xs font-bold border border-amber-400/50 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all gap-1">
+            <Button size="sm" onClick={() => navigate("/cartao-desconto")} className="rounded-full px-4 text-xs font-bold border border-warning/50 bg-warning/10 text-warning-foreground hover:bg-warning/20 transition-all gap-1">
               💳 Cartão Desconto
             </Button>
           </nav>
@@ -136,7 +136,7 @@ const Header = memo(() => {
               <>
                 <Button
                   size="sm"
-                  className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-[hsl(160,60%,40%)] to-[hsl(170,70%,45%)] text-white shadow-md shadow-[hsl(160,60%,40%)/0.2] hover:shadow-lg hover:opacity-90 transition-all px-5"
+                  className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground shadow-md shadow-secondary/20 hover:shadow-lg hover:opacity-90 transition-all px-5"
                   onClick={() => navigate("/consulta-avulsa")}
                 >
                   <ShoppingBag className="w-3.5 h-3.5" />
@@ -144,7 +144,7 @@ const Header = memo(() => {
                 </Button>
                 <Button
                   size="sm"
-                  className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-[hsl(145,65%,38%)] to-[hsl(155,75%,45%)] text-white shadow-md shadow-[hsl(145,65%,38%)/0.2] hover:shadow-lg hover:opacity-90 transition-all px-5"
+                  className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-success to-success/80 text-success-foreground shadow-md shadow-success/20 hover:shadow-lg hover:opacity-90 transition-all px-5"
                   onClick={() => navigate("/paciente")}
                 >
                   <UserRound className="w-3.5 h-3.5" />

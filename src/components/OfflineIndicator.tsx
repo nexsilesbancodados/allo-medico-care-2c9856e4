@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WifiOff, Wifi, RefreshCw } from "lucide-react";
 import { useTranslation } from "@/i18n";
 
-const OfflineIndicator = () => {
+const OfflineIndicator = forwardRef<HTMLDivElement>((_, _ref) => {
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [showReconnected, setShowReconnected] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -78,6 +78,7 @@ const OfflineIndicator = () => {
       )}
     </AnimatePresence>
   );
-};
+});
 
+OfflineIndicator.displayName = "OfflineIndicator";
 export default OfflineIndicator;
