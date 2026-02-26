@@ -71,6 +71,48 @@ const en: Record<TranslationKeys, string> = {
 
   "common.learnMore": "Learn more",
   "common.language": "Language",
+  "common.loading": "Loading...",
+  "common.error": "Error",
+  "common.retry": "Try again",
+  "common.save": "Save",
+  "common.cancel": "Cancel",
+  "common.confirm": "Confirm",
+  "common.delete": "Delete",
+  "common.edit": "Edit",
+  "common.search": "Search",
+  "common.filter": "Filter",
+  "common.noResults": "No results found",
+  "common.back": "Back",
+  "common.next": "Next",
+  "common.previous": "Previous",
+  "common.close": "Close",
+
+  "offline.title": "No connection",
+  "offline.message": "You are offline. Some features may not work.",
+  "offline.reconnected": "Connection restored!",
+  "offline.retrying": "Trying to reconnect...",
+  "offline.cachedData": "Showing cached data",
+
+  "auth.login": "Log in",
+  "auth.logout": "Log out",
+  "auth.signup": "Sign up",
+  "auth.forgotPassword": "Forgot password",
+  "auth.resetPassword": "Reset password",
+  "auth.emailLabel": "Email",
+  "auth.passwordLabel": "Password",
+  "auth.confirmPassword": "Confirm password",
+
+  "dashboard.welcome": "Welcome",
+  "dashboard.appointments": "Appointments",
+  "dashboard.prescriptions": "Prescriptions",
+  "dashboard.documents": "Documents",
+  "dashboard.settings": "Settings",
+  "dashboard.profile": "Profile",
+  "dashboard.notifications": "Notifications",
+
+  "pingo.greeting": "Hi! I'm Pingo, your virtual assistant. How can I help?",
+  "pingo.placeholder": "Type your question...",
+  "pingo.newConversation": "New conversation",
 };
 
 export default en;
