@@ -81,6 +81,52 @@ const ptBR = {
   // Common
   "common.learnMore": "Saiba mais",
   "common.language": "Idioma",
+  "common.loading": "Carregando...",
+  "common.error": "Erro",
+  "common.retry": "Tentar novamente",
+  "common.save": "Salvar",
+  "common.cancel": "Cancelar",
+  "common.confirm": "Confirmar",
+  "common.delete": "Excluir",
+  "common.edit": "Editar",
+  "common.search": "Buscar",
+  "common.filter": "Filtrar",
+  "common.noResults": "Nenhum resultado encontrado",
+  "common.back": "Voltar",
+  "common.next": "Próximo",
+  "common.previous": "Anterior",
+  "common.close": "Fechar",
+
+  // Offline / PWA
+  "offline.title": "Sem conexão",
+  "offline.message": "Você está offline. Algumas funcionalidades podem não funcionar.",
+  "offline.reconnected": "Conexão restaurada!",
+  "offline.retrying": "Tentando reconectar...",
+  "offline.cachedData": "Exibindo dados em cache",
+
+  // Auth
+  "auth.login": "Entrar",
+  "auth.logout": "Sair",
+  "auth.signup": "Criar conta",
+  "auth.forgotPassword": "Esqueci minha senha",
+  "auth.resetPassword": "Redefinir senha",
+  "auth.emailLabel": "E-mail",
+  "auth.passwordLabel": "Senha",
+  "auth.confirmPassword": "Confirmar senha",
+
+  // Dashboard
+  "dashboard.welcome": "Bem-vindo(a)",
+  "dashboard.appointments": "Consultas",
+  "dashboard.prescriptions": "Receitas",
+  "dashboard.documents": "Documentos",
+  "dashboard.settings": "Configurações",
+  "dashboard.profile": "Perfil",
+  "dashboard.notifications": "Notificações",
+
+  // Pingo
+  "pingo.greeting": "Olá! Eu sou o Pingo, seu assistente virtual. Como posso ajudar?",
+  "pingo.placeholder": "Digite sua pergunta...",
+  "pingo.newConversation": "Nova conversa",
 } as const;
 
 export default ptBR;

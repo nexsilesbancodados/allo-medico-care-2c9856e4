@@ -71,6 +71,48 @@ const es: Record<TranslationKeys, string> = {
 
   "common.learnMore": "Saber más",
   "common.language": "Idioma",
+  "common.loading": "Cargando...",
+  "common.error": "Error",
+  "common.retry": "Intentar de nuevo",
+  "common.save": "Guardar",
+  "common.cancel": "Cancelar",
+  "common.confirm": "Confirmar",
+  "common.delete": "Eliminar",
+  "common.edit": "Editar",
+  "common.search": "Buscar",
+  "common.filter": "Filtrar",
+  "common.noResults": "No se encontraron resultados",
+  "common.back": "Volver",
+  "common.next": "Siguiente",
+  "common.previous": "Anterior",
+  "common.close": "Cerrar",
+
+  "offline.title": "Sin conexión",
+  "offline.message": "Estás sin conexión. Algunas funcionalidades pueden no funcionar.",
+  "offline.reconnected": "¡Conexión restaurada!",
+  "offline.retrying": "Intentando reconectar...",
+  "offline.cachedData": "Mostrando datos en caché",
+
+  "auth.login": "Iniciar sesión",
+  "auth.logout": "Cerrar sesión",
+  "auth.signup": "Crear cuenta",
+  "auth.forgotPassword": "Olvidé mi contraseña",
+  "auth.resetPassword": "Restablecer contraseña",
+  "auth.emailLabel": "Correo electrónico",
+  "auth.passwordLabel": "Contraseña",
+  "auth.confirmPassword": "Confirmar contraseña",
+
+  "dashboard.welcome": "Bienvenido/a",
+  "dashboard.appointments": "Consultas",
+  "dashboard.prescriptions": "Recetas",
+  "dashboard.documents": "Documentos",
+  "dashboard.settings": "Configuración",
+  "dashboard.profile": "Perfil",
+  "dashboard.notifications": "Notificaciones",
+
+  "pingo.greeting": "¡Hola! Soy Pingo, tu asistente virtual. ¿Cómo puedo ayudarte?",
+  "pingo.placeholder": "Escribe tu pregunta...",
+  "pingo.newConversation": "Nueva conversación",
 };
 
 export default es;
