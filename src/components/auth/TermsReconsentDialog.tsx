@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
@@ -9,7 +9,7 @@ import { Shield } from "lucide-react";
 
 const CURRENT_TERMS_VERSION_KEY = "terms_version";
 
-const TermsReconsentDialog = () => {
+const TermsReconsentDialog = forwardRef<HTMLDivElement>((_, _ref) => {
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [accepted, setAccepted] = useState(false);
@@ -114,6 +114,7 @@ const TermsReconsentDialog = () => {
       </DialogContent>
     </Dialog>
   );
-};
+});
 
+TermsReconsentDialog.displayName = "TermsReconsentDialog";
 export default TermsReconsentDialog;

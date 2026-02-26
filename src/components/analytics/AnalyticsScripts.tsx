@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, forwardRef } from "react";
 import { useLocation } from "react-router-dom";
 
 // Configure these IDs when ready for production
@@ -50,7 +50,7 @@ export const trackSignUp = (method?: string) => {
   trackEvent("CompleteRegistration", { content_name: method });
 };
 
-const AnalyticsScripts = () => {
+const AnalyticsScripts = forwardRef<HTMLDivElement>((_, _ref) => {
   useEffect(() => {
     // Only load if IDs are configured
     if (GA_MEASUREMENT_ID) {
@@ -100,6 +100,7 @@ const AnalyticsScripts = () => {
   }, []);
 
   return null;
-};
+});
 
+AnalyticsScripts.displayName = "AnalyticsScripts";
 export default AnalyticsScripts;

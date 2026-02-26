@@ -1,4 +1,4 @@
-import { useEffect, lazy, Suspense, useState } from "react";
+import { useEffect, lazy, Suspense, useState, forwardRef } from "react";
 import { useTheme } from "next-themes";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
@@ -26,7 +26,7 @@ const TeleLaudoSection = lazy(() => import("@/components/landing/TeleLaudoSectio
 const Footer = lazy(() => import("@/components/landing/Footer"));
 const SpecialtyQuiz = lazy(() => import("@/components/landing/SpecialtyQuiz"));
 
-const Index = () => {
+const Index = forwardRef<HTMLDivElement>((_, _ref) => {
   const { setTheme, theme } = useTheme();
   const [showQuiz, setShowQuiz] = useState(false);
 
@@ -158,6 +158,7 @@ const Index = () => {
       )}
     </div>
   );
-};
+});
 
+Index.displayName = "Index";
 export default Index;
