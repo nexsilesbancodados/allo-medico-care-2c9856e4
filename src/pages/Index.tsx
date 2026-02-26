@@ -110,43 +110,69 @@ const Index = forwardRef<HTMLDivElement>((_, _ref) => {
         </div>
       </section>
 
-      <Suspense fallback={<><StatsSkeleton /><SectionSkeleton /><SectionSkeleton /><TestimonialsSkeleton /></>}>
+      <Suspense fallback={<StatsSkeleton />}>
         <StatsSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <HowItWorksSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <SpecialtiesSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <VirtualAssistantSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <MultiPlatformSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <ClinicPresentialSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <PlansSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <DoctorPremiumSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <TeleLaudoSection />
+      </Suspense>
+      <Suspense fallback={<TestimonialsSkeleton />}>
         <TestimonialsSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <CTABanner />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <FAQSection />
+      </Suspense>
+      <Suspense fallback={<SectionSkeleton />}>
         <SupportSection />
+      </Suspense>
 
-        <section className="py-16 px-4">
-          <div className="container mx-auto max-w-2xl text-center space-y-5">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
-              <Stethoscope className="w-8 h-8 text-primary" />
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-              Não sabe qual especialidade procurar?
-            </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
-            </p>
-            <Button
-              size="lg"
-              className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
-              onClick={() => setShowQuiz(true)}
-            >
-              <Stethoscope className="w-5 h-5" />
-              Fazer Triagem Gratuita
-            </Button>
+      <section aria-labelledby="triage-heading" className="py-16 px-4">
+        <div className="container mx-auto max-w-2xl text-center space-y-5">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
+            <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
           </div>
-        </section>
+          <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground">
+            Não sabe qual especialidade procurar?
+          </h2>
+          <p className="text-muted-foreground max-w-md mx-auto">
+            Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
+          </p>
+          <Button
+            size="lg"
+            className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
+            onClick={() => setShowQuiz(true)}
+          >
+            <Stethoscope className="w-5 h-5" aria-hidden="true" />
+            Fazer Triagem Gratuita
+          </Button>
+        </div>
+      </section>
 
+      <Suspense fallback={<SectionSkeleton />}>
         <Footer />
       </Suspense>
 
