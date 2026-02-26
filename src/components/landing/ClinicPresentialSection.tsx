@@ -180,7 +180,7 @@ const ClinicPresentialSection = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-background/20 text-background hover:bg-background/10 rounded-full px-6"
+                  className="border-background/30 text-background bg-transparent hover:bg-background/10 rounded-full px-6 backdrop-blur-sm"
                   onClick={() => window.open("https://wa.me/5511999999999?text=Olá! Gostaria de agendar uma consulta presencial.", "_blank")}
                 >
                   <Phone className="w-4 h-4 mr-1.5" />
