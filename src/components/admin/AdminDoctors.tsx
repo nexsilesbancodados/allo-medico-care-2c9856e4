@@ -4,13 +4,16 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { getAdminNav } from "./adminNav";
-import { Search, Eye, Edit, Check, X } from "lucide-react";
+import { Search, Eye, Edit, Check, X, UserPlus, Mail, Shield, Loader2, Sparkles } from "lucide-react";
+
+const UF_OPTIONS = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
 
 const AdminDoctors = () => {
   const { toast } = useToast();
@@ -22,11 +25,17 @@ const AdminDoctors = () => {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ crm: "", crm_state: "", bio: "", consultation_price: "" });
 
+  // Onboard dialog state
+  const [showOnboard, setShowOnboard] = useState(false);
+  const [onboardForm, setOnboardForm] = useState({ email: "", full_name: "", crm: "", crm_state: "SP", phone: "" });
+  const [onboarding, setOnboarding] = useState(false);
+  const [onboardResult, setOnboardResult] = useState<any>(null);
+
   useEffect(() => { fetchDoctors(); }, []);
 
   const fetchDoctors = async () => {
     const { data } = await supabase.from("doctor_profiles")
-      .select("id, user_id, crm, crm_state, is_approved, bio, consultation_price, experience_years, education, rating, total_reviews, created_at")
+      .select("id, user_id, crm, crm_state, is_approved, bio, consultation_price, experience_years, education, rating, total_reviews, created_at, crm_verified")
       .order("created_at", { ascending: false });
     if (!data) { setLoading(false); return; }
     const userIds = data.map(d => d.user_id);
@@ -63,6 +72,36 @@ const AdminDoctors = () => {
     }
   };
 
+  const handleOnboard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setOnboarding(true);
+    setOnboardResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("doctor-onboard-automation", {
+        body: onboardForm,
+      });
+      if (error) throw error;
+      if (data?.error) {
+        toast({ title: "Erro", description: data.error, variant: "destructive" });
+        if (data.details) {
+          toast({ title: "Detalhes", description: data.details.join(", "), variant: "destructive" });
+        }
+      } else {
+        setOnboardResult(data);
+        toast({ title: "Convite enviado! ✉️", description: `Código ${data.invite_code} enviado para ${onboardForm.email}` });
+      }
+    } catch (err: any) {
+      toast({ title: "Erro", description: err.message || "Erro ao processar convite", variant: "destructive" });
+    }
+    setOnboarding(false);
+  };
+
+  const resetOnboard = () => {
+    setOnboardForm({ email: "", full_name: "", crm: "", crm_state: "SP", phone: "" });
+    setOnboardResult(null);
+    setShowOnboard(false);
+  };
+
   const filtered = doctors.filter(d => {
     const matchSearch = `${d.first_name} ${d.last_name} ${d.crm}`.toLowerCase().includes(search.toLowerCase());
     const matchStatus = filterStatus === "all" || (filterStatus === "approved" && d.is_approved) || (filterStatus === "pending" && !d.is_approved);
@@ -72,7 +111,13 @@ const AdminDoctors = () => {
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("doctors")}>
       <div className="max-w-5xl">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Médicos</h1>
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-2xl font-bold text-foreground">Médicos</h1>
+          <Button onClick={() => setShowOnboard(true)} className="bg-gradient-to-r from-secondary to-primary text-primary-foreground shadow-lg">
+            <UserPlus className="w-4 h-4 mr-2" />
+            Cadastrar Médico
+          </Button>
+        </div>
         <p className="text-muted-foreground text-sm mb-4">{filtered.length} médico(s)</p>
 
         <div className="flex gap-3 mb-4">
@@ -110,7 +155,10 @@ const AdminDoctors = () => {
                         <Avatar className="h-8 w-8">
                           <AvatarFallback className="bg-primary/10 text-primary text-xs">{doc.first_name?.[0]}{doc.last_name?.[0]}</AvatarFallback>
                         </Avatar>
-                        <span className="font-medium text-foreground">Dr(a). {doc.first_name} {doc.last_name}</span>
+                        <div>
+                          <span className="font-medium text-foreground">Dr(a). {doc.first_name} {doc.last_name}</span>
+                          {doc.crm_verified && <Shield className="inline w-3.5 h-3.5 text-success ml-1.5" />}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{doc.crm}/{doc.crm_state}</TableCell>
@@ -133,6 +181,7 @@ const AdminDoctors = () => {
         )}
       </div>
 
+      {/* Detail / Edit Dialog */}
       <Dialog open={!!selected} onOpenChange={() => { setSelected(null); setEditing(false); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editing ? "Editar Médico" : "Detalhes do Médico"}</DialogTitle></DialogHeader>
@@ -157,8 +206,148 @@ const AdminDoctors = () => {
               <Input placeholder="Preço consulta" type="number" value={editForm.consultation_price} onChange={e => setEditForm({ ...editForm, consultation_price: e.target.value })} />
               <Input placeholder="Bio" value={editForm.bio} onChange={e => setEditForm({ ...editForm, bio: e.target.value })} />
               <div className="flex gap-2">
-                <Button onClick={saveEdit} className="bg-gradient-hero text-primary-foreground">Salvar</Button>
+                <Button onClick={saveEdit} className="bg-gradient-to-r from-secondary to-primary text-primary-foreground">Salvar</Button>
                 <Button variant="outline" onClick={() => setEditing(false)}>Cancelar</Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Onboard Doctor Dialog */}
+      <Dialog open={showOnboard} onOpenChange={(open) => { if (!open) resetOnboard(); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus className="w-5 h-5 text-primary" />
+              Cadastrar Novo Médico
+            </DialogTitle>
+            <DialogDescription>
+              Preencha os dados do médico. Um código de acesso será gerado e enviado por email automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+
+          {!onboardResult ? (
+            <form onSubmit={handleOnboard} className="space-y-4">
+              <div>
+                <Label>Nome Completo *</Label>
+                <Input
+                  value={onboardForm.full_name}
+                  onChange={e => setOnboardForm({ ...onboardForm, full_name: e.target.value })}
+                  placeholder="Dr(a). Maria Silva"
+                  required
+                  minLength={3}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label>Email *</Label>
+                <Input
+                  type="email"
+                  value={onboardForm.email}
+                  onChange={e => setOnboardForm({ ...onboardForm, email: e.target.value })}
+                  placeholder="medico@email.com"
+                  required
+                  className="mt-1"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>CRM *</Label>
+                  <Input
+                    value={onboardForm.crm}
+                    onChange={e => setOnboardForm({ ...onboardForm, crm: e.target.value.replace(/\D/g, "") })}
+                    placeholder="123456"
+                    required
+                    maxLength={7}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label>UF *</Label>
+                  <Select value={onboardForm.crm_state} onValueChange={v => setOnboardForm({ ...onboardForm, crm_state: v })}>
+                    <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {UF_OPTIONS.map(uf => <SelectItem key={uf} value={uf}>{uf}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div>
+                <Label>Telefone</Label>
+                <Input
+                  value={onboardForm.phone}
+                  onChange={e => setOnboardForm({ ...onboardForm, phone: e.target.value })}
+                  placeholder="(11) 99999-9999"
+                  className="mt-1"
+                />
+              </div>
+
+              <div className="p-3 rounded-lg bg-muted/50 border border-border text-xs text-muted-foreground space-y-1">
+                <p className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary" /> <strong>O sistema irá automaticamente:</strong></p>
+                <ul className="list-disc list-inside space-y-0.5 ml-5">
+                  <li>Validar os dados informados</li>
+                  <li>Verificar o CRM no Conselho Federal</li>
+                  <li>Gerar código de acesso seguro (7 dias)</li>
+                  <li>Enviar email com instruções de cadastro</li>
+                  <li>Registrar log de auditoria</li>
+                </ul>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-11"
+                disabled={onboarding}
+              >
+                {onboarding ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Processando...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" /> Gerar Convite e Enviar Email
+                  </span>
+                )}
+              </Button>
+            </form>
+          ) : (
+            <div className="space-y-4">
+              <div className="p-4 rounded-xl bg-success/10 border border-success/20 text-center">
+                <Check className="w-8 h-8 text-success mx-auto mb-2" />
+                <p className="font-bold text-foreground">Convite Enviado com Sucesso!</p>
+                <p className="text-sm text-muted-foreground mt-1">Email enviado para <strong>{onboardForm.email}</strong></p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-center">
+                <p className="text-xs text-muted-foreground mb-1">Código de Acesso:</p>
+                <p className="text-2xl font-bold text-primary font-mono tracking-widest">{onboardResult.invite_code}</p>
+                <p className="text-xs text-muted-foreground mt-1">Válido até {new Date(onboardResult.expires_at).toLocaleDateString("pt-BR")}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground text-xs">CRM Verificado</p>
+                  <p className="font-semibold text-foreground">{onboardResult.crm_verified ? "✅ Sim" : "⏳ Pendente"}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-muted/50">
+                  <p className="text-muted-foreground text-xs">Email</p>
+                  <p className="font-semibold text-foreground">{onboardResult.email_sent ? "✅ Enviado" : "❌ Falha"}</p>
+                </div>
+              </div>
+
+              {onboardResult.crm_details?.nome && (
+                <div className="p-3 rounded-lg bg-muted/50 text-sm">
+                  <p className="text-muted-foreground text-xs mb-1">Dados do CFM:</p>
+                  <p className="font-medium text-foreground">{onboardResult.crm_details.nome}</p>
+                  <p className="text-muted-foreground">{onboardResult.crm_details.situacao} — {onboardResult.crm_details.especialidade || "Sem especialidade"}</p>
+                </div>
+              )}
+
+              <div className="flex gap-2">
+                <Button onClick={resetOnboard} variant="outline" className="flex-1">Fechar</Button>
+                <Button onClick={() => { setOnboardResult(null); setOnboardForm({ email: "", full_name: "", crm: "", crm_state: "SP", phone: "" }); }} className="flex-1 bg-gradient-to-r from-secondary to-primary text-primary-foreground">
+                  <UserPlus className="w-4 h-4 mr-1" /> Novo Convite
+                </Button>
               </div>
             </div>
           )}

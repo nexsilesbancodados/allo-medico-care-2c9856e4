@@ -101,3 +101,6 @@ verify_jwt = false
 
 [functions.pacs-integration]
 verify_jwt = false
+
+[functions.doctor-onboard-automation]
+verify_jwt = false
