@@ -94,23 +94,25 @@ const Header = memo(() => {
           </a>
 
           {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-1.5" aria-label="Navegação principal">
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Button size="sm" onClick={() => navigate("/teleconsulta")} className="rounded-full px-5 h-9 text-xs font-bold bg-gradient-to-r from-primary to-[hsl(var(--secondary))] text-primary-foreground shadow-md shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300">
-                Teleconsulta
+          <nav className="hidden lg:flex items-center gap-2" aria-label="Navegação principal">
+            <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.96 }}>
+              <Button size="sm" onClick={() => navigate("/teleconsulta")} className="rounded-full px-5 h-9 text-xs font-bold bg-primary text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:bg-primary/90 transition-all duration-300">
+                🩺 Teleconsulta
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Button size="sm" onClick={() => navigate("/telelaudo")} className="rounded-full px-5 h-9 text-xs font-bold bg-gradient-to-r from-[hsl(190,75%,42%)] to-[hsl(205,85%,50%)] text-white shadow-md shadow-[hsl(200,80%,50%)/0.25] hover:shadow-xl hover:shadow-[hsl(200,80%,50%)/0.35] transition-all duration-300">
-                Telelaudo
+            <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.96 }}>
+              <Button size="sm" onClick={() => navigate("/telelaudo")} className="rounded-full px-5 h-9 text-xs font-bold bg-secondary text-secondary-foreground shadow-md shadow-secondary/20 hover:shadow-lg hover:shadow-secondary/30 hover:bg-secondary/90 transition-all duration-300">
+                📋 Telelaudo
               </Button>
             </motion.div>
-            <Button size="sm" variant="ghost" onClick={() => navigate("/para-empresas")} className="rounded-full px-4 h-9 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-200">
-              Para Empresas
-            </Button>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-              <Button size="sm" onClick={() => navigate("/cartao-desconto")} className="rounded-full px-4 h-9 text-xs font-bold border-2 border-[hsl(var(--secondary))]/40 bg-[hsl(var(--secondary))]/8 text-[hsl(var(--secondary))] dark:text-[hsl(160,55%,60%)] hover:bg-[hsl(var(--secondary))]/15 hover:border-[hsl(var(--secondary))]/60 transition-all duration-200 gap-1.5">
-                <span className="text-sm">💳</span> Cartão Desconto
+            <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.96 }}>
+              <Button size="sm" variant="outline" onClick={() => navigate("/para-empresas")} className="rounded-full px-5 h-9 text-xs font-bold border-2 border-primary/25 text-primary hover:bg-primary/10 hover:border-primary/40 transition-all duration-200">
+                🏢 Para Empresas
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.96 }}>
+              <Button size="sm" variant="outline" onClick={() => navigate("/cartao-desconto")} className="rounded-full px-5 h-9 text-xs font-bold border-2 border-secondary/25 text-secondary hover:bg-secondary/10 hover:border-secondary/40 transition-all duration-200">
+                💳 Cartão Desconto
               </Button>
             </motion.div>
           </nav>
@@ -143,20 +145,21 @@ const Header = memo(() => {
               </>
             ) : (
               <>
-                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.96 }}>
                   <Button
                     size="sm"
-                    className="rounded-full gap-1.5 h-9 text-xs font-bold bg-gradient-to-r from-[hsl(160,65%,38%)] to-[hsl(175,70%,42%)] text-white shadow-md shadow-[hsl(160,65%,38%)/0.3] hover:shadow-xl hover:shadow-[hsl(160,65%,38%)/0.4] transition-all duration-300 px-5"
+                    variant="outline"
+                    className="rounded-full gap-1.5 h-9 text-xs font-bold border-2 border-warning/30 text-warning hover:bg-warning/10 hover:border-warning/50 transition-all duration-300 px-5"
                     onClick={() => navigate("/consulta-avulsa")}
                   >
                     <ShoppingBag className="w-3.5 h-3.5" />
                     {t("nav.buyConsultation")}
                   </Button>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}>
+                <motion.div whileHover={{ scale: 1.04, y: -1 }} whileTap={{ scale: 0.96 }}>
                   <Button
                     size="sm"
-                    className="rounded-full gap-1.5 h-9 text-xs font-bold bg-gradient-to-r from-[hsl(145,70%,35%)] to-[hsl(158,75%,42%)] text-white shadow-md shadow-[hsl(145,70%,35%)/0.3] hover:shadow-xl hover:shadow-[hsl(145,70%,35%)/0.4] transition-all duration-300 px-5"
+                    className="rounded-full gap-1.5 h-9 text-xs font-bold bg-success text-success-foreground shadow-md shadow-success/25 hover:shadow-lg hover:shadow-success/35 hover:bg-success/90 transition-all duration-300 px-5"
                     onClick={() => navigate("/paciente")}
                   >
                     <UserRound className="w-3.5 h-3.5" />
