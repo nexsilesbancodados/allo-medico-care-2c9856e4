@@ -44,8 +44,8 @@ const Header = memo(() => {
   return (
     <>
       {/* Top ticker */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary via-secondary to-primary overflow-hidden">
-        <div className="animate-marquee whitespace-nowrap py-1.5 text-[11px] font-semibold text-primary-foreground tracking-wider uppercase flex">
+      <div role="marquee" aria-label="Destaques da plataforma" className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-primary via-secondary to-primary overflow-hidden">
+        <div aria-hidden="true" className="animate-marquee whitespace-nowrap py-1.5 text-[11px] font-semibold text-primary-foreground tracking-wider uppercase flex">
           {[...Array(2)].map((_, i) => (
             <span key={i} className="inline-flex shrink-0 items-center">
               <span className="mx-5">✦ {t("marquee.video24h")}</span>
@@ -175,10 +175,12 @@ const Header = memo(() => {
           </button>
         </div>
 
-        {/* Mobile menu */}
+          {/* Mobile menu */}
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
+              role="dialog"
+              aria-label="Menu de navegação"
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
