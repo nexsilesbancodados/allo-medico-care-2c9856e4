@@ -306,44 +306,6 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
       </div>
     `,
   }),
-  doctor_invite: (d) => ({
-    subject: "🩺 Convite para a AloClinica — Código de Acesso",
-    html: `
-      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
-        <div style="text-align:center;margin-bottom:20px;">
-          <h2 style="color:#1a6fc4;margin:0;">🩺 AloClinica</h2>
-          <p style="color:#666;font-size:14px;margin-top:4px;">Plataforma de Telemedicina</p>
-        </div>
-        <h2 style="color:#1a6fc4;">Bem-vindo(a), Dr(a). ${d.name}!</h2>
-        <p>Você foi convidado(a) para se cadastrar como médico(a) na plataforma <strong>AloClinica</strong>.</p>
-        <div style="background:white;padding:20px;border-radius:12px;margin:20px 0;border:2px solid #1a6fc4;text-align:center;">
-          <p style="color:#666;font-size:13px;margin:0 0 8px 0;">Seu código de acesso:</p>
-          <p style="font-size:28px;font-weight:bold;color:#1a6fc4;letter-spacing:4px;margin:0;font-family:monospace;">${d.invite_code}</p>
-          <p style="color:#999;font-size:12px;margin-top:8px;">Válido até ${d.expires_at}</p>
-        </div>
-        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;border:1px solid #e2e8f0;">
-          <p style="font-weight:bold;color:#333;margin-bottom:12px;">📋 Como criar sua conta:</p>
-          <ol style="padding-left:20px;color:#555;line-height:2;">
-            <li>Acesse o <a href="${d.signup_url}" style="color:#1a6fc4;font-weight:bold;">Portal do Médico</a></li>
-            <li>Clique em <strong>"Tenho um código de convite"</strong></li>
-            <li>Insira o código acima</li>
-            <li>Preencha seus dados profissionais</li>
-            <li>Aguarde a verificação do CRM</li>
-          </ol>
-        </div>
-        <div style="background:#f0f9ff;padding:12px;border-radius:8px;margin:16px 0;">
-          <p style="color:#1a6fc4;font-size:13px;margin:0;"><strong>CRM:</strong> ${d.crm} — Status: ${d.crm_status}</p>
-        </div>
-        <div style="text-align:center;margin-top:20px;">
-          <a href="${d.signup_url}" style="display:inline-block;background:#1a6fc4;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">Criar Minha Conta →</a>
-        </div>
-        <p style="color:#999;font-size:11px;text-align:center;margin-top:24px;">
-          Este convite é pessoal e intransferível. Em caso de dúvidas, entre em contato com o suporte.
-        </p>
-        <p style="color:#666;font-size:12px;text-align:center;margin-top:12px;">AloClinica — Telemedicina</p>
-      </div>
-    `,
-  }),
 };
 
 serve(async (req) => {

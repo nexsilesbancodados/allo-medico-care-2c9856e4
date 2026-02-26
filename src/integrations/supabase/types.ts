@@ -2234,30 +2234,13 @@ export type Database = {
     }
     Functions: {
       cleanup_rate_limits: { Args: never; Returns: undefined }
-      fn_archive_completed_queue: { Args: never; Returns: undefined }
-      fn_auto_cancel_expired_renewals: { Args: never; Returns: undefined }
       fn_auto_cancel_unpaid: { Args: never; Returns: undefined }
       fn_auto_close_resolved_tickets: { Args: never; Returns: undefined }
-      fn_auto_close_stale_tickets: { Args: never; Returns: undefined }
       fn_auto_complete_stale_consultations: { Args: never; Returns: undefined }
-      fn_auto_expire_coupons: { Args: never; Returns: undefined }
-      fn_auto_expire_subscriptions: { Args: never; Returns: undefined }
-      fn_auto_no_show: { Args: never; Returns: undefined }
-      fn_cleanup_old_activity_logs: { Args: never; Returns: undefined }
-      fn_cleanup_old_notifications: { Args: never; Returns: undefined }
-      fn_cleanup_past_waitlist: { Args: never; Returns: undefined }
       fn_expire_available_now: { Args: never; Returns: undefined }
       fn_expire_discount_cards: { Args: never; Returns: undefined }
       fn_expire_invite_codes: { Args: never; Returns: undefined }
       fn_expire_queue_entries: { Args: never; Returns: undefined }
-      fn_notify_expiring_invites: { Args: never; Returns: undefined }
-      fn_notify_low_rating_doctors: { Args: never; Returns: undefined }
-      fn_notify_overdue_exams: { Args: never; Returns: undefined }
-      fn_notify_return_deadline: { Args: never; Returns: undefined }
-      fn_notify_stale_b2b_leads: { Args: never; Returns: undefined }
-      fn_notify_subscription_expiry: { Args: never; Returns: undefined }
-      fn_reengage_inactive_patients: { Args: never; Returns: undefined }
-      fn_reset_available_now_midnight: { Args: never; Returns: undefined }
       get_clinic_profile_id: { Args: { _user_id: string }; Returns: string }
       get_doctor_profile_id: { Args: { _user_id: string }; Returns: string }
       has_role: {

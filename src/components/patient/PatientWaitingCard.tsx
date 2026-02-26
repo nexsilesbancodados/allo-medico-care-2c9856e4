@@ -34,14 +34,12 @@ const PatientWaitingCard = ({ appointment }: Props) => {
           .eq("doctor_id", appointment.doctor_id)
           .eq("status", "waiting")
           .order("scheduled_at", { ascending: true }),
-        // Get average consultation duration from recent completed appointments
+        // Get average actual consultation duration from recent completed appointments
         supabase
-          .from("appointments")
-          .select("duration_minutes")
-          .eq("doctor_id", appointment.doctor_id)
-          .eq("status", "completed")
-          .not("duration_minutes", "is", null)
-          .order("scheduled_at", { ascending: false })
+          .from("video_presence_logs")
+          .select("duration_seconds")
+          .gt("duration_seconds", 0)
+          .order("joined_at", { ascending: false })
           .limit(20),
       ]);
 
@@ -49,10 +47,10 @@ const PatientWaitingCard = ({ appointment }: Props) => {
         const idx = queueRes.data.findIndex(a => a.id === appointment.id);
         setPosition(idx >= 0 ? idx + 1 : null);
 
-        // Calculate dynamic wait time from actual appointment durations
-        const durations = (durationRes.data ?? []).map(d => d.duration_minutes ?? 0).filter(d => d > 0);
+        // Calculate dynamic wait time
+        const durations = (durationRes.data ?? []).map(d => d.duration_seconds ?? 0).filter(d => d > 60);
         const avgDurationMin = durations.length > 0
-          ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length)
+          ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length / 60)
           : 20; // fallback 20min
         setAvgConsultDuration(avgDurationMin);
       }

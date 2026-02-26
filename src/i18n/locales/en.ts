@@ -71,49 +71,6 @@ const en: Record<TranslationKeys, string> = {
 
   "common.learnMore": "Learn more",
   "common.language": "Language",
-
-  // Auth
-  "auth.welcomeBack": "Welcome back",
-  "auth.enterAccount": "Sign in to your account to continue",
-  "auth.email": "Email",
-  "auth.password": "Password",
-  "auth.forgotPassword": "Forgot my password",
-  "auth.login": "Sign in",
-  "auth.loggingIn": "Signing in...",
-  "auth.noAccount": "Don't have an account?",
-  "auth.signUpFree": "Sign up free",
-  "auth.createAccount": "Create account",
-  "auth.selectType": "Select the type of registration",
-  "auth.hasAccount": "Already have an account?",
-  "auth.orContinueWith": "or continue with",
-  "auth.patient": "Patient",
-  "auth.doctor": "Doctor",
-  "auth.clinic": "Clinic",
-
-  // Dashboard
-  "dashboard.overview": "Overview",
-  "dashboard.appointments": "Appointments",
-  "dashboard.settings": "Settings",
-  "dashboard.profile": "Profile",
-  "dashboard.notifications": "Notifications",
-  "dashboard.noData": "No data found",
-  "dashboard.loading": "Loading...",
-
-  // MFA
-  "mfa.title": "Two-Factor Authentication (2FA)",
-  "mfa.active": "MFA Active",
-  "mfa.setup": "Set up 2FA",
-  "mfa.disable": "Disable",
-  "mfa.verifyCode": "Enter the 6-digit code",
-  "mfa.scanQR": "Scan the QR Code",
-  "mfa.verify": "Verify",
-
-  // Accessibility
-  "a11y.skipToContent": "Skip to content",
-  "a11y.openMenu": "Open menu",
-  "a11y.closeMenu": "Close menu",
-  "a11y.darkMode": "Dark mode",
-  "a11y.lightMode": "Light mode",
 };
 
 export default en;

@@ -140,26 +140,6 @@ const PostConsultationSummary = ({
           </CardContent>
         </Card>
 
-        {/* Next steps guidance */}
-        <Card className="bg-primary/5 border-primary/20 mb-5 sm:mb-6">
-          <CardContent className="p-4 space-y-2">
-            <p className="text-xs font-semibold text-primary uppercase tracking-wider">Próximos Passos</p>
-            {isDoctor ? (
-              <ul className="text-sm text-muted-foreground space-y-1.5">
-                {!hasPrescription && <li className="flex items-center gap-2"><Pill className="w-3.5 h-3.5 text-primary" /> Emitir receita se necessário</li>}
-                {!hasNotes && <li className="flex items-center gap-2"><FileText className="w-3.5 h-3.5 text-primary" /> Completar prontuário SOAP</li>}
-                <li className="flex items-center gap-2"><Star className="w-3.5 h-3.5 text-primary" /> Paciente pode avaliar a consulta</li>
-              </ul>
-            ) : (
-              <ul className="text-sm text-muted-foreground space-y-1.5">
-                <li className="flex items-center gap-2"><Star className="w-3.5 h-3.5 text-primary" /> Avalie sua experiência</li>
-                <li className="flex items-center gap-2"><Download className="w-3.5 h-3.5 text-primary" /> Documentos disponíveis em "Meus Documentos"</li>
-                {hasPrescription && <li className="flex items-center gap-2"><Pill className="w-3.5 h-3.5 text-primary" /> Receita disponível para download</li>}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Actions */}
         <div className="space-y-3">
           {isDoctor && !hasPrescription && (

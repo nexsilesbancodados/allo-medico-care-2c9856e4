@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, Shield, Clock, ArrowRight, Stethoscope, Sparkles, CheckCircle2 } from "lucide-react";
+import { Video, Shield, Clock, ArrowRight, Stethoscope, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, memo } from "react";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
@@ -19,7 +19,7 @@ const LiveActivityIndicator = memo(() => {
     const base = 14 + Math.floor(Math.random() * 8);
     setCount(base);
     const interval = setInterval(() => {
-      setCount(prev => Math.max(8, prev + (Math.random() > 0.5 ? 1 : -1)));
+      setCount(prev => prev + (Math.random() > 0.5 ? 1 : -1));
     }, 8000);
     return () => clearInterval(interval);
   }, []);
@@ -41,13 +41,6 @@ const LiveActivityIndicator = memo(() => {
 });
 LiveActivityIndicator.displayName = "LiveActivityIndicator";
 
-const trustPoints = [
-  { icon: Shield, text: "Dados criptografados", color: "text-primary" },
-  { icon: Clock, text: "Atendimento 24h", color: "text-secondary" },
-  { icon: CheckCircle2, text: "CRM verificado", color: "text-success" },
-  { icon: Video, text: "Vídeo em HD", color: "text-warning" },
-];
-
 const HeroSection = memo(() => {
   const navigate = useNavigate();
   const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
@@ -68,6 +61,7 @@ const HeroSection = memo(() => {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-secondary/[0.04]" />
         <div className="absolute top-10 right-[10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-primary/15 to-secondary/10 blur-[100px]" />
         <div className="absolute bottom-10 left-[5%] w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-secondary/12 to-primary/8 blur-[80px]" />
+        {/* Dot grid pattern */}
         <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '32px 32px' }} />
       </div>
 
@@ -155,8 +149,12 @@ const HeroSection = memo(() => {
 
             {/* Live activity + Trust */}
             <LiveActivityIndicator />
-            <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-5 mt-4">
-              {trustPoints.map((item, i) => (
+            <div className="flex flex-wrap gap-5 mt-4">
+              {[
+                { icon: Shield, text: "Dados protegidos", color: "text-primary" },
+                { icon: Clock, text: "Atendimento 24h", color: "text-secondary" },
+                { icon: Video, text: "Vídeo em HD", color: "text-success" },
+              ].map((item, i) => (
                 <motion.div
                   key={i}
                   initial={{ opacity: 0, y: 5 }}
@@ -164,10 +162,10 @@ const HeroSection = memo(() => {
                   transition={{ delay: 0.6 + i * 0.1 }}
                   className="flex items-center gap-2 text-sm text-muted-foreground"
                 >
-                  <div className="w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center">
+                  <div className={`w-6 h-6 rounded-lg bg-muted/60 flex items-center justify-center`}>
                     <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
                   </div>
-                  <span className="text-xs sm:text-sm">{item.text}</span>
+                  {item.text}
                 </motion.div>
               ))}
             </div>
@@ -190,8 +188,6 @@ const HeroSection = memo(() => {
                 className="relative w-full h-auto drop-shadow-2xl"
                 loading="eager"
                 fetchPriority="high"
-                width={512}
-                height={512}
               />
 
               {/* Floating card — Security */}
@@ -221,21 +217,6 @@ const HeroSection = memo(() => {
                 <div>
                   <p className="text-sm font-bold text-foreground">4.9/5</p>
                   <p className="text-[11px] text-muted-foreground">12k+ avaliações</p>
-                </div>
-              </motion.div>
-
-              {/* New floating card — Consultations counter */}
-              <motion.div
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-                className="absolute top-1/2 -left-4 backdrop-blur-xl bg-card/90 rounded-2xl shadow-xl p-3 border border-border/50 hidden lg:flex items-center gap-2.5"
-              >
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                  <Stethoscope className="w-4 h-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-foreground">12.500+</p>
-                  <p className="text-[10px] text-muted-foreground">Consultas realizadas</p>
                 </div>
               </motion.div>
             </div>

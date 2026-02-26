@@ -11,7 +11,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { getAdminNav } from "@/components/admin/adminNav";
 import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, Video, Star, LayoutGrid, Download, RefreshCw, UserPlus } from "lucide-react";
 import AdminAnalyticsCharts from "./AdminAnalyticsCharts";
-import AdminSystemOverview from "./AdminSystemOverview";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import jsPDF from "jspdf";
@@ -417,11 +416,6 @@ const AdminDashboard = () => {
               </button>
             ))
           )}
-        </motion.div>
-
-        {/* System Health Overview */}
-        <motion.div variants={fadeUp}>
-          <AdminSystemOverview />
         </motion.div>
 
         {/* Analytics Charts */}

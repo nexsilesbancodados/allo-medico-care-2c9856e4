@@ -43,7 +43,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative bg-background">
       <SEOHead
         title="Consultas Médicas Online por Vídeo 24h | AloClínica"
         description="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades, plantão clínico 24h. Sua saúde na palma da mão."
