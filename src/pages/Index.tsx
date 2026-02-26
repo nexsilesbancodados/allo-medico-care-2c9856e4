@@ -61,12 +61,11 @@ const Index = () => {
           sameAs: ["https://www.instagram.com/aloclinica", "https://www.facebook.com/aloclinica"],
           hasOfferCatalog: {
             "@type": "OfferCatalog",
-            name: "Serviços de Telemedicina",
+            name: "Planos de Telemedicina",
             itemListElement: [
               { "@type": "Offer", name: "Consulta Avulsa", price: "89.00", priceCurrency: "BRL" },
+              { "@type": "Offer", name: "Plantão 24h Diurno", price: "75.00", priceCurrency: "BRL" },
               { "@type": "Offer", name: "Cartão Desconto Individual", price: "24.90", priceCurrency: "BRL" },
-              { "@type": "Offer", name: "Cartão Desconto Casal", price: "39.90", priceCurrency: "BRL" },
-              { "@type": "Offer", name: "Cartão Desconto Família", price: "54.90", priceCurrency: "BRL" },
             ],
           },
           potentialAction: {

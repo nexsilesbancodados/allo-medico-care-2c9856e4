@@ -24,7 +24,7 @@ const AffiliateDashboard = lazy(() => import("@/components/dashboards/AffiliateD
 const DoctorSearch = lazy(() => import("@/components/patient/DoctorSearch"));
 const AppointmentsList = lazy(() => import("@/components/patient/AppointmentsList"));
 const BookAppointment = lazy(() => import("@/components/patient/BookAppointment"));
-// PlansCheckout removed — only Consulta Avulsa + Cartão Desconto
+const PlansCheckout = lazy(() => import("@/components/patient/PlansCheckout"));
 const MedicalHistory = lazy(() => import("@/components/patient/MedicalHistory"));
 const PaymentHistory = lazy(() => import("@/components/patient/PaymentHistory"));
 const PatientExamUpload = lazy(() => import("@/components/patient/PatientExamUpload"));
@@ -183,7 +183,7 @@ const Dashboard = () => {
       <Route path="appointments" element={<RoleGuard allowed={["patient"]} roles={roles}><AppointmentsList /></RoleGuard>} />
       <Route path="schedule" element={<RoleGuard allowed={["patient"]} roles={roles}><DoctorSearch /></RoleGuard>} />
       <Route path="schedule/:doctorId" element={<RoleGuard allowed={["patient"]} roles={roles}><BookAppointment /></RoleGuard>} />
-      {/* plans route removed */}
+      <Route path="plans" element={<RoleGuard allowed={["patient"]} roles={roles}><PlansCheckout /></RoleGuard>} />
       <Route path="history" element={<RoleGuard allowed={["patient"]} roles={roles}><MedicalHistory /></RoleGuard>} />
       <Route path="payment-history" element={<RoleGuard allowed={["patient"]} roles={roles}><PaymentHistory /></RoleGuard>} />
       <Route path="patient/documents" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientExamUpload /></RoleGuard>} />
