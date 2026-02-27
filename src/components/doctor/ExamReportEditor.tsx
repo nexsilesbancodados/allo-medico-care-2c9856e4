@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +14,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, FileSignature, Download, Eye, Shield, Database, ImageIcon } from "lucide-react";
+import { Loader2, FileSignature, Download, Eye, Shield, Database, ImageIcon, Save } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import jsPDF from "jspdf";
@@ -37,6 +37,11 @@ const ExamReportEditor = () => {
   const [pacsStatus, setPacsStatus] = useState<"idle" | "loading" | "connected" | "unavailable">("idle");
   const [activeDicomUrl, setActiveDicomUrl] = useState<string | null>(null);
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+
+
 
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-editor", user?.id],
@@ -103,7 +108,37 @@ const ExamReportEditor = () => {
     },
   });
 
-  // Load existing report content
+  // Auto-save draft every 5 seconds after content changes
+  const autoSaveDraft = useCallback(async (text: string) => {
+    if (!doctorProfile?.id || !examId || !text.trim()) return;
+    setAutoSaveStatus("saving");
+    try {
+      if (existingReport?.id) {
+        await supabase
+          .from("exam_reports" as any)
+          .update({ content_text: text } as any)
+          .eq("id", existingReport.id);
+      } else {
+        await supabase.from("exam_reports" as any).insert({
+          exam_request_id: examId,
+          reporter_id: doctorProfile.id,
+          content_text: text,
+        } as any);
+        queryClient.invalidateQueries({ queryKey: ["exam-report-existing", examId] });
+      }
+      setAutoSaveStatus("saved");
+      setTimeout(() => setAutoSaveStatus("idle"), 2000);
+    } catch {
+      setAutoSaveStatus("idle");
+    }
+  }, [doctorProfile?.id, examId, existingReport?.id, queryClient]);
+
+  const handleContentChange = (newContent: string) => {
+    setContent(newContent);
+    if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(() => autoSaveDraft(newContent), 5000);
+  };
+
   useEffect(() => {
     if (existingReport?.content_text) {
       setContent(existingReport.content_text);
@@ -422,13 +457,21 @@ const ExamReportEditor = () => {
               </div>
             )}
 
-            <Textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Digite o laudo médico aqui..."
-              className="flex-1 min-h-[200px] resize-none text-sm"
-              readOnly={!!isReported}
-            />
+            <div className="relative flex-1">
+              <Textarea
+                value={content}
+                onChange={(e) => handleContentChange(e.target.value)}
+                placeholder="Digite o laudo médico aqui..."
+                className="flex-1 min-h-[200px] resize-none text-sm h-full"
+                readOnly={!!isReported}
+              />
+              {autoSaveStatus !== "idle" && !isReported && (
+                <div className="absolute top-2 right-2 flex items-center gap-1 text-xs text-muted-foreground bg-background/80 rounded px-2 py-1">
+                  {autoSaveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin" /> Salvando...</>}
+                  {autoSaveStatus === "saved" && <><Save className="w-3 h-3 text-success" /> Salvo</>}
+                </div>
+              )}
+            </div>
 
             {isReported ? (
               <div className="space-y-2">
