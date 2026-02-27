@@ -881,6 +881,48 @@ export type Database = {
           },
         ]
       }
+      exames: {
+        Row: {
+          arquivo_url: string | null
+          assinado_em: string | null
+          created_at: string
+          id: string
+          laudista_id: string | null
+          laudo_texto: string | null
+          paciente_nome: string
+          pdf_url: string | null
+          status: string
+          study_uid: string | null
+          updated_at: string
+        }
+        Insert: {
+          arquivo_url?: string | null
+          assinado_em?: string | null
+          created_at?: string
+          id?: string
+          laudista_id?: string | null
+          laudo_texto?: string | null
+          paciente_nome: string
+          pdf_url?: string | null
+          status?: string
+          study_uid?: string | null
+          updated_at?: string
+        }
+        Update: {
+          arquivo_url?: string | null
+          assinado_em?: string | null
+          created_at?: string
+          id?: string
+          laudista_id?: string | null
+          laudo_texto?: string | null
+          paciente_nome?: string
+          pdf_url?: string | null
+          status?: string
+          study_uid?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       favorite_doctors: {
         Row: {
           created_at: string
