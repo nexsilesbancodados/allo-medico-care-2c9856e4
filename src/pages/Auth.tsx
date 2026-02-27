@@ -288,7 +288,14 @@ const Auth = () => {
                       initial={{ opacity: 0, y: 16 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.07 }}
-                      onClick={() => { setUserType(ut.type); setMode("register"); }}
+                    onClick={() => {
+                      if (ut.type === "patient") {
+                        navigate("/paciente");
+                        return;
+                      }
+                      setUserType(ut.type);
+                      setMode("register");
+                    }}
                       className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border hover:border-primary/50 hover:bg-muted/40 transition-all text-left group"
                     >
                       <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${ut.color}`}>
