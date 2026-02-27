@@ -84,6 +84,10 @@ const ClinicDoctorsManagement = lazy(() => import("@/components/clinic/ClinicDoc
 const ReceptionSchedules = lazy(() => import("@/components/reception/ReceptionSchedules"));
 const ReceptionCheckin = lazy(() => import("@/components/reception/ReceptionCheckin"));
 const ReceptionBilling = lazy(() => import("@/components/reception/ReceptionBilling"));
+const ReceptionPatients = lazy(() => import("@/components/reception/ReceptionPatients"));
+const ReceptionCalls = lazy(() => import("@/components/reception/ReceptionCalls"));
+const ReceptionRecords = lazy(() => import("@/components/reception/ReceptionRecords"));
+const ReceptionMessages = lazy(() => import("@/components/reception/ReceptionMessages"));
 
 // Admin
 const AdminDoctors = lazy(() => import("@/components/admin/AdminDoctors"));
@@ -252,10 +256,10 @@ const Dashboard = () => {
       <Route path="reception/checkin" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionCheckin /></RoleGuard>} />
       <Route path="reception/billing" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionBilling /></RoleGuard>} />
       <Route path="reception/waiting" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
-      <Route path="reception/patients" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
-      <Route path="reception/calls" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
-      <Route path="reception/records" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
-      <Route path="reception/messages" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
+      <Route path="reception/patients" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionPatients /></RoleGuard>} />
+      <Route path="reception/calls" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionCalls /></RoleGuard>} />
+      <Route path="reception/records" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionRecords /></RoleGuard>} />
+      <Route path="reception/messages" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionMessages /></RoleGuard>} />
       <Route path="reception/exam-request" element={<RoleGuard allowed={["receptionist"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
 
       {/* Admin routes */}
