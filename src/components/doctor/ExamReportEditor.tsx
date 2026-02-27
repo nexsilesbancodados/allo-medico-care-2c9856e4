@@ -6,7 +6,6 @@ import { toast } from "@/hooks/use-toast";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getLaudistaNav } from "@/components/laudista/laudistaNav";
-import { useSearchParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -14,9 +13,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, FileSignature, Download, Eye, Shield, Database, ImageIcon, Save } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Loader2, FileSignature, Download, Eye, Save, ImageIcon,
+  Mic, MicOff, Sparkles, Wand2, BookText, ChevronDown, Lightbulb
+} from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
+import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
 import jsPDF from "jspdf";
 import DicomViewer from "@/components/consultation/DicomViewer";
 
@@ -29,28 +33,115 @@ const ExamReportEditor = () => {
   const nav = isLaudista ? getLaudistaNav("queue") : getDoctorNav("report-queue");
   const backRoute = isLaudista ? "/dashboard/laudista/queue?role=doctor" : "/dashboard/doctor/report-queue?role=doctor";
   const queryClient = useQueryClient();
+
   const [content, setContent] = useState("");
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [signing, setSigning] = useState(false);
   const [fileUrls, setFileUrls] = useState<string[]>([]);
-  const [icpStatus, setIcpStatus] = useState<"idle" | "loading" | "signed" | "unavailable">("idle");
-  const [pacsStatus, setPacsStatus] = useState<"idle" | "loading" | "connected" | "unavailable">("idle");
   const [activeDicomUrl, setActiveDicomUrl] = useState<string | null>(null);
   const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Voice dictation state
+  const [listening, setListening] = useState(false);
+  const [voiceSupported, setVoiceSupported] = useState(true);
+  const recognitionRef = useRef<any>(null);
+  const [interimText, setInterimText] = useState("");
 
+  // AI structuring state
+  const [aiProcessing, setAiProcessing] = useState(false);
+  const [aiMode, setAiMode] = useState<"structure" | "improve" | "suggest_conclusion">("structure");
 
+  // Macros state
+  const [showMacros, setShowMacros] = useState(false);
+  const macroCategories = [...new Set(REPORT_MACROS.map((m) => m.category))];
 
+  // ---- Speech Recognition Setup ----
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      setVoiceSupported(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = "pt-BR";
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event: any) => {
+      let interim = "";
+      let finalText = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalText += transcript + " ";
+        } else {
+          interim += transcript;
+        }
+      }
+      setInterimText(interim);
+      if (finalText.trim()) {
+        setContent((prev) => {
+          const newContent = prev ? prev + " " + finalText.trim() : finalText.trim();
+          // Check for macro triggers
+          const macro = findMacro(newContent);
+          if (macro) {
+            toast({ title: "📝 Macro aplicada", description: macro.label });
+            return applyMacro(newContent, macro);
+          }
+          return newContent;
+        });
+      }
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech error:", event.error);
+      if (event.error === "not-allowed") {
+        toast({ title: "Microfone bloqueado", description: "Permita o acesso ao microfone.", variant: "destructive" });
+      }
+      setListening(false);
+      setInterimText("");
+    };
+
+    recognition.onend = () => {
+      if (recognitionRef.current?._shouldRestart) {
+        try { recognition.start(); } catch {}
+      } else {
+        setListening(false);
+        setInterimText("");
+      }
+    };
+
+    recognitionRef.current = recognition;
+    return () => { try { recognition.stop(); } catch {} };
+  }, []);
+
+  const toggleListening = useCallback(() => {
+    if (!recognitionRef.current) return;
+    if (listening) {
+      recognitionRef.current._shouldRestart = false;
+      recognitionRef.current.stop();
+      setListening(false);
+      setInterimText("");
+    } else {
+      try {
+        recognitionRef.current._shouldRestart = true;
+        recognitionRef.current.start();
+        setListening(true);
+        toast({ title: "🎙️ Ditado ativado", description: "Fale e o texto será transcrito. Use /comandos para macros." });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [listening]);
+
+  // ---- Data Queries ----
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-editor", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("doctor_profiles")
-        .select("id, crm, crm_state")
-        .eq("user_id", user!.id)
-        .maybeSingle();
+      const { data } = await supabase.from("doctor_profiles").select("id, crm, crm_state").eq("user_id", user!.id).maybeSingle();
       return data;
     },
     enabled: !!user,
@@ -59,11 +150,7 @@ const ExamReportEditor = () => {
   const { data: profile } = useQuery({
     queryKey: ["profile-editor", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("first_name, last_name")
-        .eq("user_id", user!.id)
-        .maybeSingle();
+      const { data } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", user!.id).maybeSingle();
       return data;
     },
     enabled: !!user,
@@ -72,11 +159,7 @@ const ExamReportEditor = () => {
   const { data: examRequest, isLoading: loadingExam } = useQuery({
     queryKey: ["exam-request-detail", examId],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("exam_requests" as any)
-        .select("*")
-        .eq("id", examId!)
-        .maybeSingle();
+      const { data, error } = await supabase.from("exam_requests" as any).select("*").eq("id", examId!).maybeSingle();
       if (error) throw error;
       return data as any;
     },
@@ -86,11 +169,7 @@ const ExamReportEditor = () => {
   const { data: existingReport } = useQuery({
     queryKey: ["exam-report-existing", examId],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("exam_reports" as any)
-        .select("*")
-        .eq("exam_request_id", examId!)
-        .maybeSingle();
+      const { data } = await supabase.from("exam_reports" as any).select("*").eq("exam_request_id", examId!).maybeSingle();
       return data as any;
     },
     enabled: !!examId,
@@ -99,71 +178,57 @@ const ExamReportEditor = () => {
   const { data: templates } = useQuery({
     queryKey: ["report-templates"],
     queryFn: async () => {
-      const { data } = await supabase
-        .from("report_templates" as any)
-        .select("*")
-        .eq("is_active", true)
-        .order("title");
+      const { data } = await supabase.from("report_templates" as any).select("*").eq("is_active", true).order("title");
       return data as any[];
     },
   });
 
-  // Auto-save draft every 5 seconds after content changes
+  // ---- Auto-save ----
   const autoSaveDraft = useCallback(async (text: string) => {
     if (!doctorProfile?.id || !examId || !text.trim()) return;
     setAutoSaveStatus("saving");
     try {
       if (existingReport?.id) {
-        await supabase
-          .from("exam_reports" as any)
-          .update({ content_text: text } as any)
-          .eq("id", existingReport.id);
+        await supabase.from("exam_reports" as any).update({ content_text: text } as any).eq("id", existingReport.id);
       } else {
-        await supabase.from("exam_reports" as any).insert({
-          exam_request_id: examId,
-          reporter_id: doctorProfile.id,
-          content_text: text,
-        } as any);
+        await supabase.from("exam_reports" as any).insert({ exam_request_id: examId, reporter_id: doctorProfile.id, content_text: text } as any);
         queryClient.invalidateQueries({ queryKey: ["exam-report-existing", examId] });
       }
       setAutoSaveStatus("saved");
       setTimeout(() => setAutoSaveStatus("idle"), 2000);
-    } catch {
-      setAutoSaveStatus("idle");
-    }
+    } catch { setAutoSaveStatus("idle"); }
   }, [doctorProfile?.id, examId, existingReport?.id, queryClient]);
 
   const handleContentChange = (newContent: string) => {
+    // Check for macro triggers on manual typing
+    const macro = findMacro(newContent);
+    if (macro) {
+      const applied = applyMacro(newContent, macro);
+      setContent(applied);
+      toast({ title: "📝 Macro aplicada", description: macro.label });
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = setTimeout(() => autoSaveDraft(applied), 5000);
+      return;
+    }
     setContent(newContent);
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(() => autoSaveDraft(newContent), 5000);
   };
 
   useEffect(() => {
-    if (existingReport?.content_text) {
-      setContent(existingReport.content_text);
-    }
+    if (existingReport?.content_text) setContent(existingReport.content_text);
   }, [existingReport]);
 
-  // Generate signed URLs for exam files (or use directly if external URL)
+  // ---- File URLs ----
   useEffect(() => {
     if (!examRequest?.file_urls) return;
     const urls = examRequest.file_urls as string[];
     if (!urls.length) return;
     Promise.all(
       urls.map(async (path: string) => {
-        // Full external URL
-        if (path.startsWith("http://") || path.startsWith("https://")) {
-          return path;
-        }
-        // Relative URL (served from same origin, e.g. /images/sample.jpg)
-        if (path.startsWith("/")) {
-          return path;
-        }
-        // Storage path — generate signed URL
-        const { data } = await supabase.storage
-          .from("exam-files")
-          .createSignedUrl(path, 3600);
+        if (path.startsWith("http://") || path.startsWith("https://")) return path;
+        if (path.startsWith("/")) return path;
+        const { data } = await supabase.storage.from("exam-files").createSignedUrl(path, 3600);
         return data?.signedUrl || "";
       })
     ).then((resolved) => setFileUrls(resolved.filter(Boolean)));
@@ -172,17 +237,58 @@ const ExamReportEditor = () => {
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplateId(templateId);
     const tpl = templates?.find((t: any) => t.id === templateId);
-    if (tpl) {
-      setContent(tpl.body_text);
+    if (tpl) setContent(tpl.body_text);
+  };
+
+  // ---- AI Processing ----
+  const handleAiProcess = async (mode: "structure" | "improve" | "suggest_conclusion") => {
+    if (!content.trim()) {
+      toast({ title: "Texto vazio", description: "Escreva ou dite o texto antes de usar a IA.", variant: "destructive" });
+      return;
+    }
+    setAiProcessing(true);
+    setAiMode(mode);
+    try {
+      const { data, error } = await supabase.functions.invoke("structure-report", {
+        body: {
+          raw_text: content,
+          exam_type: examRequest?.exam_type || "",
+          clinical_info: examRequest?.clinical_info || "",
+          mode,
+        },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      if (data?.structured_text) {
+        if (mode === "suggest_conclusion") {
+          setContent((prev) => prev + "\n\n" + data.structured_text);
+        } else {
+          setContent(data.structured_text);
+        }
+        toast({ title: "✨ IA aplicada", description: mode === "structure" ? "Laudo estruturado com sucesso!" : mode === "improve" ? "Texto melhorado!" : "Conclusão sugerida!" });
+      }
+    } catch (err: any) {
+      toast({ title: "Erro na IA", description: err.message || "Tente novamente.", variant: "destructive" });
+    } finally {
+      setAiProcessing(false);
     }
   };
 
+  // ---- Insert macro ----
+  const insertMacro = (macroId: string) => {
+    const macro = REPORT_MACROS.find((m) => m.id === macroId);
+    if (!macro) return;
+    setContent((prev) => prev ? `${prev}\n\n${macro.text}` : macro.text);
+    setShowMacros(false);
+    toast({ title: "📝 Macro inserida", description: macro.label });
+  };
+
+  // ---- Sign & Finalize ----
   const handleSignAndFinalize = async () => {
     if (!doctorProfile?.id || !content.trim()) {
       toast({ title: "Erro", description: "Preencha o laudo antes de assinar.", variant: "destructive" });
       return;
     }
-
     setSigning(true);
     try {
       const documentHash = await gerarHashDocumento(content);
@@ -214,7 +320,6 @@ const ExamReportEditor = () => {
       const contentLines = pdf.splitTextToSize(content, 170);
       pdf.text(contentLines, 20, yStart + 7);
 
-      // Footer with hash
       pdf.setFontSize(7);
       pdf.text(`Código de Verificação: ${verificationCode}`, 20, 280);
       pdf.text(`Hash SHA-256: ${documentHash.substring(0, 32)}...`, 20, 284);
@@ -222,128 +327,53 @@ const ExamReportEditor = () => {
 
       const pdfBlob = pdf.output("blob");
       const pdfPath = `reports/${examId}/${crypto.randomUUID()}.pdf`;
-      const { error: uploadError } = await supabase.storage
-        .from("prescriptions")
-        .upload(pdfPath, pdfBlob, { contentType: "application/pdf" });
+      const { error: uploadError } = await supabase.storage.from("prescriptions").upload(pdfPath, pdfBlob, { contentType: "application/pdf" });
       if (uploadError) throw uploadError;
 
-      // Save or update report
       if (existingReport?.id) {
-        const { error } = await supabase
-          .from("exam_reports" as any)
-          .update({
-            content_text: content,
-            template_id: selectedTemplateId || null,
-            pdf_url: pdfPath,
-            document_hash: documentHash,
-            verification_code: verificationCode,
-            signed_at: new Date().toISOString(),
-          } as any)
-          .eq("id", existingReport.id);
+        const { error } = await supabase.from("exam_reports" as any).update({
+          content_text: content, template_id: selectedTemplateId || null, pdf_url: pdfPath,
+          document_hash: documentHash, verification_code: verificationCode, signed_at: new Date().toISOString(),
+        } as any).eq("id", existingReport.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("exam_reports" as any).insert({
-          exam_request_id: examId,
-          reporter_id: doctorProfile.id,
-          content_text: content,
-          template_id: selectedTemplateId || null,
-          pdf_url: pdfPath,
-          document_hash: documentHash,
-          verification_code: verificationCode,
-          signed_at: new Date().toISOString(),
+          exam_request_id: examId, reporter_id: doctorProfile.id, content_text: content,
+          template_id: selectedTemplateId || null, pdf_url: pdfPath, document_hash: documentHash,
+          verification_code: verificationCode, signed_at: new Date().toISOString(),
         } as any);
         if (error) throw error;
       }
 
-      // Update exam request status
-      await supabase
-        .from("exam_requests" as any)
-        .update({ status: "reported" } as any)
-        .eq("id", examId);
+      await supabase.from("exam_requests" as any).update({ status: "reported" } as any).eq("id", examId);
 
-      // Try ICP-Brasil signature via VIDaaS (optional enhancement)
+      // ICP-Brasil (optional)
       try {
         const icpRes = await supabase.functions.invoke("vidaas-sign", {
-          body: {
-            action: "sign",
-            document_hash: documentHash,
-            document_type: "exam_report",
-            doctor_name: doctorName,
-            doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`,
-            verification_code: verificationCode,
-          },
+          body: { action: "sign", document_hash: documentHash, document_type: "exam_report", doctor_name: doctorName, doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`, verification_code: verificationCode },
         });
-        if (icpRes.data?.success) {
-          setIcpStatus("signed");
-        }
-      } catch {
-        // ICP-Brasil is optional — SHA-256 signature is always applied
-      }
+        if (icpRes.data?.success) { /* ICP signed */ }
+      } catch {}
 
-      // Register in document_verifications
       await supabase.from("document_verifications").insert({
-        doctor_name: doctorName,
-        doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`,
-        patient_name: "Paciente",
-        document_type: "exam_report",
-        document_hash: documentHash,
-        verification_code: verificationCode,
+        doctor_name: doctorName, doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`,
+        patient_name: "Paciente", document_type: "exam_report", document_hash: documentHash, verification_code: verificationCode,
       });
 
-      // Notify requesting doctor
+      // Notifications
       if (examRequest?.requesting_doctor_id) {
-        const { data: reqDoctor } = await supabase
-          .from("doctor_profiles")
-          .select("user_id")
-          .eq("id", examRequest.requesting_doctor_id)
-          .maybeSingle();
+        const { data: reqDoctor } = await supabase.from("doctor_profiles").select("user_id").eq("id", examRequest.requesting_doctor_id).maybeSingle();
         if (reqDoctor?.user_id) {
-          await supabase.from("notifications").insert({
-            user_id: reqDoctor.user_id,
-            title: "📋 Laudo Concluído",
-            message: `O laudo do exame ${examRequest.exam_type} foi finalizado.`,
-            type: "exam_report",
-            link: `/dashboard/doctor/report-editor/${examId}?role=doctor`,
-          });
+          await supabase.from("notifications").insert({ user_id: reqDoctor.user_id, title: "📋 Laudo Concluído", message: `O laudo do exame ${examRequest.exam_type} foi finalizado.`, type: "exam_report", link: `/dashboard/doctor/report-editor/${examId}?role=doctor` });
         }
       }
-
-      // Notify patient via WhatsApp + Email
       if (examRequest?.patient_id) {
-        const { data: patientProfile } = await supabase
-          .from("profiles")
-          .select("user_id, first_name, phone")
-          .eq("user_id", examRequest.patient_id)
-          .maybeSingle();
-
+        const { data: patientProfile } = await supabase.from("profiles").select("user_id, first_name, phone").eq("user_id", examRequest.patient_id).maybeSingle();
         if (patientProfile) {
-          // In-app notification
-          await supabase.from("notifications").insert({
-            user_id: patientProfile.user_id,
-            title: "📋 Seu laudo está pronto!",
-            message: `O laudo do exame ${examRequest.exam_type} foi concluído. Acesse sua área de saúde para visualizar.`,
-            type: "exam_report",
-            link: "/dashboard/health",
-          });
-
-          // WhatsApp notification via edge function
+          await supabase.from("notifications").insert({ user_id: patientProfile.user_id, title: "📋 Seu laudo está pronto!", message: `O laudo do exame ${examRequest.exam_type} foi concluído.`, type: "exam_report", link: "/dashboard/health" });
           if (patientProfile.phone) {
-            supabase.functions.invoke("send-whatsapp", {
-              body: {
-                phone: patientProfile.phone,
-                message: `🩺 *Allo Médico* — Laudo Pronto!\n\nOlá, ${patientProfile.first_name}!\nSeu laudo de *${examRequest.exam_type}* foi finalizado pelo Dr(a). ${doctorName}.\n\n📄 Acesse sua área de saúde para visualizar e baixar o PDF.\n\nCódigo de verificação: ${verificationCode}`,
-              },
-            }).catch(console.error);
+            supabase.functions.invoke("send-whatsapp", { body: { phone: patientProfile.phone, message: `🩺 *Allo Médico* — Laudo Pronto!\n\nOlá, ${patientProfile.first_name}!\nSeu laudo de *${examRequest.exam_type}* foi finalizado pelo Dr(a). ${doctorName}.\n\nCódigo: ${verificationCode}` } }).catch(console.error);
           }
-
-          // Email notification via edge function
-          supabase.functions.invoke("send-email", {
-            body: {
-              to: examRequest.patient_id,
-              subject: `Seu laudo de ${examRequest.exam_type} está pronto`,
-              html: `<h2>Laudo Médico Finalizado</h2><p>Olá ${patientProfile.first_name},</p><p>Seu laudo de <strong>${examRequest.exam_type}</strong> foi concluído pelo Dr(a). ${doctorName}.</p><p>Código de verificação: <strong>${verificationCode}</strong></p><p>Acesse a plataforma para visualizar e baixar o PDF.</p>`,
-            },
-          }).catch(console.error);
         }
       }
 
@@ -360,9 +390,7 @@ const ExamReportEditor = () => {
   if (loadingExam) {
     return (
       <DashboardLayout nav={nav} title="Editor de Laudo">
-        <div className="flex justify-center py-16">
-          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-        </div>
+        <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
       </DashboardLayout>
     );
   }
@@ -378,9 +406,7 @@ const ExamReportEditor = () => {
             <CardTitle className="text-sm flex items-center gap-2">
               <Eye className="w-4 h-4" />
               Arquivos do Exame — {examRequest?.exam_type}
-              {examRequest?.priority === "urgent" && (
-                <Badge variant="destructive">Urgente</Badge>
-              )}
+              {examRequest?.priority === "urgent" && <Badge variant="destructive">Urgente</Badge>}
             </CardTitle>
           </CardHeader>
           <CardContent className="h-full pb-4">
@@ -389,13 +415,11 @@ const ExamReportEditor = () => {
                 <strong>Anamnese:</strong> {examRequest.clinical_info}
               </div>
             )}
-            {/* DICOM Viewer */}
             {activeDicomUrl && (
               <div className="mb-3 h-80">
                 <DicomViewer fileUrl={activeDicomUrl} fileName="Exame DICOM" />
               </div>
             )}
-
             <div className="space-y-2 overflow-y-auto" style={{ maxHeight: activeDicomUrl ? "calc(100% - 28rem)" : "calc(100% - 6rem)" }}>
               {fileUrls.map((url, i) => {
                 const originalPath = (examRequest?.file_urls as string[])?.[i] || "";
@@ -404,30 +428,18 @@ const ExamReportEditor = () => {
                 return (
                   <div key={i} className="border rounded-md overflow-hidden">
                     {isDicom ? (
-                      <Button
-                        variant="outline"
-                        className="w-full h-16"
-                        onClick={() => setActiveDicomUrl(url)}
-                      >
-                        <ImageIcon className="w-4 h-4 mr-2" /> Abrir DICOM #{i + 1} no Visualizador
+                      <Button variant="outline" className="w-full h-16" onClick={() => setActiveDicomUrl(url)}>
+                        <ImageIcon className="w-4 h-4 mr-2" /> Abrir DICOM #{i + 1}
                       </Button>
                     ) : isPdf ? (
                       <iframe src={url} className="w-full h-96" title={`Exame ${i + 1}`} />
                     ) : (
-                      <img
-                        src={url}
-                        alt={`Exame ${i + 1}`}
-                        className="w-full object-contain max-h-96 cursor-pointer hover:opacity-90 transition-opacity"
-                        onClick={() => setFullscreenImageUrl(url)}
-                        title="Clique para ver em tela cheia"
-                      />
+                      <img src={url} alt={`Exame ${i + 1}`} className="w-full object-contain max-h-96 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setFullscreenImageUrl(url)} title="Clique para ver em tela cheia" />
                     )}
                   </div>
                 );
               })}
-              {fileUrls.length === 0 && (
-                <p className="text-muted-foreground text-sm text-center py-8">Nenhum arquivo disponível.</p>
-              )}
+              {fileUrls.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Nenhum arquivo disponível.</p>}
             </div>
           </CardContent>
         </Card>
@@ -440,35 +452,119 @@ const ExamReportEditor = () => {
               {isReported ? "Laudo Finalizado" : "Redigir Laudo"}
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex-1 flex flex-col gap-3">
-            {!isReported && templates && templates.length > 0 && (
-              <div>
-                <Label className="text-xs">Modelo de Laudo</Label>
-                <Select value={selectedTemplateId} onValueChange={handleTemplateSelect}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue placeholder="Selecionar template..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {templates.map((t: any) => (
-                      <SelectItem key={t.id} value={t.id}>{t.title} ({t.exam_type})</SelectItem>
+          <CardContent className="flex-1 flex flex-col gap-3 overflow-hidden">
+            {/* Toolbar: Template + Voice + AI + Macros */}
+            {!isReported && (
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Template selector */}
+                {templates && templates.length > 0 && (
+                  <Select value={selectedTemplateId} onValueChange={handleTemplateSelect}>
+                    <SelectTrigger className="h-8 text-xs w-auto min-w-[140px]">
+                      <SelectValue placeholder="Template..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {templates.map((t: any) => (
+                        <SelectItem key={t.id} value={t.id}>{t.title} ({t.exam_type})</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {/* Voice dictation */}
+                {voiceSupported && (
+                  <Button
+                    type="button"
+                    variant={listening ? "destructive" : "outline"}
+                    size="sm"
+                    onClick={toggleListening}
+                    className="h-8 text-xs"
+                  >
+                    {listening ? (
+                      <><MicOff className="w-3.5 h-3.5 mr-1" /><span className="animate-pulse">Ditando...</span></>
+                    ) : (
+                      <><Mic className="w-3.5 h-3.5 mr-1" />Ditar</>
+                    )}
+                  </Button>
+                )}
+
+                {/* AI Tools */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 text-xs" disabled={aiProcessing}>
+                      {aiProcessing ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1" />}
+                      IA <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64 p-2" align="start">
+                    <div className="space-y-1">
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-8" onClick={() => handleAiProcess("structure")} disabled={aiProcessing}>
+                        <Wand2 className="w-3.5 h-3.5 mr-2" /> Estruturar Laudo
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-8" onClick={() => handleAiProcess("improve")} disabled={aiProcessing}>
+                        <Sparkles className="w-3.5 h-3.5 mr-2" /> Melhorar Redação
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-8" onClick={() => handleAiProcess("suggest_conclusion")} disabled={aiProcessing}>
+                        <Lightbulb className="w-3.5 h-3.5 mr-2" /> Sugerir Conclusão
+                      </Button>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground mt-2 px-1">A IA auxilia na redação. Sempre revise o resultado.</p>
+                  </PopoverContent>
+                </Popover>
+
+                {/* Macros */}
+                <Popover open={showMacros} onOpenChange={setShowMacros}>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 text-xs">
+                      <BookText className="w-3.5 h-3.5 mr-1" /> Macros <ChevronDown className="w-3 h-3 ml-1" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-72 p-2 max-h-80 overflow-y-auto" align="start">
+                    {macroCategories.map((cat) => (
+                      <div key={cat} className="mb-2">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-1">{cat}</p>
+                        {REPORT_MACROS.filter((m) => m.category === cat).map((m) => (
+                          <Button key={m.id} variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => insertMacro(m.id)}>
+                            {m.label} <span className="ml-auto text-muted-foreground font-mono">{m.trigger}</span>
+                          </Button>
+                        ))}
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
+                    <p className="text-[10px] text-muted-foreground mt-1 px-1">💡 Digite o comando (ex: /torax-normal) no editor ou dite por voz.</p>
+                  </PopoverContent>
+                </Popover>
               </div>
             )}
 
-            <div className="relative flex-1">
+            {/* Interim voice text preview */}
+            {listening && interimText && (
+              <div className="bg-primary/5 border border-primary/20 rounded-md px-3 py-2 text-sm text-primary animate-pulse">
+                🎙️ {interimText}
+              </div>
+            )}
+
+            {/* Editor */}
+            <div className="relative flex-1 min-h-0">
               <Textarea
                 value={content}
                 onChange={(e) => handleContentChange(e.target.value)}
-                placeholder="Digite o laudo médico aqui..."
-                className="flex-1 min-h-[200px] resize-none text-sm h-full"
+                placeholder={listening ? "Fale agora... o texto aparecerá aqui automaticamente." : "Digite o laudo ou use o botão Ditar para transcrição por voz...\n\nDica: digite /torax-normal para inserir um laudo modelo."}
+                className="h-full min-h-[200px] resize-none text-sm font-mono"
                 readOnly={!!isReported}
               />
               {autoSaveStatus !== "idle" && !isReported && (
                 <div className="absolute top-2 right-2 flex items-center gap-1 text-xs text-muted-foreground bg-background/80 rounded px-2 py-1">
                   {autoSaveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin" /> Salvando...</>}
                   {autoSaveStatus === "saved" && <><Save className="w-3 h-3 text-success" /> Salvo</>}
+                </div>
+              )}
+              {aiProcessing && (
+                <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-md">
+                  <div className="flex items-center gap-2 bg-background border rounded-lg px-4 py-2 shadow-lg">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    <span className="text-sm">
+                      {aiMode === "structure" ? "Estruturando laudo..." : aiMode === "improve" ? "Melhorando redação..." : "Gerando conclusão..."}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>
@@ -482,26 +578,16 @@ const ExamReportEditor = () => {
                   Código: {existingReport.verification_code} | Hash: {existingReport.document_hash?.substring(0, 16)}...
                 </p>
                 {existingReport.pdf_url && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={async () => {
-                      const { data } = await supabase.storage
-                        .from("prescriptions")
-                        .createSignedUrl(existingReport.pdf_url, 3600);
-                      if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-                    }}
-                  >
+                  <Button size="sm" variant="outline" onClick={async () => {
+                    const { data } = await supabase.storage.from("prescriptions").createSignedUrl(existingReport.pdf_url, 3600);
+                    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                  }}>
                     <Download className="w-3 h-3 mr-1" /> Baixar PDF
                   </Button>
                 )}
               </div>
             ) : (
-              <Button
-                onClick={handleSignAndFinalize}
-                disabled={signing || !content.trim()}
-                className="w-full"
-              >
+              <Button onClick={handleSignAndFinalize} disabled={signing || !content.trim()} className="w-full">
                 {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
                 {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
               </Button>
@@ -509,16 +595,11 @@ const ExamReportEditor = () => {
           </CardContent>
         </Card>
       </div>
+
       {/* Fullscreen image dialog */}
       <Dialog open={!!fullscreenImageUrl} onOpenChange={() => setFullscreenImageUrl(null)}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-2 flex items-center justify-center">
-          {fullscreenImageUrl && (
-            <img
-              src={fullscreenImageUrl}
-              alt="Exame em tela cheia"
-              className="max-w-full max-h-[90vh] object-contain"
-            />
-          )}
+          {fullscreenImageUrl && <img src={fullscreenImageUrl} alt="Exame em tela cheia" className="max-w-full max-h-[90vh] object-contain" />}
         </DialogContent>
       </Dialog>
     </DashboardLayout>
