@@ -807,39 +807,60 @@ export type Database = {
         Row: {
           assigned_to: string | null
           clinical_info: string | null
+          completed_at: string | null
           created_at: string
           exam_type: string
           file_urls: Json
           id: string
+          orthanc_study_uid: string | null
           patient_id: string | null
           priority: string
           requesting_doctor_id: string
+          sla_deadline: string | null
+          sla_hours: number | null
+          source: string | null
+          specialty_required: string | null
+          started_at: string | null
           status: string
           updated_at: string
         }
         Insert: {
           assigned_to?: string | null
           clinical_info?: string | null
+          completed_at?: string | null
           created_at?: string
           exam_type: string
           file_urls?: Json
           id?: string
+          orthanc_study_uid?: string | null
           patient_id?: string | null
           priority?: string
           requesting_doctor_id: string
+          sla_deadline?: string | null
+          sla_hours?: number | null
+          source?: string | null
+          specialty_required?: string | null
+          started_at?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
           assigned_to?: string | null
           clinical_info?: string | null
+          completed_at?: string | null
           created_at?: string
           exam_type?: string
           file_urls?: Json
           id?: string
+          orthanc_study_uid?: string | null
           patient_id?: string | null
           priority?: string
           requesting_doctor_id?: string
+          sla_deadline?: string | null
+          sla_hours?: number | null
+          source?: string | null
+          specialty_required?: string | null
+          started_at?: string | null
           status?: string
           updated_at?: string
         }
@@ -2234,6 +2255,7 @@ export type Database = {
     }
     Functions: {
       cleanup_rate_limits: { Args: never; Returns: undefined }
+      fn_alert_sla_breach: { Args: never; Returns: undefined }
       fn_archive_completed_queue: { Args: never; Returns: undefined }
       fn_auto_cancel_expired_renewals: { Args: never; Returns: undefined }
       fn_auto_cancel_unpaid: { Args: never; Returns: undefined }
