@@ -155,8 +155,8 @@ const AuthPaciente = () => {
     }
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
       if (newAttempts >= 5) {
@@ -168,6 +168,27 @@ const AuthPaciente = () => {
       }
     } else {
       setAttempts(0);
+      // Check if patient has active plan
+      const { data: { user: loggedUser } } = await supabase.auth.getUser();
+      if (loggedUser) {
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", loggedUser.id);
+        const isPatient = roles?.some(r => r.role === "patient");
+        const isOtherRole = roles?.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "affiliate"].includes(r.role));
+        
+        if (isPatient && !isOtherRole) {
+          const { data: subs } = await supabase.from("subscriptions").select("id").eq("user_id", loggedUser.id).eq("status", "active").limit(1);
+          const { data: cards } = await supabase.from("discount_cards").select("id").eq("user_id", loggedUser.id).eq("status", "active").limit(1);
+          
+          if ((!subs || subs.length === 0) && (!cards || cards.length === 0)) {
+            setLoading(false);
+            toast({ title: "Plano necessário", description: "Você precisa adquirir um plano para acessar.", variant: "destructive" });
+            await supabase.auth.signOut();
+            setStep("select");
+            return;
+          }
+        }
+      }
+      setLoading(false);
       navigate("/dashboard");
     }
   };

@@ -88,6 +88,26 @@ const Auth = () => {
         toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
       }
     } else {
+      // Check if user is patient without active subscription
+      const { data: { user: loggedUser } } = await supabase.auth.getUser();
+      if (loggedUser) {
+        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", loggedUser.id);
+        const isPatient = roles?.some(r => r.role === "patient");
+        const isOtherRole = roles?.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "affiliate"].includes(r.role));
+        
+        if (isPatient && !isOtherRole) {
+          // Check for active subscription or discount card
+          const { data: subs } = await supabase.from("subscriptions").select("id").eq("user_id", loggedUser.id).eq("status", "active").limit(1);
+          const { data: cards } = await supabase.from("discount_cards").select("id").eq("user_id", loggedUser.id).eq("status", "active").limit(1);
+          
+          if ((!subs || subs.length === 0) && (!cards || cards.length === 0)) {
+            toast({ title: "Plano necessário", description: "Você precisa adquirir um plano para acessar a plataforma.", variant: "destructive" });
+            await supabase.auth.signOut();
+            navigate("/paciente");
+            return;
+          }
+        }
+      }
       navigate("/dashboard");
     }
   };
