@@ -12,13 +12,13 @@ serve(async (req) => {
   try {
     const { raw_text, exam_type, clinical_info, mode } = await req.json();
 
-    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
-    if (!DEEPSEEK_API_KEY) throw new Error("DEEPSEEK_API_KEY não configurada");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY não configurada");
 
     let systemPrompt = "";
 
     if (mode === "structure") {
-      systemPrompt = `Você é um assistente especializado em radiologia e laudos médicos brasileiros.
+      systemPrompt = `Você é um radiologista assistente especializado em laudos médicos brasileiros.
 
 Sua tarefa é receber uma transcrição bruta de voz de um médico laudista e transformá-la em um laudo médico estruturado e profissional.
 
@@ -43,7 +43,7 @@ REGRAS:
 8. Tipo de exame: ${exam_type || "Não especificado"}
 ${clinical_info ? `9. Informações clínicas do paciente: ${clinical_info}` : ""}`;
     } else if (mode === "improve") {
-      systemPrompt = `Você é um assistente de redação médica. Melhore o texto do laudo abaixo:
+      systemPrompt = `Você é um assistente de redação médica radiológica. Melhore o texto do laudo abaixo:
 - Corrija erros gramaticais e de terminologia
 - Melhore a clareza e a objetividade
 - Mantenha a estrutura existente
@@ -62,14 +62,14 @@ ${clinical_info ? `- Contexto clínico: ${clinical_info}` : ""}`;
       throw new Error("Modo inválido. Use: structure, improve ou suggest_conclusion");
     }
 
-    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "deepseek-chat",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: raw_text },
@@ -81,10 +81,15 @@ ${clinical_info ? `- Contexto clínico: ${clinical_info}` : ""}`;
 
     if (!response.ok) {
       const t = await response.text();
-      console.error("DeepSeek error:", response.status, t);
+      console.error("AI gateway error:", response.status, t);
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Muitas requisições. Aguarde." }), {
+        return new Response(JSON.stringify({ error: "Muitas requisições. Aguarde um momento." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: "Créditos de IA esgotados. Recarregue em Settings > Workspace > Usage." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       throw new Error("Erro no serviço de IA");

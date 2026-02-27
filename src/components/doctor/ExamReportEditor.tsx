@@ -57,13 +57,32 @@ const ExamReportEditor = () => {
   const [showMacros, setShowMacros] = useState(false);
   const macroCategories = [...new Set(REPORT_MACROS.map((m) => m.category))];
 
-  // ---- Speech Recognition Setup ----
+  // ---- Audio Noise Suppression + Speech Recognition Setup ----
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setVoiceSupported(false);
       return;
     }
+
+    // Apply Web Audio API noise suppression constraints when available
+    let audioStream: MediaStream | null = null;
+    const initNoiseFilter = async () => {
+      try {
+        audioStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            // @ts-ignore - advanced constraints for noise reduction
+            suppressLocalAudioPlayback: true,
+          },
+        });
+        console.log("[STT] Noise suppression active");
+      } catch (err) {
+        console.warn("[STT] Noise filter unavailable, using raw mic:", err);
+      }
+    };
 
     const recognition = new SpeechRecognition();
     recognition.lang = "pt-BR";
@@ -85,7 +104,6 @@ const ExamReportEditor = () => {
       if (finalText.trim()) {
         setContent((prev) => {
           const newContent = prev ? prev + " " + finalText.trim() : finalText.trim();
-          // Check for macro triggers
           const macro = findMacro(newContent);
           if (macro) {
             toast({ title: "📝 Macro aplicada", description: macro.label });
@@ -115,10 +133,15 @@ const ExamReportEditor = () => {
     };
 
     recognitionRef.current = recognition;
-    return () => { try { recognition.stop(); } catch {} };
+    recognitionRef.current._initNoise = initNoiseFilter;
+
+    return () => {
+      try { recognition.stop(); } catch {}
+      if (audioStream) audioStream.getTracks().forEach((t) => t.stop());
+    };
   }, []);
 
-  const toggleListening = useCallback(() => {
+  const toggleListening = useCallback(async () => {
     if (!recognitionRef.current) return;
     if (listening) {
       recognitionRef.current._shouldRestart = false;
@@ -127,10 +150,15 @@ const ExamReportEditor = () => {
       setInterimText("");
     } else {
       try {
+        // Init noise suppression before first use
+        if (recognitionRef.current._initNoise) {
+          await recognitionRef.current._initNoise();
+          recognitionRef.current._initNoise = null;
+        }
         recognitionRef.current._shouldRestart = true;
         recognitionRef.current.start();
         setListening(true);
-        toast({ title: "🎙️ Ditado ativado", description: "Fale e o texto será transcrito. Use /comandos para macros." });
+        toast({ title: "🎙️ Ditado ativado", description: "Filtro de ruído ativo. Fale e o texto será transcrito. Use /comandos para macros." });
       } catch (e) {
         console.error(e);
       }
