@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Mail, Lock, ArrowLeft, Heart, Check, Star, Shield, Eye, EyeOff, Sparkles, Zap, Clock, Users, ChevronRight } from "lucide-react";
+import { Phone, Mail, Lock, ArrowLeft, Heart, Check, Star, Shield, Eye, EyeOff, Sparkles, Zap, Clock, Users, ChevronRight, CreditCard, QrCode, FileText, Loader2, AlertCircle, Copy, CheckCircle } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
 import { formatMask, unmask } from "@/hooks/use-mask";
@@ -38,7 +38,8 @@ const plans = [
   },
 ];
 
-type Step = "select" | "checkout" | "register" | "success";
+type Step = "select" | "register" | "payment" | "success";
+type PaymentMethod = "PIX" | "BOLETO" | "CREDIT_CARD";
 
 const stagger = {
   hidden: {},
@@ -52,8 +53,9 @@ const fadeUp = {
 const AuthPaciente = () => {
   const [searchParams] = useSearchParams();
   const initialPlan = searchParams.get("plan");
+  const reason = searchParams.get("reason");
 
-  const [step, setStep] = useState<Step>(initialPlan ? "checkout" : "select");
+  const [step, setStep] = useState<Step>(initialPlan ? "register" : "select");
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(initialPlan);
 
   const [email, setEmail] = useState("");
@@ -69,40 +71,32 @@ const AuthPaciente = () => {
   const [attempts, setAttempts] = useState(0);
   const lockoutUntil = useRef<number>(0);
 
+  // Payment state
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentData, setPaymentData] = useState<any>(null);
+  const [pixCopied, setPixCopied] = useState(false);
+  const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
+
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const currentPlan = plans.find(p => p.id === selectedPlanId);
 
+  // Show message if redirected from login without subscription
+  useEffect(() => {
+    if (reason === "no-subscription") {
+      toast({
+        title: "Plano necessário",
+        description: "Escolha um plano abaixo para acessar a plataforma.",
+        variant: "destructive",
+      });
+    }
+  }, [reason]);
+
   const handleSelectPlan = (planId: string) => {
     setSelectedPlanId(planId);
     setStep("register");
-  };
-
-  const handleCheckoutStripe = async () => {
-    if (!currentPlan) return;
-    setProcessing(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("create-checkout-session", {
-        body: {
-          mode: currentPlan.id === "mensal" ? "subscription" : "payment",
-          planId: currentPlan.id,
-          successUrl: `${window.location.origin}/payment-success`,
-          cancelUrl: `${window.location.origin}/paciente`,
-        },
-      });
-      if (error) throw error;
-      if (data?.sessionUrl) {
-        window.location.href = data.sessionUrl;
-      } else {
-        toast({ title: "Pagamento", description: "Integração Stripe pendente. Criando conta..." });
-        setStep("register");
-      }
-    } catch (err: any) {
-      toast({ title: "Erro no pagamento", description: err.message || "Tente novamente", variant: "destructive" });
-      setStep("register");
-    }
-    setProcessing(false);
   };
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -114,6 +108,10 @@ const AuthPaciente = () => {
     }
     if (!termsAccepted) {
       toast({ title: "Aceite os termos", description: "Você precisa aceitar os Termos de Uso e Política de Privacidade para continuar.", variant: "destructive" });
+      return;
+    }
+    if (!selectedPlanId) {
+      toast({ title: "Selecione um plano", description: "Volte e escolha um plano para continuar.", variant: "destructive" });
       return;
     }
     setLoading(true);
@@ -130,6 +128,7 @@ const AuthPaciente = () => {
       return;
     }
     if (data.user) {
+      setRegisteredUserId(data.user.id);
       await supabase.from("profiles").update({
         cpf: unmask(cpf),
         phone: unmask(phone),
@@ -142,8 +141,80 @@ const AuthPaciente = () => {
       } catch {}
     }
     setLoading(false);
-    toast({ title: "Cadastro realizado!", description: "Sua conta foi criada com sucesso." });
-    navigate("/dashboard");
+    toast({ title: "Conta criada!", description: "Agora finalize o pagamento para acessar." });
+    // Go to payment step instead of dashboard
+    setStep("payment");
+  };
+
+  const handleProcessPayment = async () => {
+    if (!currentPlan || !registeredUserId) return;
+    setPaymentLoading(true);
+    try {
+      const isSubscription = currentPlan.id === "mensal";
+      const body: Record<string, any> = {
+        customerName: `${firstName} ${lastName}`,
+        customerCpf: unmask(cpf),
+        customerEmail: email,
+        customerPhone: unmask(phone),
+        billingType: paymentMethod,
+        value: currentPlan.price,
+        description: isSubscription
+          ? `Assinatura Mensal — AloClínica`
+          : `Consulta Avulsa — AloClínica`,
+        planId: currentPlan.id,
+      };
+      if (isSubscription) {
+        body.cycle = "MONTHLY";
+      }
+
+      const { data, error } = await supabase.functions.invoke("create-asaas-payment", { body });
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || "Erro ao processar pagamento");
+
+      setPaymentData(data);
+
+      // For credit card or confirmed PIX, the payment may be instant
+      if (data.status === "CONFIRMED" || data.status === "RECEIVED" || data.status === "ACTIVE") {
+        await createSubscriptionRecord(data);
+        toast({ title: "Pagamento confirmado! ✅", description: "Redirecionando para o dashboard..." });
+        setTimeout(() => navigate("/dashboard"), 1500);
+      } else {
+        // PIX or Boleto — waiting for confirmation
+        toast({
+          title: paymentMethod === "PIX" ? "PIX gerado!" : "Boleto gerado!",
+          description: paymentMethod === "PIX" 
+            ? "Escaneie o QR Code ou copie o código para pagar."
+            : "Acesse o boleto para realizar o pagamento.",
+        });
+      }
+    } catch (err: any) {
+      toast({ title: "Erro no pagamento", description: err.message || "Tente novamente", variant: "destructive" });
+    }
+    setPaymentLoading(false);
+  };
+
+  const createSubscriptionRecord = async (payData: any) => {
+    if (!registeredUserId || !currentPlan) return;
+    try {
+      await supabase.from("subscriptions").insert({
+        user_id: registeredUserId,
+        plan_id: currentPlan.id,
+        status: "active",
+        payment_method: paymentMethod.toLowerCase(),
+        notes: payData.paymentId || payData.subscriptionId || null,
+      });
+    } catch (e) {
+      console.error("Error creating subscription:", e);
+    }
+  };
+
+  const handleCopyPix = () => {
+    if (paymentData?.pixCopyPaste) {
+      navigator.clipboard.writeText(paymentData.pixCopyPaste);
+      setPixCopied(true);
+      toast({ title: "Código PIX copiado!" });
+      setTimeout(() => setPixCopied(false), 3000);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -181,9 +252,8 @@ const AuthPaciente = () => {
           
           if ((!subs || subs.length === 0) && (!cards || cards.length === 0)) {
             setLoading(false);
-            toast({ title: "Plano necessário", description: "Você precisa adquirir um plano para acessar.", variant: "destructive" });
             await supabase.auth.signOut();
-            setStep("select");
+            navigate("/paciente?reason=no-subscription");
             return;
           }
         }
@@ -194,6 +264,9 @@ const AuthPaciente = () => {
   };
 
   const [mode, setMode] = useState<"register" | "login">("register");
+
+  const stepLabels = ["Escolher Plano", "Criar Conta", "Pagamento"];
+  const currentStepIndex = step === "select" ? 0 : step === "register" ? 1 : 2;
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col" style={{ background: 'var(--landing-bg)' }}>
@@ -233,10 +306,9 @@ const AuthPaciente = () => {
       {/* Steps indicator */}
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-center gap-2 text-sm mb-8">
-          {["Escolher Plano", "Criar Conta"].map((label, i) => {
-            const currentIndex = step === "select" ? 0 : 1;
-            const isActive = i === currentIndex;
-            const isDone = i < currentIndex;
+          {stepLabels.map((label, i) => {
+            const isActive = i === currentStepIndex;
+            const isDone = i < currentStepIndex;
             return (
               <div key={label} className="flex items-center gap-2">
                 {i > 0 && (
@@ -277,6 +349,20 @@ const AuthPaciente = () => {
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
               className="max-w-3xl mx-auto"
             >
+              {reason === "no-subscription" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-6 p-4 rounded-xl bg-warning/10 border border-warning/30 flex items-start gap-3"
+                >
+                  <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Você precisa de um plano ativo</p>
+                    <p className="text-xs text-muted-foreground mt-1">Escolha um plano abaixo para acessar sua conta e agendar consultas.</p>
+                  </div>
+                </motion.div>
+              )}
+
               <div className="text-center mb-10">
                 <motion.h1
                   initial={{ opacity: 0, y: 10 }}
@@ -376,8 +462,8 @@ const AuthPaciente = () => {
             </motion.div>
           )}
 
-          {/* Step 2: Register */}
-          {(step === "register" || step === "checkout") && (
+          {/* Step 2: Register / Login */}
+          {step === "register" && (
             <motion.div
               key="register"
               initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
@@ -478,7 +564,7 @@ const AuthPaciente = () => {
                       <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
                         <Sparkles className="w-4 h-4 animate-spin" /> Criando conta...
                       </motion.span>
-                    ) : "Criar conta"}
+                    ) : "Criar conta e pagar"}
                   </Button>
                   <p className="text-center text-sm text-muted-foreground">
                     Já tem conta? <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
@@ -537,6 +623,159 @@ const AuthPaciente = () => {
                 <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-warning shrink-0" /> 4.9/5</span>
                 <span className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 text-destructive shrink-0" /> 12k+ pacientes</span>
               </motion.div>
+            </motion.div>
+          )}
+
+          {/* Step 3: Payment */}
+          {step === "payment" && (
+            <motion.div
+              key="payment"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="max-w-md mx-auto"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
+                  <CreditCard className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground tracking-tight">Finalizar Pagamento</h2>
+                  <p className="text-sm text-muted-foreground">Escolha a forma de pagamento</p>
+                </div>
+              </div>
+
+              {/* Plan summary */}
+              {currentPlan && (
+                <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 mb-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-semibold text-foreground">{currentPlan.name}</p>
+                      <p className="text-xs text-muted-foreground">{currentPlan.id === "mensal" ? "Cobrança mensal recorrente" : "Pagamento único"}</p>
+                    </div>
+                    <p className="text-2xl font-extrabold text-primary">R${currentPlan.price}</p>
+                  </div>
+                </div>
+              )}
+
+              {!paymentData ? (
+                <>
+                  {/* Payment method selection */}
+                  <div className="space-y-3 mb-6">
+                    <Label className="text-sm font-medium">Forma de pagamento</Label>
+                    <div className="grid grid-cols-3 gap-3">
+                      {([
+                        { id: "PIX" as PaymentMethod, icon: QrCode, label: "PIX", desc: "Instantâneo" },
+                        { id: "BOLETO" as PaymentMethod, icon: FileText, label: "Boleto", desc: "1-3 dias úteis" },
+                        { id: "CREDIT_CARD" as PaymentMethod, icon: CreditCard, label: "Cartão", desc: "Instantâneo" },
+                      ]).map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => setPaymentMethod(m.id)}
+                          className={`p-3 rounded-xl border text-center transition-all ${
+                            paymentMethod === m.id
+                              ? "border-primary bg-primary/5 shadow-sm"
+                              : "border-border hover:border-primary/30"
+                          }`}
+                        >
+                          <m.icon className={`w-5 h-5 mx-auto mb-1.5 ${paymentMethod === m.id ? "text-primary" : "text-muted-foreground"}`} />
+                          <p className={`text-xs font-semibold ${paymentMethod === m.id ? "text-primary" : "text-foreground"}`}>{m.label}</p>
+                          <p className="text-[10px] text-muted-foreground">{m.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleProcessPayment}
+                    className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12 shadow-lg shadow-primary/20"
+                    size="lg"
+                    disabled={paymentLoading}
+                  >
+                    {paymentLoading ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Processando...
+                      </span>
+                    ) : (
+                      `Pagar R$${currentPlan?.price || 0} via ${paymentMethod === "CREDIT_CARD" ? "Cartão" : paymentMethod}`
+                    )}
+                  </Button>
+
+                  <p className="text-center text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5 text-primary" /> Pagamento seguro via Asaas
+                  </p>
+                </>
+              ) : (
+                /* Payment result */
+                <div className="space-y-4">
+                  {paymentData.pixQrCode && (
+                    <div className="text-center space-y-4">
+                      <div className="bg-card p-4 rounded-xl border border-border inline-block mx-auto">
+                        <img
+                          src={`data:image/png;base64,${paymentData.pixQrCode}`}
+                          alt="QR Code PIX"
+                          className="w-48 h-48 mx-auto"
+                        />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Escaneie o QR Code com o app do seu banco</p>
+                      {paymentData.pixCopyPaste && (
+                        <Button
+                          variant="outline"
+                          onClick={handleCopyPix}
+                          className="w-full"
+                        >
+                          {pixCopied ? (
+                            <span className="flex items-center gap-2"><CheckCircle className="w-4 h-4 text-success" /> Copiado!</span>
+                          ) : (
+                            <span className="flex items-center gap-2"><Copy className="w-4 h-4" /> Copiar código PIX</span>
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+
+                  {paymentData.bankSlipUrl && (
+                    <div className="text-center space-y-4">
+                      <FileText className="w-12 h-12 text-primary mx-auto" />
+                      <p className="text-sm text-muted-foreground">Seu boleto foi gerado com sucesso</p>
+                      <a href={paymentData.bankSlipUrl} target="_blank" rel="noopener noreferrer">
+                        <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground">
+                          <FileText className="w-4 h-4 mr-2" /> Abrir Boleto
+                        </Button>
+                      </a>
+                    </div>
+                  )}
+
+                  {paymentData.invoiceUrl && !paymentData.pixQrCode && !paymentData.bankSlipUrl && (
+                    <div className="text-center space-y-4">
+                      <CreditCard className="w-12 h-12 text-primary mx-auto" />
+                      <p className="text-sm text-muted-foreground">Redirecionando para pagamento...</p>
+                      <a href={paymentData.invoiceUrl} target="_blank" rel="noopener noreferrer">
+                        <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground">
+                          Ir para pagamento
+                        </Button>
+                      </a>
+                    </div>
+                  )}
+
+                  <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-center">
+                    <p className="text-xs text-muted-foreground">
+                      Após a confirmação do pagamento, seu acesso será liberado automaticamente.
+                      Você receberá uma notificação por email.
+                    </p>
+                  </div>
+
+                  <Button
+                    variant="ghost"
+                    onClick={() => navigate("/dashboard")}
+                    className="w-full text-sm"
+                  >
+                    Já realizei o pagamento → Ir para o Dashboard
+                  </Button>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

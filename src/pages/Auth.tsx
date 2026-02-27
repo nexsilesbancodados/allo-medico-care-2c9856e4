@@ -101,9 +101,8 @@ const Auth = () => {
           const { data: cards } = await supabase.from("discount_cards").select("id").eq("user_id", loggedUser.id).eq("status", "active").limit(1);
           
           if ((!subs || subs.length === 0) && (!cards || cards.length === 0)) {
-            toast({ title: "Plano necessário", description: "Você precisa adquirir um plano para acessar a plataforma.", variant: "destructive" });
             await supabase.auth.signOut();
-            navigate("/paciente");
+            navigate("/paciente?reason=no-subscription");
             return;
           }
         }
