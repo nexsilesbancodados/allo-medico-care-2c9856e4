@@ -104,3 +104,6 @@ verify_jwt = false
 
 [functions.structure-report]
 verify_jwt = false
+
+[functions.deepseek-laudo]
+verify_jwt = false
