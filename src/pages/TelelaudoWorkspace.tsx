@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import jsPDF from "jspdf";
 import { gerarHashDocumento } from "@/lib/signature";
+import TipTapEditor from "@/components/telelaudo/TipTapEditor";
 import {
   ResizablePanelGroup,
   ResizablePanel,
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui/resizable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,7 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import {
   Mic, MicOff, Wand2, FileSignature, Upload, RefreshCw,
   ZoomIn, ZoomOut, Sun, Contrast, Ruler, Move, Loader2,
-  FileText, Clock, CheckCircle, AlertTriangle
+  FileText, Clock, CheckCircle, AlertTriangle, RotateCw, Maximize2
 } from "lucide-react";
 
 type Exame = {
@@ -107,6 +107,9 @@ const DicomViewerPanel = ({ arquivoUrl }: { arquivoUrl: string | null }) => {
         <Button size="sm" variant="outline" onClick={() => setZoom(z => Math.max(z - 0.25, 0.25))} title="Zoom -">
           <ZoomOut className="w-4 h-4" />
         </Button>
+        <Button size="sm" variant="outline" onClick={() => setZoom(1)} title="Reset Zoom">
+          <RotateCw className="w-4 h-4" />
+        </Button>
         <span className="text-xs text-muted-foreground mx-1">{Math.round(zoom * 100)}%</span>
         <Separator orientation="vertical" className="h-6 mx-1" />
         <div className="flex items-center gap-1">
@@ -119,6 +122,10 @@ const DicomViewerPanel = ({ arquivoUrl }: { arquivoUrl: string | null }) => {
           <input type="range" min="-1000" max="1000" value={wl} onChange={e => setWl(+e.target.value)}
             className="w-16 h-1 accent-primary" title={`WL: ${wl}`} />
         </div>
+        <div className="flex-1" />
+        <Button size="sm" variant="outline" onClick={() => containerRef.current?.requestFullscreen?.()} title="Tela cheia">
+          <Maximize2 className="w-4 h-4" />
+        </Button>
       </div>
 
       {/* Viewer */}
@@ -180,13 +187,13 @@ const LaudoEditorPanel = ({
 
     let finalTranscript = "";
     recognition.onresult = (e: any) => {
-      let interim = "";
       for (let i = e.resultIndex; i < e.results.length; i++) {
         if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + " ";
-        else interim = e.results[i][0].transcript;
       }
-      setText(prev => prev + finalTranscript);
-      finalTranscript = "";
+      if (finalTranscript) {
+        setText(prev => prev + finalTranscript);
+        finalTranscript = "";
+      }
     };
     recognition.onerror = () => { setIsRecording(false); toast.error("Erro no reconhecimento de voz"); };
     recognition.onend = () => setIsRecording(false);
@@ -194,7 +201,7 @@ const LaudoEditorPanel = ({
     recognition.start();
     recognitionRef.current = recognition;
     setIsRecording(true);
-    toast.success("🎙️ Ditado ativado");
+    toast.success("🎙️ Ditado ativado — fale agora");
   }, [isRecording]);
 
   const structureWithAI = useCallback(async () => {
@@ -260,13 +267,11 @@ const LaudoEditorPanel = ({
         </Button>
       </div>
 
-      {/* Editor */}
-      <div className="flex-1 p-3">
-        <Textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          className="w-full h-full resize-none font-mono text-sm bg-background border-border"
-          placeholder="Dite ou digite o laudo aqui..."
+      {/* TipTap Editor */}
+      <div className="flex-1 overflow-hidden">
+        <TipTapEditor
+          content={text}
+          onChange={setText}
           disabled={isSigned}
         />
       </div>
