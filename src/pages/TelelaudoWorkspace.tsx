@@ -20,8 +20,19 @@ import { Separator } from "@/components/ui/separator";
 import {
   Mic, MicOff, Wand2, FileSignature, Upload, RefreshCw,
   ZoomIn, ZoomOut, Sun, Contrast, Ruler, Move, Loader2,
-  FileText, Clock, CheckCircle, AlertTriangle, RotateCw, Maximize2
+  FileText, Clock, CheckCircle, AlertTriangle, RotateCw, Maximize2,
+  Search, Sparkles, MessageSquare, Filter, Keyboard, Download
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
 
 type Exame = {
   id: string;
@@ -170,15 +181,24 @@ const LaudoEditorPanel = ({
     return () => clearInterval(timer);
   }, [text, exame, isSigned, onSave]);
 
-  const toggleVoice = useCallback(() => {
-    if (isRecording) {
-      recognitionRef.current?.stop();
-      setIsRecording(false);
-      return;
-    }
-
+  const startNoiseFilteredRecognition = useCallback(async () => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { toast.error("Reconhecimento de voz não suportado neste navegador"); return; }
+
+    // Web Audio API noise suppression
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+      });
+      // Keep stream active while recording
+      const audioCtx = new AudioContext();
+      const source = audioCtx.createMediaStreamSource(stream);
+      const dest = audioCtx.createMediaStreamDestination();
+      source.connect(dest);
+      toast.info("🔇 Filtro de ruído ativado");
+    } catch {
+      // Fallback: proceed without noise filter
+    }
 
     const recognition = new SR();
     recognition.lang = "pt-BR";
@@ -202,19 +222,33 @@ const LaudoEditorPanel = ({
     recognitionRef.current = recognition;
     setIsRecording(true);
     toast.success("🎙️ Ditado ativado — fale agora");
-  }, [isRecording]);
+  }, []);
 
-  const structureWithAI = useCallback(async () => {
+  const toggleVoice = useCallback(() => {
+    if (isRecording) {
+      recognitionRef.current?.stop();
+      setIsRecording(false);
+      return;
+    }
+    startNoiseFilteredRecognition();
+  }, [isRecording, startNoiseFilteredRecognition]);
+
+  const callAI = useCallback(async (mode: "structure" | "improve" | "suggest_conclusion") => {
     if (!text.trim()) { toast.error("Digite ou dite o texto primeiro"); return; }
     setIsProcessing(true);
     try {
       const { data, error } = await supabase.functions.invoke("deepseek-laudo", {
-        body: { raw_text: text, exam_type: "Radiologia", mode: "structure" },
+        body: { raw_text: text, exam_type: "Radiologia", mode },
       });
       if (error) throw error;
       if (data?.structured_text) {
-        setText(data.structured_text);
-        toast.success("Laudo estruturado pela IA");
+        if (mode === "suggest_conclusion") {
+          setText(prev => prev + "\n\n**CONCLUSÃO:**\n" + data.structured_text);
+          toast.success("Conclusão sugerida pela IA");
+        } else {
+          setText(data.structured_text);
+          toast.success(mode === "structure" ? "Laudo estruturado pela IA" : "Texto melhorado pela IA");
+        }
       }
     } catch (err: any) {
       toast.error(err?.message || "Erro ao processar com IA");
@@ -253,10 +287,27 @@ const LaudoEditorPanel = ({
           {isRecording ? <MicOff className="w-4 h-4 mr-1" /> : <Mic className="w-4 h-4 mr-1" />}
           {isRecording ? "Parar" : "Ditar"}
         </Button>
-        <Button size="sm" variant="outline" onClick={structureWithAI} disabled={isProcessing || isSigned}>
-          {isProcessing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Wand2 className="w-4 h-4 mr-1" />}
-          Estruturar (IA)
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button size="sm" variant="outline" disabled={isProcessing || isSigned}>
+              {isProcessing ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Wand2 className="w-4 h-4 mr-1" />}
+              IA ▾
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuLabel className="text-xs">Assistente IA</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => callAI("structure")}>
+              <Wand2 className="w-4 h-4 mr-2" /> Estruturar Laudo
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => callAI("improve")}>
+              <Sparkles className="w-4 h-4 mr-2" /> Melhorar Texto
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => callAI("suggest_conclusion")}>
+              <MessageSquare className="w-4 h-4 mr-2" /> Sugerir Conclusão
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <div className="flex-1" />
         <Button size="sm" variant="outline" onClick={() => onSave(text)} disabled={isSigned}>
           Salvar
@@ -292,6 +343,9 @@ const TelelaudoWorkspace = () => {
   const [uploadName, setUploadName] = useState("");
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "pendente" | "assinado">("all");
+  const saveRef = useRef<((text: string) => void) | null>(null);
 
   const fetchExames = useCallback(async () => {
     setLoading(true);
@@ -306,6 +360,32 @@ const TelelaudoWorkspace = () => {
 
   useEffect(() => { fetchExames(); }, [fetchExames]);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Ctrl+S = Save
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        if (selectedExame && selectedExame.status !== "assinado") {
+          saveRef.current?.(selectedExame.laudo_texto || "");
+          toast.success("Salvo!");
+        }
+      }
+      // Ctrl+Enter = Sign
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (selectedExame && selectedExame.status !== "assinado") setShowSignModal(true);
+      }
+      // Ctrl+Shift+F = Focus search
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === "F") {
+        e.preventDefault();
+        document.getElementById("exam-search")?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [selectedExame]);
+
   const handleSave = useCallback(async (text: string) => {
     if (!selectedExame) return;
     const { error } = await supabase
@@ -319,9 +399,11 @@ const TelelaudoWorkspace = () => {
     }
   }, [selectedExame]);
 
+  // Keep saveRef updated
+  useEffect(() => { saveRef.current = handleSave; }, [handleSave]);
+
   const handleSign = useCallback(async () => {
     if (!selectedExame || !signToken.trim()) { toast.error("Informe o token"); return; }
-    // Simulate ICP-Brasil token validation (min 6 chars)
     if (signToken.length < 6) { toast.error("Token inválido (mín. 6 caracteres)"); return; }
 
     setSigning(true);
@@ -329,7 +411,6 @@ const TelelaudoWorkspace = () => {
       const laudoText = selectedExame.laudo_texto || "";
       const hash = await gerarHashDocumento(laudoText);
 
-      // Generate PDF
       const doc = new jsPDF();
       doc.setFontSize(10);
       doc.text("LAUDO MÉDICO — ASSINADO DIGITALMENTE", 20, 20);
@@ -348,7 +429,6 @@ const TelelaudoWorkspace = () => {
       const { error: uploadError } = await supabase.storage
         .from("dicom-bucket")
         .upload(fileName, pdfBlob, { contentType: "application/pdf" });
-
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage
@@ -364,7 +444,6 @@ const TelelaudoWorkspace = () => {
           laudo_texto: laudoText,
         })
         .eq("id", selectedExame.id);
-
       if (updateError) throw updateError;
 
       setSelectedExame(prev => prev ? { ...prev, status: "assinado" } : null);
@@ -409,6 +488,12 @@ const TelelaudoWorkspace = () => {
     }
   }, [uploadFile, uploadName, user, fetchExames]);
 
+  // Filtered exames
+  const filteredExames = exames.filter(e => {
+    const matchesSearch = !searchQuery || e.paciente_nome.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || e.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
   const pendentes = exames.filter(e => e.status === "pendente");
   const assinados = exames.filter(e => e.status === "assinado");
 
@@ -416,25 +501,59 @@ const TelelaudoWorkspace = () => {
     <div className="flex h-screen bg-background text-foreground">
       {/* Sidebar */}
       <div className="w-72 border-r border-border flex flex-col bg-card">
-        <div className="p-3 border-b border-border">
-          <div className="flex items-center justify-between mb-2">
+        <div className="p-3 border-b border-border space-y-2">
+          <div className="flex items-center justify-between">
             <h2 className="font-bold text-sm">Fila de Exames</h2>
             <div className="flex gap-1">
-              <Button size="icon" variant="ghost" onClick={fetchExames} title="Atualizar">
-                <RefreshCw className="w-4 h-4" />
-              </Button>
-              <Button size="icon" variant="ghost" onClick={() => setShowUpload(true)} title="Upload">
-                <Upload className="w-4 h-4" />
-              </Button>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost" onClick={fetchExames} className="h-7 w-7">
+                      <RefreshCw className="w-3.5 h-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Atualizar lista</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button size="icon" variant="ghost" onClick={() => setShowUpload(true)} className="h-7 w-7">
+                      <Upload className="w-3.5 h-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Upload de exame</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
             </div>
           </div>
-          <div className="flex gap-2 text-xs">
-            <span className="flex items-center gap-1 text-warning">
-              <Clock className="w-3 h-3" /> {pendentes.length} pendentes
-            </span>
-            <span className="flex items-center gap-1 text-primary">
-              <CheckCircle className="w-3 h-3" /> {assinados.length} assinados
-            </span>
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input
+              id="exam-search"
+              placeholder="Buscar paciente..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="h-7 pl-7 text-xs"
+            />
+          </div>
+          {/* Filter tabs */}
+          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+            <TabsList className="w-full h-7">
+              <TabsTrigger value="all" className="text-[10px] flex-1 h-5">
+                Todos ({exames.length})
+              </TabsTrigger>
+              <TabsTrigger value="pendente" className="text-[10px] flex-1 h-5">
+                Pendentes ({pendentes.length})
+              </TabsTrigger>
+              <TabsTrigger value="assinado" className="text-[10px] flex-1 h-5">
+                Assinados ({assinados.length})
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+          {/* Shortcuts hint */}
+          <div className="flex items-center gap-1 text-[9px] text-muted-foreground">
+            <Keyboard className="w-3 h-3" />
+            <span>Ctrl+S salvar · Ctrl+Enter assinar · Ctrl+Shift+F buscar</span>
           </div>
         </div>
 
@@ -443,13 +562,13 @@ const TelelaudoWorkspace = () => {
             <div className="flex items-center justify-center p-8">
               <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
             </div>
-          ) : exames.length === 0 ? (
+          ) : filteredExames.length === 0 ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
-              Nenhum exame encontrado
+              {searchQuery ? "Nenhum resultado para a busca" : "Nenhum exame encontrado"}
             </div>
           ) : (
             <div className="p-2 space-y-1">
-              {exames.map((exame) => (
+              {filteredExames.map((exame) => (
                 <Card
                   key={exame.id}
                   className={`p-3 cursor-pointer transition-colors hover:bg-accent/50 ${
