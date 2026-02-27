@@ -1,4 +1,4 @@
-import { Home, Calendar, Search, Clock, MessageCircle, Headphones, ClipboardList, Heart, Smile, Upload, CreditCard, Users, SlidersHorizontal, User, Zap, FileText, FolderLock } from "lucide-react";
+import { Home, Calendar, Search, Clock, MessageCircle, Headphones, ClipboardList, Heart, Smile, Upload, CreditCard, Users, SlidersHorizontal, User, Zap, FileText, FolderLock, FileCheck } from "lucide-react";
 
 export const getPatientNav = (active: string) => [
   { label: "Início", href: "/dashboard?role=patient", icon: <Home className="w-4 h-4" />, active: active === "home", group: "Principal" },
@@ -13,6 +13,7 @@ export const getPatientNav = (active: string) => [
   { label: "Diário", href: "/dashboard/patient/diary?role=patient", icon: <Smile className="w-4 h-4" />, active: active === "diary", group: "Saúde" },
   { label: "Cofre de Documentos", href: "/dashboard/patient/documents?role=patient", icon: <FolderLock className="w-4 h-4" />, active: active === "documents", group: "Saúde" },
   { label: "Renovar Receita", href: "/dashboard/prescription-renewal?role=patient", icon: <FileText className="w-4 h-4" />, active: active === "renewal", group: "Saúde" },
+  { label: "Resultados de Exames", href: "/dashboard/patient/exam-results?role=patient", icon: <FileCheck className="w-4 h-4" />, active: active === "exam-results", group: "Saúde" },
   { label: "Pagamentos", href: "/dashboard/payment-history?role=patient", icon: <CreditCard className="w-4 h-4" />, active: active === "payments", group: "Conta" },
   { label: "Dependentes", href: "/dashboard/patient/dependents?role=patient", icon: <Users className="w-4 h-4" />, active: active === "dependents", group: "Conta" },
   { label: "Configurações", href: "/dashboard/settings?role=patient", icon: <SlidersHorizontal className="w-4 h-4" />, active: active === "settings", group: "Conta" },

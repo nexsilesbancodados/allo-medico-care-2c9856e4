@@ -33,6 +33,7 @@ const PatientSupportChat = lazy(() => import("@/components/patient/PatientSuppor
 const DependentsManager = lazy(() => import("@/components/patient/DependentsManager"));
 const HealthTimeline = lazy(() => import("@/components/patient/HealthTimeline"));
 const SymptomDiary = lazy(() => import("@/components/patient/SymptomDiary"));
+const PatientExamResults = lazy(() => import("@/components/patient/PatientExamResults"));
 
 // Doctor
 const DoctorAvailability = lazy(() => import("@/components/doctor/DoctorAvailability"));
@@ -45,6 +46,9 @@ const DoctorCalendar = lazy(() => import("@/components/doctor/DoctorCalendar"));
 const DoctorWaitingRoom = lazy(() => import("@/components/doctor/DoctorWaitingRoom"));
 const PatientDocuments = lazy(() => import("@/components/doctor/PatientDocuments"));
 const DoctorPublicProfile = lazy(() => import("@/components/doctor/DoctorPublicProfile"));
+const ExamReportQueue = lazy(() => import("@/components/doctor/ExamReportQueue"));
+const ExamReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
+const ExamRequestForm = lazy(() => import("@/components/doctor/ExamRequestForm"));
 
 const UrgentCareQueue = lazy(() => import("@/components/patient/UrgentCareQueue"));
 const PrescriptionRenewalForm = lazy(() => import("@/components/patient/PrescriptionRenewalForm"));
@@ -196,6 +200,7 @@ const Dashboard = () => {
       <Route path="patient/diary" element={<RoleGuard allowed={["patient"]} roles={roles}><SymptomDiary /></RoleGuard>} />
       <Route path="urgent-care" element={<RoleGuard allowed={["patient"]} roles={roles}><UrgentCareQueue /></RoleGuard>} />
       <Route path="prescription-renewal" element={<RoleGuard allowed={["patient"]} roles={roles}><PrescriptionRenewalForm /></RoleGuard>} />
+      <Route path="patient/exam-results" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientExamResults /></RoleGuard>} />
 
       {/* Doctor routes */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />
@@ -209,6 +214,9 @@ const Dashboard = () => {
       <Route path="doctor/documents" element={<RoleGuard allowed={["doctor"]} roles={roles}><PatientDocuments /></RoleGuard>} />
       <Route path="doctor/on-duty" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorOnDutyPanel /></RoleGuard>} />
       <Route path="doctor/renewal-queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><RenewalQueue /></RoleGuard>} />
+      <Route path="doctor/report-queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportQueue /></RoleGuard>} />
+      <Route path="doctor/report-editor/:examId" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportEditor /></RoleGuard>} />
+      <Route path="doctor/exam-request" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamRequestForm /></RoleGuard>} />
 
       {/* Consultation routes */}
       <Route path="consultation/:appointmentId" element={<RoleGuard allowed={["doctor", "patient"]} roles={roles}><VideoRoom /></RoleGuard>} />

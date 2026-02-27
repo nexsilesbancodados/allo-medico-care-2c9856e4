@@ -63,7 +63,26 @@ const ExamReportQueue = () => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as any[];
+
+      // Fetch patient names
+      const patientIds = [...new Set((data || []).filter((e: any) => e.patient_id).map((e: any) => e.patient_id))];
+      let patientMap: Record<string, string> = {};
+      if (patientIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from("profiles")
+          .select("user_id, first_name, last_name")
+          .in("user_id", patientIds);
+        if (profiles) {
+          profiles.forEach((p: any) => {
+            patientMap[p.user_id] = `${p.first_name} ${p.last_name}`.trim();
+          });
+        }
+      }
+
+      return (data || []).map((e: any) => ({
+        ...e,
+        patient_name: e.patient_id ? patientMap[e.patient_id] || "Paciente" : (e.clinical_info?.match(/Paciente: (.+)/)?.[1] || "—"),
+      }));
     },
     enabled: !!user,
   });
@@ -119,6 +138,7 @@ const ExamReportQueue = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Tipo</TableHead>
+                    <TableHead>Paciente</TableHead>
                     <TableHead>Prioridade</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Data</TableHead>
@@ -129,6 +149,7 @@ const ExamReportQueue = () => {
                   {examRequests.map((exam: any) => (
                     <TableRow key={exam.id}>
                       <TableCell className="font-medium">{exam.exam_type}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">{exam.patient_name}</TableCell>
                       <TableCell>
                         <Badge variant={exam.priority === "urgent" ? "destructive" : "secondary"}>
                           {exam.priority === "urgent" ? "Urgente" : "Normal"}
