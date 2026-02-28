@@ -12,8 +12,8 @@ serve(async (req) => {
   try {
     const { raw_text, exam_type, clinical_info, mode } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY não configurada");
+    const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY");
+    if (!DEEPSEEK_API_KEY) throw new Error("DEEPSEEK_API_KEY não configurada");
 
     let systemPrompt = "";
 
@@ -62,14 +62,14 @@ ${clinical_info ? `- Contexto clínico: ${clinical_info}` : ""}`;
       throw new Error("Modo inválido. Use: structure, improve ou suggest_conclusion");
     }
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.deepseek.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${DEEPSEEK_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "deepseek-chat",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: raw_text },
@@ -81,18 +81,13 @@ ${clinical_info ? `- Contexto clínico: ${clinical_info}` : ""}`;
 
     if (!response.ok) {
       const t = await response.text();
-      console.error("AI gateway error:", response.status, t);
+      console.error("DeepSeek error:", response.status, t);
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Muitas requisições. Aguarde um momento." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "Créditos de IA esgotados. Recarregue em Settings > Workspace > Usage." }), {
-          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-      throw new Error("Erro no serviço de IA");
+      throw new Error("Erro no serviço DeepSeek");
     }
 
     const data = await response.json();
