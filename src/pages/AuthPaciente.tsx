@@ -51,6 +51,7 @@ const AuthPaciente = () => {
 
   const [step, setStep] = useState<Step>("register");
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(initialPlan || "avulsa");
+
   const [plans, setPlans] = useState<PlanItem[]>([]);
 
   const [email, setEmail] = useState("");
@@ -310,14 +311,14 @@ const AuthPaciente = () => {
     }
   };
 
-  const [mode, setMode] = useState<"register" | "login">("register");
+  const [mode, setMode] = useState<"register" | "login">("login");
 
   const stepLabels = ["Escolher Plano", "Criar Conta", "Pagamento"];
   const currentStepIndex = step === "select" ? 0 : step === "register" ? 1 : 2;
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col" style={{ background: 'var(--landing-bg)' }}>
-      <SEOHead title="Cadastro de Paciente" description="Crie sua conta de paciente na AloClinica e agende consultas online com médicos especialistas." />
+      <SEOHead title="Meu Cartão de Benefícios" description="Acesse sua conta do Cartão de Benefícios AloClinica e aproveite consultas com desconto." />
       
       {/* Mobile gradient header */}
       <div className="lg:hidden bg-gradient-to-br from-primary to-secondary px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-6">
@@ -326,11 +327,11 @@ const AuthPaciente = () => {
         </Link>
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/20">
-            <Heart className="w-5 h-5 text-primary-foreground" />
+            <CreditCard className="w-5 h-5 text-primary-foreground" />
           </div>
           <div>
-            <h1 className="text-lg font-bold text-primary-foreground">Portal do Paciente</h1>
-            <p className="text-xs text-primary-foreground/70">Cuide da sua saúde online</p>
+            <h1 className="text-lg font-bold text-primary-foreground">Meu Cartão</h1>
+            <p className="text-xs text-primary-foreground/70">Acesse sua conta do cartão de benefícios</p>
           </div>
         </div>
       </div>
@@ -350,39 +351,41 @@ const AuthPaciente = () => {
         </div>
       </div>
 
-      {/* Steps indicator */}
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-center gap-2 text-sm mb-8">
-          {stepLabels.map((label, i) => {
-            const isActive = i === currentStepIndex;
-            const isDone = i < currentStepIndex;
-            return (
-              <div key={label} className="flex items-center gap-2">
-                {i > 0 && (
-                  <div className="w-10 h-0.5 bg-border rounded-full overflow-hidden">
-                    <motion.div
-                      className="h-full bg-primary rounded-full"
-                      initial={{ width: "0%" }}
-                      animate={{ width: isDone ? "100%" : "0%" }}
-                      transition={{ duration: 0.5, ease: "easeOut" }}
-                    />
-                  </div>
-                )}
-                <motion.div
-                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
-                    isActive ? "bg-primary text-primary-foreground shadow-md shadow-primary/25" : isDone ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
-                  }`}
-                  animate={isActive ? { scale: [1, 1.05, 1] } : {}}
-                  transition={{ duration: 0.3 }}
-                >
-                  {isDone ? <Check className="w-3 h-3" /> : <span>{i + 1}</span>}
-                  <span className="hidden sm:inline">{label}</span>
-                </motion.div>
-              </div>
-            );
-          })}
+      {/* Steps indicator - only show when registering */}
+      {mode === "register" && (
+        <div className="container mx-auto px-4 py-6">
+          <div className="flex items-center justify-center gap-2 text-sm mb-8">
+            {stepLabels.map((label, i) => {
+              const isActive = i === currentStepIndex;
+              const isDone = i < currentStepIndex;
+              return (
+                <div key={label} className="flex items-center gap-2">
+                  {i > 0 && (
+                    <div className="w-10 h-0.5 bg-border rounded-full overflow-hidden">
+                      <motion.div
+                        className="h-full bg-primary rounded-full"
+                        initial={{ width: "0%" }}
+                        animate={{ width: isDone ? "100%" : "0%" }}
+                        transition={{ duration: 0.5, ease: "easeOut" }}
+                      />
+                    </div>
+                  )}
+                  <motion.div
+                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                      isActive ? "bg-primary text-primary-foreground shadow-md shadow-primary/25" : isDone ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    }`}
+                    animate={isActive ? { scale: [1, 1.05, 1] } : {}}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {isDone ? <Check className="w-3 h-3" /> : <span>{i + 1}</span>}
+                    <span className="hidden sm:inline">{label}</span>
+                  </motion.div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="container mx-auto px-4 pb-16 flex-1">
         <AnimatePresence mode="wait">
@@ -400,12 +403,12 @@ const AuthPaciente = () => {
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
-                  <Heart className="w-5 h-5 text-primary-foreground" />
+                  <CreditCard className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground tracking-tight">{mode === "register" ? "Criar sua conta" : "Bem-vindo de volta"}</h2>
+                  <h2 className="text-2xl font-bold text-foreground tracking-tight">{mode === "register" ? "Criar sua conta" : "Acessar meu cartão"}</h2>
                   <p className="text-sm text-muted-foreground">
-                    {mode === "register" ? "Preencha seus dados para acessar" : "Acesse sua conta de paciente"}
+                    {mode === "register" ? "Preencha seus dados para acessar" : "Entre com seus dados do cartão de benefícios"}
                   </p>
                 </div>
               </div>
