@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -19,10 +19,34 @@ import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 import Header from "@/components/landing/Header";
 import { lazy, Suspense } from "react";
-import doctorPremium1 from "@/assets/doctor-premium-1.png";
+import heroMedicos1 from "@/assets/hero-medicos.png";
+import heroMedicos2 from "@/assets/hero-medicos-2.png";
+import heroMedicos3 from "@/assets/hero-medicos-3.png";
 import mascotWave from "@/assets/mascot-wave.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
+
+const medicoHeroImages = [heroMedicos1, heroMedicos2, heroMedicos3];
+
+const HeroCarousel = ({ images, alt }: { images: string[]; alt: string }) => {
+  const [current, setCurrent] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setCurrent(prev => (prev + 1) % images.length), 5000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+  return (
+    <>
+      {images.map((img, i) => (
+        <motion.img key={i} src={img} alt={`${alt} ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" initial={false} animate={{ opacity: i === current ? 1 : 0, scale: i === current ? 1.05 : 1 }} transition={{ opacity: { duration: 1 }, scale: { duration: 6 } }} />
+      ))}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+        {images.map((_, i) => (
+          <button key={i} onClick={() => setCurrent(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? "bg-white w-8" : "bg-white/40 hover:bg-white/60"}`} />
+        ))}
+      </div>
+    </>
+  );
+};
 
 type Step = "welcome" | "code" | "register" | "login" | "quiz" | "apply" | "applied";
 
@@ -182,11 +206,11 @@ const AuthMedico = () => {
 
         {/* Hero */}
         <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
+          <HeroCarousel images={medicoHeroImages} alt="Médico AloClínica" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           <div className="container mx-auto px-4 relative">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div className="max-w-2xl">
               <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
                 <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
                   <Stethoscope className="w-3.5 h-3.5 mr-1.5" /> Para Médicos
@@ -215,9 +239,6 @@ const AuthMedico = () => {
                     <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
                   ))}
                 </div>
-              </motion.div>
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="hidden lg:flex justify-center">
-                <img src={doctorPremium1} alt="Médico na plataforma" className="w-full max-w-md rounded-3xl shadow-2xl shadow-black/30 object-cover" />
               </motion.div>
             </div>
           </div>
