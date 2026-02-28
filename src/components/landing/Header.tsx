@@ -17,6 +17,10 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
+import pingoVirtualAssistant from "@/assets/pingo-virtual-assistant.png";
+import telelaudoPingo from "@/assets/telelaudo-pingo.png";
+import mascotThumbsup from "@/assets/mascot-thumbsup.png";
+import mascotWave from "@/assets/mascot-wave.png";
 
 const ListItem = ({
   className,
@@ -24,8 +28,9 @@ const ListItem = ({
   children,
   href,
   icon: Icon,
+  imgSrc,
   ...props
-}: React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType }) => {
+}: React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType; imgSrc?: string }) => {
   return (
     <li>
       <NavigationMenuLink asChild>
@@ -38,11 +43,13 @@ const ListItem = ({
           {...(props as any)}
         >
           <div className="flex items-center gap-2.5">
-            {Icon && (
+            {imgSrc ? (
+              <img src={imgSrc} alt={title} className="w-8 h-8 rounded-lg object-contain shrink-0" />
+            ) : Icon ? (
               <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
                 <Icon className="w-4 h-4 text-primary" />
               </div>
-            )}
+            ) : null}
             <div>
               <div className="text-sm font-semibold leading-none text-foreground">{title}</div>
               <p className="line-clamp-2 text-xs leading-snug text-muted-foreground mt-1">{children}</p>
@@ -154,7 +161,7 @@ const Header = memo(() => {
                             to="/teleconsulta"
                             className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-primary/10 to-primary/5 p-5 no-underline outline-none focus:shadow-md hover:from-primary/15 hover:to-primary/10 transition-colors"
                           >
-                            <Video className="w-6 h-6 text-primary mb-2" />
+                            <img src={pingoVirtualAssistant} alt="Teleconsulta" className="w-10 h-10 object-contain mb-2" />
                             <div className="mb-1 text-base font-bold text-foreground">Teleconsulta</div>
                             <p className="text-xs leading-relaxed text-muted-foreground">
                               Consultas médicas por vídeo 24h com mais de 30 especialidades.
@@ -162,13 +169,13 @@ const Header = memo(() => {
                           </Link>
                         </NavigationMenuLink>
                       </li>
-                      <ListItem href="/telelaudo" title="Telelaudo" icon={FileText}>
+                      <ListItem href="/telelaudo" title="Telelaudo" icon={FileText} imgSrc={telelaudoPingo}>
                         Laudos médicos a distância com assinatura digital SHA-256.
                       </ListItem>
-                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard}>
+                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={mascotThumbsup}>
                         Descontos em consultas e exames para toda a família.
                       </ListItem>
-                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>
+                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope} imgSrc={mascotWave}>
                         Atendimento sem cadastro, rápido e seguro.
                       </ListItem>
                     </ul>
