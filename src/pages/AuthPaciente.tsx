@@ -214,6 +214,10 @@ const AuthPaciente = () => {
     }
     if (data.user) {
       setRegisteredUserId(data.user.id);
+
+      // Capture referral code from sessionStorage
+      const refCode = sessionStorage.getItem("ref_code");
+
       // Use upsert to handle race condition with trigger
       await supabase.from("profiles").upsert({
         user_id: data.user.id,
@@ -221,7 +225,20 @@ const AuthPaciente = () => {
         phone: unmask(phone),
         first_name: firstName,
         last_name: lastName,
+        referred_by: refCode || null,
       }, { onConflict: "user_id" });
+
+      // Register referral conversion
+      if (refCode) {
+        await supabase.from("referrals").insert({
+          referral_code: refCode,
+          referred_user_id: data.user.id,
+          referrer_id: data.user.id, // will be resolved by trigger
+          status: "pending",
+          source: "signup",
+        }).then(() => sessionStorage.removeItem("ref_code"));
+      }
+
       await registerConsent(data.user.id);
       try {
         await supabase.functions.invoke("send-email", {

@@ -1678,7 +1678,7 @@ export type Database = {
           {
             foreignKeyName: "prescription_validations_prescription_id_fkey"
             columns: ["prescription_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "prescriptions"
             referencedColumns: ["id"]
           },
@@ -1753,6 +1753,7 @@ export type Database = {
           phone: string | null
           referral_code: string | null
           referred_by: string | null
+          settings: Json | null
           updated_at: string
           user_id: string
         }
@@ -1770,6 +1771,7 @@ export type Database = {
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          settings?: Json | null
           updated_at?: string
           user_id: string
         }
@@ -1787,6 +1789,7 @@ export type Database = {
           phone?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          settings?: Json | null
           updated_at?: string
           user_id?: string
         }
@@ -2442,6 +2445,10 @@ export type Database = {
       fn_expire_discount_cards: { Args: never; Returns: undefined }
       fn_expire_invite_codes: { Args: never; Returns: undefined }
       fn_expire_queue_entries: { Args: never; Returns: undefined }
+      fn_increment_coupon_usage_atomic: {
+        Args: { p_code: string }
+        Returns: boolean
+      }
       fn_notify_expiring_invites: { Args: never; Returns: undefined }
       fn_notify_low_rating_doctors: { Args: never; Returns: undefined }
       fn_notify_overdue_exams: { Args: never; Returns: undefined }

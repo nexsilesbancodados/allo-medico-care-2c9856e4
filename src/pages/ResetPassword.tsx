@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Lock, Check } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import PasswordStrength from "@/components/ui/password-strength";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
@@ -35,7 +36,13 @@ const ResetPassword = () => {
     } else {
       setSuccess(true);
       toast({ title: "Senha atualizada!" });
-      setTimeout(() => navigate("/dashboard"), 2000);
+      // Check if user has active session before redirecting
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setTimeout(() => navigate("/dashboard"), 2000);
+      } else {
+        setTimeout(() => navigate("/paciente"), 2000);
+      }
     }
   };
 
@@ -49,7 +56,7 @@ const ResetPassword = () => {
               <Check className="w-8 h-8 text-secondary" />
             </div>
             <h3 className="text-lg font-bold text-foreground mb-2">Senha Atualizada!</h3>
-            <p className="text-muted-foreground">Redirecionando para o dashboard...</p>
+            <p className="text-muted-foreground">Redirecionando...</p>
           </div>
         ) : (
           <>
@@ -62,6 +69,7 @@ const ResetPassword = () => {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Mínimo 6 caracteres" className="pl-10" required minLength={6} />
                 </div>
+                <PasswordStrength password={password} />
               </div>
               <div>
                 <Label>Confirmar Senha</Label>

@@ -300,13 +300,16 @@ const GuestCheckout = () => {
       };
 
       if (paymentMethod === "credit") {
+        // PCI compliance: send card data for server-side tokenization
+        // The edge function handles tokenization via Asaas API before charging
         paymentPayload.cardHolderName = cardName;
-        paymentPayload.cardNumber = cardNumber;
+        paymentPayload.cardNumber = cardNumber.replace(/\s/g, "");
         paymentPayload.cardExpiryMonth = expiryMonth;
         paymentPayload.cardExpiryYear = `20${expiryYear}`;
         paymentPayload.cardCcv = cardCvv;
         paymentPayload.cardHolderCpf = guestCpf;
         paymentPayload.cardHolderPhone = guestPhone;
+        paymentPayload.remoteIp = "0.0.0.0"; // Required by Asaas tokenization
       }
 
       const { data: payData, error: payError } = await supabase.functions.invoke("create-asaas-payment", {

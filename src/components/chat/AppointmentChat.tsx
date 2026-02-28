@@ -51,9 +51,28 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
   const [sending, setSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
+  const [chatExpired, setChatExpired] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const channelRef = useRef<any>(null);
+
+  // Check 48h chat window expiration
+  useEffect(() => {
+    if (!appointmentId) return;
+    const checkExpiry = async () => {
+      const { data } = await supabase
+        .from("appointments")
+        .select("scheduled_at, status")
+        .eq("id", appointmentId)
+        .single();
+      if (data && data.status === "completed") {
+        const scheduledAt = new Date(data.scheduled_at);
+        const hoursElapsed = (Date.now() - scheduledAt.getTime()) / (1000 * 60 * 60);
+        if (hoursElapsed > 48) setChatExpired(true);
+      }
+    };
+    checkExpiry();
+  }, [appointmentId]);
 
   useEffect(() => {
     if (!user || !appointmentId) return;
@@ -294,23 +313,29 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
       </ScrollArea>
 
       {/* Input */}
-      <div className="p-3 border-t border-border flex gap-2 items-center">
-        <Input
-          value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          placeholder="Digite sua mensagem..."
-          className="flex-1 rounded-xl"
-        />
-        <Button
-          size="icon"
-          onClick={sendMessage}
-          disabled={!input.trim() || sending}
-          className="rounded-xl shrink-0"
-        >
-          <Send className="w-4 h-4" />
-        </Button>
-      </div>
+      {chatExpired ? (
+        <div className="p-3 border-t border-border text-center">
+          <p className="text-xs text-muted-foreground">⏰ Prazo de chat pós-consulta encerrado (48h).</p>
+        </div>
+      ) : (
+        <div className="p-3 border-t border-border flex gap-2 items-center">
+          <Input
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Digite sua mensagem..."
+            className="flex-1 rounded-xl"
+          />
+          <Button
+            size="icon"
+            onClick={sendMessage}
+            disabled={!input.trim() || sending}
+            className="rounded-xl shrink-0"
+          >
+            <Send className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

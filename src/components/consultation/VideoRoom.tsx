@@ -231,7 +231,28 @@ const VideoRoom = () => {
 
     if (!data) { setLoading(false); return; }
 
-    // Check payment status before allowing entry (issue #2)
+    // Block entry for cancelled/no_show appointments
+    if (["cancelled", "no_show"].includes(data.status)) {
+      toast({ title: "Consulta indisponível", description: "Esta consulta foi cancelada ou marcada como não comparecimento.", variant: "destructive" });
+      navigate("/dashboard");
+      return;
+    }
+
+    // Verify correct participant
+    if (isDoctor) {
+      const { data: dp } = await supabase.from("doctor_profiles").select("id").eq("user_id", user!.id).maybeSingle();
+      if (dp && dp.id !== data.doctor_id) {
+        toast({ title: "Acesso negado", description: "Esta consulta não está atribuída a você.", variant: "destructive" });
+        navigate("/dashboard");
+        return;
+      }
+    } else if (user && data.patient_id && data.patient_id !== user.id) {
+      toast({ title: "Acesso negado", description: "Esta consulta pertence a outro paciente.", variant: "destructive" });
+      navigate("/dashboard");
+      return;
+    }
+
+    // Check payment status before allowing entry
     if (!isDoctor && data.payment_status === "pending" && data.status === "scheduled") {
       toast({
         title: "⏳ Aguardando pagamento",

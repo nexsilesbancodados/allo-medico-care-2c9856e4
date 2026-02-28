@@ -80,12 +80,29 @@ const PartnerDashboard = () => {
 
   const validatePrescription = async (status: string) => {
     if (!foundPrescription || !user) return;
+
+    // Check if prescription was already validated (UNIQUE constraint)
+    const { data: existing } = await supabase.from("prescription_validations")
+      .select("id, created_at")
+      .eq("prescription_id", foundPrescription.id)
+      .limit(1);
+
+    if (existing && existing.length > 0) {
+      toast.error(`Esta receita já foi dispensada em ${format(new Date(existing[0].created_at), "dd/MM/yyyy", { locale: ptBR })}.`);
+      return;
+    }
+
     const { error } = await supabase.from("prescription_validations").insert({
       prescription_id: foundPrescription.id, validated_by: user.id, status,
       notes: status === "dispensed" ? "Medicamento dispensado" : "Receita validada",
     });
-    if (error) { toast.error("Erro ao validar receita."); }
-    else {
+    if (error) {
+      if (error.code === "23505") {
+        toast.error("Esta receita já foi dispensada anteriormente.");
+      } else {
+        toast.error("Erro ao validar receita.");
+      }
+    } else {
       toast.success(status === "dispensed" ? "Medicamento dispensado com sucesso!" : "Receita validada!");
       setFoundPrescription(null); setPrescriptionCode(""); fetchValidations();
     }
