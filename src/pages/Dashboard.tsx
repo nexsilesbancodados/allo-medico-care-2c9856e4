@@ -1,8 +1,9 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, Routes, Route, useSearchParams } from "react-router-dom";
+import { Navigate, Routes, Route, useSearchParams, useNavigate } from "react-router-dom";
 import { usePresence } from "@/hooks/use-presence";
-import { lazy, Suspense, ReactNode } from "react";
+import { lazy, Suspense, ReactNode, useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
@@ -121,8 +122,25 @@ const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: str
 const Dashboard = () => {
   const { user, roles, loading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const forceRole = searchParams.get("role");
   usePresence();
+
+  // Check if patient has active plan
+  const isPatientOnly = !loading && user && roles.includes("patient") && !roles.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "affiliate", "laudista"].includes(r));
+
+  useEffect(() => {
+    if (!isPatientOnly || !user) return;
+    const checkPlan = async () => {
+      const [{ data: subs }, { data: cards }] = await Promise.all([
+        supabase.from("subscriptions").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
+        supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
+      ]);
+      const hasPlan = (subs && subs.length > 0) || (cards && cards.length > 0);
+      if (!hasPlan) navigate("/paciente?reason=no-subscription");
+    };
+    checkPlan();
+  }, [isPatientOnly, user]);
 
   if (loading) {
     return <PageLoader />;

@@ -174,10 +174,36 @@ const AuthMedico = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
-    else navigate("/dashboard?role=doctor");
+
+    if (error) {
+      toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
+      return;
+    }
+
+    if (data.user) {
+      const { data: doctorProfile } = await supabase
+        .from("doctor_profiles")
+        .select("id, is_approved, crm_verified")
+        .eq("user_id", data.user.id)
+        .single();
+
+      if (!doctorProfile) {
+        await supabase.auth.signOut();
+        toast({ title: "Cadastro não encontrado", description: "Seu perfil de médico não foi localizado. Solicite o cadastro primeiro.", variant: "destructive" });
+        setStep("quiz");
+        return;
+      }
+
+      if (!doctorProfile.is_approved) {
+        await supabase.auth.signOut();
+        toast({ title: "Cadastro em análise", description: "Seu cadastro está sendo analisado. Você receberá o código de acesso por email quando aprovado.", variant: "destructive" });
+        return;
+      }
+
+      navigate("/dashboard?role=doctor");
+    }
   };
 
   const handleRegister = async (e: React.FormEvent) => {

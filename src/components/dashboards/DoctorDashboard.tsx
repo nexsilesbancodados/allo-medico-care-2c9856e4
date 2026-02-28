@@ -75,6 +75,21 @@ const DoctorDashboard = () => {
           <DoctorOnboarding />
         </SectionErrorBoundary>
 
+        {/* CRM verification status banner */}
+        {!loading && data && !data.crmVerified && (
+          <motion.div variants={fadeUp}>
+            <div className="rounded-xl bg-warning/10 border border-warning/30 p-4 flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
+              <div>
+                <p className="font-semibold text-foreground text-sm">Perfil em análise</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Seu CRM está sendo verificado pela nossa equipe. Você receberá um email quando seu perfil for ativado e puder receber pacientes.
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         {/* ═══ Hero Header — gradient card ═══ */}
         <motion.div variants={fadeUp}>
           <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-secondary/90 to-primary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-secondary/20">

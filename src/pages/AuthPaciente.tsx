@@ -60,6 +60,7 @@ const AuthPaciente = () => {
 
   const [plans, setPlans] = useState<PlanItem[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
+  const [plansError, setPlansError] = useState(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -95,12 +96,11 @@ const AuthPaciente = () => {
   useEffect(() => {
     const fetchPlans = async () => {
       setPlansLoading(true);
-      const { data, error } = await supabase.from("plans").select("*").eq("is_active", true).order("price", { ascending: true });
-      if (error || !data || data.length === 0) {
-        toast({ title: "Erro ao carregar planos", description: "Não foi possível carregar os planos. Tente novamente.", variant: "destructive" });
-        setPlansLoading(false);
-        return;
-      }
+      setPlansError(false);
+      try {
+        const { data, error } = await supabase.from("plans").select("*").eq("is_active", true).order("price", { ascending: true });
+        if (error) throw error;
+        if (!data || data.length === 0) throw new Error("Nenhum plano encontrado");
       const mapped: PlanItem[] = data.map((p: any) => {
         const meta = PLAN_MAP[p.name] ?? { icon: Clock, color: "from-primary/80 to-primary", highlighted: false };
         const featureList = Array.isArray(p.features) ? p.features as string[] : [];
@@ -120,6 +120,9 @@ const AuthPaciente = () => {
       setPlans(mapped);
       if (!selectedPlanId && mapped.length > 0) {
         setSelectedPlanId(mapped[0].id);
+      }
+      } catch (err) {
+        setPlansError(true);
       }
       setPlansLoading(false);
     };
@@ -378,8 +381,8 @@ const AuthPaciente = () => {
         </div>
       </div>
 
-      {/* Steps indicator - always visible during registration flow (any step except success) */}
-      {step !== "success" && mode === "register" && (
+      {/* Steps indicator - always visible during registration flow */}
+      {step !== "success" && (
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-center gap-2 text-sm mb-8">
             {stepLabels.map((label, i) => {

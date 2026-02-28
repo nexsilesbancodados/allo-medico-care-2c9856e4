@@ -230,6 +230,26 @@ const GuestCheckout = () => {
   };
 
   const handleCheckout = async () => {
+    // Validate guest info before checkout
+    const cleanCpf = guestCpf.replace(/\D/g, "");
+    if (!validarCPF(cleanCpf)) {
+      toast({ title: "CPF inválido", description: "Verifique o CPF informado.", variant: "destructive" });
+      return;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(guestEmail)) {
+      toast({ title: "Email inválido", description: "Digite um email válido.", variant: "destructive" });
+      return;
+    }
+    const cleanPhone = guestPhone.replace(/\D/g, "");
+    if (cleanPhone.length < 10) {
+      toast({ title: "Telefone inválido", description: "Digite um telefone com DDD.", variant: "destructive" });
+      return;
+    }
+    if (!guestName.trim() || guestName.trim().split(" ").length < 2) {
+      toast({ title: "Nome completo obrigatório", description: "Digite nome e sobrenome.", variant: "destructive" });
+      return;
+    }
     if (paymentMethod === "credit" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
       toast({ title: "Preencha todos os dados do cartão", variant: "destructive" });
       return;
