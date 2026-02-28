@@ -81,38 +81,38 @@ const Telelaudo = () => {
         <Header />
 
         {/* Hero */}
-        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "85vh" }}>
+        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "55vh" }}>
           <HeroCarousel images={teleLaudoHeroImages} alt="Telelaudo" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "85vh" }}>
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-                <FileText className="w-3.5 h-3.5 mr-1.5" /> Telelaudo
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-end pb-12" style={{ minHeight: "55vh" }}>
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-xl">
+              <Badge className="mb-3 text-xs px-4 py-1 bg-white/15 text-white border-white/20 backdrop-blur-sm">
+                <FileText className="w-3 h-3 mr-1" /> Telelaudo
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
+              <h1 className="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight leading-tight">
                 Laudos Médicos<br />
                 <span className="text-white/85">a Distância</span>
               </h1>
-              <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Laudos assinados digitalmente por especialistas qualificados. Upload do exame, análise com suporte de IA e entrega com verificação por QR Code.
+              <p className="text-sm text-white/70 max-w-lg mb-6 leading-relaxed">
+                Laudos assinados digitalmente por especialistas. Upload, análise com IA e verificação por QR Code.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button size="lg" className="bg-white text-secondary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" asChild>
-                  <Link to="/medico">Começar a Usar <ArrowRight className="w-5 h-5 ml-2" /></Link>
+              <div className="flex flex-col sm:flex-row items-start gap-3">
+                <Button size="default" className="bg-white text-secondary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl shadow-black/20" asChild>
+                  <Link to="/medico">Começar a Usar <ArrowRight className="w-4 h-4 ml-2" /></Link>
                 </Button>
-                <Button size="lg" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl h-14 px-8 text-base font-semibold" asChild>
-                  <Link to="/para-empresas">Sou Clínica / Hospital</Link>
+                <Button size="default" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl px-6 font-semibold" asChild>
+                  <Link to="/para-empresas">Sou Clínica</Link>
                 </Button>
               </div>
-              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
+              <div className="flex flex-wrap items-center gap-4 mt-6">
                 {[
-                  { icon: <Shield className="w-4 h-4" />, label: "Assinatura SHA-256" },
-                  { icon: <Clock className="w-4 h-4" />, label: "SLA < 2h" },
-                  { icon: <Lock className="w-4 h-4" />, label: "LGPD Compliant" },
-                  { icon: <Users className="w-4 h-4" />, label: "Laudistas Certificados" },
+                  { icon: <Shield className="w-3.5 h-3.5" />, label: "SHA-256" },
+                  { icon: <Clock className="w-3.5 h-3.5" />, label: "SLA < 2h" },
+                  { icon: <Lock className="w-3.5 h-3.5" />, label: "LGPD" },
+                  { icon: <Users className="w-3.5 h-3.5" />, label: "Certificados" },
                 ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
+                  <span key={i} className="flex items-center gap-1.5 text-white/50 text-xs font-medium">{item.icon} {item.label}</span>
                 ))}
               </div>
             </motion.div>

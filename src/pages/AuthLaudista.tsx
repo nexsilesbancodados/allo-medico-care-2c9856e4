@@ -179,30 +179,30 @@ const AuthLaudista = () => {
       <Header />
 
       {/* ==================== HERO ==================== */}
-      <section className="relative pt-28 pb-16 overflow-hidden">
+      <section className="relative pt-24 pb-10 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-[hsl(200,80%,95%)] via-background to-[hsl(210,85%,92%)] dark:from-[hsl(200,30%,12%)] dark:via-background dark:to-[hsl(210,30%,15%)]" />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 items-center">
             <motion.div initial="hidden" animate="visible" variants={stagger}>
               <motion.div variants={fadeUp}>
-                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[hsl(210,85%,45%)]/10 text-[hsl(210,85%,45%)] text-sm font-semibold mb-6">
-                  <ClipboardList className="w-4 h-4" /> Portal Laudista
+                <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[hsl(210,85%,45%)]/10 text-[hsl(210,85%,45%)] text-xs font-semibold mb-4">
+                  <ClipboardList className="w-3.5 h-3.5" /> Portal Laudista
                 </span>
               </motion.div>
-              <motion.h1 variants={fadeUp} className="text-4xl sm:text-5xl font-black text-foreground tracking-tight leading-[1.1] mb-4">
+              <motion.h1 variants={fadeUp} className="text-3xl sm:text-4xl font-black text-foreground tracking-tight leading-[1.1] mb-3">
                 Laude de <span className="text-transparent bg-clip-text bg-gradient-to-r from-[hsl(200,80%,35%)] to-[hsl(220,90%,50%)]">qualquer lugar</span>
               </motion.h1>
-              <motion.p variants={fadeUp} className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-lg">
-                Emita laudos médicos à distância com assinatura digital SHA-256, fila inteligente por prioridade e suporte de IA para triagem automática.
+              <motion.p variants={fadeUp} className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-lg">
+                Laudos à distância com assinatura digital SHA-256, fila inteligente e suporte de IA.
               </motion.p>
-              <motion.div variants={fadeUp} className="flex flex-wrap gap-3">
-                <Button size="lg" className="bg-gradient-to-r from-[hsl(200,80%,35%)] to-[hsl(220,90%,50%)] text-white rounded-full px-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all" onClick={scrollToForm}>
+              <motion.div variants={fadeUp}>
+                <Button size="default" className="bg-gradient-to-r from-[hsl(200,80%,35%)] to-[hsl(220,90%,50%)] text-white rounded-full px-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all" onClick={scrollToForm}>
                   Solicitar Cadastro <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </motion.div>
             </motion.div>
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.6 }} className="hidden lg:block">
-              <img src={telelaudoImg} alt="Telelaudo" className="w-full max-w-lg mx-auto rounded-2xl shadow-2xl" loading="lazy" />
+              <img src={telelaudoImg} alt="Telelaudo" className="w-full max-w-md mx-auto rounded-2xl shadow-2xl" loading="lazy" />
             </motion.div>
           </div>
         </div>

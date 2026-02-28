@@ -96,32 +96,32 @@ const B2BLanding = () => {
         <Header />
 
         {/* Hero with Carousel */}
-        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "85vh" }}>
+        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "55vh" }}>
           <HeroCarousel />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 z-10" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
-          <div className="container mx-auto px-4 relative z-20 flex items-center" style={{ minHeight: "85vh" }}>
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-2xl">
-              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-                <CreditCard className="w-4 h-4 mr-2" /> Para Empresas
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10" />
+          <div className="container mx-auto px-4 relative z-20 flex items-end pb-12" style={{ minHeight: "55vh" }}>
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-xl">
+              <Badge className="mb-3 text-xs px-4 py-1 bg-white/15 text-white border-white/20 backdrop-blur-sm">
+                <CreditCard className="w-3 h-3 mr-1" /> Para Empresas
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-black text-white mb-5 tracking-tight leading-tight text-left">
+              <h1 className="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight leading-tight text-left">
                 Cartão de Benefícios<br /><span className="text-white/80">para seus Funcionários</span>
               </h1>
-              <p className="text-lg text-white/70 max-w-xl mb-10 leading-relaxed text-left">
-                Cuide da saúde da sua equipe com telemedicina 24h, clube de vantagens e descontos exclusivos. Um benefício que valoriza e retém talentos.
+              <p className="text-sm text-white/70 max-w-lg mb-6 leading-relaxed text-left">
+                Cuide da saúde da sua equipe com telemedicina 24h, clube de vantagens e descontos exclusivos.
               </p>
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
-                Solicitar Proposta <ArrowRight className="w-5 h-5 ml-2" />
+              <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
+                Solicitar Proposta <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
-              <div className="flex flex-wrap items-start gap-6 sm:gap-10 mt-12">
+              <div className="flex flex-wrap items-start gap-4 mt-6">
                 {[
-                  { icon: <Heart className="w-4 h-4" />, label: "Telemedicina 24h" },
-                  { icon: <Users className="w-4 h-4" />, label: "Planos Família" },
-                  { icon: <Shield className="w-4 h-4" />, label: "30% de Desconto" },
-                  { icon: <Star className="w-4 h-4" />, label: "Clube de Vantagens" },
+                  { icon: <Heart className="w-3.5 h-3.5" />, label: "Telemedicina 24h" },
+                  { icon: <Users className="w-3.5 h-3.5" />, label: "Planos Família" },
+                  { icon: <Shield className="w-3.5 h-3.5" />, label: "30% Desconto" },
+                  { icon: <Star className="w-3.5 h-3.5" />, label: "Clube de Vantagens" },
                 ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-2 text-white/60 text-sm font-medium">{item.icon} {item.label}</span>
+                  <span key={i} className="flex items-center gap-1.5 text-white/50 text-xs font-medium">{item.icon} {item.label}</span>
                 ))}
               </div>
             </motion.div>

@@ -76,38 +76,38 @@ const Teleconsulta = () => {
         <Header />
 
         {/* Hero */}
-        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "85vh" }}>
+        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "55vh" }}>
           <img src={heroTeleconsulta} alt="Teleconsulta" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "85vh" }}>
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-                <Video className="w-3.5 h-3.5 mr-1.5" /> Telemedicina
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-end pb-12" style={{ minHeight: "55vh" }}>
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-xl">
+              <Badge className="mb-3 text-xs px-4 py-1 bg-white/15 text-white border-white/20 backdrop-blur-sm">
+                <Video className="w-3 h-3 mr-1" /> Telemedicina
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
+              <h1 className="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight leading-tight">
                 Teleconsulta Médica<br />
                 <span className="text-white/85">por Vídeo 24h</span>
               </h1>
-              <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Consulte médicos online de qualquer lugar do Brasil. Agendamento fácil, receitas digitais válidas e atendimento seguro pela plataforma.
+              <p className="text-sm text-white/70 max-w-lg mb-6 leading-relaxed">
+                Consulte médicos online de qualquer lugar do Brasil. Agendamento fácil, receitas digitais válidas e atendimento seguro.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" asChild>
-                  <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" /></Link>
+              <div className="flex flex-col sm:flex-row items-start gap-3">
+                <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl shadow-black/20" asChild>
+                  <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-4 h-4 ml-2" /></Link>
                 </Button>
-                <Button size="lg" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl h-14 px-8 text-base font-semibold" asChild>
-                  <Link to="/medico">Sou Médico — Cadastre-se</Link>
+                <Button size="default" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl px-6 font-semibold" asChild>
+                  <Link to="/medico">Sou Médico</Link>
                 </Button>
               </div>
-              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
+              <div className="flex flex-wrap items-center gap-4 mt-6">
                 {[
-                  { icon: <Shield className="w-4 h-4" />, label: "LGPD Compliant" },
-                  { icon: <Video className="w-4 h-4" />, label: "Vídeo HD Criptografado" },
-                  { icon: <FileText className="w-4 h-4" />, label: "Receita Digital Válida" },
-                  { icon: <Users className="w-4 h-4" />, label: "30+ Especialidades" },
+                  { icon: <Shield className="w-3.5 h-3.5" />, label: "LGPD" },
+                  { icon: <Video className="w-3.5 h-3.5" />, label: "Vídeo HD" },
+                  { icon: <FileText className="w-3.5 h-3.5" />, label: "Receita Digital" },
+                  { icon: <Users className="w-3.5 h-3.5" />, label: "30+ Especialidades" },
                 ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
+                  <span key={i} className="flex items-center gap-1.5 text-white/50 text-xs font-medium">{item.icon} {item.label}</span>
                 ))}
               </div>
             </motion.div>

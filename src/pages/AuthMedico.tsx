@@ -205,42 +205,40 @@ const AuthMedico = () => {
         <Header />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
+        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "55vh" }}>
           <HeroCarousel images={medicoHeroImages} alt="Médico AloClínica" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="container mx-auto px-4 relative">
-            <div className="max-w-2xl">
-              <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-                <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-                  <Stethoscope className="w-3.5 h-3.5 mr-1.5" /> Para Médicos
-                </Badge>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
-                  Atenda pacientes<br /><span className="text-white/85">de todo o Brasil</span>
-                </h1>
-                <p className="text-lg text-white/70 max-w-xl mb-8 leading-relaxed">
-                  Amplie sua base de pacientes, defina seus preços e atenda por videochamada. Sem mensalidade — ganhe por consulta.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl" onClick={scrollToForm}>
-                    Cadastrar como Médico <ArrowRight className="w-5 h-5 ml-2" />
-                  </Button>
-                  <Button size="lg" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl h-14 px-8 text-base font-semibold" asChild>
-                    <a href="#como-funciona">Como funciona</a>
-                  </Button>
-                </div>
-                <div className="flex flex-wrap items-center gap-6 mt-10">
-                  {[
-                    { icon: <Shield className="w-4 h-4" />, label: "CFM Verificado" },
-                    { icon: <Award className="w-4 h-4" />, label: "Selo Confiança" },
-                    { icon: <Globe className="w-4 h-4" />, label: "30+ Especialidades" },
-                    { icon: <Zap className="w-4 h-4" />, label: "Sem Mensalidade" },
-                  ].map((item, i) => (
-                    <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
-                  ))}
-                </div>
-              </motion.div>
-            </div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-end pb-12" style={{ minHeight: "55vh" }}>
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-xl">
+              <Badge className="mb-3 text-xs px-4 py-1 bg-white/15 text-white border-white/20 backdrop-blur-sm">
+                <Stethoscope className="w-3 h-3 mr-1" /> Para Médicos
+              </Badge>
+              <h1 className="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight leading-tight">
+                Atenda pacientes<br /><span className="text-white/85">de todo o Brasil</span>
+              </h1>
+              <p className="text-sm text-white/70 max-w-lg mb-6 leading-relaxed">
+                Amplie sua base de pacientes, defina seus preços e atenda por videochamada. Sem mensalidade.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl" onClick={scrollToForm}>
+                  Cadastrar como Médico <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+                <Button size="default" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl px-6 font-semibold" asChild>
+                  <a href="#como-funciona">Como funciona</a>
+                </Button>
+              </div>
+              <div className="flex flex-wrap items-center gap-4 mt-6">
+                {[
+                  { icon: <Shield className="w-3.5 h-3.5" />, label: "CFM Verificado" },
+                  { icon: <Award className="w-3.5 h-3.5" />, label: "Selo Confiança" },
+                  { icon: <Globe className="w-3.5 h-3.5" />, label: "30+ Especialidades" },
+                  { icon: <Zap className="w-3.5 h-3.5" />, label: "Sem Mensalidade" },
+                ].map((item, i) => (
+                  <span key={i} className="flex items-center gap-1.5 text-white/50 text-xs font-medium">{item.icon} {item.label}</span>
+                ))}
+              </div>
+            </motion.div>
           </div>
         </section>
 
