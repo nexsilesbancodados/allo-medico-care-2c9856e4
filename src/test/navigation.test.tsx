@@ -84,7 +84,7 @@ describe("Route Navigation", () => {
   it("renders NotFound for unknown routes", async () => {
     const NotFound = (await import("@/pages/NotFound")).default;
     render(
-      <MemoryRouter initialEntries={["/rota-inexistente"]}>
+      <MemoryRouter initialEntries={["/rota-inexistente"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <NotFound />
       </MemoryRouter>
     );
@@ -94,7 +94,7 @@ describe("Route Navigation", () => {
   it("renders Auth page at /paciente", async () => {
     const Auth = (await import("@/pages/Auth")).default;
     render(
-      <MemoryRouter initialEntries={["/paciente"]}>
+      <MemoryRouter initialEntries={["/paciente"]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Auth />
       </MemoryRouter>
     );

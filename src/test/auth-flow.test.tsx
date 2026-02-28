@@ -44,7 +44,7 @@ describe("Auth Flow", () => {
   });
 
   it("renders login form by default", () => {
-    render(<BrowserRouter><Auth /></BrowserRouter>);
+    render(<BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Auth /></BrowserRouter>);
     expect(screen.getByText("Entrar")).toBeInTheDocument();
   });
 
@@ -53,7 +53,7 @@ describe("Auth Flow", () => {
       data: { user: { id: "1" } as any, session: null as any },
       error: null,
     });
-    render(<BrowserRouter><Auth /></BrowserRouter>);
+    render(<BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Auth /></BrowserRouter>);
 
     fireEvent.change(screen.getByPlaceholderText("seu@email.com"), { target: { value: "test@test.com" } });
     fireEvent.change(screen.getByPlaceholderText("••••••••"), { target: { value: "password123" } });
@@ -70,7 +70,7 @@ describe("Auth Flow", () => {
   });
 
   it("switches to register mode", () => {
-    render(<BrowserRouter><Auth /></BrowserRouter>);
+    render(<BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Auth /></BrowserRouter>);
     const registerLink = screen.getByText("Cadastre-se grátis");
     fireEvent.click(registerLink);
     expect(screen.getByText("Criar conta")).toBeInTheDocument();

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,9 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { getAdminNav } from "./adminNav";
-import { Search, Eye, Edit, Phone, Mail } from "lucide-react";
+import { Search, Eye, Edit, Download, ChevronLeft, ChevronRight, Users, Calendar, Filter } from "lucide-react";
+
+const PAGE_SIZE = 20;
 
 const AdminPatients = () => {
   const { toast } = useToast();
@@ -21,6 +24,9 @@ const AdminPatients = () => {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ first_name: "", last_name: "", phone: "", cpf: "" });
   const [appointments, setAppointments] = useState<any[]>([]);
+  const [page, setPage] = useState(0);
+  const [dateFilter, setDateFilter] = useState<string>("all");
+  const [sortBy, setSortBy] = useState<string>("newest");
 
   useEffect(() => { fetchPatients(); }, []);
 
@@ -35,6 +41,38 @@ const AdminPatients = () => {
     setPatients(profiles ?? []);
     setLoading(false);
   };
+
+  const filtered = useMemo(() => {
+    let result = patients.filter(p =>
+      `${p.first_name} ${p.last_name} ${p.cpf || ""} ${p.phone || ""}`.toLowerCase().includes(search.toLowerCase())
+    );
+
+    // Date filter
+    if (dateFilter !== "all") {
+      const now = new Date();
+      const cutoff = new Date();
+      if (dateFilter === "7d") cutoff.setDate(now.getDate() - 7);
+      else if (dateFilter === "30d") cutoff.setDate(now.getDate() - 30);
+      else if (dateFilter === "90d") cutoff.setDate(now.getDate() - 90);
+      result = result.filter(p => new Date(p.created_at) >= cutoff);
+    }
+
+    // Sort
+    if (sortBy === "name") {
+      result.sort((a, b) => `${a.first_name} ${a.last_name}`.localeCompare(`${b.first_name} ${b.last_name}`));
+    } else if (sortBy === "oldest") {
+      result.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    }
+    // "newest" is default from API
+
+    return result;
+  }, [patients, search, dateFilter, sortBy]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  // Reset page when filters change
+  useEffect(() => { setPage(0); }, [search, dateFilter, sortBy]);
 
   const openDetail = async (p: any) => {
     setSelected(p);
@@ -65,9 +103,23 @@ const AdminPatients = () => {
     }
   };
 
-  const filtered = patients.filter(p =>
-    `${p.first_name} ${p.last_name} ${p.cpf || ""}`.toLowerCase().includes(search.toLowerCase())
-  );
+  const exportCSV = () => {
+    const headers = ["Nome", "Sobrenome", "Telefone", "CPF", "Nascimento", "Cadastro"];
+    const rows = filtered.map(p => [
+      p.first_name, p.last_name, p.phone || "", p.cpf || "",
+      p.date_of_birth ? new Date(p.date_of_birth).toLocaleDateString("pt-BR") : "",
+      new Date(p.created_at).toLocaleDateString("pt-BR"),
+    ]);
+    const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pacientes_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "CSV exportado!" });
+  };
 
   const statusLabel: Record<string, string> = {
     scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -78,57 +130,108 @@ const AdminPatients = () => {
       <div className="max-w-5xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Pacientes</h1>
-            <p className="text-muted-foreground text-sm">{filtered.length} paciente(s) cadastrado(s)</p>
+            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
+              <Users className="w-6 h-6 text-primary" />
+              Pacientes
+            </h1>
+            <p className="text-muted-foreground text-sm">{filtered.length} paciente(s) encontrado(s)</p>
           </div>
+          <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5">
+            <Download className="w-4 h-4" /> Exportar CSV
+          </Button>
         </div>
 
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Buscar por nome ou CPF..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input placeholder="Buscar por nome, CPF ou telefone..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+          </div>
+          <Select value={dateFilter} onValueChange={setDateFilter}>
+            <SelectTrigger className="w-[160px]">
+              <Calendar className="w-4 h-4 mr-1.5 text-muted-foreground" />
+              <SelectValue placeholder="Período" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="7d">Últimos 7 dias</SelectItem>
+              <SelectItem value="30d">Últimos 30 dias</SelectItem>
+              <SelectItem value="90d">Últimos 90 dias</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={sortBy} onValueChange={setSortBy}>
+            <SelectTrigger className="w-[160px]">
+              <Filter className="w-4 h-4 mr-1.5 text-muted-foreground" />
+              <SelectValue placeholder="Ordenar" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Mais recentes</SelectItem>
+              <SelectItem value="oldest">Mais antigos</SelectItem>
+              <SelectItem value="name">Nome (A-Z)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
-          <div className="rounded-lg border border-border overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Paciente</TableHead>
-                  <TableHead>Telefone</TableHead>
-                  <TableHead>CPF</TableHead>
-                  <TableHead>Cadastro</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map(p => (
-                  <TableRow key={p.user_id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                            {p.first_name?.[0]}{p.last_name?.[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium text-foreground">{p.first_name} {p.last_name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{p.phone || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{p.cpf || "—"}</TableCell>
-                    <TableCell className="text-muted-foreground">{new Date(p.created_at).toLocaleDateString("pt-BR")}</TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" variant="ghost" onClick={() => openDetail(p)}>
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
+          <>
+            <div className="rounded-lg border border-border overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Paciente</TableHead>
+                    <TableHead>Telefone</TableHead>
+                    <TableHead>CPF</TableHead>
+                    <TableHead>Cadastro</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-                {filtered.length === 0 && (
-                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhum paciente encontrado.</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {paged.map(p => (
+                    <TableRow key={p.user_id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                              {p.first_name?.[0]}{p.last_name?.[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium text-foreground">{p.first_name} {p.last_name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">{p.phone || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{p.cpf || "—"}</TableCell>
+                      <TableCell className="text-muted-foreground">{new Date(p.created_at).toLocaleDateString("pt-BR")}</TableCell>
+                      <TableCell className="text-right">
+                        <Button size="sm" variant="ghost" onClick={() => openDetail(p)}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {paged.length === 0 && (
+                    <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhum paciente encontrado.</TableCell></TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex items-center justify-between mt-4">
+                <p className="text-xs text-muted-foreground">
+                  Página {page + 1} de {totalPages}
+                </p>
+                <div className="flex gap-1">
+                  <Button size="sm" variant="outline" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
+                    <ChevronLeft className="w-4 h-4" />
+                  </Button>
+                  <Button size="sm" variant="outline" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </>
         )}
       </div>
 

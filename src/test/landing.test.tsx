@@ -34,7 +34,7 @@ describe("Header", () => {
 
   it("renders logo and nav links with i18n", () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <I18nProvider>
           <Header />
         </I18nProvider>
@@ -48,7 +48,7 @@ describe("Header", () => {
 
 describe("StatsSection", () => {
   it("renders stat labels", () => {
-    render(<BrowserRouter><StatsSection /></BrowserRouter>);
+    render(<BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><StatsSection /></BrowserRouter>);
     expect(screen.getByText("Pacientes atendidos")).toBeInTheDocument();
     expect(screen.getByText("Médicos especialistas")).toBeInTheDocument();
   });

@@ -124,25 +124,37 @@ const Dashboard = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const forceRole = searchParams.get("role");
+  const [checkingPlan, setCheckingPlan] = useState(true);
   usePresence();
 
   // Check if patient has active plan
   const isPatientOnly = !loading && user && roles.includes("patient") && !roles.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "affiliate", "laudista"].includes(r));
 
   useEffect(() => {
-    if (!isPatientOnly || !user) return;
+    if (loading) return;
+    if (!isPatientOnly || !user) {
+      setCheckingPlan(false);
+      return;
+    }
     const checkPlan = async () => {
-      const [{ data: subs }, { data: cards }] = await Promise.all([
-        supabase.from("subscriptions").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
-        supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
-      ]);
-      const hasPlan = (subs && subs.length > 0) || (cards && cards.length > 0);
-      if (!hasPlan) navigate("/paciente?reason=no-subscription");
+      try {
+        const [{ data: subs }, { data: cards }] = await Promise.all([
+          supabase.from("subscriptions").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
+          supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
+        ]);
+        const hasPlan = (subs && subs.length > 0) || (cards && cards.length > 0);
+        if (!hasPlan) {
+          navigate("/paciente?reason=no-subscription");
+          return;
+        }
+      } finally {
+        setCheckingPlan(false);
+      }
     };
     checkPlan();
-  }, [isPatientOnly, user]);
+  }, [isPatientOnly, user, loading]);
 
-  if (loading) {
+  if (loading || checkingPlan) {
     return <PageLoader />;
   }
 

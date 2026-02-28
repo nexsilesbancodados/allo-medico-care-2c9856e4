@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, act } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 
 // Mock framer-motion
@@ -14,6 +14,10 @@ vi.mock("framer-motion", () => ({
 vi.mock("@/assets/mascot.png", () => ({ default: "mascot.png" }));
 vi.mock("@/assets/mascot-wave.png", () => ({ default: "wave.png" }));
 
+const TestRouter = ({ children }: { children: React.ReactNode }) => (
+  <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{children}</BrowserRouter>
+);
+
 // ─── CookieConsent ───
 describe("CookieConsent", () => {
   beforeEach(() => {
@@ -23,16 +27,20 @@ describe("CookieConsent", () => {
 
   it("shows banner after delay when no consent stored", async () => {
     const { default: CookieConsent } = await import("@/components/CookieConsent");
-    render(<BrowserRouter><CookieConsent /></BrowserRouter>);
-    await vi.advanceTimersByTimeAsync(2500);
+    render(<TestRouter><CookieConsent /></TestRouter>);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2500);
+    });
     expect(screen.getByText("Cookies & Privacidade")).toBeInTheDocument();
     vi.useRealTimers();
   });
 
   it("hides banner after accept and persists to localStorage", async () => {
     const { default: CookieConsent } = await import("@/components/CookieConsent");
-    render(<BrowserRouter><CookieConsent /></BrowserRouter>);
-    await vi.advanceTimersByTimeAsync(2500);
+    render(<TestRouter><CookieConsent /></TestRouter>);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(2500);
+    });
     fireEvent.click(screen.getByText("Aceitar todos"));
     expect(localStorage.getItem("aloclinica_cookie_consent")).toBe("accepted");
     vi.useRealTimers();
