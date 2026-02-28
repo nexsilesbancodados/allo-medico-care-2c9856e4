@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getDoctorNav } from "./doctorNav";
 import { FileBadge, Download, Eye, History } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,7 @@ import { ptBR } from "date-fns/locale";
 
 const MedicalCertificate = () => {
   const { profile, user } = useAuth();
-  const { toast } = useToast();
+  
   const [patientName, setPatientName] = useState("");
   const [patientCpf, setPatientCpf] = useState("");
   const [days, setDays] = useState(1);
@@ -72,7 +72,7 @@ const MedicalCertificate = () => {
 
   const generateCertificate = async () => {
     if (!patientName) {
-      toast({ title: "Informe o nome do paciente", variant: "destructive" });
+      toast.error("Informe o nome do paciente");
       return;
     }
     setGenerating(true);
@@ -192,7 +192,7 @@ const MedicalCertificate = () => {
 
     setGenerating(false);
     setHistory(prev => [{ name: patientName, date: today, type: certConfig.label }, ...prev.slice(0, 9)]);
-    toast({ title: "Documento gerado! ✅", description: `Código de verificação: ${verificationCode}` });
+    toast.success("Documento gerado! ✅", { description: `Código de verificação: ${verificationCode}` });
 
     // Notify patient about certificate
     notifyCertificateSent(

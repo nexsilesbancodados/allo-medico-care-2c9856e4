@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getDoctorNav } from "./doctorNav";
 import { Plus, Trash2, Clock, CalendarOff, Zap } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
@@ -37,7 +37,6 @@ interface Absence {
 
 const DoctorAvailability = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [absences, setAbsences] = useState<Absence[]>([]);
@@ -70,7 +69,7 @@ const DoctorAvailability = () => {
 
   const toggleAvailableNow = async () => {
     if (!doctorProfileId) {
-      toast({ title: "Perfil médico não encontrado", description: "Atualize a página e tente novamente.", variant: "destructive" });
+      toast.error("Perfil médico não encontrado", { description: "Atualize a página e tente novamente." });
       return;
     }
     setTogglingAvailability(true);
@@ -82,14 +81,14 @@ const DoctorAvailability = () => {
       }).eq("id", doctorProfileId);
       if (error) {
         console.error("Toggle available_now error:", error);
-        toast({ title: "Erro ao atualizar disponibilidade", description: error.message, variant: "destructive" });
+        toast.error("Erro ao atualizar disponibilidade", { description: error.message });
       } else {
         setAvailableNow(newVal);
-        toast({ title: newVal ? "🟢 Você está disponível para consultas imediatas!" : "Modo plantão desativado." });
+        toast.success(newVal ? "🟢 Você está disponível para consultas imediatas!" : "Modo plantão desativado.");
       }
     } catch (err) {
       console.error("Toggle available_now exception:", err);
-      toast({ title: "Erro inesperado", variant: "destructive" });
+      toast.error("Erro inesperado");
     } finally {
       setTogglingAvailability(false);
     }
@@ -127,7 +126,7 @@ const DoctorAvailability = () => {
       newEnd > s.start_time
     );
     if (overlapping.length > 0) {
-      toast({ title: "Conflito de horário", description: "Você já tem um slot neste período. Remova-o primeiro.", variant: "destructive" });
+      toast.error("Conflito de horário", { description: "Você já tem um slot neste período. Remova-o primeiro." });
       return;
     }
 
@@ -138,9 +137,9 @@ const DoctorAvailability = () => {
       end_time: newEnd,
     });
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      toast.error("Erro", { description: error.message });
     } else {
-      toast({ title: "Horário adicionado!" });
+      toast.success("Horário adicionado!");
       fetchSlots(doctorProfileId);
     }
   };
@@ -158,10 +157,10 @@ const DoctorAvailability = () => {
       reason: absenceReason.trim() || null,
     });
     if (error) {
-      if (error.code === "23505") toast({ title: "Essa data já está marcada como folga", variant: "destructive" });
-      else toast({ title: "Erro", description: error.message, variant: "destructive" });
+      if (error.code === "23505") toast.error("Essa data já está marcada como folga");
+      else toast.error("Erro", { description: error.message });
     } else {
-      toast({ title: "Folga registrada!" });
+      toast.success("Folga registrada!");
       setAbsenceDate("");
       setAbsenceReason("");
       fetchAbsences(doctorProfileId);

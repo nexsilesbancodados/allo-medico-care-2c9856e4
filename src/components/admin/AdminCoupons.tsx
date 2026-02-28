@@ -10,13 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Plus, Tag, Copy, Check, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const AdminCoupons = () => {
-  const { toast } = useToast();
+  
   const nav = getAdminNav("coupons");
   const [coupons, setCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +39,7 @@ const AdminCoupons = () => {
 
   const handleCreate = async () => {
     if (!form.code.trim()) {
-      toast({ title: "Código é obrigatório", variant: "destructive" });
+      toast.error("Código é obrigatório");
       return;
     }
 
@@ -52,9 +52,9 @@ const AdminCoupons = () => {
     });
 
     if (error) {
-      toast({ title: "Erro ao criar cupom", description: error.message, variant: "destructive" });
+      toast.error("Erro ao criar cupom", { description: error.message });
     } else {
-      toast({ title: "Cupom criado com sucesso!" });
+      toast.success("Cupom criado com sucesso!");
       setShowForm(false);
       setForm({ code: "", discount_percentage: "10", max_uses: "", expires_at: "" });
       fetchCoupons();
@@ -68,7 +68,7 @@ const AdminCoupons = () => {
 
   const deleteCoupon = async (id: string) => {
     await supabase.from("coupons").delete().eq("id", id);
-    toast({ title: "Cupom excluído" });
+    toast.success("Cupom excluído");
     fetchCoupons();
   };
 

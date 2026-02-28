@@ -13,7 +13,7 @@ import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { getAdminNav } from "@/components/admin/adminNav";
 import { getReceptionNav } from "@/components/reception/receptionNav";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const roleLabels: Record<string, string> = {
   patient: "Paciente",
@@ -208,7 +208,7 @@ const PanelSettings = () => {
   const { user, roles } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { toast } = useToast();
+  
 
   const forceRole = searchParams.get("role");
   const isAdmin = roles.includes("admin");
@@ -260,9 +260,9 @@ const PanelSettings = () => {
     const { error } = await supabase.from("profiles").update({ settings: allSettings } as any).eq("user_id", user.id);
     setSaving(false);
     if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      toast.error("Erro ao salvar", { description: error.message });
     } else {
-      toast({ title: "Configurações salvas", description: `Preferências do painel ${roleLabels[activeRole]} atualizadas.` });
+      toast.success("Configurações salvas", { description: `Preferências do painel ${roleLabels[activeRole]} atualizadas.` });
     }
   };
 

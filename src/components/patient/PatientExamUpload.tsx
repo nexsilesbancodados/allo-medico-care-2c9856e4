@@ -13,12 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Upload, FileText, Trash2, Eye, Plus, Search, FolderLock } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useEffect } from "react";
 
 const PatientExamUpload = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,7 +43,7 @@ const PatientExamUpload = () => {
     if (!file || !user) return;
 
     if (file.size > 10 * 1024 * 1024) {
-      toast({ title: "Arquivo muito grande", description: "O tamanho máximo é 10MB.", variant: "destructive" });
+      toast.error("Arquivo muito grande", { description: "O tamanho máximo é 10MB." });
       return;
     }
 
@@ -56,7 +55,7 @@ const PatientExamUpload = () => {
       .upload(filePath, file);
 
     if (uploadError) {
-      toast({ title: "Erro no upload", description: uploadError.message, variant: "destructive" });
+      toast.error("Erro no upload", { description: uploadError.message });
       setUploading(false);
       return;
     }
@@ -75,9 +74,9 @@ const PatientExamUpload = () => {
     });
 
     if (dbError) {
-      toast({ title: "Erro ao salvar", description: dbError.message, variant: "destructive" });
+      toast.error("Erro ao salvar", { description: dbError.message });
     } else {
-      toast({ title: "Documento enviado! ✅" });
+      toast.success("Documento enviado! ✅");
       setDescription("");
       setCategory("exam");
       fetchDocuments();
@@ -89,13 +88,13 @@ const PatientExamUpload = () => {
   const viewDocument = async (doc: any) => {
     const { data } = await supabase.storage.from("patient-documents").createSignedUrl(doc.file_url, 3600);
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-    else toast({ title: "Erro ao abrir documento", variant: "destructive" });
+    else toast.error("Erro ao abrir documento");
   };
 
   const deleteDocument = async (doc: any) => {
     await supabase.storage.from("patient-documents").remove([doc.file_url]);
     await supabase.from("patient_documents").delete().eq("id", doc.id);
-    toast({ title: "Documento removido" });
+    toast.success("Documento removido");
     fetchDocuments();
   };
 

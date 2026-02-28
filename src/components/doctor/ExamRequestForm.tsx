@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getLaudistaNav } from "@/components/laudista/laudistaNav";
@@ -138,21 +138,13 @@ const ExamRequestForm = () => {
     e.preventDefault();
 
     if (!effectiveDoctorProfileId) {
-      toast({
-        title: "Erro",
-        description: "Perfil de médico não encontrado. Certifique-se de que há um médico vinculado à sua clínica.",
-        variant: "destructive",
-      });
+      toast.error("Erro", { description: "Perfil de médico não encontrado. Certifique-se de que há um médico vinculado à sua clínica." });
       return;
     }
 
     const finalExamType = examType === "Outro" ? customExamType : examType;
     if (!finalExamType || files.length === 0) {
-      toast({
-        title: "Campos obrigatórios",
-        description: "Selecione o tipo de exame e envie pelo menos um arquivo.",
-        variant: "destructive",
-      });
+      toast.error("Campos obrigatórios", { description: "Selecione o tipo de exame e envie pelo menos um arquivo." });
       return;
     }
 
@@ -183,10 +175,10 @@ const ExamRequestForm = () => {
 
       if (error) throw error;
 
-      toast({ title: "Solicitação enviada!", description: "O exame foi enviado para a fila de laudos." });
+      toast.success("Solicitação enviada!", { description: "O exame foi enviado para a fila de laudos." });
       navigate(getBackRoute());
     } catch (err: any) {
-      toast({ title: "Erro ao enviar", description: err.message, variant: "destructive" });
+      toast.error("Erro ao enviar", { description: err.message });
     } finally {
       setUploading(false);
     }

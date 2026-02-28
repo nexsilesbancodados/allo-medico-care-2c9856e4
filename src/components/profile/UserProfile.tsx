@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ArrowLeft, Camera, Save, User, Trash2, AlertTriangle } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
@@ -39,7 +39,7 @@ const UserProfile = () => {
   const { user, profile, roles } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { toast } = useToast();
+  
 
   const forceRole = searchParams.get("role");
   const isAdmin = roles.includes("admin");
@@ -105,14 +105,14 @@ const UserProfile = () => {
     const path = `${user.id}/avatar.${ext}`;
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
     if (error) {
-      toast({ title: "Erro no upload", description: error.message, variant: "destructive" });
+      toast.error("Erro no upload", { description: error.message });
       setUploading(false);
       return;
     }
     const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
     setAvatarUrl(publicUrl);
     await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
-    toast({ title: "Foto atualizada!" });
+    toast.success("Foto atualizada!");
     setUploading(false);
   };
 
@@ -134,9 +134,9 @@ const UserProfile = () => {
 
     setSaving(false);
     if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      toast.error("Erro ao salvar", { description: error.message });
     } else {
-      toast({ title: "Perfil atualizado!" });
+      toast.success("Perfil atualizado!");
     }
   };
 
@@ -181,10 +181,10 @@ const UserProfile = () => {
       // Sign out
       await supabase.auth.signOut();
       
-      toast({ title: "Conta excluída", description: "Seus dados foram anonimizados conforme a LGPD." });
+      toast.success("Conta excluída", { description: "Seus dados foram anonimizados conforme a LGPD." });
       navigate("/");
     } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
+      toast.error("Erro", { description: err.message });
     } finally {
       setDeleting(false);
     }

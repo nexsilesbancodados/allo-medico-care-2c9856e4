@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Check, Star, CreditCard, Calendar as CalIcon, Clock,
@@ -51,7 +51,7 @@ const fadeUp = {
 
 const GuestCheckout = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
 
   const [step, setStep] = useState<Step>("specialty");
 

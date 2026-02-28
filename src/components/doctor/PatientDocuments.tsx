@@ -11,11 +11,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { FileText, Download, Search, Eye, Trash2, Upload } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const PatientDocuments = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const [documents, setDocuments] = useState<any[]>([]);
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -66,7 +66,7 @@ const PatientDocuments = () => {
     if (data?.signedUrl) {
       window.open(data.signedUrl, "_blank");
     } else {
-      toast({ title: "Erro ao abrir documento", variant: "destructive" });
+      toast.error("Erro ao abrir documento");
     }
   };
 

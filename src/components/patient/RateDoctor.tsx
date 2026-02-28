@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Star } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
@@ -13,7 +13,6 @@ interface RateDoctorProps {
 }
 
 const RateDoctor = ({ doctorId, appointmentId, doctorName }: RateDoctorProps) => {
-  const { toast } = useToast();
   const [rating, setRating] = useState(0);
   const [hover, setHover] = useState(0);
   const [comment, setComment] = useState("");
@@ -22,7 +21,7 @@ const RateDoctor = ({ doctorId, appointmentId, doctorName }: RateDoctorProps) =>
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      toast({ title: "Selecione uma nota", variant: "destructive" });
+      toast.error("Selecione uma nota");
       return;
     }
     setSubmitting(true);
@@ -53,7 +52,7 @@ const RateDoctor = ({ doctorId, appointmentId, doctorName }: RateDoctorProps) =>
 
     setSubmitting(false);
     setOpen(false);
-    toast({ title: "Avaliação enviada!", description: `Obrigado por avaliar ${doctorName}` });
+    toast.success("Avaliação enviada!", { description: `Obrigado por avaliar ${doctorName}` });
   };
 
   return (

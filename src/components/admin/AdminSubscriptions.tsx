@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Plus, Search } from "lucide-react";
 import { format } from "date-fns";
@@ -17,7 +17,7 @@ const statusLabel: Record<string, string> = { active: "Ativa", cancelled: "Cance
 const statusVariant: Record<string, "default" | "destructive" | "outline"> = { active: "default", cancelled: "destructive", expired: "outline", paused: "outline" };
 
 const AdminSubscriptions = () => {
-  const { toast } = useToast();
+  
   const [subs, setSubs] = useState<any[]>([]);
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +59,7 @@ const AdminSubscriptions = () => {
 
   const createSubscription = async () => {
     if (!form.plan_id || !form.user_id) {
-      toast({ title: "Selecione um usuário e um plano", variant: "destructive" });
+      toast.error("Selecione um usuário e um plano");
       return;
     }
     const plan = plans.find(p => p.id === form.plan_id);
@@ -77,9 +77,9 @@ const AdminSubscriptions = () => {
       expires_at: expiresAt.toISOString(),
     });
     if (error) {
-      toast({ title: "Erro ao criar assinatura", description: error.message, variant: "destructive" });
+      toast.error("Erro ao criar assinatura", { description: error.message });
     } else {
-      toast({ title: "Assinatura criada com sucesso! ✅" });
+      toast.success("Assinatura criada com sucesso! ✅");
       setShowForm(false);
       fetchData();
     }
@@ -89,13 +89,13 @@ const AdminSubscriptions = () => {
     const payload: any = { status: newStatus };
     if (newStatus === "cancelled") payload.cancelled_at = new Date().toISOString();
     await supabase.from("subscriptions").update(payload).eq("id", id);
-    toast({ title: "Status atualizado!" });
+    toast.success("Status atualizado!");
     fetchData();
   };
 
   const deleteSub = async (id: string) => {
     await supabase.from("subscriptions").delete().eq("id", id);
-    toast({ title: "Assinatura removida" });
+    toast.success("Assinatura removida");
     fetchData();
   };
 

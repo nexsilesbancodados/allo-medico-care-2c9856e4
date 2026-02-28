@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2, FileText, Download, Calendar, Clock, Users, Settings } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
@@ -38,7 +38,7 @@ const PrescriptionForm = () => {
   const { appointmentId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
 
   const store = useConsultationStore();
   const [patientName, setPatientName] = useState("");
