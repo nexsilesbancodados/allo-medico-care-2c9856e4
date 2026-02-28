@@ -168,6 +168,7 @@ const Dashboard = () => {
     ? forceRole
     : isAdmin ? "admin"
     : roles.includes("doctor") ? "doctor"
+    : roles.includes("laudista") ? "laudista"
     : roles.includes("receptionist") ? "receptionist"
     : roles.includes("support") ? "support"
     : roles.includes("clinic") ? "clinic"
@@ -317,13 +318,13 @@ const Dashboard = () => {
       <Route path="admin/coupons" element={<RoleGuard allowed={[]} roles={roles}><AdminCoupons /></RoleGuard>} />
 
       {/* Laudista routes */}
-      <Route path="laudista" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaDashboard /></RoleGuard>} />
-      <Route path="laudista/queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaReportQueue /></RoleGuard>} />
-      <Route path="laudista/my-reports" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaMyReports /></RoleGuard>} />
-      <Route path="laudista/templates" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaTemplates /></RoleGuard>} />
-      <Route path="laudista/stats" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaStats /></RoleGuard>} />
-      <Route path="laudista/exam-request" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
-      <Route path="laudista/report-editor/:examId" element={<RoleGuard allowed={["doctor"]} roles={roles}><LaudistaReportEditor /></RoleGuard>} />
+      <Route path="laudista" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaDashboard /></RoleGuard>} />
+      <Route path="laudista/queue" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaReportQueue /></RoleGuard>} />
+      <Route path="laudista/my-reports" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaMyReports /></RoleGuard>} />
+      <Route path="laudista/templates" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaTemplates /></RoleGuard>} />
+      <Route path="laudista/stats" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaStats /></RoleGuard>} />
+      <Route path="laudista/exam-request" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
+      <Route path="laudista/report-editor/:examId" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaReportEditor /></RoleGuard>} />
 
       {/* Fallback: redirect to role-appropriate dashboard */}
       <Route
