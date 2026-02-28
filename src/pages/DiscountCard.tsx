@@ -145,37 +145,52 @@ const DiscountCard = () => {
         <Header />
 
         {/* ==================== HERO ==================== */}
-        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
+        <section className="relative overflow-hidden mt-[70px]">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
-          <div className="container mx-auto px-4 text-center relative">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-                <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Cartão de Benefícios
-              </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
-                Saúde + Economia<br /><span className="text-white/85">para toda a família</span>
-              </h1>
-              <p className="text-lg text-white/70 max-w-2xl mx-auto mb-8 leading-relaxed">
-                Telemedicina 24h, clube de vantagens com até 80% de desconto em +10.000 empresas, e assistência funerária completa. Tudo em um único cartão.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl" onClick={() => document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })}>
-                  Ver Planos <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-6 mt-4">
-                {[
-                  { icon: <Shield className="w-4 h-4" />, label: "Sem carência" },
-                  { icon: <Star className="w-4 h-4" />, label: "Cancele quando quiser" },
-                  { icon: <Zap className="w-4 h-4" />, label: "Ativação imediata" },
-                  { icon: <Flower2 className="w-4 h-4" />, label: "Assist. Funerária" },
-                ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-1.5 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
-                ))}
-              </div>
-            </motion.div>
+          <div className="container mx-auto px-4 relative">
+            <div className="grid lg:grid-cols-2 gap-0 items-center">
+              <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="py-24 sm:py-32 pr-0 lg:pr-12">
+                <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
+                  <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Cartão de Benefícios
+                </Badge>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
+                  Saúde + Economia<br /><span className="text-white/85">para toda a família</span>
+                </h1>
+                <p className="text-lg text-white/70 max-w-xl mb-8 leading-relaxed">
+                  Telemedicina 24h, clube de vantagens com até 80% de desconto em +10.000 empresas, e assistência funerária completa. Tudo em um único cartão.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                  <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl" onClick={() => document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })}>
+                    Ver Planos <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </div>
+                <div className="flex flex-wrap items-center gap-6">
+                  {[
+                    { icon: <Shield className="w-4 h-4" />, label: "Sem carência" },
+                    { icon: <Star className="w-4 h-4" />, label: "Cancele quando quiser" },
+                    { icon: <Zap className="w-4 h-4" />, label: "Ativação imediata" },
+                    { icon: <Flower2 className="w-4 h-4" />, label: "Assist. Funerária" },
+                  ].map((item, i) => (
+                    <span key={i} className="flex items-center gap-1.5 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
+                  ))}
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="hidden lg:block relative h-full min-h-[400px]"
+              >
+                <img
+                  src={mascotWave}
+                  alt="Cartão de Benefícios"
+                  className="w-full h-full object-contain object-center rounded-2xl"
+                  loading="eager"
+                />
+              </motion.div>
+            </div>
           </div>
         </section>
 

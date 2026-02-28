@@ -76,41 +76,56 @@ const Teleconsulta = () => {
         <Header />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
+        <section className="relative overflow-hidden mt-[70px]">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
-          <div className="container mx-auto px-4 text-center relative">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-                <Video className="w-3.5 h-3.5 mr-1.5" /> Telemedicina
-              </Badge>
-              <h1 className="text-4xl md:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
-                Teleconsulta Médica<br />
-                <span className="text-white/85">por Vídeo 24h</span>
-              </h1>
-              <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Consulte médicos online de qualquer lugar do Brasil. Agendamento fácil, receitas digitais válidas e atendimento seguro pela plataforma.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" asChild>
-                  <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" /></Link>
-                </Button>
-                <Button size="lg" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl h-14 px-8 text-base font-semibold" asChild>
-                  <Link to="/medico">Sou Médico — Cadastre-se</Link>
-                </Button>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
-                {[
-                  { icon: <Shield className="w-4 h-4" />, label: "LGPD Compliant" },
-                  { icon: <Video className="w-4 h-4" />, label: "Vídeo HD Criptografado" },
-                  { icon: <FileText className="w-4 h-4" />, label: "Receita Digital Válida" },
-                  { icon: <Users className="w-4 h-4" />, label: "30+ Especialidades" },
-                ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
-                ))}
-              </div>
-            </motion.div>
+          <div className="container mx-auto px-4 relative">
+            <div className="grid lg:grid-cols-2 gap-0 items-center">
+              <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="py-24 sm:py-32 pr-0 lg:pr-12">
+                <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
+                  <Video className="w-3.5 h-3.5 mr-1.5" /> Telemedicina
+                </Badge>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
+                  Teleconsulta Médica<br />
+                  <span className="text-white/85">por Vídeo 24h</span>
+                </h1>
+                <p className="text-lg text-white/70 max-w-xl mb-8 leading-relaxed">
+                  Consulte médicos online de qualquer lugar do Brasil. Agendamento fácil, receitas digitais válidas e atendimento seguro pela plataforma.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" asChild>
+                    <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" /></Link>
+                  </Button>
+                  <Button size="lg" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl h-14 px-8 text-base font-semibold" asChild>
+                    <Link to="/medico">Sou Médico — Cadastre-se</Link>
+                  </Button>
+                </div>
+                <div className="flex flex-wrap items-center gap-6 mt-10">
+                  {[
+                    { icon: <Shield className="w-4 h-4" />, label: "LGPD Compliant" },
+                    { icon: <Video className="w-4 h-4" />, label: "Vídeo HD Criptografado" },
+                    { icon: <FileText className="w-4 h-4" />, label: "Receita Digital Válida" },
+                    { icon: <Users className="w-4 h-4" />, label: "30+ Especialidades" },
+                  ].map((item, i) => (
+                    <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
+                  ))}
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="hidden lg:block relative h-full"
+              >
+                <img
+                  src={pingoWave}
+                  alt="Teleconsulta médica"
+                  className="w-full h-full object-contain object-center rounded-2xl"
+                  loading="eager"
+                />
+              </motion.div>
+            </div>
           </div>
         </section>
 
