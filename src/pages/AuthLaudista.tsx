@@ -9,7 +9,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail, Lock, KeyRound, Check, MessageCircle, LogIn, Eye, EyeOff,
   Shield, Star, Sparkles, ClipboardList, FileSignature, Brain, Fingerprint,
-  ChevronRight, Stethoscope, ArrowRight, Zap, HelpCircle, CheckCircle2, Video
+  ChevronRight, Stethoscope, ArrowRight, Zap, HelpCircle, CheckCircle2, Video,
+  Monitor, Upload, Bell, Clock
 } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
@@ -48,11 +49,38 @@ const howItWorks = [
   { step: "03", title: "Comece a laudar", desc: "Acesse a fila e emita laudos com assinatura digital.", icon: <FileSignature className="w-6 h-6 text-white" />, gradient: "from-secondary to-secondary/70" },
 ];
 
+const supportedExamTypes = [
+  { icon: <Brain className="w-5 h-5 text-white" />, title: "Eletroencefalograma", gradient: "from-primary to-primary/70" },
+  { icon: <Stethoscope className="w-5 h-5 text-white" />, title: "Eletrocardiograma", gradient: "from-destructive to-destructive/70" },
+  { icon: <Monitor className="w-5 h-5 text-white" />, title: "Raio-X / Tomografia", gradient: "from-secondary to-secondary/70" },
+  { icon: <FileSignature className="w-5 h-5 text-white" />, title: "Ressonância Magnética", gradient: "from-warning to-warning/70" },
+  { icon: <Brain className="w-5 h-5 text-white" />, title: "Ultrassonografia", gradient: "from-primary to-secondary" },
+  { icon: <Stethoscope className="w-5 h-5 text-white" />, title: "Espirometria", gradient: "from-secondary to-primary" },
+];
+
+const telelaudoSteps = [
+  { step: "01", title: "Upload do Exame", desc: "O médico assistente faz upload das imagens e dados clínicos na plataforma.", icon: <Upload className="w-6 h-6 text-white" />, gradient: "from-primary to-primary/70" },
+  { step: "02", title: "Análise pelo Especialista", desc: "Um médico laudista qualificado analisa o exame com suporte de IA para triagem de prioridade.", icon: <Brain className="w-6 h-6 text-white" />, gradient: "from-warning to-warning/70" },
+  { step: "03", title: "Laudo Assinado Digitalmente", desc: "O laudo é assinado com hash SHA-256 e disponibilizado para download em PDF com QR Code de verificação.", icon: <Fingerprint className="w-6 h-6 text-white" />, gradient: "from-secondary to-secondary/70" },
+  { step: "04", title: "Notificação Automática", desc: "Paciente e médico solicitante recebem notificação via WhatsApp e E-mail com o link do laudo.", icon: <Bell className="w-6 h-6 text-white" />, gradient: "from-destructive to-destructive/70" },
+];
+
+const telelaudoBenefits = [
+  "Laudos emitidos por especialistas qualificados",
+  "Assinatura digital SHA-256 com certificação ICP-Brasil",
+  "Código de verificação para autenticidade",
+  "Notificação automática via WhatsApp e E-mail",
+  "Armazenamento seguro em nuvem (LGPD)",
+  "Tempo médio de resposta inferior a 2 horas",
+];
+
 const faqs = [
   { question: "Como funciona o cadastro?", answer: "Preencha o formulário de solicitação. Nossa equipe verifica seus dados e CRM. Se aprovado, você recebe um código de acesso por email." },
   { question: "Preciso de CRM para laudar?", answer: "Sim, é necessário CRM ativo e verificado para emitir laudos na plataforma." },
   { question: "Quanto tempo leva a aprovação?", answer: "Normalmente em até 48 horas úteis." },
   { question: "Posso laudar de qualquer lugar?", answer: "Sim! A plataforma é 100% online, basta ter internet." },
+  { question: "Quais exames são atendidos?", answer: "Eletroencefalograma, Eletrocardiograma, Raio-X, Tomografia, Ressonância Magnética, Ultrassonografia, Espirometria e mais." },
+  { question: "Como clínicas podem integrar?", answer: "Clínicas podem solicitar integração pela página Para Empresas e acessar o serviço de telelaudo diretamente." },
 ];
 
 const AuthLaudista = () => {
@@ -248,8 +276,103 @@ const AuthLaudista = () => {
         </div>
       </section>
 
-      {/* ==================== FAQ ==================== */}
+      {/* ==================== TELELAUDO PROCESS ==================== */}
       <section className="py-20">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            <motion.div variants={fadeUp} className="text-center mb-14">
+              <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Como funciona o Telelaudo?</h2>
+              <p className="text-muted-foreground mt-3 max-w-lg mx-auto">Do upload do exame à entrega do laudo assinado</p>
+            </motion.div>
+            <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
+              {telelaudoSteps.map((item, i) => (
+                <motion.div key={i} variants={fadeUp} whileHover={{ y: -4 }} className="p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-lg transition-all">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg`}>{item.icon}</div>
+                    <span className="text-3xl font-black text-muted-foreground/20">{item.step}</span>
+                  </div>
+                  <h3 className="font-bold text-foreground text-lg mb-2">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ==================== EXAM TYPES ==================== */}
+      <section className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            <motion.h2 variants={fadeUp} className="text-3xl font-black text-foreground text-center mb-3 tracking-tight">Exames Atendidos</motion.h2>
+            <motion.p variants={fadeUp} className="text-muted-foreground text-center mb-10">Laudamos as principais modalidades diagnósticas</motion.p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+              {supportedExamTypes.map((exam, i) => (
+                <motion.div key={i} variants={fadeUp} whileHover={{ y: -4 }} className="p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-lg transition-all flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${exam.gradient} flex items-center justify-center shadow-md shrink-0`}>{exam.icon}</div>
+                  <span className="font-semibold text-foreground text-sm">{exam.title}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ==================== DIFFERENTIALS ==================== */}
+      <section className="py-20">
+        <div className="container mx-auto px-4 max-w-3xl">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            <motion.h2 variants={fadeUp} className="text-3xl font-black text-foreground text-center mb-3 tracking-tight">Diferenciais do Telelaudo</motion.h2>
+            <motion.p variants={fadeUp} className="text-muted-foreground text-center mb-10">Segurança, agilidade e rastreabilidade</motion.p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {telelaudoBenefits.map((b, i) => (
+                <motion.div key={i} variants={fadeUp} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50 hover:shadow-lg hover:border-primary/20 transition-all group">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-success to-success/70 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+                    <CheckCircle2 className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm text-foreground font-medium">{b}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ==================== CTA CLINIC ==================== */}
+      <section className="py-6 px-4">
+        <div className="container mx-auto max-w-3xl">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-secondary to-primary text-primary-foreground shadow-xl shadow-secondary/20">
+            <div className="text-center sm:text-left">
+              <h3 className="text-lg font-bold flex items-center gap-2 justify-center sm:justify-start">
+                <Zap className="w-5 h-5" /> Integre o Telelaudo à sua clínica
+              </h3>
+              <p className="text-sm opacity-70 mt-1">Laudos rápidos, seguros e verificáveis para sua operação.</p>
+            </div>
+            <Button size="lg" className="bg-white text-secondary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
+              <Link to="/para-empresas">Solicitar Acesso <ChevronRight className="w-4 h-4 ml-1" /></Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* ==================== VERIFICATION ==================== */}
+      <section className="py-20">
+        <div className="container mx-auto px-4 max-w-2xl text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-secondary to-primary mx-auto mb-5 shadow-xl">
+              <Fingerprint className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-3 tracking-tight">Verificação de Autenticidade</h2>
+            <p className="text-muted-foreground max-w-md mx-auto mb-8">Todo laudo possui um código único e QR Code para verificação pública. Farmácias e empresas podem confirmar a autenticidade em tempo real.</p>
+            <Button size="lg" variant="outline" className="rounded-2xl h-14 px-8 text-base font-bold border-border" asChild>
+              <Link to="/validar"><Shield className="w-5 h-5 mr-2" /> Validar Documento</Link>
+            </Button>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ==================== FAQ ==================== */}
+      <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4 max-w-3xl">
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="text-center mb-10">
             <motion.h2 variants={fadeUp} className="text-3xl font-black text-foreground tracking-tight flex items-center justify-center gap-2"><HelpCircle className="w-7 h-7 text-[hsl(210,85%,45%)]" /> Perguntas Frequentes</motion.h2>

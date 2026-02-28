@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, CheckCircle2, ArrowRight, Shield, Users, Heart, Stethoscope, Clock, Star, Building2, Phone } from "lucide-react";
+import { CreditCard, CheckCircle2, ArrowRight, Shield, Users, Heart, Stethoscope, Clock, Star, Building2, Phone, FileText, Brain, Fingerprint, Zap, Upload, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -132,6 +132,70 @@ const B2BLanding = () => {
         </section>
 
 
+
+        {/* ==================== TELELAUDO PARA CLÍNICAS ==================== */}
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
+              <motion.div variants={fadeUp} className="text-center mb-4">
+                <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/10 text-secondary text-xs font-semibold mb-4">
+                  <FileText className="w-3.5 h-3.5" /> Telelaudo
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Laudos a Distância para sua Clínica</h2>
+                <p className="text-muted-foreground mt-3 max-w-lg mx-auto">Terceirize laudos médicos com segurança, agilidade e assinatura digital verificável.</p>
+              </motion.div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto mt-10">
+                {[
+                  { icon: <Upload className="w-7 h-7 text-white" />, title: "Upload Fácil", desc: "Envie exames pela plataforma ou integre via PACS/DICOM automaticamente.", gradient: "from-primary to-primary/70" },
+                  { icon: <Brain className="w-7 h-7 text-white" />, title: "IA de Triagem", desc: "Classificação automática por urgência com sugestão inteligente de achados.", gradient: "from-warning to-warning/70" },
+                  { icon: <Fingerprint className="w-7 h-7 text-white" />, title: "Assinatura Digital", desc: "Laudos com hash SHA-256, QR Code de verificação e rastreabilidade total.", gradient: "from-secondary to-secondary/70" },
+                  { icon: <Zap className="w-7 h-7 text-white" />, title: "SLA < 2 horas", desc: "Laudos urgentes em até 2h, normais em até 24h com alertas de prazo.", gradient: "from-destructive to-destructive/70" },
+                ].map((s, i) => (
+                  <motion.div key={i} variants={fadeUp}>
+                    <Card className="h-full border-border/50 hover:shadow-xl hover:border-border hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
+                      <CardContent className="p-6">
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>{s.icon}</div>
+                        <h3 className="font-bold text-foreground text-lg mb-2">{s.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+
+              <motion.div variants={fadeUp} className="mt-10 max-w-4xl mx-auto">
+                <div className="grid sm:grid-cols-3 gap-4">
+                  {[
+                    "Eletrocardiograma (ECG)",
+                    "Raio-X e Tomografia",
+                    "Ressonância Magnética",
+                    "Eletroencefalograma (EEG)",
+                    "Ultrassonografia",
+                    "Espirometria",
+                  ].map((exam, i) => (
+                    <div key={i} className="flex items-center gap-2 p-3 rounded-xl bg-card border border-border/50 text-sm font-medium text-foreground">
+                      <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                      {exam}
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+              <motion.div variants={fadeUp} className="mt-10 text-center">
+                <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-6 rounded-2xl bg-gradient-to-r from-secondary to-primary text-primary-foreground shadow-xl">
+                  <div className="text-center sm:text-left">
+                    <h3 className="text-lg font-bold">Integre o Telelaudo à sua operação</h3>
+                    <p className="text-sm opacity-70 mt-1">Laudos rápidos, seguros e verificáveis. Sem necessidade de equipe própria de laudistas.</p>
+                  </div>
+                  <Button size="lg" className="bg-white text-secondary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
+                    <Link to="/laudista">Sou Laudista <ChevronRight className="w-4 h-4 ml-1" /></Link>
+                  </Button>
+                </div>
+              </motion.div>
+            </motion.div>
+          </div>
+        </section>
 
         {/* Advantages for company */}
         <section className="py-20">
