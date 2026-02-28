@@ -90,6 +90,9 @@ const AuthMedico = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [submittingApplication, setSubmittingApplication] = useState(false);
+  const [experienceYears, setExperienceYears] = useState("");
+  const [consultationType, setConsultationType] = useState("");
+  const [howFound, setHowFound] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const formRef = useRef<HTMLDivElement>(null);
@@ -101,6 +104,12 @@ const AuthMedico = () => {
     setSubmittingApplication(true);
     try {
       const fullName = `${firstName} ${lastName}`.trim();
+      const enrichedBio = [
+        bio && `Sobre: ${bio}`,
+        experienceYears && `Experiência: ${experienceYears} anos`,
+        consultationType && `Tipo de atendimento: ${consultationType}`,
+        howFound && `Como conheceu: ${howFound}`,
+      ].filter(Boolean).join("\n");
       const { error } = await supabase.from("doctor_applications" as any).insert({
         full_name: fullName,
         email,
@@ -108,7 +117,7 @@ const AuthMedico = () => {
         crm,
         crm_state: crmState,
         specialty: specialty || null,
-        bio: bio || null,
+        bio: enrichedBio || null,
       } as any);
       if (error) throw error;
       setStep("applied");
@@ -343,7 +352,30 @@ const AuthMedico = () => {
                       <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1 h-11" /></div>
                       <div><Label>UF</Label><Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1 h-11" maxLength={2} /></div>
                     </div>
-                    <div><Label>Especialidade (opcional)</Label><Input value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="Ex: Cardiologia" className="mt-1 h-11" /></div>
+                    <div><Label>Especialidade</Label><Input value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="Ex: Cardiologia" className="mt-1 h-11" required /></div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label>Anos de experiência</Label><Input type="number" min="0" max="60" value={experienceYears} onChange={e => setExperienceYears(e.target.value)} placeholder="Ex: 5" className="mt-1 h-11" /></div>
+                      <div>
+                        <Label>Tipo de atendimento</Label>
+                        <select value={consultationType} onChange={e => setConsultationType(e.target.value)} className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                          <option value="">Selecione</option>
+                          <option value="Teleconsulta">Teleconsulta</option>
+                          <option value="Presencial">Presencial</option>
+                          <option value="Ambos">Ambos</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Como conheceu a AloClinica?</Label>
+                      <select value={howFound} onChange={e => setHowFound(e.target.value)} className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                        <option value="">Selecione</option>
+                        <option value="Google">Google</option>
+                        <option value="Indicação de colega">Indicação de colega</option>
+                        <option value="Redes sociais">Redes sociais</option>
+                        <option value="Congresso/Evento">Congresso/Evento</option>
+                        <option value="Outro">Outro</option>
+                      </select>
+                    </div>
                     <div><Label>Sobre você (opcional)</Label><textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Breve descrição da sua experiência..." className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={500} /></div>
                     <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={submittingApplication}>
                       {submittingApplication ? <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2"><Sparkles className="w-4 h-4 animate-spin" /> Enviando...</motion.span> : "Enviar Solicitação"}
