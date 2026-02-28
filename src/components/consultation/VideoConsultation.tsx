@@ -21,6 +21,7 @@ const formatElapsed = (seconds: number) => {
 
 const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsultationProps) => {
   const [loading, setLoading] = useState(true);
+  const [jitsiFailed, setJitsiFailed] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [showTopBar, setShowTopBar] = useState(true);
@@ -179,14 +180,21 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
       return;
     }
 
-    // Load the Jitsi External API script
+    // Load the Jitsi External API script with 15s timeout (issue #20)
     const script = document.createElement("script");
     script.src = "https://meet.jit.si/external_api.js";
     script.async = true;
-    script.onload = () => loadAndInit();
+    const loadTimeout = setTimeout(() => {
+      console.error("Jitsi load timeout (15s)");
+      setLoading(false);
+      setJitsiFailed(true);
+    }, 15000);
+    script.onload = () => { clearTimeout(loadTimeout); loadAndInit(); };
     script.onerror = () => {
+      clearTimeout(loadTimeout);
       console.error("Failed to load Jitsi API");
       setLoading(false);
+      setJitsiFailed(true);
     };
     document.head.appendChild(script);
 
@@ -211,6 +219,24 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
         className="absolute inset-0 w-full h-full z-[1]"
         style={{ minHeight: "100dvh" }}
       />
+
+      {/* Jitsi fallback (issue #20) */}
+      {jitsiFailed && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-background/95 gap-4 p-6 text-center">
+          <Phone className="w-12 h-12 text-destructive" />
+          <h3 className="text-lg font-bold text-foreground">Não foi possível iniciar a videochamada</h3>
+          <p className="text-sm text-muted-foreground max-w-sm">O servidor de vídeo pode estar indisponível. Tente o link direto abaixo.</p>
+          <a
+            href={`https://meet.jit.si/${roomName}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium"
+          >
+            Abrir no Jitsi.org
+          </a>
+          <button onClick={onEndCall} className="text-sm text-muted-foreground underline">Voltar</button>
+        </div>
+      )}
 
       {/* ===== TOP STATUS BAR (overlay) ===== */}
       <AnimatePresence>

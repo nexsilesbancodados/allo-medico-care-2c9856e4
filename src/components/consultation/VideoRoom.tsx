@@ -230,11 +230,22 @@ const VideoRoom = () => {
       .from("appointments").select("*").eq("id", appointmentId).single();
 
     if (!data) { setLoading(false); return; }
+
+    // Check payment status before allowing entry (issue #2)
+    if (!isDoctor && data.payment_status === "pending" && data.status === "scheduled") {
+      toast({
+        title: "⏳ Aguardando pagamento",
+        description: "Sua consulta será liberada assim que o pagamento for confirmado.",
+        variant: "destructive",
+      });
+      navigate("/dashboard/appointments");
+      return;
+    }
+
     setAppointment(data);
 
     if (isDoctor) {
       await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId);
-      // Notify patient that doctor entered the room
       const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
       notifyConsultationStarted(appointmentId!, docName).catch(console.error);
     }
