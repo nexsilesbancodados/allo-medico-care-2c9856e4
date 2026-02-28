@@ -76,7 +76,6 @@ const Header = memo(() => {
 
   const navLinks = [
     { label: "Teleconsulta", href: "/teleconsulta", isRoute: true },
-    { label: "Telelaudo", href: "/laudista", isRoute: true },
     { label: "Cartão de Benefícios", href: "/cartao-beneficios", isRoute: true },
     { label: "Empresas: Cartão", href: "/para-empresas/cartao", isRoute: true },
     { label: "Empresas: Telelaudo", href: "/para-empresas/telelaudo", isRoute: true },
@@ -171,10 +170,7 @@ const Header = memo(() => {
                           </Link>
                         </NavigationMenuLink>
                       </li>
-                      <ListItem href="/laudista" title="Telelaudo" icon={FileText} imgSrc={telelaudoPingo}>
-                        Laudos médicos a distância com assinatura digital SHA-256.
-                      </ListItem>
-                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={mascotThumbsup}>
+                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={telelaudoPingo}>
                         Descontos em consultas e exames para toda a família.
                       </ListItem>
                       <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope} imgSrc={mascotWave}>
