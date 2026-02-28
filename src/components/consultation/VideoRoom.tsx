@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { notifyConsultationStarted, notifyConsultationCompleted } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft,
   UserRound, Pill, PhoneOff, Mic, MicOff, Video, VideoOff, Shield,
@@ -39,7 +39,7 @@ const VideoRoom = () => {
   const { appointmentId } = useParams();
   const { user, roles } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const isMobile = useIsMobile();
 
   const [appointment, setAppointment] = useState<any>(null);

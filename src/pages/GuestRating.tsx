@@ -3,7 +3,7 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Star, Heart, CheckCircle2, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
@@ -14,7 +14,7 @@ const GuestRating = () => {
   const appointmentId = searchParams.get("appointment");
   const doctorName = searchParams.get("doctor") || "seu médico";
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
 
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
@@ -24,7 +24,7 @@ const GuestRating = () => {
 
   const handleSubmit = async () => {
     if (rating === 0) {
-      toast({ title: "Selecione uma nota", variant: "destructive" });
+      toast.error("Selecione uma nota");
       return;
     }
     setSubmitting(true);

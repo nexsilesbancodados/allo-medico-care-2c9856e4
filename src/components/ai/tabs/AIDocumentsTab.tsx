@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileText, Copy, Check, Loader2, Download, Sparkles, FileDown, Printer } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import jsPDF from "jspdf";
 
 import { AI_URL } from "@/lib/ai";
@@ -28,7 +28,6 @@ interface Props {
 }
 
 const AIDocumentsTab = ({ primaryRole }: Props) => {
-  const { toast } = useToast();
   const [docType, setDocType] = useState("");
   const [patientName, setPatientName] = useState("");
   const [patientCPF, setPatientCPF] = useState("");
@@ -115,7 +114,7 @@ IMPORTANTE: Este é apenas um RASCUNHO para revisão do médico. O documento fin
     navigator.clipboard.writeText(result);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Copiado!" });
+    toast.success("Copiado!");
   };
 
   const exportPDF = () => {
@@ -150,7 +149,7 @@ IMPORTANTE: Este é apenas um RASCUNHO para revisão do médico. O documento fin
     doc.text("⚠️ RASCUNHO — Documento gerado por IA para revisão do médico responsável.", 105, 285, { align: "center" });
 
     doc.save(`${docType || "documento"}-${new Date().toISOString().slice(0, 10)}.pdf`);
-    toast({ title: "PDF gerado!" });
+    toast.success("PDF gerado!");
   };
 
   const printResult = () => {

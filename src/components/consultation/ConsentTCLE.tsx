@@ -6,7 +6,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
 import { Shield, FileCheck, AlertTriangle } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 
 interface ConsentTCLEProps {
@@ -47,7 +47,6 @@ O profissional de saúde é responsável por garantir a qualidade técnica da te
 
 const ConsentTCLE = ({ appointmentId, doctorName, onConsented }: ConsentTCLEProps) => {
   const { user } = useAuth();
-  const { toast } = useToast();
   const [accepted, setAccepted] = useState(false);
   const [acceptedPrivacy, setAcceptedPrivacy] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -100,18 +99,11 @@ const ConsentTCLE = ({ appointmentId, doctorName, onConsented }: ConsentTCLEProp
 
       if (error) throw error;
 
-      toast({
-        title: "Consentimento registrado ✅",
-        description: "Seu TCLE foi aceito e registrado com segurança.",
-      });
+      toast.success("Consentimento registrado ✅", { description: "Seu TCLE foi aceito e registrado com segurança." });
       onConsented();
     } catch (err: any) {
       console.error("Consent error:", err);
-      toast({
-        title: "Erro ao registrar consentimento",
-        description: err.message || "Tente novamente.",
-        variant: "destructive",
-      });
+      toast.error("Erro ao registrar consentimento", { description: err.message || "Tente novamente." });
     } finally {
       setSubmitting(false);
     }

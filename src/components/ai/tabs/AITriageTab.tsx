@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Stethoscope, AlertTriangle, ArrowRight, RotateCcw, Loader2, ThermometerSun, Clock, MapPin, Copy, Check, Plus, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 import { AI_URL } from "@/lib/ai";
 
@@ -38,7 +38,6 @@ interface TriageResult {
 }
 
 const AITriageTab = () => {
-  const { toast } = useToast();
   const [symptoms, setSymptoms] = useState("");
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [severity, setSeverity] = useState("");
@@ -148,7 +147,7 @@ IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
     navigator.clipboard.writeText(result.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Resultado copiado!" });
+    toast.success("Resultado copiado!");
   };
 
   return (

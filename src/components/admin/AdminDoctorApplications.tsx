@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   Stethoscope, Check, X, Mail, Clock, Eye, Send, Copy,
   CheckCircle2, XCircle, Loader2, RefreshCw, Search
@@ -38,7 +38,7 @@ const AdminDoctorApplications = () => {
   const [adminNotes, setAdminNotes] = useState("");
   const [processing, setProcessing] = useState(false);
   const [generatedCode, setGeneratedCode] = useState<string | null>(null);
-  const { toast } = useToast();
+  
 
   const fetchApplications = async () => {
     setLoading(true);
@@ -96,10 +96,10 @@ const AdminDoctorApplications = () => {
       });
 
       setGeneratedCode(code);
-      toast({ title: "Aprovado!", description: `Código ${code} enviado para ${selectedApp.email}` });
+      toast.success("Aprovado!", { description: `Código ${code} enviado para ${selectedApp.email}` });
       fetchApplications();
     } catch (err: any) {
-      toast({ title: "Erro", description: err?.message || "Falha ao aprovar.", variant: "destructive" });
+      toast.error("Erro", { description: err?.message || "Falha ao aprovar." });
     }
     setProcessing(false);
   };
@@ -129,12 +129,12 @@ const AdminDoctorApplications = () => {
         },
       });
 
-      toast({ title: "Rejeitado", description: "O médico foi notificado por email." });
+      toast.success("Rejeitado", { description: "O médico foi notificado por email." });
       setSelectedApp(null);
       setAdminNotes("");
       fetchApplications();
     } catch (err: any) {
-      toast({ title: "Erro", description: err?.message || "Falha ao rejeitar.", variant: "destructive" });
+      toast.error("Erro", { description: err?.message || "Falha ao rejeitar." });
     }
     setProcessing(false);
   };
@@ -237,7 +237,7 @@ const AdminDoctorApplications = () => {
                   <p className="text-sm text-success font-medium mb-2">✅ Código gerado e enviado por email:</p>
                   <div className="flex items-center justify-center gap-2">
                     <code className="text-lg font-mono font-bold text-success">{generatedCode}</code>
-                    <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(generatedCode); toast({ title: "Copiado!" }); }}>
+                    <Button variant="ghost" size="sm" onClick={() => { navigator.clipboard.writeText(generatedCode); toast.success("Copiado!"); }}>
                       <Copy className="w-4 h-4" />
                     </Button>
                   </div>

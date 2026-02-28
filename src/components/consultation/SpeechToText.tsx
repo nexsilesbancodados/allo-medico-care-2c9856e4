@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Mic, MicOff, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface SpeechToTextProps {
   onTranscript: (text: string) => void;
@@ -12,7 +12,7 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(true);
   const recognitionRef = useRef<any>(null);
-  const { toast } = useToast();
+  
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -41,7 +41,7 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
     recognition.onerror = (event: any) => {
       console.error("Speech error:", event.error);
       if (event.error === "not-allowed") {
-        toast({ title: "Microfone bloqueado", description: "Permita o acesso ao microfone nas configurações do navegador.", variant: "destructive" });
+        toast.error("Microfone bloqueado", { description: "Permita o acesso ao microfone nas configurações do navegador." });
       }
       setListening(false);
     };
@@ -60,7 +60,7 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
     return () => {
       try { recognition.stop(); } catch {}
     };
-  }, [onTranscript, toast]);
+  }, [onTranscript]);
 
   const toggleListening = useCallback(() => {
     if (!recognitionRef.current) return;
@@ -74,12 +74,12 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
         recognitionRef.current._shouldRestart = true;
         recognitionRef.current.start();
         setListening(true);
-        toast({ title: "🎙️ Ditado ativado", description: "Fale e o texto será transcrito automaticamente." });
+        toast.success("🎙️ Ditado ativado", { description: "Fale e o texto será transcrito automaticamente." });
       } catch (e) {
         console.error(e);
       }
     }
-  }, [listening, toast]);
+  }, [listening]);
 
   if (!supported) return null;
 

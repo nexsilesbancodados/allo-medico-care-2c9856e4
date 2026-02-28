@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } } };
@@ -108,11 +108,11 @@ const LaudistaDashboard = () => {
         .update({ assigned_to: doctorProfile.id, status: "in_review" } as any)
         .eq("id", examId);
       if (error) throw error;
-      toast({ title: "Exame assumido!", description: "Você pode iniciar o laudo agora." });
+      toast.success("Exame assumido!", { description: "Você pode iniciar o laudo agora." });
       queryClient.invalidateQueries({ queryKey: ["laudista-recent-exams"] });
       queryClient.invalidateQueries({ queryKey: ["laudista-stats"] });
     } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
+      toast.error("Erro", { description: err.message });
     } finally {
       setClaimingId(null);
     }
