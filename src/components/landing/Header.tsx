@@ -70,7 +70,7 @@ const Header = memo(() => {
     { label: "Teleconsulta", href: "/teleconsulta", isRoute: true },
     { label: "Telelaudo", href: "/telelaudo", isRoute: true },
     { label: "Para Empresas", href: "/para-empresas", isRoute: true },
-    { label: "Cartão de Desconto", href: "/cartao-desconto", isRoute: true },
+    { label: "Cartão de Benefícios", href: "/cartao-beneficios", isRoute: true },
   ];
 
   const handleNavClick = (link: { href: string; isRoute?: boolean }) => {
@@ -165,7 +165,7 @@ const Header = memo(() => {
                       <ListItem href="/telelaudo" title="Telelaudo" icon={FileText}>
                         Laudos médicos a distância com assinatura digital SHA-256.
                       </ListItem>
-                      <ListItem href="/cartao-desconto" title="Cartão Desconto" icon={CreditCard}>
+                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard}>
                         Descontos em consultas e exames para toda a família.
                       </ListItem>
                       <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>

@@ -793,7 +793,7 @@ const PlansCheckout = () => {
                         )}
                         {cardDiscount > 0 && (
                           <div className="flex items-center gap-1 text-xs text-primary mb-2">
-                            <CheckCircle2 className="w-3 h-3" /> Cartão de Desconto — {cardDiscount}% off
+                            <CheckCircle2 className="w-3 h-3" /> Cartão de Benefícios — {cardDiscount}% off
                           </div>
                         )}
                         {couponValid === false && (
