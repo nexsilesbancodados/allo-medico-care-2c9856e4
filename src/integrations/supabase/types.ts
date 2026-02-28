@@ -572,6 +572,68 @@ export type Database = {
           },
         ]
       }
+      doctor_applications: {
+        Row: {
+          admin_notes: string | null
+          bio: string | null
+          created_at: string
+          crm: string
+          crm_state: string
+          email: string
+          full_name: string
+          id: string
+          invite_code_id: string | null
+          phone: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          specialty: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          bio?: string | null
+          created_at?: string
+          crm: string
+          crm_state?: string
+          email: string
+          full_name: string
+          id?: string
+          invite_code_id?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          specialty?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          bio?: string | null
+          created_at?: string
+          crm?: string
+          crm_state?: string
+          email?: string
+          full_name?: string
+          id?: string
+          invite_code_id?: string | null
+          phone?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          specialty?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_applications_invite_code_id_fkey"
+            columns: ["invite_code_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_invite_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctor_invite_codes: {
         Row: {
           code: string

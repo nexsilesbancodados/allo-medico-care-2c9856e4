@@ -110,6 +110,7 @@ const SystemHealth = lazy(() => import("@/components/admin/SystemHealth"));
 const PanelCenter = lazy(() => import("@/components/admin/PanelCenter"));
 const AdminFinancial = lazy(() => import("@/components/admin/AdminFinancial"));
 const AdminCoupons = lazy(() => import("@/components/admin/AdminCoupons"));
+const AdminDoctorApplications = lazy(() => import("@/components/admin/AdminDoctorApplications"));
 const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: string[]; children: ReactNode }) => {
   const isAdmin = roles.includes("admin");
   if (isAdmin) return <>{children}</>;
@@ -275,6 +276,7 @@ const Dashboard = () => {
       <Route path="admin/invite-codes" element={<RoleGuard allowed={[]} roles={roles}><AdminInviteCodes /></RoleGuard>} />
       <Route path="admin/reports" element={<RoleGuard allowed={[]} roles={roles}><AdminReports /></RoleGuard>} />
       <Route path="admin/approvals" element={<RoleGuard allowed={[]} roles={roles}><AdminApprovals /></RoleGuard>} />
+      <Route path="admin/doctor-applications" element={<RoleGuard allowed={[]} roles={roles}><AdminDoctorApplications /></RoleGuard>} />
       <Route path="admin/switch-panel" element={<RoleGuard allowed={[]} roles={roles}><AdminSwitchPanel /></RoleGuard>} />
       <Route path="admin/nps" element={<RoleGuard allowed={[]} roles={roles}><AdminNPS /></RoleGuard>} />
       <Route path="admin/whatsapp" element={<RoleGuard allowed={[]} roles={roles}><AdminWhatsApp /></RoleGuard>} />

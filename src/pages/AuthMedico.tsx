@@ -24,7 +24,7 @@ import mascotWave from "@/assets/mascot-wave.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
-type Step = "welcome" | "code" | "register" | "login";
+type Step = "welcome" | "code" | "register" | "login" | "apply" | "applied";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -47,9 +47,9 @@ const landingBenefits = [
 ];
 
 const howItWorks = [
-  { step: "01", title: "Cadastre-se", desc: "Crie sua conta com código de convite e tenha seu CRM verificado.", icon: <Stethoscope className="w-6 h-6 text-white" />, gradient: "from-primary to-primary/70" },
-  { step: "02", title: "Configure seu perfil", desc: "Defina especialidades, horários e preços.", icon: <BarChart3 className="w-6 h-6 text-white" />, gradient: "from-warning to-warning/70" },
-  { step: "03", title: "Comece a atender", desc: "Receba agendamentos e atenda por vídeo.", icon: <Video className="w-6 h-6 text-white" />, gradient: "from-secondary to-secondary/70" },
+  { step: "01", title: "Solicite seu cadastro", desc: "Preencha o formulário com seus dados e CRM. Nossa equipe analisará sua solicitação.", icon: <FileText className="w-6 h-6 text-white" />, gradient: "from-primary to-primary/70" },
+  { step: "02", title: "Aprovação por email", desc: "Você receberá um código de acesso por email após aprovação.", icon: <Mail className="w-6 h-6 text-white" />, gradient: "from-warning to-warning/70" },
+  { step: "03", title: "Comece a atender", desc: "Use o código para criar sua conta e atenda por vídeo.", icon: <Video className="w-6 h-6 text-white" />, gradient: "from-secondary to-secondary/70" },
 ];
 
 const features = [
@@ -64,7 +64,7 @@ const features = [
 ];
 
 const faqItems = [
-  { question: "Preciso de convite para me cadastrar?", answer: "Sim, o cadastro é feito com código de convite do administrador. Você também pode solicitar via WhatsApp." },
+  { question: "Como funciona o cadastro?", answer: "Preencha o formulário de solicitação. Nossa equipe verifica seus dados e CRM. Se aprovado, você recebe um código de acesso por email." },
   { question: "Como funciona o pagamento?", answer: "Você define o preço. O paciente paga pela plataforma e o valor é repassado diretamente para você." },
   { question: "A receita digital tem validade legal?", answer: "Sim. Nossas receitas seguem as normas do CFM com assinatura digital válida em todo Brasil." },
   { question: "Posso usar junto com meu consultório presencial?", answer: "Claro! Muitos médicos usam como complemento, ampliando alcance para pacientes de outras regiões." },
@@ -81,14 +81,41 @@ const AuthMedico = () => {
   const [lastName, setLastName] = useState("");
   const [crm, setCrm] = useState("");
   const [crmState, setCrmState] = useState("SP");
+  const [phone, setPhone] = useState("");
+  const [specialty, setSpecialty] = useState("");
+  const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [submittingApplication, setSubmittingApplication] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const formRef = useRef<HTMLDivElement>(null);
 
   const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: "smooth" });
+
+  const handleSubmitApplication = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmittingApplication(true);
+    try {
+      const fullName = `${firstName} ${lastName}`.trim();
+      const { error } = await supabase.from("doctor_applications" as any).insert({
+        full_name: fullName,
+        email,
+        phone: phone || null,
+        crm,
+        crm_state: crmState,
+        specialty: specialty || null,
+        bio: bio || null,
+      } as any);
+      if (error) throw error;
+      setStep("applied");
+      toast({ title: "Solicitação enviada!", description: "Analisaremos seus dados e retornaremos por email." });
+    } catch (err: any) {
+      toast({ title: "Erro ao enviar", description: err?.message || "Tente novamente.", variant: "destructive" });
+    }
+    setSubmittingApplication(false);
+  };
 
   const handleValidateCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -259,8 +286,9 @@ const AuthMedico = () => {
                   <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-3">
                     {[
                       { icon: LogIn, label: "Entrar na minha conta", desc: "Acesse seu painel de atendimento", action: () => setStep("login"), variant: "primary" as const },
-                      { icon: KeyRound, label: "Tenho um código de convite", desc: "Primeiro acesso com código do admin", action: () => setStep("code"), variant: "outline" as const },
-                      { icon: MessageCircle, label: "Solicitar cadastro via WhatsApp", desc: "Fale com nossa equipe", action: () => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma AloClinica.", "_blank"), variant: "ghost" as const },
+                      { icon: Stethoscope, label: "Quero me cadastrar", desc: "Solicite acesso preenchendo seus dados", action: () => setStep("apply"), variant: "outline" as const },
+                      { icon: KeyRound, label: "Já tenho código de acesso", desc: "Recebi o código por email", action: () => setStep("code"), variant: "outline" as const },
+                      { icon: MessageCircle, label: "Dúvidas? Fale pelo WhatsApp", desc: "Fale com nossa equipe", action: () => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma AloClinica.", "_blank"), variant: "ghost" as const },
                     ].map(({ icon: Icon, label, desc, action, variant }) => (
                       <motion.div key={label} variants={fadeUpForm}>
                         <Button className={`w-full h-auto py-4 px-5 justify-start text-left ${variant === "primary" ? "bg-gradient-to-r from-secondary to-primary text-primary-foreground shadow-lg shadow-primary/20" : ""}`} variant={variant === "primary" ? "default" : variant} size="lg" onClick={action}>
@@ -282,8 +310,8 @@ const AuthMedico = () => {
                 {step === "code" && (
                   <form onSubmit={handleValidateCode} className="space-y-4">
                     <div className="p-4 rounded-xl bg-muted/50 border border-border">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><KeyRound className="w-4 h-4 text-primary" /><span className="font-medium">Cadastro por convite</span></div>
-                      <p className="text-xs text-muted-foreground">Para se cadastrar, você precisa de um código fornecido pelo administrador.</p>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1"><KeyRound className="w-4 h-4 text-primary" /><span className="font-medium">Já recebi meu código</span></div>
+                      <p className="text-xs text-muted-foreground">Digite o código de acesso que você recebeu por email após aprovação.</p>
                     </div>
                     <div>
                       <Label>Código de Convite</Label>
@@ -296,7 +324,51 @@ const AuthMedico = () => {
                   </form>
                 )}
 
-                {/* Register */}
+                {/* Apply - Pre-registration form */}
+                {step === "apply" && (
+                  <form onSubmit={handleSubmitApplication} className="space-y-4">
+                    <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+                      <div className="flex items-center gap-2 text-sm text-foreground mb-1"><Stethoscope className="w-4 h-4 text-primary" /><span className="font-medium">Solicitar cadastro</span></div>
+                      <p className="text-xs text-muted-foreground">Preencha seus dados. Nossa equipe analisará e enviará o código de acesso por email.</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1 h-11" /></div>
+                      <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1 h-11" /></div>
+                    </div>
+                    <div><Label>Email</Label><div className="relative mt-1"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required /></div></div>
+                    <div><Label>Telefone / WhatsApp</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" className="mt-1 h-11" /></div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1 h-11" /></div>
+                      <div><Label>UF</Label><Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1 h-11" maxLength={2} /></div>
+                    </div>
+                    <div><Label>Especialidade (opcional)</Label><Input value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="Ex: Cardiologia" className="mt-1 h-11" /></div>
+                    <div><Label>Sobre você (opcional)</Label><textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Breve descrição da sua experiência..." className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={500} /></div>
+                    <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={submittingApplication}>
+                      {submittingApplication ? <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2"><Sparkles className="w-4 h-4 animate-spin" /> Enviando...</motion.span> : "Enviar Solicitação"}
+                    </Button>
+                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
+                  </form>
+                )}
+
+                {/* Applied - Success */}
+                {step === "applied" && (
+                  <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center py-6 space-y-4">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-success to-success/70 flex items-center justify-center mx-auto shadow-lg">
+                      <Check className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold text-foreground">Solicitação Enviada!</h3>
+                    <p className="text-sm text-muted-foreground leading-relaxed max-w-sm mx-auto">
+                      Recebemos seus dados. Nossa equipe analisará sua solicitação e enviará o <strong>código de acesso por email</strong> em até 48 horas úteis.
+                    </p>
+                    <div className="pt-2 space-y-2">
+                      <Button variant="outline" className="w-full" onClick={() => setStep("code")}>
+                        <KeyRound className="w-4 h-4 mr-2" /> Já recebi o código
+                      </Button>
+                      <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setStep("welcome")}>← Voltar ao início</Button>
+                    </div>
+                  </motion.div>
+                )}
+
                 {step === "register" && (
                   <form onSubmit={handleRegister} className="space-y-4">
                     <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 text-secondary text-sm border border-secondary/20">
