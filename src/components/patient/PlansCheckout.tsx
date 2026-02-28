@@ -11,9 +11,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Check, Star, CreditCard, Calendar as CalIcon, Clock, FileText,
-  Search, ArrowLeft, Shield, User, History, QrCode, FileBarChart, Copy, CheckCircle2, Lock
+  Search, ArrowLeft, Shield, User, History, QrCode, FileBarChart, Copy, CheckCircle2, Lock,
+  Crown, Diamond, Building2, ArrowRight, Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
@@ -42,6 +44,53 @@ const plans = [
   },
 ];
 
+const cardPlans = [
+  {
+    id: "prata_familiar",
+    name: "Mini Família",
+    price: 47.9,
+    people: "Titular + até 4 dependentes",
+    icon: <Shield className="w-6 h-6 text-white" />,
+    highlighted: false,
+    gradient: "from-[hsl(210,15%,60%)] to-[hsl(210,15%,45%)]",
+    benefits: ["Telemedicina 24h/7", "Clube de Vantagens (até 80% off)"],
+    tag: null,
+  },
+  {
+    id: "ouro_individual",
+    name: "Solitário",
+    price: 37.9,
+    people: "Apenas o titular",
+    icon: <Star className="w-6 h-6 text-white" />,
+    highlighted: false,
+    gradient: "from-[hsl(45,80%,50%)] to-[hsl(35,80%,42%)]",
+    benefits: ["Telemedicina 24h/7", "Clube de Vantagens", "Assistência Funeral"],
+    tag: null,
+  },
+  {
+    id: "ouro_familiar",
+    name: "King Família",
+    price: 77.9,
+    people: "Titular + até 4 dependentes",
+    icon: <Crown className="w-6 h-6 text-white" />,
+    highlighted: true,
+    gradient: "from-primary via-primary to-secondary",
+    benefits: ["Telemedicina 24h/7 (todos)", "Clube de Vantagens (todos)"],
+    tag: "⭐ MAIS POPULAR",
+  },
+  {
+    id: "diamante_familiar",
+    name: "Prime Família",
+    price: 157.9,
+    people: "Titular + até 4 dependentes",
+    icon: <Diamond className="w-6 h-6 text-white" />,
+    highlighted: false,
+    gradient: "from-[hsl(260,60%,55%)] to-[hsl(280,60%,45%)]",
+    benefits: ["Telemedicina 24h/7 (todos)", "Clube de Vantagens (todos)", "Assistência Funeral (todos)"],
+    tag: "💎 COMPLETO",
+  },
+];
+
 type Step = "select" | "specialty" | "doctor" | "datetime" | "checkout" | "success";
 
 interface DoctorOption {
@@ -66,6 +115,8 @@ const PlansCheckout = () => {
 
   const [step, setStep] = useState<Step>("specialty");
   const [selectedPlan, setSelectedPlan] = useState<string | null>("avulsa");
+  const [activeTab, setActiveTab] = useState("consulta");
+  const [subscribingCard, setSubscribingCard] = useState<string | null>(null);
 
   // Avulsa flow state
   const [specialties, setSpecialties] = useState<{ id: string; name: string }[]>([]);
@@ -483,6 +534,94 @@ const PlansCheckout = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={patientNav}>
+      <div className="max-w-5xl">
+        {/* Tab selector */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="consulta" className="text-xs sm:text-sm">
+              <CreditCard className="w-4 h-4 mr-1.5" /> Consulta Avulsa
+            </TabsTrigger>
+            <TabsTrigger value="cartao" className="text-xs sm:text-sm">
+              <Shield className="w-4 h-4 mr-1.5" /> Cartão de Benefícios
+            </TabsTrigger>
+            <TabsTrigger value="empresarial" className="text-xs sm:text-sm">
+              <Building2 className="w-4 h-4 mr-1.5" /> Empresarial
+            </TabsTrigger>
+          </TabsList>
+
+          {/* ===== TAB: CARTÃO DE BENEFÍCIOS ===== */}
+          <TabsContent value="cartao" className="mt-6">
+            <h2 className="text-2xl font-bold text-foreground mb-1">Cartão de Benefícios</h2>
+            <p className="text-muted-foreground mb-6">Telemedicina 24h, clube de vantagens e assistência funerária.</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {cardPlans.map((plan) => (
+                <Card key={plan.id} className={`relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl h-full ${plan.highlighted ? "border-primary shadow-lg shadow-primary/15 ring-2 ring-primary/20" : "border-border/50"}`}>
+                  {plan.tag && (
+                    <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-secondary text-primary-foreground text-center text-[10px] py-1 font-bold tracking-wide">{plan.tag}</div>
+                  )}
+                  <CardContent className={`p-5 text-center flex flex-col h-full ${plan.tag ? "pt-8" : ""}`}>
+                    <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mx-auto mb-3 shadow-lg`}>{plan.icon}</div>
+                    <h3 className="text-base font-bold text-foreground">{plan.name}</h3>
+                    <p className="text-[11px] text-muted-foreground mb-3">{plan.people}</p>
+                    <div className="mb-2">
+                      <span className="text-3xl font-black text-foreground">R$ {plan.price.toFixed(2).replace(".", ",")}</span>
+                      <span className="text-muted-foreground text-xs">/mês</span>
+                    </div>
+                    <ul className="text-left space-y-1.5 my-3 flex-1">
+                      {plan.benefits.map((b, j) => (
+                        <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <Check className="w-3.5 h-3.5 text-secondary mt-0.5 shrink-0" />
+                          <span>{b}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Button
+                      className={`w-full h-10 rounded-xl font-bold text-sm ${plan.highlighted ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground" : ""}`}
+                      variant={plan.highlighted ? "default" : "outline"}
+                      onClick={async () => {
+                        if (!user) { navigate("/paciente"); return; }
+                        setSubscribingCard(plan.id);
+                        try {
+                          const { data: existing } = await supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle();
+                          if (existing) { toast({ title: "Você já possui um cartão ativo!" }); return; }
+                          const validUntil = new Date(); validUntil.setMonth(validUntil.getMonth() + 1);
+                          const { error } = await supabase.from("discount_cards").insert({ user_id: user.id, plan_type: plan.id, price_monthly: plan.price, discount_percent: 30, status: "active", valid_until: validUntil.toISOString() });
+                          if (error) throw error;
+                          toast({ title: "Cartão ativado! 🎉", description: "Aproveite seus benefícios." });
+                          navigate("/dashboard");
+                        } catch (err: any) {
+                          toast({ title: "Erro", description: err.message, variant: "destructive" });
+                        } finally { setSubscribingCard(null); }
+                      }}
+                      disabled={subscribingCard === plan.id}
+                    >
+                      {subscribingCard === plan.id ? <><Loader2 className="w-4 h-4 mr-1 animate-spin" /> Processando...</> : <>Assinar <ArrowRight className="w-4 h-4 ml-1" /></>}
+                    </Button>
+                    <p className="text-[10px] text-muted-foreground mt-2">Sem carência • Cancele quando quiser</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* ===== TAB: EMPRESARIAL ===== */}
+          <TabsContent value="empresarial" className="mt-6">
+            <div className="text-center py-12">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <Building2 className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-2">Plano Empresarial</h2>
+              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                Ofereça saúde e bem-estar para seus colaboradores com condições especiais para empresas.
+              </p>
+              <Button size="lg" className="rounded-xl" onClick={() => navigate("/empresas")}>
+                Conhecer Plano Empresarial <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* ===== TAB: CONSULTA AVULSA ===== */}
+          <TabsContent value="consulta" className="mt-6">
       <div className={step === "checkout" ? "max-w-4xl" : "max-w-3xl"}>
 
         {/* Step indicator */}
@@ -999,6 +1138,9 @@ const PlansCheckout = () => {
             </div>
           </motion.div>
         )}
+      </div>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
