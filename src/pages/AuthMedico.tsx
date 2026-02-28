@@ -18,6 +18,7 @@ import { registerConsent } from "@/lib/consent";
 import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 import Header from "@/components/landing/Header";
+import { translateAuthError } from "@/lib/authErrors";
 import { lazy, Suspense } from "react";
 import heroMedicos1 from "@/assets/hero-medicos.png";
 import heroMedicos2 from "@/assets/hero-medicos-2.png";
@@ -175,7 +176,7 @@ const AuthMedico = () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
     else navigate("/dashboard?role=doctor");
   };
 
@@ -187,7 +188,7 @@ const AuthMedico = () => {
       email, password,
       options: { emailRedirectTo: window.location.origin, data: { first_name: firstName, last_name: lastName } },
     });
-    if (error) { setLoading(false); toast({ title: "Erro no cadastro", description: error.message, variant: "destructive" }); return; }
+    if (error) { setLoading(false); toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" }); return; }
     if (data.user) {
       await supabase.functions.invoke("assign-role", { body: { user_id: data.user.id, role: "doctor", profile_data: { crm, crm_state: crmState, invite_code_id: validatedCodeId } } });
       await registerConsent(data.user.id, "terms_and_privacy_doctor");

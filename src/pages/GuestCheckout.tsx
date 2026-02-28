@@ -339,11 +339,16 @@ const GuestCheckout = () => {
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(guestEmail)) {
-      toast({ title: "Email inválido", variant: "destructive" });
+      toast({ title: "Email inválido", description: "Informe um email válido.", variant: "destructive" });
       return;
     }
     if (!validarCPF(guestCpf)) {
-      toast({ title: "CPF inválido", variant: "destructive" });
+      toast({ title: "CPF inválido", description: "Verifique o CPF informado.", variant: "destructive" });
+      return;
+    }
+    const phoneDigits = guestPhone.replace(/\D/g, "");
+    if (phoneDigits.length < 10) {
+      toast({ title: "Telefone inválido", description: "Informe um telefone com pelo menos 10 dígitos.", variant: "destructive" });
       return;
     }
     setStep("checkout");
