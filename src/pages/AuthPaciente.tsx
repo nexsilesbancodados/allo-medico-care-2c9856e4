@@ -535,9 +535,9 @@ const AuthPaciente = () => {
                   <p className="text-center text-sm text-muted-foreground">
                     <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
                   </p>
-                  <p className="text-center text-sm text-muted-foreground">
-                    Não tem conta? <button type="button" onClick={() => setMode("register")} className="text-primary font-semibold hover:underline">Cadastre-se</button>
-                  </p>
+                   <p className="text-center text-sm text-muted-foreground">
+                     Comprou o cartão? <button type="button" onClick={() => setMode("register")} className="text-primary font-semibold hover:underline">Primeiro acesso</button>
+                   </p>
                 </form>
               )}
 
