@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Megaphone, LogIn, UserPlus, AlertCircle, Sparkles } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
@@ -22,7 +22,6 @@ const AuthAfiliado = () => {
   const [pixKey, setPixKey] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +29,7 @@ const AuthAfiliado = () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
+      toast.error("Erro ao entrar", { description: translateAuthError(error.message) });
     } else {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -41,13 +40,13 @@ const AuthAfiliado = () => {
           .maybeSingle();
         
         if (!affiliateProfile) {
-          toast({ title: "Conta não encontrada", description: "Você não possui um perfil de afiliado.", variant: "destructive" });
+          toast.error("Conta não encontrada", { description: "Você não possui um perfil de afiliado." });
           await supabase.auth.signOut();
           return;
         }
         
         if (!affiliateProfile.is_approved) {
-          toast({ title: "Aguardando aprovação", description: "Seu cadastro ainda está em análise.", variant: "destructive" });
+          toast.error("Aguardando aprovação", { description: "Seu cadastro ainda está em análise." });
           await supabase.auth.signOut();
           return;
         }
@@ -65,7 +64,7 @@ const AuthAfiliado = () => {
     });
     if (error) {
       setLoading(false);
-      toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" });
+      toast.error("Erro no cadastro", { description: translateAuthError(error.message) });
       return;
     }
     if (data.user) {
@@ -75,7 +74,7 @@ const AuthAfiliado = () => {
     }
     setLoading(false);
     await supabase.auth.signOut();
-    toast({ title: "Cadastro realizado!", description: "Seu pedido de afiliação foi enviado. O administrador irá analisar." });
+    toast.success("Cadastro realizado!", { description: "Seu pedido de afiliação foi enviado. O administrador irá analisar." });
     setStep("welcome");
   };
 

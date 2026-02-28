@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getLaudistaNav } from "@/components/laudista/laudistaNav";
@@ -73,7 +73,7 @@ const ReportTemplateManager = () => {
 
   const handleSave = async () => {
     if (!title || !examType) {
-      toast({ title: "Preencha título e tipo de exame", variant: "destructive" });
+      toast.error("Preencha título e tipo de exame");
       return;
     }
     setSaving(true);
@@ -84,7 +84,7 @@ const ReportTemplateManager = () => {
           .update({ title, exam_type: examType, body_text: bodyText } as any)
           .eq("id", editingId);
         if (error) throw error;
-        toast({ title: "Template atualizado!" });
+        toast.success("Template atualizado!");
       } else {
         const { error } = await supabase.from("report_templates" as any).insert({
           title,
@@ -93,13 +93,13 @@ const ReportTemplateManager = () => {
           created_by: user!.id,
         } as any);
         if (error) throw error;
-        toast({ title: "Template criado!" });
+        toast.success("Template criado!");
       }
       queryClient.invalidateQueries({ queryKey: ["report-templates-manage"] });
       setDialogOpen(false);
       resetForm();
     } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
+      toast.error("Erro", { description: err.message });
     } finally {
       setSaving(false);
     }
@@ -112,10 +112,10 @@ const ReportTemplateManager = () => {
         .delete()
         .eq("id", id);
       if (error) throw error;
-      toast({ title: "Template removido!" });
+      toast.success("Template removido!");
       queryClient.invalidateQueries({ queryKey: ["report-templates-manage"] });
     } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
+      toast.error("Erro", { description: err.message });
     }
   };
 

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getLaudistaNav } from "@/components/laudista/laudistaNav";
@@ -106,7 +106,7 @@ const ExamReportEditor = () => {
           const newContent = prev ? prev + " " + finalText.trim() : finalText.trim();
           const macro = findMacro(newContent);
           if (macro) {
-            toast({ title: "📝 Macro aplicada", description: macro.label });
+            toast("📝 Macro aplicada", { description: macro.label });
             return applyMacro(newContent, macro);
           }
           return newContent;
@@ -117,7 +117,7 @@ const ExamReportEditor = () => {
     recognition.onerror = (event: any) => {
       console.error("Speech error:", event.error);
       if (event.error === "not-allowed") {
-        toast({ title: "Microfone bloqueado", description: "Permita o acesso ao microfone.", variant: "destructive" });
+        toast.error("Microfone bloqueado", { description: "Permita o acesso ao microfone." });
       }
       setListening(false);
       setInterimText("");
@@ -158,7 +158,7 @@ const ExamReportEditor = () => {
         recognitionRef.current._shouldRestart = true;
         recognitionRef.current.start();
         setListening(true);
-        toast({ title: "🎙️ Ditado ativado", description: "Filtro de ruído ativo. Fale e o texto será transcrito. Use /comandos para macros." });
+        toast("🎙️ Ditado ativado", { description: "Filtro de ruído ativo. Fale e o texto será transcrito. Use /comandos para macros." });
       } catch (e) {
         console.error(e);
       }
@@ -233,7 +233,7 @@ const ExamReportEditor = () => {
     if (macro) {
       const applied = applyMacro(newContent, macro);
       setContent(applied);
-      toast({ title: "📝 Macro aplicada", description: macro.label });
+      toast("📝 Macro aplicada", { description: macro.label });
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
       autoSaveTimerRef.current = setTimeout(() => autoSaveDraft(applied), 5000);
       return;
@@ -251,7 +251,7 @@ const ExamReportEditor = () => {
   useEffect(() => {
     if (!existingReport || !doctorProfile) return;
     if (existingReport.reporter_id && existingReport.reporter_id !== doctorProfile.id) {
-      toast({ title: "Acesso negado", description: "Este laudo não está atribuído a você.", variant: "destructive" });
+      toast.error("Acesso negado", { description: "Este laudo não está atribuído a você." });
       navigate(backRoute);
     }
   }, [existingReport, doctorProfile]);
@@ -280,7 +280,7 @@ const ExamReportEditor = () => {
   // ---- AI Processing ----
   const handleAiProcess = async (mode: "structure" | "improve" | "suggest_conclusion") => {
     if (!content.trim()) {
-      toast({ title: "Texto vazio", description: "Escreva ou dite o texto antes de usar a IA.", variant: "destructive" });
+      toast.error("Texto vazio", { description: "Escreva ou dite o texto antes de usar a IA." });
       return;
     }
     setAiProcessing(true);
@@ -302,10 +302,10 @@ const ExamReportEditor = () => {
         } else {
           setContent(data.structured_text);
         }
-        toast({ title: "✨ IA aplicada", description: mode === "structure" ? "Laudo estruturado com sucesso!" : mode === "improve" ? "Texto melhorado!" : "Conclusão sugerida!" });
+        toast.success("✨ IA aplicada", { description: mode === "structure" ? "Laudo estruturado com sucesso!" : mode === "improve" ? "Texto melhorado!" : "Conclusão sugerida!" });
       }
     } catch (err: any) {
-      toast({ title: "Erro na IA", description: err.message || "Tente novamente.", variant: "destructive" });
+      toast.error("Erro na IA", { description: err.message || "Tente novamente." });
     } finally {
       setAiProcessing(false);
     }
@@ -317,13 +317,13 @@ const ExamReportEditor = () => {
     if (!macro) return;
     setContent((prev) => prev ? `${prev}\n\n${macro.text}` : macro.text);
     setShowMacros(false);
-    toast({ title: "📝 Macro inserida", description: macro.label });
+    toast("📝 Macro inserida", { description: macro.label });
   };
 
   // ---- Sign & Finalize ----
   const handleSignAndFinalize = async () => {
     if (!doctorProfile?.id || !content.trim()) {
-      toast({ title: "Erro", description: "Preencha o laudo antes de assinar.", variant: "destructive" });
+      toast.error("Erro", { description: "Preencha o laudo antes de assinar." });
       return;
     }
     setSigning(true);
@@ -414,11 +414,11 @@ const ExamReportEditor = () => {
         }
       }
 
-      toast({ title: "Laudo assinado e finalizado!", description: `Código: ${verificationCode}` });
+      toast.success("Laudo assinado e finalizado!", { description: `Código: ${verificationCode}` });
       queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
       navigate(backRoute);
     } catch (err: any) {
-      toast({ title: "Erro ao assinar", description: err.message, variant: "destructive" });
+      toast.error("Erro ao assinar", { description: err.message });
     } finally {
       setSigning(false);
     }

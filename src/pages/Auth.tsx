@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, User, ArrowLeft, Stethoscope, Building2, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
@@ -43,7 +43,6 @@ const Auth = () => {
   const [success, setSuccess] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { redirectAfterLogin } = useAuthRedirect();
 
   const validateEmail = (val: string) => {
@@ -89,7 +88,7 @@ const Auth = () => {
       if (error.message.includes("Invalid login credentials")) {
         setPasswordError(translated);
       } else {
-        toast({ title: "Erro ao entrar", description: translated, variant: "destructive" });
+        toast.error("Erro ao entrar", { description: translated });
       }
     } else if (data.user) {
       // Use centralized redirect logic — no signOut on missing subscription
@@ -100,7 +99,7 @@ const Auth = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!termsAccepted) {
-      toast({ title: "Aceite os termos", description: "Você precisa aceitar os Termos de Uso e Política de Privacidade.", variant: "destructive" });
+      toast.error("Aceite os termos", { description: "Você precisa aceitar os Termos de Uso e Política de Privacidade." });
       return;
     }
     const eErr = validateEmail(email);
@@ -121,7 +120,7 @@ const Auth = () => {
 
     if (error) {
       setLoading(false);
-      toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" });
+      toast.error("Erro no cadastro", { description: translateAuthError(error.message) });
       return;
     }
 

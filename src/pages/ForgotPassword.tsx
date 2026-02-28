@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { ArrowLeft, Mail, Phone } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
@@ -13,7 +13,6 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleReset = async (e: React.FormEvent) => {
@@ -24,10 +23,10 @@ const ForgotPassword = () => {
     });
     setLoading(false);
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      toast.error("Erro", { description: error.message });
     } else {
       setSent(true);
-      toast({ title: "Email enviado!", description: "Verifique sua caixa de entrada." });
+      toast.success("Email enviado!", { description: "Verifique sua caixa de entrada." });
     }
   };
 

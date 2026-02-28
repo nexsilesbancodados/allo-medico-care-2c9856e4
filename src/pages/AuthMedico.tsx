@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail, Lock, Stethoscope, KeyRound, Check, MessageCircle, LogIn, Eye, EyeOff,
@@ -119,7 +119,7 @@ const AuthMedico = () => {
   const [consultationType, setConsultationType] = useState("");
   const [howFound, setHowFound] = useState("");
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const formRef = useRef<HTMLDivElement>(null);
 
   const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -146,9 +146,9 @@ const AuthMedico = () => {
       } as any);
       if (error) throw error;
       setStep("applied");
-      toast({ title: "Solicitação enviada!", description: "Analisaremos seus dados e retornaremos por email." });
+      toast.success("Solicitação enviada!", { description: "Analisaremos seus dados e retornaremos por email." });
     } catch (err: any) {
-      toast({ title: "Erro ao enviar", description: err?.message || "Tente novamente.", variant: "destructive" });
+      toast.error("Erro ao enviar", { description: err?.message || "Tente novamente." });
     }
     setSubmittingApplication(false);
   };
@@ -161,12 +161,12 @@ const AuthMedico = () => {
       if (res.data?.valid) {
         setValidatedCodeId(res.data.code_id);
         setStep("register");
-        toast({ title: "Código válido!", description: "Preencha seus dados para criar sua conta." });
+        toast.success("Código válido!", { description: "Preencha seus dados para criar sua conta." });
       } else {
-        toast({ title: "Código inválido", description: res.data?.error || "Verifique e tente novamente.", variant: "destructive" });
+        toast.error("Código inválido", { description: res.data?.error || "Verifique e tente novamente." });
       }
     } catch {
-      toast({ title: "Erro", description: "Não foi possível validar o código.", variant: "destructive" });
+      toast.error("Erro", { description: "Não foi possível validar o código." });
     }
     setValidating(false);
   };
@@ -178,7 +178,7 @@ const AuthMedico = () => {
     setLoading(false);
 
     if (error) {
-      toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
+      toast.error("Erro ao entrar", { description: translateAuthError(error.message) });
       return;
     }
 
@@ -191,14 +191,14 @@ const AuthMedico = () => {
 
       if (!doctorProfile) {
         await supabase.auth.signOut();
-        toast({ title: "Cadastro não encontrado", description: "Seu perfil de médico não foi localizado. Solicite o cadastro primeiro.", variant: "destructive" });
+        toast.error("Cadastro não encontrado", { description: "Seu perfil de médico não foi localizado. Solicite o cadastro primeiro." });
         setStep("quiz");
         return;
       }
 
       if (!doctorProfile.is_approved) {
         await supabase.auth.signOut();
-        toast({ title: "Cadastro em análise", description: "Seu cadastro está sendo analisado. Você receberá o código de acesso por email quando aprovado.", variant: "destructive" });
+        toast.error("Cadastro em análise", { description: "Seu cadastro está sendo analisado. Você receberá o código de acesso por email quando aprovado." });
         return;
       }
 
@@ -208,20 +208,20 @@ const AuthMedico = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!termsAccepted) { toast({ title: "Aceite os termos", variant: "destructive" }); return; }
+    if (!termsAccepted) { toast.error("Aceite os termos"); return; }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email, password,
       options: { emailRedirectTo: window.location.origin, data: { first_name: firstName, last_name: lastName } },
     });
-    if (error) { setLoading(false); toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" }); return; }
+    if (error) { setLoading(false); toast.error("Erro no cadastro", { description: translateAuthError(error.message) }); return; }
     if (data.user) {
       await supabase.functions.invoke("assign-role", { body: { user_id: data.user.id, role: "doctor", profile_data: { crm, crm_state: crmState, invite_code_id: validatedCodeId } } });
       await registerConsent(data.user.id, "terms_and_privacy_doctor");
       supabase.functions.invoke("send-email", { body: { type: "welcome_doctor", to: email, data: { name: `${firstName} ${lastName}`, crm: `${crm}/${crmState}` } } }).catch(console.error);
     }
     setLoading(false);
-    toast({ title: "Cadastro realizado!", description: "Aguarde a aprovação do seu CRM." });
+    toast.success("Cadastro realizado!", { description: "Aguarde a aprovação do seu CRM." });
     navigate("/dashboard?role=doctor");
   };
 
