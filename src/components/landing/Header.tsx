@@ -18,7 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
 import pingoVirtualAssistant from "@/assets/pingo-virtual-assistant.png";
-import howItWorksConsultation from "@/assets/how-it-works-consultation.png";
+import teleconsultaDropdown from "@/assets/teleconsulta-dropdown.png";
 import telelaudoPingo from "@/assets/telelaudo-pingo.png";
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
 import mascotWave from "@/assets/mascot-wave.png";
@@ -160,9 +160,9 @@ const Header = memo(() => {
                         <NavigationMenuLink asChild>
                           <Link
                             to="/teleconsulta"
-                            className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-primary/10 to-primary/5 p-4 no-underline outline-none focus:shadow-md hover:from-primary/15 hover:to-primary/10 transition-colors relative overflow-hidden"
+                            className="flex h-full w-full select-none flex-col items-center justify-end rounded-lg bg-gradient-to-b from-muted/60 to-muted/30 p-4 no-underline outline-none focus:shadow-md hover:from-primary/10 hover:to-primary/5 transition-colors relative overflow-hidden"
                           >
-                            <img src={howItWorksConsultation} alt="Teleconsulta" className="w-full max-h-28 object-contain object-center mb-3 rounded-md" />
+                            <img src={teleconsultaDropdown} alt="Teleconsulta" className="w-full flex-1 object-cover object-center rounded-md mb-3" />
                             <div className="mb-1 text-base font-bold text-foreground">Teleconsulta</div>
                             <p className="text-xs leading-relaxed text-muted-foreground">
                               Consultas médicas por vídeo 24h com mais de 30 especialidades.
