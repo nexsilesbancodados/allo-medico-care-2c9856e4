@@ -19,10 +19,10 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
   }
 
   if (!user) {
-    // Redirect to the correct auth page based on required role
     if (requiredRole === "patient") return <Navigate to="/paciente" replace />;
-    if (requiredRole === "doctor") return <Navigate to="/medico" replace />;
+    if (requiredRole === "doctor") return <Navigate to="/medico?acesso=entrar" replace />;
     if (requiredRole === "clinic") return <Navigate to="/clinica" replace />;
+    if (requiredRole === "admin") return <Navigate to="/admin" replace />;
     return <Navigate to="/auth" replace />;
   }
 

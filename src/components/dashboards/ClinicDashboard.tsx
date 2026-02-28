@@ -240,7 +240,14 @@ const ClinicDashboard = () => {
         </motion.div>
 
         <motion.div variants={fadeUp}>
-          <Tabs defaultValue={defaultTab} className="w-full">
+          <Tabs defaultValue={defaultTab} className="w-full" onValueChange={(val) => {
+            const tabToPath: Record<string, string> = {
+              overview: "/dashboard",
+              performance: "/dashboard/clinic/reports",
+              finance: "/dashboard/clinic/finance",
+            };
+            if (tabToPath[val]) navigate(tabToPath[val]);
+          }}>
             <TabsList className="bg-muted/50 border border-border/40 h-10 rounded-xl p-1 w-full max-w-md">
               <TabsTrigger value="overview" className="text-xs rounded-lg flex-1">Visão Geral</TabsTrigger>
               <TabsTrigger value="performance" className="text-xs rounded-lg flex-1">Performance</TabsTrigger>

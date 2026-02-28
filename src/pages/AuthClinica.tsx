@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
+import { validarCNPJ } from "@/lib/cnpj";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import { translateAuthError } from "@/lib/authErrors";
@@ -121,6 +122,12 @@ const AuthClinica = () => {
     e.preventDefault();
     if (!termsAccepted) { toast({ title: "Aceite os termos", variant: "destructive" }); return; }
     if (!clinicName || !cnpj) { toast({ title: "Preencha nome e CNPJ da clínica", variant: "destructive" }); return; }
+    // Validate CNPJ
+    const cleanCnpj = cnpj.replace(/\D/g, "");
+    if (cleanCnpj.length !== 14 || !validarCNPJ(cleanCnpj)) {
+      toast({ title: "CNPJ inválido", description: "Digite um CNPJ válido com 14 dígitos.", variant: "destructive" });
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { first_name: firstName, last_name: lastName } } });
     if (error) { toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" }); setLoading(false); return; }
@@ -138,10 +145,34 @@ const AuthClinica = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
-    else navigate("/dashboard");
+
+    if (error) {
+      toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
+      return;
+    }
+
+    if (data.user) {
+      const { data: clinicProfile } = await supabase
+        .from("clinic_profiles")
+        .select("id, is_approved")
+        .eq("user_id", data.user.id)
+        .single();
+
+      if (!clinicProfile) {
+        await supabase.auth.signOut();
+        toast({ title: "Clínica não encontrada", description: "Perfil de clínica não localizado. Cadastre sua clínica primeiro.", variant: "destructive" });
+        setMode("register");
+        return;
+      }
+
+      if (!clinicProfile.is_approved) {
+        toast({ title: "Cadastro em análise", description: "Sua clínica está sendo analisada. Funcionalidades completas serão liberadas após aprovação." });
+      }
+
+      navigate("/dashboard");
+    }
   };
 
   return (
