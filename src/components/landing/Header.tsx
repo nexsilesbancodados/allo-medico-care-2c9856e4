@@ -214,16 +214,16 @@ const Header = memo(() => {
                     Serviços
                   </NavigationMenuTrigger>
                    <NavigationMenuContent>
-                    <div className="w-[100vw] max-w-[100vw] p-0 -ml-[50vw] left-1/2 relative">
-                      {/* Full-viewport carousel */}
-                      <div className="relative w-full h-[70vh] min-h-[400px] max-h-[600px] overflow-hidden">
+                    <div className="w-[90vw] max-w-[900px] p-0">
+                      {/* Full-width carousel */}
+                      <div className="relative w-full h-[280px] overflow-hidden rounded-t-lg">
                         <AnimatePresence mode="wait">
                           <motion.div
                             key={`${activeCat}-${carouselIdx}`}
-                            initial={{ opacity: 0, scale: 1.05 }}
+                            initial={{ opacity: 0, scale: 1.03 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.6 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.5 }}
                             className="absolute inset-0"
                           >
                             <Link to={carouselCategories[activeCat].href} className="block h-full">
@@ -232,54 +232,40 @@ const Header = memo(() => {
                                 alt={carouselCategories[activeCat].label}
                                 className="w-full h-full object-cover"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-                              <div className="absolute bottom-0 left-0 right-0 top-0 flex flex-col justify-end p-8 md:p-12 max-w-2xl">
-                                <h2 className="text-2xl md:text-4xl font-extrabold text-white uppercase leading-tight tracking-tight">
-                                  {carouselCategories[activeCat].label}
-                                </h2>
-                                <p className="text-sm md:text-base text-white/80 mt-3 leading-relaxed">
-                                  {carouselCategories[activeCat].descs[carouselIdx]}
-                                </p>
-                                <Button
-                                  size="sm"
-                                  className="mt-4 w-fit rounded-full bg-primary text-primary-foreground font-bold px-6 shadow-lg hover:opacity-90"
-                                  onClick={(e) => { e.preventDefault(); navigate(carouselCategories[activeCat].href); }}
-                                >
-                                  Saiba mais
-                                </Button>
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+                              <div className="absolute bottom-0 left-0 right-0 p-5">
+                                <div className="text-base font-bold text-white">{carouselCategories[activeCat].label}</div>
+                                <p className="text-xs text-white/80 mt-1">{carouselCategories[activeCat].descs[carouselIdx]}</p>
                               </div>
                             </Link>
                           </motion.div>
                         </AnimatePresence>
-                        {/* Dots centered bottom */}
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                        {/* Image dots */}
+                        <div className="absolute top-3 right-3 flex gap-1.5 z-10">
                           {[0, 1, 2].map((i) => (
                             <button
                               key={i}
                               onClick={(e) => { e.preventDefault(); setCarouselIdx(i); }}
-                              className={cn(
-                                "h-3 rounded-full transition-all",
-                                i === carouselIdx ? "bg-primary w-8" : "bg-white/40 hover:bg-white/60 w-3"
-                              )}
+                              className={cn("h-2 rounded-full transition-all", i === carouselIdx ? "bg-white w-6" : "bg-white/40 hover:bg-white/60 w-2")}
                             />
                           ))}
                         </div>
                         {/* Arrows */}
                         <button
                           onClick={(e) => { e.preventDefault(); setCarouselIdx(prev => (prev + 2) % 3); }}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 transition-colors z-10"
+                          className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors z-10"
                         >
-                          <ChevronLeft className="w-5 h-5" />
+                          <ChevronLeft className="w-4 h-4" />
                         </button>
                         <button
                           onClick={(e) => { e.preventDefault(); setCarouselIdx(prev => (prev + 1) % 3); }}
-                          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 transition-colors z-10"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors z-10"
                         >
-                          <ChevronRight className="w-5 h-5" />
+                          <ChevronRight className="w-4 h-4" />
                         </button>
                       </div>
-                      {/* Category tabs at bottom */}
-                      <div className="grid grid-cols-4 bg-background/95 backdrop-blur-lg border-t border-border/50">
+                      {/* Category tabs */}
+                      <div className="grid grid-cols-4 border-t border-border/50">
                         {carouselCategories.map((cat, i) => {
                           const Icon = cat.icon;
                           return (
@@ -288,14 +274,14 @@ const Header = memo(() => {
                               onMouseEnter={() => { setActiveCat(i); setCarouselIdx(0); }}
                               onClick={(e) => { e.preventDefault(); navigate(cat.href); }}
                               className={cn(
-                                "flex flex-col items-center gap-2 py-4 px-3 text-center transition-all border-b-3",
+                                "flex flex-col items-center gap-1.5 py-3 px-2 text-center transition-all border-b-2",
                                 i === activeCat
-                                  ? "border-primary bg-primary/10 text-primary"
+                                  ? "border-primary bg-primary/5 text-primary"
                                   : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30"
                               )}
                             >
-                              <Icon className="w-6 h-6" />
-                              <span className="text-xs font-bold leading-tight">{cat.label}</span>
+                              <Icon className="w-5 h-5" />
+                              <span className="text-[11px] font-semibold leading-tight">{cat.label}</span>
                             </button>
                           );
                         })}
