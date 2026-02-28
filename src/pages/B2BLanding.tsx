@@ -64,7 +64,7 @@ const B2BLanding = () => {
 
   return (
     <>
-      <SEOHead title="Cartão de Benefícios Corporativo | AloClinica" description="Ofereça saúde e bem-estar aos seus funcionários com o Cartão de Benefícios AloClinica. Telemedicina 24h, clube de vantagens e até 30% de desconto." />
+      <SEOHead title="Cartão de Benefícios & Telelaudo para Empresas | AloClinica" description="Cartão de benefícios corporativo com telemedicina 24h e serviço de telelaudo para clínicas. Saúde para colaboradores e laudos médicos a distância." />
       <div className="min-h-screen bg-background">
         <Header />
 
@@ -79,10 +79,10 @@ const B2BLanding = () => {
                 <CreditCard className="w-3 h-3 mr-1" /> Para Empresas
               </Badge>
               <h1 className="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight leading-tight text-left">
-                Cartão de Benefícios<br /><span className="text-white/80">para seus Funcionários</span>
+                Soluções em Saúde<br /><span className="text-white/80">para sua Empresa</span>
               </h1>
               <p className="text-sm text-white/70 max-w-lg mb-6 leading-relaxed text-left">
-                Cuide da saúde da sua equipe com telemedicina 24h, clube de vantagens e descontos exclusivos.
+                Cartão de benefícios para colaboradores e serviço de telelaudo para clínicas — tudo em uma única plataforma.
               </p>
               <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
                 Solicitar Proposta <ArrowRight className="w-4 h-4 ml-2" />
