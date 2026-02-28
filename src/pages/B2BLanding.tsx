@@ -6,9 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Building2, Monitor, FileText, Stethoscope, Phone, CheckCircle2, ArrowRight, Shield, Users, Zap, BarChart2, CreditCard } from "lucide-react";
+import { CreditCard, CheckCircle2, ArrowRight, Shield, Users, Heart, Stethoscope, Clock, Star, Building2, Phone } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,7 +15,6 @@ import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import { z } from "zod";
 import { lazy, Suspense } from "react";
-import pingoReading from "@/assets/mascot-reading.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
@@ -30,41 +28,29 @@ const leadSchema = z.object({
   message: z.string().max(2000).optional(),
 });
 
-const services = [
-  { id: "telelaudo", label: "Telelaudo", icon: <FileText className="w-5 h-5" />, desc: "Laudos a distância" },
-  { id: "teleconsulta", label: "Teleconsulta", icon: <Monitor className="w-5 h-5" />, desc: "Vídeo consultas" },
-  { id: "plantao24h", label: "Plantão 24h", icon: <Phone className="w-5 h-5" />, desc: "SLA 15min" },
-  { id: "cartao", label: "Cartão Corporativo", icon: <CreditCard className="w-5 h-5" />, desc: "Benefícios para funcionários" },
-];
-
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } } };
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.08 } } };
+const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 
 const B2BLanding = () => {
-  const [form, setForm] = useState({ company_name: "", contact_name: "", email: "", phone: "", cnpj: "", company_type: "clinic", message: "" });
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [form, setForm] = useState({ company_name: "", contact_name: "", email: "", phone: "", cnpj: "", company_type: "company", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-
-  const toggleService = (id: string) => {
-    setSelectedServices(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const result = leadSchema.safeParse(form);
     if (!result.success) { toast.error(result.error.errors[0].message); return; }
     setSubmitting(true);
-    const { error } = await supabase.from("b2b_leads").insert({ ...form, services_interested: selectedServices });
+    const { error } = await supabase.from("b2b_leads").insert({ ...form, services_interested: ["cartao_corporativo"] });
     if (error) { toast.error("Erro ao enviar: " + error.message); setSubmitting(false); return; }
-    await supabase.functions.invoke("b2b-lead-notification", { body: { ...form, services_interested: selectedServices } }).catch(() => {});
+    await supabase.functions.invoke("b2b-lead-notification", { body: { ...form, services_interested: ["cartao_corporativo"] } }).catch(() => {});
     setSubmitted(true);
     setSubmitting(false);
   };
 
   return (
     <>
-      <SEOHead title="Telemedicina para Empresas | AloClinica" description="Soluções de teleconsulta, telelaudo e plantão 24h para clínicas e hospitais." />
+      <SEOHead title="Cartão de Benefícios Corporativo | AloClinica" description="Ofereça saúde e bem-estar aos seus funcionários com o Cartão de Benefícios AloClinica. Telemedicina 24h, clube de vantagens e até 30% de desconto." />
       <div className="min-h-screen bg-background">
         <Header />
 
@@ -75,22 +61,24 @@ const B2BLanding = () => {
           <div className="absolute -bottom-16 -left-16 w-60 h-60 rounded-full bg-white/5 blur-3xl" />
           <div className="container mx-auto px-4 text-center relative">
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">🏢 Para Empresas</Badge>
+              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
+                <CreditCard className="w-4 h-4 mr-2" /> Para Empresas
+              </Badge>
               <h1 className="text-4xl md:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
-                Telemedicina para sua<br /><span className="text-white/90">Clínica ou Hospital</span>
+                Cartão de Benefícios<br /><span className="text-white/90">para seus Funcionários</span>
               </h1>
               <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Teleconsulta, telelaudo e pronto-atendimento digital. Integre nossa plataforma ao seu fluxo de trabalho.
+                Cuide da saúde da sua equipe com telemedicina 24h, clube de vantagens e descontos exclusivos. Um benefício que valoriza e retém talentos.
               </p>
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
-                Solicitar Orçamento <ArrowRight className="w-5 h-5 ml-2" />
+                Solicitar Proposta <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
                 {[
-                  { icon: <Shield className="w-4 h-4" />, label: "CFM Regulado" },
-                  { icon: <Users className="w-4 h-4" />, label: "500+ Clínicas" },
-                  { icon: <Zap className="w-4 h-4" />, label: "SLA 15min" },
-                  { icon: <BarChart2 className="w-4 h-4" />, label: "99.9% Uptime" },
+                  { icon: <Heart className="w-4 h-4" />, label: "Telemedicina 24h" },
+                  { icon: <Users className="w-4 h-4" />, label: "Planos Família" },
+                  { icon: <Shield className="w-4 h-4" />, label: "30% de Desconto" },
+                  { icon: <Star className="w-4 h-4" />, label: "Clube de Vantagens" },
                 ].map((item, i) => (
                   <span key={i} className="flex items-center gap-2 text-white/60 text-sm font-medium">{item.icon} {item.label}</span>
                 ))}
@@ -99,20 +87,20 @@ const B2BLanding = () => {
           </div>
         </section>
 
-        {/* Services */}
+        {/* Benefits */}
         <section className="py-20">
           <div className="container mx-auto px-4">
             <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
-              <motion.div variants={fadeUp} className="text-center mb-12 relative inline-block mx-auto w-full">
-                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Nossos Serviços B2B</h2>
-                <p className="text-muted-foreground mt-2 max-w-lg mx-auto">Soluções completas de telemedicina para sua operação</p>
+              <motion.div variants={fadeUp} className="text-center mb-12">
+                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Por que oferecer o Cartão AloClinica?</h2>
+                <p className="text-muted-foreground mt-2 max-w-lg mx-auto">Benefícios reais para seus colaboradores e sua empresa</p>
               </motion.div>
-              <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5 max-w-5xl mx-auto">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
                 {[
-                  { icon: <Stethoscope className="w-7 h-7 text-white" />, title: "Teleconsulta", desc: "Consultas por videochamada com receita digital", gradient: "from-primary to-primary/70" },
-                  { icon: <FileText className="w-7 h-7 text-white" />, title: "Telelaudo", desc: "Laudos a distância com assinatura digital", gradient: "from-warning to-warning/70" },
-                  { icon: <Phone className="w-7 h-7 text-white" />, title: "Plantão 24h", desc: "Pronto-atendimento digital SLA 15 min", gradient: "from-destructive to-destructive/70" },
-                  { icon: <CreditCard className="w-7 h-7 text-white" />, title: "Cartão Corporativo", desc: "Benefícios de saúde para seus funcionários com 30% de desconto", gradient: "from-secondary to-secondary/70" },
+                  { icon: <Stethoscope className="w-7 h-7 text-white" />, title: "Telemedicina 24h", desc: "Consultas médicas por vídeo a qualquer hora, 30+ especialidades", gradient: "from-primary to-primary/70" },
+                  { icon: <CreditCard className="w-7 h-7 text-white" />, title: "30% de Desconto", desc: "Economia em todas as consultas e serviços para o titular e dependentes", gradient: "from-secondary to-secondary/70" },
+                  { icon: <Star className="w-7 h-7 text-white" />, title: "Clube de Vantagens", desc: "Descontos em farmácias, academias e serviços parceiros", gradient: "from-warning to-warning/70" },
+                  { icon: <Heart className="w-7 h-7 text-white" />, title: "Assistência Funeral", desc: "Cobertura nacional incluída nos planos Pro e Diamante", gradient: "from-destructive to-destructive/70" },
                 ].map((s, i) => (
                   <motion.div key={i} variants={fadeUp}>
                     <Card className="h-full border-border/50 hover:shadow-xl hover:border-border hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
@@ -129,20 +117,84 @@ const B2BLanding = () => {
           </div>
         </section>
 
+        {/* Plans */}
+        <section className="py-20 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
+              <motion.div variants={fadeUp} className="text-center mb-12">
+                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Planos Corporativos</h2>
+                <p className="text-muted-foreground mt-2 max-w-lg mx-auto">Valores especiais para empresas — quanto mais cartões, maior o desconto</p>
+              </motion.div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
+                {[
+                  { name: "Prata Familiar", price: "49,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Até 4 dependentes"], highlight: false },
+                  { name: "Individual Pro", price: "39,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Assistência Funeral Nacional"], highlight: false },
+                  { name: "Ouro Familiar", price: "79,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Até 6 dependentes", "Prioridade no atendimento"], highlight: true },
+                  { name: "Diamante Familiar", price: "159,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Assistência Funeral Nacional", "Dependentes ilimitados", "Gestor dedicado"], highlight: false },
+                ].map((plan, i) => (
+                  <motion.div key={i} variants={fadeUp}>
+                    <Card className={`h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${plan.highlight ? "border-primary shadow-lg ring-2 ring-primary/20" : "border-border/50"}`}>
+                      <CardContent className="p-6">
+                        {plan.highlight && <Badge className="mb-3 bg-primary/10 text-primary border-primary/20 text-xs">Mais Popular</Badge>}
+                        <h3 className="font-bold text-foreground text-lg mb-1">{plan.name}</h3>
+                        <div className="mb-4">
+                          <span className="text-3xl font-black text-foreground">R$ {plan.price}</span>
+                          <span className="text-sm text-muted-foreground">/mês</span>
+                        </div>
+                        <ul className="space-y-2.5">
+                          {plan.features.map((f, j) => (
+                            <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
+                              <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                              {f}
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+              <motion.p variants={fadeUp} className="text-center text-sm text-muted-foreground mt-8">
+                * Valores por colaborador. Condições especiais para contratações acima de 50 cartões.
+              </motion.p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Advantages for company */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
+              <motion.div variants={fadeUp} className="text-center mb-12">
+                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Vantagens para sua Empresa</h2>
+              </motion.div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                {[
+                  { icon: <Users className="w-6 h-6" />, title: "Retenção de Talentos", desc: "Benefício diferenciado que valoriza seus colaboradores e reduz turnover" },
+                  { icon: <Clock className="w-6 h-6" />, title: "Menos Absenteísmo", desc: "Consultas online reduzem faltas por idas ao médico durante expediente" },
+                  { icon: <Building2 className="w-6 h-6" />, title: "Sem Burocracia", desc: "Implantação rápida, sem carência e sem coparticipação" },
+                  { icon: <Phone className="w-6 h-6" />, title: "Suporte Dedicado", desc: "Gestor de conta exclusivo para RH e acompanhamento de utilização" },
+                  { icon: <Shield className="w-6 h-6" />, title: "Custo Acessível", desc: "Muito mais barato que plano de saúde tradicional, sem reajuste por sinistralidade" },
+                  { icon: <Heart className="w-6 h-6" />, title: "Bem-estar Integral", desc: "Saúde física e mental com acesso a diversas especialidades" },
+                ].map((item, i) => (
+                  <motion.div key={i} variants={fadeUp} className="flex items-start gap-4 p-5 rounded-2xl border border-border/50 hover:border-border hover:shadow-md transition-all">
+                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-primary">{item.icon}</div>
+                    <div>
+                      <h3 className="font-bold text-foreground mb-1">{item.title}</h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Form */}
-        <section id="form" className="py-20 bg-muted/30 relative">
-          <motion.img
-            src={pingoReading}
-            alt="Pingo mascote"
-            className="absolute right-4 top-8 w-16 h-16 object-contain drop-shadow-lg hidden lg:block"
-            initial={{ opacity: 0, x: 20 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, type: "spring" }}
-          />
+        <section id="form" className="py-20 bg-muted/30">
           <div className="container mx-auto px-4 max-w-2xl">
-            <h2 className="text-3xl font-black text-foreground text-center mb-3 tracking-tight">Solicite um Orçamento</h2>
-            <p className="text-muted-foreground text-center mb-10">Entraremos em contato em até 24h úteis</p>
+            <h2 className="text-3xl font-black text-foreground text-center mb-3 tracking-tight">Solicite uma Proposta</h2>
+            <p className="text-muted-foreground text-center mb-10">Preencha o formulário e nossa equipe comercial entrará em contato em até 24h</p>
 
             {submitted ? (
               <Card className="border-success/30 shadow-xl">
@@ -150,8 +202,8 @@ const B2BLanding = () => {
                   <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-success to-success/70 flex items-center justify-center mx-auto mb-5 shadow-lg">
                     <CheckCircle2 className="w-10 h-10 text-white" />
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-foreground">Orçamento solicitado!</h3>
-                  <p className="text-muted-foreground">Nossa equipe entrará em contato em breve.</p>
+                  <h3 className="text-xl font-bold mb-2 text-foreground">Proposta solicitada!</h3>
+                  <p className="text-muted-foreground">Nossa equipe comercial entrará em contato em breve.</p>
                 </CardContent>
               </Card>
             ) : (
@@ -163,42 +215,27 @@ const B2BLanding = () => {
                       <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">CNPJ</Label><Input value={form.cnpj} onChange={e => setForm(f => ({ ...f, cnpj: e.target.value }))} placeholder="00.000.000/0001-00" className="mt-1.5 h-11 rounded-xl" /></div>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
-                      <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Contato *</Label><Input required value={form.contact_name} onChange={e => setForm(f => ({ ...f, contact_name: e.target.value }))} className="mt-1.5 h-11 rounded-xl" /></div>
+                      <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nome do Contato *</Label><Input required value={form.contact_name} onChange={e => setForm(f => ({ ...f, contact_name: e.target.value }))} className="mt-1.5 h-11 rounded-xl" /></div>
                       <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email *</Label><Input type="email" required value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} className="mt-1.5 h-11 rounded-xl" /></div>
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Telefone</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="mt-1.5 h-11 rounded-xl" /></div>
                       <div>
-                        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tipo *</Label>
+                        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nº de Funcionários *</Label>
                         <Select value={form.company_type} onValueChange={v => setForm(f => ({ ...f, company_type: v }))}>
                           <SelectTrigger className="mt-1.5 h-11 rounded-xl"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="clinic">Clínica</SelectItem>
-                            <SelectItem value="hospital">Hospital</SelectItem>
-                            <SelectItem value="health_plan">Plano de Saúde</SelectItem>
-                            <SelectItem value="other">Outro</SelectItem>
+                            <SelectItem value="1-50">1 a 50</SelectItem>
+                            <SelectItem value="51-200">51 a 200</SelectItem>
+                            <SelectItem value="201-500">201 a 500</SelectItem>
+                            <SelectItem value="500+">Mais de 500</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                     </div>
-                    <div>
-                      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Serviços de Interesse</Label>
-                      <div className="grid grid-cols-2 gap-2.5 mt-2">
-                        {services.map(s => (
-                          <div key={s.id} onClick={() => toggleService(s.id)}
-                            className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all ${selectedServices.includes(s.id) ? "border-primary bg-primary/5 shadow-sm" : "border-border/50 hover:border-border"}`}>
-                            <Checkbox checked={selectedServices.includes(s.id)} className="shrink-0" />
-                            <div className="min-w-0">
-                              <span className="text-sm font-semibold text-foreground block">{s.label}</span>
-                              <span className="text-[10px] text-muted-foreground">{s.desc}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                    <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mensagem</Label><Textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Conte sobre as necessidades..." rows={3} className="mt-1.5 rounded-xl" /></div>
+                    <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mensagem</Label><Textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Conte sobre as necessidades da sua empresa..." rows={3} className="mt-1.5 rounded-xl" /></div>
                     <Button type="submit" className="w-full h-13 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground font-bold text-base shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow" disabled={submitting}>
-                      {submitting ? "Enviando..." : "Enviar Solicitação"}
+                      {submitting ? "Enviando..." : "Solicitar Proposta Comercial"}
                     </Button>
                   </form>
                 </CardContent>
