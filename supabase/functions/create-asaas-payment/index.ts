@@ -6,7 +6,10 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const PAYMENT_TIMEOUT = 30000;
+const DOCTOR_COMMISSION_PERCENT = 50; // 50% for doctor, 50% for platform
 
 async function asaasFetch(url: string, options: RequestInit, attempt = 1): Promise<Response> {
   try {
@@ -39,13 +42,6 @@ async function safeJson(res: Response): Promise<any> {
   return res.json();
 }
 
-/**
- * Resolve Asaas base URL based on API key prefix.
- * Production keys start with "$aact_", sandbox keys with "$aact_" too but
- * the sandbox URL changed to api-sandbox.asaas.com per official docs.
- * We use a simple heuristic: if key contains "sandbox" treat as sandbox,
- * otherwise production. Users can also set ASAAS_ENVIRONMENT secret.
- */
 function getBaseUrl(apiKey: string): string {
   const env = Deno.env.get("ASAAS_ENVIRONMENT"); // "production" or "sandbox"
   if (env === "production") return "https://api.asaas.com/v3";
@@ -73,6 +69,11 @@ serve(async (req) => {
 
     const baseUrl = getBaseUrl(ASAAS_API_KEY);
 
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
     const {
       customerName,
       customerCpf,
@@ -88,9 +89,8 @@ serve(async (req) => {
       description,
       appointmentId,
       planId,
-      // Credit card token (from tokenize-card endpoint) — PCI compliant
+      doctorProfileId, // NEW: for split
       creditCardToken,
-      // Legacy credit card fields (kept for backward compatibility but prefer token)
       cardHolderName,
       cardNumber,
       cardExpiryMonth,
@@ -103,18 +103,36 @@ serve(async (req) => {
       cardHolderAddressNumber,
       cardHolderAddress,
       cardHolderProvince,
-      // Subscription fields
       cycle,
       nextDueDate,
       maxPayments,
       endDate,
-      // Installment fields (parcelamento)
       installmentCount,
       installmentValue,
       totalValue,
-      // Notification
       notificationDisabled,
     } = await req.json();
+
+    // ─── Build split array if doctor has an Asaas wallet ───
+    let splitRules: any[] | undefined;
+    if (doctorProfileId) {
+      const { data: walletSetting } = await supabase
+        .from("app_settings")
+        .select("value")
+        .eq("key", `asaas_wallet_${doctorProfileId}`)
+        .maybeSingle();
+
+      if (walletSetting?.value) {
+        const doctorValue = Number((value * (DOCTOR_COMMISSION_PERCENT / 100)).toFixed(2));
+        splitRules = [{
+          walletId: walletSetting.value,
+          fixedValue: doctorValue,
+        }];
+        console.log(`[Split] Doctor ${doctorProfileId} → wallet ${walletSetting.value}, commission: R$${doctorValue} (${DOCTOR_COMMISSION_PERCENT}%)`);
+      } else {
+        console.warn(`[Split] Doctor ${doctorProfileId} has no Asaas wallet. Payment without split.`);
+      }
+    }
 
     if (!customerName || !customerCpf || !billingType || !value) {
       return new Response(
@@ -195,6 +213,7 @@ serve(async (req) => {
       if (planId) subBody.externalReference = planId;
       if (maxPayments) subBody.maxPayments = maxPayments;
       if (endDate) subBody.endDate = endDate;
+      if (splitRules?.length) subBody.split = splitRules;
 
       // Credit card: prefer token (PCI compliant), fallback to inline
       if (billingType === "CREDIT_CARD") {
@@ -258,6 +277,7 @@ serve(async (req) => {
       description: description || "Consulta AloClínica",
     };
     if (appointmentId) paymentBody.externalReference = appointmentId;
+    if (splitRules?.length) paymentBody.split = splitRules;
 
     // Per docs: installment fields for parcelamento (2+ parcelas only)
     if (installmentCount && installmentCount >= 2) {
