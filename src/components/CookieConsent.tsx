@@ -1,4 +1,4 @@
-import { useState, useEffect, forwardRef } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Cookie, X } from "lucide-react";
@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 const COOKIE_KEY = "aloclinica_cookie_consent";
 
-const CookieConsent = forwardRef<HTMLDivElement>((_, _ref) => {
+const CookieConsent = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -81,7 +81,6 @@ const CookieConsent = forwardRef<HTMLDivElement>((_, _ref) => {
       )}
     </AnimatePresence>
   );
-});
+};
 
-CookieConsent.displayName = "CookieConsent";
 export default CookieConsent;
