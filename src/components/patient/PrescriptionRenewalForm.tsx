@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -9,11 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, Clock, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Upload, FileText, Clock, CheckCircle2, XCircle, AlertCircle, QrCode, CreditCard, FileBarChart, Lock, Copy, Shield, Check } from "lucide-react";
 import { toast } from "sonner";
-import { useEffect } from "react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { motion, AnimatePresence } from "framer-motion";
+
+type PaymentMethod = "pix" | "card" | "boleto";
+const RENEWAL_PRICE = 80;
 
 const PrescriptionRenewalForm = () => {
   const { user } = useAuth();
@@ -27,6 +30,20 @@ const PrescriptionRenewalForm = () => {
   const [sideEffects, setSideEffects] = useState("");
   const [notes, setNotes] = useState("");
   const [myRenewals, setMyRenewals] = useState<any[]>([]);
+
+  // Payment state
+  const [showPayment, setShowPayment] = useState(false);
+  const [renewalId, setRenewalId] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
+  const [processing, setProcessing] = useState(false);
+  const [pixQrCode, setPixQrCode] = useState<string | null>(null);
+  const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
+  const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
+  const [pixCopied, setPixCopied] = useState(false);
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
 
   useEffect(() => { if (user) fetchRenewals(); }, [user]);
 
@@ -43,27 +60,17 @@ const PrescriptionRenewalForm = () => {
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Arquivo muito grande (máx 10MB)");
-      return;
-    }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande (máx 10MB)"); return; }
     setUploading(true);
     const filePath = `${user.id}/renewal-${Date.now()}-${file.name}`;
     const { error } = await supabase.storage.from("patient-documents").upload(filePath, file);
-    if (error) {
-      toast.error("Erro no upload: " + error.message);
-    } else {
-      setPrescriptionUrl(filePath);
-      toast.success("Receita enviada!");
-    }
+    if (error) { toast.error("Erro no upload: " + error.message); }
+    else { setPrescriptionUrl(filePath); toast.success("Receita enviada!"); }
     setUploading(false);
   };
 
   const handleSubmit = async () => {
-    if (!user || !prescriptionUrl) {
-      toast.error("Envie a receita vencida primeiro");
-      return;
-    }
+    if (!user || !prescriptionUrl) { toast.error("Envie a receita vencida primeiro"); return; }
     setSubmitting(true);
     const questionnaire = {
       allergies: allergies.trim(),
@@ -73,27 +80,107 @@ const PrescriptionRenewalForm = () => {
       additional_notes: notes.trim(),
     };
 
-    const { error } = await supabase.from("prescription_renewals").insert({
+    const { data, error } = await supabase.from("prescription_renewals").insert({
       patient_id: user.id,
       original_prescription_url: prescriptionUrl,
       health_questionnaire: questionnaire,
-      status: "pending",
-    });
+      status: "pending_payment",
+    }).select("id").single();
 
-    if (error) {
-      toast.error("Erro: " + error.message);
-    } else {
-      toast.success("Solicitação enviada! Um médico analisará em breve.");
-      setPrescriptionUrl("");
-      setAllergies(""); setConditions(""); setMedications(""); setSideEffects(""); setNotes("");
-      fetchRenewals();
+    if (error) { toast.error("Erro: " + error.message); }
+    else {
+      setRenewalId(data.id);
+      setShowPayment(true);
+      toast.info("Agora finalize o pagamento para enviar ao médico.");
     }
     setSubmitting(false);
   };
 
+  const handlePayment = async () => {
+    if (!user || !renewalId) return;
+    if (paymentMethod === "card" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
+      toast.error("Preencha todos os campos do cartão"); return;
+    }
+    setProcessing(true);
+    try {
+      const { data: profile } = await supabase.from("profiles").select("first_name, last_name, cpf, phone").eq("user_id", user.id).single();
+      if (!profile?.cpf) { toast.error("CPF obrigatório"); setProcessing(false); return; }
+
+      const customerName = `${profile.first_name} ${profile.last_name}`.trim();
+      const billingTypeMap: Record<PaymentMethod, string> = { pix: "PIX", card: "CREDIT_CARD", boleto: "BOLETO" };
+
+      const payload: Record<string, any> = {
+        customerName,
+        customerCpf: profile.cpf,
+        customerEmail: user.email || "",
+        customerMobilePhone: profile.phone || "",
+        billingType: billingTypeMap[paymentMethod],
+        value: RENEWAL_PRICE,
+        description: `Renovação de Receita - AloClínica`,
+        appointmentId: `renewal_${renewalId}`,
+      };
+
+      if (paymentMethod === "card") {
+        const [expiryMonth, expiryYear] = cardExpiry.split("/");
+        const { data: tokenData, error: tokenError } = await supabase.functions.invoke("tokenize-card", {
+          body: {
+            customerName, customerCpf: profile.cpf, customerEmail: user.email, customerPhone: profile.phone,
+            cardHolderName: cardName, cardNumber: cardNumber.replace(/\s/g, ""),
+            cardExpiryMonth: expiryMonth, cardExpiryYear: `20${expiryYear}`, cardCcv: cardCvv,
+            cardHolderCpf: profile.cpf, cardHolderPhone: profile.phone, remoteIp: "0.0.0.0",
+          },
+        });
+        if (tokenError || !tokenData?.success) { toast.error("Erro no cartão", { description: tokenData?.error }); setProcessing(false); return; }
+        payload.creditCardToken = tokenData.creditCardToken;
+      }
+
+      const { data, error } = await supabase.functions.invoke("create-asaas-payment", { body: payload });
+      if (error || !data?.success) { toast.error("Erro no pagamento", { description: data?.error }); setProcessing(false); return; }
+
+      if (paymentMethod === "pix" && data.pixQrCode) {
+        setPixQrCode(data.pixQrCode);
+        setPixCopyPaste(data.pixCopyPaste || "");
+        setProcessing(false);
+        toast.success("PIX gerado! 🎉");
+        return;
+      }
+
+      if (paymentMethod === "boleto") {
+        setBoletoUrl(data.bankSlipUrl || data.invoiceUrl);
+        setProcessing(false);
+        toast.success("Boleto gerado!");
+        return;
+      }
+
+      // Card — instant
+      if (data.status === "CONFIRMED" || data.status === "RECEIVED") {
+        await supabase.from("prescription_renewals").update({ paid_at: new Date().toISOString(), status: "pending_review", payment_id: data.paymentId }).eq("id", renewalId);
+        toast.success("Pagamento confirmado! 🎉", { description: "Um médico analisará sua receita em breve." });
+        resetForm();
+        fetchRenewals();
+      }
+    } catch (err: any) {
+      toast.error("Erro", { description: err.message });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const resetForm = () => {
+    setShowPayment(false);
+    setRenewalId(null);
+    setPrescriptionUrl("");
+    setAllergies(""); setConditions(""); setMedications(""); setSideEffects(""); setNotes("");
+    setPixQrCode(null); setPixCopyPaste(null); setBoletoUrl(null);
+  };
+
+  const formatCardNum = (v: string) => v.replace(/\D/g, "").slice(0, 16).replace(/(\d{4})/g, "$1 ").trim();
+  const formatExp = (v: string) => { const c = v.replace(/\D/g, "").slice(0, 4); return c.length >= 3 ? `${c.slice(0, 2)}/${c.slice(2)}` : c; };
+
   const statusBadge = (status: string) => {
     switch (status) {
-      case "pending": return <Badge variant="outline"><Clock className="w-3 h-3 mr-1" />Pendente</Badge>;
+      case "pending_payment": return <Badge variant="outline"><Clock className="w-3 h-3 mr-1" />Aguardando pagamento</Badge>;
+      case "pending": case "pending_review": return <Badge variant="outline"><Clock className="w-3 h-3 mr-1" />Em análise</Badge>;
       case "in_review": return <Badge className="bg-amber-500"><AlertCircle className="w-3 h-3 mr-1" />Em análise</Badge>;
       case "approved": return <Badge className="bg-emerald-500"><CheckCircle2 className="w-3 h-3 mr-1" />Aprovada</Badge>;
       case "rejected": return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Rejeitada</Badge>;
@@ -107,52 +194,122 @@ const PrescriptionRenewalForm = () => {
         <h1 className="text-2xl font-bold text-foreground mb-1">💊 Renovar Receita</h1>
         <p className="text-muted-foreground text-sm mb-6">Renove sua receita sem precisar de videoconsulta</p>
 
-        <Card className="mb-6">
-          <CardContent className="p-6 space-y-4">
-            <div>
-              <Label className="text-sm font-medium">1. Envie a receita vencida</Label>
-              <div className="mt-2">
-                <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} />
-                <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                  <Upload className="w-4 h-4 mr-2" /> {uploading ? "Enviando..." : prescriptionUrl ? "✅ Receita enviada" : "Escolher arquivo"}
-                </Button>
-              </div>
-            </div>
-
-            <div>
-              <Label className="text-sm font-medium">2. Questionário de saúde</Label>
-              <div className="space-y-3 mt-2">
-                <div>
-                  <Label className="text-xs text-muted-foreground">Alergias conhecidas</Label>
-                  <Input value={allergies} onChange={e => setAllergies(e.target.value)} placeholder="Ex: Dipirona, Penicilina..." />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Condições crônicas</Label>
-                  <Input value={conditions} onChange={e => setConditions(e.target.value)} placeholder="Ex: Hipertensão, Diabetes..." />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Medicamentos atuais</Label>
-                  <Textarea value={medications} onChange={e => setMedications(e.target.value)} placeholder="Liste os medicamentos que toma atualmente" rows={2} />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Efeitos colaterais percebidos</Label>
-                  <Input value={sideEffects} onChange={e => setSideEffects(e.target.value)} placeholder="Algum efeito colateral?" />
-                </div>
-                <div>
-                  <Label className="text-xs text-muted-foreground">Observações adicionais</Label>
-                  <Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Informações extras para o médico" rows={2} />
+        {!showPayment ? (
+          <Card className="mb-6">
+            <CardContent className="p-6 space-y-4">
+              <div>
+                <Label className="text-sm font-medium">1. Envie a receita vencida</Label>
+                <div className="mt-2">
+                  <input ref={fileRef} type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden" onChange={handleUpload} />
+                  <Button variant="outline" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                    <Upload className="w-4 h-4 mr-2" /> {uploading ? "Enviando..." : prescriptionUrl ? "✅ Receita enviada" : "Escolher arquivo"}
+                  </Button>
                 </div>
               </div>
-            </div>
 
-            <Button onClick={handleSubmit} disabled={submitting || !prescriptionUrl} className="w-full">
-              {submitting ? "Enviando..." : "Enviar Solicitação — R$ 80,00"}
-            </Button>
-            <p className="text-xs text-muted-foreground text-center">Análise em até 3 dias úteis</p>
-          </CardContent>
-        </Card>
+              <div>
+                <Label className="text-sm font-medium">2. Questionário de saúde</Label>
+                <div className="space-y-3 mt-2">
+                  <div><Label className="text-xs text-muted-foreground">Alergias conhecidas</Label><Input value={allergies} onChange={e => setAllergies(e.target.value)} placeholder="Ex: Dipirona, Penicilina..." /></div>
+                  <div><Label className="text-xs text-muted-foreground">Condições crônicas</Label><Input value={conditions} onChange={e => setConditions(e.target.value)} placeholder="Ex: Hipertensão, Diabetes..." /></div>
+                  <div><Label className="text-xs text-muted-foreground">Medicamentos atuais</Label><Textarea value={medications} onChange={e => setMedications(e.target.value)} placeholder="Liste os medicamentos" rows={2} /></div>
+                  <div><Label className="text-xs text-muted-foreground">Efeitos colaterais</Label><Input value={sideEffects} onChange={e => setSideEffects(e.target.value)} placeholder="Algum efeito colateral?" /></div>
+                  <div><Label className="text-xs text-muted-foreground">Observações</Label><Textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Informações extras" rows={2} /></div>
+                </div>
+              </div>
 
-        {/* My renewals */}
+              <Button onClick={handleSubmit} disabled={submitting || !prescriptionUrl} className="w-full">
+                {submitting ? "Enviando..." : `Prosseguir para Pagamento — R$ ${RENEWAL_PRICE},00`}
+              </Button>
+              <p className="text-xs text-muted-foreground text-center">Análise em até 3 dias úteis após pagamento</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="mb-6">
+            <CardContent className="p-6">
+              <div className="text-center mb-6">
+                <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-2" />
+                <h2 className="text-lg font-bold text-foreground">Pagamento — Renovação de Receita</h2>
+                <p className="text-muted-foreground text-sm">R$ {RENEWAL_PRICE},00 • Pagamento via Asaas</p>
+              </div>
+
+              <div className="grid grid-cols-3 gap-2 mb-5">
+                {([
+                  { id: "pix" as PaymentMethod, label: "PIX", icon: QrCode, badge: "Instantâneo" },
+                  { id: "card" as PaymentMethod, label: "Cartão", icon: CreditCard, badge: null },
+                  { id: "boleto" as PaymentMethod, label: "Boleto", icon: FileBarChart, badge: null },
+                ]).map(method => (
+                  <motion.button key={method.id} whileTap={{ scale: 0.97 }} onClick={() => setPaymentMethod(method.id)}
+                    className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${
+                      paymentMethod === method.id ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/30"
+                    }`}>
+                    <method.icon className={`w-5 h-5 ${paymentMethod === method.id ? "text-primary" : "text-muted-foreground"}`} />
+                    <span className={`text-xs font-semibold ${paymentMethod === method.id ? "text-primary" : "text-foreground"}`}>{method.label}</span>
+                    {method.badge && <Badge className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0 bg-secondary text-secondary-foreground border-0">{method.badge}</Badge>}
+                  </motion.button>
+                ))}
+              </div>
+
+              <AnimatePresence mode="wait">
+                {paymentMethod === "pix" && (
+                  <motion.div key="pix" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
+                    {pixQrCode ? (
+                      <>
+                        <div className="w-48 h-48 mx-auto rounded-2xl bg-card border-2 border-border p-2 mb-4">
+                          <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-full h-full object-contain rounded-xl" />
+                        </div>
+                        <Button variant="outline" className="w-full mb-4 text-xs" onClick={() => { navigator.clipboard.writeText(pixCopyPaste || ""); setPixCopied(true); toast.success("Copiado!"); setTimeout(() => setPixCopied(false), 3000); }}>
+                          {pixCopied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-secondary" /> Copiado!</> : <><Copy className="w-4 h-4 mr-2" /> Copiar código PIX</>}
+                        </Button>
+                        <p className="text-xs text-muted-foreground">Após o pagamento, sua solicitação será enviada automaticamente.</p>
+                      </>
+                    ) : (
+                      <>
+                        <QrCode className="w-12 h-12 mx-auto text-primary/60 mb-4" />
+                        <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>
+                          {processing ? "Gerando PIX..." : `Gerar PIX • R$ ${RENEWAL_PRICE},00`}
+                        </Button>
+                      </>
+                    )}
+                  </motion.div>
+                )}
+
+                {paymentMethod === "card" && (
+                  <motion.div key="card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+                    <div><Label className="text-xs text-muted-foreground">Nome no cartão</Label><Input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Nome no cartão" className="mt-1" /></div>
+                    <div><Label className="text-xs text-muted-foreground">Número</Label><Input value={cardNumber} onChange={e => setCardNumber(formatCardNum(e.target.value))} placeholder="0000 0000 0000 0000" className="mt-1 font-mono" maxLength={19} /></div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label className="text-xs text-muted-foreground">Validade</Label><Input value={cardExpiry} onChange={e => setCardExpiry(formatExp(e.target.value))} placeholder="MM/AA" className="mt-1 font-mono" maxLength={5} /></div>
+                      <div><Label className="text-xs text-muted-foreground">CVV</Label><Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="•••" className="mt-1 font-mono" maxLength={4} type="password" /></div>
+                    </div>
+                    <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>
+                      {processing ? "Processando..." : <><Lock className="w-4 h-4 mr-2" /> Pagar R$ {RENEWAL_PRICE},00</>}
+                    </Button>
+                  </motion.div>
+                )}
+
+                {paymentMethod === "boleto" && (
+                  <motion.div key="boleto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
+                    {boletoUrl ? (
+                      <><CheckCircle2 className="w-12 h-12 mx-auto text-secondary mb-4" /><a href={boletoUrl} target="_blank" rel="noopener noreferrer"><Button className="w-full">📄 Abrir Boleto</Button></a></>
+                    ) : (
+                      <><FileBarChart className="w-12 h-12 mx-auto text-primary/60 mb-4" /><Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>
+                        {processing ? "Gerando boleto..." : `Gerar Boleto • R$ ${RENEWAL_PRICE},00`}
+                      </Button></>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="flex items-center justify-center gap-4 mt-4 text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs"><Lock className="w-3 h-3" /> SSL 256-bit</div>
+                <div className="flex items-center gap-1 text-xs"><Shield className="w-3 h-3" /> PCI DSS</div>
+                <div className="flex items-center gap-1 text-xs"><Check className="w-3 h-3" /> LGPD</div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {myRenewals.length > 0 && (
           <Card>
             <CardContent className="p-6">
