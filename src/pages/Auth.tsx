@@ -13,6 +13,8 @@ import { registerConsent } from "@/lib/consent";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import { notifyWelcomePatient, notifyWelcomeDoctor } from "@/lib/notifications";
+import { translateAuthError } from "@/lib/authErrors";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 type UserType = "patient" | "doctor" | "clinic";
 type AuthMode = "login" | "register" | "select-type";
@@ -42,6 +44,7 @@ const Auth = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { redirectAfterLogin } = useAuthRedirect();
 
   const validateEmail = (val: string) => {
     if (!val) return "Email é obrigatório";
@@ -78,36 +81,19 @@ const Auth = () => {
     if (eErr || pErr) return;
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
 
     if (error) {
+      const translated = translateAuthError(error.message);
       if (error.message.includes("Invalid login credentials")) {
-        setPasswordError("Email ou senha incorretos");
+        setPasswordError(translated);
       } else {
-        toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
+        toast({ title: "Erro ao entrar", description: translated, variant: "destructive" });
       }
-    } else {
-      // Check if user is patient without active subscription
-      const { data: { user: loggedUser } } = await supabase.auth.getUser();
-      if (loggedUser) {
-        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", loggedUser.id);
-        const isPatient = roles?.some(r => r.role === "patient");
-        const isOtherRole = roles?.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "affiliate"].includes(r.role));
-        
-        if (isPatient && !isOtherRole) {
-          // Check for active subscription or discount card
-          const { data: subs } = await supabase.from("subscriptions").select("id").eq("user_id", loggedUser.id).eq("status", "active").limit(1);
-          const { data: cards } = await supabase.from("discount_cards").select("id").eq("user_id", loggedUser.id).eq("status", "active").limit(1);
-          
-          if ((!subs || subs.length === 0) && (!cards || cards.length === 0)) {
-            await supabase.auth.signOut();
-            navigate("/paciente?reason=no-subscription");
-            return;
-          }
-        }
-      }
-      navigate("/dashboard");
+    } else if (data.user) {
+      // Use centralized redirect logic — no signOut on missing subscription
+      await redirectAfterLogin(data.user.id);
     }
   };
 
@@ -135,7 +121,7 @@ const Auth = () => {
 
     if (error) {
       setLoading(false);
-      toast({ title: "Erro no cadastro", description: error.message, variant: "destructive" });
+      toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" });
       return;
     }
 

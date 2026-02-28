@@ -12,6 +12,8 @@ import { registerConsent } from "@/lib/consent";
 import { formatMask, unmask } from "@/hooks/use-mask";
 import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
+import { translateAuthError } from "@/lib/authErrors";
+import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 const PLAN_MAP: Record<string, { icon: any; color: string; highlighted: boolean }> = {
   "Consulta Avulsa": { icon: Clock, color: "from-primary/80 to-primary", highlighted: false },
@@ -49,10 +51,13 @@ const AuthPaciente = () => {
   const initialPlan = searchParams.get("plan");
   const reason = searchParams.get("reason");
 
-  const [step, setStep] = useState<Step>("register");
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(initialPlan || "avulsa");
+  // ALL state declarations at the top — fixes Problem 2 (mode used before declared)
+  const [mode, setMode] = useState<"register" | "login">("login");
+  const [step, setStep] = useState<Step>(initialPlan ? "register" : "select");
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(initialPlan || null);
 
   const [plans, setPlans] = useState<PlanItem[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -67,6 +72,7 @@ const AuthPaciente = () => {
   const [attempts, setAttempts] = useState(0);
   const lockoutUntil = useRef<number>(0);
   const [cpfVerified, setCpfVerified] = useState(false);
+  const [isNewCustomer, setIsNewCustomer] = useState(false);
   const [verifyCpf, setVerifyCpf] = useState("");
   const [verifyingCpf, setVerifyingCpf] = useState(false);
 
@@ -79,38 +85,41 @@ const AuthPaciente = () => {
 
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { redirectAfterLogin } = useAuthRedirect();
 
   const currentPlan = plans.find(p => p.id === selectedPlanId);
 
   // Fetch plans from database
   useEffect(() => {
     const fetchPlans = async () => {
-      const { data } = await supabase.from("plans").select("*").eq("is_active", true).order("price", { ascending: true });
-      if (data && data.length > 0) {
-        const mapped: PlanItem[] = data.map((p: any) => {
-          const meta = PLAN_MAP[p.name] ?? { icon: Clock, color: "from-primary/80 to-primary", highlighted: false };
-          const featureList = Array.isArray(p.features) ? p.features as string[] : [];
-          return {
-            id: p.id,
-            name: p.name,
-            price: p.price,
-            period: p.interval === "monthly" ? "por mês" : "por consulta",
-            description: p.description || "",
-            features: featureList.length > 0 ? featureList : [p.name],
-            highlighted: meta.highlighted,
-            icon: meta.icon,
-            color: meta.color,
-            interval: p.interval,
-          };
-        });
-        setPlans(mapped);
-      } else {
-        // Fallback hardcoded plans
-        setPlans([
-          { id: "fallback-avulsa", name: "Consulta Avulsa", price: 89, period: "por consulta", description: "Ideal para atendimento pontual.", features: ["1 consulta por videochamada", "Receita digital inclusa", "Chat pós-consulta (48h)"], highlighted: false, icon: Clock, color: "from-primary/80 to-primary", interval: "one_time" },
-          { id: "fallback-mensal", name: "Plano Mensal", price: 149, period: "por mês", description: "Acesso ilimitado para sua família.", features: ["Consultas ilimitadas", "Receitas digitais ilimitadas", "Chat ilimitado", "Prioridade no agendamento", "Até 4 dependentes"], highlighted: true, icon: Zap, color: "from-secondary to-primary", interval: "monthly" },
-        ]);
+      setPlansLoading(true);
+      const { data, error } = await supabase.from("plans").select("*").eq("is_active", true).order("price", { ascending: true });
+      if (error || !data || data.length === 0) {
+        toast({ title: "Erro ao carregar planos", description: "Não foi possível carregar os planos. Tente novamente.", variant: "destructive" });
+        setPlansLoading(false);
+        return;
       }
+      const mapped: PlanItem[] = data.map((p: any) => {
+        const meta = PLAN_MAP[p.name] ?? { icon: Clock, color: "from-primary/80 to-primary", highlighted: false };
+        const featureList = Array.isArray(p.features) ? p.features as string[] : [];
+        return {
+          id: p.id,
+          name: p.name,
+          price: p.price,
+          period: p.interval === "monthly" ? "por mês" : "por consulta",
+          description: p.description || "",
+          features: featureList.length > 0 ? featureList : [p.name],
+          highlighted: meta.highlighted,
+          icon: meta.icon,
+          color: meta.color,
+          interval: p.interval,
+        };
+      });
+      setPlans(mapped);
+      if (!selectedPlanId && mapped.length > 0) {
+        setSelectedPlanId(mapped[0].id);
+      }
+      setPlansLoading(false);
     };
     fetchPlans();
   }, []);
@@ -194,15 +203,19 @@ const AuthPaciente = () => {
     });
     if (error) {
       setLoading(false);
-      toast({ title: "Erro no cadastro", description: error.message, variant: "destructive" });
+      toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" });
       return;
     }
     if (data.user) {
       setRegisteredUserId(data.user.id);
-      await supabase.from("profiles").update({
+      // Use upsert to handle race condition with trigger
+      await supabase.from("profiles").upsert({
+        user_id: data.user.id,
         cpf: unmask(cpf),
         phone: unmask(phone),
-      }).eq("user_id", data.user.id);
+        first_name: firstName,
+        last_name: lastName,
+      }, { onConflict: "user_id" });
       await registerConsent(data.user.id);
       try {
         await supabase.functions.invoke("send-email", {
@@ -266,32 +279,21 @@ const AuthPaciente = () => {
   const createSubscriptionRecord = async (payData: any) => {
     if (!registeredUserId || !currentPlan) return;
     try {
-      // Use the real UUID plan_id from the database
       const planId = currentPlan.id;
-      // Validate it's a real UUID, not a fallback
-      if (planId.startsWith("fallback-")) {
-        // Lookup actual plan from DB by name
-        const { data: dbPlan } = await supabase.from("plans").select("id").eq("name", currentPlan.name).single();
-        if (!dbPlan) {
-          console.error("Plan not found in database:", currentPlan.name);
-          return;
-        }
-        await supabase.from("subscriptions").insert({
-          user_id: registeredUserId,
-          plan_id: dbPlan.id,
-          status: "active",
-          payment_method: paymentMethod.toLowerCase(),
-          notes: payData.paymentId || payData.subscriptionId || null,
-        });
-      } else {
-        await supabase.from("subscriptions").insert({
-          user_id: registeredUserId,
-          plan_id: planId,
-          status: "active",
-          payment_method: paymentMethod.toLowerCase(),
-          notes: payData.paymentId || payData.subscriptionId || null,
-        });
+      // Validate it's a real UUID — reject fallback IDs
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(planId)) {
+        console.error("Invalid plan ID, cannot create subscription:", planId);
+        toast({ title: "Erro interno", description: "ID de plano inválido. Entre em contato com o suporte.", variant: "destructive" });
+        return;
       }
+      await supabase.from("subscriptions").insert({
+        user_id: registeredUserId,
+        plan_id: planId,
+        status: "active",
+        payment_method: paymentMethod.toLowerCase(),
+        notes: payData.paymentId || payData.subscriptionId || null,
+      });
     } catch (e) {
       console.error("Error creating subscription:", e);
     }
@@ -314,7 +316,7 @@ const AuthPaciente = () => {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setLoading(false);
       const newAttempts = attempts + 1;
@@ -324,35 +326,16 @@ const AuthPaciente = () => {
         setAttempts(0);
         toast({ title: "Muitas tentativas", description: "Conta bloqueada por 30 segundos.", variant: "destructive" });
       } else {
-        toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
+        toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
       }
-    } else {
+    } else if (data.user) {
       setAttempts(0);
-      // Check if patient has active plan
-      const { data: { user: loggedUser } } = await supabase.auth.getUser();
-      if (loggedUser) {
-        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", loggedUser.id);
-        const isPatient = roles?.some(r => r.role === "patient");
-        const isOtherRole = roles?.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "affiliate"].includes(r.role));
-        
-        if (isPatient && !isOtherRole) {
-          const { data: subs } = await supabase.from("subscriptions").select("id").eq("user_id", loggedUser.id).eq("status", "active").limit(1);
-          const { data: cards } = await supabase.from("discount_cards").select("id").eq("user_id", loggedUser.id).eq("status", "active").limit(1);
-          
-          if ((!subs || subs.length === 0) && (!cards || cards.length === 0)) {
-            setLoading(false);
-            await supabase.auth.signOut();
-            navigate("/paciente?reason=no-subscription");
-            return;
-          }
-        }
-      }
       setLoading(false);
-      navigate("/dashboard");
+      // Use centralized redirect — no signOut on missing subscription
+      await redirectAfterLogin(data.user.id);
     }
   };
 
-  const [mode, setMode] = useState<"register" | "login">("login");
 
   const stepLabels = ["Escolher Plano", "Criar Conta", "Pagamento"];
   const currentStepIndex = step === "select" ? 0 : step === "register" ? 1 : 2;
@@ -392,8 +375,8 @@ const AuthPaciente = () => {
         </div>
       </div>
 
-      {/* Steps indicator - only show when registering */}
-      {mode === "register" && (
+      {/* Steps indicator - always visible during registration flow */}
+      {mode === "register" && step !== "success" && (
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-center gap-2 text-sm mb-8">
             {stepLabels.map((label, i) => {
@@ -517,7 +500,7 @@ const AuthPaciente = () => {
                     Já tem conta? <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
                   </p>
                   <p className="text-center text-sm text-muted-foreground">
-                    Ainda não tem o cartão? <Link to="/cartao-beneficios" className="text-primary font-semibold hover:underline">Adquira aqui</Link>
+                    Ainda não tem o cartão? <button type="button" onClick={() => { setIsNewCustomer(true); setCpfVerified(true); setStep("select"); }} className="text-primary font-semibold hover:underline">Quero assinar um plano</button>
                   </p>
                 </div>
               ) : mode === "register" ? (
