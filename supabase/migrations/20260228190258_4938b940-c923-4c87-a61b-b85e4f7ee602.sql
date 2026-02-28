@@ -1,0 +1,1 @@
+UPDATE profiles SET cpf = '24971563792', phone = '11999999999' WHERE user_id = 'a5c1ac9a-5368-4429-83a0-85e2b3d4a353' AND cpf IS NULL;
