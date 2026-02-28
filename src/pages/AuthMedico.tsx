@@ -1,5 +1,5 @@
-import { useState, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useRef, useMemo } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,7 +71,9 @@ const faqItems = [
 ];
 
 const AuthMedico = () => {
-  const [step, setStep] = useState<Step>("welcome");
+  const [searchParams] = useSearchParams();
+  const hasLoginAccess = useMemo(() => searchParams.get("acesso") === "entrar", [searchParams]);
+  const [step, setStep] = useState<Step>(hasLoginAccess ? "welcome" : "apply");
   const [inviteCode, setInviteCode] = useState("");
   const [validatedCodeId, setValidatedCodeId] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
@@ -276,18 +278,18 @@ const AuthMedico = () => {
                 <Stethoscope className="w-7 h-7 text-white" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">Portal do Médico</h2>
-              <p className="text-muted-foreground mt-1">Acesse sua conta ou cadastre-se</p>
+              <p className="text-muted-foreground mt-1">{hasLoginAccess ? "Acesse sua conta ou cadastre-se" : "Solicite seu cadastro na plataforma"}</p>
             </motion.div>
 
             <AnimatePresence mode="wait">
               <motion.div key={step} initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }} animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }} exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} className="bg-card border border-border rounded-2xl p-6 shadow-lg">
                 {/* Welcome */}
-                {step === "welcome" && (
+                {step === "welcome" && hasLoginAccess && (
                   <motion.div variants={stagger} initial="hidden" animate="visible" className="space-y-3">
                     {[
                       { icon: LogIn, label: "Entrar na minha conta", desc: "Acesse seu painel de atendimento", action: () => setStep("login"), variant: "primary" as const },
-                      { icon: Stethoscope, label: "Quero me cadastrar", desc: "Solicite acesso preenchendo seus dados", action: () => setStep("apply"), variant: "outline" as const },
                       { icon: KeyRound, label: "Já tenho código de acesso", desc: "Recebi o código por email", action: () => setStep("code"), variant: "outline" as const },
+                      { icon: Stethoscope, label: "Quero me cadastrar", desc: "Solicite acesso preenchendo seus dados", action: () => setStep("apply"), variant: "outline" as const },
                       { icon: MessageCircle, label: "Dúvidas? Fale pelo WhatsApp", desc: "Fale com nossa equipe", action: () => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma AloClinica.", "_blank"), variant: "ghost" as const },
                     ].map(({ icon: Icon, label, desc, action, variant }) => (
                       <motion.div key={label} variants={fadeUpForm}>
@@ -346,7 +348,7 @@ const AuthMedico = () => {
                     <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={submittingApplication}>
                       {submittingApplication ? <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2"><Sparkles className="w-4 h-4 animate-spin" /> Enviando...</motion.span> : "Enviar Solicitação"}
                     </Button>
-                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
+                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => hasLoginAccess ? setStep("welcome") : navigate("/")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
                   </form>
                 )}
 
@@ -361,10 +363,7 @@ const AuthMedico = () => {
                       Recebemos seus dados. Nossa equipe analisará sua solicitação e enviará o <strong>código de acesso por email</strong> em até 48 horas úteis.
                     </p>
                     <div className="pt-2 space-y-2">
-                      <Button variant="outline" className="w-full" onClick={() => setStep("code")}>
-                        <KeyRound className="w-4 h-4 mr-2" /> Já recebi o código
-                      </Button>
-                      <Button variant="ghost" className="w-full text-muted-foreground" onClick={() => setStep("welcome")}>← Voltar ao início</Button>
+                      <p className="text-xs text-muted-foreground">Quando aprovado, você receberá por email o link exclusivo e o código de acesso para criar sua conta.</p>
                     </div>
                   </motion.div>
                 )}
