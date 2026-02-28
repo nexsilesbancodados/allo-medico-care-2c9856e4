@@ -24,7 +24,7 @@ import mascotWave from "@/assets/mascot-wave.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
-type Step = "welcome" | "code" | "register" | "login" | "apply" | "applied";
+type Step = "welcome" | "code" | "register" | "login" | "quiz" | "apply" | "applied";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -73,7 +73,7 @@ const faqItems = [
 const AuthMedico = () => {
   const [searchParams] = useSearchParams();
   const hasLoginAccess = useMemo(() => searchParams.get("acesso") === "entrar", [searchParams]);
-  const [step, setStep] = useState<Step>(hasLoginAccess ? "welcome" : "apply");
+  const [step, setStep] = useState<Step>(hasLoginAccess ? "welcome" : "quiz");
   const [inviteCode, setInviteCode] = useState("");
   const [validatedCodeId, setValidatedCodeId] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
@@ -287,7 +287,7 @@ const AuthMedico = () => {
                 <Stethoscope className="w-7 h-7 text-white" />
               </div>
               <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">Portal do Médico</h2>
-              <p className="text-muted-foreground mt-1">{hasLoginAccess ? "Acesse sua conta ou cadastre-se" : "Solicite seu cadastro na plataforma"}</p>
+              <p className="text-muted-foreground mt-1">{hasLoginAccess ? "Acesse sua conta ou cadastre-se" : step === "quiz" ? "Conte-nos sobre sua atuação" : "Solicite seu cadastro na plataforma"}</p>
             </motion.div>
 
             <AnimatePresence mode="wait">
@@ -298,7 +298,7 @@ const AuthMedico = () => {
                     {[
                       { icon: LogIn, label: "Entrar na minha conta", desc: "Acesse seu painel de atendimento", action: () => setStep("login"), variant: "primary" as const },
                       { icon: KeyRound, label: "Já tenho código de acesso", desc: "Recebi o código por email", action: () => setStep("code"), variant: "outline" as const },
-                      { icon: Stethoscope, label: "Quero me cadastrar", desc: "Solicite acesso preenchendo seus dados", action: () => setStep("apply"), variant: "outline" as const },
+                      { icon: Stethoscope, label: "Quero me cadastrar", desc: "Solicite acesso preenchendo seus dados", action: () => setStep("quiz"), variant: "outline" as const },
                       { icon: MessageCircle, label: "Dúvidas? Fale pelo WhatsApp", desc: "Fale com nossa equipe", action: () => window.open("https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de me cadastrar na plataforma AloClinica.", "_blank"), variant: "ghost" as const },
                     ].map(({ icon: Icon, label, desc, action, variant }) => (
                       <motion.div key={label} variants={fadeUpForm}>
@@ -335,35 +335,23 @@ const AuthMedico = () => {
                   </form>
                 )}
 
-                {/* Apply - Pre-registration form */}
-                {step === "apply" && (
-                  <form onSubmit={handleSubmitApplication} className="space-y-4">
+                {/* Quiz - profiling step */}
+                {step === "quiz" && (
+                  <div className="space-y-4">
                     <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
-                      <div className="flex items-center gap-2 text-sm text-foreground mb-1"><Stethoscope className="w-4 h-4 text-primary" /><span className="font-medium">Solicitar cadastro</span></div>
-                      <p className="text-xs text-muted-foreground">Preencha seus dados. Nossa equipe analisará e enviará o código de acesso por email.</p>
+                      <div className="flex items-center gap-2 text-sm text-foreground mb-1"><Stethoscope className="w-4 h-4 text-primary" /><span className="font-medium">Sobre sua atuação</span></div>
+                      <p className="text-xs text-muted-foreground">Responda essas perguntas rápidas para prosseguir ao cadastro.</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1 h-11" /></div>
-                      <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1 h-11" /></div>
-                    </div>
-                    <div><Label>Email</Label><div className="relative mt-1"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required /></div></div>
-                    <div><Label>Telefone / WhatsApp</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" className="mt-1 h-11" /></div>
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1 h-11" /></div>
-                      <div><Label>UF</Label><Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1 h-11" maxLength={2} /></div>
-                    </div>
-                    <div><Label>Especialidade</Label><Input value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="Ex: Cardiologia" className="mt-1 h-11" required /></div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div><Label>Anos de experiência</Label><Input type="number" min="0" max="60" value={experienceYears} onChange={e => setExperienceYears(e.target.value)} placeholder="Ex: 5" className="mt-1 h-11" /></div>
-                      <div>
-                        <Label>Tipo de atendimento</Label>
-                        <select value={consultationType} onChange={e => setConsultationType(e.target.value)} className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                          <option value="">Selecione</option>
-                          <option value="Teleconsulta">Teleconsulta</option>
-                          <option value="Presencial">Presencial</option>
-                          <option value="Ambos">Ambos</option>
-                        </select>
-                      </div>
+                    <div><Label>Qual sua especialidade? *</Label><Input value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="Ex: Cardiologia, Dermatologia..." required className="mt-1 h-11" /></div>
+                    <div><Label>Anos de experiência</Label><Input type="number" min="0" max="60" value={experienceYears} onChange={e => setExperienceYears(e.target.value)} placeholder="Ex: 5" className="mt-1 h-11" /></div>
+                    <div>
+                      <Label>Tipo de atendimento pretendido *</Label>
+                      <select value={consultationType} onChange={e => setConsultationType(e.target.value)} className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" required>
+                        <option value="">Selecione</option>
+                        <option value="Teleconsulta">Teleconsulta</option>
+                        <option value="Presencial">Presencial</option>
+                        <option value="Ambos">Ambos</option>
+                      </select>
                     </div>
                     <div>
                       <Label>Como conheceu a AloClinica?</Label>
@@ -376,11 +364,42 @@ const AuthMedico = () => {
                         <option value="Outro">Outro</option>
                       </select>
                     </div>
+                    <Button className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={!specialty || !consultationType} onClick={() => setStep("apply")}>
+                      Continuar para Cadastro <ArrowRight className="w-5 h-5 ml-2" />
+                    </Button>
+                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => hasLoginAccess ? setStep("welcome") : navigate("/")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
+                  </div>
+                )}
+
+                {/* Apply - Pre-registration form */}
+                {step === "apply" && (
+                  <form onSubmit={handleSubmitApplication} className="space-y-4">
+                    <div className="p-4 rounded-xl bg-primary/5 border border-primary/20">
+                      <div className="flex items-center gap-2 text-sm text-foreground mb-1"><Stethoscope className="w-4 h-4 text-primary" /><span className="font-medium">Solicitar cadastro</span></div>
+                      <p className="text-xs text-muted-foreground">Preencha seus dados. Nossa equipe analisará e enviará o código de acesso por email.</p>
+                    </div>
+                    {specialty && (
+                      <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 text-secondary text-sm border border-secondary/20">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span className="font-medium">Especialidade: {specialty}</span>
+                        {consultationType && <Badge variant="outline" className="ml-auto text-xs">{consultationType}</Badge>}
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1 h-11" /></div>
+                      <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1 h-11" /></div>
+                    </div>
+                    <div><Label>Email</Label><div className="relative mt-1"><Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" /><Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required /></div></div>
+                    <div><Label>Telefone / WhatsApp</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" className="mt-1 h-11" /></div>
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="col-span-2"><Label>CRM</Label><Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1 h-11" /></div>
+                      <div><Label>UF</Label><Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1 h-11" maxLength={2} /></div>
+                    </div>
                     <div><Label>Sobre você (opcional)</Label><textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Breve descrição da sua experiência..." className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[80px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" maxLength={500} /></div>
                     <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={submittingApplication}>
                       {submittingApplication ? <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2"><Sparkles className="w-4 h-4 animate-spin" /> Enviando...</motion.span> : "Enviar Solicitação"}
                     </Button>
-                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => hasLoginAccess ? setStep("welcome") : navigate("/")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
+                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => setStep("quiz")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
                   </form>
                 )}
 
