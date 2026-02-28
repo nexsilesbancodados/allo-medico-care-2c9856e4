@@ -22,8 +22,8 @@ const Footer = lazy(() => import("@/components/landing/Footer"));
 const plans = [
   {
     id: "prata_familiar",
-    name: "Prata Familiar",
-    price: 49.9,
+    name: "Mini Família",
+    price: 47.9,
     people: "Titular + até 4 dependentes",
     icon: <Shield className="w-6 h-6 text-white" />,
     highlighted: false,
@@ -33,8 +33,8 @@ const plans = [
   },
   {
     id: "ouro_individual",
-    name: "Individual Pro",
-    price: 39.9,
+    name: "Solitário",
+    price: 37.9,
     people: "Apenas o titular",
     icon: <Star className="w-6 h-6 text-white" />,
     highlighted: false,
@@ -44,8 +44,8 @@ const plans = [
   },
   {
     id: "ouro_familiar",
-    name: "Ouro Familiar",
-    price: 79.9,
+    name: "King Família",
+    price: 77.9,
     people: "Titular + até 4 dependentes",
     icon: <Crown className="w-6 h-6 text-white" />,
     highlighted: true,
@@ -55,8 +55,8 @@ const plans = [
   },
   {
     id: "diamante_familiar",
-    name: "Diamante Familiar",
-    price: 159.9,
+    name: "Prime Família",
+    price: 157.9,
     people: "Titular + até 4 dependentes",
     icon: <Diamond className="w-6 h-6 text-white" />,
     highlighted: false,
@@ -96,10 +96,10 @@ const faqs = [
   { q: "O Cartão de Benefícios é um plano de saúde?", a: "Não. O Cartão de Benefícios é um programa de vantagens que oferece acesso a telemedicina, clube de descontos e assistência funerária. Não substitui um plano de saúde." },
   { q: "Tem carência?", a: "Não! Todos os benefícios são ativados imediatamente após a confirmação do pagamento." },
   { q: "Posso cancelar quando quiser?", a: "Sim. Sem multa e sem burocracia. Cancele direto pelo app a qualquer momento." },
-  { q: "A assistência funerária está em todos os planos?", a: "Não. A assistência funerária está incluída no Individual Pro (titular), e no Diamante Familiar (todos os membros). Os planos Prata e Ouro Familiar não incluem assistência funerária." },
+  { q: "A assistência funerária está em todos os planos?", a: "Não. A assistência funerária está incluída no Solitário (titular), e no Prime Família (todos os membros). Os planos Mini Família e King Família não incluem assistência funerária." },
   { q: "Como funciona a teleconsulta?", a: "Você agenda ou acessa o plantão 24h. Um médico atende por vídeo e pode emitir receitas e atestados digitais com validade legal." },
   { q: "Quais empresas participam do Clube de Vantagens?", a: "Mais de 10.000 empresas parceiras com descontos de até 80%. Farmácias, óticas, academias, laboratórios e muito mais." },
-  { q: "Qual a diferença entre Ouro e Diamante Familiar?", a: "O Ouro Familiar inclui telemedicina e clube de vantagens para todos. O Diamante Familiar adiciona assistência funerária completa para todos os 5 membros." },
+  { q: "Qual a diferença entre King e Prime Família?", a: "O King Família inclui telemedicina e clube de vantagens para todos. O Prime Família adiciona assistência funerária completa para todos os 5 membros." },
 ];
 
 const fadeUp = { hidden: { opacity: 0, y: 24 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } } };
@@ -295,7 +295,7 @@ const DiscountCard = () => {
               </motion.div>
               <div className="grid sm:grid-cols-3 gap-6">
                 {[
-                  { step: "01", title: "Escolha seu plano", desc: "Prata, Individual Pro, Ouro ou Diamante. Cada um com benefícios sob medida.", icon: <CreditCard className="w-6 h-6 text-white" />, gradient: "from-primary to-primary/70" },
+                  { step: "01", title: "Escolha seu plano", desc: "Solitário, Mini Família, King ou Prime. Cada um com benefícios sob medida.", icon: <CreditCard className="w-6 h-6 text-white" />, gradient: "from-primary to-primary/70" },
                   { step: "02", title: "Ativação imediata", desc: "Pague via PIX e seu cartão é ativado na hora. Sem carência.", icon: <Zap className="w-6 h-6 text-white" />, gradient: "from-secondary to-secondary/70" },
                   { step: "03", title: "Use seus benefícios", desc: "Consulte por vídeo, compre com desconto e tenha cobertura completa.", icon: <HeartHandshake className="w-6 h-6 text-white" />, gradient: "from-warning to-warning/70" },
                 ].map((item, i) => (
