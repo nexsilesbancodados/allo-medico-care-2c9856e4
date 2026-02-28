@@ -58,11 +58,12 @@ const HeroSection = memo(() => {
     <section aria-label="Início" className="relative min-h-[85vh] sm:min-h-[90vh] lg:min-h-screen flex items-center pt-20 sm:pt-24 overflow-hidden">
       {/* Rich layered background */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-secondary/[0.04]" />
-        <div className="absolute top-10 right-[10%] w-[500px] h-[500px] rounded-full bg-gradient-to-br from-primary/15 to-secondary/10 blur-[100px]" />
-        <div className="absolute bottom-10 left-[5%] w-[400px] h-[400px] rounded-full bg-gradient-to-tr from-secondary/12 to-primary/8 blur-[80px]" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-secondary/[0.05]" />
+        <div className="absolute top-10 right-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-primary/12 to-secondary/8 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute bottom-10 left-[5%] w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-secondary/10 to-primary/6 blur-[100px] animate-pulse" style={{ animationDuration: '12s' }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-radial from-primary/[0.03] to-transparent blur-[60px]" />
         {/* Dot grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+        <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '28px 28px' }} />
       </div>
 
       <div className="container mx-auto px-4 py-16 lg:py-20">
@@ -103,11 +104,15 @@ const HeroSection = memo(() => {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.4 }}
               >
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-extrabold leading-[1.1] text-foreground mb-4 sm:mb-6 tracking-tight">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl font-extrabold leading-[1.08] text-foreground mb-5 sm:mb-6 tracking-tight">
                   {poseContent[poseIndex].title}{" "}
-                  <span className="text-gradient bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent">{poseContent[poseIndex].highlight}</span>
+                  <span className="relative inline-block">
+                    <span className="text-gradient bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_100%] animate-[gradient-shift_4s_ease-in-out_infinite]">
+                      {poseContent[poseIndex].highlight}
+                    </span>
+                  </span>
                 </h1>
-                <p className="text-base sm:text-lg text-muted-foreground max-w-lg mb-7 sm:mb-8 leading-relaxed">
+                <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-lg mb-7 sm:mb-8 leading-relaxed">
                   {poseContent[poseIndex].description}
                 </p>
               </motion.div>

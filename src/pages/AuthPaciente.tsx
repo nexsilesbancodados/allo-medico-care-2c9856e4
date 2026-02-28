@@ -13,30 +13,24 @@ import { formatMask, unmask } from "@/hooks/use-mask";
 import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 
-const plans = [
-  {
-    id: "avulsa",
-    name: "Consulta Avulsa",
-    price: 89,
-    period: "por consulta",
-    description: "Ideal para quem precisa de atendimento pontual.",
-    features: ["1 consulta por videochamada", "Receita digital inclusa", "Chat pós-consulta (48h)", "Escolha de especialidade"],
-    highlighted: false,
-    icon: Clock,
-    color: "from-primary/80 to-primary",
-  },
-  {
-    id: "mensal",
-    name: "Plano Mensal",
-    price: 149,
-    period: "por mês",
-    description: "Acesso ilimitado para cuidar da saúde da família.",
-    features: ["Consultas ilimitadas", "Receitas digitais ilimitadas", "Chat ilimitado com médicos", "Prioridade no agendamento", "Prontuário digital completo", "Acesso para até 4 dependentes"],
-    highlighted: true,
-    icon: Zap,
-    color: "from-secondary to-primary",
-  },
-];
+const PLAN_MAP: Record<string, { icon: any; color: string; highlighted: boolean }> = {
+  "Consulta Avulsa": { icon: Clock, color: "from-primary/80 to-primary", highlighted: false },
+  "Plano Mensal": { icon: Zap, color: "from-secondary to-primary", highlighted: true },
+  "Plano Família+": { icon: Users, color: "from-secondary to-success", highlighted: false },
+};
+
+interface PlanItem {
+  id: string;
+  name: string;
+  price: number;
+  period: string;
+  description: string;
+  features: string[];
+  highlighted: boolean;
+  icon: any;
+  color: string;
+  interval: string;
+}
 
 type Step = "select" | "register" | "payment" | "success";
 type PaymentMethod = "PIX" | "BOLETO" | "CREDIT_CARD";
@@ -57,6 +51,7 @@ const AuthPaciente = () => {
 
   const [step, setStep] = useState<Step>(initialPlan ? "register" : "select");
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(initialPlan);
+  const [plans, setPlans] = useState<PlanItem[]>([]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -82,6 +77,39 @@ const AuthPaciente = () => {
   const { toast } = useToast();
 
   const currentPlan = plans.find(p => p.id === selectedPlanId);
+
+  // Fetch plans from database
+  useEffect(() => {
+    const fetchPlans = async () => {
+      const { data } = await supabase.from("plans").select("*").eq("is_active", true).order("price", { ascending: true });
+      if (data && data.length > 0) {
+        const mapped: PlanItem[] = data.map((p: any) => {
+          const meta = PLAN_MAP[p.name] ?? { icon: Clock, color: "from-primary/80 to-primary", highlighted: false };
+          const featureList = Array.isArray(p.features) ? p.features as string[] : [];
+          return {
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            period: p.interval === "monthly" ? "por mês" : "por consulta",
+            description: p.description || "",
+            features: featureList.length > 0 ? featureList : [p.name],
+            highlighted: meta.highlighted,
+            icon: meta.icon,
+            color: meta.color,
+            interval: p.interval,
+          };
+        });
+        setPlans(mapped);
+      } else {
+        // Fallback hardcoded plans
+        setPlans([
+          { id: "fallback-avulsa", name: "Consulta Avulsa", price: 89, period: "por consulta", description: "Ideal para atendimento pontual.", features: ["1 consulta por videochamada", "Receita digital inclusa", "Chat pós-consulta (48h)"], highlighted: false, icon: Clock, color: "from-primary/80 to-primary", interval: "one_time" },
+          { id: "fallback-mensal", name: "Plano Mensal", price: 149, period: "por mês", description: "Acesso ilimitado para sua família.", features: ["Consultas ilimitadas", "Receitas digitais ilimitadas", "Chat ilimitado", "Prioridade no agendamento", "Até 4 dependentes"], highlighted: true, icon: Zap, color: "from-secondary to-primary", interval: "monthly" },
+        ]);
+      }
+    };
+    fetchPlans();
+  }, []);
 
   // Show message if redirected from login without subscription
   useEffect(() => {
@@ -196,13 +224,32 @@ const AuthPaciente = () => {
   const createSubscriptionRecord = async (payData: any) => {
     if (!registeredUserId || !currentPlan) return;
     try {
-      await supabase.from("subscriptions").insert({
-        user_id: registeredUserId,
-        plan_id: currentPlan.id,
-        status: "active",
-        payment_method: paymentMethod.toLowerCase(),
-        notes: payData.paymentId || payData.subscriptionId || null,
-      });
+      // Use the real UUID plan_id from the database
+      const planId = currentPlan.id;
+      // Validate it's a real UUID, not a fallback
+      if (planId.startsWith("fallback-")) {
+        // Lookup actual plan from DB by name
+        const { data: dbPlan } = await supabase.from("plans").select("id").eq("name", currentPlan.name).single();
+        if (!dbPlan) {
+          console.error("Plan not found in database:", currentPlan.name);
+          return;
+        }
+        await supabase.from("subscriptions").insert({
+          user_id: registeredUserId,
+          plan_id: dbPlan.id,
+          status: "active",
+          payment_method: paymentMethod.toLowerCase(),
+          notes: payData.paymentId || payData.subscriptionId || null,
+        });
+      } else {
+        await supabase.from("subscriptions").insert({
+          user_id: registeredUserId,
+          plan_id: planId,
+          status: "active",
+          payment_method: paymentMethod.toLowerCase(),
+          notes: payData.paymentId || payData.subscriptionId || null,
+        });
+      }
     } catch (e) {
       console.error("Error creating subscription:", e);
     }
