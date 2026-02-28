@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Mail, MapPin, Phone, Instagram, Linkedin, Youtube, ArrowRight, Heart, Shield, Award, Lock, Verified, ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -18,15 +19,27 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  const handleNewsletter = (e: React.FormEvent) => {
+  const handleNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
     setSubmitting(true);
-    setTimeout(() => {
-      toast.success("Inscrito com sucesso! 🎉", { description: "Você receberá nossas novidades." });
+    try {
+      const { error } = await supabase.from("newsletter_subscribers").insert({ email: email.trim().toLowerCase() });
+      if (error) {
+        if (error.code === "23505") {
+          toast.info("Você já está inscrito! 📬");
+        } else {
+          toast.error("Erro ao inscrever. Tente novamente.");
+        }
+      } else {
+        toast.success("Inscrito com sucesso! 🎉", { description: "Você receberá nossas novidades." });
+      }
       setEmail("");
+    } catch {
+      toast.error("Erro de conexão. Tente novamente.");
+    } finally {
       setSubmitting(false);
-    }, 800);
+    }
   };
 
   return (
@@ -103,9 +116,9 @@ const Footer = () => {
             {/* Social links */}
             <div className="flex gap-2 mb-6">
               {[
-                { icon: Instagram, label: "Instagram", href: "#" },
-                { icon: Linkedin, label: "LinkedIn", href: "#" },
-                { icon: Youtube, label: "YouTube", href: "#" },
+                { icon: Instagram, label: "Instagram", href: "https://instagram.com/aloclinica" },
+                { icon: Linkedin, label: "LinkedIn", href: "https://linkedin.com/company/aloclinica" },
+                { icon: Youtube, label: "YouTube", href: "https://youtube.com/@aloclinica" },
               ].map((social, i) => (
                 <motion.a
                   key={social.label}
