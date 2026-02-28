@@ -429,10 +429,11 @@ const PlansCheckout = () => {
         payload.remoteIp = "0.0.0.0";
       }
 
-      // Increment coupon usage atomically on successful payment
+      // Pass coupon code to edge function for server-side tracking
       if (couponCode && couponDiscount > 0) {
         payload.couponCode = couponCode;
       }
+
 
       const { data, error } = await supabase.functions.invoke("create-asaas-payment", {
         body: payload,
@@ -476,6 +477,10 @@ const PlansCheckout = () => {
       if (data.status === "CONFIRMED" || data.status === "RECEIVED") {
         if (appointmentId) {
           await supabase.from("appointments").update({ payment_status: "approved", payment_confirmed_at: new Date().toISOString() }).eq("id", appointmentId);
+        }
+        // Increment coupon usage only after confirmed payment (issue #2 rodada 3)
+        if (couponCode && couponDiscount > 0) {
+          await supabase.rpc("fn_increment_coupon_usage_atomic", { p_code: couponCode });
         }
       }
 
@@ -523,6 +528,7 @@ const PlansCheckout = () => {
 
   const availableTimes = selectedDate ? getAvailableTimesForDate(selectedDate) : [];
   const selectedSpecialtyName = specialties.find(s => s.id === selectedSpecialty)?.name;
+  // Use real doctor consultation_price instead of hardcoded R$89 (issue #8 rodada 3)
   const basePrice = selectedPlan === "avulsa" ? (selectedDoctor?.consultation_price ?? 89) : (currentPlan?.price ?? 149);
   const totalDiscountPercent = Math.min(couponDiscount + cardDiscount, 100);
   const discountAmount = basePrice * (totalDiscountPercent / 100);

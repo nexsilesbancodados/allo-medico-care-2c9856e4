@@ -38,9 +38,10 @@ const NotificationBell = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
   const [hasNewPulse, setHasNewPulse] = useState(false);
+  const [unreadMessages, setUnreadMessages] = useState(0);
   const pulseTimeout = useRef<NodeJS.Timeout>();
 
-  const unreadCount = notifications.filter(n => !n.is_read).length;
+  const unreadCount = notifications.filter(n => !n.is_read).length + unreadMessages;
 
   const showRealtimeToast = useCallback((notif: Notification) => {
     const typeIcons: Record<string, string> = {
@@ -68,8 +69,9 @@ const NotificationBell = () => {
   useEffect(() => {
     if (!user) return;
     fetchNotifications();
+    fetchUnreadMessages();
 
-    // Realtime subscription
+    // Realtime subscription for notifications
     const channel = supabase
       .channel("notifications-realtime")
       .on(
@@ -83,11 +85,32 @@ const NotificationBell = () => {
       )
       .subscribe();
 
+    // Realtime subscription for unread messages (issue #12 rodada 3)
+    const msgChannel = supabase
+      .channel("unread-messages-count")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages" },
+        () => fetchUnreadMessages()
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
+      supabase.removeChannel(msgChannel);
       if (pulseTimeout.current) clearTimeout(pulseTimeout.current);
     };
   }, [user, showRealtimeToast]);
+
+  const fetchUnreadMessages = async () => {
+    if (!user) return;
+    const { count } = await supabase
+      .from("messages")
+      .select("id", { count: "exact", head: true })
+      .eq("is_read", false)
+      .neq("sender_id", user.id);
+    setUnreadMessages(count ?? 0);
+  };
 
   const fetchNotifications = async () => {
     const { data } = await supabase

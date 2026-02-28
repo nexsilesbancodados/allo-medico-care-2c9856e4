@@ -247,6 +247,15 @@ const ExamReportEditor = () => {
     if (existingReport?.content_text) setContent(existingReport.content_text);
   }, [existingReport]);
 
+  // Access control: verify reporter owns this report (issue #13 rodada 3)
+  useEffect(() => {
+    if (!existingReport || !doctorProfile) return;
+    if (existingReport.reporter_id && existingReport.reporter_id !== doctorProfile.id) {
+      toast({ title: "Acesso negado", description: "Este laudo não está atribuído a você.", variant: "destructive" });
+      navigate(backRoute);
+    }
+  }, [existingReport, doctorProfile]);
+
   // ---- File URLs ----
   useEffect(() => {
     if (!examRequest?.file_urls) return;
