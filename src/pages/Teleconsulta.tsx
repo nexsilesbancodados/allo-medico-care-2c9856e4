@@ -8,7 +8,11 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
-import logo from "@/assets/logo.png";
+import Header from "@/components/landing/Header";
+import { lazy, Suspense } from "react";
+import pingoWave from "@/assets/mascot-wave.png";
+
+const Footer = lazy(() => import("@/components/landing/Footer"));
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -69,26 +73,10 @@ const Teleconsulta = () => {
         description="Consulte médicos online por vídeo 24h. Entenda como funciona a teleconsulta, benefícios, legalidade e como agendar."
       />
       <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2.5">
-              <img src={logo} alt="AloClinica" className="w-9 h-9 rounded-xl" />
-              <span className="font-bold text-foreground text-lg tracking-tight">AloClínica</span>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" className="rounded-xl text-sm font-semibold" asChild>
-                <Link to="/medico">Sou Médico</Link>
-              </Button>
-              <Button className="rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold shadow-lg shadow-primary/20" asChild>
-                <Link to="/paciente">Marcar Consulta</Link>
-              </Button>
-            </div>
-          </div>
-        </header>
+        <Header />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-24 sm:py-32">
+        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
@@ -105,25 +93,13 @@ const Teleconsulta = () => {
                 Consulte médicos online de qualquer lugar do Brasil. Agendamento fácil, receitas digitais válidas e atendimento seguro pela plataforma.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button
-                  size="lg"
-                  className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20"
-                  asChild
-                >
-                  <Link to="/paciente">
-                    Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" />
-                  </Link>
+                <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" asChild>
+                  <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" /></Link>
                 </Button>
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl h-14 px-8 text-base font-semibold"
-                  asChild
-                >
+                <Button size="lg" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl h-14 px-8 text-base font-semibold" asChild>
                   <Link to="/medico">Sou Médico — Cadastre-se</Link>
                 </Button>
               </div>
-
               <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
                 {[
                   { icon: <Shield className="w-4 h-4" />, label: "LGPD Compliant" },
@@ -131,9 +107,7 @@ const Teleconsulta = () => {
                   { icon: <FileText className="w-4 h-4" />, label: "Receita Digital Válida" },
                   { icon: <Users className="w-4 h-4" />, label: "30+ Especialidades" },
                 ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">
-                    {item.icon} {item.label}
-                  </span>
+                  <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
                 ))}
               </div>
             </motion.div>
@@ -141,41 +115,32 @@ const Teleconsulta = () => {
         </section>
 
         {/* How it works */}
-        <section className="py-20">
+        <section className="py-20 relative">
           <div className="container mx-auto px-4 max-w-4xl">
             <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
-              <motion.div variants={fadeUp} className="text-center mb-14">
+              <motion.div variants={fadeUp} className="text-center mb-14 relative">
                 <Badge variant="outline" className="mb-3 text-sm px-4 py-1 rounded-full">
                   <HelpCircle className="w-3.5 h-3.5 mr-1.5" /> Entenda
                 </Badge>
                 <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
                   Como funciona a Teleconsulta?
                 </h2>
+                <motion.img
+                  src={pingoWave}
+                  alt="Pingo mascote"
+                  className="absolute -right-2 sm:right-4 -bottom-6 w-14 h-14 sm:w-18 sm:h-18 object-contain drop-shadow-lg"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                />
               </motion.div>
 
               <div className="grid md:grid-cols-3 gap-5">
                 {[
-                  {
-                    step: "01",
-                    title: "Agende no Marketplace",
-                    desc: "Escolha seu médico por especialidade, avaliação e preço. Agende o melhor horário para você.",
-                    icon: <Stethoscope className="w-6 h-6 text-white" />,
-                    gradient: "from-primary to-primary/70",
-                  },
-                  {
-                    step: "02",
-                    title: "Prepare-se",
-                    desc: "Anexe exames, atestados e receitas no seu prontuário digital. O médico terá acesso durante a consulta.",
-                    icon: <FileText className="w-6 h-6 text-white" />,
-                    gradient: "from-warning to-warning/70",
-                  },
-                  {
-                    step: "03",
-                    title: "Entre na sala virtual",
-                    desc: "30 min antes, você recebe o link por SMS. Entre na sala de vídeo segura e criptografada.",
-                    icon: <Video className="w-6 h-6 text-white" />,
-                    gradient: "from-secondary to-secondary/70",
-                  },
+                  { step: "01", title: "Agende no Marketplace", desc: "Escolha seu médico por especialidade, avaliação e preço. Agende o melhor horário para você.", icon: <Stethoscope className="w-6 h-6 text-white" />, gradient: "from-primary to-primary/70" },
+                  { step: "02", title: "Prepare-se", desc: "Anexe exames, atestados e receitas no seu prontuário digital. O médico terá acesso durante a consulta.", icon: <FileText className="w-6 h-6 text-white" />, gradient: "from-warning to-warning/70" },
+                  { step: "03", title: "Entre na sala virtual", desc: "30 min antes, você recebe o link por SMS. Entre na sala de vídeo segura e criptografada.", icon: <Video className="w-6 h-6 text-white" />, gradient: "from-secondary to-secondary/70" },
                 ].map((item, i) => (
                   <motion.div key={i} variants={fadeUp}>
                     <Card className="h-full border-border/50 hover:shadow-xl hover:border-border hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
@@ -214,12 +179,12 @@ const Teleconsulta = () => {
         {/* CTA Banner */}
         <section className="py-6 px-4">
           <div className="container mx-auto max-w-3xl">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white shadow-xl shadow-primary/20">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl shadow-primary/20">
               <div className="text-center sm:text-left">
                 <h3 className="text-lg font-bold flex items-center gap-2 justify-center sm:justify-start">
                   <Video className="w-5 h-5" /> Marque sua Teleconsulta agora!
                 </h3>
-                <p className="text-sm text-white/70 mt-1">Atendimento rápido, seguro e sem sair de casa.</p>
+                <p className="text-sm opacity-70 mt-1">Atendimento rápido, seguro e sem sair de casa.</p>
               </div>
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
                 <Link to="/paciente">Agendar <ArrowRight className="w-4 h-4 ml-1.5" /></Link>
@@ -269,11 +234,7 @@ const Teleconsulta = () => {
               </motion.p>
               <div className="grid sm:grid-cols-2 gap-3">
                 {benefits.map((b, i) => (
-                  <motion.div
-                    key={i}
-                    variants={fadeUp}
-                    className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50 hover:shadow-lg hover:border-primary/20 transition-all group"
-                  >
+                  <motion.div key={i} variants={fadeUp} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50 hover:shadow-lg hover:border-primary/20 transition-all group">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-success to-success/70 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
                       <CheckCircle2 className="w-4 h-4 text-white" />
                     </div>
@@ -288,10 +249,10 @@ const Teleconsulta = () => {
         {/* CTA Banner 2 */}
         <section className="py-6 px-4">
           <div className="container mx-auto max-w-3xl">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-secondary to-primary text-white shadow-xl shadow-secondary/20">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-secondary to-primary text-primary-foreground shadow-xl shadow-secondary/20">
               <div className="text-center sm:text-left">
                 <h3 className="text-lg font-bold">Pronto para sua teleconsulta?</h3>
-                <p className="text-sm text-white/70 mt-1">Médicos disponíveis agora. Agende em menos de 2 minutos.</p>
+                <p className="text-sm opacity-70 mt-1">Médicos disponíveis agora. Agende em menos de 2 minutos.</p>
               </div>
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
                 <Link to="/paciente">Marcar Agora <ChevronRight className="w-4 h-4 ml-1" /></Link>
@@ -300,7 +261,7 @@ const Teleconsulta = () => {
           </div>
         </section>
 
-        {/* FAQ-style sections */}
+        {/* FAQ */}
         <section className="py-20">
           <div className="container mx-auto px-4 max-w-3xl">
             <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
@@ -343,28 +304,16 @@ const Teleconsulta = () => {
               <p className="text-muted-foreground max-w-md mx-auto mb-8">
                 Celular, tablet ou computador com webcam. É tudo que você precisa.
               </p>
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-primary via-primary to-secondary text-white rounded-2xl h-14 px-10 text-base font-bold shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow"
-                asChild
-              >
-                <Link to="/paciente">
-                  Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" />
-                </Link>
+              <Button size="lg" className="bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground rounded-2xl h-14 px-10 text-base font-bold shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow" asChild>
+                <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" /></Link>
               </Button>
             </motion.div>
           </div>
         </section>
 
-        {/* Footer */}
-        <footer className="py-8 border-t border-border/40 text-center text-xs text-muted-foreground">
-          <p>
-            © 2026 AloClinica ·{" "}
-            <Link to="/terms" className="hover:text-foreground transition-colors">Termos</Link> ·{" "}
-            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacidade</Link> ·{" "}
-            <Link to="/lgpd" className="hover:text-foreground transition-colors">LGPD</Link>
-          </p>
-        </footer>
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
     </>
   );

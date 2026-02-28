@@ -13,8 +13,12 @@ import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
-import logo from "@/assets/logo.png";
+import Header from "@/components/landing/Header";
 import { z } from "zod";
+import { lazy, Suspense } from "react";
+import pingoReading from "@/assets/mascot-reading.png";
+
+const Footer = lazy(() => import("@/components/landing/Footer"));
 
 const leadSchema = z.object({
   company_name: z.string().trim().min(2, "Nome da empresa obrigatório").max(200),
@@ -62,19 +66,10 @@ const B2BLanding = () => {
     <>
       <SEOHead title="Telemedicina para Empresas | AloClinica" description="Soluções de teleconsulta, telelaudo e plantão 24h para clínicas e hospitais." />
       <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2.5">
-              <img src={logo} alt="AloClinica" className="w-9 h-9 rounded-xl" />
-              <span className="font-bold text-foreground text-lg tracking-tight">AloClínica</span>
-            </Link>
-            <Button variant="outline" className="rounded-xl font-semibold" asChild><Link to="/clinica">Acesso Clínica</Link></Button>
-          </div>
-        </header>
+        <Header />
 
-        {/* Hero — gradient */}
-        <section className="relative overflow-hidden py-24 sm:py-32">
+        {/* Hero */}
+        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-16 -left-16 w-60 h-60 rounded-full bg-white/5 blur-3xl" />
@@ -90,8 +85,6 @@ const B2BLanding = () => {
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
                 Solicitar Orçamento <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-
-              {/* Trust metrics */}
               <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
                 {[
                   { icon: <Shield className="w-4 h-4" />, label: "CFM Regulado" },
@@ -99,21 +92,21 @@ const B2BLanding = () => {
                   { icon: <Zap className="w-4 h-4" />, label: "SLA 15min" },
                   { icon: <BarChart2 className="w-4 h-4" />, label: "99.9% Uptime" },
                 ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-2 text-white/60 text-sm font-medium">
-                    {item.icon} {item.label}
-                  </span>
+                  <span key={i} className="flex items-center gap-2 text-white/60 text-sm font-medium">{item.icon} {item.label}</span>
                 ))}
               </div>
             </motion.div>
           </div>
         </section>
 
-        {/* Services — gradient icon cards */}
+        {/* Services */}
         <section className="py-20">
           <div className="container mx-auto px-4">
             <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
-              <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-black text-foreground text-center mb-4 tracking-tight">Nossos Serviços B2B</motion.h2>
-              <motion.p variants={fadeUp} className="text-muted-foreground text-center mb-12 max-w-lg mx-auto">Soluções completas de telemedicina para sua operação</motion.p>
+              <motion.div variants={fadeUp} className="text-center mb-12 relative inline-block mx-auto w-full">
+                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Nossos Serviços B2B</h2>
+                <p className="text-muted-foreground mt-2 max-w-lg mx-auto">Soluções completas de telemedicina para sua operação</p>
+              </motion.div>
               <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5 max-w-5xl mx-auto">
                 {[
                   { icon: <Stethoscope className="w-7 h-7 text-white" />, title: "Teleconsulta", desc: "Consultas por videochamada com receita digital", gradient: "from-primary to-primary/70" },
@@ -124,9 +117,7 @@ const B2BLanding = () => {
                   <motion.div key={i} variants={fadeUp}>
                     <Card className="h-full border-border/50 hover:shadow-xl hover:border-border hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
                       <CardContent className="p-6">
-                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                          {s.icon}
-                        </div>
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>{s.icon}</div>
                         <h3 className="font-bold text-foreground text-lg mb-2">{s.title}</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
                       </CardContent>
@@ -139,7 +130,16 @@ const B2BLanding = () => {
         </section>
 
         {/* Form */}
-        <section id="form" className="py-20 bg-muted/30">
+        <section id="form" className="py-20 bg-muted/30 relative">
+          <motion.img
+            src={pingoReading}
+            alt="Pingo mascote"
+            className="absolute right-4 top-8 w-16 h-16 object-contain drop-shadow-lg hidden lg:block"
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3, type: "spring" }}
+          />
           <div className="container mx-auto px-4 max-w-2xl">
             <h2 className="text-3xl font-black text-foreground text-center mb-3 tracking-tight">Solicite um Orçamento</h2>
             <p className="text-muted-foreground text-center mb-10">Entraremos em contato em até 24h úteis</p>
@@ -197,7 +197,7 @@ const B2BLanding = () => {
                       </div>
                     </div>
                     <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mensagem</Label><Textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Conte sobre as necessidades..." rows={3} className="mt-1.5 rounded-xl" /></div>
-                    <Button type="submit" className="w-full h-13 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-white font-bold text-base shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow" disabled={submitting}>
+                    <Button type="submit" className="w-full h-13 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground font-bold text-base shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow" disabled={submitting}>
                       {submitting ? "Enviando..." : "Enviar Solicitação"}
                     </Button>
                   </form>
@@ -207,9 +207,9 @@ const B2BLanding = () => {
           </div>
         </section>
 
-        <footer className="py-8 border-t border-border/40 text-center text-xs text-muted-foreground">
-          <p>© 2026 AloClinica · <Link to="/terms" className="hover:text-foreground transition-colors">Termos</Link> · <Link to="/privacy" className="hover:text-foreground transition-colors">Privacidade</Link></p>
-        </footer>
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
     </>
   );
