@@ -16,8 +16,8 @@ const specialties = [
 
 const benefitCards = [
   {
-    name: "Prata Familiar",
-    price: 49.9,
+    name: "Mini Família",
+    price: 47.9,
     description: "Telemedicina 24h para toda a família.",
     icon: Heart,
     features: [
@@ -31,8 +31,8 @@ const benefitCards = [
     badge: null,
   },
   {
-    name: "Individual Pro",
-    price: 39.9,
+    name: "Solitário",
+    price: 37.9,
     description: "Plano completo para uso individual.",
     icon: Award,
     features: [
@@ -46,12 +46,12 @@ const benefitCards = [
     badge: "Mais popular",
   },
   {
-    name: "Ouro Familiar",
-    price: 79.9,
+    name: "King Família",
+    price: 77.9,
     description: "Cobertura completa para a família.",
     icon: Sparkles,
     features: [
-      "Tudo do Individual Pro",
+      "Tudo do Solitário",
       "Dependentes inclusos",
       "Prioridade no agendamento",
       "Chat ilimitado com médicos",
@@ -61,12 +61,12 @@ const benefitCards = [
     badge: null,
   },
   {
-    name: "Diamante Familiar",
-    price: 159.9,
+    name: "Prime Família",
+    price: 157.9,
     description: "O plano mais completo da plataforma.",
     icon: Diamond,
     features: [
-      "Tudo do Ouro Familiar",
+      "Tudo do King Família",
       "Assistência Funeral Nacional",
       "Suporte prioritário 24h",
       "Consultas de retorno ilimitadas",

@@ -141,10 +141,10 @@ const B2BLanding = () => {
               </motion.div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
                 {[
-                  { name: "Prata Familiar", price: "49,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Até 4 dependentes"], highlight: false },
-                  { name: "Individual Pro", price: "39,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Assistência Funeral Nacional"], highlight: false },
-                  { name: "Ouro Familiar", price: "79,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Até 6 dependentes", "Prioridade no atendimento"], highlight: true },
-                  { name: "Diamante Familiar", price: "159,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Assistência Funeral Nacional", "Dependentes ilimitados", "Gestor dedicado"], highlight: false },
+                  { name: "Mini Família", price: "47,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Até 4 dependentes"], highlight: false },
+                  { name: "Solitário", price: "37,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Assistência Funeral Nacional"], highlight: false },
+                  { name: "King Família", price: "77,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Até 6 dependentes", "Prioridade no atendimento"], highlight: true },
+                  { name: "Prime Família", price: "157,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Assistência Funeral Nacional", "Dependentes ilimitados", "Gestor dedicado"], highlight: false },
                 ].map((plan, i) => (
                   <motion.div key={i} variants={fadeUp}>
                     <Card className={`h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${plan.highlight ? "border-primary shadow-lg ring-2 ring-primary/20" : "border-border/50"}`}>
