@@ -69,33 +69,48 @@ const B2BLanding = () => {
         <Header />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
+        <section className="relative overflow-hidden mt-[70px]">
           <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
           <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-16 -left-16 w-60 h-60 rounded-full bg-white/5 blur-3xl" />
-          <div className="container mx-auto px-4 text-center relative">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">🏢 Para Empresas</Badge>
-              <h1 className="text-4xl md:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
-                Telemedicina para sua<br /><span className="text-white/90">Clínica ou Hospital</span>
-              </h1>
-              <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
-                Teleconsulta, telelaudo e pronto-atendimento digital. Integre nossa plataforma ao seu fluxo de trabalho.
-              </p>
-              <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
-                Solicitar Orçamento <ArrowRight className="w-5 h-5 ml-2" />
-              </Button>
-              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
-                {[
-                  { icon: <Shield className="w-4 h-4" />, label: "CFM Regulado" },
-                  { icon: <Users className="w-4 h-4" />, label: "500+ Clínicas" },
-                  { icon: <Zap className="w-4 h-4" />, label: "SLA 15min" },
-                  { icon: <BarChart2 className="w-4 h-4" />, label: "99.9% Uptime" },
-                ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-2 text-white/60 text-sm font-medium">{item.icon} {item.label}</span>
-                ))}
-              </div>
-            </motion.div>
+          <div className="container mx-auto px-4 relative">
+            <div className="grid lg:grid-cols-2 gap-0 items-center">
+              <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="py-24 sm:py-32 pr-0 lg:pr-12">
+                <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">🏢 Para Empresas</Badge>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
+                  Telemedicina para sua<br /><span className="text-white/90">Clínica ou Hospital</span>
+                </h1>
+                <p className="text-lg text-white/70 max-w-xl mb-8 leading-relaxed">
+                  Teleconsulta, telelaudo e pronto-atendimento digital. Integre nossa plataforma ao seu fluxo de trabalho.
+                </p>
+                <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
+                  Solicitar Orçamento <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+                <div className="flex flex-wrap items-center gap-6 mt-10">
+                  {[
+                    { icon: <Shield className="w-4 h-4" />, label: "CFM Regulado" },
+                    { icon: <Users className="w-4 h-4" />, label: "500+ Clínicas" },
+                    { icon: <Zap className="w-4 h-4" />, label: "SLA 15min" },
+                    { icon: <BarChart2 className="w-4 h-4" />, label: "99.9% Uptime" },
+                  ].map((item, i) => (
+                    <span key={i} className="flex items-center gap-2 text-white/60 text-sm font-medium">{item.icon} {item.label}</span>
+                  ))}
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                className="hidden lg:block relative h-full min-h-[400px]"
+              >
+                <img
+                  src={pingoReading}
+                  alt="Telemedicina para empresas"
+                  className="w-full h-full object-contain object-center rounded-2xl"
+                  loading="eager"
+                />
+              </motion.div>
+            </div>
           </div>
         </section>
 

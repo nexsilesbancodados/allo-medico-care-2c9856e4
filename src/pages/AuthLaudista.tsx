@@ -201,8 +201,8 @@ const AuthLaudista = () => {
                 </Button>
               </motion.div>
             </motion.div>
-            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.6 }} className="hidden lg:block">
-              <img src={telelaudoImg} alt="Telelaudo" className="w-full max-w-lg mx-auto rounded-2xl shadow-2xl" loading="lazy" />
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.6 }} className="hidden lg:block relative h-full min-h-[400px]">
+              <img src={telelaudoImg} alt="Telelaudo" className="w-full h-full object-cover rounded-2xl" loading="eager" />
             </motion.div>
           </div>
         </div>

@@ -161,8 +161,8 @@ const AuthClinica = () => {
                   ))}
                 </div>
               </motion.div>
-              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="hidden lg:flex justify-center">
-                <img src={clinicReceptionist} alt="Painel da clínica" className="w-full max-w-md rounded-3xl shadow-2xl shadow-black/30 object-cover" />
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="hidden lg:block relative h-full min-h-[400px]">
+                <img src={clinicReceptionist} alt="Painel da clínica" className="w-full h-full object-cover rounded-2xl" loading="eager" />
               </motion.div>
             </div>
           </div>
