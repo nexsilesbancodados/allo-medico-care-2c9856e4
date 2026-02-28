@@ -202,6 +202,7 @@ const BookAppointment = () => {
         appointment_type: firstApptId ? "return" : appointmentType,
         notes: notesText ? notesText + (firstApptId ? ` | Recorrente` : "") : (firstApptId ? "Agendamento recorrente" : null),
         original_appointment_id: firstApptId || null,
+        price_at_booking: doctor.consultation_price,
       }).select("id").single();
 
       if (error || !insertedAppt) {

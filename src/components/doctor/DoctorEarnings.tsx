@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { getDoctorNav } from "./doctorNav";
-import { TrendingUp, Wallet, ArrowUpRight, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { TrendingUp, Wallet, ArrowUpRight, Clock, CheckCircle2, XCircle, Building2, AlertCircle } from "lucide-react";
 import { format, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
@@ -17,11 +17,12 @@ import { toast } from "sonner";
 
 const PLATFORM_PERCENT = 10;
 const DEFAULT_DOCTOR_PERCENT = 70;
+const MIN_WITHDRAWAL = 50;
 
 const DoctorEarnings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [stats, setStats] = useState({ total: 0, thisMonth: 0, totalAppts: 0, available: 0 });
+  const [stats, setStats] = useState({ total: 0, pending: 0, thisMonth: 0, totalAppts: 0, available: 0 });
   const [monthlyData, setMonthlyData] = useState<any[]>([]);
   const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,6 +30,7 @@ const DoctorEarnings = () => {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [clinicInfo, setClinicInfo] = useState<{ name: string; percent: number } | null>(null);
 
   useEffect(() => { if (user) fetchEarnings(); }, [user]);
 
@@ -36,15 +38,38 @@ const DoctorEarnings = () => {
     const { data: docProfile } = await supabase.from("doctor_profiles").select("id, consultation_price").eq("user_id", user!.id).single();
     if (!docProfile) { setLoading(false); return; }
 
-    const price = Number(docProfile.consultation_price) || 89;
-    const doctorPercent = DEFAULT_DOCTOR_PERCENT;
+    // Check clinic affiliation for commission percent (issue #16)
+    const { data: affiliation } = await supabase
+      .from("clinic_affiliations")
+      .select("commission_percent, clinic_id, clinic_profiles(name)")
+      .eq("doctor_id", docProfile.id)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
 
-    const [apptsRes, withdrawRes] = await Promise.all([
+    const doctorPercent = affiliation ? Number(affiliation.commission_percent) : DEFAULT_DOCTOR_PERCENT;
+    if (affiliation) {
+      setClinicInfo({
+        name: (affiliation as any).clinic_profiles?.name || "Clínica",
+        percent: doctorPercent,
+      });
+    }
+
+    const [confirmedRes, pendingRes, withdrawRes] = await Promise.all([
+      // Only count appointments with confirmed payment (issue #5)
       supabase
         .from("appointments")
-        .select("id, scheduled_at, status")
+        .select("id, scheduled_at, status, payment_status, price_at_booking")
         .eq("doctor_id", docProfile.id)
         .eq("status", "completed")
+        .in("payment_status", ["approved", "confirmed", "received"])
+        .order("scheduled_at", { ascending: false }),
+      supabase
+        .from("appointments")
+        .select("id, scheduled_at, price_at_booking")
+        .eq("doctor_id", docProfile.id)
+        .eq("status", "completed")
+        .eq("payment_status", "pending")
         .order("scheduled_at", { ascending: false }),
       supabase
         .from("withdrawal_requests")
@@ -54,23 +79,31 @@ const DoctorEarnings = () => {
         .limit(20),
     ]);
 
-    const allAppts = apptsRes.data ?? [];
+    const confirmedAppts = confirmedRes.data ?? [];
+    const pendingAppts = pendingRes.data ?? [];
     setWithdrawals(withdrawRes.data ?? []);
 
-    const now = new Date();
-    const monthStart = startOfMonth(now);
-    const thisMonthAppts = allAppts.filter(a => new Date(a.scheduled_at) >= monthStart);
+    const defaultPrice = Number(docProfile.consultation_price) || 89;
 
-    const totalEarned = allAppts.length * price * (doctorPercent / 100);
+    // Use price_at_booking if available, otherwise fallback (issue #13)
+    const getPrice = (appt: any) => Number(appt.price_at_booking) || defaultPrice;
+
+    const totalEarned = confirmedAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0);
+    const totalPending = pendingAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0);
     const totalWithdrawn = (withdrawRes.data ?? [])
       .filter(w => w.status === "approved")
       .reduce((sum: number, w: any) => sum + Number(w.amount), 0);
 
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const thisMonthAppts = confirmedAppts.filter(a => new Date(a.scheduled_at) >= monthStart);
+
     setStats({
       total: totalEarned,
-      thisMonth: thisMonthAppts.length * price * (doctorPercent / 100),
-      totalAppts: allAppts.length,
-      available: totalEarned - totalWithdrawn,
+      pending: totalPending,
+      thisMonth: thisMonthAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0),
+      totalAppts: confirmedAppts.length,
+      available: Math.max(0, totalEarned - totalWithdrawn),
     });
 
     // Last 6 months chart
@@ -79,14 +112,14 @@ const DoctorEarnings = () => {
       const m = subMonths(now, i);
       const mStart = startOfMonth(m);
       const mEnd = endOfMonth(m);
-      const count = allAppts.filter(a => {
+      const monthAppts = confirmedAppts.filter(a => {
         const d = new Date(a.scheduled_at);
         return d >= mStart && d <= mEnd;
-      }).length;
+      });
       chartData.push({
         month: format(m, "MMM", { locale: ptBR }),
-        consultas: count,
-        valor: count * price * (doctorPercent / 100),
+        consultas: monthAppts.length,
+        valor: monthAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0),
       });
     }
     setMonthlyData(chartData);
@@ -95,20 +128,28 @@ const DoctorEarnings = () => {
 
   const requestWithdrawal = async () => {
     const amount = parseFloat(withdrawAmount);
-    if (!amount || amount <= 0 || amount > stats.available) {
-      toast.error("Valor inválido ou superior ao saldo disponível");
+    if (!amount || amount < MIN_WITHDRAWAL) {
+      toast.error(`Valor mínimo para saque: R$ ${MIN_WITHDRAWAL.toFixed(2)}`);
+      return;
+    }
+    if (amount > stats.available) {
+      toast.error("Valor superior ao saldo disponível");
+      return;
+    }
+    if (!pixKey.trim()) {
+      toast.error("Informe sua chave PIX");
       return;
     }
     setSubmitting(true);
     const { error } = await supabase.from("withdrawal_requests").insert({
       user_id: user!.id,
       amount,
-      pix_key: pixKey || null,
+      pix_key: pixKey,
     });
     if (error) {
       toast.error("Erro ao solicitar saque");
     } else {
-      toast.success("Solicitação de saque enviada!");
+      toast.success("Solicitação de saque enviada! Processamento em 3-5 dias úteis.");
       setWithdrawOpen(false);
       setWithdrawAmount("");
       setPixKey("");
@@ -133,16 +174,24 @@ const DoctorEarnings = () => {
         <h1 className="text-2xl font-bold text-foreground mb-1">Meus Ganhos</h1>
         <p className="text-muted-foreground mb-6">Resumo financeiro das consultas realizadas</p>
 
+        {/* Clinic affiliation info */}
+        {clinicInfo && (
+          <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20 flex items-center gap-3 text-xs">
+            <Building2 className="w-4 h-4 text-primary shrink-0" />
+            <span className="text-foreground">Vinculado à <strong>{clinicInfo.name}</strong> — seu repasse é de <strong>{clinicInfo.percent}%</strong></span>
+          </div>
+        )}
+
         {/* Split info */}
         <div className="mb-6 p-3 rounded-lg bg-muted/50 border border-border flex items-center gap-3 text-xs text-muted-foreground">
           <Wallet className="w-4 h-4 shrink-0" />
-          <span>Split automático: <strong className="text-foreground">{DEFAULT_DOCTOR_PERCENT}% Médico</strong> · 20% Clínica · {PLATFORM_PERCENT}% Plataforma</span>
+          <span>Split automático: <strong className="text-foreground">{clinicInfo?.percent ?? DEFAULT_DOCTOR_PERCENT}% Médico</strong> · {clinicInfo ? `${100 - (clinicInfo.percent + PLATFORM_PERCENT)}% Clínica` : "20% Clínica"} · {PLATFORM_PERCENT}% Plataforma</span>
         </div>
 
         <div className="grid sm:grid-cols-4 gap-4 mb-8">
           <Card className="border-border bg-gradient-to-br from-primary/5 to-transparent">
             <CardContent className="pt-6">
-              <p className="text-xs text-muted-foreground">Total Acumulado</p>
+              <p className="text-xs text-muted-foreground">Ganho Confirmado</p>
               <p className="text-2xl font-bold text-foreground">R$ {stats.total.toFixed(2)}</p>
             </CardContent>
           </Card>
@@ -154,8 +203,11 @@ const DoctorEarnings = () => {
           </Card>
           <Card className="border-border">
             <CardContent className="pt-6">
-              <p className="text-xs text-muted-foreground">Consultas Realizadas</p>
-              <p className="text-2xl font-bold text-foreground">{stats.totalAppts}</p>
+              <p className="text-xs text-muted-foreground flex items-center gap-1">
+                Pendente <AlertCircle className="w-3 h-3 text-warning" />
+              </p>
+              <p className="text-2xl font-bold text-warning">R$ {stats.pending.toFixed(2)}</p>
+              <p className="text-[10px] text-muted-foreground">Aguardando confirmação de pagamento</p>
             </CardContent>
           </Card>
           <Card className="border-border border-secondary/20 bg-secondary/5">
@@ -176,29 +228,16 @@ const DoctorEarnings = () => {
                     <p className="text-sm text-muted-foreground">
                       Saldo disponível: <strong className="text-foreground">R$ {stats.available.toFixed(2)}</strong>
                     </p>
+                    <p className="text-xs text-muted-foreground">Valor mínimo: R$ {MIN_WITHDRAWAL.toFixed(2)} · Processamento em 3-5 dias úteis</p>
                     <div>
-                      <label className="text-xs font-medium text-foreground">Valor do saque (R$)</label>
-                      <Input
-                        type="number"
-                        placeholder="0.00"
-                        value={withdrawAmount}
-                        onChange={e => setWithdrawAmount(e.target.value)}
-                        max={stats.available}
-                      />
+                      <label className="text-xs font-medium text-foreground">Valor do saque (R$) *</label>
+                      <Input type="number" placeholder={`Mín. ${MIN_WITHDRAWAL.toFixed(2)}`} value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} min={MIN_WITHDRAWAL} max={stats.available} />
                     </div>
                     <div>
-                      <label className="text-xs font-medium text-foreground">Chave PIX (opcional)</label>
-                      <Input
-                        placeholder="CPF, e-mail ou telefone"
-                        value={pixKey}
-                        onChange={e => setPixKey(e.target.value)}
-                      />
+                      <label className="text-xs font-medium text-foreground">Chave PIX *</label>
+                      <Input placeholder="CPF, e-mail ou telefone" value={pixKey} onChange={e => setPixKey(e.target.value)} />
                     </div>
-                    <Button
-                      className="w-full bg-gradient-hero text-primary-foreground"
-                      onClick={requestWithdrawal}
-                      disabled={submitting || !withdrawAmount}
-                    >
+                    <Button className="w-full bg-gradient-hero text-primary-foreground" onClick={requestWithdrawal} disabled={submitting || !withdrawAmount || !pixKey.trim()}>
                       {submitting ? "Enviando..." : "Confirmar Solicitação"}
                     </Button>
                   </div>
@@ -225,7 +264,6 @@ const DoctorEarnings = () => {
           </CardContent>
         </Card>
 
-        {/* Withdrawal history */}
         {withdrawals.length > 0 && (
           <Card className="border-border">
             <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Wallet className="w-5 h-5" /> Histórico de Saques</CardTitle></CardHeader>

@@ -11,7 +11,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { code } = await req.json();
+    const { code, user_id } = await req.json();
 
     if (!code || typeof code !== "string" || code.trim().length === 0) {
       return new Response(JSON.stringify({ valid: false, error: "Código inválido" }), {
@@ -45,6 +45,18 @@ Deno.serve(async (req) => {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Mark code as used (issue #15)
+    if (user_id) {
+      await supabase
+        .from("doctor_invite_codes")
+        .update({
+          is_used: true,
+          used_at: new Date().toISOString(),
+          used_by: user_id,
+        })
+        .eq("id", data.id);
     }
 
     return new Response(JSON.stringify({ valid: true, code_id: data.id }), {

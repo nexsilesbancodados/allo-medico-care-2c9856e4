@@ -25,7 +25,9 @@ interface Appointment {
   id: string;
   scheduled_at: string;
   status: string;
+  payment_status: string;
   duration_minutes: number;
+  doctor_id: string;
   doctor_name: string;
   doctor_crm: string;
   specialties: string[];
@@ -33,6 +35,7 @@ interface Appointment {
 
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   scheduled: { label: "Agendada", color: "bg-primary/10 text-primary", dot: "bg-primary" },
+  payment_pending: { label: "Aguardando pagamento", color: "bg-warning/10 text-warning", dot: "bg-warning animate-pulse" },
   waiting: { label: "Sala de espera", color: "bg-amber-500/10 text-amber-600", dot: "bg-amber-500" },
   in_progress: { label: "Em andamento", color: "bg-secondary/10 text-secondary", dot: "bg-secondary animate-pulse" },
   completed: { label: "Concluída", color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
@@ -84,7 +87,7 @@ const AppointmentsList = () => {
     setLoading(true);
     const { data } = await supabase
       .from("appointments")
-      .select("id, scheduled_at, status, duration_minutes, doctor_id")
+      .select("id, scheduled_at, status, payment_status, duration_minutes, doctor_id")
       .eq("patient_id", user!.id)
       .order("scheduled_at", { ascending: false });
 
@@ -114,11 +117,15 @@ const AppointmentsList = () => {
     setAppointments(data.map(a => {
       const doc = doctorMap.get(a.doctor_id);
       const profile = doc ? profileMap.get(doc.user_id) : null;
+      // Show payment_pending as visual status if payment not confirmed (issue #12)
+      const displayStatus = (a.status === "scheduled" && a.payment_status === "pending") ? "payment_pending" : a.status;
       return {
         id: a.id,
         scheduled_at: a.scheduled_at,
-        status: a.status,
+        status: displayStatus,
+        payment_status: a.payment_status ?? "pending",
         duration_minutes: a.duration_minutes,
+        doctor_id: a.doctor_id,
         doctor_name: profile ? `Dr(a). ${profile.first_name} ${profile.last_name}` : "Médico",
         doctor_crm: doc ? `${doc.crm}/${doc.crm_state}` : "",
         specialties: specMap.get(a.doctor_id) ?? [],
@@ -268,9 +275,11 @@ const AppointmentsList = () => {
                 </Button>
               )}
 
-              {appt.status === "scheduled" && (
+              {(appt.status === "scheduled" || appt.status === "payment_pending") && (
                 <CancelRescheduleDialog
                   appointmentId={appt.id}
+                  doctorId={appt.doctor_id}
+                  scheduledAt={appt.scheduled_at}
                   currentDate={format(scheduledDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
                   doctorName={appt.doctor_name}
                   onSuccess={fetchAppointments}

@@ -160,6 +160,7 @@ export type Database = {
           payment_confirmed_at: string | null
           payment_confirmed_by: string | null
           payment_status: string | null
+          price_at_booking: number | null
           return_deadline: string | null
           scheduled_at: string
           status: string
@@ -183,6 +184,7 @@ export type Database = {
           payment_confirmed_at?: string | null
           payment_confirmed_by?: string | null
           payment_status?: string | null
+          price_at_booking?: number | null
           return_deadline?: string | null
           scheduled_at: string
           status?: string
@@ -206,6 +208,7 @@ export type Database = {
           payment_confirmed_at?: string | null
           payment_confirmed_by?: string | null
           payment_status?: string | null
+          price_at_booking?: number | null
           return_deadline?: string | null
           scheduled_at?: string
           status?: string
@@ -2359,6 +2362,7 @@ export type Database = {
     }
     Functions: {
       cleanup_rate_limits: { Args: never; Returns: undefined }
+      expire_subscriptions_and_cards: { Args: never; Returns: undefined }
       fn_alert_sla_breach: { Args: never; Returns: undefined }
       fn_archive_completed_queue: { Args: never; Returns: undefined }
       fn_auto_cancel_expired_renewals: { Args: never; Returns: undefined }
@@ -2397,6 +2401,7 @@ export type Database = {
       is_partner: { Args: never; Returns: boolean }
       is_receptionist: { Args: never; Returns: boolean }
       is_support: { Args: never; Returns: boolean }
+      mark_no_shows: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role:
