@@ -33,7 +33,7 @@ const TestConsumer = () => {
 describe("AuthContext", () => {
   it("provides default guest state", async () => {
     render(
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <AuthProvider>
           <TestConsumer />
         </AuthProvider>

@@ -45,7 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const fetchingRef = useRef(false);
 
-  const fetchUserData = async (userId: string) => {
+  const fetchUserData = async (userId: string, retries = 2) => {
     if (fetchingRef.current) return;
     fetchingRef.current = true;
     try {
@@ -56,6 +56,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (profileRes.data) setProfile(profileRes.data as Profile);
       if (rolesRes.data) setRoles(rolesRes.data.map((r: any) => r.role as AppRole));
+
+      // Retry if both failed (network issue)
+      if (profileRes.error && rolesRes.error && retries > 0) {
+        fetchingRef.current = false;
+        await new Promise(r => setTimeout(r, 1000));
+        return fetchUserData(userId, retries - 1);
+      }
     } finally {
       fetchingRef.current = false;
     }
