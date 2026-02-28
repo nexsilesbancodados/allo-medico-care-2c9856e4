@@ -23,6 +23,7 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     if (requiredRole === "doctor") return <Navigate to="/medico?acesso=entrar" replace />;
     if (requiredRole === "clinic") return <Navigate to="/clinica" replace />;
     if (requiredRole === "admin") return <Navigate to="/admin" replace />;
+    if (requiredRole === "laudista") return <Navigate to="/laudista" replace />;
     return <Navigate to="/auth" replace />;
   }
 
