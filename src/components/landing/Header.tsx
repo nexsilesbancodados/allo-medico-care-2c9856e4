@@ -159,9 +159,9 @@ const Header = memo(() => {
                         <NavigationMenuLink asChild>
                           <Link
                             to="/teleconsulta"
-                            className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-primary/10 to-primary/5 p-5 no-underline outline-none focus:shadow-md hover:from-primary/15 hover:to-primary/10 transition-colors"
+                            className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-primary/10 to-primary/5 p-4 no-underline outline-none focus:shadow-md hover:from-primary/15 hover:to-primary/10 transition-colors relative overflow-hidden"
                           >
-                            <img src={pingoVirtualAssistant} alt="Teleconsulta" className="w-10 h-10 object-contain mb-2" />
+                            <img src={pingoVirtualAssistant} alt="Teleconsulta" className="w-full max-h-28 object-contain object-center mb-3" />
                             <div className="mb-1 text-base font-bold text-foreground">Teleconsulta</div>
                             <p className="text-xs leading-relaxed text-muted-foreground">
                               Consultas médicas por vídeo 24h com mais de 30 especialidades.
