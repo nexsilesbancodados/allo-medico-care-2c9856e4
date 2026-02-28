@@ -15,8 +15,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { lazy, Suspense } from "react";
-import pingoThumbsup from "@/assets/mascot-thumbsup.png";
-import mascotWave from "@/assets/mascot-wave.png";
+import heroCartao from "@/assets/hero-cartao.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
@@ -145,11 +144,11 @@ const DiscountCard = () => {
         <Header />
 
         {/* ==================== HERO ==================== */}
-        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
-          <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-white/5 blur-3xl" />
-          <div className="container mx-auto px-4 text-center relative">
+        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "85vh" }}>
+          <img src={heroCartao} alt="Cartão de Benefícios" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "85vh" }}>
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
                 <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Cartão de Benefícios
@@ -220,7 +219,7 @@ const DiscountCard = () => {
             <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }} className="max-w-4xl mx-auto">
               <motion.div variants={fadeUp} className="text-center mb-10 relative">
                 <h2 className="text-2xl sm:text-3xl font-black text-foreground tracking-tight">Tudo incluso no seu cartão</h2>
-                <motion.img src={pingoThumbsup} alt="Pingo" className="absolute -right-2 sm:right-8 -bottom-4 w-12 sm:w-16 object-contain drop-shadow-lg hidden sm:block" initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.3, type: "spring", stiffness: 200 }} />
+                
               </motion.div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {extras.map(({ icon: Icon, label }, i) => (
@@ -294,7 +293,7 @@ const DiscountCard = () => {
               <motion.div variants={fadeUp} className="text-center mb-14 relative">
                 <Badge variant="outline" className="mb-3 text-sm px-4 py-1 rounded-full"><HelpCircle className="w-3.5 h-3.5 mr-1.5" /> Passo a passo</Badge>
                 <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Como funciona?</h2>
-                <motion.img src={mascotWave} alt="Pingo" className="absolute -right-2 sm:right-4 -bottom-6 w-14 sm:w-18 object-contain drop-shadow-lg" initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.3, type: "spring", stiffness: 200 }} />
+                
               </motion.div>
               <div className="grid sm:grid-cols-3 gap-6">
                 {[

@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import { lazy, Suspense } from "react";
-import pingoMascot from "@/assets/telelaudo-pingo.png";
+import heroTelelaudo from "@/assets/hero-telelaudo.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
@@ -56,11 +56,11 @@ const Telelaudo = () => {
         <Header />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary/90 to-primary" />
-          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
-          <div className="container mx-auto px-4 text-center relative">
+        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "85vh" }}>
+          <img src={heroTelelaudo} alt="Telelaudo" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "85vh" }}>
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
                 <FileText className="w-3.5 h-3.5 mr-1.5" /> Telelaudo
@@ -101,15 +101,6 @@ const Telelaudo = () => {
               <motion.div variants={fadeUp} className="text-center mb-14 relative">
                 <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Como funciona o Telelaudo?</h2>
                 <p className="text-muted-foreground mt-3 max-w-lg mx-auto">Do upload do exame à entrega do laudo assinado</p>
-                <motion.img
-                  src={pingoMascot}
-                  alt="Pingo mascote do Telelaudo"
-                  className="absolute -right-4 sm:right-0 -bottom-10 w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-lg"
-                  initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
-                  whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-                />
               </motion.div>
               <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
                 {steps.map((item, i) => (

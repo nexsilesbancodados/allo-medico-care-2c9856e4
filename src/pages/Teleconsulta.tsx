@@ -10,7 +10,7 @@ import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import { lazy, Suspense } from "react";
-import pingoWave from "@/assets/mascot-wave.png";
+import heroTeleconsulta from "@/assets/hero-teleconsulta.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
@@ -76,11 +76,11 @@ const Teleconsulta = () => {
         <Header />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
-          <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
-          <div className="container mx-auto px-4 text-center relative">
+        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "85vh" }}>
+          <img src={heroTeleconsulta} alt="Teleconsulta" className="absolute inset-0 w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "85vh" }}>
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
               <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
                 <Video className="w-3.5 h-3.5 mr-1.5" /> Telemedicina
@@ -125,15 +125,6 @@ const Teleconsulta = () => {
                 <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
                   Como funciona a Teleconsulta?
                 </h2>
-                <motion.img
-                  src={pingoWave}
-                  alt="Pingo mascote"
-                  className="absolute -right-2 sm:right-4 -bottom-6 w-14 h-14 sm:w-18 sm:h-18 object-contain drop-shadow-lg"
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
-                />
               </motion.div>
 
               <div className="grid md:grid-cols-3 gap-5">
