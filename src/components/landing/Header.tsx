@@ -76,7 +76,7 @@ const Header = memo(() => {
 
   const navLinks = [
     { label: "Teleconsulta", href: "/teleconsulta", isRoute: true },
-    { label: "Telelaudo", href: "/telelaudo", isRoute: true },
+    { label: "Telelaudo", href: "/laudista", isRoute: true },
     { label: "Cartão de Benefícios", href: "/cartao-beneficios", isRoute: true },
     { label: "Empresas: Cartão", href: "/para-empresas/cartao", isRoute: true },
     { label: "Empresas: Telelaudo", href: "/para-empresas/telelaudo", isRoute: true },
@@ -171,7 +171,7 @@ const Header = memo(() => {
                           </Link>
                         </NavigationMenuLink>
                       </li>
-                      <ListItem href="/telelaudo" title="Telelaudo" icon={FileText} imgSrc={telelaudoPingo}>
+                      <ListItem href="/laudista" title="Telelaudo" icon={FileText} imgSrc={telelaudoPingo}>
                         Laudos médicos a distância com assinatura digital SHA-256.
                       </ListItem>
                       <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={mascotThumbsup}>
@@ -323,15 +323,6 @@ const Header = memo(() => {
                   className="text-sm font-medium py-3 px-4 rounded-xl transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted"
                 >
                   Sou Médico
-                </motion.button>
-                <motion.button
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.2 }}
-                  onClick={() => { setMobileOpen(false); navigate("/laudista"); }}
-                  className="text-sm font-medium py-3 px-4 rounded-xl transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted"
-                >
-                  Sou Laudista
                 </motion.button>
                 <div className="flex flex-col gap-2 pt-3 mt-2 border-t border-border/50">
                   <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
