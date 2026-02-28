@@ -1,12 +1,58 @@
 import { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LayoutDashboard, UserRound, ShoppingBag } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, UserRound, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Shield, Users } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "@/i18n";
 import { useAuth } from "@/contexts/AuthContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+  navigationMenuTriggerStyle,
+} from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
+
+const ListItem = ({
+  className,
+  title,
+  children,
+  href,
+  icon: Icon,
+  ...props
+}: React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType }) => {
+  return (
+    <li>
+      <NavigationMenuLink asChild>
+        <Link
+          to={href || "#"}
+          className={cn(
+            "block select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground group",
+            className
+          )}
+          {...(props as any)}
+        >
+          <div className="flex items-center gap-2.5">
+            {Icon && (
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
+                <Icon className="w-4 h-4 text-primary" />
+              </div>
+            )}
+            <div>
+              <div className="text-sm font-semibold leading-none text-foreground">{title}</div>
+              <p className="line-clamp-2 text-xs leading-snug text-muted-foreground mt-1">{children}</p>
+            </div>
+          </div>
+        </Link>
+      </NavigationMenuLink>
+    </li>
+  );
+};
 
 const Header = memo(() => {
   const navigate = useNavigate();
@@ -74,8 +120,6 @@ const Header = memo(() => {
           className="absolute bottom-0 left-0 h-[2px] bg-gradient-hero origin-left"
           style={{ scaleX: scrollYProgress }}
         />
-
-        {/* Subtle bottom border */}
         <div className="absolute bottom-0 left-0 right-0 h-px bg-border/50" />
 
         <div className="container mx-auto flex items-center justify-between h-14 lg:h-16 px-4">
@@ -93,21 +137,73 @@ const Header = memo(() => {
             </span>
           </a>
 
-          {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-2" aria-label="Navegação principal">
-            <Button size="sm" onClick={() => navigate("/teleconsulta")} className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:opacity-90 transition-all">
-              Teleconsulta
-            </Button>
-            <Button size="sm" onClick={() => navigate("/telelaudo")} className="rounded-full px-5 text-xs font-bold bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-md shadow-primary/20 hover:shadow-lg hover:opacity-90 transition-all">
-              Telelaudo
-            </Button>
-            <Button size="sm" variant="ghost" onClick={() => navigate("/para-empresas")} className="rounded-full px-4 text-xs font-semibold text-muted-foreground hover:text-foreground transition-all">
-              Para Empresas
-            </Button>
-            <Button size="sm" onClick={() => navigate("/cartao-desconto")} className="rounded-full px-4 text-xs font-bold border border-warning/50 bg-warning/10 text-warning-foreground hover:bg-warning/20 transition-all gap-1">
-              💳 Cartão Desconto
-            </Button>
-          </nav>
+          {/* Desktop nav with NavigationMenu */}
+          <div className="hidden lg:flex items-center">
+            <NavigationMenu>
+              <NavigationMenuList>
+                {/* Serviços dropdown */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="text-sm font-semibold text-foreground/80 hover:text-foreground bg-transparent">
+                    Serviços
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid gap-1 p-2 md:w-[420px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                      <li className="row-span-3">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/teleconsulta"
+                            className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-primary/10 to-primary/5 p-5 no-underline outline-none focus:shadow-md hover:from-primary/15 hover:to-primary/10 transition-colors"
+                          >
+                            <Video className="w-6 h-6 text-primary mb-2" />
+                            <div className="mb-1 text-base font-bold text-foreground">Teleconsulta</div>
+                            <p className="text-xs leading-relaxed text-muted-foreground">
+                              Consultas médicas por vídeo 24h com mais de 30 especialidades.
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <ListItem href="/telelaudo" title="Telelaudo" icon={FileText}>
+                        Laudos médicos a distância com assinatura digital SHA-256.
+                      </ListItem>
+                      <ListItem href="/cartao-desconto" title="Cartão Desconto" icon={CreditCard}>
+                        Descontos em consultas e exames para toda a família.
+                      </ListItem>
+                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>
+                        Atendimento sem cadastro, rápido e seguro.
+                      </ListItem>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                {/* Para Profissionais dropdown */}
+                <NavigationMenuItem>
+                  <NavigationMenuTrigger className="text-sm font-semibold text-foreground/80 hover:text-foreground bg-transparent">
+                    Profissionais
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[340px] gap-1 p-2">
+                      <ListItem href="/medico" title="Sou Médico" icon={Stethoscope}>
+                        Atenda pacientes online e aumente sua renda.
+                      </ListItem>
+                      <ListItem href="/laudista" title="Sou Laudista" icon={Brain}>
+                        Emita laudos à distância com IA e assinatura digital.
+                      </ListItem>
+                      <ListItem href="/clinica" title="Sou Clínica" icon={Building2}>
+                        Gerencie sua clínica com agendamento e prontuário.
+                      </ListItem>
+                    </ul>
+                  </NavigationMenuContent>
+                </NavigationMenuItem>
+
+                {/* Para Empresas - direct link */}
+                <NavigationMenuItem>
+                  <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), "text-sm font-semibold text-foreground/80 hover:text-foreground bg-transparent cursor-pointer")}>
+                    <Link to="/para-empresas">Para Empresas</Link>
+                  </NavigationMenuLink>
+                </NavigationMenuItem>
+              </NavigationMenuList>
+            </NavigationMenu>
+          </div>
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-1.5">
@@ -175,7 +271,7 @@ const Header = memo(() => {
           </button>
         </div>
 
-          {/* Mobile menu */}
+        {/* Mobile menu */}
         <AnimatePresence>
           {mobileOpen && (
             <motion.div
@@ -200,6 +296,24 @@ const Header = memo(() => {
                     {link.label}
                   </motion.button>
                 ))}
+                <motion.button
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.16 }}
+                  onClick={() => { setMobileOpen(false); navigate("/medico"); }}
+                  className="text-sm font-medium py-3 px-4 rounded-xl transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted"
+                >
+                  Sou Médico
+                </motion.button>
+                <motion.button
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  onClick={() => { setMobileOpen(false); navigate("/laudista"); }}
+                  className="text-sm font-medium py-3 px-4 rounded-xl transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted"
+                >
+                  Sou Laudista
+                </motion.button>
                 <div className="flex flex-col gap-2 pt-3 mt-2 border-t border-border/50">
                   <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
                   {user ? (
@@ -231,6 +345,5 @@ const Header = memo(() => {
     </>
   );
 });
-
 Header.displayName = "Header";
 export default Header;
