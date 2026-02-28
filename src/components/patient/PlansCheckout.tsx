@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Calendar } from "@/components/ui/calendar";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -110,7 +110,7 @@ interface DoctorOption {
 
 const PlansCheckout = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const { user } = useAuth();
 
   const [step, setStep] = useState<Step>("specialty");
@@ -334,7 +334,7 @@ const PlansCheckout = () => {
           .limit(1);
         if (data && data.length > 0) {
           clearInterval(pollTimer);
-          toast({ title: "✅ Pagamento confirmado!" });
+          toast.success("✅ Pagamento confirmado!");
           setStep("success");
           clearCheckoutDraft();
         }
@@ -345,7 +345,7 @@ const PlansCheckout = () => {
 
   const handleCheckout = async () => {
     if (paymentMethod === "card" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
-      toast({ title: "Preencha todos os campos do cartão", variant: "destructive" });
+      toast.error("Preencha todos os campos do cartão");
       return;
     }
     setProcessing(true);
@@ -372,7 +372,7 @@ const PlansCheckout = () => {
       }
 
       if (!customerCpf) {
-        toast({ title: "CPF obrigatório", description: "Complete seu perfil com o CPF antes de pagar.", variant: "destructive" });
+        toast.error("CPF obrigatório", { description: "Complete seu perfil com o CPF antes de pagar." });
         setProcessing(false);
         return;
       }
@@ -391,7 +391,7 @@ const PlansCheckout = () => {
         }).select("id").single();
 
         if (error || !appt) {
-          toast({ title: "Erro ao agendar", description: "Tente novamente.", variant: "destructive" });
+          toast.error("Erro ao agendar", { description: "Tente novamente." });
           setProcessing(false);
           return;
         }
@@ -438,7 +438,7 @@ const PlansCheckout = () => {
         });
 
         if (tokenError || !tokenData?.success) {
-          toast({ title: "Erro no cartão", description: tokenData?.error || "Não foi possível processar o cartão.", variant: "destructive" });
+          toast.error("Erro no cartão", { description: tokenData?.error || "Não foi possível processar o cartão." });
           setProcessing(false);
           return;
         }
@@ -458,11 +458,7 @@ const PlansCheckout = () => {
       });
 
       if (error || !data?.success) {
-        toast({
-          title: "Erro no pagamento",
-          description: data?.error || "Tente novamente.",
-          variant: "destructive",
-        });
+        toast.error("Erro no pagamento", { description: data?.error || "Tente novamente." });
 
         // Cancel the appointment if payment failed
         if (appointmentId) {
@@ -479,7 +475,7 @@ const PlansCheckout = () => {
         setPixCopyPasteCode(data.pixCopyPaste || null);
         setProcessing(false);
         // Don't go to success yet — user needs to pay
-        toast({ title: "PIX gerado! 🎉", description: "Escaneie o QR Code ou copie o código para pagar." });
+        toast.success("PIX gerado! 🎉", { description: "Escaneie o QR Code ou copie o código para pagar." });
         return;
       }
 
@@ -507,7 +503,7 @@ const PlansCheckout = () => {
       clearCheckoutDraft();
     } catch (err: any) {
       console.error("Payment error:", err);
-      toast({ title: "Erro", description: err.message || "Erro inesperado.", variant: "destructive" });
+      toast.error("Erro", { description: err.message || "Erro inesperado." });
       setProcessing(false);
     }
   };
@@ -516,7 +512,7 @@ const PlansCheckout = () => {
     const code = pixCopyPasteCode || "";
     navigator.clipboard.writeText(code);
     setPixCopied(true);
-    toast({ title: "Código PIX copiado!" });
+    toast.success("Código PIX copiado!");
     setTimeout(() => setPixCopied(false), 3000);
   };
 
@@ -565,18 +561,18 @@ const PlansCheckout = () => {
     if (error || !data) {
       setCouponValid(false);
       setCouponDiscount(0);
-      toast({ title: "Cupom inválido", variant: "destructive" });
+      toast.error("Cupom inválido");
     } else {
       const expired = data.expires_at && new Date(data.expires_at) < new Date();
       const maxReached = data.max_uses && data.times_used >= data.max_uses;
       if (expired || maxReached) {
         setCouponValid(false);
         setCouponDiscount(0);
-        toast({ title: expired ? "Cupom expirado" : "Cupom esgotado", variant: "destructive" });
+        toast.error(expired ? "Cupom expirado" : "Cupom esgotado");
       } else {
         setCouponValid(true);
         setCouponDiscount(Number(data.discount_percentage));
-        toast({ title: `Cupom aplicado! ${data.discount_percentage}% de desconto 🎉` });
+        toast.success(`Cupom aplicado! ${data.discount_percentage}% de desconto 🎉`);
       }
     }
     setCheckingCoupon(false);
@@ -637,14 +633,14 @@ const PlansCheckout = () => {
                         setSubscribingCard(plan.id);
                         try {
                           const { data: existing } = await supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle();
-                          if (existing) { toast({ title: "Você já possui um cartão ativo!" }); return; }
+                          if (existing) { toast.info("Você já possui um cartão ativo!"); return; }
                           const validUntil = new Date(); validUntil.setMonth(validUntil.getMonth() + 1);
                           const { error } = await supabase.from("discount_cards").insert({ user_id: user.id, plan_type: plan.id, price_monthly: plan.price, discount_percent: 30, status: "active", valid_until: validUntil.toISOString() });
                           if (error) throw error;
-                          toast({ title: "Cartão ativado! 🎉", description: "Aproveite seus benefícios." });
+                          toast.success("Cartão ativado! 🎉", { description: "Aproveite seus benefícios." });
                           navigate("/dashboard");
                         } catch (err: any) {
-                          toast({ title: "Erro", description: err.message, variant: "destructive" });
+                          toast.error("Erro", { description: err.message });
                         } finally { setSubscribingCard(null); }
                       }}
                       disabled={subscribingCard === plan.id}

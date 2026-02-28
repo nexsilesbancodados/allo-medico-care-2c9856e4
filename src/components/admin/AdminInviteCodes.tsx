@@ -7,14 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { KeyRound, Copy, Plus, Check } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const AdminInviteCodes = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const [codes, setCodes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -41,17 +41,17 @@ const AdminInviteCodes = () => {
     });
     setGenerating(false);
     if (error) {
-      toast({ title: "Erro ao gerar código", description: error.message, variant: "destructive" });
+      toast.error("Erro ao gerar código", { description: error.message });
       return;
     }
-    toast({ title: "Código gerado!", description: code });
+    toast.success("Código gerado!", { description: code });
     fetchCodes();
   };
 
   const copyCode = (code: string, id: string) => {
     navigator.clipboard.writeText(code);
     setCopiedId(id);
-    toast({ title: "Copiado!", description: code });
+    toast.success("Copiado!", { description: code });
     setTimeout(() => setCopiedId(null), 2000);
   };
 
