@@ -15,8 +15,8 @@ import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { toast } from "sonner";
 
-const PLATFORM_PERCENT = 10;
-const DEFAULT_DOCTOR_PERCENT = 70;
+const PLATFORM_PERCENT = 50;
+const DEFAULT_DOCTOR_PERCENT = 50;
 const MIN_WITHDRAWAL = 50;
 
 const DoctorEarnings = () => {
@@ -185,7 +185,7 @@ const DoctorEarnings = () => {
         {/* Split info */}
         <div className="mb-6 p-3 rounded-lg bg-muted/50 border border-border flex items-center gap-3 text-xs text-muted-foreground">
           <Wallet className="w-4 h-4 shrink-0" />
-          <span>Split automático: <strong className="text-foreground">{clinicInfo?.percent ?? DEFAULT_DOCTOR_PERCENT}% Médico</strong> · {clinicInfo ? `${100 - (clinicInfo.percent + PLATFORM_PERCENT)}% Clínica` : "20% Clínica"} · {PLATFORM_PERCENT}% Plataforma</span>
+          <span>Split automático: <strong className="text-foreground">{clinicInfo?.percent ?? DEFAULT_DOCTOR_PERCENT}% Médico</strong> · {PLATFORM_PERCENT}% Plataforma</span>
         </div>
 
         <div className="grid sm:grid-cols-4 gap-4 mb-8">
