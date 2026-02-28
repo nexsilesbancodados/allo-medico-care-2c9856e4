@@ -8,8 +8,11 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
-import logo from "@/assets/logo.png";
+import Header from "@/components/landing/Header";
+import { lazy, Suspense } from "react";
 import pingoMascot from "@/assets/telelaudo-pingo.png";
+
+const Footer = lazy(() => import("@/components/landing/Footer"));
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -50,26 +53,10 @@ const Telelaudo = () => {
         description="Laudos médicos a distância com assinatura digital, verificação por QR Code e notificação automática. Eletro, Raio-X, Ressonância e mais."
       />
       <div className="min-h-screen bg-background">
-        {/* Header */}
-        <header className="border-b border-border/40 bg-card/80 backdrop-blur-xl sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-            <Link to="/" className="flex items-center gap-2.5">
-              <img src={logo} alt="AloClinica" className="w-9 h-9 rounded-xl" />
-              <span className="font-bold text-foreground text-lg tracking-tight">AloClínica</span>
-            </Link>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" className="rounded-xl text-sm font-semibold" asChild>
-                <Link to="/medico">Sou Médico</Link>
-              </Button>
-              <Button className="rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-semibold shadow-lg shadow-primary/20" asChild>
-                <Link to="/clinica">Acesso Clínica</Link>
-              </Button>
-            </div>
-          </div>
-        </header>
+        <Header />
 
         {/* Hero */}
-        <section className="relative overflow-hidden py-24 sm:py-32">
+        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
           <div className="absolute inset-0 bg-gradient-to-br from-secondary via-secondary/90 to-primary" />
           <div className="absolute -top-24 -right-24 w-80 h-80 rounded-full bg-white/10 blur-3xl" />
           <div className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full bg-white/5 blur-3xl" />
@@ -93,7 +80,6 @@ const Telelaudo = () => {
                   <Link to="/para-empresas">Sou Clínica / Hospital</Link>
                 </Button>
               </div>
-
               <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
                 {[
                   { icon: <Shield className="w-4 h-4" />, label: "Assinatura SHA-256" },
@@ -101,9 +87,7 @@ const Telelaudo = () => {
                   { icon: <Lock className="w-4 h-4" />, label: "LGPD Compliant" },
                   { icon: <Users className="w-4 h-4" />, label: "Laudistas Certificados" },
                 ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">
-                    {item.icon} {item.label}
-                  </span>
+                  <span key={i} className="flex items-center gap-2 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
                 ))}
               </div>
             </motion.div>
@@ -117,7 +101,6 @@ const Telelaudo = () => {
               <motion.div variants={fadeUp} className="text-center mb-14 relative">
                 <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Como funciona o Telelaudo?</h2>
                 <p className="text-muted-foreground mt-3 max-w-lg mx-auto">Do upload do exame à entrega do laudo assinado</p>
-                {/* Pingo mascot */}
                 <motion.img
                   src={pingoMascot}
                   alt="Pingo mascote do Telelaudo"
@@ -197,12 +180,12 @@ const Telelaudo = () => {
         {/* CTA */}
         <section className="py-6 px-4">
           <div className="container mx-auto max-w-3xl">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-secondary to-primary text-white shadow-xl shadow-secondary/20">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 rounded-2xl bg-gradient-to-r from-secondary to-primary text-primary-foreground shadow-xl shadow-secondary/20">
               <div className="text-center sm:text-left">
                 <h3 className="text-lg font-bold flex items-center gap-2 justify-center sm:justify-start">
                   <Zap className="w-5 h-5" /> Integre o Telelaudo à sua clínica
                 </h3>
-                <p className="text-sm text-white/70 mt-1">Laudos rápidos, seguros e verificáveis para sua operação.</p>
+                <p className="text-sm opacity-70 mt-1">Laudos rápidos, seguros e verificáveis para sua operação.</p>
               </div>
               <Button size="lg" className="bg-white text-secondary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
                 <Link to="/para-empresas">Solicitar Acesso <ChevronRight className="w-4 h-4 ml-1" /></Link>
@@ -233,14 +216,9 @@ const Telelaudo = () => {
           </div>
         </section>
 
-        <footer className="py-8 border-t border-border/40 text-center text-xs text-muted-foreground">
-          <p>
-            © 2026 AloClinica ·{" "}
-            <Link to="/terms" className="hover:text-foreground transition-colors">Termos</Link> ·{" "}
-            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacidade</Link> ·{" "}
-            <Link to="/lgpd" className="hover:text-foreground transition-colors">LGPD</Link>
-          </p>
-        </footer>
+        <Suspense fallback={null}>
+          <Footer />
+        </Suspense>
       </div>
     </>
   );
