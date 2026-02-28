@@ -41,7 +41,8 @@ describe("Header", () => {
       </BrowserRouter>
     );
     expect(screen.getByText("Alo")).toBeInTheDocument();
-    expect(screen.getByText("Teleconsulta")).toBeInTheDocument();
+    // "Serviços" is the dropdown trigger that contains Teleconsulta
+    expect(screen.getByText("Serviços")).toBeInTheDocument();
   });
 });
 

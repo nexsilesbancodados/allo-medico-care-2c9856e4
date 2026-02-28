@@ -2,10 +2,15 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 
+// Mock supabase — the onAuthStateChange callback must fire to set loading=false
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     auth: {
-      onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
+      onAuthStateChange: vi.fn((callback: any) => {
+        // Fire callback with no session to simulate unauthenticated state
+        setTimeout(() => callback("INITIAL_SESSION", null), 0);
+        return { data: { subscription: { unsubscribe: vi.fn() } } };
+      }),
       getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
       signOut: vi.fn(),
     },
