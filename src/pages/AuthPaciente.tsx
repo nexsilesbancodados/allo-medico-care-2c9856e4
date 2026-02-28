@@ -49,8 +49,8 @@ const AuthPaciente = () => {
   const initialPlan = searchParams.get("plan");
   const reason = searchParams.get("reason");
 
-  const [step, setStep] = useState<Step>(initialPlan ? "register" : "select");
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(initialPlan);
+  const [step, setStep] = useState<Step>("register");
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(initialPlan || "avulsa");
   const [plans, setPlans] = useState<PlanItem[]>([]);
 
   const [email, setEmail] = useState("");
@@ -386,128 +386,7 @@ const AuthPaciente = () => {
 
       <div className="container mx-auto px-4 pb-16 flex-1">
         <AnimatePresence mode="wait">
-          {/* Step 1: Select Plan */}
-          {step === "select" && (
-            <motion.div
-              key="select"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="max-w-3xl mx-auto"
-            >
-              {reason === "no-subscription" && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mb-6 p-4 rounded-xl bg-warning/10 border border-warning/30 flex items-start gap-3"
-                >
-                  <AlertCircle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">Você precisa de um plano ativo</p>
-                    <p className="text-xs text-muted-foreground mt-1">Escolha um plano abaixo para acessar sua conta e agendar consultas.</p>
-                  </div>
-                </motion.div>
-              )}
-
-              <div className="text-center mb-10">
-                <motion.h1
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight mb-2"
-                >
-                  Escolha seu Plano
-                </motion.h1>
-                <p className="text-muted-foreground max-w-md mx-auto">Selecione o plano ideal para você e sua família. Cancele quando quiser.</p>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {plans.map((plan) => {
-                  const Icon = plan.icon;
-                  return (
-                    <motion.div
-                      key={plan.id}
-                      variants={fadeUp}
-                      initial="hidden"
-                      animate="visible"
-                      whileHover={{ scale: 1.02, y: -4 }}
-                      whileTap={{ scale: 0.98 }}
-                      className={`relative rounded-2xl p-7 border cursor-pointer transition-all ${
-                        plan.highlighted
-                          ? "bg-gradient-to-br from-secondary to-primary text-primary-foreground border-transparent shadow-xl shadow-primary/20"
-                          : "bg-card border-border shadow-card hover:shadow-elevated hover:border-primary/30"
-                      }`}
-                      onClick={() => handleSelectPlan(plan.id)}
-                    >
-                      {plan.highlighted && (
-                        <motion.div
-                          initial={{ scale: 0, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.3, type: "spring" }}
-                          className="absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full bg-card text-primary text-xs font-bold flex items-center gap-1 shadow-md"
-                        >
-                          <Star className="w-3 h-3 fill-current" /> Mais popular
-                        </motion.div>
-                      )}
-
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center mb-4 ${
-                        plan.highlighted ? "bg-white/20" : "bg-primary/10"
-                      }`}>
-                        <Icon className={`w-5 h-5 ${plan.highlighted ? "" : "text-primary"}`} />
-                      </div>
-
-                      <h3 className={`text-xl font-bold mb-1 ${plan.highlighted ? "" : "text-foreground"}`}>{plan.name}</h3>
-                      <p className={`text-sm mb-5 ${plan.highlighted ? "opacity-80" : "text-muted-foreground"}`}>{plan.description}</p>
-                      <div className="mb-5">
-                        <span className="text-4xl font-extrabold tracking-tight">R${plan.price}</span>
-                        <span className={`text-sm ml-1.5 ${plan.highlighted ? "opacity-70" : "text-muted-foreground"}`}>{plan.period}</span>
-                      </div>
-                      <ul className="space-y-2.5 mb-7">
-                        {plan.features.map((f, i) => (
-                          <li key={i} className="flex items-start gap-2.5 text-sm">
-                            <div className={`w-4.5 h-4.5 rounded-full flex items-center justify-center mt-0.5 shrink-0 ${
-                              plan.highlighted ? "bg-white/20" : "bg-primary/10"
-                            }`}>
-                              <Check className={`w-3 h-3 ${plan.highlighted ? "" : "text-primary"}`} />
-                            </div>
-                            {f}
-                          </li>
-                        ))}
-                      </ul>
-                      <Button className={`w-full h-12 font-semibold ${
-                        plan.highlighted
-                          ? "bg-card text-primary hover:bg-card/90 shadow-lg"
-                          : "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md shadow-primary/15"
-                      }`} size="lg">
-                        <span className="flex items-center gap-2">
-                          Selecionar <ChevronRight className="w-4 h-4" />
-                        </span>
-                      </Button>
-                    </motion.div>
-                  );
-                })}
-              </div>
-
-              {/* Trust badges */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="flex flex-wrap items-center justify-center gap-6 mt-10 text-xs text-muted-foreground"
-              >
-                <span className="flex items-center gap-1.5"><Shield className="w-4 h-4 text-primary" /> Dados 100% protegidos</span>
-                <span className="flex items-center gap-1.5"><Star className="w-4 h-4 text-warning" /> Avaliação 4.9/5</span>
-                <span className="flex items-center gap-1.5"><Users className="w-4 h-4 text-secondary" /> 12.000+ pacientes</span>
-              </motion.div>
-
-              <p className="text-center text-sm text-muted-foreground mt-8">
-                Já tem conta?{" "}
-                <button onClick={() => { setStep("register"); setMode("login"); }} className="text-primary font-semibold hover:underline">
-                  Entrar
-                </button>
-              </p>
-            </motion.div>
-          )}
+          {/* Plan selection removed — pacientes vão direto para registro/login */}
 
           {/* Step 2: Register / Login */}
           {step === "register" && (
