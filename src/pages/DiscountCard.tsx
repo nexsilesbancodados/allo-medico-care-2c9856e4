@@ -144,34 +144,32 @@ const DiscountCard = () => {
         <Header />
 
         {/* ==================== HERO ==================== */}
-        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "85vh" }}>
+        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "55vh" }}>
           <img src={heroCartao} alt="Cartão de Benefícios" className="absolute inset-0 w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "85vh" }}>
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-              <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-                <Sparkles className="w-3.5 h-3.5 mr-1.5" /> Cartão de Benefícios
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-end pb-12" style={{ minHeight: "55vh" }}>
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-xl">
+              <Badge className="mb-3 text-xs px-4 py-1 bg-white/15 text-white border-white/20 backdrop-blur-sm">
+                <Sparkles className="w-3 h-3 mr-1" /> Cartão de Benefícios
               </Badge>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
+              <h1 className="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight leading-tight">
                 Saúde + Economia<br /><span className="text-white/85">para toda a família</span>
               </h1>
-              <p className="text-lg text-white/70 max-w-2xl mx-auto mb-8 leading-relaxed">
-                Telemedicina 24h, clube de vantagens com até 80% de desconto em +10.000 empresas, e assistência funerária completa. Tudo em um único cartão.
+              <p className="text-sm text-white/70 max-w-lg mb-6 leading-relaxed">
+                Telemedicina 24h, clube de vantagens com até 80% de desconto e assistência funerária. Tudo em um único cartão.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl" onClick={() => document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })}>
-                  Ver Planos <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap items-center justify-center gap-6 mt-4">
+              <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl" onClick={() => document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })}>
+                Ver Planos <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+              <div className="flex flex-wrap items-center gap-4 mt-6">
                 {[
-                  { icon: <Shield className="w-4 h-4" />, label: "Sem carência" },
-                  { icon: <Star className="w-4 h-4" />, label: "Cancele quando quiser" },
-                  { icon: <Zap className="w-4 h-4" />, label: "Ativação imediata" },
-                  { icon: <Flower2 className="w-4 h-4" />, label: "Assist. Funerária" },
+                  { icon: <Shield className="w-3.5 h-3.5" />, label: "Sem carência" },
+                  { icon: <Star className="w-3.5 h-3.5" />, label: "Cancele quando quiser" },
+                  { icon: <Zap className="w-3.5 h-3.5" />, label: "Ativação imediata" },
+                  { icon: <Flower2 className="w-3.5 h-3.5" />, label: "Assist. Funerária" },
                 ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-1.5 text-white/55 text-sm font-medium">{item.icon} {item.label}</span>
+                  <span key={i} className="flex items-center gap-1.5 text-white/50 text-xs font-medium">{item.icon} {item.label}</span>
                 ))}
               </div>
             </motion.div>
