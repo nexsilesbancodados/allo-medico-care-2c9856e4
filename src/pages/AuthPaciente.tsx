@@ -66,6 +66,9 @@ const AuthPaciente = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const lockoutUntil = useRef<number>(0);
+  const [cpfVerified, setCpfVerified] = useState(false);
+  const [verifyCpf, setVerifyCpf] = useState("");
+  const [verifyingCpf, setVerifyingCpf] = useState(false);
 
   // Payment state
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX");
@@ -122,6 +125,44 @@ const AuthPaciente = () => {
       });
     }
   }, [reason]);
+
+  const handleVerifyCpf = async () => {
+    const cleanCpf = unmask(verifyCpf);
+    if (cleanCpf.length !== 11) {
+      toast({ title: "CPF inválido", description: "Digite um CPF válido com 11 dígitos.", variant: "destructive" });
+      return;
+    }
+    setVerifyingCpf(true);
+    try {
+      // Check guest_patients (purchased without account)
+      const { data: guestData } = await supabase.from("guest_patients").select("id, full_name, email, phone").eq("cpf", cleanCpf).limit(1);
+      
+      if (guestData && guestData.length > 0) {
+        // Found a purchase — pre-fill data and allow registration
+        const guest = guestData[0];
+        const nameParts = guest.full_name.split(" ");
+        setFirstName(nameParts[0] || "");
+        setLastName(nameParts.slice(1).join(" ") || "");
+        setEmail(guest.email || "");
+        setPhone(formatMask(guest.phone || "", "phone"));
+        setCpf(verifyCpf);
+        setCpfVerified(true);
+        toast({ title: "CPF verificado! ✅", description: "Seus dados da compra foram encontrados. Complete seu cadastro." });
+      } else {
+        // Also check if there's an existing profile with active card
+        const { data: profileData } = await supabase.from("profiles").select("user_id, cpf").eq("cpf", cleanCpf).limit(1);
+        if (profileData && profileData.length > 0) {
+          toast({ title: "Conta já existe", description: "Já existe uma conta com esse CPF. Use a opção 'Entrar'.", variant: "destructive" });
+          setMode("login");
+        } else {
+          toast({ title: "CPF não encontrado", description: "Não encontramos uma compra com esse CPF. Adquira seu cartão primeiro.", variant: "destructive" });
+        }
+      }
+    } catch (err) {
+      toast({ title: "Erro na verificação", description: "Tente novamente.", variant: "destructive" });
+    }
+    setVerifyingCpf(false);
+  };
 
   const handleSelectPlan = (planId: string) => {
     setSelectedPlanId(planId);
@@ -406,14 +447,18 @@ const AuthPaciente = () => {
                   <CreditCard className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground tracking-tight">{mode === "register" ? "Criar sua conta" : "Acessar meu cartão"}</h2>
+                  <h2 className="text-2xl font-bold text-foreground tracking-tight">
+                    {mode === "register" ? (cpfVerified ? "Criar sua conta" : "Primeiro acesso") : "Acessar meu cartão"}
+                  </h2>
                   <p className="text-sm text-muted-foreground">
-                    {mode === "register" ? "Preencha seus dados para acessar" : "Entre com seus dados do cartão de benefícios"}
+                    {mode === "register" 
+                      ? (cpfVerified ? "Complete seus dados para acessar" : "Informe o CPF usado na compra do cartão")
+                      : "Entre com seus dados do cartão de benefícios"}
                   </p>
                 </div>
               </div>
 
-              {currentPlan && mode === "register" && (
+              {currentPlan && mode === "register" && cpfVerified && (
                 <motion.div
                   initial={{ scale: 0.95, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
@@ -432,7 +477,50 @@ const AuthPaciente = () => {
                 </motion.div>
               )}
 
-              {mode === "register" ? (
+              {mode === "register" && !cpfVerified ? (
+                /* CPF Verification Step */
+                <div className="space-y-5">
+                  <div className="p-4 rounded-xl bg-accent/30 border border-accent/50">
+                    <div className="flex items-start gap-3">
+                      <Shield className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="text-sm font-medium text-foreground">Verificação de compra</p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Informe o CPF que você usou ao adquirir o Cartão de Benefícios. Vamos verificar sua compra antes de criar sua conta.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div>
+                    <Label>CPF da compra</Label>
+                    <Input
+                      value={verifyCpf}
+                      onChange={e => setVerifyCpf(formatMask(e.target.value, 'cpf'))}
+                      placeholder="000.000.000-00"
+                      className="mt-1 font-mono h-12 text-base"
+                      maxLength={14}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleVerifyCpf}
+                    className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12 shadow-lg shadow-primary/20"
+                    size="lg"
+                    disabled={verifyingCpf || unmask(verifyCpf).length !== 11}
+                  >
+                    {verifyingCpf ? (
+                      <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Verificando...</span>
+                    ) : (
+                      <span className="flex items-center gap-2"><Shield className="w-4 h-4" /> Verificar CPF</span>
+                    )}
+                  </Button>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Já tem conta? <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
+                  </p>
+                  <p className="text-center text-sm text-muted-foreground">
+                    Ainda não tem o cartão? <Link to="/cartao-beneficios" className="text-primary font-semibold hover:underline">Adquira aqui</Link>
+                  </p>
+                </div>
+              ) : mode === "register" ? (
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1 h-11" /></div>
@@ -536,7 +624,7 @@ const AuthPaciente = () => {
                     <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
                   </p>
                    <p className="text-center text-sm text-muted-foreground">
-                     Comprou o cartão? <button type="button" onClick={() => setMode("register")} className="text-primary font-semibold hover:underline">Primeiro acesso</button>
+                     Comprou o cartão? <button type="button" onClick={() => { setMode("register"); setCpfVerified(false); setVerifyCpf(""); }} className="text-primary font-semibold hover:underline">Primeiro acesso</button>
                    </p>
                 </form>
               )}
