@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Lock, Check } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
@@ -15,27 +15,26 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirmPassword) {
-      toast({ title: "Senhas não conferem", variant: "destructive" });
+      toast.error("Senhas não conferem");
       return;
     }
     if (password.length < 6) {
-      toast({ title: "Senha deve ter no mínimo 6 caracteres", variant: "destructive" });
+      toast.error("Senha deve ter no mínimo 6 caracteres");
       return;
     }
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      toast.error("Erro", { description: error.message });
     } else {
       setSuccess(true);
-      toast({ title: "Senha atualizada!" });
+      toast.success("Senha atualizada!");
       // Check if user has active session before redirecting
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {

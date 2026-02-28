@@ -1,4 +1,4 @@
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 /**
  * Wraps a Supabase query with automatic retry on rate-limit (429) or network errors.
@@ -36,19 +36,19 @@ function showErrorToast(error: any) {
   const isRateLimit = error?.status === 429;
   const isNetwork = !navigator.onLine || message.includes("fetch");
 
-  toast({
-    title: isRateLimit
-      ? "Muitas requisições"
-      : isNetwork
-        ? "Sem conexão"
-        : "Erro",
-    description: isRateLimit
-      ? "Aguarde alguns segundos e tente novamente."
-      : isNetwork
-        ? "Verifique sua conexão com a internet."
-        : message,
-    variant: "destructive",
-  });
+  const title = isRateLimit
+    ? "Muitas requisições"
+    : isNetwork
+      ? "Sem conexão"
+      : "Erro";
+
+  const description = isRateLimit
+    ? "Aguarde alguns segundos e tente novamente."
+    : isNetwork
+      ? "Verifique sua conexão com a internet."
+      : message;
+
+  toast.error(title, { description });
 }
 
 /**
@@ -56,16 +56,13 @@ function showErrorToast(error: any) {
  */
 export function initNetworkListeners() {
   window.addEventListener("offline", () => {
-    toast({
-      title: "Conexão perdida",
+    toast.error("Conexão perdida", {
       description: "Você está offline. Algumas funcionalidades podem não funcionar.",
-      variant: "destructive",
     });
   });
 
   window.addEventListener("online", () => {
-    toast({
-      title: "Conexão restaurada ✅",
+    toast.success("Conexão restaurada ✅", {
       description: "Você está online novamente.",
     });
   });

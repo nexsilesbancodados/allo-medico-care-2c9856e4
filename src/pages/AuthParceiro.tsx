@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Handshake, Building2, LogIn, Sparkles } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
@@ -24,7 +24,6 @@ const AuthParceiro = () => {
   const [partnerType, setPartnerType] = useState("pharmacy");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +31,7 @@ const AuthParceiro = () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
+      toast.error("Erro ao entrar", { description: translateAuthError(error.message) });
     } else {
       navigate("/dashboard?role=partner");
     }
@@ -47,7 +46,7 @@ const AuthParceiro = () => {
     });
     if (error) {
       setLoading(false);
-      toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" });
+      toast.error("Erro no cadastro", { description: translateAuthError(error.message) });
       return;
     }
     if (data.user) {
@@ -60,7 +59,7 @@ const AuthParceiro = () => {
       });
     }
     setLoading(false);
-    toast({ title: "Cadastro realizado!", description: "Aguarde a aprovação do administrador." });
+    toast.success("Cadastro realizado!", { description: "Aguarde a aprovação do administrador." });
     navigate("/dashboard?role=partner");
   };
 

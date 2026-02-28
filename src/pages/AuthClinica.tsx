@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion } from "framer-motion";
 import {
   Building2, Mail, Lock, Phone, MapPin, FileText, Sparkles, Eye, EyeOff,
@@ -103,7 +103,7 @@ const AuthClinica = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { } = {};
   const formRef = useRef<HTMLDivElement>(null);
 
   const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -120,17 +120,17 @@ const AuthClinica = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!termsAccepted) { toast({ title: "Aceite os termos", variant: "destructive" }); return; }
-    if (!clinicName || !cnpj) { toast({ title: "Preencha nome e CNPJ da clínica", variant: "destructive" }); return; }
+    if (!termsAccepted) { toast.error("Aceite os termos"); return; }
+    if (!clinicName || !cnpj) { toast.error("Preencha nome e CNPJ da clínica"); return; }
     // Validate CNPJ
     const cleanCnpj = cnpj.replace(/\D/g, "");
     if (cleanCnpj.length !== 14 || !validarCNPJ(cleanCnpj)) {
-      toast({ title: "CNPJ inválido", description: "Digite um CNPJ válido com 14 dígitos.", variant: "destructive" });
+      toast.error("CNPJ inválido", { description: "Digite um CNPJ válido com 14 dígitos." });
       return;
     }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { first_name: firstName, last_name: lastName } } });
-    if (error) { toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" }); setLoading(false); return; }
+    if (error) { toast.error("Erro no cadastro", { description: translateAuthError(error.message) }); setLoading(false); return; }
     if (data.user) {
       await supabase.from("clinic_profiles").insert({ user_id: data.user.id, name: clinicName, cnpj: cnpj.replace(/\D/g, ""), phone: phone.replace(/\D/g, ""), address }).then(r => r.error && console.error(r.error));
       await supabase.functions.invoke("assign-role", { body: { user_id: data.user.id, role: "clinic" } }).catch(console.error);
@@ -138,7 +138,7 @@ const AuthClinica = () => {
       supabase.functions.invoke("send-email", { body: { type: "welcome_clinic", to: email, data: { name: `${firstName} ${lastName}`, clinic_name: clinicName } } }).catch(console.error);
     }
     setLoading(false);
-    toast({ title: "Cadastro realizado! 🏥", description: "Sua clínica será analisada para aprovação." });
+    toast.success("Cadastro realizado! 🏥", { description: "Sua clínica será analisada para aprovação." });
     navigate("/dashboard");
   };
 
@@ -149,7 +149,7 @@ const AuthClinica = () => {
     setLoading(false);
 
     if (error) {
-      toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
+      toast.error("Erro ao entrar", { description: translateAuthError(error.message) });
       return;
     }
 
@@ -162,13 +162,13 @@ const AuthClinica = () => {
 
       if (!clinicProfile) {
         await supabase.auth.signOut();
-        toast({ title: "Clínica não encontrada", description: "Perfil de clínica não localizado. Cadastre sua clínica primeiro.", variant: "destructive" });
+        toast.error("Clínica não encontrada", { description: "Perfil de clínica não localizado. Cadastre sua clínica primeiro." });
         setMode("register");
         return;
       }
 
       if (!clinicProfile.is_approved) {
-        toast({ title: "Cadastro em análise", description: "Sua clínica está sendo analisada. Funcionalidades completas serão liberadas após aprovação." });
+        toast("Cadastro em análise", { description: "Sua clínica está sendo analisada. Funcionalidades completas serão liberadas após aprovação." });
       }
 
       navigate("/dashboard");
