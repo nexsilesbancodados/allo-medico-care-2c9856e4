@@ -37,18 +37,27 @@ const HeroImage = () => (
 );
 
 const B2BLanding = () => {
+  const [step, setStep] = useState(1);
+  const [quiz, setQuiz] = useState({ segment: "", employees: "", current_benefit: "", interest: [] as string[], budget: "" });
   const [form, setForm] = useState({ company_name: "", contact_name: "", email: "", phone: "", cnpj: "", company_type: "company", message: "" });
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
+  const toggleInterest = (val: string) => {
+    setQuiz(q => ({ ...q, interest: q.interest.includes(val) ? q.interest.filter(v => v !== val) : [...q.interest, val] }));
+  };
+
+  const canAdvanceStep1 = quiz.segment && quiz.employees && quiz.current_benefit && quiz.interest.length > 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const result = leadSchema.safeParse(form);
+    const result = leadSchema.safeParse({ ...form, company_type: quiz.employees || form.company_type });
     if (!result.success) { toast.error(result.error.errors[0].message); return; }
     setSubmitting(true);
-    const { error } = await supabase.from("b2b_leads").insert({ ...form, services_interested: ["cartao_corporativo"] });
+    const servicesInterested = [...quiz.interest, `segmento:${quiz.segment}`, `funcionarios:${quiz.employees}`, `beneficio_atual:${quiz.current_benefit}`, quiz.budget ? `orcamento:${quiz.budget}` : ""].filter(Boolean);
+    const { error } = await supabase.from("b2b_leads").insert({ ...form, company_type: quiz.segment, services_interested: servicesInterested as any });
     if (error) { toast.error("Erro ao enviar: " + error.message); setSubmitting(false); return; }
-    await supabase.functions.invoke("b2b-lead-notification", { body: { ...form, services_interested: ["cartao_corporativo"] } }).catch(() => {});
+    await supabase.functions.invoke("b2b-lead-notification", { body: { ...form, services_interested: servicesInterested } }).catch(() => {});
     setSubmitted(true);
     setSubmitting(false);
   };
@@ -195,11 +204,23 @@ const B2BLanding = () => {
           </div>
         </section>
 
-        {/* Form */}
+        {/* Multi-step Form */}
         <section id="form" className="py-20 bg-muted/30">
           <div className="container mx-auto px-4 max-w-2xl">
             <h2 className="text-3xl font-black text-foreground text-center mb-3 tracking-tight">Solicite uma Proposta</h2>
-            <p className="text-muted-foreground text-center mb-10">Preencha o formulário e nossa equipe comercial entrará em contato em até 24h</p>
+            <p className="text-muted-foreground text-center mb-4">Responda algumas perguntas para montarmos a proposta ideal</p>
+
+            {/* Progress */}
+            {!submitted && (
+              <div className="flex items-center justify-center gap-2 mb-10">
+                {[1, 2].map(s => (
+                  <div key={s} className="flex items-center gap-2">
+                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-colors ${step >= s ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>{s}</div>
+                    {s < 2 && <div className={`w-16 h-1 rounded-full transition-colors ${step > s ? "bg-primary" : "bg-muted"}`} />}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {submitted ? (
               <Card className="border-success/30 shadow-xl">
@@ -208,7 +229,77 @@ const B2BLanding = () => {
                     <CheckCircle2 className="w-10 h-10 text-white" />
                   </div>
                   <h3 className="text-xl font-bold mb-2 text-foreground">Proposta solicitada!</h3>
-                  <p className="text-muted-foreground">Nossa equipe comercial entrará em contato em breve.</p>
+                  <p className="text-muted-foreground">Nossa equipe comercial entrará em contato em até 24h com uma proposta personalizada.</p>
+                </CardContent>
+              </Card>
+            ) : step === 1 ? (
+              <Card className="shadow-xl border-border/50">
+                <CardContent className="p-6 sm:p-8 space-y-6">
+                  <div>
+                    <Label className="text-sm font-bold text-foreground mb-3 block">1. Qual o segmento da sua empresa?</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {["Comércio", "Indústria", "Serviços", "Saúde", "Educação", "Outro"].map(v => (
+                        <button key={v} type="button" onClick={() => setQuiz(q => ({ ...q, segment: v }))}
+                          className={`p-3 rounded-xl border text-sm font-medium transition-all ${quiz.segment === v ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"}`}>
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-bold text-foreground mb-3 block">2. Quantos funcionários sua empresa possui?</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {["1–20", "21–50", "51–200", "200+"].map(v => (
+                        <button key={v} type="button" onClick={() => setQuiz(q => ({ ...q, employees: v }))}
+                          className={`p-3 rounded-xl border text-sm font-medium transition-all ${quiz.employees === v ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"}`}>
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-bold text-foreground mb-3 block">3. Sua empresa já oferece algum benefício de saúde?</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["Plano de saúde", "Convênio", "Nenhum benefício", "Outro"].map(v => (
+                        <button key={v} type="button" onClick={() => setQuiz(q => ({ ...q, current_benefit: v }))}
+                          className={`p-3 rounded-xl border text-sm font-medium transition-all ${quiz.current_benefit === v ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"}`}>
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-bold text-foreground mb-3 block">4. O que mais interessa para sua empresa? (selecione quantos quiser)</Label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {["Telemedicina 24h", "Clube de Vantagens", "Cartão de Desconto", "Assistência Funeral", "Prioridade no atendimento", "Gestor dedicado"].map(v => (
+                        <button key={v} type="button" onClick={() => toggleInterest(v)}
+                          className={`p-3 rounded-xl border text-sm font-medium transition-all flex items-center gap-2 ${quiz.interest.includes(v) ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"}`}>
+                          <CheckCircle2 className={`w-4 h-4 shrink-0 ${quiz.interest.includes(v) ? "text-primary" : "text-transparent"}`} />
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-bold text-foreground mb-3 block">5. Orçamento mensal estimado por colaborador (opcional)</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {["Até R$50", "R$50–100", "R$100–200", "A definir"].map(v => (
+                        <button key={v} type="button" onClick={() => setQuiz(q => ({ ...q, budget: v }))}
+                          className={`p-3 rounded-xl border text-sm font-medium transition-all ${quiz.budget === v ? "border-primary bg-primary/10 text-primary" : "border-border hover:border-primary/50 text-muted-foreground hover:text-foreground"}`}>
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button onClick={() => { setStep(2); document.getElementById("form")?.scrollIntoView({ behavior: "smooth" }); }} disabled={!canAdvanceStep1}
+                    className="w-full h-13 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground font-bold text-base shadow-xl shadow-primary/20">
+                    Próximo: Dados da Empresa <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
@@ -225,23 +316,27 @@ const B2BLanding = () => {
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Telefone</Label><Input value={form.phone} onChange={e => setForm(f => ({ ...f, phone: e.target.value }))} className="mt-1.5 h-11 rounded-xl" /></div>
-                      <div>
-                        <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Nº de Funcionários *</Label>
-                        <Select value={form.company_type} onValueChange={v => setForm(f => ({ ...f, company_type: v }))}>
-                          <SelectTrigger className="mt-1.5 h-11 rounded-xl"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="1-50">1 a 50</SelectItem>
-                            <SelectItem value="51-200">51 a 200</SelectItem>
-                            <SelectItem value="201-500">201 a 500</SelectItem>
-                            <SelectItem value="500+">Mais de 500</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cargo</Label><Input value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Ex: RH, Diretor, Proprietário" className="mt-1.5 h-11 rounded-xl" /></div>
                     </div>
-                    <div><Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Mensagem</Label><Textarea value={form.message} onChange={e => setForm(f => ({ ...f, message: e.target.value }))} placeholder="Conte sobre as necessidades da sua empresa..." rows={3} className="mt-1.5 rounded-xl" /></div>
-                    <Button type="submit" className="w-full h-13 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground font-bold text-base shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow" disabled={submitting}>
-                      {submitting ? "Enviando..." : "Solicitar Proposta Comercial"}
-                    </Button>
+
+                    {/* Quiz summary */}
+                    <div className="bg-muted/50 rounded-xl p-4 space-y-1.5">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">Resumo do questionário</p>
+                      <p className="text-sm text-foreground"><span className="text-muted-foreground">Segmento:</span> {quiz.segment}</p>
+                      <p className="text-sm text-foreground"><span className="text-muted-foreground">Funcionários:</span> {quiz.employees}</p>
+                      <p className="text-sm text-foreground"><span className="text-muted-foreground">Benefício atual:</span> {quiz.current_benefit}</p>
+                      <p className="text-sm text-foreground"><span className="text-muted-foreground">Interesses:</span> {quiz.interest.join(", ")}</p>
+                      {quiz.budget && <p className="text-sm text-foreground"><span className="text-muted-foreground">Orçamento:</span> {quiz.budget}</p>}
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button type="button" variant="outline" onClick={() => setStep(1)} className="rounded-xl h-13 flex-1">
+                        Voltar
+                      </Button>
+                      <Button type="submit" className="flex-[2] h-13 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground font-bold text-base shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow" disabled={submitting}>
+                        {submitting ? "Enviando..." : "Enviar e Receber Proposta"}
+                      </Button>
+                    </div>
                   </form>
                 </CardContent>
               </Card>
