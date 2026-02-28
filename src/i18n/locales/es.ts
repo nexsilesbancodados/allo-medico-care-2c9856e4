@@ -8,7 +8,7 @@ const es: Record<TranslationKeys, string> = {
   "nav.faq": "FAQ",
   "nav.imDoctor": "Soy Médico",
   "nav.buyConsultation": "Comprar Consulta",
-  "nav.imPatient": "Soy Paciente",
+  "nav.imPatient": "Mi Tarjeta",
 
   "marquee.video24h": "✦ Consultas por video 24h",
   "marquee.validPrescriptions": "✦ Recetas digitales válidas",

@@ -7,7 +7,7 @@ const ptBR = {
   "nav.faq": "FAQ",
   "nav.imDoctor": "Sou Médico",
   "nav.buyConsultation": "Comprar Consulta",
-  "nav.imPatient": "Sou Paciente",
+  "nav.imPatient": "Meu Cartão",
 
   // Marquee
   "marquee.video24h": "✦ Consultas por vídeo 24h",
