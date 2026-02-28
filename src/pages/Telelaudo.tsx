@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,9 +11,33 @@ import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import { lazy, Suspense } from "react";
-import heroTelelaudo from "@/assets/hero-telelaudo.png";
+import heroTelelaudo1 from "@/assets/hero-telelaudo.png";
+import heroTelelaudo2 from "@/assets/hero-telelaudo-2.png";
+import heroTelelaudo3 from "@/assets/hero-telelaudo-3.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
+
+const teleLaudoHeroImages = [heroTelelaudo1, heroTelelaudo2, heroTelelaudo3];
+
+const HeroCarousel = ({ images, alt }: { images: string[]; alt: string }) => {
+  const [current, setCurrent] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => setCurrent(prev => (prev + 1) % images.length), 5000);
+    return () => clearInterval(timer);
+  }, [images.length]);
+  return (
+    <>
+      {images.map((img, i) => (
+        <motion.img key={i} src={img} alt={`${alt} ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" initial={false} animate={{ opacity: i === current ? 1 : 0, scale: i === current ? 1.05 : 1 }} transition={{ opacity: { duration: 1 }, scale: { duration: 6 } }} />
+      ))}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+        {images.map((_, i) => (
+          <button key={i} onClick={() => setCurrent(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? "bg-white w-8" : "bg-white/40 hover:bg-white/60"}`} />
+        ))}
+      </div>
+    </>
+  );
+};
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -57,7 +82,7 @@ const Telelaudo = () => {
 
         {/* Hero */}
         <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "85vh" }}>
-          <img src={heroTelelaudo} alt="Telelaudo" className="absolute inset-0 w-full h-full object-cover" />
+          <HeroCarousel images={teleLaudoHeroImages} alt="Telelaudo" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "85vh" }}>
