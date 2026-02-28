@@ -233,25 +233,25 @@ const GuestCheckout = () => {
     // Validate guest info before checkout
     const cleanCpf = guestCpf.replace(/\D/g, "");
     if (!validarCPF(cleanCpf)) {
-      toast({ title: "CPF inválido", description: "Verifique o CPF informado.", variant: "destructive" });
+      toast.error("CPF inválido", { description: "Verifique o CPF informado." });
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(guestEmail)) {
-      toast({ title: "Email inválido", description: "Digite um email válido.", variant: "destructive" });
+      toast.error("Email inválido", { description: "Digite um email válido." });
       return;
     }
     const cleanPhone = guestPhone.replace(/\D/g, "");
     if (cleanPhone.length < 10) {
-      toast({ title: "Telefone inválido", description: "Digite um telefone com DDD.", variant: "destructive" });
+      toast.error("Telefone inválido", { description: "Digite um telefone com DDD." });
       return;
     }
     if (!guestName.trim() || guestName.trim().split(" ").length < 2) {
-      toast({ title: "Nome completo obrigatório", description: "Digite nome e sobrenome.", variant: "destructive" });
+      toast.error("Nome completo obrigatório", { description: "Digite nome e sobrenome." });
       return;
     }
     if (paymentMethod === "credit" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
-      toast({ title: "Preencha todos os dados do cartão", variant: "destructive" });
+      toast.error("Preencha todos os dados do cartão");
       return;
     }
     if (!selectedDoctor || !selectedDate || !selectedTime) return;
@@ -319,7 +319,7 @@ const GuestCheckout = () => {
         });
 
         if (tokenError || !tokenData?.success) {
-          toast({ title: "Erro no cartão", description: tokenData?.error || "Não foi possível processar o cartão.", variant: "destructive" });
+          toast.error("Erro no cartão", { description: tokenData?.error || "Não foi possível processar o cartão." });
           setProcessing(false);
           return;
         }
@@ -334,17 +334,11 @@ const GuestCheckout = () => {
 
       if (payError || !payData?.success) {
         console.error("Payment error:", payError, payData);
-        toast({
-          title: "Consulta agendada, mas pagamento pendente",
-          description: payData?.error || "Você receberá instruções de pagamento por email.",
-        });
+        toast.success("Consulta agendada, mas pagamento pendente", { description: payData?.error || "Você receberá instruções de pagamento por email." });
       } else {
         // Handle fallback from PIX to BOLETO
         if (payData.fallbackUsed) {
-          toast({
-            title: "📋 Boleto gerado automaticamente",
-            description: payData.fallbackMessage || "PIX indisponível no momento. Um boleto foi gerado.",
-          });
+          toast.success("📋 Boleto gerado automaticamente", { description: payData.fallbackMessage || "PIX indisponível no momento. Um boleto foi gerado." });
           setPaymentMethod("boleto");
         }
         // Store payment results
@@ -357,7 +351,7 @@ const GuestCheckout = () => {
       setConsultationUrl(data.consultation_url);
       setStep("success");
     } catch (err: any) {
-      toast({ title: "Erro ao agendar", description: err.message || "Tente novamente.", variant: "destructive" });
+      toast.error("Erro ao agendar", { description: err.message || "Tente novamente." });
     } finally {
       setProcessing(false);
     }
@@ -373,21 +367,21 @@ const GuestCheckout = () => {
 
   const validatePatientInfo = () => {
     if (!guestName.trim() || !guestEmail.trim() || !guestPhone.trim() || !guestCpf.trim()) {
-      toast({ title: "Preencha todos os campos obrigatórios", variant: "destructive" });
+      toast.error("Preencha todos os campos obrigatórios");
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(guestEmail)) {
-      toast({ title: "Email inválido", description: "Informe um email válido.", variant: "destructive" });
+      toast.error("Email inválido", { description: "Informe um email válido." });
       return;
     }
     if (!validarCPF(guestCpf)) {
-      toast({ title: "CPF inválido", description: "Verifique o CPF informado.", variant: "destructive" });
+      toast.error("CPF inválido", { description: "Verifique o CPF informado." });
       return;
     }
     const phoneDigits = guestPhone.replace(/\D/g, "");
     if (phoneDigits.length < 10) {
-      toast({ title: "Telefone inválido", description: "Informe um telefone com pelo menos 10 dígitos.", variant: "destructive" });
+      toast.error("Telefone inválido", { description: "Informe um telefone com pelo menos 10 dígitos." });
       return;
     }
     setStep("checkout");
@@ -955,7 +949,7 @@ const GuestCheckout = () => {
                             variant="outline"
                             size="sm"
                             className="w-full rounded-xl"
-                            onClick={() => { navigator.clipboard.writeText(pixCopyPaste); toast({ title: "Código PIX copiado!" }); }}
+                            onClick={() => { navigator.clipboard.writeText(pixCopyPaste); toast.success("Código PIX copiado!"); }}
                           >
                             <Copy className="w-3.5 h-3.5 mr-1.5" /> Copiar Código PIX
                           </Button>
@@ -1011,7 +1005,7 @@ const GuestCheckout = () => {
                       </div>
                       <Button
                         className="w-full bg-gradient-to-r from-primary to-primary/80 text-white rounded-xl shadow-lg shadow-primary/20"
-                        onClick={() => navigator.clipboard.writeText(consultationUrl).then(() => toast({ title: "Link copiado!" }))}
+                        onClick={() => navigator.clipboard.writeText(consultationUrl).then(() => toast.success("Link copiado!"))}
                       >
                         <Copy className="w-4 h-4 mr-2" /> Copiar Link da Consulta
                       </Button>
