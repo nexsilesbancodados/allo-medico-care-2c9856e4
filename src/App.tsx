@@ -155,7 +155,7 @@ const App = () => {
             <Route path="/cartao-desconto" element={<Navigate to="/cartao-beneficios" replace />} />
             <Route path="/para-empresas" element={<B2BLanding />} />
             <Route path="/teleconsulta" element={<Teleconsulta />} />
-            <Route path="/telelaudo" element={<Telelaudo />} />
+            <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
             <Route path="/laudista" element={<AuthLaudista />} />
             <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
             <Route
