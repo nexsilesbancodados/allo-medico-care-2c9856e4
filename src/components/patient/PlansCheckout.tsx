@@ -40,15 +40,6 @@ const plans = [
     features: ["1 consulta por videochamada", "Receita digital inclusa", "Chat pós-consulta (48h)", "Escolha de especialidade"],
     highlighted: false,
   },
-  {
-    id: "mensal",
-    name: "Plano Mensal",
-    price: 149,
-    period: "por mês",
-    description: "Acesso ilimitado para cuidar da saúde da família.",
-    features: ["Consultas ilimitadas", "Receitas digitais ilimitadas", "Chat ilimitado com médicos", "Prioridade no agendamento", "Prontuário digital completo", "Acesso para até 4 dependentes"],
-    highlighted: true,
-  },
 ];
 
 type Step = "select" | "specialty" | "doctor" | "datetime" | "checkout" | "success";
@@ -73,8 +64,8 @@ const PlansCheckout = () => {
   const { toast } = useToast();
   const { user } = useAuth();
 
-  const [step, setStep] = useState<Step>("select");
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [step, setStep] = useState<Step>("specialty");
+  const [selectedPlan, setSelectedPlan] = useState<string | null>("avulsa");
 
   // Avulsa flow state
   const [specialties, setSpecialties] = useState<{ id: string; name: string }[]>([]);
@@ -241,13 +232,8 @@ const PlansCheckout = () => {
   };
 
   const handleSelectPlan = (planId: string) => {
-    if (planId === "avulsa") {
-      navigate("/consulta-avulsa");
-      return;
-    }
     setSelectedPlan(planId);
-    setStep("checkout");
-    saveCheckoutDraft({ step: "checkout", plan_id: planId });
+    setStep("specialty");
   };
 
   const handleSelectSpecialty = (specId: string) => {
@@ -352,11 +338,8 @@ const PlansCheckout = () => {
         customerMobilePhone: customerPhone,
         billingType: billingTypeMap[paymentMethod],
         value: totalPrice,
-        description: selectedPlan === "avulsa"
-          ? `Consulta Médica - AloClinica`
-          : `Plano ${currentPlan?.name} - AloClinica`,
+        description: `Consulta Médica - AloClinica`,
         appointmentId,
-        ...(selectedPlan === "mensal" ? { cycle: "MONTHLY", planId: selectedPlan } : {}),
       };
 
       // Add card data if credit card
@@ -440,13 +423,10 @@ const PlansCheckout = () => {
   };
 
   const goBack = () => {
-    if (step === "specialty") setStep("select");
+    if (step === "specialty") navigate(-1);
     else if (step === "doctor") setStep("specialty");
     else if (step === "datetime") setStep("doctor");
-    else if (step === "checkout") {
-      if (selectedPlan === "avulsa") setStep("datetime");
-      else setStep("select");
-    }
+    else if (step === "checkout") setStep("datetime");
   };
 
   const formatCardNumber = (value: string) => {
@@ -498,19 +478,15 @@ const PlansCheckout = () => {
   };
 
   // Step indicators
-  const avulsaSteps = ["Plano", "Especialidade", "Médico", "Data/Hora", "Pagamento"];
-  const mensalSteps = ["Plano", "Pagamento"];
-  const stepLabels = selectedPlan === "avulsa" ? avulsaSteps : mensalSteps;
-  const stepIndex = selectedPlan === "avulsa"
-    ? { select: 0, specialty: 1, doctor: 2, datetime: 3, checkout: 4, success: 5 }[step]
-    : { select: 0, checkout: 1, success: 2 }[step] ?? 0;
+  const stepLabels = ["Especialidade", "Médico", "Data/Hora", "Pagamento"];
+  const stepIndex = { specialty: 0, doctor: 1, datetime: 2, checkout: 3, success: 4 }[step] ?? 0;
 
   return (
     <DashboardLayout title="Paciente" nav={patientNav}>
       <div className={step === "checkout" ? "max-w-4xl" : "max-w-3xl"}>
 
         {/* Step indicator */}
-        {step !== "select" && step !== "success" && (
+        {step !== "success" && (
           <div className="mb-6">
             <button onClick={goBack} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
               <ArrowLeft className="w-4 h-4" /> Voltar
@@ -533,46 +509,7 @@ const PlansCheckout = () => {
           </div>
         )}
 
-        {/* STEP 1: Select Plan */}
-        {step === "select" && (
-          <>
-            <h1 className="text-2xl font-bold text-foreground mb-1">Escolha seu Plano</h1>
-            <p className="text-muted-foreground mb-8">Selecione o plano ideal para você</p>
-            <div className="grid md:grid-cols-2 gap-6">
-              {plans.map((plan) => (
-                <motion.div
-                  key={plan.id}
-                  whileHover={{ scale: 1.02 }}
-                  className={`relative rounded-2xl p-6 border cursor-pointer transition-all ${
-                    plan.highlighted
-                      ? "bg-gradient-hero text-primary-foreground border-transparent shadow-elevated"
-                      : "bg-card border-border shadow-card hover:shadow-elevated"
-                  }`}
-                  onClick={() => handleSelectPlan(plan.id)}
-                >
-                  {plan.highlighted && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-card text-primary text-xs font-bold flex items-center gap-1">
-                      <Star className="w-3 h-3" /> Mais popular
-                    </div>
-                  )}
-                  <h3 className={`text-lg font-bold mb-1 ${plan.highlighted ? "" : "text-foreground"}`}>{plan.name}</h3>
-                  <p className={`text-sm mb-4 ${plan.highlighted ? "opacity-80" : "text-muted-foreground"}`}>{plan.description}</p>
-                  <div className="mb-4">
-                    <span className="text-3xl font-extrabold">R${plan.price}</span>
-                    <span className={`text-sm ml-1 ${plan.highlighted ? "opacity-70" : "text-muted-foreground"}`}>{plan.period}</span>
-                  </div>
-                  <ul className="space-y-2">
-                    {plan.features.map((f, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm">
-                        <Check className="w-4 h-4 mt-0.5 flex-shrink-0" /> {f}
-                      </li>
-                    ))}
-                  </ul>
-                </motion.div>
-              ))}
-            </div>
-          </>
-        )}
+        {/* Plan selection removed — only consulta avulsa */}
 
         {/* STEP 2: Choose Specialty (avulsa only) */}
         {step === "specialty" && (
