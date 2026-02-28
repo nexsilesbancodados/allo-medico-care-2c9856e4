@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,9 +23,26 @@ const DoctorAnalyticsCharts = () => {
   const [patientDemographics, setPatientDemographics] = useState<any[]>([]);
   const [summaryStats, setSummaryStats] = useState({ completionRate: 0, avgRating: 0, totalEarnings: 0, totalPatients: 0, returnRate: 0 });
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [tab, setTab] = useState("performance");
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
-  useEffect(() => { if (user) fetchData(); }, [user]);
+  const refresh = useCallback(async (silent = false) => {
+    if (!user) return;
+    if (!silent) setRefreshing(true);
+    await fetchData();
+    setLastUpdated(new Date());
+    if (!silent) setRefreshing(false);
+  }, [user]);
+
+  useEffect(() => {
+    if (user) {
+      refresh(true);
+      intervalRef.current = setInterval(() => refresh(true), 60_000);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [user, refresh]);
 
   const fetchData = async () => {
     const { data: docProfile } = await supabase
@@ -146,6 +165,15 @@ const DoctorAnalyticsCharts = () => {
 
   return (
     <div className="mb-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">
+          Atualizado: {lastUpdated.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+          <span className="ml-1 text-[10px]">(auto-refresh 60s)</span>
+        </p>
+        <Button variant="ghost" size="sm" onClick={() => refresh()} disabled={refreshing} className="h-7 text-xs gap-1">
+          <RefreshCw className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`} /> Atualizar
+        </Button>
+      </div>
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         {[

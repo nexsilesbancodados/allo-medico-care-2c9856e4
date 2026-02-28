@@ -1,5 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -34,9 +36,24 @@ const AdminAnalyticsCharts = () => {
   const [urgentCareKPIs, setUrgentCareKPIs] = useState({ total: 0, waiting: 0, completed: 0, refunded: 0, avgWait: 0, revenue: 0 });
   const [renewalKPIs, setRenewalKPIs] = useState({ total: 0, pending: 0, approved: 0, rejected: 0, avgReviewDays: 0 });
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [tab, setTab] = useState("overview");
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
-  useEffect(() => { fetchChartData(); fetchNewFlowsData(); fetchSpecialtyReports(); }, []);
+  const refreshAll = useCallback(async (silent = false) => {
+    if (!silent) setRefreshing(true);
+    await Promise.all([fetchChartData(), fetchNewFlowsData(), fetchSpecialtyReports()]);
+    setLastUpdated(new Date());
+    if (!silent) setRefreshing(false);
+  }, []);
+
+  useEffect(() => {
+    refreshAll(true);
+    // Auto-refresh every 60 seconds
+    intervalRef.current = setInterval(() => refreshAll(true), 60_000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [refreshAll]);
 
   const fetchChartData = async () => {
     const days = 14;
@@ -290,6 +307,15 @@ const AdminAnalyticsCharts = () => {
 
   return (
     <div className="mb-6" role="region" aria-label="Gráficos de análise">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-xs text-muted-foreground">
+          Atualizado: {lastUpdated.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+          <span className="ml-1 text-[10px]">(auto-refresh 60s)</span>
+        </p>
+        <Button variant="ghost" size="sm" onClick={() => refreshAll()} disabled={refreshing} className="h-7 text-xs gap-1">
+          <RefreshCw className={`w-3 h-3 ${refreshing ? "animate-spin" : ""}`} /> Atualizar
+        </Button>
+      </div>
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="bg-muted/50 border border-border/40 h-9 mb-4 flex-wrap">
           <TabsTrigger value="overview" className="text-xs data-[state=active]:bg-card data-[state=active]:shadow-sm">📊 Visão Geral</TabsTrigger>
