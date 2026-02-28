@@ -1,6 +1,6 @@
-import { useState, memo } from "react";
+import { useState, memo, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LayoutDashboard, UserRound, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Shield, Users } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, UserRound, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Shield, Users, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "@/i18n";
@@ -17,6 +17,17 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
+import carouselBenefits from "@/assets/header-carousel-benefits.png";
+import carouselLaudista from "@/assets/header-carousel-laudista.png";
+import carouselMedico from "@/assets/header-carousel-medico.png";
+import carouselEmpresas from "@/assets/header-carousel-empresas.png";
+
+const carouselSlides = [
+  { image: carouselBenefits, label: "Cartão de Benefícios", desc: "Telemedicina + Clube de Vantagens + Assistência Funerária", href: "/cartao-beneficios" },
+  { image: carouselMedico, label: "Seja Médico Parceiro", desc: "Atenda pacientes online e aumente sua renda", href: "/medico" },
+  { image: carouselLaudista, label: "Telelaudo", desc: "Laudos à distância com IA e assinatura digital", href: "/telelaudo" },
+  { image: carouselEmpresas, label: "Para Empresas", desc: "Soluções corporativas em telemedicina", href: "/para-empresas" },
+];
 
 const ListItem = ({
   className,
@@ -61,10 +72,17 @@ const Header = memo(() => {
   const { user, profile, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const { scrollY, scrollYProgress } = useScroll();
+  const [carouselIdx, setCarouselIdx] = useState(0);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setScrolled(latest > 40);
   });
+
+  // Auto-rotate carousel
+  useEffect(() => {
+    const timer = setInterval(() => setCarouselIdx(prev => (prev + 1) % carouselSlides.length), 4000);
+    return () => clearInterval(timer);
+  }, []);
 
   const navLinks = [
     { label: "Teleconsulta", href: "/teleconsulta", isRoute: true },
@@ -147,31 +165,59 @@ const Header = memo(() => {
                     Serviços
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
-                    <ul className="grid gap-1 p-2 md:w-[420px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
-                      <li className="row-span-3">
-                        <NavigationMenuLink asChild>
-                          <Link
-                            to="/teleconsulta"
-                            className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-primary/10 to-primary/5 p-5 no-underline outline-none focus:shadow-md hover:from-primary/15 hover:to-primary/10 transition-colors"
+                    <div className="grid gap-1 p-2 md:w-[480px] lg:w-[580px] lg:grid-cols-[1fr_1fr]">
+                      {/* Carousel left panel */}
+                      <div className="row-span-4 relative rounded-lg overflow-hidden group min-h-[200px]">
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={carouselIdx}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.4 }}
+                            className="absolute inset-0"
                           >
-                            <Video className="w-6 h-6 text-primary mb-2" />
-                            <div className="mb-1 text-base font-bold text-foreground">Teleconsulta</div>
-                            <p className="text-xs leading-relaxed text-muted-foreground">
-                              Consultas médicas por vídeo 24h com mais de 30 especialidades.
-                            </p>
-                          </Link>
-                        </NavigationMenuLink>
-                      </li>
-                      <ListItem href="/telelaudo" title="Telelaudo" icon={FileText}>
-                        Laudos médicos a distância com assinatura digital SHA-256.
-                      </ListItem>
-                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard}>
-                        Descontos em consultas e exames para toda a família.
-                      </ListItem>
-                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>
-                        Atendimento sem cadastro, rápido e seguro.
-                      </ListItem>
-                    </ul>
+                            <Link to={carouselSlides[carouselIdx].href} className="block h-full">
+                              <img
+                                src={carouselSlides[carouselIdx].image}
+                                alt={carouselSlides[carouselIdx].label}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                              <div className="absolute bottom-0 left-0 right-0 p-4">
+                                <div className="text-sm font-bold text-white">{carouselSlides[carouselIdx].label}</div>
+                                <p className="text-[11px] text-white/70 mt-0.5">{carouselSlides[carouselIdx].desc}</p>
+                              </div>
+                            </Link>
+                          </motion.div>
+                        </AnimatePresence>
+                        {/* Dots */}
+                        <div className="absolute top-2 right-2 flex gap-1">
+                          {carouselSlides.map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={(e) => { e.preventDefault(); setCarouselIdx(i); }}
+                              className={cn("w-1.5 h-1.5 rounded-full transition-all", i === carouselIdx ? "bg-white w-4" : "bg-white/40 hover:bg-white/60")}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                      {/* Links right panel */}
+                      <ul className="space-y-1">
+                        <ListItem href="/teleconsulta" title="Teleconsulta" icon={Video}>
+                          Consultas por vídeo 24h com 30+ especialidades.
+                        </ListItem>
+                        <ListItem href="/telelaudo" title="Telelaudo" icon={FileText}>
+                          Laudos a distância com assinatura digital.
+                        </ListItem>
+                        <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard}>
+                          Descontos em consultas e exames para a família.
+                        </ListItem>
+                        <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>
+                          Atendimento sem cadastro, rápido e seguro.
+                        </ListItem>
+                      </ul>
+                    </div>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
