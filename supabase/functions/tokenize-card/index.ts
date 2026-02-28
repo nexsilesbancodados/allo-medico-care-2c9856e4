@@ -131,7 +131,7 @@ serve(async (req) => {
       (tokenizeBody as any).remoteIp = remoteIp;
     }
 
-    const tokenRes = await fetch(`${baseUrl}/creditCard/tokenize`, {
+    const tokenRes = await fetch(`${baseUrl}/creditCard/tokenizeCreditCard`, {
       method: "POST",
       headers,
       body: JSON.stringify(tokenizeBody),
