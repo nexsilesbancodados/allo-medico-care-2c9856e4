@@ -4,18 +4,25 @@ import { useState, useRef, useCallback } from "react";
 import avatarMaria from "@/assets/avatar-maria.png";
 import avatarCarlos from "@/assets/avatar-carlos.png";
 import avatarAna from "@/assets/avatar-ana.png";
+import avatarPedro from "@/assets/avatar-pedro.png";
+import avatarJuliana from "@/assets/avatar-juliana.png";
+import avatarRenata from "@/assets/avatar-renata.png";
+import avatarLucas from "@/assets/avatar-lucas.png";
+import avatarCamila from "@/assets/avatar-camila.png";
+import avatarMarcos from "@/assets/avatar-marcos.png";
+import avatarFernanda from "@/assets/avatar-fernanda.png";
 
 const allTestimonials = [
   { name: "Maria Silva", handle: "@maria.silva", text: "Consegui uma consulta com cardiologista em menos de 1 hora. A receita chegou digital na hora. Incrível! 💙", rating: 5, avatar: avatarMaria, verified: true, likes: 342, time: "2h" },
   { name: "Dr. Carlos Mendes", handle: "@dr.carlos", text: "A plataforma facilitou muito meu dia a dia. Atendo de casa com a mesma qualidade do consultório. Recomendo!", rating: 5, avatar: avatarCarlos, verified: true, likes: 518, time: "5h" },
   { name: "Ana Costa", handle: "@ana.costa", text: "Com o plano mensal, cuido da saúde de toda minha família sem sair de casa. Vale cada centavo! ❤️", rating: 5, avatar: avatarAna, verified: true, likes: 276, time: "8h" },
-  { name: "Pedro Oliveira", handle: "@pedro.oliv", text: "Agendei uma consulta às 23h e fui atendido no dia seguinte às 7h. Praticidade absurda!", rating: 5, avatar: avatarCarlos, verified: true, likes: 189, time: "1d" },
-  { name: "Juliana Santos", handle: "@ju.santos", text: "Minha mãe de 72 anos conseguiu usar sozinha. Interface super intuitiva e médicos muito atenciosos.", rating: 5, avatar: avatarMaria, verified: true, likes: 423, time: "1d" },
-  { name: "Dr. Renata Lopes", handle: "@dra.renata", text: "Finalmente uma telemedicina que funciona de verdade. Prontuário completo, receita digital, tudo integrado.", rating: 5, avatar: avatarAna, verified: true, likes: 367, time: "2d" },
-  { name: "Lucas Ferreira", handle: "@lucas.f", text: "Estava com dor forte e fui atendido em 15 minutos. O médico foi super atencioso. Nota 10! 🌟", rating: 5, avatar: avatarCarlos, verified: true, likes: 298, time: "2d" },
-  { name: "Camila Rocha", handle: "@cami.rocha", text: "Uso com meus 3 filhos. O plano família é imbatível. Já economizei muito com deslocamento e tempo.", rating: 5, avatar: avatarMaria, verified: true, likes: 445, time: "3d" },
-  { name: "Dr. Marcos Alves", handle: "@dr.marcos", text: "Como médico, a AloClinica me permitiu alcançar pacientes de todo o Brasil. A tecnologia é de ponta.", rating: 5, avatar: avatarCarlos, verified: true, likes: 512, time: "3d" },
-  { name: "Fernanda Lima", handle: "@fer.lima", text: "Melhor investimento em saúde que já fiz. Atendimento humanizado mesmo sendo online. Parabéns! 👏", rating: 5, avatar: avatarAna, verified: true, likes: 331, time: "4d" },
+  { name: "Pedro Oliveira", handle: "@pedro.oliv", text: "Agendei uma consulta às 23h e fui atendido no dia seguinte às 7h. Praticidade absurda!", rating: 5, avatar: avatarPedro, verified: true, likes: 189, time: "1d" },
+  { name: "Juliana Santos", handle: "@ju.santos", text: "Minha mãe de 72 anos conseguiu usar sozinha. Interface super intuitiva e médicos muito atenciosos.", rating: 5, avatar: avatarJuliana, verified: true, likes: 423, time: "1d" },
+  { name: "Dra. Renata Lopes", handle: "@dra.renata", text: "Finalmente uma telemedicina que funciona de verdade. Prontuário completo, receita digital, tudo integrado.", rating: 5, avatar: avatarRenata, verified: true, likes: 367, time: "2d" },
+  { name: "Lucas Ferreira", handle: "@lucas.f", text: "Estava com dor forte e fui atendido em 15 minutos. O médico foi super atencioso. Nota 10! 🌟", rating: 5, avatar: avatarLucas, verified: true, likes: 298, time: "2d" },
+  { name: "Camila Rocha", handle: "@cami.rocha", text: "Uso com meus 3 filhos. O plano família é imbatível. Já economizei muito com deslocamento e tempo.", rating: 5, avatar: avatarCamila, verified: true, likes: 445, time: "3d" },
+  { name: "Dr. Marcos Alves", handle: "@dr.marcos", text: "Como médico, a AloClinica me permitiu alcançar pacientes de todo o Brasil. A tecnologia é de ponta.", rating: 5, avatar: avatarMarcos, verified: true, likes: 512, time: "3d" },
+  { name: "Fernanda Lima", handle: "@fer.lima", text: "Melhor investimento em saúde que já fiz. Atendimento humanizado mesmo sendo online. Parabéns! 👏", rating: 5, avatar: avatarFernanda, verified: true, likes: 331, time: "4d" },
 ];
 
 const TestimonialsSection = () => {
