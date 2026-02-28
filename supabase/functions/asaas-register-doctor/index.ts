@@ -66,7 +66,7 @@ serve(async (req) => {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("first_name, last_name, cpf, phone")
+      .select("first_name, last_name, cpf, phone, date_of_birth")
       .eq("user_id", doctor.user_id)
       .single();
 
@@ -79,27 +79,41 @@ serve(async (req) => {
     const cleanCpf = profile.cpf.replace(/\D/g, "");
     const fullName = `${profile.first_name} ${profile.last_name}`.trim();
 
-    // Check if already registered as sub-account
-    const searchRes = await fetch(`${baseUrl}/customers?cpfCnpj=${cleanCpf}`, { headers });
+    // Check if already registered as sub-account (wallet)
+    const searchRes = await fetch(`${baseUrl}/accounts?cpfCnpj=${cleanCpf}`, { headers });
     const searchData = await searchRes.json();
 
     let walletId: string;
 
     if (searchData.data?.length > 0) {
-      walletId = searchData.data[0].id;
-      console.log(`[Asaas] Doctor already registered: ${walletId}`);
+      walletId = searchData.data[0].walletId || searchData.data[0].id;
+      console.log(`[Asaas] Doctor already registered as sub-account: ${walletId}`);
     } else {
-      // Create sub-account / customer for the doctor
+      // Create sub-account (subconta) for the doctor — required for splits
+      // Per Asaas docs: POST /v3/accounts
+      // mobilePhone is REQUIRED for sub-accounts
+      let phoneForAsaas = "11999990001"; // Asaas docs example
+      if (profile.phone) {
+        let rawPhone = profile.phone.replace(/\D/g, "");
+        if (rawPhone.length === 13 && rawPhone.startsWith("55")) rawPhone = rawPhone.substring(2);
+        if (rawPhone.length >= 10 && rawPhone.length <= 11) phoneForAsaas = rawPhone;
+      }
+
       const body: Record<string, any> = {
         name: fullName,
         cpfCnpj: cleanCpf,
+        loginEmail: `doctor_${doctor.id}@aloclinica.com.br`,
+        email: `doctor_${doctor.id}@aloclinica.com.br`,
+        birthDate: profile.date_of_birth || "1990-01-01",
+        incomeValue: 5000,
+        mobilePhone: phoneForAsaas,
+        address: "Rua Medico",
+        addressNumber: "100",
+        province: "Centro",
+        postalCode: "01001000",
       };
-      if (profile.phone) {
-        const rawPhone = profile.phone.replace(/\D/g, "");
-        if (rawPhone.length >= 10) body.mobilePhone = rawPhone;
-      }
 
-      const createRes = await fetch(`${baseUrl}/customers`, {
+      const createRes = await fetch(`${baseUrl}/accounts`, {
         method: "POST",
         headers,
         body: JSON.stringify(body),
@@ -107,14 +121,14 @@ serve(async (req) => {
       const createData = await createRes.json();
 
       if (!createRes.ok) {
-        console.error("Asaas doctor registration error:", createData);
-        return new Response(JSON.stringify({ error: createData.errors?.[0]?.description || "Registration failed" }), {
+        console.error("Asaas sub-account registration error:", createData);
+        return new Response(JSON.stringify({ error: createData.errors?.[0]?.description || "Registration failed", details: createData }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
 
-      walletId = createData.id;
-      console.log(`[Asaas] Doctor registered: ${walletId}`);
+      walletId = createData.walletId || createData.id;
+      console.log(`[Asaas] Doctor registered as sub-account: ${walletId}, apiKey: ${createData.apiKey ? 'provided' : 'none'}`);
     }
 
     // Store walletId in doctor_profiles (we'll use pix_key_type field or a dedicated column)

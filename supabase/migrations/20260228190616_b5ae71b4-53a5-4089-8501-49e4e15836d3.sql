@@ -1,0 +1,1 @@
+UPDATE profiles SET cpf = '45385043059' WHERE user_id = 'a5c1ac9a-5368-4429-83a0-85e2b3d4a353';
