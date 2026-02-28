@@ -251,7 +251,7 @@ const Header = memo(() => {
                   className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-success to-success/80 text-success-foreground shadow-md shadow-success/20 hover:shadow-lg hover:opacity-90 transition-all px-5"
                   onClick={() => navigate("/paciente")}
                 >
-                  <UserRound className="w-3.5 h-3.5" />
+                  <CreditCard className="w-3.5 h-3.5" />
                   {t("nav.imPatient")}
                 </Button>
               </>
@@ -340,7 +340,7 @@ const Header = memo(() => {
                         <ShoppingBag className="w-4 h-4" /> {t("nav.buyConsultation")}
                       </Button>
                       <Button size="sm" className="rounded-xl justify-start gap-2 bg-gradient-hero text-primary-foreground font-bold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
-                        <UserRound className="w-4 h-4" /> {t("nav.imPatient")}
+                        <CreditCard className="w-4 h-4" /> {t("nav.imPatient")}
                       </Button>
                     </>
                   )}
