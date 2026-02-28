@@ -101,8 +101,8 @@ const B2BLanding = () => {
           </div>
         </section>
 
-        {/* Benefits */}
-        <section className="py-20">
+        {/* Cartão de Benefícios */}
+        <section id="cartao" className="py-20 scroll-mt-24">
           <div className="container mx-auto px-4">
             <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
               <motion.div variants={fadeUp} className="text-center mb-12">
@@ -134,7 +134,7 @@ const B2BLanding = () => {
 
 
         {/* ==================== TELELAUDO PARA CLÍNICAS ==================== */}
-        <section className="py-20 bg-muted/30">
+        <section id="telelaudo" className="py-20 bg-muted/30 scroll-mt-24">
           <div className="container mx-auto px-4">
             <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
               <motion.div variants={fadeUp} className="text-center mb-4">

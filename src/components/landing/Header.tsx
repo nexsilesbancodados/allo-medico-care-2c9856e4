@@ -77,8 +77,9 @@ const Header = memo(() => {
   const navLinks = [
     { label: "Teleconsulta", href: "/teleconsulta", isRoute: true },
     { label: "Telelaudo", href: "/telelaudo", isRoute: true },
-    { label: "Para Empresas", href: "/para-empresas", isRoute: true },
     { label: "Cartão de Benefícios", href: "/cartao-beneficios", isRoute: true },
+    { label: "Empresas: Cartão", href: "/para-empresas#cartao", isRoute: true },
+    { label: "Empresas: Telelaudo", href: "/para-empresas#telelaudo", isRoute: true },
   ];
 
   const handleNavClick = (link: { href: string; isRoute?: boolean }) => {
@@ -203,11 +204,21 @@ const Header = memo(() => {
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
-                {/* Para Empresas - direct link */}
+                {/* Para Empresas dropdown */}
                 <NavigationMenuItem>
-                  <NavigationMenuLink asChild className={cn(navigationMenuTriggerStyle(), "text-sm font-semibold text-foreground/80 hover:text-foreground bg-transparent cursor-pointer")}>
-                    <Link to="/para-empresas">Para Empresas</Link>
-                  </NavigationMenuLink>
+                  <NavigationMenuTrigger className="text-sm font-semibold text-foreground/80 hover:text-foreground bg-transparent">
+                    Para Empresas
+                  </NavigationMenuTrigger>
+                  <NavigationMenuContent>
+                    <ul className="grid w-[340px] gap-1 p-2">
+                      <ListItem href="/para-empresas#cartao" title="Cartão de Benefícios" icon={CreditCard}>
+                        Telemedicina 24h e descontos para seus colaboradores.
+                      </ListItem>
+                      <ListItem href="/para-empresas#telelaudo" title="Telelaudo para Clínicas" icon={FileText}>
+                        Laudos a distância com IA, SLA e assinatura digital.
+                      </ListItem>
+                    </ul>
+                  </NavigationMenuContent>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
