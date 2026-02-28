@@ -376,14 +376,14 @@ const PatientDashboard = () => {
                 className={`flex items-center gap-3 p-4 rounded-2xl border cursor-pointer active:scale-[0.98] transition-all ${
                   isExpiringSoon ? "border-warning/30 bg-warning/5" : "border-success/30 bg-success/5"
                 }`}
-                onClick={() => navigate("/dashboard/payment-history")}
+                onClick={() => navigate(isExpiringSoon ? `/dashboard/plans?action=renew&plan_id=${(activeSub as any).plan_id}` : "/dashboard/payment-history")}
               >
                 {isExpiringSoon
                   ? <AlertCircle className="w-5 h-5 text-warning shrink-0" />
                   : <CheckCircle2 className="w-5 h-5 text-success shrink-0" />}
                 <div className="flex-1 min-w-0">
                   <p className={`text-sm font-semibold ${isExpiringSoon ? "text-warning" : "text-success"}`}>
-                    {isExpiringSoon ? `Plano expira em ${daysLeft}d` : "Plano ativo"}
+                    {isExpiringSoon ? `Plano expira em ${daysLeft}d — Renovar agora` : "Plano ativo"}
                   </p>
                   <p className="text-xs text-muted-foreground truncate">{(activeSub as any).plans?.name ?? "Assinatura"}</p>
                 </div>
