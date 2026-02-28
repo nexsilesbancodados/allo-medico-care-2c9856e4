@@ -131,49 +131,7 @@ const B2BLanding = () => {
           </div>
         </section>
 
-        {/* Plans */}
-        <section className="py-20 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
-              <motion.div variants={fadeUp} className="text-center mb-12">
-                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Planos Corporativos</h2>
-                <p className="text-muted-foreground mt-2 max-w-lg mx-auto">Valores especiais para empresas — quanto mais cartões, maior o desconto</p>
-              </motion.div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
-                {[
-                  { name: "Mini Família", price: "47,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Até 4 dependentes"], highlight: false },
-                  { name: "Solitário", price: "37,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Assistência Funeral Nacional"], highlight: false },
-                  { name: "King Família", price: "77,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Até 6 dependentes", "Prioridade no atendimento"], highlight: true },
-                  { name: "Prime Família", price: "157,90", features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Assistência Funeral Nacional", "Dependentes ilimitados", "Gestor dedicado"], highlight: false },
-                ].map((plan, i) => (
-                  <motion.div key={i} variants={fadeUp}>
-                    <Card className={`h-full transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${plan.highlight ? "border-primary shadow-lg ring-2 ring-primary/20" : "border-border/50"}`}>
-                      <CardContent className="p-6">
-                        {plan.highlight && <Badge className="mb-3 bg-primary/10 text-primary border-primary/20 text-xs">Mais Popular</Badge>}
-                        <h3 className="font-bold text-foreground text-lg mb-1">{plan.name}</h3>
-                        <div className="mb-4">
-                          <span className="text-3xl font-black text-foreground">R$ {plan.price}</span>
-                          <span className="text-sm text-muted-foreground">/mês</span>
-                        </div>
-                        <ul className="space-y-2.5">
-                          {plan.features.map((f, j) => (
-                            <li key={j} className="flex items-start gap-2 text-sm text-muted-foreground">
-                              <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                              {f}
-                            </li>
-                          ))}
-                        </ul>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-              <motion.p variants={fadeUp} className="text-center text-sm text-muted-foreground mt-8">
-                * Valores por colaborador. Condições especiais para contratações acima de 50 cartões.
-              </motion.p>
-            </motion.div>
-          </div>
-        </section>
+
 
         {/* Advantages for company */}
         <section className="py-20">
