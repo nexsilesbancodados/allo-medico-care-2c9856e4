@@ -14,9 +14,7 @@ import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import { z } from "zod";
-import b2bHero1 from "@/assets/b2b-hero-1.png";
 import b2bHero2 from "@/assets/b2b-hero-2.png";
-import b2bHero3 from "@/assets/b2b-hero-3.png";
 import { lazy, Suspense } from "react";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
@@ -34,43 +32,9 @@ const leadSchema = z.object({
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } } };
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 
-const heroImages = [b2bHero1, b2bHero2, b2bHero3];
-
-const HeroCarousel = () => {
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrent(prev => (prev + 1) % heroImages.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  return (
-    <>
-      {heroImages.map((img, i) => (
-        <motion.img
-          key={i}
-          src={img}
-          alt={`Benefícios corporativos ${i + 1}`}
-          className="absolute inset-0 w-full h-full object-cover"
-          initial={false}
-          animate={{ opacity: i === current ? 1 : 0, scale: i === current ? 1.05 : 1 }}
-          transition={{ opacity: { duration: 1 }, scale: { duration: 6 } }}
-        />
-      ))}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-        {heroImages.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setCurrent(i)}
-            className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? "bg-white w-8" : "bg-white/40 hover:bg-white/60"}`}
-          />
-        ))}
-      </div>
-    </>
-  );
-};
+const HeroImage = () => (
+  <img src={b2bHero2} alt="Benefícios corporativos" className="absolute inset-0 w-full h-full object-cover" />
+);
 
 const B2BLanding = () => {
   const [form, setForm] = useState({ company_name: "", contact_name: "", email: "", phone: "", cnpj: "", company_type: "company", message: "" });
@@ -97,7 +61,7 @@ const B2BLanding = () => {
 
         {/* Hero with Carousel */}
         <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "55vh" }}>
-          <HeroCarousel />
+          <HeroImage />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent z-10" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10" />
           <div className="container mx-auto px-4 relative z-20 flex items-end pb-12" style={{ minHeight: "55vh" }}>
