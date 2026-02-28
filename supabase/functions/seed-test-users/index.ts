@@ -29,18 +29,89 @@ serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    // Get all existing users once (instead of per-user)
     const { data: existing } = await supabase.auth.admin.listUsers({ perPage: 1000 });
-    const existingEmails = new Set((existing?.users ?? []).map((u: any) => u.email));
+    const existingMap = new Map((existing?.users ?? []).map((u: any) => [u.email, u]));
 
     const results: any[] = [];
 
     for (const u of TEST_USERS) {
-      if (existingEmails.has(u.email)) {
-        results.push({ email: u.email, role: u.role, status: "already_exists" });
+      const existingUser = existingMap.get(u.email);
+
+      if (existingUser) {
+        const userId = existingUser.id;
+
+        // Ensure profile exists
+        const { data: profile } = await supabase.from("profiles").select("id").eq("user_id", userId).maybeSingle();
+        if (!profile) {
+          await supabase.from("profiles").insert({
+            user_id: userId,
+            first_name: u.first_name,
+            last_name: u.last_name,
+          });
+        }
+
+        // Ensure role exists
+        const { data: role } = await supabase.from("user_roles").select("id").eq("user_id", userId).eq("role", u.role === "laudista" ? "doctor" : u.role).maybeSingle();
+        if (!role) {
+          await supabase.from("user_roles").upsert({
+            user_id: userId,
+            role: u.role === "laudista" ? "doctor" : u.role,
+          }, { onConflict: "user_id,role" });
+        }
+
+        // Ensure patient role also exists (default)
+        await supabase.from("user_roles").upsert({
+          user_id: userId,
+          role: "patient",
+        }, { onConflict: "user_id,role" });
+
+        // Ensure role-specific profiles exist
+        if (u.role === "doctor" || u.role === "laudista") {
+          const { data: dp } = await supabase.from("doctor_profiles").select("id").eq("user_id", userId).maybeSingle();
+          if (!dp) {
+            await supabase.from("doctor_profiles").insert({
+              user_id: userId,
+              crm: u.role === "laudista" ? "654321" : "123456",
+              crm_state: "SP",
+              bio: u.role === "laudista" ? "Médica laudista para validação do sistema." : "Médico de teste para validação do sistema.",
+              consultation_price: 89,
+              is_approved: true,
+              crm_verified: true,
+            });
+          } else {
+            // Ensure approved
+            await supabase.from("doctor_profiles").update({
+              is_approved: true,
+              crm_verified: true,
+              consultation_price: 89,
+              bio: u.role === "laudista" ? "Médica laudista para validação do sistema." : "Médico de teste para validação do sistema.",
+            }).eq("user_id", userId);
+          }
+        }
+
+        if (u.role === "clinic") {
+          const { data: cp } = await supabase.from("clinic_profiles").select("id").eq("user_id", userId).maybeSingle();
+          if (!cp) {
+            await supabase.from("clinic_profiles").insert({
+              user_id: userId, name: "Clínica Teste", cnpj: "12.345.678/0001-00", phone: "(11) 99999-0000", is_approved: true,
+            });
+          }
+        }
+
+        if (u.role === "partner") {
+          const { data: pp } = await supabase.from("partner_profiles").select("id").eq("user_id", userId).maybeSingle();
+          if (!pp) {
+            await supabase.from("partner_profiles").insert({
+              user_id: userId, business_name: "Farmácia Teste", partner_type: "pharmacy", cnpj: "98.765.432/0001-00", is_approved: true,
+            });
+          }
+        }
+
+        results.push({ email: u.email, role: u.role, status: "repaired" });
         continue;
       }
 
+      // Create new user
       const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
         email: u.email,
         password: u.password,
@@ -55,12 +126,10 @@ serve(async (req) => {
 
       const userId = newUser.user.id;
 
-      // handle_new_user trigger creates profile + default 'patient' role
       if (u.role !== "patient") {
-        await supabase.from("user_roles").insert({ user_id: userId, role: u.role });
+        await supabase.from("user_roles").insert({ user_id: userId, role: u.role === "laudista" ? "doctor" : u.role });
       }
 
-      // Role-specific profiles
       if (u.role === "doctor" || u.role === "laudista") {
         await supabase.from("doctor_profiles").insert({
           user_id: userId,
@@ -75,21 +144,13 @@ serve(async (req) => {
 
       if (u.role === "clinic") {
         await supabase.from("clinic_profiles").insert({
-          user_id: userId,
-          name: "Clínica Teste",
-          cnpj: "12.345.678/0001-00",
-          phone: "(11) 99999-0000",
-          is_approved: true,
+          user_id: userId, name: "Clínica Teste", cnpj: "12.345.678/0001-00", phone: "(11) 99999-0000", is_approved: true,
         });
       }
 
       if (u.role === "partner") {
         await supabase.from("partner_profiles").insert({
-          user_id: userId,
-          business_name: "Farmácia Teste",
-          partner_type: "pharmacy",
-          cnpj: "98.765.432/0001-00",
-          is_approved: true,
+          user_id: userId, business_name: "Farmácia Teste", partner_type: "pharmacy", cnpj: "98.765.432/0001-00", is_approved: true,
         });
       }
 
