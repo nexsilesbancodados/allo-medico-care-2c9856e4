@@ -1,6 +1,6 @@
-import { useState, memo, useEffect, useCallback } from "react";
+import { useState, memo } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LayoutDashboard, UserRound, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Shield, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, UserRound, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Shield, Users } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "@/i18n";
@@ -17,65 +17,6 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/logo.png";
-import carouselBenefits from "@/assets/header-carousel-benefits.png";
-import carouselBenefits2 from "@/assets/header-carousel-benefits-2.png";
-import carouselBenefits3 from "@/assets/header-carousel-benefits-3.png";
-import carouselLaudista from "@/assets/header-carousel-laudista.png";
-import carouselLaudista2 from "@/assets/header-carousel-laudista-2.png";
-import carouselLaudista3 from "@/assets/header-carousel-laudista-3.png";
-import carouselMedico from "@/assets/header-carousel-medico.png";
-import carouselMedico2 from "@/assets/header-carousel-medico-2.png";
-import carouselMedico3 from "@/assets/header-carousel-medico-3.png";
-import carouselEmpresas from "@/assets/header-carousel-empresas.png";
-import carouselEmpresas2 from "@/assets/header-carousel-empresas-2.png";
-import carouselEmpresas3 from "@/assets/header-carousel-empresas-3.png";
-
-const carouselCategories = [
-  {
-    label: "Cartão de Benefícios",
-    href: "/cartao-beneficios",
-    icon: CreditCard,
-    images: [carouselBenefits, carouselBenefits2, carouselBenefits3],
-    descs: [
-      "Telemedicina + Clube de Vantagens + Assistência Funerária",
-      "Família protegida com acesso à saúde digital",
-      "Descontos em farmácias e parceiros de saúde",
-    ],
-  },
-  {
-    label: "Telelaudo",
-    href: "/telelaudo",
-    icon: FileText,
-    images: [carouselLaudista, carouselLaudista2, carouselLaudista3],
-    descs: [
-      "Laudos à distância com IA e assinatura digital",
-      "Estação de trabalho com múltiplos monitores DICOM",
-      "Relatórios médicos gerados com inteligência artificial",
-    ],
-  },
-  {
-    label: "Seja Médico Parceiro",
-    href: "/medico",
-    icon: Stethoscope,
-    images: [carouselMedico, carouselMedico2, carouselMedico3],
-    descs: [
-      "Atenda pacientes online e aumente sua renda",
-      "Teleconsulta do seu consultório ou de casa",
-      "Dashboard de ganhos e estatísticas de pacientes",
-    ],
-  },
-  {
-    label: "Para Empresas",
-    href: "/para-empresas",
-    icon: Building2,
-    images: [carouselEmpresas, carouselEmpresas2, carouselEmpresas3],
-    descs: [
-      "Soluções corporativas em telemedicina",
-      "Gestão de saúde ocupacional para equipes",
-      "Colaboradores acessando saúde digital no trabalho",
-    ],
-  },
-];
 
 const ListItem = ({
   className,
@@ -120,18 +61,10 @@ const Header = memo(() => {
   const { user, profile, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const { scrollY, scrollYProgress } = useScroll();
-  const [carouselIdx, setCarouselIdx] = useState(0);
-  const [activeCat, setActiveCat] = useState(0);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
     setScrolled(latest > 40);
   });
-
-  // Auto-rotate carousel images within active category
-  useEffect(() => {
-    const timer = setInterval(() => setCarouselIdx(prev => (prev + 1) % 3), 4000);
-    return () => clearInterval(timer);
-  }, [activeCat]);
 
   const navLinks = [
     { label: "Teleconsulta", href: "/teleconsulta", isRoute: true },
@@ -213,80 +146,32 @@ const Header = memo(() => {
                   <NavigationMenuTrigger className="text-sm font-semibold text-foreground/80 hover:text-foreground bg-transparent">
                     Serviços
                   </NavigationMenuTrigger>
-                   <NavigationMenuContent>
-                    <div className="w-[90vw] max-w-[900px] p-0">
-                      {/* Full-width carousel */}
-                      <div className="relative w-full h-[280px] overflow-hidden rounded-t-lg">
-                        <AnimatePresence mode="wait">
-                          <motion.div
-                            key={`${activeCat}-${carouselIdx}`}
-                            initial={{ opacity: 0, scale: 1.03 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.98 }}
-                            transition={{ duration: 0.5 }}
-                            className="absolute inset-0"
+                  <NavigationMenuContent>
+                    <ul className="grid gap-1 p-2 md:w-[420px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                      <li className="row-span-3">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/teleconsulta"
+                            className="flex h-full w-full select-none flex-col justify-end rounded-lg bg-gradient-to-b from-primary/10 to-primary/5 p-5 no-underline outline-none focus:shadow-md hover:from-primary/15 hover:to-primary/10 transition-colors"
                           >
-                            <Link to={carouselCategories[activeCat].href} className="block h-full">
-                              <img
-                                src={carouselCategories[activeCat].images[carouselIdx]}
-                                alt={carouselCategories[activeCat].label}
-                                className="w-full h-full object-cover"
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                              <div className="absolute bottom-0 left-0 right-0 p-5">
-                                <div className="text-base font-bold text-white">{carouselCategories[activeCat].label}</div>
-                                <p className="text-xs text-white/80 mt-1">{carouselCategories[activeCat].descs[carouselIdx]}</p>
-                              </div>
-                            </Link>
-                          </motion.div>
-                        </AnimatePresence>
-                        {/* Image dots */}
-                        <div className="absolute top-3 right-3 flex gap-1.5 z-10">
-                          {[0, 1, 2].map((i) => (
-                            <button
-                              key={i}
-                              onClick={(e) => { e.preventDefault(); setCarouselIdx(i); }}
-                              className={cn("h-2 rounded-full transition-all", i === carouselIdx ? "bg-white w-6" : "bg-white/40 hover:bg-white/60 w-2")}
-                            />
-                          ))}
-                        </div>
-                        {/* Arrows */}
-                        <button
-                          onClick={(e) => { e.preventDefault(); setCarouselIdx(prev => (prev + 2) % 3); }}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors z-10"
-                        >
-                          <ChevronLeft className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={(e) => { e.preventDefault(); setCarouselIdx(prev => (prev + 1) % 3); }}
-                          className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors z-10"
-                        >
-                          <ChevronRight className="w-4 h-4" />
-                        </button>
-                      </div>
-                      {/* Category tabs */}
-                      <div className="grid grid-cols-4 border-t border-border/50">
-                        {carouselCategories.map((cat, i) => {
-                          const Icon = cat.icon;
-                          return (
-                            <button
-                              key={cat.label}
-                              onMouseEnter={() => { setActiveCat(i); setCarouselIdx(0); }}
-                              onClick={(e) => { e.preventDefault(); navigate(cat.href); }}
-                              className={cn(
-                                "flex flex-col items-center gap-1.5 py-3 px-2 text-center transition-all border-b-2",
-                                i === activeCat
-                                  ? "border-primary bg-primary/5 text-primary"
-                                  : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/30"
-                              )}
-                            >
-                              <Icon className="w-5 h-5" />
-                              <span className="text-[11px] font-semibold leading-tight">{cat.label}</span>
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
+                            <Video className="w-6 h-6 text-primary mb-2" />
+                            <div className="mb-1 text-base font-bold text-foreground">Teleconsulta</div>
+                            <p className="text-xs leading-relaxed text-muted-foreground">
+                              Consultas médicas por vídeo 24h com mais de 30 especialidades.
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <ListItem href="/telelaudo" title="Telelaudo" icon={FileText}>
+                        Laudos médicos a distância com assinatura digital SHA-256.
+                      </ListItem>
+                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard}>
+                        Descontos em consultas e exames para toda a família.
+                      </ListItem>
+                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>
+                        Atendimento sem cadastro, rápido e seguro.
+                      </ListItem>
+                    </ul>
                   </NavigationMenuContent>
                 </NavigationMenuItem>
 
