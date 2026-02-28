@@ -106,9 +106,9 @@ const AuthLaudista = () => {
       } as any);
       if (error) throw error;
       setStep("applied");
-      toast({ title: "Solicitação enviada!", description: "Analisaremos seus dados e retornaremos por email." });
+      toast.success("Solicitação enviada!", { description: "Analisaremos seus dados e retornaremos por email." });
     } catch (err: any) {
-      toast({ title: "Erro ao enviar", description: err?.message || "Tente novamente.", variant: "destructive" });
+      toast.error("Erro ao enviar", { description: err?.message || "Tente novamente." });
     }
     setSubmittingApplication(false);
   };
@@ -124,12 +124,12 @@ const AuthLaudista = () => {
       if (data?.valid) {
         setValidatedCodeId(data.code_id);
         setStep("register");
-        toast({ title: "Código válido!", description: "Preencha seus dados para criar sua conta." });
+        toast.success("Código válido!", { description: "Preencha seus dados para criar sua conta." });
       } else {
-        toast({ title: "Código inválido", description: data?.error || "Verifique o código e tente novamente.", variant: "destructive" });
+        toast.error("Código inválido", { description: data?.error || "Verifique o código e tente novamente." });
       }
     } catch {
-      toast({ title: "Erro", description: "Não foi possível validar o código.", variant: "destructive" });
+      toast.error("Erro", { description: "Não foi possível validar o código." });
     }
     setValidating(false);
   };
@@ -140,7 +140,7 @@ const AuthLaudista = () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
+      toast.error("Erro ao entrar", { description: error.message });
     } else {
       navigate("/dashboard/laudista?role=doctor");
     }
@@ -149,7 +149,7 @@ const AuthLaudista = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!termsAccepted) {
-      toast({ title: "Aceite os termos", description: "Você precisa aceitar os Termos de Uso.", variant: "destructive" });
+      toast.error("Aceite os termos", { description: "Você precisa aceitar os Termos de Uso." });
       return;
     }
     setLoading(true);
@@ -159,7 +159,7 @@ const AuthLaudista = () => {
     });
     if (error) {
       setLoading(false);
-      toast({ title: "Erro no cadastro", description: error.message, variant: "destructive" });
+      toast.error("Erro no cadastro", { description: error.message });
       return;
     }
     if (data.user) {
@@ -169,7 +169,7 @@ const AuthLaudista = () => {
       await registerConsent(data.user.id, "terms_and_privacy_doctor");
     }
     setLoading(false);
-    toast({ title: "Cadastro realizado!", description: "Aguarde a aprovação do seu CRM." });
+    toast.success("Cadastro realizado!", { description: "Aguarde a aprovação do seu CRM." });
     navigate("/dashboard/laudista?role=doctor");
   };
 

@@ -233,7 +233,7 @@ const VideoRoom = () => {
 
     // Block entry for cancelled/no_show appointments
     if (["cancelled", "no_show"].includes(data.status)) {
-      toast({ title: "Consulta indisponível", description: "Esta consulta foi cancelada ou marcada como não comparecimento.", variant: "destructive" });
+      toast.error("Consulta indisponível", { description: "Esta consulta foi cancelada ou marcada como não comparecimento." });
       navigate("/dashboard");
       return;
     }
@@ -242,23 +242,19 @@ const VideoRoom = () => {
     if (isDoctor) {
       const { data: dp } = await supabase.from("doctor_profiles").select("id").eq("user_id", user!.id).maybeSingle();
       if (dp && dp.id !== data.doctor_id) {
-        toast({ title: "Acesso negado", description: "Esta consulta não está atribuída a você.", variant: "destructive" });
+        toast.error("Acesso negado", { description: "Esta consulta não está atribuída a você." });
         navigate("/dashboard");
         return;
       }
     } else if (user && data.patient_id && data.patient_id !== user.id) {
-      toast({ title: "Acesso negado", description: "Esta consulta pertence a outro paciente.", variant: "destructive" });
+      toast.error("Acesso negado", { description: "Esta consulta pertence a outro paciente." });
       navigate("/dashboard");
       return;
     }
 
     // Check payment status before allowing entry
     if (!isDoctor && data.payment_status === "pending" && data.status === "scheduled") {
-      toast({
-        title: "⏳ Aguardando pagamento",
-        description: "Sua consulta será liberada assim que o pagamento for confirmado.",
-        variant: "destructive",
-      });
+      toast.error("⏳ Aguardando pagamento", { description: "Sua consulta será liberada assim que o pagamento for confirmado." });
       navigate("/dashboard/appointments");
       return;
     }
@@ -344,7 +340,7 @@ const VideoRoom = () => {
       .from("patient-documents")
       .upload(filePath, file, { contentType: file.type });
     if (uploadErr) {
-      toast({ title: "Erro ao enviar arquivo", variant: "destructive" });
+      toast.error("Erro ao enviar arquivo");
       return;
     }
     const { data: urlData } = supabase.storage.from("patient-documents").getPublicUrl(filePath);
@@ -508,10 +504,10 @@ const VideoRoom = () => {
           });
         }
 
-        toast({ title: "✅ SOAP salvo e PDF gerado!", description: "Documento salvo no prontuário do paciente." });
+        toast.success("✅ SOAP salvo e PDF gerado!", { description: "Documento salvo no prontuário do paciente." });
       } catch (pdfErr) {
         console.error("PDF generation error:", pdfErr);
-        toast({ title: "✅ Anotações salvas!", description: "Não foi possível gerar o PDF." });
+        toast.success("✅ Anotações salvas!", { description: "Não foi possível gerar o PDF." });
       }
     }
   };
@@ -569,7 +565,7 @@ const VideoRoom = () => {
       notifyConsultationCompleted(appointmentId!, docName).catch(console.error);
     }
     
-    toast({ title: "Consulta encerrada" });
+    toast.success("Consulta encerrada");
     setShowSummary(true);
   }, [isDoctor, appointmentId]);
 
@@ -808,15 +804,15 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
             };
             setSoapNotes(updated);
             setNotes(JSON.stringify(updated));
-            toast({ title: "🤖 SOAP preenchido pela IA", description: "Revise e ajuste antes de salvar." });
+            toast.success("🤖 SOAP preenchido pela IA", { description: "Revise e ajuste antes de salvar." });
           }
         } catch {
-          toast({ title: "IA respondeu", description: "Não foi possível interpretar o formato. Tente novamente.", variant: "destructive" });
+          toast.error("IA respondeu", { description: "Não foi possível interpretar o formato. Tente novamente." });
         }
       }
     } catch (err) {
       console.error("AI SOAP fill error:", err);
-      toast({ title: "Erro ao preencher", description: "Tente novamente em alguns segundos.", variant: "destructive" });
+      toast.error("Erro ao preencher", { description: "Tente novamente em alguns segundos." });
     } finally {
       setAiFillingSOAP(false);
     }

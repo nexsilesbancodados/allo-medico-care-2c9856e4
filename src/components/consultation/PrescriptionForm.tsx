@@ -354,7 +354,7 @@ const PrescriptionForm = () => {
   const handleSave = async () => {
     const validMeds = medications.filter(m => m.name.trim());
     if (validMeds.length === 0) {
-      toast({ title: "Adicione pelo menos um medicamento", variant: "destructive" });
+      toast.error("Adicione pelo menos um medicamento");
       return;
     }
 
@@ -402,7 +402,7 @@ const PrescriptionForm = () => {
     setSaving(false);
 
     if (error) {
-      toast({ title: "Erro ao salvar receita", description: error.message, variant: "destructive" });
+      toast.error("Erro ao salvar receita", { description: error.message });
     } else {
       // Send prescription via email + WhatsApp
       const doctorFullName = `Dr(a). ${doctorInfo?.first_name} ${doctorInfo?.last_name}`;
@@ -422,7 +422,7 @@ const PrescriptionForm = () => {
           const sentWhatsapp = data?.sent_to?.whatsapp;
           const channels = [sentEmail && "e-mail", sentWhatsapp && "WhatsApp"].filter(Boolean).join(" e ");
           if (channels) {
-            toast({ title: `📩 Receita enviada por ${channels}` });
+            toast.success(`📩 Receita enviada por ${channels}`);
           }
         }
       }).catch(console.error);
@@ -434,7 +434,7 @@ const PrescriptionForm = () => {
         notifyPrescriptionSent(patientId, doctorFullName, diagnosis || undefined, medsSummary).catch(console.error);
       }
       store.clearDraft();
-      toast({ title: "Receita salva com sucesso! ✅" });
+      toast.success("Receita salva com sucesso! ✅");
       navigate("/dashboard/prescriptions");
     }
   };
@@ -464,7 +464,7 @@ const PrescriptionForm = () => {
               patientName={patientName}
               patientCpf={patientCpf}
               onDocumentCreated={(docType) => {
-                toast({ title: "Documento CFM emitido! ✅", description: `${docType} criado na plataforma oficial do CFM.` });
+                toast.success("Documento CFM emitido! ✅", { description: `${docType} criado na plataforma oficial do CFM.` });
               }}
             />
           </div>
@@ -479,7 +479,7 @@ const PrescriptionForm = () => {
               patientCpf={patientCpf}
               patientId={patientId}
               onPrescriptionCreated={(data) => {
-                toast({ title: "Receita Memed salva! ✅", description: "A receita digital foi emitida e registrada." });
+                toast.success("Receita Memed salva! ✅", { description: "A receita digital foi emitida e registrada." });
               }}
             />
           </div>
