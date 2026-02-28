@@ -686,6 +686,8 @@ export type Database = {
           experience_years: number | null
           id: string
           is_approved: boolean | null
+          pix_key: string | null
+          pix_key_type: string | null
           rating: number | null
           rejection_reason: string | null
           total_reviews: number | null
@@ -707,6 +709,8 @@ export type Database = {
           experience_years?: number | null
           id?: string
           is_approved?: boolean | null
+          pix_key?: string | null
+          pix_key_type?: string | null
           rating?: number | null
           rejection_reason?: string | null
           total_reviews?: number | null
@@ -728,6 +732,8 @@ export type Database = {
           experience_years?: number | null
           id?: string
           is_approved?: boolean | null
+          pix_key?: string | null
+          pix_key_type?: string | null
           rating?: number | null
           rejection_reason?: string | null
           total_reviews?: number | null
@@ -1879,6 +1885,59 @@ export type Database = {
         }
         Relationships: []
       }
+      refunds: {
+        Row: {
+          amount: number
+          appointment_id: string
+          created_at: string
+          id: string
+          patient_id: string
+          payment_id: string | null
+          processed_at: string | null
+          reason: string
+          refund_external_id: string | null
+          requested_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          appointment_id: string
+          created_at?: string
+          id?: string
+          patient_id: string
+          payment_id?: string | null
+          processed_at?: string | null
+          reason?: string
+          refund_external_id?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string
+          created_at?: string
+          id?: string
+          patient_id?: string
+          payment_id?: string | null
+          processed_at?: string | null
+          reason?: string
+          refund_external_id?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_templates: {
         Row: {
           body_text: string
@@ -2322,6 +2381,7 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          min_amount_validated: boolean | null
           notes: string | null
           pix_key: string | null
           reviewed_at: string | null
@@ -2334,6 +2394,7 @@ export type Database = {
           amount: number
           created_at?: string
           id?: string
+          min_amount_validated?: boolean | null
           notes?: string | null
           pix_key?: string | null
           reviewed_at?: string | null
@@ -2346,6 +2407,7 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          min_amount_validated?: boolean | null
           notes?: string | null
           pix_key?: string | null
           reviewed_at?: string | null
