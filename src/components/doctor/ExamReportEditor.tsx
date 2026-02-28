@@ -78,7 +78,7 @@ const ExamReportEditor = () => {
             suppressLocalAudioPlayback: true,
           },
         });
-        console.log("[STT] Noise suppression active");
+        // STT noise suppression active
       } catch (err) {
         console.warn("[STT] Noise filter unavailable, using raw mic:", err);
       }

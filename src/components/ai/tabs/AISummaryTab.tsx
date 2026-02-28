@@ -10,7 +10,7 @@ import ReactMarkdown from "react-markdown";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 
-const SUPABASE_URL = "https://oaixgmuocuwhsabidpei.supabase.co";
+import { AI_URL } from "@/lib/ai";
 
 interface Props {
   primaryRole: string;
@@ -130,7 +130,7 @@ Estruture em:
 7. 📋 **Recomendações para Próxima Consulta**`;
 
     try {
-      const resp = await fetch(`${SUPABASE_URL}/functions/v1/ai-assistant`, {
+      const resp = await fetch(AI_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

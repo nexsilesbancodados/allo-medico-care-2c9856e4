@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { useToast } from "@/hooks/use-toast";
 
-const SUPABASE_URL = "https://oaixgmuocuwhsabidpei.supabase.co";
+import { AI_URL } from "@/lib/ai";
 
 const SEVERITY_OPTIONS = [
   { value: "leve", label: "🟢 Leve", description: "Desconforto tolerável", color: "border-green-500/30 bg-green-500/5" },
@@ -82,7 +82,7 @@ Responda com:
 IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
 
     try {
-      const resp = await fetch(`${SUPABASE_URL}/functions/v1/ai-assistant`, {
+      const resp = await fetch(AI_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
