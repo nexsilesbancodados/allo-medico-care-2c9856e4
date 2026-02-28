@@ -142,7 +142,7 @@ const AdminFinancial = () => {
     });
     setCommissionData(
       Array.from(doctorRevenue.values())
-        .map(d => ({ doctor_name: d.name, count: d.count, revenue: d.revenue, commission: d.revenue * 0.7 }))
+        .map(d => ({ doctor_name: d.name, count: d.count, revenue: d.revenue, commission: d.revenue * 0.5 }))
         .sort((a, b) => b.revenue - a.revenue)
         .slice(0, 10)
     );
