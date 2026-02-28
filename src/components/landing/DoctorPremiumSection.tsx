@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 import { ArrowRight, Check, TrendingUp, Calendar, Shield, Wallet, Star, Quote, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import doctorImg1 from "@/assets/doctor-premium-1.png";
-import doctorImg2 from "@/assets/doctor-premium-2.png";
+import doctorImg1 from "@/assets/hero-medicos.png";
+import doctorImg2 from "@/assets/hero-teleconsulta.png";
 import avatarCarlos from "@/assets/avatar-carlos.png";
 
 const benefits = [
