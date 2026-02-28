@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ClipboardCheck, FileSignature, Shield, Clock, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import teleLaudoImg from "@/assets/telelaudo-section.png";
+import teleLaudoImg from "@/assets/telelaudo-pingo.png";
 
 const features = [
   { icon: ClipboardCheck, title: "Fila Inteligente", desc: "Exames organizados por prioridade e tipo para máxima eficiência." },
