@@ -182,17 +182,6 @@ const B2BLanding = () => {
                 </div>
               </motion.div>
 
-              <motion.div variants={fadeUp} className="mt-10 text-center">
-                <div className="inline-flex flex-col sm:flex-row items-center gap-4 p-6 rounded-2xl bg-gradient-to-r from-secondary to-primary text-primary-foreground shadow-xl">
-                  <div className="text-center sm:text-left">
-                    <h3 className="text-lg font-bold">Integre o Telelaudo à sua operação</h3>
-                    <p className="text-sm opacity-70 mt-1">Laudos rápidos, seguros e verificáveis. Sem necessidade de equipe própria de laudistas.</p>
-                  </div>
-                  <Button size="lg" className="bg-white text-secondary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
-                    <Link to="/laudista">Sou Laudista <ChevronRight className="w-4 h-4 ml-1" /></Link>
-                  </Button>
-                </div>
-              </motion.div>
             </motion.div>
           </div>
         </section>
