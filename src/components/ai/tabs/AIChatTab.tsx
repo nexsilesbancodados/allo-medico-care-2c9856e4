@@ -16,8 +16,7 @@ import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const SUPABASE_URL = "https://oaixgmuocuwhsabidpei.supabase.co";
-const AI_URL = `${SUPABASE_URL}/functions/v1/ai-assistant`;
+import { AI_URL } from "@/lib/ai";
 
 interface QuickAction {
   label: string;

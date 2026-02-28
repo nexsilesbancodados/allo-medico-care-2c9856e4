@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
-import { lazy, Suspense, useState, useCallback, memo } from "react";
+import { lazy, Suspense, useState, useCallback, useEffect, memo } from "react";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import SplashScreen from "./components/SplashScreen";
 const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
@@ -90,6 +91,16 @@ const App = () => {
   const [splashDone, setSplashDone] = useState(false);
   const handleSplashFinish = useCallback(() => setSplashDone(true), []);
 
+  // Global safety net for unhandled async errors (prevents white screen)
+  useEffect(() => {
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      console.error("Unhandled rejection:", event.reason);
+      toast.error("Ocorreu um erro. Tente novamente.");
+      event.preventDefault();
+    };
+    window.addEventListener("unhandledrejection", handleRejection);
+    return () => window.removeEventListener("unhandledrejection", handleRejection);
+  }, []);
   return (
   <>
   {!splashDone && <SplashScreen onFinish={handleSplashFinish} />}

@@ -88,7 +88,7 @@ const MemedPrescription = ({
     script.async = true;
 
     script.onload = () => {
-      console.log("Memed script loaded");
+      // Memed script loaded
       scriptLoadedRef.current = true;
       setupMemedEvents();
     };
@@ -111,7 +111,7 @@ const MemedPrescription = ({
           "core:moduleInit",
           async (module: any) => {
             if (module.name === "plataforma.prescricao") {
-              console.log("Memed prescription module ready");
+              // Memed prescription module ready
               moduleReadyRef.current = true;
               setStatus("ready");
 
@@ -131,7 +131,7 @@ const MemedPrescription = ({
                     ...(patientEmail && { email: patientEmail }),
                   }
                 );
-                console.log("Patient set on Memed");
+                // Patient set on Memed
               } catch (e) {
                 console.warn("Error setting patient:", e);
               }
@@ -140,7 +140,7 @@ const MemedPrescription = ({
               window.MdHub.event.add(
                 "prescricaoImpressa",
                 async (prescriptionData: any) => {
-                  console.log("Prescription created:", prescriptionData);
+                  // Prescription created via Memed
                   toast.success("Receita emitida via Memed! ✅");
 
                   // Save prescription to our database
@@ -179,7 +179,7 @@ const MemedPrescription = ({
 
               // Listen for prescription deleted
               window.MdHub.event.add("prescricaoExcluida", () => {
-                console.log("Prescription deleted on Memed");
+                // Prescription deleted on Memed
               });
             }
           }

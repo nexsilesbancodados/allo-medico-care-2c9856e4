@@ -124,7 +124,7 @@ const AdminApprovals = () => {
         },
       });
     } catch (e) {
-      console.log("Email notification attempted", e);
+      console.warn("Email notification attempted", e);
     }
 
     // Create notification in-app

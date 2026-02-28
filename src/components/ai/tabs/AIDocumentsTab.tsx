@@ -10,7 +10,7 @@ import ReactMarkdown from "react-markdown";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from "jspdf";
 
-const SUPABASE_URL = "https://oaixgmuocuwhsabidpei.supabase.co";
+import { AI_URL } from "@/lib/ai";
 
 const DOC_TYPES = [
   { value: "atestado", label: "📋 Atestado Médico", prompt: "Gere um rascunho de atestado médico", description: "Afastamento, comparecimento" },
@@ -60,7 +60,7 @@ Gere o documento em formato profissional brasileiro, com:
 IMPORTANTE: Este é apenas um RASCUNHO para revisão do médico. O documento final deve ser validado e assinado pelo profissional.`;
 
     try {
-      const resp = await fetch(`${SUPABASE_URL}/functions/v1/ai-assistant`, {
+      const resp = await fetch(AI_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
