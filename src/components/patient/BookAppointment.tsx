@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ArrowLeft, Clock, Star, Check, UserPlus, UserCheck, AlertTriangle, CalendarDays, CheckCircle2, ChevronRight, Stethoscope } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
@@ -55,7 +55,7 @@ const BookAppointment = () => {
   const { doctorId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const [doctor, setDoctor] = useState<DoctorInfo | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -217,7 +217,7 @@ const BookAppointment = () => {
     setBooking(false);
 
     if (errorOccurred || !firstApptId) {
-      toast({ title: "Erro", description: "Não foi possível agendar. Tente novamente.", variant: "destructive" });
+      toast.error("Erro", { description: "Não foi possível agendar. Tente novamente." });
     } else {
       const patientProfile = user.user_metadata;
       const pName = `${patientProfile?.first_name || ""} ${patientProfile?.last_name || ""}`.trim() || "Paciente";
@@ -228,7 +228,7 @@ const BookAppointment = () => {
       const msg = recurrence !== "none"
         ? `${datesToBook.length} consultas agendadas com Dr(a). ${doctor.first_name}`
         : `${format(scheduledAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} com Dr(a). ${doctor.first_name}`;
-      toast({ title: "Consulta agendada! ✅", description: msg });
+      toast.success("Consulta agendada! ✅", { description: msg });
       navigate("/dashboard/appointments");
     }
   };
@@ -403,7 +403,7 @@ const BookAppointment = () => {
                           doctor_id: doctor.id,
                           desired_date: format(selectedDate, "yyyy-MM-dd"),
                         });
-                        if (!error) toast({ title: "✅ Avisaremos você!", description: "Se uma vaga abrir, você será notificado." });
+                        if (!error) toast.success("✅ Avisaremos você!", { description: "Se uma vaga abrir, você será notificado." });
                       }}
                     >
                       🔔 Me avise se vagar

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -96,10 +96,10 @@ const ExamReportQueue = () => {
         .update({ assigned_to: doctorProfile.id, status: "in_review" } as any)
         .eq("id", examId);
       if (error) throw error;
-      toast({ title: "Exame assumido!", description: "Você pode iniciar o laudo agora." });
+      toast.success("Exame assumido!", { description: "Você pode iniciar o laudo agora." });
       queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
     } catch (err: any) {
-      toast({ title: "Erro", description: err.message, variant: "destructive" });
+      toast.error("Erro", { description: err.message });
     } finally {
       setClaimingId(null);
     }

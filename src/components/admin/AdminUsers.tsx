@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Search, Shield, Eye } from "lucide-react";
 
@@ -46,7 +46,7 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
 };
 
 const AdminUsers = () => {
-  const { toast } = useToast();
+  
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -105,7 +105,7 @@ const AdminUsers = () => {
       await supabase.from("user_roles").delete().eq("user_id", selected.user_id).eq("role", role as any);
     }
 
-    toast({ title: "Roles atualizadas! ✅" });
+    toast.success("Roles atualizadas! ✅");
     setSaving(false);
     setSelected(null);
     fetchUsers();

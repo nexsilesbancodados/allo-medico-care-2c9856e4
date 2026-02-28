@@ -9,14 +9,14 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Plus, Edit, Trash2 } from "lucide-react";
 
 const intervalLabel: Record<string, string> = { monthly: "Mensal", yearly: "Anual", single: "Avulso" };
 
 const AdminPlans = () => {
-  const { toast } = useToast();
+  
   const [plans, setPlans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -58,12 +58,12 @@ const AdminPlans = () => {
 
     if (editingPlan) {
       const { error } = await supabase.from("plans").update(payload).eq("id", editingPlan.id);
-      if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
-      toast({ title: "Plano atualizado!" });
+      if (error) { toast.error("Erro", { description: error.message }); return; }
+      toast.success("Plano atualizado!");
     } else {
       const { error } = await supabase.from("plans").insert(payload as any);
-      if (error) { toast({ title: "Erro", description: error.message, variant: "destructive" }); return; }
-      toast({ title: "Plano criado!" });
+      if (error) { toast.error("Erro", { description: error.message }); return; }
+      toast.success("Plano criado!");
     }
     resetForm();
     fetchPlans();
@@ -72,7 +72,7 @@ const AdminPlans = () => {
   const deletePlan = async (id: string) => {
     await supabase.from("plans").delete().eq("id", id);
     fetchPlans();
-    toast({ title: "Plano removido" });
+    toast.success("Plano removido");
   };
 
   return (

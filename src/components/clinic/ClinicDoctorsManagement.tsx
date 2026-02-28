@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Users, Calendar, BarChart3, Settings, Plus, Check, X, Search, Mail, MessageCircle, Percent } from "lucide-react";
 import {
   Dialog,
@@ -40,7 +40,7 @@ interface ClinicDoctor {
 
 const ClinicDoctorsManagement = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const [clinicProfileId, setClinicProfileId] = useState<string | null>(null);
   const [clinicName, setClinicName] = useState("");
   const [doctors, setDoctors] = useState<ClinicDoctor[]>([]);
@@ -134,7 +134,7 @@ const ClinicDoctorsManagement = () => {
       .single();
 
     if (!data) {
-      toast({ title: "Médico não encontrado", description: "Verifique o CRM informado.", variant: "destructive" });
+      toast.error("Médico não encontrado", { description: "Verifique o CRM informado." });
       setSearching(false);
       return;
     }
@@ -163,9 +163,9 @@ const ClinicDoctorsManagement = () => {
     });
 
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      toast.error("Erro", { description: error.message });
     } else {
-      toast({ title: "Convite enviado!" });
+      toast.success("Convite enviado!");
       setDialogOpen(false);
       setSearchCrm("");
       setSearchResult(null);
@@ -188,11 +188,11 @@ const ClinicDoctorsManagement = () => {
           html: `<p>Você foi convidado para atender na clínica <strong>${clinicName}</strong> na plataforma Allo Médico.</p><p>Cadastre-se em: <a href="${window.location.origin}/medico">${window.location.origin}/medico</a></p>`,
         },
       });
-      toast({ title: "Convite enviado por e-mail! 📧" });
+      toast.success("Convite enviado por e-mail! 📧");
       setInviteEmail("");
       setInviteDialogOpen(false);
     } catch {
-      toast({ title: "Erro ao enviar convite", variant: "destructive" });
+      toast.error("Erro ao enviar convite");
     }
   };
 
@@ -208,7 +208,7 @@ const ClinicDoctorsManagement = () => {
     await supabase.from("clinic_affiliations")
       .update({ commission_percent: commissionValue } as any)
       .eq("id", editingDoctor.affiliation_id);
-    toast({ title: `Repasse atualizado: ${commissionValue}% para o médico` });
+    toast.success(`Repasse atualizado: ${commissionValue}% para o médico`);
     setCommissionDialogOpen(false);
     if (clinicProfileId) fetchDoctors(clinicProfileId);
   };

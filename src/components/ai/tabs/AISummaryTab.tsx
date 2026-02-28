@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { ClipboardList, Loader2, Search, FileText, AlertCircle, Copy, Check, Download, User, Calendar, Pill, Heart } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import jsPDF from "jspdf";
 
 import { AI_URL } from "@/lib/ai";
@@ -18,7 +18,7 @@ interface Props {
 
 const AISummaryTab = ({ primaryRole }: Props) => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const [patientSearch, setPatientSearch] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
@@ -185,7 +185,7 @@ Estruture em:
     navigator.clipboard.writeText(result);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    toast({ title: "Resumo copiado!" });
+    toast.success("Resumo copiado!");
   };
 
   const exportPDF = () => {
@@ -207,7 +207,7 @@ Estruture em:
     doc.text(lines, 20, 36);
 
     doc.save(`resumo-${patient?.first_name || "paciente"}-${new Date().toISOString().slice(0, 10)}.pdf`);
-    toast({ title: "PDF exportado!" });
+    toast.success("PDF exportado!");
   };
 
   return (

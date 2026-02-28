@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { UserPlus, UserCheck, AlertTriangle, Video, Clock, Bell, RefreshCw, HeartPulse } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const typeLabel: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   first_visit: { label: "1ª Consulta", icon: <UserPlus className="w-3 h-3" />, color: "bg-blue-500/10 text-blue-700 border-blue-200" },
@@ -23,7 +23,7 @@ const CRITICAL_SYMPTOMS = ["Dor no peito", "Falta de ar", "Desmaio", "Convulsão
 const DoctorWaitingRoom = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const [doctorId, setDoctorId] = useState<string | null>(null);
   const [waitingPatients, setWaitingPatients] = useState<any[]>([]);
   const [triageAlerts, setTriageAlerts] = useState<Map<string, any>>(new Map());
@@ -50,8 +50,7 @@ const DoctorWaitingRoom = () => {
         (payload) => {
           fetchWaitingPatients(doctorId);
           if (payload.eventType === "UPDATE" && (payload.new as any).status === "waiting") {
-            toast({
-              title: "🔔 Paciente na sala de espera!",
+            toast.success("🔔 Paciente na sala de espera!", {
               description: "Um paciente entrou na sala de espera virtual.",
             });
             try {
@@ -61,10 +60,8 @@ const DoctorWaitingRoom = () => {
             } catch {}
           }
           if (payload.eventType === "UPDATE" && (payload.new as any).status === "cancelled") {
-            toast({
-              title: "⚠️ Consulta cancelada",
+            toast.error("⚠️ Consulta cancelada", {
               description: "Um paciente cancelou a consulta.",
-              variant: "destructive",
             });
           }
         }

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import {
   Phone, MessageSquare, Clock, Send, X, Video, Shield, Wifi, WifiOff,
@@ -23,7 +23,7 @@ const GuestConsultation = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get("token");
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -180,7 +180,7 @@ const GuestConsultation = () => {
       setTimeout(() => setConfirmEnd(false), 4000);
       return;
     }
-    toast({ title: "Consulta encerrada" });
+    toast.success("Consulta encerrada");
     const params = new URLSearchParams();
     if (appointment?.id) params.set("appointment", appointment.id);
     if (doctorName) params.set("doctor", doctorName);

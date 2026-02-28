@@ -8,12 +8,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Search, Eye, Edit, Check, X } from "lucide-react";
 
 const AdminDoctors = () => {
-  const { toast } = useToast();
+  
   const [doctors, setDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -38,7 +38,7 @@ const AdminDoctors = () => {
 
   const toggleApproval = async (id: string, current: boolean) => {
     await supabase.from("doctor_profiles").update({ is_approved: !current }).eq("id", id);
-    toast({ title: current ? "Médico desativado" : "Médico aprovado! ✅" });
+    toast.success(current ? "Médico desativado" : "Médico aprovado! ✅");
     fetchDoctors();
   };
 
@@ -56,9 +56,9 @@ const AdminDoctors = () => {
       consultation_price: parseFloat(editForm.consultation_price) || null,
     }).eq("id", selected.id);
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      toast.error("Erro", { description: error.message });
     } else {
-      toast({ title: "Médico atualizado!" });
+      toast.success("Médico atualizado!");
       setEditing(false); setSelected(null); fetchDoctors();
     }
   };

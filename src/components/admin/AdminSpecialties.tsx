@@ -5,12 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Plus, Trash2 } from "lucide-react";
 
 const AdminSpecialties = () => {
-  const { toast } = useToast();
+  
   const [specialties, setSpecialties] = useState<any[]>([]);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
@@ -28,8 +28,8 @@ const AdminSpecialties = () => {
   const addSpecialty = async () => {
     if (!newName.trim()) return;
     const { error } = await supabase.from("specialties").insert({ name: newName.trim(), description: newDesc.trim() || null, consultation_price: newPrice ? Number(newPrice) : null } as any);
-    if (error) toast({ title: "Erro", description: error.message, variant: "destructive" });
-    else { setNewName(""); setNewDesc(""); setNewPrice(""); fetchSpecialties(); toast({ title: "Especialidade adicionada!" }); }
+    if (error) toast.error("Erro", { description: error.message });
+    else { setNewName(""); setNewDesc(""); setNewPrice(""); fetchSpecialties(); toast.success("Especialidade adicionada!"); }
   };
 
   const removeSpecialty = async (id: string) => {
@@ -40,7 +40,7 @@ const AdminSpecialties = () => {
   const updatePrice = async (id: string, price: string) => {
     await supabase.from("specialties").update({ consultation_price: price ? Number(price) : null } as any).eq("id", id);
     fetchSpecialties();
-    toast({ title: "Preço atualizado!" });
+    toast.success("Preço atualizado!");
   };
 
   return (
