@@ -88,7 +88,9 @@ serve(async (req) => {
       description,
       appointmentId,
       planId,
-      // Credit card fields
+      // Credit card token (from tokenize-card endpoint) — PCI compliant
+      creditCardToken,
+      // Legacy credit card fields (kept for backward compatibility but prefer token)
       cardHolderName,
       cardNumber,
       cardExpiryMonth,
@@ -194,25 +196,29 @@ serve(async (req) => {
       if (maxPayments) subBody.maxPayments = maxPayments;
       if (endDate) subBody.endDate = endDate;
 
-      // Credit card inline for subscriptions
-      if (billingType === "CREDIT_CARD" && cardNumber) {
-        subBody.creditCard = {
-          holderName: cardHolderName,
-          number: cardNumber.replace(/\s/g, ""),
-          expiryMonth: cardExpiryMonth,
-          expiryYear: cardExpiryYear,
-          ccv: cardCcv,
-        };
-        subBody.creditCardHolderInfo = {
-          name: cardHolderName || customerName,
-          email: cardHolderEmail || customerEmail || "",
-          cpfCnpj: (cardHolderCpf || customerCpf).replace(/\D/g, ""),
-          phone: (cardHolderPhone || customerMobilePhone || customerPhone || "").replace(/\D/g, ""),
-          postalCode: (cardHolderPostalCode || customerPostalCode || "").replace(/\D/g, ""),
-          addressNumber: cardHolderAddressNumber || customerAddressNumber || "",
-          address: cardHolderAddress || customerAddress || "",
-          province: cardHolderProvince || customerProvince || "",
-        };
+      // Credit card: prefer token (PCI compliant), fallback to inline
+      if (billingType === "CREDIT_CARD") {
+        if (creditCardToken) {
+          subBody.creditCardToken = creditCardToken;
+        } else if (cardNumber) {
+          subBody.creditCard = {
+            holderName: cardHolderName,
+            number: cardNumber.replace(/\s/g, ""),
+            expiryMonth: cardExpiryMonth,
+            expiryYear: cardExpiryYear,
+            ccv: cardCcv,
+          };
+          subBody.creditCardHolderInfo = {
+            name: cardHolderName || customerName,
+            email: cardHolderEmail || customerEmail || "",
+            cpfCnpj: (cardHolderCpf || customerCpf).replace(/\D/g, ""),
+            phone: (cardHolderPhone || customerMobilePhone || customerPhone || "").replace(/\D/g, ""),
+            postalCode: (cardHolderPostalCode || customerPostalCode || "").replace(/\D/g, ""),
+            addressNumber: cardHolderAddressNumber || customerAddressNumber || "",
+            address: cardHolderAddress || customerAddress || "",
+            province: cardHolderProvince || customerProvince || "",
+          };
+        }
       }
 
       const subRes = await asaasFetch(`${baseUrl}/subscriptions`, {
@@ -263,9 +269,40 @@ serve(async (req) => {
       }
     }
 
-    // For CREDIT_CARD: create payment first, then pay with card via /payWithCreditCard
-    if (billingType === "CREDIT_CARD" && cardNumber) {
-      // Step 3a: Create the payment without card info
+    // For CREDIT_CARD: prefer token-based payment, fallback to inline card data
+    if (billingType === "CREDIT_CARD" && (creditCardToken || cardNumber)) {
+      // If we have a token, include it directly in the payment body (PCI compliant)
+      if (creditCardToken) {
+        paymentBody.creditCardToken = creditCardToken;
+        const payRes = await asaasFetch(`${baseUrl}/payments`, {
+          method: "POST",
+          headers,
+          body: JSON.stringify(paymentBody),
+        });
+        const payData = await safeJson(payRes);
+
+        if (!payRes.ok) {
+          console.error("Asaas token payment error:", payData);
+          return new Response(
+            JSON.stringify({ error: payData.errors?.[0]?.description || "Error creating payment" }),
+            { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            type: "payment",
+            paymentId: payData.id,
+            status: payData.status,
+            invoiceUrl: payData.invoiceUrl,
+            ...payData,
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Legacy fallback: create payment then pay with raw card data
       const payRes = await asaasFetch(`${baseUrl}/payments`, {
         method: "POST",
         headers,
@@ -281,7 +318,6 @@ serve(async (req) => {
         );
       }
 
-      // Step 3b: Pay with credit card (POST /v3/payments/{id}/payWithCreditCard)
       const cardBody: Record<string, any> = {
         creditCard: {
           holderName: cardHolderName,
