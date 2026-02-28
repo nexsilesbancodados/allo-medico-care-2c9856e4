@@ -30,7 +30,7 @@ serve(async (req) => {
       });
     }
 
-    const appointmentId = payment.externalReference;
+    const externalRef = payment.externalReference || "";
 
     // Map Asaas events to internal payment statuses
     const statusMap: Record<string, string> = {
@@ -56,6 +56,105 @@ serve(async (req) => {
 
     const newPaymentStatus = statusMap[event];
 
+    // ─── Handle subscription-related events ───
+    const isCardSubscription = externalRef.startsWith("card_");
+    
+    if (isCardSubscription) {
+      console.log(`[Asaas Webhook] Card subscription event: ${event}, ref: ${externalRef}`);
+      
+      // Parse: card_{planType}_{userId}
+      const parts = externalRef.split("_");
+      const planType = parts.slice(1, -1).join("_"); // everything between "card_" and last "_userId"
+      const userId = parts[parts.length - 1];
+      
+      if (newPaymentStatus === "approved") {
+        // Activate discount card
+        const { data: existing } = await supabase
+          .from("discount_cards")
+          .select("id, status")
+          .eq("user_id", userId)
+          .eq("plan_type", planType)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        const validUntil = new Date();
+        validUntil.setMonth(validUntil.getMonth() + 1);
+
+        if (existing) {
+          await supabase.from("discount_cards")
+            .update({
+              status: "active",
+              valid_until: validUntil.toISOString(),
+              payment_id: payment.id,
+            })
+            .eq("id", existing.id);
+          console.log(`[Asaas Webhook] Renewed discount card ${existing.id}`);
+        } else {
+          // Determine price from plan type
+          const priceMap: Record<string, number> = {
+            prata_familiar: 47.9,
+            ouro_individual: 37.9,
+            ouro_familiar: 77.9,
+            diamante_familiar: 157.9,
+          };
+          await supabase.from("discount_cards").insert({
+            user_id: userId,
+            plan_type: planType,
+            price_monthly: priceMap[planType] || payment.value || 0,
+            discount_percent: 30,
+            status: "active",
+            valid_until: validUntil.toISOString(),
+            payment_id: payment.id,
+          });
+          console.log(`[Asaas Webhook] Created new discount card for user ${userId}`);
+        }
+
+        // Notify user
+        await supabase.from("notifications").insert({
+          user_id: userId,
+          title: "✅ Cartão de Benefícios Ativado!",
+          message: "Seu pagamento foi confirmado e seu Cartão de Benefícios está ativo.",
+          type: "payment",
+          link: "/dashboard",
+        });
+      }
+
+      if (["cancelled", "refunded", "chargeback"].includes(newPaymentStatus || "")) {
+        // Deactivate discount card
+        const userId = parts[parts.length - 1];
+        const planType = parts.slice(1, -1).join("_");
+        
+        await supabase.from("discount_cards")
+          .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+          .eq("user_id", userId)
+          .eq("plan_type", planType)
+          .eq("status", "active");
+
+        await supabase.from("notifications").insert({
+          user_id: userId,
+          title: "❌ Cartão de Benefícios Cancelado",
+          message: `Seu Cartão de Benefícios foi cancelado devido a: ${newPaymentStatus}.`,
+          type: "payment",
+          link: "/dashboard/plans",
+        });
+        console.log(`[Asaas Webhook] Cancelled discount card for user ${userId}`);
+      }
+    }
+
+    // ─── Handle renewal payment events ───
+    const isRenewal = externalRef.startsWith("renewal_");
+    if (isRenewal && newPaymentStatus === "approved") {
+      const renewalId = externalRef.replace("renewal_", "");
+      await supabase.from("prescription_renewals")
+        .update({ paid_at: new Date().toISOString(), status: "pending_review", payment_id: payment.id })
+        .eq("id", renewalId);
+      console.log(`[Asaas Webhook] Renewal ${renewalId} payment confirmed`);
+    }
+
+    // ─── Handle appointment payment events (existing logic) ───
+    const appointmentId = !isCardSubscription && !isRenewal ? externalRef : null;
+
     if (!newPaymentStatus) {
       console.log(`[Asaas Webhook] Unhandled event: ${event}`);
       return new Response(JSON.stringify({ received: true, message: "Event not mapped" }), {
@@ -63,25 +162,21 @@ serve(async (req) => {
       });
     }
 
-    // ─── Update appointment payment status ───
     if (appointmentId) {
       const updateData: Record<string, any> = {
         payment_status: newPaymentStatus,
       };
 
-      // On approval: confirm appointment + timestamp
       if (newPaymentStatus === "approved") {
         updateData.payment_confirmed_at = new Date().toISOString();
         updateData.status = "confirmed";
       }
 
-      // On refund/chargeback: cancel appointment
       if (["refunded", "chargeback", "cancelled"].includes(newPaymentStatus)) {
         updateData.status = "cancelled";
         updateData.cancel_reason = `Pagamento ${newPaymentStatus === "refunded" ? "reembolsado" : newPaymentStatus === "chargeback" ? "contestado (chargeback)" : "cancelado"} via Asaas`;
       }
 
-      // On refused: mark as failed
       if (newPaymentStatus === "refused") {
         updateData.payment_status = "refused";
       }
@@ -96,81 +191,54 @@ serve(async (req) => {
       if (updateError) {
         console.error("Error updating appointment:", updateError);
       } else {
-        console.log(`[Asaas Webhook] Appointment ${appointmentId} → payment_status: ${newPaymentStatus}, status: ${updateData.status || "(unchanged)"}`);
+        console.log(`[Asaas Webhook] Appointment ${appointmentId} → payment_status: ${newPaymentStatus}`);
 
-        // ─── Notifications on payment confirmation ───
         if (newPaymentStatus === "approved" && appointment) {
           const scheduledDate = new Date(appointment.scheduled_at).toLocaleString("pt-BR", {
-            timeZone: "America/Sao_Paulo",
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
+            timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit",
           });
 
-          // Notify patient (if registered)
           if (appointment.patient_id) {
             await supabase.from("notifications").insert({
               user_id: appointment.patient_id,
               title: "✅ Pagamento Confirmado!",
               message: `Seu pagamento foi aprovado. Consulta agendada para ${scheduledDate}.`,
-              type: "payment",
-              link: "/dashboard/appointments",
+              type: "payment", link: "/dashboard/appointments",
             });
           }
 
-          // Notify doctor
           const { data: doctorProfile } = await supabase
-            .from("doctor_profiles")
-            .select("user_id")
-            .eq("id", appointment.doctor_id)
-            .single();
+            .from("doctor_profiles").select("user_id").eq("id", appointment.doctor_id).single();
 
           if (doctorProfile?.user_id) {
             await supabase.from("notifications").insert({
               user_id: doctorProfile.user_id,
               title: "💰 Novo Pagamento Confirmado",
               message: `Pagamento confirmado para consulta em ${scheduledDate}.`,
-              type: "payment",
-              link: "/dashboard/appointments",
+              type: "payment", link: "/dashboard/appointments",
             });
           }
 
-          // Send WhatsApp notification to patient
+          // WhatsApp notification
           try {
             let patientPhone: string | null = null;
             let patientName = "";
-
             if (appointment.patient_id) {
-              const { data: profile } = await supabase
-                .from("profiles")
-                .select("phone, first_name")
-                .eq("user_id", appointment.patient_id)
-                .single();
+              const { data: profile } = await supabase.from("profiles").select("phone, first_name").eq("user_id", appointment.patient_id).single();
               patientPhone = profile?.phone || null;
               patientName = profile?.first_name || "";
             } else if (appointment.guest_patient_id) {
-              const { data: guest } = await supabase
-                .from("guest_patients")
-                .select("phone, full_name")
-                .eq("id", appointment.guest_patient_id)
-                .single();
+              const { data: guest } = await supabase.from("guest_patients").select("phone, full_name").eq("id", appointment.guest_patient_id).single();
               patientPhone = guest?.phone || null;
               patientName = guest?.full_name?.split(" ")[0] || "";
             }
-
             if (patientPhone) {
               const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
               const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-              const whatsappMsg = `✅ *Pagamento Confirmado!*\n\nOlá, ${patientName}!\nSeu pagamento foi aprovado com sucesso.\n\n📅 Consulta: ${scheduledDate}\n\nAcesse o link da consulta no horário marcado. Até lá! 💚\n\n_Alô Médico_`;
-
+              const whatsappMsg = `✅ *Pagamento Confirmado!*\n\nOlá, ${patientName}!\nSeu pagamento foi aprovado.\n\n📅 Consulta: ${scheduledDate}\n\n_Alô Médico_`;
               await fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp`, {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${SERVICE_KEY}`,
-                },
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
                 body: JSON.stringify({ phone: patientPhone, message: whatsappMsg }),
               });
             }
@@ -178,86 +246,60 @@ serve(async (req) => {
             console.warn("WhatsApp notification failed (non-blocking):", whatsErr);
           }
 
-          // Send email notification
+          // Email notification for guests
           try {
-            let patientEmail: string | null = null;
-            let patientName = "";
-
             if (appointment.guest_patient_id) {
-              const { data: guest } = await supabase
-                .from("guest_patients")
-                .select("email, full_name")
-                .eq("id", appointment.guest_patient_id)
-                .single();
-              patientEmail = guest?.email || null;
-              patientName = guest?.full_name || "";
-            }
-
-            if (patientEmail) {
-              const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-              const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-              await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${SERVICE_KEY}`,
-                },
-                body: JSON.stringify({
-                  to: patientEmail,
-                  subject: "✅ Pagamento Confirmado - Alô Médico",
-                  html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px">
-                    <h2 style="color:#0ea5e9">Pagamento Confirmado! ✅</h2>
-                    <p>Olá, <strong>${patientName}</strong>!</p>
-                    <p>Seu pagamento foi aprovado com sucesso.</p>
-                    <div style="background:#f0f9ff;padding:16px;border-radius:8px;margin:16px 0">
-                      <p style="margin:4px 0"><strong>📅 Data:</strong> ${scheduledDate}</p>
-                      <p style="margin:4px 0"><strong>💰 Valor:</strong> R$ ${payment.value?.toFixed(2) || "—"}</p>
-                    </div>
-                    <p>Acesse o link da consulta no horário marcado.</p>
-                    <p style="color:#64748b;font-size:12px;margin-top:24px">Alô Médico — Cuidando de você 💚</p>
-                  </div>`,
-                }),
-              });
+              const { data: guest } = await supabase.from("guest_patients").select("email, full_name").eq("id", appointment.guest_patient_id).single();
+              if (guest?.email) {
+                const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+                const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+                await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+                  body: JSON.stringify({
+                    to: guest.email,
+                    subject: "✅ Pagamento Confirmado - Alô Médico",
+                    html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px"><h2 style="color:#0ea5e9">Pagamento Confirmado! ✅</h2><p>Olá, <strong>${guest.full_name}</strong>!</p><p>Consulta: ${scheduledDate}</p><p style="color:#64748b;font-size:12px;margin-top:24px">Alô Médico 💚</p></div>`,
+                  }),
+                });
+              }
             }
           } catch (emailErr) {
             console.warn("Email notification failed (non-blocking):", emailErr);
           }
         }
 
-        // ─── Notifications on refund ───
+        // Refund notifications
         if (["refunded", "partially_refunded"].includes(newPaymentStatus) && appointment?.patient_id) {
           await supabase.from("notifications").insert({
             user_id: appointment.patient_id,
             title: "💸 Reembolso Processado",
             message: newPaymentStatus === "refunded"
-              ? `Seu pagamento de R$ ${payment.value?.toFixed(2)} foi reembolsado integralmente.`
-              : `Um reembolso parcial foi processado para sua consulta.`,
-            type: "payment",
-            link: "/dashboard/appointments",
+              ? `Seu pagamento de R$ ${payment.value?.toFixed(2)} foi reembolsado.`
+              : `Um reembolso parcial foi processado.`,
+            type: "payment", link: "/dashboard/appointments",
           });
         }
 
-        // ─── Notifications on refusal ───
+        // Refusal notifications
         if (newPaymentStatus === "refused" && appointment?.patient_id) {
           await supabase.from("notifications").insert({
             user_id: appointment.patient_id,
             title: "❌ Pagamento Recusado",
-            message: "Seu pagamento não foi aprovado. Tente novamente com outro método de pagamento.",
-            type: "payment",
-            link: "/dashboard/appointments",
+            message: "Seu pagamento não foi aprovado. Tente novamente.",
+            type: "payment", link: "/dashboard/appointments",
           });
         }
       }
     }
 
-    // ─── Activity log for every event ───
+    // ─── Activity log ───
     await supabase.from("activity_logs").insert({
       action: `asaas_${event.toLowerCase()}`,
       entity_type: "payment",
       entity_id: payment.id,
       details: {
-        appointment_id: appointmentId,
+        external_reference: externalRef,
         billing_type: payment.billingType,
         value: payment.value,
         net_value: payment.netValue,
@@ -265,12 +307,7 @@ serve(async (req) => {
         asaas_status: payment.status,
         customer_id: payment.customer,
         due_date: payment.dueDate,
-        confirmed_date: payment.confirmedDate,
-        original_due_date: payment.originalDueDate,
-        payment_date: payment.paymentDate,
-        invoice_url: payment.invoiceUrl,
-        bank_slip_url: payment.bankSlipUrl,
-        refund_value: payment.refundedValue || null,
+        subscription_id: payment.subscription || null,
       },
     });
 
@@ -279,7 +316,6 @@ serve(async (req) => {
     });
   } catch (error: any) {
     console.error("[Asaas Webhook] Fatal error:", error);
-    // Always return 200 to Asaas to prevent retry storms
     return new Response(JSON.stringify({ received: true, error: error.message }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
