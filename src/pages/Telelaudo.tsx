@@ -9,6 +9,7 @@ import {
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import logo from "@/assets/logo.png";
+import pingoMascot from "@/assets/telelaudo-pingo.png";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -110,12 +111,22 @@ const Telelaudo = () => {
         </section>
 
         {/* How it works */}
-        <section className="py-20">
+        <section className="py-20 relative">
           <div className="container mx-auto px-4 max-w-5xl">
             <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
-              <motion.div variants={fadeUp} className="text-center mb-14">
+              <motion.div variants={fadeUp} className="text-center mb-14 relative">
                 <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Como funciona o Telelaudo?</h2>
                 <p className="text-muted-foreground mt-3 max-w-lg mx-auto">Do upload do exame à entrega do laudo assinado</p>
+                {/* Pingo mascot */}
+                <motion.img
+                  src={pingoMascot}
+                  alt="Pingo mascote do Telelaudo"
+                  className="absolute -right-4 sm:right-0 -bottom-10 w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-lg"
+                  initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+                  whileInView={{ opacity: 1, scale: 1, rotate: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                />
               </motion.div>
               <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
                 {steps.map((item, i) => (
