@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,6 +14,9 @@ import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import { z } from "zod";
+import b2bHero1 from "@/assets/b2b-hero-1.png";
+import b2bHero2 from "@/assets/b2b-hero-2.png";
+import b2bHero3 from "@/assets/b2b-hero-3.png";
 import { lazy, Suspense } from "react";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
@@ -30,6 +33,44 @@ const leadSchema = z.object({
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } } };
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
+
+const heroImages = [b2bHero1, b2bHero2, b2bHero3];
+
+const HeroCarousel = () => {
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrent(prev => (prev + 1) % heroImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <>
+      {heroImages.map((img, i) => (
+        <motion.img
+          key={i}
+          src={img}
+          alt={`Benefícios corporativos ${i + 1}`}
+          className="absolute inset-0 w-full h-full object-cover"
+          initial={false}
+          animate={{ opacity: i === current ? 1 : 0, scale: i === current ? 1.05 : 1 }}
+          transition={{ opacity: { duration: 1 }, scale: { duration: 6 } }}
+        />
+      ))}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
+        {heroImages.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrent(i)}
+            className={`w-2.5 h-2.5 rounded-full transition-all ${i === current ? "bg-white w-8" : "bg-white/40 hover:bg-white/60"}`}
+          />
+        ))}
+      </div>
+    </>
+  );
+};
 
 const B2BLanding = () => {
   const [form, setForm] = useState({ company_name: "", contact_name: "", email: "", phone: "", cnpj: "", company_type: "company", message: "" });
@@ -54,26 +95,26 @@ const B2BLanding = () => {
       <div className="min-h-screen bg-background">
         <Header />
 
-        {/* Hero */}
-        <section className="relative overflow-hidden py-24 sm:py-32 mt-[70px]">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
-          <div className="absolute -top-20 -right-20 w-72 h-72 rounded-full bg-white/10 blur-3xl" />
-          <div className="absolute -bottom-16 -left-16 w-60 h-60 rounded-full bg-white/5 blur-3xl" />
-          <div className="container mx-auto px-4 text-center relative">
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+        {/* Hero with Carousel */}
+        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "85vh" }}>
+          <HeroCarousel />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent z-10" />
+          <div className="container mx-auto px-4 relative z-20 flex items-center" style={{ minHeight: "85vh" }}>
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-2xl">
               <Badge className="mb-5 text-sm px-5 py-1.5 bg-white/15 text-white border-white/20 backdrop-blur-sm">
                 <CreditCard className="w-4 h-4 mr-2" /> Para Empresas
               </Badge>
-              <h1 className="text-4xl md:text-6xl font-black text-white mb-5 tracking-tight leading-tight">
-                Cartão de Benefícios<br /><span className="text-white/90">para seus Funcionários</span>
+              <h1 className="text-4xl md:text-6xl font-black text-white mb-5 tracking-tight leading-tight text-left">
+                Cartão de Benefícios<br /><span className="text-white/80">para seus Funcionários</span>
               </h1>
-              <p className="text-lg text-white/70 max-w-2xl mx-auto mb-10 leading-relaxed">
+              <p className="text-lg text-white/70 max-w-xl mb-10 leading-relaxed text-left">
                 Cuide da saúde da sua equipe com telemedicina 24h, clube de vantagens e descontos exclusivos. Um benefício que valoriza e retém talentos.
               </p>
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
                 Solicitar Proposta <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10 mt-12">
+              <div className="flex flex-wrap items-start gap-6 sm:gap-10 mt-12">
                 {[
                   { icon: <Heart className="w-4 h-4" />, label: "Telemedicina 24h" },
                   { icon: <Users className="w-4 h-4" />, label: "Planos Família" },
