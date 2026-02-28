@@ -34,7 +34,6 @@ const services = [
   { id: "telelaudo", label: "Telelaudo", icon: <FileText className="w-5 h-5" />, desc: "Laudos a distância" },
   { id: "teleconsulta", label: "Teleconsulta", icon: <Monitor className="w-5 h-5" />, desc: "Vídeo consultas" },
   { id: "plantao24h", label: "Plantão 24h", icon: <Phone className="w-5 h-5" />, desc: "SLA 15min" },
-  { id: "whitelabel", label: "White Label", icon: <Building2 className="w-5 h-5" />, desc: "Sua marca" },
 ];
 
 const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } } };
@@ -107,12 +106,11 @@ const B2BLanding = () => {
                 <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Nossos Serviços B2B</h2>
                 <p className="text-muted-foreground mt-2 max-w-lg mx-auto">Soluções completas de telemedicina para sua operação</p>
               </motion.div>
-              <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5 max-w-5xl mx-auto">
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-5 max-w-4xl mx-auto">
                 {[
                   { icon: <Stethoscope className="w-7 h-7 text-white" />, title: "Teleconsulta", desc: "Consultas por videochamada com receita digital", gradient: "from-primary to-primary/70" },
                   { icon: <FileText className="w-7 h-7 text-white" />, title: "Telelaudo", desc: "Laudos a distância com assinatura digital", gradient: "from-warning to-warning/70" },
                   { icon: <Phone className="w-7 h-7 text-white" />, title: "Plantão 24h", desc: "Pronto-atendimento digital SLA 15 min", gradient: "from-destructive to-destructive/70" },
-                  { icon: <Building2 className="w-7 h-7 text-white" />, title: "White Label", desc: "Plataforma personalizada com sua marca", gradient: "from-secondary to-secondary/70" },
                 ].map((s, i) => (
                   <motion.div key={i} variants={fadeUp}>
                     <Card className="h-full border-border/50 hover:shadow-xl hover:border-border hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
