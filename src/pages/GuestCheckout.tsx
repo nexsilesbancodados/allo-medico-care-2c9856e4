@@ -300,16 +300,32 @@ const GuestCheckout = () => {
       };
 
       if (paymentMethod === "credit") {
-        // PCI compliance: send card data for server-side tokenization
-        // The edge function handles tokenization via Asaas API before charging
-        paymentPayload.cardHolderName = cardName;
-        paymentPayload.cardNumber = cardNumber.replace(/\s/g, "");
-        paymentPayload.cardExpiryMonth = expiryMonth;
-        paymentPayload.cardExpiryYear = `20${expiryYear}`;
-        paymentPayload.cardCcv = cardCvv;
-        paymentPayload.cardHolderCpf = guestCpf;
-        paymentPayload.cardHolderPhone = guestPhone;
-        paymentPayload.remoteIp = "0.0.0.0"; // Required by Asaas tokenization
+        // PCI Compliance: Tokenize card via dedicated endpoint BEFORE sending to payment
+        const { data: tokenData, error: tokenError } = await supabase.functions.invoke("tokenize-card", {
+          body: {
+            customerName: guestName,
+            customerCpf: guestCpf,
+            customerEmail: guestEmail,
+            customerPhone: guestPhone,
+            cardHolderName: cardName,
+            cardNumber: cardNumber.replace(/\s/g, ""),
+            cardExpiryMonth: expiryMonth,
+            cardExpiryYear: `20${expiryYear}`,
+            cardCcv: cardCvv,
+            cardHolderCpf: guestCpf,
+            cardHolderPhone: guestPhone,
+            remoteIp: "0.0.0.0",
+          },
+        });
+
+        if (tokenError || !tokenData?.success) {
+          toast({ title: "Erro no cartão", description: tokenData?.error || "Não foi possível processar o cartão.", variant: "destructive" });
+          setProcessing(false);
+          return;
+        }
+
+        // Send ONLY the token to payment endpoint — never raw card data
+        paymentPayload.creditCardToken = tokenData.creditCardToken;
       }
 
       const { data: payData, error: payError } = await supabase.functions.invoke("create-asaas-payment", {

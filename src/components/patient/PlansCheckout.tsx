@@ -404,7 +404,7 @@ const PlansCheckout = () => {
         boleto: "BOLETO",
       };
 
-      const [expiryMonth, expiryYear] = cardExpiry.split("/");
+      // cardExpiry split moved inside card tokenization block below
 
       const payload: Record<string, any> = {
         customerName,
@@ -417,16 +417,34 @@ const PlansCheckout = () => {
         appointmentId,
       };
 
-      // Add card data if credit card (tokenized server-side via Asaas API)
+      // PCI Compliance: Tokenize card via dedicated endpoint BEFORE payment
       if (paymentMethod === "card") {
-        payload.cardHolderName = cardName;
-        payload.cardNumber = cardNumber.replace(/\s/g, "");
-        payload.cardExpiryMonth = expiryMonth;
-        payload.cardExpiryYear = `20${expiryYear}`;
-        payload.cardCcv = cardCvv;
-        payload.cardHolderCpf = customerCpf;
-        payload.cardHolderPhone = customerPhone;
-        payload.remoteIp = "0.0.0.0";
+        const [expiryMonth, expiryYear] = cardExpiry.split("/");
+        const { data: tokenData, error: tokenError } = await supabase.functions.invoke("tokenize-card", {
+          body: {
+            customerName,
+            customerCpf,
+            customerEmail,
+            customerPhone,
+            cardHolderName: cardName,
+            cardNumber: cardNumber.replace(/\s/g, ""),
+            cardExpiryMonth: expiryMonth,
+            cardExpiryYear: `20${expiryYear}`,
+            cardCcv: cardCvv,
+            cardHolderCpf: customerCpf,
+            cardHolderPhone: customerPhone,
+            remoteIp: "0.0.0.0",
+          },
+        });
+
+        if (tokenError || !tokenData?.success) {
+          toast({ title: "Erro no cartão", description: tokenData?.error || "Não foi possível processar o cartão.", variant: "destructive" });
+          setProcessing(false);
+          return;
+        }
+
+        // Send ONLY the token — never raw card data
+        payload.creditCardToken = tokenData.creditCardToken;
       }
 
       // Pass coupon code to edge function for server-side tracking
