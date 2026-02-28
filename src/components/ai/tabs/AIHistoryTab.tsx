@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { History, Trash2, MessageSquare, Loader2, Clock, Search, Download, ArrowLeft, Filter } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -33,7 +33,7 @@ const roleLabels: Record<string, string> = {
 
 const AIHistoryTab = ({ primaryRole }: Props) => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
@@ -68,7 +68,7 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
     if (!error) {
       setConversations(prev => prev.filter(c => c.id !== id));
       if (selectedConv?.id === id) setSelectedConv(null);
-      toast({ title: "Conversa excluída" });
+      toast.success("Conversa excluída");
     }
   };
 
@@ -81,7 +81,7 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
     a.download = `${conv.title.slice(0, 30)}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    toast({ title: "Conversa exportada!" });
+    toast.success("Conversa exportada!");
   };
 
   const filtered = conversations.filter(c => {

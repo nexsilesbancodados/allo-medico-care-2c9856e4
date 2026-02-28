@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Calendar as CalendarIcon, Clock, FileText, Video, Search, Download, Filter, ArrowLeft, ChevronRight, MoreHorizontal } from "lucide-react";
 import { format, isWithinInterval, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -59,7 +59,7 @@ const fadeUp = {
 
 const AppointmentsList = () => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -170,7 +170,7 @@ const AppointmentsList = () => {
       y += 16;
     });
     doc.save(`consultas-${format(new Date(), "yyyy-MM-dd")}.pdf`);
-    toast({ title: "PDF exportado com sucesso!" });
+    toast.success("PDF exportado com sucesso!");
   };
 
   const exportCSV = () => {
@@ -192,7 +192,7 @@ const AppointmentsList = () => {
     el.download = `consultas-${format(new Date(), "yyyy-MM-dd")}.csv`;
     el.click();
     URL.revokeObjectURL(url);
-    toast({ title: "CSV exportado!" });
+    toast.success("CSV exportado!");
   };
 
   const handleCalendarSelect = (date: Date | undefined) => {

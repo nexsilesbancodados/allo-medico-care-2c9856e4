@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   Send, Bot, Sparkles, Trash2, Copy, Check, Save, Download,
   Stethoscope, FileText, Calculator, Brain, Mic, MicOff,
@@ -81,7 +81,7 @@ interface Props {
 
 const AIChatTab = ({ primaryRole }: Props) => {
   const { user, profile } = useAuth();
-  const { toast } = useToast();
+  
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -122,13 +122,13 @@ const AIChatTab = ({ primaryRole }: Props) => {
     a.download = `chat-ia-${new Date().toISOString().slice(0, 10)}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    toast({ title: "Chat exportado!" });
+    toast.success("Chat exportado!");
   };
 
   const toggleVoice = () => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      toast({ title: "Navegador não suporta reconhecimento de voz", variant: "destructive" });
+      toast.error("Navegador não suporta reconhecimento de voz");
       return;
     }
     if (isListening && recognitionRef.current) {
@@ -171,9 +171,9 @@ const AIChatTab = ({ primaryRole }: Props) => {
       role_context: primaryRole,
     } as any);
     if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      toast.error("Erro ao salvar", { description: error.message });
     } else {
-      toast({ title: "✅ Conversa salva!", description: "Acesse na aba Histórico." });
+      toast.success("✅ Conversa salva!", { description: "Acesse na aba Histórico." });
     }
   };
 

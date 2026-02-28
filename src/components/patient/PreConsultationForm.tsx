@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { ClipboardList, Plus, X, CheckCircle2, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -24,7 +24,7 @@ const COMMON_SYMPTOMS = [
 
 const PreConsultationForm = ({ appointmentId, onComplete }: PreConsultationFormProps) => {
   const { user } = useAuth();
-  const { toast } = useToast();
+  
   const [mainComplaint, setMainComplaint] = useState("");
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [customSymptom, setCustomSymptom] = useState("");
@@ -62,9 +62,9 @@ const PreConsultationForm = ({ appointmentId, onComplete }: PreConsultationFormP
 
     setSaving(false);
     if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      toast.error("Erro ao salvar", { description: error.message });
     } else {
-      toast({ title: "Sintomas registrados! ✅", description: "O médico terá acesso antes da consulta." });
+      toast.success("Sintomas registrados! ✅", { description: "O médico terá acesso antes da consulta." });
       onComplete();
     }
   };

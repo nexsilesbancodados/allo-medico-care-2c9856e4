@@ -9,14 +9,14 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Search, Eye, Edit, Download, ChevronLeft, ChevronRight, Users, Calendar, Filter } from "lucide-react";
 
 const PAGE_SIZE = 20;
 
 const AdminPatients = () => {
-  const { toast } = useToast();
+  
   const [patients, setPatients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -94,9 +94,9 @@ const AdminPatients = () => {
       cpf: editForm.cpf || null,
     }).eq("user_id", selected.user_id);
     if (error) {
-      toast({ title: "Erro ao salvar", description: error.message, variant: "destructive" });
+      toast.error("Erro ao salvar", { description: error.message });
     } else {
-      toast({ title: "Paciente atualizado!" });
+      toast.success("Paciente atualizado!");
       setEditing(false);
       setSelected(null);
       fetchPatients();
@@ -118,7 +118,7 @@ const AdminPatients = () => {
     a.download = `pacientes_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
-    toast({ title: "CSV exportado!" });
+    toast.success("CSV exportado!");
   };
 
   const statusLabel: Record<string, string> = {

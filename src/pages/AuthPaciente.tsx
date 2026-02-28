@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { Phone, Mail, Lock, ArrowLeft, Heart, Check, Star, Shield, Eye, EyeOff, Sparkles, Zap, Clock, Users, ChevronRight, CreditCard, QrCode, FileText, Loader2, AlertCircle, Copy, CheckCircle } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
@@ -51,7 +51,6 @@ const AuthPaciente = () => {
   const initialPlan = searchParams.get("plan");
   const reason = searchParams.get("reason");
 
-  // ALL state declarations at the top — fixes Problem 2 (mode used before declared)
   const [mode, setMode] = useState<"register" | "login">("login");
   const [step, setStep] = useState<Step>(initialPlan ? "register" : "select");
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
@@ -79,7 +78,6 @@ const AuthPaciente = () => {
   const [verifyCpf, setVerifyCpf] = useState("");
   const [verifyingCpf, setVerifyingCpf] = useState(false);
 
-  // Payment state
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX");
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<any>(null);
@@ -87,12 +85,10 @@ const AuthPaciente = () => {
   const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
 
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { redirectAfterLogin } = useAuthRedirect();
 
   const currentPlan = plans.find(p => p.id === selectedPlanId);
 
-  // Fetch plans from database
   useEffect(() => {
     const fetchPlans = async () => {
       setPlansLoading(true);
@@ -129,30 +125,23 @@ const AuthPaciente = () => {
     fetchPlans();
   }, []);
 
-  // Show message if redirected from login without subscription
   useEffect(() => {
     if (reason === "no-subscription") {
-      toast({
-        title: "Plano necessário",
-        description: "Escolha um plano abaixo para acessar a plataforma.",
-        variant: "destructive",
-      });
+      toast.error("Plano necessário", { description: "Escolha um plano abaixo para acessar a plataforma." });
     }
   }, [reason]);
 
   const handleVerifyCpf = async () => {
     const cleanCpf = unmask(verifyCpf);
     if (cleanCpf.length !== 11) {
-      toast({ title: "CPF inválido", description: "Digite um CPF válido com 11 dígitos.", variant: "destructive" });
+      toast.error("CPF inválido", { description: "Digite um CPF válido com 11 dígitos." });
       return;
     }
     setVerifyingCpf(true);
     try {
-      // Check guest_patients (purchased without account)
       const { data: guestData } = await supabase.from("guest_patients").select("id, full_name, email, phone").eq("cpf", cleanCpf).limit(1);
       
       if (guestData && guestData.length > 0) {
-        // Found a purchase — pre-fill data and allow registration
         const guest = guestData[0];
         const nameParts = guest.full_name.split(" ");
         setFirstName(nameParts[0] || "");
@@ -161,19 +150,18 @@ const AuthPaciente = () => {
         setPhone(formatMask(guest.phone || "", "phone"));
         setCpf(verifyCpf);
         setCpfVerified(true);
-        toast({ title: "CPF verificado! ✅", description: "Seus dados da compra foram encontrados. Complete seu cadastro." });
+        toast.success("CPF verificado! ✅", { description: "Seus dados da compra foram encontrados. Complete seu cadastro." });
       } else {
-        // Also check if there's an existing profile with active card
         const { data: profileData } = await supabase.from("profiles").select("user_id, cpf").eq("cpf", cleanCpf).limit(1);
         if (profileData && profileData.length > 0) {
-          toast({ title: "Conta já existe", description: "Já existe uma conta com esse CPF. Use a opção 'Entrar'.", variant: "destructive" });
+          toast.error("Conta já existe", { description: "Já existe uma conta com esse CPF. Use a opção 'Entrar'." });
           setMode("login");
         } else {
-          toast({ title: "CPF não encontrado", description: "Não encontramos uma compra com esse CPF. Adquira seu cartão primeiro.", variant: "destructive" });
+          toast.error("CPF não encontrado", { description: "Não encontramos uma compra com esse CPF. Adquira seu cartão primeiro." });
         }
       }
     } catch (err) {
-      toast({ title: "Erro na verificação", description: "Tente novamente.", variant: "destructive" });
+      toast.error("Erro na verificação", { description: "Tente novamente." });
     }
     setVerifyingCpf(false);
   };
@@ -188,15 +176,15 @@ const AuthPaciente = () => {
     e.preventDefault();
     if (Date.now() < lockoutUntil.current) {
       const secs = Math.ceil((lockoutUntil.current - Date.now()) / 1000);
-      toast({ title: "Aguarde", description: `Tente novamente em ${secs}s`, variant: "destructive" });
+      toast.error("Aguarde", { description: `Tente novamente em ${secs}s` });
       return;
     }
     if (!termsAccepted) {
-      toast({ title: "Aceite os termos", description: "Você precisa aceitar os Termos de Uso e Política de Privacidade para continuar.", variant: "destructive" });
+      toast.error("Aceite os termos", { description: "Você precisa aceitar os Termos de Uso e Política de Privacidade para continuar." });
       return;
     }
     if (!selectedPlanId) {
-      toast({ title: "Selecione um plano", description: "Volte e escolha um plano para continuar.", variant: "destructive" });
+      toast.error("Selecione um plano", { description: "Volte e escolha um plano para continuar." });
       return;
     }
     setLoading(true);
@@ -209,16 +197,12 @@ const AuthPaciente = () => {
     });
     if (error) {
       setLoading(false);
-      toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" });
+      toast.error("Erro no cadastro", { description: translateAuthError(error.message) });
       return;
     }
     if (data.user) {
       setRegisteredUserId(data.user.id);
-
-      // Capture referral code from sessionStorage
       const refCode = sessionStorage.getItem("ref_code");
-
-      // Use upsert to handle race condition with trigger
       await supabase.from("profiles").upsert({
         user_id: data.user.id,
         cpf: unmask(cpf),
@@ -227,18 +211,15 @@ const AuthPaciente = () => {
         last_name: lastName,
         referred_by: refCode || null,
       }, { onConflict: "user_id" });
-
-      // Register referral conversion
       if (refCode) {
         await supabase.from("referrals").insert({
           referral_code: refCode,
           referred_user_id: data.user.id,
-          referrer_id: data.user.id, // will be resolved by trigger
+          referrer_id: data.user.id,
           status: "pending",
           source: "signup",
         }).then(() => sessionStorage.removeItem("ref_code"));
       }
-
       await registerConsent(data.user.id);
       try {
         await supabase.functions.invoke("send-email", {
@@ -247,8 +228,7 @@ const AuthPaciente = () => {
       } catch {}
     }
     setLoading(false);
-    toast({ title: "Conta criada!", description: "Agora finalize o pagamento para acessar." });
-    // Go to payment step instead of dashboard
+    toast.success("Conta criada!", { description: "Agora finalize o pagamento para acessar." });
     setStep("payment");
   };
 
@@ -279,22 +259,19 @@ const AuthPaciente = () => {
 
       setPaymentData(data);
 
-      // For credit card or confirmed PIX, the payment may be instant
       if (data.status === "CONFIRMED" || data.status === "RECEIVED" || data.status === "ACTIVE") {
         await createSubscriptionRecord(data);
-        toast({ title: "Pagamento confirmado! ✅", description: "Redirecionando para o dashboard..." });
+        toast.success("Pagamento confirmado! ✅", { description: "Redirecionando para o dashboard..." });
         setTimeout(() => navigate("/dashboard"), 1500);
       } else {
-        // PIX or Boleto — waiting for confirmation
-        toast({
-          title: paymentMethod === "PIX" ? "PIX gerado!" : "Boleto gerado!",
+        toast.success(paymentMethod === "PIX" ? "PIX gerado!" : "Boleto gerado!", {
           description: paymentMethod === "PIX" 
             ? "Escaneie o QR Code ou copie o código para pagar."
             : "Acesse o boleto para realizar o pagamento.",
         });
       }
     } catch (err: any) {
-      toast({ title: "Erro no pagamento", description: err.message || "Tente novamente", variant: "destructive" });
+      toast.error("Erro no pagamento", { description: err.message || "Tente novamente" });
     }
     setPaymentLoading(false);
   };
@@ -303,11 +280,10 @@ const AuthPaciente = () => {
     if (!registeredUserId || !currentPlan) return;
     try {
       const planId = currentPlan.id;
-      // Validate it's a real UUID — reject fallback IDs
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(planId)) {
         console.error("Invalid plan ID, cannot create subscription:", planId);
-        toast({ title: "Erro interno", description: "ID de plano inválido. Entre em contato com o suporte.", variant: "destructive" });
+        toast.error("Erro interno", { description: "ID de plano inválido. Entre em contato com o suporte." });
         return;
       }
       await supabase.from("subscriptions").insert({
@@ -326,7 +302,7 @@ const AuthPaciente = () => {
     if (paymentData?.pixCopyPaste) {
       navigator.clipboard.writeText(paymentData.pixCopyPaste);
       setPixCopied(true);
-      toast({ title: "Código PIX copiado!" });
+      toast.success("Código PIX copiado!");
       setTimeout(() => setPixCopied(false), 3000);
     }
   };
@@ -335,7 +311,7 @@ const AuthPaciente = () => {
     e.preventDefault();
     if (Date.now() < lockoutUntil.current) {
       const secs = Math.ceil((lockoutUntil.current - Date.now()) / 1000);
-      toast({ title: "Aguarde", description: `Tente novamente em ${secs}s`, variant: "destructive" });
+      toast.error("Aguarde", { description: `Tente novamente em ${secs}s` });
       return;
     }
     setLoading(true);
@@ -347,18 +323,16 @@ const AuthPaciente = () => {
       if (newAttempts >= 5) {
         lockoutUntil.current = Date.now() + 30000;
         setAttempts(0);
-        toast({ title: "Muitas tentativas", description: "Conta bloqueada por 30 segundos.", variant: "destructive" });
+        toast.error("Muitas tentativas", { description: "Conta bloqueada por 30 segundos." });
       } else {
-        toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
+        toast.error("Erro ao entrar", { description: translateAuthError(error.message) });
       }
     } else if (data.user) {
       setAttempts(0);
       setLoading(false);
-      // Use centralized redirect — no signOut on missing subscription
       await redirectAfterLogin(data.user.id);
     }
   };
-
 
   const stepLabels = ["Escolher Plano", "Criar Conta", "Pagamento"];
   const currentStepIndex = step === "select" ? 0 : step === "register" ? 1 : 2;

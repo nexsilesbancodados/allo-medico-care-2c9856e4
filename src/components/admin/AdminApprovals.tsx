@@ -9,13 +9,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck, Megaphone } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const AdminApprovals = () => {
-  const { toast } = useToast();
+  
   const [pendingDoctors, setPendingDoctors] = useState<any[]>([]);
   const [approvedDoctors, setApprovedDoctors] = useState<any[]>([]);
   const [pendingClinics, setPendingClinics] = useState<any[]>([]);
@@ -136,7 +136,7 @@ const AdminApprovals = () => {
       link: "/dashboard?role=affiliate",
     });
 
-    toast({ title: "Afiliado aprovado! ✅" });
+    toast.success("Afiliado aprovado! ✅");
     fetchAll();
   };
 
@@ -156,7 +156,7 @@ const AdminApprovals = () => {
       }
     }
 
-    toast({ title: `${type === "doctor" ? "Médico" : type === "clinic" ? "Clínica" : "Parceiro"} aprovado! ✅` });
+    toast.success(`${type === "doctor" ? "Médico" : type === "clinic" ? "Clínica" : "Parceiro"} aprovado! ✅`);
     fetchAll();
   };
 
@@ -166,7 +166,7 @@ const AdminApprovals = () => {
       crm_verified_at: !currentValue ? new Date().toISOString() : null,
     };
     await supabase.from("doctor_profiles").update(updateData).eq("id", id);
-    toast({ title: !currentValue ? "CRM verificado ✅" : "Verificação de CRM removida" });
+    toast.success(!currentValue ? "CRM verificado ✅" : "Verificação de CRM removida");
     fetchAll();
   };
 
@@ -180,13 +180,13 @@ const AdminApprovals = () => {
       });
       if (error) throw error;
       if (data?.valid) {
-        toast({ title: "✅ CRM verificado automaticamente!", description: `${data.doctor?.nome} — ${data.doctor?.situacao}` });
+        toast.success("✅ CRM verificado automaticamente!", { description: `${data.doctor?.nome} — ${data.doctor?.situacao}` });
       } else {
-        toast({ title: "⚠️ Verificação falhou", description: data?.message || "CRM não encontrado ou irregular", variant: "destructive" });
+        toast.error("⚠️ Verificação falhou", { description: data?.message || "CRM não encontrado ou irregular" });
       }
       fetchAll();
     } catch (e: any) {
-      toast({ title: "Erro na verificação", description: e.message, variant: "destructive" });
+      toast.error("Erro na verificação", { description: e.message });
     } finally {
       setVerifyingCrmId(null);
     }
@@ -223,7 +223,7 @@ const AdminApprovals = () => {
       }
     }
     
-    toast({ title: "Cadastro rejeitado", description: rejectReason || undefined });
+    toast.success("Cadastro rejeitado", { description: rejectReason || undefined });
     setShowReject(false);
     setRejectReason("");
     setRejectTarget(null);

@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Search, Eye, Edit } from "lucide-react";
 
 const AdminClinics = () => {
-  const { toast } = useToast();
+  
   const [clinics, setClinics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -32,7 +32,7 @@ const AdminClinics = () => {
 
   const toggleApproval = async (id: string, current: boolean) => {
     await supabase.from("clinic_profiles").update({ is_approved: !current }).eq("id", id);
-    toast({ title: current ? "Clínica desativada" : "Clínica aprovada!" });
+    toast.success(current ? "Clínica desativada" : "Clínica aprovada!");
     fetchClinics();
   };
 
@@ -46,8 +46,8 @@ const AdminClinics = () => {
     const { error } = await supabase.from("clinic_profiles").update({
       name: editForm.name, cnpj: editForm.cnpj || null, phone: editForm.phone || null, address: editForm.address || null,
     }).eq("id", selected.id);
-    if (error) toast({ title: "Erro", description: error.message, variant: "destructive" });
-    else { toast({ title: "Clínica atualizada!" }); setEditing(false); setSelected(null); fetchClinics(); }
+    if (error) toast.error("Erro", { description: error.message });
+    else { toast.success("Clínica atualizada!"); setEditing(false); setSelected(null); fetchClinics(); }
   };
 
   const filtered = clinics.filter(c => `${c.name} ${c.cnpj || ""}`.toLowerCase().includes(search.toLowerCase()));

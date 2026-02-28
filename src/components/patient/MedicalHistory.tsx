@@ -11,13 +11,13 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import jsPDF from "jspdf";
 import { getPatientNav } from "./patientNav";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
 const MedicalHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
+  
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [summaries, setSummaries] = useState<Record<string, string>>({});
@@ -94,7 +94,7 @@ const MedicalHistory = () => {
       setSummaries(prev => ({ ...prev, [appt.id]: data.summary }));
     } catch (e) {
       console.error(e);
-      toast({ title: "Erro ao gerar resumo", description: "Tente novamente em alguns segundos.", variant: "destructive" });
+      toast.error("Erro ao gerar resumo", { description: "Tente novamente em alguns segundos." });
       setExpandedId(null);
     } finally {
       setLoadingSummary(prev => ({ ...prev, [appt.id]: false }));
