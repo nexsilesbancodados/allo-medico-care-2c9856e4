@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Mail, Lock, ArrowLeft, Megaphone, LogIn, UserPlus, AlertCircle, Sparkles } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import { translateAuthError } from "@/lib/authErrors";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 type Step = "welcome" | "register" | "login";
@@ -29,7 +30,7 @@ const AuthAfiliado = () => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
-      toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
+      toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
     } else {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -64,7 +65,7 @@ const AuthAfiliado = () => {
     });
     if (error) {
       setLoading(false);
-      toast({ title: "Erro no cadastro", description: error.message, variant: "destructive" });
+      toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" });
       return;
     }
     if (data.user) {

@@ -54,7 +54,9 @@ const AuthPaciente = () => {
   // ALL state declarations at the top — fixes Problem 2 (mode used before declared)
   const [mode, setMode] = useState<"register" | "login">("login");
   const [step, setStep] = useState<Step>(initialPlan ? "register" : "select");
-  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(initialPlan || null);
+  const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
+    initialPlan || sessionStorage.getItem("selectedPlanId") || null
+  );
 
   const [plans, setPlans] = useState<PlanItem[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
@@ -175,6 +177,7 @@ const AuthPaciente = () => {
 
   const handleSelectPlan = (planId: string) => {
     setSelectedPlanId(planId);
+    sessionStorage.setItem("selectedPlanId", planId);
     setStep("register");
   };
 
@@ -375,8 +378,8 @@ const AuthPaciente = () => {
         </div>
       </div>
 
-      {/* Steps indicator - always visible during registration flow */}
-      {mode === "register" && step !== "success" && (
+      {/* Steps indicator - always visible during registration flow (any step except success) */}
+      {step !== "success" && mode === "register" && (
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-center gap-2 text-sm mb-8">
             {stepLabels.map((label, i) => {

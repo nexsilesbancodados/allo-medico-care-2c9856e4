@@ -18,6 +18,7 @@ import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
+import { translateAuthError } from "@/lib/authErrors";
 import { lazy, Suspense } from "react";
 import heroClinica1 from "@/assets/hero-clinica-1.png";
 import heroClinica2 from "@/assets/hero-clinica-2.png";
@@ -122,7 +123,7 @@ const AuthClinica = () => {
     if (!clinicName || !cnpj) { toast({ title: "Preencha nome e CNPJ da clínica", variant: "destructive" }); return; }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { first_name: firstName, last_name: lastName } } });
-    if (error) { toast({ title: "Erro no cadastro", description: error.message, variant: "destructive" }); setLoading(false); return; }
+    if (error) { toast({ title: "Erro no cadastro", description: translateAuthError(error.message), variant: "destructive" }); setLoading(false); return; }
     if (data.user) {
       await supabase.from("clinic_profiles").insert({ user_id: data.user.id, name: clinicName, cnpj: cnpj.replace(/\D/g, ""), phone: phone.replace(/\D/g, ""), address }).then(r => r.error && console.error(r.error));
       await supabase.functions.invoke("assign-role", { body: { user_id: data.user.id, role: "clinic" } }).catch(console.error);
@@ -139,7 +140,7 @@ const AuthClinica = () => {
     setLoading(true);
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) toast({ title: "Erro ao entrar", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "Erro ao entrar", description: translateAuthError(error.message), variant: "destructive" });
     else navigate("/dashboard");
   };
 
