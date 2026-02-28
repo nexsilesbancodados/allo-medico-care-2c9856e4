@@ -58,9 +58,9 @@ export function useSubdomainRedirect() {
     const targetRoute = SUBDOMAIN_ROUTES[subdomain];
     if (!targetRoute) return;
 
-    // Only redirect if on root path
+    // Only redirect if on root path, preserving query params
     if (location.pathname === "/") {
-      navigate(targetRoute, { replace: true });
+      navigate(targetRoute + location.search + location.hash, { replace: true });
     }
   }, [navigate, location.pathname]);
 }

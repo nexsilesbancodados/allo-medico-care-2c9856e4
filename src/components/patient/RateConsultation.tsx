@@ -75,6 +75,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
 
   const submit = async () => {
     if (nps === null) { toast.error("Selecione uma nota NPS (0-10)"); return; }
+    if (already) { toast.error("Você já avaliou esta consulta."); return; }
     setSubmitting(true);
 
     const fullComment = [
@@ -103,7 +104,19 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
     setSubmitting(false);
   };
 
-  if (already) return null;
+  if (already) {
+    return (
+      <Dialog open onOpenChange={() => onClose()}>
+        <DialogContent className="max-w-sm text-center">
+          <DialogHeader>
+            <DialogTitle>Avaliação já enviada ✅</DialogTitle>
+          </DialogHeader>
+          <p className="text-muted-foreground text-sm py-4">Você já avaliou esta consulta. Obrigado pelo seu feedback!</p>
+          <Button onClick={onClose}>Fechar</Button>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const npsColors = (i: number) => {
     if (i <= 6) return nps === i ? "bg-destructive text-destructive-foreground" : "border-destructive/30 text-destructive hover:bg-destructive/10";

@@ -172,6 +172,12 @@ const UserProfile = () => {
         .eq("user_id", user.id)
         .eq("status", "active");
 
+      // Cancel active subscriptions
+      await supabase.from("subscriptions")
+        .update({ status: "cancelled", cancelled_at: new Date().toISOString(), updated_at: new Date().toISOString() })
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
       // Sign out
       await supabase.auth.signOut();
       

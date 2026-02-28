@@ -117,9 +117,23 @@ const DoctorAvailability = () => {
 
   const addSlot = async () => {
     if (!doctorProfileId) return;
+    const dayNum = parseInt(newDay);
+
+    // Check for overlapping slots
+    const overlapping = slots.filter(s =>
+      s.day_of_week === dayNum &&
+      s.is_active &&
+      newStart < s.end_time &&
+      newEnd > s.start_time
+    );
+    if (overlapping.length > 0) {
+      toast({ title: "Conflito de horário", description: "Você já tem um slot neste período. Remova-o primeiro.", variant: "destructive" });
+      return;
+    }
+
     const { error } = await supabase.from("availability_slots").insert({
       doctor_id: doctorProfileId,
-      day_of_week: parseInt(newDay),
+      day_of_week: dayNum,
       start_time: newStart,
       end_time: newEnd,
     });

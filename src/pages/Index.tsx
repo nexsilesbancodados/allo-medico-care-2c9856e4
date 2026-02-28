@@ -30,6 +30,15 @@ const Index = forwardRef<HTMLDivElement>((_, _ref) => {
     return () => { if (prev && prev !== "light") setTheme(prev); };
   }, []);
 
+  // Capture affiliate referral code from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const refCode = params.get("ref");
+    if (refCode) {
+      sessionStorage.setItem("ref_code", refCode);
+    }
+  }, []);
+
   useEffect(() => {
     const handler = () => setShowQuiz(true);
     window.addEventListener("open-specialty-quiz", handler);

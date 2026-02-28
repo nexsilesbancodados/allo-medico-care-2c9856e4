@@ -319,6 +319,30 @@ const PlansCheckout = () => {
   const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
   const [asaasPaymentId, setAsaasPaymentId] = useState<string | null>(null);
 
+  // PIX polling for payment confirmation
+  useEffect(() => {
+    if (step !== "checkout" || paymentMethod !== "pix" || (!pixQrCode && !asaasPaymentId)) return;
+    const pollTimer = setInterval(async () => {
+      if (selectedDoctor && user) {
+        const { data } = await supabase
+          .from("appointments")
+          .select("payment_status")
+          .eq("patient_id", user.id)
+          .eq("doctor_id", selectedDoctor.id)
+          .in("payment_status", ["approved", "confirmed", "received"])
+          .order("created_at", { ascending: false })
+          .limit(1);
+        if (data && data.length > 0) {
+          clearInterval(pollTimer);
+          toast({ title: "✅ Pagamento confirmado!" });
+          setStep("success");
+          clearCheckoutDraft();
+        }
+      }
+    }, 10000);
+    return () => clearInterval(pollTimer);
+  }, [step, paymentMethod, pixQrCode, asaasPaymentId]);
+
   const handleCheckout = async () => {
     if (paymentMethod === "card" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
       toast({ title: "Preencha todos os campos do cartão", variant: "destructive" });
@@ -393,15 +417,21 @@ const PlansCheckout = () => {
         appointmentId,
       };
 
-      // Add card data if credit card
+      // Add card data if credit card (tokenized server-side via Asaas API)
       if (paymentMethod === "card") {
         payload.cardHolderName = cardName;
-        payload.cardNumber = cardNumber;
+        payload.cardNumber = cardNumber.replace(/\s/g, "");
         payload.cardExpiryMonth = expiryMonth;
         payload.cardExpiryYear = `20${expiryYear}`;
         payload.cardCcv = cardCvv;
         payload.cardHolderCpf = customerCpf;
         payload.cardHolderPhone = customerPhone;
+        payload.remoteIp = "0.0.0.0";
+      }
+
+      // Increment coupon usage atomically on successful payment
+      if (couponCode && couponDiscount > 0) {
+        payload.couponCode = couponCode;
       }
 
       const { data, error } = await supabase.functions.invoke("create-asaas-payment", {
