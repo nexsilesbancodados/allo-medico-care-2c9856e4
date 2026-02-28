@@ -90,7 +90,7 @@ const AdminDoctorApplications = () => {
           data: {
             name: selectedApp.full_name,
             subject: "Seu cadastro foi aprovado! — AloClinica",
-            message: `Olá Dr(a). ${selectedApp.full_name},\n\nSeu cadastro foi aprovado! Use o código abaixo para criar sua conta:\n\n🔑 Código de Acesso: ${code}\n\nEste código expira em 7 dias.\n\nAcesse: ${window.location.origin}/medico\n\nBem-vindo(a) à AloClinica! 💚`,
+            message: `Olá Dr(a). ${selectedApp.full_name},\n\nSeu cadastro foi aprovado! Use o código abaixo para criar sua conta:\n\n🔑 Código de Acesso: ${code}\n\nEste código expira em 7 dias.\n\nAcesse o portal exclusivo para médicos:\n${window.location.origin}/medico?acesso=entrar\n\nBem-vindo(a) à AloClinica! 💚`,
           },
         },
       });
