@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
@@ -142,7 +142,8 @@ const App = () => {
             <Route path="/l/:id" element={<LinkRedirect />} />
             <Route path="/validar/:id" element={<ValidateDocument />} />
             <Route path="/validar" element={<ValidateDocument />} />
-            <Route path="/cartao-desconto" element={<DiscountCard />} />
+            <Route path="/cartao-beneficios" element={<DiscountCard />} />
+            <Route path="/cartao-desconto" element={<Navigate to="/cartao-beneficios" replace />} />
             <Route path="/para-empresas" element={<B2BLanding />} />
             <Route path="/teleconsulta" element={<Teleconsulta />} />
             <Route path="/telelaudo" element={<Telelaudo />} />
