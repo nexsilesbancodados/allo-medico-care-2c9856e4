@@ -9,20 +9,14 @@ import { SectionSkeleton, StatsSkeleton, TestimonialsSkeleton } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Stethoscope } from "lucide-react";
 
-// Lazy load ALL below-the-fold sections
+// Lazy load below-the-fold sections (core landing only)
 const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
 const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection"));
 const SpecialtiesSection = lazy(() => import("@/components/landing/SpecialtiesSection"));
 const PlansSection = lazy(() => import("@/components/landing/PlansSection"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
 const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
-const DoctorPremiumSection = lazy(() => import("@/components/landing/DoctorPremiumSection"));
-const VirtualAssistantSection = lazy(() => import("@/components/landing/VirtualAssistantSection"));
-const MultiPlatformSection = lazy(() => import("@/components/landing/MultiPlatformSection"));
-const ClinicPresentialSection = lazy(() => import("@/components/landing/ClinicPresentialSection"));
 const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
-const SupportSection = lazy(() => import("@/components/landing/SupportSection"));
-const TeleLaudoSection = lazy(() => import("@/components/landing/TeleLaudoSection"));
 const Footer = lazy(() => import("@/components/landing/Footer"));
 const SpecialtyQuiz = lazy(() => import("@/components/landing/SpecialtyQuiz"));
 
@@ -120,22 +114,7 @@ const Index = forwardRef<HTMLDivElement>((_, _ref) => {
         <SpecialtiesSection />
       </Suspense>
       <Suspense fallback={<SectionSkeleton />}>
-        <VirtualAssistantSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <MultiPlatformSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <ClinicPresentialSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
         <PlansSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <DoctorPremiumSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <TeleLaudoSection />
       </Suspense>
       <Suspense fallback={<TestimonialsSkeleton />}>
         <TestimonialsSection />
@@ -145,9 +124,6 @@ const Index = forwardRef<HTMLDivElement>((_, _ref) => {
       </Suspense>
       <Suspense fallback={<SectionSkeleton />}>
         <FAQSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <SupportSection />
       </Suspense>
 
       <section aria-labelledby="triage-heading" className="py-16 px-4">
