@@ -5,7 +5,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
-import { lazy, Suspense, useState, useCallback, useEffect, memo } from "react";
+import { lazy, Suspense, useState, useCallback, useEffect, memo, forwardRef } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import SplashScreen from "./components/SplashScreen";
@@ -72,11 +72,14 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = memo(() => (
+// forwardRef already imported above
+
+const PageLoader = memo(forwardRef<HTMLDivElement>((_props, _ref) => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <Loader2 className="w-8 h-8 animate-spin text-primary" />
   </div>
-));
+)));
+PageLoader.displayName = "PageLoader";
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();
