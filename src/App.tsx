@@ -81,15 +81,17 @@ const PageLoader = memo(forwardRef<HTMLDivElement>((_props, _ref) => (
 )));
 PageLoader.displayName = "PageLoader";
 
-const KeyboardShortcutsProvider = () => {
+const KeyboardShortcutsProvider = forwardRef<HTMLDivElement>((_props, _ref) => {
   useKeyboardShortcuts();
   return null;
-};
+});
+KeyboardShortcutsProvider.displayName = "KeyboardShortcutsProvider";
 
-const SubdomainRedirectProvider = () => {
+const SubdomainRedirectProvider = forwardRef<HTMLDivElement>((_props, _ref) => {
   useSubdomainRedirect();
   return null;
-};
+});
+SubdomainRedirectProvider.displayName = "SubdomainRedirectProvider";
 
 const App = () => {
   const [splashDone, setSplashDone] = useState(false);
