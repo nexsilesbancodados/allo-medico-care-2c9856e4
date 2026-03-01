@@ -1,11 +1,11 @@
-import { useEffect } from "react";
+import { useEffect, forwardRef } from "react";
 import { useLocation } from "react-router-dom";
 
 /**
  * Scrolls to top on every route change.
  * Place inside <BrowserRouter>.
  */
-const ScrollToTop = () => {
+const ScrollToTop = forwardRef<HTMLDivElement>((_props, _ref) => {
   const { pathname } = useLocation();
 
   useEffect(() => {
@@ -13,6 +13,7 @@ const ScrollToTop = () => {
   }, [pathname]);
 
   return null;
-};
+});
 
+ScrollToTop.displayName = "ScrollToTop";
 export default ScrollToTop;
