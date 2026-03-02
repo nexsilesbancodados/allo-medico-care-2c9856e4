@@ -5,10 +5,9 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
-import { lazy, Suspense, useState, useCallback, useEffect, memo, forwardRef } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import SplashScreen from "./components/SplashScreen";
 const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -23,7 +22,6 @@ const PingoChatbot = lazy(() => import("./components/PingoChatbot"));
 const OfflineIndicator = lazy(() => import("./components/OfflineIndicator"));
 const CookieConsent = lazy(() => import("./components/CookieConsent"));
 const TermsReconsentDialog = lazy(() => import("./components/auth/TermsReconsentDialog"));
-
 
 // Lazy-loaded pages for code splitting
 const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
@@ -64,39 +62,31 @@ const TelelaudoWorkspace = lazy(() => import("./pages/TelelaudoWorkspace"));
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 min
-      gcTime: 10 * 60 * 1000, // 10 min garbage collection
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
       refetchOnWindowFocus: false,
       retry: 1,
     },
   },
 });
 
-// forwardRef already imported above
-
-const PageLoader = memo(forwardRef<HTMLDivElement>((_props, _ref) => (
+const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <Loader2 className="w-8 h-8 animate-spin text-primary" />
   </div>
-)));
-PageLoader.displayName = "PageLoader";
+);
 
-const KeyboardShortcutsProvider = forwardRef<HTMLDivElement>((_props, _ref) => {
+const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();
   return null;
-});
-KeyboardShortcutsProvider.displayName = "KeyboardShortcutsProvider";
+};
 
-const SubdomainRedirectProvider = forwardRef<HTMLDivElement>((_props, _ref) => {
+const SubdomainRedirectProvider = () => {
   useSubdomainRedirect();
   return null;
-});
-SubdomainRedirectProvider.displayName = "SubdomainRedirectProvider";
+};
 
 const App = () => {
-  const [splashDone, setSplashDone] = useState(false);
-  const handleSplashFinish = useCallback(() => setSplashDone(true), []);
-
   // Global safety net for unhandled async errors (prevents white screen)
   useEffect(() => {
     const handleRejection = (event: PromiseRejectionEvent) => {
@@ -107,9 +97,8 @@ const App = () => {
     window.addEventListener("unhandledrejection", handleRejection);
     return () => window.removeEventListener("unhandledrejection", handleRejection);
   }, []);
+
   return (
-  <>
-  {!splashDone && <SplashScreen onFinish={handleSplashFinish} />}
   <ErrorBoundary>
   <I18nProvider>
   <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
@@ -193,7 +182,6 @@ const App = () => {
   </ThemeProvider>
   </I18nProvider>
   </ErrorBoundary>
-  </>
   );
 };
 
