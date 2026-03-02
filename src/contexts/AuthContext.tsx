@@ -69,26 +69,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    // Use only onAuthStateChange with INITIAL_SESSION for clean initialization
+    let didSetLoading = false;
+    const markLoaded = () => {
+      if (!didSetLoading) {
+        didSetLoading = true;
+        setLoading(false);
+      }
+    };
+
+    // Safety: force loading=false after 4s even if onAuthStateChange never fires
+    const safetyTimer = setTimeout(markLoaded, 4000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Don't await inside onAuthStateChange — it can block/deadlock
           setTimeout(() => {
-            fetchUserData(session.user.id).finally(() => setLoading(false));
+            fetchUserData(session.user.id).finally(markLoaded);
           }, 0);
         } else {
           setProfile(null);
           setRoles([]);
-          setLoading(false);
+          markLoaded();
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(safetyTimer);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = useCallback(async () => {
