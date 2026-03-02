@@ -69,7 +69,15 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="initial-loader" style="display:flex;align-items:center;justify-content:center;height:100vh;background:#f8fafc;font-family:system-ui,sans-serif">
+        <div style="text-align:center">
+          <div style="width:40px;height:40px;border:3px solid #e2e8f0;border-top-color:#1a6fc4;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto"></div>
+          <p style="margin-top:16px;color:#64748b;font-size:14px">Carregando...</p>
+        </div>
+      </div>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
