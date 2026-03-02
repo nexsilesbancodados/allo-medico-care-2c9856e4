@@ -71,17 +71,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Use only onAuthStateChange with INITIAL_SESSION for clean initialization
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          await fetchUserData(session.user.id);
+          // Don't await inside onAuthStateChange — it can block/deadlock
+          setTimeout(() => {
+            fetchUserData(session.user.id).finally(() => setLoading(false));
+          }, 0);
         } else {
           setProfile(null);
           setRoles([]);
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
