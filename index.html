@@ -79,24 +79,12 @@
     </div>
     <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     <script>
-      // Safety: if React hasn't mounted after 6s, reload once
-      setTimeout(function(){
-        var el=document.getElementById('initial-loader');
-        if(el&&el.parentNode.children.length===1){
-          if(!sessionStorage.getItem('_reload')){
-            sessionStorage.setItem('_reload','1');
-            location.reload();
-          } else {
-            sessionStorage.removeItem('_reload');
-            el.querySelector('p').textContent='Tente recarregar a página';
-            var btn=document.createElement('button');
-            btn.textContent='Recarregar';
-            btn.style.cssText='margin-top:12px;padding:8px 20px;border-radius:8px;border:1px solid #cbd5e1;cursor:pointer;font-size:14px;background:#fff';
-            btn.onclick=function(){location.reload()};
-            el.querySelector('div').appendChild(btn);
-          }
-        }
-      },6000);
+      // Remove initial loader once React mounts (detected by new children in #root)
+      var _obs = new MutationObserver(function(){
+        var el = document.getElementById('initial-loader');
+        if(el){ el.remove(); _obs.disconnect(); }
+      });
+      _obs.observe(document.getElementById('root'), { childList: true });
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
