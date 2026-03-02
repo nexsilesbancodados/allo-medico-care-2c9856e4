@@ -59,21 +59,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     let mounted = true;
+    let didLoad = false;
+    const markLoaded = () => {
+      if (!didLoad && mounted) { didLoad = true; setLoading(false); }
+    };
 
-    // 1. Primary init: getSession (works even if onAuthStateChange is delayed)
+    // Safety: force loading=false after 3s (prevents stuck spinner in preview)
+    const safetyTimer = setTimeout(markLoaded, 3000);
+
+    // 1. Primary init: getSession
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       if (!mounted) return;
       setSession(s);
       setUser(s?.user ?? null);
 
       if (s?.user) {
-        fetchUserData(s.user.id).finally(() => { if (mounted) setLoading(false); });
+        fetchUserData(s.user.id).finally(markLoaded);
       } else {
-        setLoading(false);
+        markLoaded();
       }
-    }).catch(() => {
-      if (mounted) setLoading(false);
-    });
+    }).catch(markLoaded);
 
     // 2. Listen for subsequent auth changes (sign in/out/token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -93,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       mounted = false;
+      clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
   }, [fetchUserData]);
