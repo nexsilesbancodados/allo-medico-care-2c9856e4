@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode, useRef } from "react";
+import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -43,65 +43,59 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
-  const fetchingRef = useRef(false);
 
-  const fetchUserData = async (userId: string, retries = 2) => {
-    if (fetchingRef.current) return;
-    fetchingRef.current = true;
+  const fetchUserData = useCallback(async (userId: string) => {
     try {
       const [profileRes, rolesRes] = await Promise.all([
-        supabase.from("profiles").select("*").eq("user_id", userId).single(),
+        supabase.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", userId),
       ]);
-
       if (profileRes.data) setProfile(profileRes.data as Profile);
       if (rolesRes.data) setRoles(rolesRes.data.map((r: any) => r.role as AppRole));
-
-      // Retry if both failed (network issue)
-      if (profileRes.error && rolesRes.error && retries > 0) {
-        fetchingRef.current = false;
-        await new Promise(r => setTimeout(r, 1000));
-        return fetchUserData(userId, retries - 1);
-      }
-    } finally {
-      fetchingRef.current = false;
+    } catch (e) {
+      console.error("fetchUserData error:", e);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    let didSetLoading = false;
-    const markLoaded = () => {
-      if (!didSetLoading) {
-        didSetLoading = true;
+    let mounted = true;
+
+    // 1. Primary init: getSession (works even if onAuthStateChange is delayed)
+    supabase.auth.getSession().then(({ data: { session: s } }) => {
+      if (!mounted) return;
+      setSession(s);
+      setUser(s?.user ?? null);
+
+      if (s?.user) {
+        fetchUserData(s.user.id).finally(() => { if (mounted) setLoading(false); });
+      } else {
         setLoading(false);
       }
-    };
+    }).catch(() => {
+      if (mounted) setLoading(false);
+    });
 
-    // Safety: force loading=false after 4s even if onAuthStateChange never fires
-    const safetyTimer = setTimeout(markLoaded, 4000);
-
+    // 2. Listen for subsequent auth changes (sign in/out/token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      (_event, s) => {
+        if (!mounted) return;
+        setSession(s);
+        setUser(s?.user ?? null);
 
-        if (session?.user) {
-          setTimeout(() => {
-            fetchUserData(session.user.id).finally(markLoaded);
-          }, 0);
+        if (s?.user) {
+          fetchUserData(s.user.id);
         } else {
           setProfile(null);
           setRoles([]);
-          markLoaded();
         }
       }
     );
 
     return () => {
-      clearTimeout(safetyTimer);
+      mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchUserData]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
@@ -113,7 +107,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const refreshRoles = useCallback(async () => {
     if (user) await fetchUserData(user.id);
-  }, [user]);
+  }, [user, fetchUserData]);
 
   const contextValue = useMemo(
     () => ({ user, session, profile, roles, loading, signOut, refreshRoles }),
