@@ -8,7 +8,9 @@ const SplashScreen = memo(({ onFinish }: { onFinish: () => void }) => {
   useEffect(() => {
     const t1 = setTimeout(() => setVisible(false), 1200);
     const t2 = setTimeout(onFinish, 1600);
-    return () => { clearTimeout(t1); clearTimeout(t2); };
+    // Safety: force finish after 4s even if animations fail
+    const safety = setTimeout(onFinish, 4000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(safety); };
   }, [onFinish]);
 
   return (
