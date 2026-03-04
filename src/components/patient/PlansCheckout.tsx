@@ -324,18 +324,20 @@ const PlansCheckout = () => {
   const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
   const [asaasPaymentId, setAsaasPaymentId] = useState<string | null>(null);
 
+  // Track appointment ID created during checkout for PIX polling
+  const [currentAppointmentId, setCurrentAppointmentId] = useState<string | null>(null);
+
   // PIX polling for payment confirmation
   useEffect(() => {
     if (step !== "checkout" || paymentMethod !== "pix" || (!pixQrCode && !asaasPaymentId)) return;
     const pollTimer = setInterval(async () => {
-      if (selectedDoctor && user) {
+      if (user && currentAppointmentId) {
+        // Poll specific appointment instead of latest by doctor
         const { data } = await supabase
           .from("appointments")
           .select("payment_status")
-          .eq("patient_id", user.id)
-          .eq("doctor_id", selectedDoctor.id)
+          .eq("id", currentAppointmentId)
           .in("payment_status", ["approved", "confirmed", "received"])
-          .order("created_at", { ascending: false })
           .limit(1);
         if (data && data.length > 0) {
           clearInterval(pollTimer);
@@ -346,7 +348,7 @@ const PlansCheckout = () => {
       }
     }, 10000);
     return () => clearInterval(pollTimer);
-  }, [step, paymentMethod, pixQrCode, asaasPaymentId]);
+  }, [step, paymentMethod, pixQrCode, asaasPaymentId, currentAppointmentId]);
 
   const handleCheckout = async () => {
     if (paymentMethod === "card" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
@@ -401,6 +403,7 @@ const PlansCheckout = () => {
           return;
         }
         appointmentId = appt.id;
+        setCurrentAppointmentId(appt.id);
       }
 
       const billingTypeMap: Record<PaymentMethod, string> = {
@@ -420,6 +423,7 @@ const PlansCheckout = () => {
         value: totalPrice,
         description: `Consulta Médica - AloClinica`,
         appointmentId,
+        doctorProfileId: selectedDoctor?.id,
       };
 
       // PCI Compliance: Tokenize card via dedicated endpoint BEFORE payment
