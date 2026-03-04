@@ -7,24 +7,55 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, stripe-signature, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+/** Verify Stripe webhook signature using HMAC-SHA256 via Web Crypto API */
+async function verifyStripeSignature(
+  body: string,
+  sigHeader: string,
+  secret: string
+): Promise<boolean> {
+  const parts = sigHeader.split(",").reduce((acc, part) => {
+    const [key, value] = part.split("=");
+    acc[key.trim()] = value;
+    return acc;
+  }, {} as Record<string, string>);
+
+  const timestamp = parts["t"];
+  const v1Signature = parts["v1"];
+  if (!timestamp || !v1Signature) return false;
+
+  // Reject timestamps older than 5 minutes
+  const age = Math.floor(Date.now() / 1000) - parseInt(timestamp);
+  if (Math.abs(age) > 300) {
+    console.warn("Stripe webhook timestamp too old:", age, "seconds");
+    return false;
+  }
+
+  const signedPayload = `${timestamp}.${body}`;
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signatureBytes = await crypto.subtle.sign("HMAC", key, encoder.encode(signedPayload));
+  const expectedSig = Array.from(new Uint8Array(signatureBytes))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+
+  return expectedSig === v1Signature;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const STRIPE_SECRET_KEY = Deno.env.get("STRIPE_SECRET_KEY");
     const STRIPE_WEBHOOK_SECRET = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    if (!STRIPE_SECRET_KEY || !STRIPE_WEBHOOK_SECRET) {
-      console.error("Stripe secrets not configured");
-      return new Response(JSON.stringify({ error: "Stripe not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
 
     const signature = req.headers.get("stripe-signature");
     const body = await req.text();
@@ -36,11 +67,21 @@ serve(async (req) => {
       });
     }
 
-    // Verify webhook signature using Stripe API approach
-    // For production, use crypto.subtle to verify HMAC
-    // For now, we'll parse the event and verify via Stripe API
-    const event = JSON.parse(body);
+    // Verify signature if secret is configured
+    if (STRIPE_WEBHOOK_SECRET) {
+      const isValid = await verifyStripeSignature(body, signature, STRIPE_WEBHOOK_SECRET);
+      if (!isValid) {
+        console.error("Stripe webhook signature verification failed");
+        return new Response(JSON.stringify({ error: "Invalid signature" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+    } else {
+      console.warn("STRIPE_WEBHOOK_SECRET not configured — skipping signature verification");
+    }
 
+    const event = JSON.parse(body);
     const supabase = createClient(supabaseUrl, serviceKey);
 
     if (event.type === "checkout.session.completed") {
@@ -51,10 +92,10 @@ serve(async (req) => {
       console.log("Checkout completed:", { mode, appointmentId, planId, userId });
 
       if (mode === "payment" && appointmentId) {
-        // Update appointment payment status
         await supabase.from("appointments").update({
-          status: "scheduled",
-          payment_status: "paid",
+          status: "confirmed",
+          payment_status: "approved",
+          payment_confirmed_at: new Date().toISOString(),
         }).eq("id", appointmentId);
 
         // Trigger appointment confirmed notification
@@ -99,6 +140,13 @@ serve(async (req) => {
       const subscription = event.data.object;
       await supabase.from("subscriptions")
         .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
+        .eq("stripe_subscription_id", subscription.id);
+    }
+
+    if (event.type === "customer.subscription.updated") {
+      const subscription = event.data.object;
+      await supabase.from("subscriptions")
+        .update({ status: subscription.status })
         .eq("stripe_subscription_id", subscription.id);
     }
 
