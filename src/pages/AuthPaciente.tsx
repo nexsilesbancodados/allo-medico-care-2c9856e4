@@ -52,7 +52,7 @@ const AuthPaciente = () => {
   const reason = searchParams.get("reason");
 
   const [mode, setMode] = useState<"register" | "login">("login");
-  const [step, setStep] = useState<Step>("register");
+  const [step, setStep] = useState<Step>(initialPlan ? "register" : "select");
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
     initialPlan || sessionStorage.getItem("selectedPlanId") || null
   );
@@ -410,7 +410,106 @@ const AuthPaciente = () => {
 
       <div className="container mx-auto px-4 pb-16 flex-1">
         <AnimatePresence mode="wait">
-          {/* Plan selection removed — pacientes vão direto para registro/login */}
+          {/* Step 1: Plan Selection */}
+          {step === "select" && (
+            <motion.div
+              key="select"
+              initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="max-w-3xl mx-auto"
+            >
+              <div className="text-center mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">Escolha seu plano</h2>
+                <p className="text-muted-foreground mt-2">Selecione o plano ideal para você e sua família</p>
+              </div>
+
+              {plansLoading ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+              ) : plansError ? (
+                <div className="text-center py-16">
+                  <AlertCircle className="w-10 h-10 text-destructive mx-auto mb-3" />
+                  <p className="text-sm text-muted-foreground">Não foi possível carregar os planos.</p>
+                  <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
+                    Tentar novamente
+                  </Button>
+                </div>
+              ) : (
+                <motion.div variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {plans.map((plan) => {
+                    const isSelected = selectedPlanId === plan.id;
+                    const PlanIcon = plan.icon;
+                    return (
+                      <motion.div
+                        key={plan.id}
+                        variants={fadeUp}
+                        onClick={() => setSelectedPlanId(plan.id)}
+                        className={`relative cursor-pointer rounded-2xl border-2 p-5 transition-all hover:shadow-lg ${
+                          isSelected
+                            ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
+                            : "border-border bg-card hover:border-primary/30"
+                        } ${plan.highlighted ? "ring-2 ring-primary/20" : ""}`}
+                      >
+                        {plan.highlighted && (
+                          <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">
+                            Mais popular
+                          </span>
+                        )}
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-3`}>
+                          <PlanIcon className="w-5 h-5 text-primary-foreground" />
+                        </div>
+                        <h3 className="font-bold text-foreground text-lg">{plan.name}</h3>
+                        <p className="text-xs text-muted-foreground mt-1 mb-3">{plan.description}</p>
+                        <div className="flex items-baseline gap-1 mb-4">
+                          <span className="text-2xl font-extrabold text-foreground">R${plan.price.toFixed(2).replace('.', ',')}</span>
+                          <span className="text-xs text-muted-foreground">/{plan.period}</span>
+                        </div>
+                        <ul className="space-y-1.5">
+                          {plan.features.map((f, i) => (
+                            <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                              {f}
+                            </li>
+                          ))}
+                        </ul>
+                        {isSelected && (
+                          <motion.div
+                            layoutId="plan-check"
+                            className="absolute top-3 right-3 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
+                          >
+                            <Check className="w-3.5 h-3.5 text-primary-foreground" />
+                          </motion.div>
+                        )}
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              )}
+
+              <div className="mt-8 flex justify-center">
+                <Button
+                  size="lg"
+                  className="bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-full px-10 h-12 text-base font-semibold shadow-xl shadow-primary/20"
+                  disabled={!selectedPlanId}
+                  onClick={() => {
+                    if (selectedPlanId) {
+                      sessionStorage.setItem("selectedPlanId", selectedPlanId);
+                      setStep("register");
+                    }
+                  }}
+                >
+                  Continuar <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+
+              <p className="text-center text-sm text-muted-foreground mt-4">
+                Já tem conta? <button type="button" onClick={() => { setStep("register"); setMode("login"); }} className="text-primary font-semibold hover:underline">Entrar</button>
+              </p>
+            </motion.div>
+          )}
 
           {/* Step 2: Register / Login */}
           {step === "register" && (
