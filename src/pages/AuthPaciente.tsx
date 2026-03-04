@@ -52,7 +52,7 @@ const AuthPaciente = () => {
   const reason = searchParams.get("reason");
 
   const [mode, setMode] = useState<"register" | "login">("login");
-  const [step, setStep] = useState<Step>(initialPlan ? "register" : "select");
+  const [step, setStep] = useState<Step>("register");
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
     initialPlan || sessionStorage.getItem("selectedPlanId") || null
   );
