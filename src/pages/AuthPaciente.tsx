@@ -509,13 +509,14 @@ const AuthPaciente = () => {
                           </motion.div>
                         )}
 
-                        {/* Icon */}
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                          isPremium
-                            ? "bg-white/15 backdrop-blur-sm"
-                            : `bg-gradient-to-br ${plan.color} shadow-md`
-                        }`}>
-                          <PlanIcon className={`w-6 h-6 ${isPremium ? "text-primary-foreground" : "text-primary-foreground"}`} />
+                        {/* Pingo mascot image */}
+                        <div className="flex justify-center mb-4">
+                          <img
+                            src={PLAN_IMAGE_MAP[plan.name] || pingoSolitario}
+                            alt={`Pingo - ${plan.name}`}
+                            className="w-24 h-24 object-contain drop-shadow-lg"
+                            loading="lazy"
+                          />
                         </div>
 
                         {/* Name & description */}
