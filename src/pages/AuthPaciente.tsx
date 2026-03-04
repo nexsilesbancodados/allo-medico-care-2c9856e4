@@ -509,15 +509,14 @@ const AuthPaciente = () => {
                           </motion.div>
                         )}
 
-                        {/* Pingo mascot image */}
-                        <div className="flex justify-center mb-4">
-                          <img
-                            src={PLAN_IMAGE_MAP[plan.name] || pingoSolitario}
-                            alt={`Pingo - ${plan.name}`}
-                            className="w-24 h-24 object-contain drop-shadow-lg"
-                            loading="lazy"
-                          />
-                        </div>
+                        {/* Pingo mascot as background */}
+                        <img
+                          src={PLAN_IMAGE_MAP[plan.name] || pingoSolitario}
+                          alt=""
+                          aria-hidden="true"
+                          className="pointer-events-none absolute -bottom-4 -right-4 w-36 h-36 object-contain opacity-15 select-none"
+                          loading="lazy"
+                        />
 
                         {/* Name & description */}
                         <h3 className={`font-bold text-xl tracking-tight ${isPremium ? "text-primary-foreground" : "text-foreground"}`}>
