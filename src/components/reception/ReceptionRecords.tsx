@@ -93,7 +93,7 @@ const ReceptionRecords = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {records.map((r: any) => (
+                    {records.map((r: { id: string; patient_id?: string; title: string; record_type: string; cid_code?: string | null; is_active: boolean; created_at: string }) => (
                       <TableRow key={r.id}>
                         <TableCell className="font-medium">
                           <span className="flex items-center gap-1.5">

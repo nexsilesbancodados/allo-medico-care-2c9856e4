@@ -19,20 +19,22 @@ const COLORS = [
 const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 const AdminAnalyticsCharts = () => {
-  const [dailyAppts, setDailyAppts] = useState<any[]>([]);
-  const [statusBreakdown, setStatusBreakdown] = useState<any[]>([]);
-  const [specialtyData, setSpecialtyData] = useState<any[]>([]);
-  const [revenueData, setRevenueData] = useState<any[]>([]);
-  const [patientGrowth, setPatientGrowth] = useState<any[]>([]);
-  const [retentionData, setRetentionData] = useState<any[]>([]);
-  const [funnelData, setFunnelData] = useState<any[]>([]);
-  const [heatmapData, setHeatmapData] = useState<any[]>([]);
-  const [npsTrend, setNpsTrend] = useState<any[]>([]);
-  const [urgentCareData, setUrgentCareData] = useState<any[]>([]);
-  const [renewalData, setRenewalData] = useState<any[]>([]);
-  const [specialtyRevenueData, setSpecialtyRevenueData] = useState<any[]>([]);
-  const [specialtyConversionData, setSpecialtyConversionData] = useState<any[]>([]);
-  const [doctorPerformanceData, setDoctorPerformanceData] = useState<any[]>([]);
+  /* eslint-disable @typescript-eslint/no-explicit-any -- Recharts data shapes vary per chart type; strict typing adds complexity without safety here */
+  const [dailyAppts, setDailyAppts] = useState<Record<string, any>[]>([]);
+  const [statusBreakdown, setStatusBreakdown] = useState<Record<string, any>[]>([]);
+  const [specialtyData, setSpecialtyData] = useState<Record<string, any>[]>([]);
+  const [revenueData, setRevenueData] = useState<Record<string, any>[]>([]);
+  const [patientGrowth, setPatientGrowth] = useState<Record<string, any>[]>([]);
+  const [retentionData, setRetentionData] = useState<Record<string, any>[]>([]);
+  const [funnelData, setFunnelData] = useState<Record<string, any>[]>([]);
+  const [heatmapData, setHeatmapData] = useState<Record<string, any>[]>([]);
+  const [npsTrend, setNpsTrend] = useState<Record<string, any>[]>([]);
+  const [urgentCareData, setUrgentCareData] = useState<Record<string, any>[]>([]);
+  const [renewalData, setRenewalData] = useState<Record<string, any>[]>([]);
+  const [specialtyRevenueData, setSpecialtyRevenueData] = useState<Record<string, any>[]>([]);
+  const [specialtyConversionData, setSpecialtyConversionData] = useState<Record<string, any>[]>([]);
+  const [doctorPerformanceData, setDoctorPerformanceData] = useState<Record<string, any>[]>([]);
+  /* eslint-enable @typescript-eslint/no-explicit-any */
   const [urgentCareKPIs, setUrgentCareKPIs] = useState({ total: 0, waiting: 0, completed: 0, refunded: 0, avgWait: 0, revenue: 0 });
   const [renewalKPIs, setRenewalKPIs] = useState({ total: 0, pending: 0, approved: 0, rejected: 0, avgReviewDays: 0 });
   const [loading, setLoading] = useState(true);

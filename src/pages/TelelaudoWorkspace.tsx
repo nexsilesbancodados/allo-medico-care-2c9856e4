@@ -206,7 +206,7 @@ const LaudoEditorPanel = ({
     recognition.interimResults = true;
 
     let finalTranscript = "";
-    recognition.onresult = (e: any) => {
+    recognition.onresult = (e: SpeechRecognitionEvent) => {
       for (let i = e.resultIndex; i < e.results.length; i++) {
         if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript + " ";
       }
@@ -250,8 +250,8 @@ const LaudoEditorPanel = ({
           toast.success(mode === "structure" ? "Laudo estruturado pela IA" : "Texto melhorado pela IA");
         }
       }
-    } catch (err: any) {
-      toast.error(err?.message || "Erro ao processar com IA");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao processar com IA");
     } finally {
       setIsProcessing(false);
     }
@@ -451,8 +451,8 @@ const TelelaudoWorkspace = () => {
       setShowSignModal(false);
       setSignToken("");
       toast.success("✅ Laudo assinado e PDF gerado com sucesso!");
-    } catch (err: any) {
-      toast.error(err?.message || "Erro ao assinar laudo");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro ao assinar laudo");
     } finally {
       setSigning(false);
     }
@@ -481,8 +481,8 @@ const TelelaudoWorkspace = () => {
       setUploadName("");
       setUploadFile(null);
       fetchExames();
-    } catch (err: any) {
-      toast.error(err?.message || "Erro no upload");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro no upload");
     } finally {
       setUploading(false);
     }

@@ -189,8 +189,8 @@ const PartnerDashboard = () => {
                           <div className="space-y-1.5">
                             {foundPrescription.medications.map((med: any, i: number) => (
                               <div key={i} className="text-sm p-3 rounded-xl bg-muted/40 border border-border/30">
-                                <span className="font-medium text-foreground">{med.name ?? med}</span>
-                                {med.dosage && <span className="text-muted-foreground"> · {med.dosage}</span>}
+                                <span className="font-medium text-foreground">{typeof med === 'string' ? med : med.name ?? med}</span>
+                                {typeof med !== 'string' && med.dosage && <span className="text-muted-foreground"> · {med.dosage}</span>}
                               </div>
                             ))}
                           </div>

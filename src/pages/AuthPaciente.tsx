@@ -80,7 +80,7 @@ const AuthPaciente = () => {
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX");
   const [paymentLoading, setPaymentLoading] = useState(false);
-  const [paymentData, setPaymentData] = useState<any>(null);
+  const [paymentData, setPaymentData] = useState<Record<string, any> | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
   const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
 

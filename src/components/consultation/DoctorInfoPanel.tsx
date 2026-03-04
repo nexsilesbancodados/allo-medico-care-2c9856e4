@@ -31,7 +31,7 @@ interface DoctorData {
 interface PrescriptionInfo {
   id: string;
   diagnosis: string | null;
-  medications: any[];
+  medications: Array<{ name: string; dosage?: string; frequency?: string }>;
   created_at: string;
 }
 
@@ -63,7 +63,7 @@ const DoctorInfoPanel = ({ doctorId, appointmentId }: DoctorInfoPanelProps) => {
         .eq("user_id", docRes.data.user_id)
         .single();
 
-      const specialties = (specRes.data ?? []).map((s: any) => s.specialties?.name).filter(Boolean);
+      const specialties = (specRes.data ?? []).map((s: { specialties?: { name?: string } | null }) => s.specialties?.name).filter(Boolean) as string[];
 
       setDoctor({
         ...docRes.data,

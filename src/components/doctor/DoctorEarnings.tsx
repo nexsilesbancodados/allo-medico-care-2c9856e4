@@ -86,13 +86,13 @@ const DoctorEarnings = () => {
     const defaultPrice = Number(docProfile.consultation_price) || 89;
 
     // Use price_at_booking if available, otherwise fallback (issue #13)
-    const getPrice = (appt: any) => Number(appt.price_at_booking) || defaultPrice;
+    const getPrice = (appt: { price_at_booking?: number | null }) => Number(appt.price_at_booking) || defaultPrice;
 
     const totalEarned = confirmedAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0);
     const totalPending = pendingAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0);
     const totalWithdrawn = (withdrawRes.data ?? [])
       .filter(w => w.status === "approved")
-      .reduce((sum: number, w: any) => sum + Number(w.amount), 0);
+      .reduce((sum: number, w: { amount: number }) => sum + Number(w.amount), 0);
 
     const now = new Date();
     const monthStart = startOfMonth(now);

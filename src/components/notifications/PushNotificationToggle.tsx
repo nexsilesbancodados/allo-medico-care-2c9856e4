@@ -17,7 +17,7 @@ const PushNotificationToggle = () => {
       setSupported(true);
 
       const reg = await navigator.serviceWorker.ready;
-      const sub = await (reg as any).pushManager.getSubscription();
+      const sub = await (reg as ServiceWorkerRegistration & { pushManager: PushManager }).pushManager.getSubscription();
       if (sub) setSubscribed(true);
     };
     check();
@@ -36,7 +36,7 @@ const PushNotificationToggle = () => {
       }
 
       const reg = await navigator.serviceWorker.ready;
-      const sub = await (reg as any).pushManager.subscribe({
+      const sub = await (reg as ServiceWorkerRegistration & { pushManager: PushManager }).pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: "BAcxZjzip4n-k1ifUoCKTHN8s2fo9woakP0bT1_2bim88q4vvDDFhrm5Ydg2Q_dg8-paX0lg39E6fq0KysNKkmg",
       });
@@ -51,8 +51,8 @@ const PushNotificationToggle = () => {
 
       setSubscribed(true);
       toast.success("Notificações ativadas!");
-    } catch (err: any) {
-      console.error("Push subscription error:", err);
+    } catch (err: unknown) {
+      if (import.meta.env.DEV) console.error("Push subscription error:", err);
       toast.error("Erro ao ativar notificações. Tente novamente.");
     }
     setLoading(false);
@@ -64,7 +64,7 @@ const PushNotificationToggle = () => {
 
     try {
       const reg = await navigator.serviceWorker.ready;
-      const sub = await (reg as any).pushManager.getSubscription();
+      const sub = await (reg as ServiceWorkerRegistration & { pushManager: PushManager }).pushManager.getSubscription();
       if (sub) {
         await sub.unsubscribe();
         await supabase.from("push_subscriptions").delete()

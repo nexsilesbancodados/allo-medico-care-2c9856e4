@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import type { DoctorWithProfile } from "@/types/domain";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -14,11 +15,11 @@ import { Search, Eye, Edit, Check, X } from "lucide-react";
 
 const AdminDoctors = () => {
   
-  const [doctors, setDoctors] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<DoctorWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [selected, setSelected] = useState<any>(null);
+  const [selected, setSelected] = useState<DoctorWithProfile | null>(null);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ crm: "", crm_state: "", bio: "", consultation_price: "" });
 
@@ -42,7 +43,7 @@ const AdminDoctors = () => {
     fetchDoctors();
   };
 
-  const openDetail = (doc: any) => {
+  const openDetail = (doc: DoctorWithProfile) => {
     setSelected(doc);
     setEditForm({ crm: doc.crm, crm_state: doc.crm_state, bio: doc.bio || "", consultation_price: String(doc.consultation_price || "") });
   };

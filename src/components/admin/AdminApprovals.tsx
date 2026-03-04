@@ -16,6 +16,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 const AdminApprovals = () => {
   
+  /* eslint-disable @typescript-eslint/no-explicit-any -- Admin approval items have varying shapes across entity types */
   const [pendingDoctors, setPendingDoctors] = useState<any[]>([]);
   const [approvedDoctors, setApprovedDoctors] = useState<any[]>([]);
   const [pendingClinics, setPendingClinics] = useState<any[]>([]);
@@ -24,6 +25,7 @@ const AdminApprovals = () => {
   const [approvedPartners, setApprovedPartners] = useState<any[]>([]);
   const [pendingAffiliates, setPendingAffiliates] = useState<any[]>([]);
   const [approvedAffiliates, setApprovedAffiliates] = useState<any[]>([]);
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   const [loading, setLoading] = useState(true);
   const [rejectReason, setRejectReason] = useState("");
@@ -161,7 +163,7 @@ const AdminApprovals = () => {
   };
 
   const toggleCrmVerified = async (id: string, currentValue: boolean) => {
-    const updateData: any = { 
+    const updateData = { 
       crm_verified: !currentValue,
       crm_verified_at: !currentValue ? new Date().toISOString() : null,
     };
@@ -185,8 +187,8 @@ const AdminApprovals = () => {
         toast.error("⚠️ Verificação falhou", { description: data?.message || "CRM não encontrado ou irregular" });
       }
       fetchAll();
-    } catch (e: any) {
-      toast.error("Erro na verificação", { description: e.message });
+    } catch (e: unknown) {
+      toast.error("Erro na verificação", { description: e instanceof Error ? e.message : "Erro desconhecido" });
     } finally {
       setVerifyingCrmId(null);
     }
