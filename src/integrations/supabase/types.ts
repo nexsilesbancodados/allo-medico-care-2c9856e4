@@ -679,6 +679,48 @@ export type Database = {
           },
         ]
       }
+      doctor_financial: {
+        Row: {
+          created_at: string | null
+          doctor_id: string
+          id: string
+          pix_key: string | null
+          pix_key_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doctor_id: string
+          id?: string
+          pix_key?: string | null
+          pix_key_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doctor_id?: string
+          id?: string
+          pix_key?: string | null
+          pix_key_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_financial_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: true
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_financial_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: true
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctor_invite_codes: {
         Row: {
           code: string
