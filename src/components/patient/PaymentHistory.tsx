@@ -34,10 +34,28 @@ const statusConfig: Record<string, { label: string; icon: React.ReactNode; class
   },
 };
 
+import type { Json } from "@/integrations/supabase/types";
+
+interface SubscriptionEntry {
+  id: string;
+  plan_id: string;
+  status: string;
+  starts_at: string | null;
+  expires_at: string | null;
+  created_at: string;
+  payment_method: string | null;
+  notes: string | null;
+  plan_name: string;
+  plan_price: number;
+  plan_description: string;
+  plan_interval: string;
+  plan_features: Json;
+}
+
 const PaymentHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [subs, setSubs] = useState<any[]>([]);
+  const [subs, setSubs] = useState<SubscriptionEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Filters
@@ -107,7 +125,7 @@ const PaymentHistory = () => {
     .filter((s) => s.status !== "cancelled")
     .reduce((acc, s) => acc + Number(s.plan_price), 0);
 
-  const generateReceipt = (s: any) => {
+  const generateReceipt = (s: SubscriptionEntry) => {
     const doc = new jsPDF();
     const w = doc.internal.pageSize.getWidth();
 

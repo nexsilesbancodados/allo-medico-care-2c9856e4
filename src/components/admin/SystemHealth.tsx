@@ -77,8 +77,8 @@ const SystemHealth = () => {
         message: error ? error.message : `Respondendo em ${latency}ms`,
         icon: <Database className="w-5 h-5" />,
       });
-    } catch (e: any) {
-      results.push({ name: "Banco de Dados (PostgreSQL)", status: "error", message: e.message, icon: <Database className="w-5 h-5" /> });
+    } catch (e: unknown) {
+      results.push({ name: "Banco de Dados (PostgreSQL)", status: "error", message: e instanceof Error ? e.message : "Erro desconhecido", icon: <Database className="w-5 h-5" /> });
     }
 
     // 2. Auth
@@ -93,8 +93,8 @@ const SystemHealth = () => {
         message: data.session ? `Sessão ativa • ${latency}ms` : `Sem sessão • ${latency}ms`,
         icon: <Server className="w-5 h-5" />,
       });
-    } catch (e: any) {
-      results.push({ name: "Autenticação (GoTrue)", status: "error", message: e.message, icon: <Server className="w-5 h-5" /> });
+    } catch (e: unknown) {
+      results.push({ name: "Autenticação (GoTrue)", status: "error", message: e instanceof Error ? e.message : "Erro desconhecido", icon: <Server className="w-5 h-5" /> });
     }
 
     // 3. Edge Functions
@@ -116,8 +116,8 @@ const SystemHealth = () => {
         message: `Gateway ativo • ${latency}ms`,
         icon: <Bot className="w-5 h-5" />,
       });
-    } catch (e: any) {
-      results.push({ name: "Edge Functions (Deno)", status: "error", message: e.message, icon: <Bot className="w-5 h-5" /> });
+    } catch (e: unknown) {
+      results.push({ name: "Edge Functions (Deno)", status: "error", message: e instanceof Error ? e.message : "Erro desconhecido", icon: <Bot className="w-5 h-5" /> });
     }
 
     // 4. Realtime
@@ -141,8 +141,8 @@ const SystemHealth = () => {
         message: `Conectado • ${latency}ms`,
         icon: <Globe className="w-5 h-5" />,
       });
-    } catch (e: any) {
-      results.push({ name: "Realtime (WebSocket)", status: "error", message: e.message, icon: <Globe className="w-5 h-5" /> });
+    } catch (e: unknown) {
+      results.push({ name: "Realtime (WebSocket)", status: "error", message: e instanceof Error ? e.message : "Erro desconhecido", icon: <Globe className="w-5 h-5" /> });
     }
 
     // 5. Storage
@@ -157,8 +157,8 @@ const SystemHealth = () => {
         message: error ? error.message : `Acessível • ${latency}ms`,
         icon: <HardDrive className="w-5 h-5" />,
       });
-    } catch (e: any) {
-      results.push({ name: "Storage (S3)", status: "error", message: e.message, icon: <HardDrive className="w-5 h-5" /> });
+    } catch (e: unknown) {
+      results.push({ name: "Storage (S3)", status: "error", message: e instanceof Error ? e.message : "Erro desconhecido", icon: <HardDrive className="w-5 h-5" /> });
     }
 
     setChecks(results);

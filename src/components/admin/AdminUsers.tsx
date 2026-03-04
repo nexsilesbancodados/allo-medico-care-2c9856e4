@@ -45,12 +45,22 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
   affiliate: "Rastreamento de indicações e comissões",
 };
 
+interface UserWithRoles {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
+  cpf: string | null;
+  created_at: string;
+  roles: string[];
+}
+
 const AdminUsers = () => {
   
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<UserWithRoles[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<any>(null);
+  const [selected, setSelected] = useState<UserWithRoles | null>(null);
   const [userRoles, setUserRoles] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
 
@@ -79,7 +89,7 @@ const AdminUsers = () => {
     setLoading(false);
   };
 
-  const openDetail = (u: any) => {
+  const openDetail = (u: UserWithRoles) => {
     setSelected(u);
     setUserRoles([...u.roles]);
   };
@@ -99,10 +109,10 @@ const AdminUsers = () => {
     const toRemove = currentRoles.filter(r => !userRoles.includes(r));
 
     for (const role of toAdd) {
-      await supabase.from("user_roles").insert({ user_id: selected.user_id, role } as any);
+      await supabase.from("user_roles").upsert({ user_id: selected.user_id, role: role as "admin" | "affiliate" | "clinic" | "doctor" | "partner" | "patient" | "receptionist" | "support" });
     }
     for (const role of toRemove) {
-      await supabase.from("user_roles").delete().eq("user_id", selected.user_id).eq("role", role as any);
+      await supabase.from("user_roles").delete().eq("user_id", selected.user_id).eq("role", role as "admin" | "affiliate" | "clinic" | "doctor" | "partner" | "patient" | "receptionist" | "support");
     }
 
     toast.success("Roles atualizadas! ✅");

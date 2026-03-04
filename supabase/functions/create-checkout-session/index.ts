@@ -80,7 +80,7 @@ serve(async (req) => {
     params.append("success_url", sessionParams.success_url);
     params.append("cancel_url", sessionParams.cancel_url);
 
-    sessionParams.line_items.forEach((item: any, i: number) => {
+    sessionParams.line_items.forEach((item: Record<string, unknown>, i: number) => {
       if (item.price) {
         params.append(`line_items[${i}][price]`, item.price);
         params.append(`line_items[${i}][quantity]`, String(item.quantity));

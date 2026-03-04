@@ -13,11 +13,27 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
+interface PatientDoc {
+  id: string;
+  patient_id: string;
+  file_name: string;
+  file_type: string | null;
+  description: string | null;
+  created_at: string;
+  patient_name: string;
+}
+
+interface PatientProfile {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+}
+
 const PatientDocuments = () => {
   const { user } = useAuth();
   
-  const [documents, setDocuments] = useState<any[]>([]);
-  const [patients, setPatients] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<PatientDoc[]>([]);
+  const [patients, setPatients] = useState<PatientProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterPatient, setFilterPatient] = useState("all");
@@ -59,7 +75,7 @@ const PatientDocuments = () => {
     setLoading(false);
   };
 
-  const viewDocument = async (doc: any) => {
+  const viewDocument = async (doc: PatientDoc) => {
     const { data } = await supabase.storage.from("patient-documents").createSignedUrl(
       `${doc.patient_id}/${doc.file_name}`, 3600
     );

@@ -126,7 +126,7 @@ ${context ? `\n--- CONTEXTO DO PACIENTE LOGADO ---\n${context}\n---\nUse essas i
 
     // AI Triage: analyze the last user message for urgency keywords
     if (ticket_id && user_id) {
-      const lastUserMsg = messages.filter((m: any) => m.role === "user").pop()?.content?.toLowerCase() ?? "";
+      const lastUserMsg = messages.filter((m: { role: string; content?: string }) => m.role === "user").pop()?.content?.toLowerCase() ?? "";
       const highPriorityKeywords = [
         "urgente", "emergência", "emergencia", "dor forte", "dor intensa", "sangramento",
         "desmaio", "desmaiou", "falta de ar", "peito", "avc", "convulsão", "convulsao",

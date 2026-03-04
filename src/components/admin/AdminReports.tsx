@@ -15,12 +15,19 @@ import jsPDF from "jspdf";
 
 const COLORS = ["hsl(210,90%,45%)", "hsl(160,55%,45%)", "hsl(40,90%,55%)", "hsl(0,84%,60%)", "hsl(270,60%,55%)"];
 
+interface ChartDataPoint {
+  month: string;
+  [key: string]: string | number;
+}
+
 const AdminReports = () => {
-  const [revenueData, setRevenueData] = useState<any[]>([]);
-  const [userGrowth, setUserGrowth] = useState<any[]>([]);
-  const [specialtyData, setSpecialtyData] = useState<any[]>([]);
-  const [cancellationData, setCancellationData] = useState<any[]>([]);
+  const [revenueData, setRevenueData] = useState<ChartDataPoint[]>([]);
+  const [userGrowth, setUserGrowth] = useState<ChartDataPoint[]>([]);
+  const [specialtyData, setSpecialtyData] = useState<{ name: string; value: number }[]>([]);
+  const [cancellationData, setCancellationData] = useState<ChartDataPoint[]>([]);
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const [topDoctors, setTopDoctors] = useState<any[]>([]);
+  /* eslint-enable @typescript-eslint/no-explicit-any */
   const [summaryStats, setSummaryStats] = useState({
     totalRevenue: 0, totalAppts: 0, totalCancelled: 0, totalNoShow: 0, avgTicket: 0, avgNps: 0,
   });
@@ -150,7 +157,7 @@ const AdminReports = () => {
     setLoading(false);
   };
 
-  const exportCSV = (data: any[], filename: string) => {
+  const exportCSV = (data: Record<string, unknown>[], filename: string) => {
     if (data.length === 0) return;
     const headers = Object.keys(data[0]).join(",");
     const rows = data.map(r => Object.values(r).join(",")).join("\n");
@@ -195,7 +202,7 @@ const AdminReports = () => {
     doc.text("Receita Mensal", 20, 105);
     doc.setFontSize(9);
     revenueData.forEach((r, i) => {
-      doc.text(`${r.month}: R$ ${r.receita.toFixed(2)}`, 25, 115 + i * 6);
+      doc.text(`${r.month}: R$ ${Number(r.receita).toFixed(2)}`, 25, 115 + i * 6);
     });
 
     // Top doctors

@@ -94,8 +94,8 @@ const DoctorConsultations = () => {
         : { data: [] },
     ]);
 
-    const pMap = new Map((profilesRes.data ?? []).map((p: any) => [p.user_id, `${p.first_name} ${p.last_name}`]));
-    const gMap = new Map((guestsRes.data ?? []).map((g: any) => [g.id, g.full_name]));
+    const pMap = new Map((profilesRes.data ?? []).map((p: { user_id: string; first_name: string; last_name: string }) => [p.user_id, `${p.first_name} ${p.last_name}`]));
+    const gMap = new Map((guestsRes.data ?? []).map((g: { id: string; full_name: string }) => [g.id, g.full_name]));
 
     setAppointments(data.map(a => ({
       ...a,

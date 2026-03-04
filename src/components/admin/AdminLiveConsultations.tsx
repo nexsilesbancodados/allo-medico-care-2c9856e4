@@ -83,7 +83,7 @@ const AdminLiveConsultations = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
+  const statusConfig: Record<string, { label: string; color: string; icon: React.ComponentType<{ className?: string }> }> = {
     scheduled: { label: "Aguardando", color: "bg-warning/10 text-warning border-warning/30", icon: Clock },
     waiting: { label: "Na Espera", color: "bg-primary/10 text-primary border-primary/30", icon: Users },
     in_progress: { label: "Em Andamento", color: "bg-success/10 text-success border-success/30", icon: Video },

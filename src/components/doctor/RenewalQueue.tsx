@@ -15,12 +15,25 @@ import { ptBR } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { notifyRenewalApproved, notifyRenewalRejected } from "@/lib/notifications-queue";
 
+import type { Json } from "@/integrations/supabase/types";
+
+interface RenewalItem {
+  id: string;
+  patient_id: string;
+  status: string;
+  created_at: string;
+  assigned_doctor_id: string | null;
+  original_prescription_url: string | null;
+  health_questionnaire: Json;
+  rejection_reason: string | null;
+}
+
 const RenewalQueue = () => {
   const { user } = useAuth();
-  const [renewals, setRenewals] = useState<any[]>([]);
+  const [renewals, setRenewals] = useState<RenewalItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
-  const [selectedRenewal, setSelectedRenewal] = useState<any>(null);
+  const [selectedRenewal, setSelectedRenewal] = useState<RenewalItem | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
   const [processing, setProcessing] = useState(false);
 
@@ -44,7 +57,7 @@ const RenewalQueue = () => {
     setLoading(false);
   };
 
-  const handleClaim = async (renewal: any) => {
+  const handleClaim = async (renewal: RenewalItem) => {
     if (!doctorProfileId) return;
     await supabase.from("prescription_renewals").update({
       status: "in_review",
