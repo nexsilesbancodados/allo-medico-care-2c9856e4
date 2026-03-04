@@ -5,7 +5,6 @@ const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN || "";
 
 export const initSentry = () => {
   if (!SENTRY_DSN) {
-    console.info("[Sentry] DSN não configurado. Crie uma conta em https://sentry.io e adicione VITE_SENTRY_DSN.");
     return;
   }
 
@@ -25,7 +24,7 @@ export const initSentry = () => {
     },
   });
 
-  console.info("[Sentry] Monitoramento ativo ✅");
+  
 };
 
 /**
