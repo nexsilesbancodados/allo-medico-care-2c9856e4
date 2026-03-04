@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         supabase.from("user_roles").select("role").eq("user_id", userId),
       ]);
       if (profileRes.data) setProfile(profileRes.data as Profile);
-      if (rolesRes.data) setRoles(rolesRes.data.map((r: any) => r.role as AppRole));
+      if (rolesRes.data) setRoles(rolesRes.data.map((r: { role: string }) => r.role as AppRole));
     } catch (e) {
       console.error("fetchUserData error:", e);
     }

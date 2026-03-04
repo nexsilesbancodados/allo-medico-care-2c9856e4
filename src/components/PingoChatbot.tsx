@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, MessageCircle, Headphones, Sparkles, CalendarDays, CreditCard, Stethoscope, RotateCcw, Volume2 } from "lucide-react";
+import { X, Send, Headphones, Sparkles, CalendarDays, CreditCard, Stethoscope, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -87,7 +87,7 @@ const PingoChatbot = forwardRef<HTMLDivElement>((_, _ref) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showLiveSupport, setShowLiveSupport] = useState(false);
   const [userContext, setUserContext] = useState<string>("");
-  const [typingSpeed, setTypingSpeed] = useState<"normal" | "fast">("normal");
+  
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
