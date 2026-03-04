@@ -96,11 +96,23 @@ export const useDoctorProfile = () => {
       if (!user) return null;
       const { data, error } = await supabase
         .from("doctor_profiles")
-        .select("id, user_id, crm, crm_state, crm_verified, crm_verified_at, bio, consultation_price, rating, total_reviews, experience_years, education, is_approved, rejection_reason, available_now, available_now_since, pix_key, pix_key_type, created_at, updated_at")
+        .select("id, user_id, crm, crm_state, crm_verified, crm_verified_at, bio, consultation_price, rating, total_reviews, experience_years, education, is_approved, rejection_reason, available_now, available_now_since, created_at, updated_at")
         .eq("user_id", user.id)
         .maybeSingle();
       if (error) throw error;
-      return data;
+      
+      // Fetch financial data separately (protected table)
+      let financial = null;
+      if (data) {
+        const { data: fin } = await supabase
+          .from("doctor_financial")
+          .select("pix_key, pix_key_type")
+          .eq("doctor_id", data.id)
+          .maybeSingle();
+        financial = fin;
+      }
+      
+      return data ? { ...data, pix_key: financial?.pix_key ?? null, pix_key_type: financial?.pix_key_type ?? null } : null;
     },
     enabled: !!user,
     staleTime: 5 * 60 * 1000,
