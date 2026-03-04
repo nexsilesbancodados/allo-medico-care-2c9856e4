@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
-import { Video, Shield, Clock, ArrowRight, Stethoscope, Sparkles } from "lucide-react";
+import { Video, Shield, Clock, ArrowRight, Stethoscope, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect, memo } from "react";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
@@ -12,34 +12,11 @@ const poseContent = [
   { title: "Receitas e laudos", highlight: "100% digitais", description: "Receba prescrições, atestados e laudos médicos direto no seu celular. Tudo organizado e acessível." },
 ];
 
-const LiveActivityIndicator = memo(() => {
-  const [count, setCount] = useState(0);
-
-  useEffect(() => {
-    const base = 14 + Math.floor(Math.random() * 8);
-    setCount(base);
-    const interval = setInterval(() => {
-      setCount(prev => prev + (Math.random() > 0.5 ? 1 : -1));
-    }, 8000);
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.8 }}
-      className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-success/10 border border-success/20 text-xs font-medium text-success backdrop-blur-sm"
-    >
-      <span className="relative flex h-2 w-2">
-        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-        <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
-      </span>
-      {count} pessoas agendando agora
-    </motion.div>
-  );
-});
-LiveActivityIndicator.displayName = "LiveActivityIndicator";
+const trustItems = [
+  "Regulamentado pelo CFM",
+  "Criptografia end-to-end",
+  "Nota 4.9 no Google",
+];
 
 const HeroSection = memo(() => {
   const navigate = useNavigate();
@@ -56,45 +33,34 @@ const HeroSection = memo(() => {
 
   return (
     <section aria-label="Início" className="relative min-h-[85vh] sm:min-h-[90vh] lg:min-h-screen flex items-center pt-20 sm:pt-24 overflow-hidden">
-      {/* Rich layered background */}
+      {/* Refined corporate background */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-secondary/[0.05]" />
-        <div className="absolute top-10 right-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-primary/12 to-secondary/8 blur-[120px] animate-pulse" style={{ animationDuration: '8s' }} />
-        <div className="absolute bottom-10 left-[5%] w-[500px] h-[500px] rounded-full bg-gradient-to-tr from-secondary/10 to-primary/6 blur-[100px] animate-pulse" style={{ animationDuration: '12s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-gradient-radial from-primary/[0.03] to-transparent blur-[60px]" />
-        {/* Dot grid pattern */}
-        <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '28px 28px' }} />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-secondary/[0.04]" />
+        <div className="absolute top-10 right-[10%] w-[500px] h-[500px] rounded-full bg-primary/[0.06] blur-[140px]" />
+        <div className="absolute bottom-10 left-[5%] w-[400px] h-[400px] rounded-full bg-secondary/[0.05] blur-[120px]" />
+        <div className="absolute inset-0 opacity-[0.018]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)', backgroundSize: '32px 32px' }} />
       </div>
 
       <div className="container mx-auto px-4 py-16 lg:py-20">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           <motion.div
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            {/* Badges */}
-            <div className="flex flex-wrap items-center gap-2 mb-5">
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/15 text-primary text-sm font-medium backdrop-blur-sm"
-              >
-                <Video className="w-4 h-4" />
-                Consultas por videochamada
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-success/10 border border-success/15 text-success text-xs font-semibold"
-              >
-                <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
-                <Stethoscope className="w-3 h-3" />
-                Médicos online agora
-              </motion.div>
-            </div>
+            {/* Corporate badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/[0.07] border border-primary/10 text-primary text-sm font-semibold mb-6"
+            >
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-success" />
+              </span>
+              Médicos disponíveis agora
+            </motion.div>
 
             <AnimatePresence mode="wait">
               <motion.div
@@ -104,12 +70,10 @@ const HeroSection = memo(() => {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.4 }}
               >
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.5rem] xl:text-6xl font-extrabold leading-[1.08] text-foreground mb-5 sm:mb-6 tracking-tight">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold leading-[1.08] text-foreground mb-5 sm:mb-6 tracking-tight">
                   {poseContent[poseIndex].title}{" "}
-                  <span className="relative inline-block">
-                    <span className="text-gradient bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent bg-[length:200%_100%] animate-[gradient-shift_4s_ease-in-out_infinite]">
-                      {poseContent[poseIndex].highlight}
-                    </span>
+                  <span className="text-gradient bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                    {poseContent[poseIndex].highlight}
                   </span>
                 </h1>
                 <p className="text-base sm:text-lg lg:text-xl text-muted-foreground max-w-lg mb-7 sm:mb-8 leading-relaxed">
@@ -118,62 +82,54 @@ const HeroSection = memo(() => {
               </motion.div>
             </AnimatePresence>
 
-            {/* CTA */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            {/* Primary CTA — strong hierarchy */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-8">
+              <Button
+                size="lg"
+                className="bg-gradient-hero text-primary-foreground rounded-full px-8 h-13 text-base font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:opacity-95 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                onClick={() => navigate("/paciente")}
+                onMouseEnter={prefetchPaciente}
+              >
+                Agendar consulta
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
               <Button
                 size="lg"
                 variant="outline"
-                className="rounded-full px-7 h-12 text-base font-semibold border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all"
+                className="rounded-full px-7 h-13 text-base font-semibold border-border hover:bg-muted/50 transition-all"
                 onClick={() => navigate("/consulta-avulsa")}
                 onMouseEnter={prefetchConsulta}
               >
-                Consulta Avulsa — R$89
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                className="rounded-full px-7 h-12 text-base font-semibold border-destructive/30 text-destructive hover:bg-destructive/5 hover:border-destructive/50 transition-all"
-                onClick={() => navigate("/paciente")}
-              >
-                <Clock className="w-4 h-4 mr-1" />
-                Plantão 24h
+                Consulta avulsa — R$89
               </Button>
             </div>
 
-            {/* Live activity + Trust */}
-            <LiveActivityIndicator />
-            <div className="flex flex-wrap gap-5 mt-4">
-              {[
-                { icon: Shield, text: "Dados protegidos", color: "text-primary" },
-                { icon: Clock, text: "Atendimento 24h", color: "text-secondary" },
-                { icon: Video, text: "Vídeo em HD", color: "text-success" },
-              ].map((item, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.6 + i * 0.1 }}
-                  className="flex items-center gap-2 text-sm text-muted-foreground"
-                >
-                  <div className={`w-6 h-6 rounded-lg bg-muted/60 flex items-center justify-center`}>
-                    <item.icon className={`w-3.5 h-3.5 ${item.color}`} />
-                  </div>
-                  {item.text}
-                </motion.div>
+            {/* Trust indicators — corporate style */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-wrap gap-x-6 gap-y-2"
+            >
+              {trustItems.map((item, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <CheckCircle className="w-4 h-4 text-success shrink-0" />
+                  <span>{item}</span>
+                </div>
               ))}
-            </div>
+            </motion.div>
           </motion.div>
 
           {/* Hero image */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             className="relative"
           >
             <div className="relative w-full max-w-[200px] sm:max-w-[280px] md:max-w-sm lg:max-w-lg mx-auto">
-              {/* Glow behind mascot */}
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 blur-[60px] rounded-full scale-75" />
+              {/* Subtle glow */}
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/15 to-secondary/15 blur-[80px] rounded-full scale-75" />
               
               <img
                 src={heroDoctor}
@@ -187,9 +143,9 @@ const HeroSection = memo(() => {
               <motion.div
                 animate={{ y: [0, -8, 0] }}
                 transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-4 right-0 backdrop-blur-xl bg-card/90 rounded-2xl shadow-xl p-3.5 border border-border/50 hidden md:flex items-center gap-3"
+                className="absolute top-4 right-0 backdrop-blur-xl bg-card/95 rounded-2xl shadow-xl shadow-foreground/[0.06] p-3.5 border border-border/60 hidden md:flex items-center gap-3"
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-success/20 to-success/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
                   <Shield className="w-5 h-5 text-success" />
                 </div>
                 <div>
@@ -202,9 +158,9 @@ const HeroSection = memo(() => {
               <motion.div
                 animate={{ y: [0, 6, 0] }}
                 transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-                className="absolute bottom-8 left-0 backdrop-blur-xl bg-card/90 rounded-2xl shadow-xl p-3.5 border border-border/50 hidden md:flex items-center gap-3"
+                className="absolute bottom-8 left-0 backdrop-blur-xl bg-card/95 rounded-2xl shadow-xl shadow-foreground/[0.06] p-3.5 border border-border/60 hidden md:flex items-center gap-3"
               >
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-warning/20 to-warning/10 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
                   <span className="text-lg">⭐</span>
                 </div>
                 <div>

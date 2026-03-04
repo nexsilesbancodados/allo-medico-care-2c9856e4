@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
-import { Mail, MapPin, Phone, Instagram, Linkedin, Youtube, ArrowRight, Heart, Shield, Award, Lock, Verified, ExternalLink } from "lucide-react";
+import { Mail, MapPin, Phone, Instagram, Linkedin, Youtube, ArrowRight, Heart, Shield, Lock, Verified, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -45,27 +45,22 @@ const Footer = () => {
   return (
     <footer aria-label="Rodapé" className="bg-foreground text-background">
       {/* Trust badges strip */}
-      <div className="border-b border-background/10">
+      <div className="border-b border-background/8">
         <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-wrap justify-center gap-6 md:gap-10">
+          <div className="flex flex-wrap justify-center gap-8 md:gap-12">
             {trustBadges.map((badge, i) => (
               <motion.div
                 key={badge.label}
-                initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                initial={{ opacity: 0, y: 8 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.08, type: "spring", stiffness: 200, damping: 15 }}
-                whileHover={{ scale: 1.08, y: -2 }}
-                className="flex items-center gap-2 group cursor-default"
+                transition={{ delay: i * 0.06, duration: 0.4 }}
+                className="flex items-center gap-2.5"
               >
-                <motion.div
-                  className="w-8 h-8 rounded-lg bg-background/8 flex items-center justify-center group-hover:bg-primary/20 transition-colors"
-                  whileHover={{ rotate: 8 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <badge.icon className="w-4 h-4 text-primary transition-transform duration-300 group-hover:scale-110" />
-                </motion.div>
-                <span className="text-xs font-semibold opacity-60 group-hover:opacity-100 transition-opacity">{badge.label}</span>
+                <div className="w-8 h-8 rounded-lg bg-background/[0.06] flex items-center justify-center">
+                  <badge.icon className="w-4 h-4 text-primary" />
+                </div>
+                <span className="text-xs font-semibold opacity-60">{badge.label}</span>
               </motion.div>
             ))}
           </div>
@@ -73,12 +68,12 @@ const Footer = () => {
       </div>
 
       {/* Newsletter strip */}
-      <div className="border-b border-background/10">
+      <div className="border-b border-background/8">
         <div className="container mx-auto px-4 py-10">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6 max-w-4xl mx-auto">
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-bold mb-1">Fique por dentro 💌</h3>
-              <p className="text-sm opacity-60">Receba dicas de saúde e novidades da plataforma.</p>
+              <h3 className="text-lg font-bold mb-1">Fique por dentro</h3>
+              <p className="text-sm opacity-50">Receba dicas de saúde e novidades da plataforma.</p>
             </div>
             <form onSubmit={handleNewsletter} className="flex gap-2 w-full max-w-sm">
               <Input
@@ -86,7 +81,7 @@ const Footer = () => {
                 placeholder="seu@email.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                className="bg-background/10 border-background/20 text-background placeholder:text-background/40 rounded-xl h-11"
+                className="bg-background/[0.06] border-background/10 text-background placeholder:text-background/30 rounded-xl h-11"
                 required
               />
               <Button type="submit" disabled={submitting} className="bg-primary hover:bg-primary/90 rounded-xl h-11 px-5 shrink-0">
@@ -100,50 +95,28 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-14">
         <div className="grid md:grid-cols-4 gap-10 mb-12">
           <div className="md:col-span-1">
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="flex items-center gap-2 mb-4"
-            >
+            <div className="flex items-center gap-2 mb-4">
               <img src={logo} alt="AloClinica" className="w-8 h-8 rounded-lg object-contain" />
               <span className="text-lg font-bold">AloClinica</span>
-            </motion.div>
-            <p className="text-sm opacity-60 leading-relaxed mb-4">
+            </div>
+            <p className="text-sm opacity-50 leading-relaxed mb-5">
               Plataforma completa de telemedicina. Conectando pacientes e médicos
               com segurança e praticidade.
             </p>
-            {/* Social links */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex gap-2">
               {[
                 { icon: Instagram, label: "Instagram", href: "https://instagram.com/aloclinica" },
                 { icon: Linkedin, label: "LinkedIn", href: "https://linkedin.com/company/aloclinica" },
                 { icon: Youtube, label: "YouTube", href: "https://youtube.com/@aloclinica" },
-              ].map((social, i) => (
-                <motion.a
+              ].map((social) => (
+                <a
                   key={social.label}
                   href={social.href}
                   aria-label={social.label}
-                  whileHover={{ scale: 1.15, y: -3 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  className="w-9 h-9 rounded-lg bg-background/10 flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
+                  className="w-9 h-9 rounded-lg bg-background/[0.06] flex items-center justify-center hover:bg-primary hover:text-primary-foreground transition-colors duration-200"
                 >
                   <social.icon className="w-4 h-4" />
-                </motion.a>
-              ))}
-            </div>
-
-            {/* Mini stats */}
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                { value: "12.5k+", label: "Pacientes" },
-                { value: "500+", label: "Médicos" },
-              ].map((stat) => (
-                <div key={stat.label} className="bg-background/5 rounded-lg p-2.5 text-center border border-background/10">
-                  <p className="text-sm font-bold">{stat.value}</p>
-                  <p className="text-[10px] opacity-50">{stat.label}</p>
-                </div>
+                </a>
               ))}
             </div>
           </div>
@@ -171,85 +144,70 @@ const Footer = () => {
               ],
             },
           ].map((col, ci) => (
-            <motion.div
-              key={ci}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: ci * 0.1 + 0.1 }}
-            >
-              <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-80">{col.title}</h4>
-              <ul className="space-y-2.5 text-sm opacity-60" role="list">
+            <div key={ci}>
+              <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-70">{col.title}</h4>
+              <ul className="space-y-2.5 text-sm opacity-50" role="list">
                 {col.links.map((link, li) => (
                   <li key={li}>
                     {"to" in link ? (
-                      <Link to={link.to!} className="hover:opacity-100 transition-opacity duration-200 hover:translate-x-0.5 inline-block">{link.label}</Link>
+                      <Link to={link.to!} className="hover:opacity-100 transition-opacity duration-200 inline-block">{link.label}</Link>
                     ) : (
-                      <a href={link.href} className="hover:opacity-100 transition-opacity duration-200 hover:translate-x-0.5 inline-flex items-center gap-1">
+                      <a href={link.href} className="hover:opacity-100 transition-opacity duration-200 inline-block">
                         {link.label}
-                        {"external" in link && link.external && <ExternalLink className="w-3 h-3" />}
                       </a>
                     )}
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </div>
           ))}
 
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-          >
-            <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-80">Contato</h4>
-            <ul className="space-y-3 text-sm opacity-60">
+          <div>
+            <h4 className="font-bold mb-4 text-sm uppercase tracking-wider opacity-70">Contato</h4>
+            <ul className="space-y-3 text-sm opacity-50">
               <li className="flex items-center gap-2"><Mail className="w-4 h-4 shrink-0" /> contato@aloclinica.com.br</li>
               <li className="flex items-center gap-2"><Phone className="w-4 h-4 shrink-0" /> 0800 123 4567</li>
               <li className="flex items-center gap-2"><MapPin className="w-4 h-4 shrink-0" /> São Paulo, SP</li>
             </ul>
 
-            {/* App badges */}
             <div className="mt-6 space-y-2">
-              <p className="text-xs font-semibold opacity-50 uppercase tracking-wider">Disponível em</p>
+              <p className="text-xs font-semibold opacity-40 uppercase tracking-wider">Disponível em</p>
               <div className="flex gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-background/10 border border-background/10 text-xs font-medium">
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-background/[0.06] border border-background/8 text-xs font-medium">
                   🌐 PWA App
                 </div>
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-background/10 border border-background/10 text-xs font-medium">
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-background/[0.06] border border-background/8 text-xs font-medium">
                   📱 Mobile
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Platform status bar */}
-        <div className="mb-6 px-4 py-2.5 rounded-xl bg-background/5 border border-background/10 flex items-center justify-center gap-4 text-xs flex-wrap">
+        {/* Status bar */}
+        <div className="mb-6 px-4 py-2.5 rounded-xl bg-background/[0.04] border border-background/8 flex items-center justify-center gap-4 text-xs flex-wrap">
           <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="opacity-70">Operação: Normal</span>
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+            <span className="opacity-60">Operação: Normal</span>
           </span>
-          <span className="opacity-30 hidden sm:inline">|</span>
-          <span className="opacity-70">Plataforma 100% online</span>
-          <span className="opacity-30 hidden sm:inline">|</span>
-          <span className="opacity-70">Dados protegidos (LGPD)</span>
-          <span className="opacity-30 hidden sm:inline">|</span>
-          <span className="opacity-70">Uptime 99.9%</span>
+          <span className="opacity-20 hidden sm:inline">|</span>
+          <span className="opacity-60">Plataforma 100% online</span>
+          <span className="opacity-20 hidden sm:inline">|</span>
+          <span className="opacity-60">Uptime 99.9%</span>
         </div>
 
-        <div className="border-t border-background/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs opacity-40 flex items-center gap-1">
+        <div className="border-t border-background/8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-xs opacity-35 flex items-center gap-1">
             © 2026 AloClinica. Feito com <Heart className="w-3 h-3 fill-current text-destructive inline" /> no Brasil.
           </p>
-          <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs opacity-40">
-            <Link to="/terms" className="hover:opacity-100 transition-opacity duration-200">Termos de Uso</Link>
-            <Link to="/privacy" className="hover:opacity-100 transition-opacity duration-200">Privacidade</Link>
-            <Link to="/lgpd" className="hover:opacity-100 transition-opacity duration-200">LGPD</Link>
-            <Link to="/cookies" className="hover:opacity-100 transition-opacity duration-200">Cookies</Link>
-            <Link to="/refund" className="hover:opacity-100 transition-opacity duration-200">Reembolso</Link>
-            <Link to="/doctor-terms" className="hover:opacity-100 transition-opacity duration-200">Termos Médicos</Link>
-            <Link to="/accessibility" className="hover:opacity-100 transition-opacity duration-200">Acessibilidade</Link>
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 text-xs opacity-35">
+            <Link to="/terms" className="hover:opacity-100 transition-opacity">Termos de Uso</Link>
+            <Link to="/privacy" className="hover:opacity-100 transition-opacity">Privacidade</Link>
+            <Link to="/lgpd" className="hover:opacity-100 transition-opacity">LGPD</Link>
+            <Link to="/cookies" className="hover:opacity-100 transition-opacity">Cookies</Link>
+            <Link to="/refund" className="hover:opacity-100 transition-opacity">Reembolso</Link>
+            <Link to="/doctor-terms" className="hover:opacity-100 transition-opacity">Termos Médicos</Link>
+            <Link to="/accessibility" className="hover:opacity-100 transition-opacity">Acessibilidade</Link>
           </div>
         </div>
       </div>
