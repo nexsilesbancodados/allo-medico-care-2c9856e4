@@ -78,13 +78,20 @@
     <div id="root"></div>
     <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     <script>
+      // Unregister stale service workers that may cache broken bundles
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.getRegistrations().then(function(regs){
+          regs.forEach(function(r){ if(r.active && r.active.scriptURL.includes('sw.js')) r.unregister(); });
+        });
+      }
       // Remove loader when React mounts (new children appear in #root)
+      var _rootEl = document.getElementById('root');
       var _obs = new MutationObserver(function(){
         var el = document.getElementById('initial-loader');
-        if(el){ el.remove(); _obs.disconnect(); }
+        if(el){ el.style.opacity='0'; setTimeout(function(){ el.remove(); },300); _obs.disconnect(); }
       });
-      _obs.observe(document.getElementById('root'), { childList: true });
-      // Safety: if React never mounts after 8s, show reload button
+      if(_rootEl) _obs.observe(_rootEl, { childList: true });
+      // Safety: if React never mounts after 6s, show reload button
       setTimeout(function(){
         var el = document.getElementById('initial-loader');
         if(el){
@@ -93,10 +100,10 @@
           var btn = document.createElement('button');
           btn.textContent = 'Recarregar';
           btn.style.cssText = 'margin-top:12px;padding:8px 20px;border-radius:8px;border:1px solid #cbd5e1;cursor:pointer;font-size:14px;background:#fff';
-          btn.onclick = function(){ location.reload(); };
+          btn.onclick = function(){ caches.keys().then(function(k){k.forEach(function(n){caches.delete(n);})}); location.reload(); };
           el.querySelector('div').appendChild(btn);
         }
-      }, 8000);
+      }, 6000);
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
