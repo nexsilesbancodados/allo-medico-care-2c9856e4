@@ -69,22 +69,34 @@
   </head>
 
   <body>
-    <div id="root">
-      <div id="initial-loader" style="display:flex;align-items:center;justify-content:center;height:100vh;background:#f8fafc;font-family:system-ui,sans-serif">
-        <div style="text-align:center">
-          <div style="width:40px;height:40px;border:3px solid #e2e8f0;border-top-color:#1a6fc4;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto"></div>
-          <p style="margin-top:16px;color:#64748b;font-size:14px">Carregando...</p>
-        </div>
+    <div id="initial-loader" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#f8fafc;font-family:system-ui,sans-serif">
+      <div style="text-align:center">
+        <div style="width:40px;height:40px;border:3px solid #e2e8f0;border-top-color:#1a6fc4;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto"></div>
+        <p id="loader-text" style="margin-top:16px;color:#64748b;font-size:14px">Carregando...</p>
       </div>
     </div>
+    <div id="root"></div>
     <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     <script>
-      // Remove initial loader once React mounts (detected by new children in #root)
+      // Remove loader when React mounts (new children appear in #root)
       var _obs = new MutationObserver(function(){
         var el = document.getElementById('initial-loader');
         if(el){ el.remove(); _obs.disconnect(); }
       });
       _obs.observe(document.getElementById('root'), { childList: true });
+      // Safety: if React never mounts after 8s, show reload button
+      setTimeout(function(){
+        var el = document.getElementById('initial-loader');
+        if(el){
+          var p = document.getElementById('loader-text');
+          if(p) p.textContent = 'O carregamento está demorando...';
+          var btn = document.createElement('button');
+          btn.textContent = 'Recarregar';
+          btn.style.cssText = 'margin-top:12px;padding:8px 20px;border-radius:8px;border:1px solid #cbd5e1;cursor:pointer;font-size:14px;background:#fff';
+          btn.onclick = function(){ location.reload(); };
+          el.querySelector('div').appendChild(btn);
+        }
+      }, 8000);
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
