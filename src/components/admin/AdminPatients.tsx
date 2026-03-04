@@ -15,15 +15,32 @@ import { Search, Eye, Edit, Download, ChevronLeft, ChevronRight, Users, Calendar
 
 const PAGE_SIZE = 20;
 
+interface PatientProfile {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
+  cpf: string | null;
+  date_of_birth: string | null;
+  created_at: string;
+}
+
+interface PatientAppointment {
+  id: string;
+  scheduled_at: string;
+  status: string;
+  doctor_id: string;
+}
+
 const AdminPatients = () => {
   
-  const [patients, setPatients] = useState<any[]>([]);
+  const [patients, setPatients] = useState<PatientProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<any>(null);
+  const [selected, setSelected] = useState<PatientProfile | null>(null);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ first_name: "", last_name: "", phone: "", cpf: "" });
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<PatientAppointment[]>([]);
   const [page, setPage] = useState(0);
   const [dateFilter, setDateFilter] = useState<string>("all");
   const [sortBy, setSortBy] = useState<string>("newest");
@@ -74,7 +91,7 @@ const AdminPatients = () => {
   // Reset page when filters change
   useEffect(() => { setPage(0); }, [search, dateFilter, sortBy]);
 
-  const openDetail = async (p: any) => {
+  const openDetail = async (p: PatientProfile) => {
     setSelected(p);
     setEditForm({ first_name: p.first_name, last_name: p.last_name, phone: p.phone || "", cpf: p.cpf || "" });
     const { data } = await supabase.from("appointments")

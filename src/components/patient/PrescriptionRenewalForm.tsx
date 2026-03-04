@@ -159,8 +159,8 @@ const PrescriptionRenewalForm = () => {
         resetForm();
         fetchRenewals();
       }
-    } catch (err: any) {
-      toast.error("Erro", { description: err.message });
+    } catch (err: unknown) {
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro inesperado" });
     } finally {
       setProcessing(false);
     }

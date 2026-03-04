@@ -65,7 +65,7 @@ const defaultSettings: Record<string, SettingsState> = {
 
 /* ── Setting sections per role ── */
 
-const PatientSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: any) => void }) => (
+const PatientSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: boolean | string) => void }) => (
   <>
     <SettingSection title="Notificações" icon={<Bell className="w-4 h-4" />}>
       <SettingToggle label="Lembrete de consulta (WhatsApp)" checked={settings.reminder_whatsapp} onChange={v => onChange("reminder_whatsapp", v)} />
@@ -84,7 +84,7 @@ const PatientSettings = ({ settings, onChange }: { settings: SettingsState; onCh
   </>
 );
 
-const DoctorSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: any) => void }) => (
+const DoctorSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: boolean | string) => void }) => (
   <>
     <SettingSection title="Consultas" icon={<Clock className="w-4 h-4" />}>
       <SettingSelect label="Duração padrão da consulta" options={["15 min", "20 min", "30 min", "45 min", "60 min"]} value={settings.default_duration} onChange={v => onChange("default_duration", v)} />
@@ -108,7 +108,7 @@ const DoctorSettings = ({ settings, onChange }: { settings: SettingsState; onCha
   </>
 );
 
-const AdminSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: any) => void }) => (
+const AdminSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: boolean | string) => void }) => (
   <>
     <SettingSection title="Plataforma" icon={<Globe className="w-4 h-4" />}>
       <SettingToggle label="Modo manutenção" checked={settings.maintenance_mode} onChange={v => onChange("maintenance_mode", v)} />
@@ -129,7 +129,7 @@ const AdminSettings = ({ settings, onChange }: { settings: SettingsState; onChan
   </>
 );
 
-const ReceptionSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: any) => void }) => (
+const ReceptionSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: boolean | string) => void }) => (
   <>
     <SettingSection title="Check-in" icon={<Clock className="w-4 h-4" />}>
       <SettingToggle label="Check-in automático ao confirmar presença" checked={settings.auto_checkin} onChange={v => onChange("auto_checkin", v)} />

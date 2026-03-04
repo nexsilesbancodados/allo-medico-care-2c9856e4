@@ -136,7 +136,7 @@ export const useFavoriteDoctors = () => {
 
       return favDocs.map(d => {
         const p = favProfiles?.find(pr => pr.user_id === d.user_id);
-        const specs = favSpecs?.filter((s: any) => s.doctor_id === d.id).map((s: any) => s.specialties?.name).filter(Boolean) ?? [];
+        const specs = favSpecs?.filter((s: { doctor_id: string; specialties?: { name?: string } | null }) => s.doctor_id === d.id).map((s: { specialties?: { name?: string } | null }) => s.specialties?.name).filter(Boolean) as string[] ?? [];
         return { ...d, name: p ? `Dr(a). ${p.first_name} ${p.last_name}` : "Médico", specs };
       });
     },
