@@ -14,6 +14,17 @@ import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 import { translateAuthError } from "@/lib/authErrors";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import pingoSolitario from "@/assets/pingo-solitario.png";
+import pingoMiniFamilia from "@/assets/pingo-mini-familia.png";
+import pingoKingFamilia from "@/assets/pingo-king-familia.png";
+import pingoPrimeFamilia from "@/assets/pingo-prime-familia.png";
+
+const PLAN_IMAGE_MAP: Record<string, string> = {
+  "Solitário": pingoSolitario,
+  "Mini Família": pingoMiniFamilia,
+  "King Família": pingoKingFamilia,
+  "Prime Família": pingoPrimeFamilia,
+};
 
 const PLAN_MAP: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; highlighted: boolean }> = {
   "Solitário": { icon: Shield, color: "from-secondary to-primary", highlighted: true },
