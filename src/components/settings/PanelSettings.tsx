@@ -146,7 +146,7 @@ const ReceptionSettings = ({ settings, onChange }: { settings: SettingsState; on
   </>
 );
 
-const GenericSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: any) => void }) => (
+const GenericSettings = ({ settings, onChange }: { settings: SettingsState; onChange: (key: string, val: boolean | string) => void }) => (
   <>
     <SettingSection title="Notificações" icon={<Bell className="w-4 h-4" />}>
       <SettingToggle label="Notificações por e-mail" checked={settings.notify_email ?? true} onChange={v => onChange("notify_email", v)} />
@@ -245,7 +245,7 @@ const PanelSettings = () => {
     load();
   }, [user, activeRole]);
 
-  const handleChange = useCallback((key: string, val: any) => {
+  const handleChange = useCallback((key: string, val: boolean | string) => {
     setSettings(prev => ({ ...prev, [key]: val }));
   }, []);
 

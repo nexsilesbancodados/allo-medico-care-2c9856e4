@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import type { AppointmentRow } from "@/types/domain";
 import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -42,7 +43,7 @@ const VideoRoom = () => {
   
   const isMobile = useIsMobile();
 
-  const [appointment, setAppointment] = useState<any>(null);
+  const [appointment, setAppointment] = useState<AppointmentRow | null>(null);
   const [otherPartyName, setOtherPartyName] = useState("");
   const [loading, setLoading] = useState(true);
   const [hasConsent, setHasConsent] = useState(false);

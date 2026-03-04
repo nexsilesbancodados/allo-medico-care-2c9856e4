@@ -111,7 +111,7 @@ const BookAppointment = () => {
       rating: Number(doc.rating),
       first_name: profileRes.data?.first_name ?? "",
       last_name: profileRes.data?.last_name ?? "",
-      specialties: specsRes.data?.map((s: any) => s.specialties?.name).filter(Boolean) ?? [],
+      specialties: specsRes.data?.map((s: { specialties?: { name?: string } | null }) => s.specialties?.name).filter(Boolean) as string[] ?? [],
       slots: slotsRes.data ?? [],
     });
     setLoading(false);

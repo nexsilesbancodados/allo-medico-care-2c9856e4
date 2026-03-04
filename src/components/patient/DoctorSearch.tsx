@@ -129,7 +129,7 @@ const DoctorSearch = () => {
 
     const profilesMap = new Map(profilesRes.data?.map(p => [p.user_id, p]) ?? []);
     const specsMap = new Map<string, string[]>();
-    specRes.data?.forEach((s: any) => {
+    specRes.data?.forEach((s: { doctor_id: string; specialties?: { name?: string } | null }) => {
       const arr = specsMap.get(s.doctor_id) ?? [];
       arr.push(s.specialties?.name ?? "");
       specsMap.set(s.doctor_id, arr);
