@@ -439,51 +439,121 @@ const AuthPaciente = () => {
                   </Button>
                 </div>
               ) : (
-                <motion.div variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <motion.div variants={stagger} initial="hidden" animate="visible" className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {plans.map((plan) => {
                     const isSelected = selectedPlanId === plan.id;
                     const PlanIcon = plan.icon;
+                    const isPremium = plan.name === "Prime Família";
                     return (
                       <motion.div
                         key={plan.id}
                         variants={fadeUp}
+                        whileHover={{ y: -4, transition: { duration: 0.2 } }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => setSelectedPlanId(plan.id)}
-                        className={`relative cursor-pointer rounded-2xl border-2 p-5 transition-all hover:shadow-lg ${
-                          isSelected
-                            ? "border-primary bg-primary/5 shadow-md shadow-primary/10"
-                            : "border-border bg-card hover:border-primary/30"
-                        } ${plan.highlighted ? "ring-2 ring-primary/20" : ""}`}
+                        className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 group overflow-hidden ${
+                          isPremium
+                            ? "bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground border-2 border-primary shadow-2xl shadow-primary/30"
+                            : isSelected
+                              ? "border-2 border-primary bg-card shadow-xl shadow-primary/15"
+                              : plan.highlighted
+                                ? "border-2 border-primary/40 bg-card shadow-lg shadow-primary/10"
+                                : "border-2 border-border bg-card hover:border-primary/30 hover:shadow-lg"
+                        }`}
                       >
-                        {plan.highlighted && (
-                          <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider">
+                        {/* Background glow for premium */}
+                        {isPremium && (
+                          <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 pointer-events-none" />
+                        )}
+
+                        {/* Badge */}
+                        {plan.highlighted && !isPremium && (
+                          <span className="absolute -top-px left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-primary-foreground text-[10px] font-bold px-4 py-1 rounded-b-xl uppercase tracking-wider shadow-md">
                             Mais popular
                           </span>
                         )}
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${plan.color} flex items-center justify-center mb-3`}>
-                          <PlanIcon className="w-5 h-5 text-primary-foreground" />
+                        {isPremium && (
+                          <span className="absolute top-4 right-4 bg-white/20 backdrop-blur-sm text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                            Premium
+                          </span>
+                        )}
+
+                        {/* Selected check */}
+                        {isSelected && !isPremium && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute top-4 right-4 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30"
+                          >
+                            <Check className="w-4 h-4 text-primary-foreground" />
+                          </motion.div>
+                        )}
+                        {isSelected && isPremium && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/25 backdrop-blur-sm flex items-center justify-center"
+                          >
+                            <Check className="w-4 h-4 text-primary-foreground" />
+                          </motion.div>
+                        )}
+
+                        {/* Icon */}
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
+                          isPremium
+                            ? "bg-white/15 backdrop-blur-sm"
+                            : `bg-gradient-to-br ${plan.color} shadow-md`
+                        }`}>
+                          <PlanIcon className={`w-6 h-6 ${isPremium ? "text-primary-foreground" : "text-primary-foreground"}`} />
                         </div>
-                        <h3 className="font-bold text-foreground text-lg">{plan.name}</h3>
-                        <p className="text-xs text-muted-foreground mt-1 mb-3">{plan.description}</p>
-                        <div className="flex items-baseline gap-1 mb-4">
-                          <span className="text-2xl font-extrabold text-foreground">R${plan.price.toFixed(2).replace('.', ',')}</span>
-                          <span className="text-xs text-muted-foreground">/{plan.period}</span>
+
+                        {/* Name & description */}
+                        <h3 className={`font-bold text-xl tracking-tight ${isPremium ? "text-primary-foreground" : "text-foreground"}`}>
+                          {plan.name}
+                        </h3>
+                        <p className={`text-xs mt-1 mb-4 ${isPremium ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                          {plan.description}
+                        </p>
+
+                        {/* Price */}
+                        <div className="flex items-baseline gap-1 mb-5">
+                          <span className={`text-3xl font-extrabold tracking-tight ${isPremium ? "text-primary-foreground" : "text-foreground"}`}>
+                            R${plan.price.toFixed(2).replace('.', ',')}
+                          </span>
+                          <span className={`text-xs ${isPremium ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                            /{plan.period}
+                          </span>
                         </div>
-                        <ul className="space-y-1.5">
+
+                        {/* Divider */}
+                        <div className={`h-px w-full mb-4 ${isPremium ? "bg-white/15" : "bg-border"}`} />
+
+                        {/* Features */}
+                        <ul className="space-y-2.5">
                           {plan.features.map((f, i) => (
-                            <li key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
-                              <Check className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                            <li key={i} className={`flex items-center gap-2.5 text-sm ${isPremium ? "text-primary-foreground/90" : "text-muted-foreground"}`}>
+                              <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                isPremium ? "bg-white/20" : "bg-primary/10"
+                              }`}>
+                                <Check className={`w-2.5 h-2.5 ${isPremium ? "text-primary-foreground" : "text-primary"}`} />
+                              </div>
                               {f}
                             </li>
                           ))}
                         </ul>
-                        {isSelected && (
-                          <motion.div
-                            layoutId="plan-check"
-                            className="absolute top-3 right-3 w-6 h-6 rounded-full bg-primary flex items-center justify-center"
-                          >
-                            <Check className="w-3.5 h-3.5 text-primary-foreground" />
-                          </motion.div>
-                        )}
+
+                        {/* CTA inside card */}
+                        <div className="mt-6">
+                          <div className={`w-full py-2.5 rounded-xl text-center text-sm font-semibold transition-all ${
+                            isPremium
+                              ? "bg-white/20 backdrop-blur-sm text-primary-foreground hover:bg-white/30"
+                              : isSelected
+                                ? "bg-primary text-primary-foreground shadow-md"
+                                : "bg-primary/5 text-primary group-hover:bg-primary/10"
+                          }`}>
+                            Assinar Cartão →
+                          </div>
+                        </div>
                       </motion.div>
                     );
                   })}
