@@ -514,7 +514,7 @@ const AuthPaciente = () => {
                           src={PLAN_IMAGE_MAP[plan.name] || pingoSolitario}
                           alt=""
                           aria-hidden="true"
-                          className="pointer-events-none absolute -bottom-4 -right-4 w-36 h-36 object-contain opacity-15 select-none"
+                          className="pointer-events-none absolute -bottom-6 -right-6 w-48 h-48 object-contain opacity-20 select-none mix-blend-multiply dark:mix-blend-screen"
                           loading="lazy"
                         />
 
