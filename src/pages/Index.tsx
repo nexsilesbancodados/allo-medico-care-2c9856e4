@@ -104,7 +104,7 @@ const Index = () => {
             <Button
               size="lg"
               className="bg-white text-primary hover:bg-white/90 rounded-full px-7 gap-2 shadow-lg font-semibold shrink-0"
-              onClick={() => window.location.href = "/paciente"}
+              onClick={() => window.location.href = "/consulta-avulsa"}
             >
               <Stethoscope className="w-4 h-4" />
               Acessar Plantão
