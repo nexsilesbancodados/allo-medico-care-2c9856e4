@@ -15,7 +15,7 @@ import PasswordStrength from "@/components/ui/password-strength";
 import { translateAuthError } from "@/lib/authErrors";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
-const PLAN_MAP: Record<string, { icon: any; color: string; highlighted: boolean }> = {
+const PLAN_MAP: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; highlighted: boolean }> = {
   "Consulta Avulsa": { icon: Clock, color: "from-primary/80 to-primary", highlighted: false },
   "Plano Mensal": { icon: Zap, color: "from-secondary to-primary", highlighted: true },
   "Plano Família+": { icon: Users, color: "from-secondary to-success", highlighted: false },
@@ -29,7 +29,7 @@ interface PlanItem {
   description: string;
   features: string[];
   highlighted: boolean;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   interval: string;
 }
@@ -97,7 +97,7 @@ const AuthPaciente = () => {
         const { data, error } = await supabase.from("plans").select("*").eq("is_active", true).order("price", { ascending: true });
         if (error) throw error;
         if (!data || data.length === 0) throw new Error("Nenhum plano encontrado");
-      const mapped: PlanItem[] = data.map((p: any) => {
+      const mapped: PlanItem[] = data.map((p: { id: string; name: string; price: number; interval: string; description: string | null; features: unknown }) => {
         const meta = PLAN_MAP[p.name] ?? { icon: Clock, color: "from-primary/80 to-primary", highlighted: false };
         const featureList = Array.isArray(p.features) ? p.features as string[] : [];
         return {
@@ -270,13 +270,13 @@ const AuthPaciente = () => {
             : "Acesse o boleto para realizar o pagamento.",
         });
       }
-    } catch (err: any) {
-      toast.error("Erro no pagamento", { description: err.message || "Tente novamente" });
+    } catch (err: unknown) {
+      toast.error("Erro no pagamento", { description: err instanceof Error ? err.message : "Tente novamente" });
     }
     setPaymentLoading(false);
   };
 
-  const createSubscriptionRecord = async (payData: any) => {
+  const createSubscriptionRecord = async (payData: Record<string, unknown>) => {
     if (!registeredUserId || !currentPlan) return;
     try {
       const planId = currentPlan.id;
@@ -286,13 +286,13 @@ const AuthPaciente = () => {
         toast.error("Erro interno", { description: "ID de plano inválido. Entre em contato com o suporte." });
         return;
       }
-      await supabase.from("subscriptions").insert({
+      await supabase.from("subscriptions").insert([{
         user_id: registeredUserId,
         plan_id: planId,
         status: "active",
         payment_method: paymentMethod.toLowerCase(),
-        notes: payData.paymentId || payData.subscriptionId || null,
-      });
+        notes: (payData as Record<string, string>).paymentId || (payData as Record<string, string>).subscriptionId || null,
+      }]);
     } catch (e) {
       console.error("Error creating subscription:", e);
     }

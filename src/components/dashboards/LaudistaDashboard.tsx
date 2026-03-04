@@ -111,8 +111,8 @@ const LaudistaDashboard = () => {
       toast.success("Exame assumido!", { description: "Você pode iniciar o laudo agora." });
       queryClient.invalidateQueries({ queryKey: ["laudista-recent-exams"] });
       queryClient.invalidateQueries({ queryKey: ["laudista-stats"] });
-    } catch (err: any) {
-      toast.error("Erro", { description: err.message });
+    } catch (err: unknown) {
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro inesperado" });
     } finally {
       setClaimingId(null);
     }

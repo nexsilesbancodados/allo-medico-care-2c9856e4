@@ -131,9 +131,9 @@ const DiscountCard = () => {
       toast.success("Cartão de Benefícios ativado! 🎉", { description: "Aproveite todos os benefícios agora mesmo." });
       if (paymentData?.payment?.invoiceUrl) window.open(paymentData.payment.invoiceUrl, "_blank");
       navigate("/dashboard");
-    } catch (err: any) {
-      console.error("Subscription error:", err);
-      toast.error("Erro ao processar", { description: err.message || "Tente novamente." });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Tente novamente.";
+      toast.error("Erro ao processar", { description: message });
     } finally { setSubscribing(null); }
   };
 

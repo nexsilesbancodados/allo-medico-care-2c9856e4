@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useMemo, useCallback, ReactNode } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import { warn } from "@/lib/logger";
 
 type AppRole = "patient" | "doctor" | "clinic" | "admin" | "receptionist" | "support" | "partner" | "affiliate" | "laudista";
 
@@ -53,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (profileRes.data) setProfile(profileRes.data as Profile);
       if (rolesRes.data) setRoles(rolesRes.data.map((r: { role: string }) => r.role as AppRole));
     } catch (e) {
-      console.error("fetchUserData error:", e);
+      warn("fetchUserData error:", e);
     }
   }, []);
 

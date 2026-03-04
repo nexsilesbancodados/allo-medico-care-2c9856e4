@@ -62,7 +62,7 @@ const PatientDashboard = () => {
   const { data: credits = 0 } = useUserCredits();
 
   const loading = statsLoading || upcomingLoading;
-  const waitingAppt = upcoming.find((a: any) => a.status === "waiting" || a.status === "in_progress") ?? null;
+  const waitingAppt = upcoming.find((a: { status: string }) => a.status === "waiting" || a.status === "in_progress") ?? null;
 
   useEffect(() => {
     if (!loading && (stats?.total ?? 0) === 0 && !localStorage.getItem(ONBOARDING_KEY)) {
@@ -228,7 +228,7 @@ const PatientDashboard = () => {
         {healthMetrics.length > 0 && (
           <motion.div variants={fadeUp}>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {healthMetrics.map((m: any, i: number) => {
+              {healthMetrics.map((m: { type: string; value: number; unit: string; measured_at: string }, i: number) => {
                 const typeIcons: Record<string, { icon: string; color: string }> = {
                   "pressao_arterial": { icon: "🫀", color: "text-destructive" },
                   "peso": { icon: "⚖️", color: "text-primary" },
@@ -404,7 +404,7 @@ const PatientDashboard = () => {
                   </div>
                   <p className="text-sm font-bold text-warning">Retorno Grátis</p>
                 </div>
-                {returnAppts.map((ra: any) => {
+                {returnAppts.map((ra: { id: string; return_deadline: string; doctor_name: string; doctor_id: string }) => {
                   const daysRemaining = differenceInDays(new Date(ra.return_deadline), new Date());
                   return (
                     <div key={ra.id} className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/40">
@@ -483,7 +483,7 @@ const PatientDashboard = () => {
               </Button>
             </div>
             <div className="space-y-2">
-              {upcoming.slice(1).map((a: any) => (
+              {upcoming.slice(1).map((a: { id: string; scheduled_at: string; status: string; doctor_name: string; duration_minutes?: number | null }) => (
                 <Card key={a.id} className="border-border/40 overflow-hidden hover:border-primary/20 hover:shadow-md transition-all">
                   <CardContent className="p-0">
                     <div className="flex items-center gap-3 p-3.5">
@@ -567,7 +567,7 @@ const PatientDashboard = () => {
               </Button>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory scrollbar-none">
-              {favDoctors.slice(0, 6).map((doc: any) => (
+              {favDoctors.slice(0, 6).map((doc: { id: string; name: string; specs: string[]; rating: number | null }) => (
                 <Card key={doc.id} className="border-border/40 shrink-0 w-32 snap-start cursor-pointer active:scale-[0.97] transition-all hover:shadow-lg hover:border-primary/20 overflow-hidden group" onClick={() => navigate(`/dashboard/schedule/${doc.id}`)}>
                   <CardContent className="p-0">
                     <div className="h-20 bg-gradient-to-br from-primary/10 to-secondary/10 group-hover:from-primary/15 group-hover:to-secondary/15 flex items-center justify-center transition-colors">
