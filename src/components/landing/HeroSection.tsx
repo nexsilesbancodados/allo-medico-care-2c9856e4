@@ -122,18 +122,6 @@ const HeroSection = memo(() => {
             <div className="flex flex-col sm:flex-row gap-3 mb-6">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-primary via-primary to-secondary hover:opacity-90 text-primary-foreground rounded-full px-7 relative overflow-hidden group h-12 sm:h-12 text-base font-semibold shadow-xl shadow-primary/25 cta-shimmer"
-                onClick={() => navigate("/paciente")}
-                onMouseEnter={prefetchPaciente}
-              >
-                <span className="relative z-10 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  Começar Agora
-                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </span>
-              </Button>
-              <Button
-                size="lg"
                 variant="outline"
                 className="rounded-full px-7 h-12 text-base font-semibold border-primary/20 hover:bg-primary/5 hover:border-primary/40 transition-all"
                 onClick={() => navigate("/consulta-avulsa")}
