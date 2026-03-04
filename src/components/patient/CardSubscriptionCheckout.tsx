@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -54,7 +54,25 @@ const CardSubscriptionCheckout = ({
 }: Props) => {
   const [processing, setProcessing] = useState(false);
   const [pixCopied, setPixCopied] = useState(false);
-  const [pixCountdown, setPixCountdown] = useState(900);
+
+  // PIX polling for card subscription confirmation
+  useEffect(() => {
+    if (!pixQrCode || !user) return;
+    const pollTimer = setInterval(async () => {
+      const { data } = await supabase
+        .from("discount_cards")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .limit(1);
+      if (data && data.length > 0) {
+        clearInterval(pollTimer);
+        toast.success("✅ Pagamento confirmado! Cartão ativado.");
+        onSuccess();
+      }
+    }, 10000);
+    return () => clearInterval(pollTimer);
+  }, [pixQrCode, user]);
 
   const handleSubscribe = async () => {
     if (!user) return;
