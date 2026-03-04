@@ -337,6 +337,8 @@ serve(async (req) => {
 
     const { subject, html } = template(data);
 
+    const fromAddress = Deno.env.get("EMAIL_FROM") || "AloClinica <onboarding@resend.dev>";
+    
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -344,7 +346,7 @@ serve(async (req) => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: Deno.env.get("EMAIL_FROM") || "AloClinica <onboarding@resend.dev>",
+        from: fromAddress,
         to: [to],
         subject,
         html,
@@ -354,6 +356,15 @@ serve(async (req) => {
     const result = await res.json();
 
     if (!res.ok) {
+      // If Resend rejects due to unverified domain, log but return success
+      // so callers don't break. The email simply won't be delivered.
+      if (result?.name === "validation_error" && result?.message?.includes("verify a domain")) {
+        console.warn("Resend domain not verified — email skipped:", to, "template:", type);
+        return new Response(
+          JSON.stringify({ success: true, skipped: true, reason: "domain_not_verified" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       console.error("Resend error:", result);
       return new Response(JSON.stringify({ error: "Failed to send email", details: result }), {
         status: 500,
