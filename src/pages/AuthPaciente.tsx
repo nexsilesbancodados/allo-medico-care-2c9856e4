@@ -16,9 +16,10 @@ import { translateAuthError } from "@/lib/authErrors";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 
 const PLAN_MAP: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; highlighted: boolean }> = {
-  "Consulta Avulsa": { icon: Clock, color: "from-primary/80 to-primary", highlighted: false },
-  "Plano Mensal": { icon: Zap, color: "from-secondary to-primary", highlighted: true },
-  "Plano Família+": { icon: Users, color: "from-secondary to-success", highlighted: false },
+  "Solitário": { icon: Shield, color: "from-secondary to-primary", highlighted: true },
+  "Mini Família": { icon: Heart, color: "from-primary/80 to-primary", highlighted: false },
+  "King Família": { icon: Star, color: "from-primary to-secondary", highlighted: false },
+  "Prime Família": { icon: Sparkles, color: "from-secondary to-success", highlighted: false },
 };
 
 interface PlanItem {
