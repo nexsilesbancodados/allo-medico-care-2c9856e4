@@ -96,7 +96,7 @@ export const useDoctorProfile = () => {
       if (!user) return null;
       const { data, error } = await supabase
         .from("doctor_profiles")
-        .select("*")
+        .select("id, user_id, crm, crm_state, crm_verified, crm_verified_at, bio, consultation_price, rating, total_reviews, experience_years, education, is_approved, rejection_reason, available_now, available_now_since, pix_key, pix_key_type, created_at, updated_at")
         .eq("user_id", user.id)
         .maybeSingle();
       if (error) throw error;
