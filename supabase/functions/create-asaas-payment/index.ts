@@ -24,15 +24,15 @@ async function asaasFetch(url: string, options: RequestInit, attempt = 1): Promi
       return asaasFetch(url, options, attempt + 1);
     }
     return res;
-  } catch (error: any) {
-    console.error(`Asaas fetch error (attempt ${attempt}/3):`, error.message);
+  } catch (error: unknown) {
+    console.error(`Asaas fetch error (attempt ${attempt}/3):`, error instanceof Error ? error.message : "unknown");
     if (attempt >= 3) throw error;
     await new Promise(r => setTimeout(r, 2000 * Math.pow(2, attempt - 1)));
     return asaasFetch(url, options, attempt + 1);
   }
 }
 
-async function safeJson(res: Response): Promise<any> {
+async function safeJson(res: Response): Promise<Record<string, unknown>> {
   const contentType = res.headers.get("content-type");
   if (!contentType?.includes("application/json")) {
     const text = await res.text();
@@ -114,7 +114,7 @@ serve(async (req) => {
     } = await req.json();
 
     // ─── Build split array if doctor has an Asaas wallet ───
-    let splitRules: any[] | undefined;
+    let splitRules: { walletId: string; fixedValue?: number; percentualValue?: number }[] | undefined;
     if (doctorProfileId) {
       const { data: walletSetting } = await supabase
         .from("app_settings")

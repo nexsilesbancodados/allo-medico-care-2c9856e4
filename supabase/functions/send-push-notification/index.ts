@@ -84,11 +84,11 @@ serve(async (req) => {
           urgency: "high",
         });
         sent++;
-      } catch (err: any) {
-        console.error(`Push failed for ${sub.endpoint}:`, err.statusCode || err.message);
+      } catch (err: unknown) {
+        const statusCode = (err as { statusCode?: number })?.statusCode;
+        console.error(`Push failed for ${sub.endpoint}:`, statusCode || (err instanceof Error ? err.message : "unknown"));
         failed++;
-        // Remove expired/invalid subscriptions
-        if (err.statusCode === 404 || err.statusCode === 410) {
+        if (statusCode === 404 || statusCode === 410) {
           await supabase.from("push_subscriptions").delete().eq("id", sub.id);
           console.log("Removed expired subscription:", sub.id);
         }
@@ -108,10 +108,10 @@ serve(async (req) => {
       JSON.stringify({ success: true, sent, failed }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

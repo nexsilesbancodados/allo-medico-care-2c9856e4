@@ -29,6 +29,7 @@ const getAffiliateNav = (active: string) => [
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
 const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
 
+/* eslint-disable @typescript-eslint/no-explicit-any -- Affiliate tables not in generated types */
 const AffiliateDashboard = () => {
   const { user } = useAuth();
   const [referrals, setReferrals] = useState<any[]>([]);
@@ -136,7 +137,7 @@ const AffiliateDashboard = () => {
     }
   };
 
-  const monthlyData = referrals.reduce((acc: any[], r) => {
+  const monthlyData = referrals.reduce((acc: { month: string; conversoes: number }[], r) => {
     if (r.status !== "converted" || !r.converted_at) return acc;
     const month = format(new Date(r.converted_at), "MMM/yy", { locale: ptBR });
     const existing = acc.find(a => a.month === month);

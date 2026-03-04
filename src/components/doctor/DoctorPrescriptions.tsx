@@ -10,10 +10,18 @@ import { FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+import type { Json } from "@/integrations/supabase/types";
+
+interface MedicationEntry {
+  name?: string;
+  dosage?: string;
+  frequency?: string;
+}
+
 interface Prescription {
   id: string;
   created_at: string;
-  medications: any[];
+  medications: Json[];
   diagnosis: string | null;
   patient_name: string;
 }
@@ -90,9 +98,9 @@ const DoctorPrescriptions = () => {
                       <p className="font-semibold text-foreground">{p.patient_name}</p>
                       {p.diagnosis && <p className="text-sm text-muted-foreground">{p.diagnosis}</p>}
                       <div className="flex gap-1 mt-1">
-                        {p.medications.map((m: any, i: number) => (
+                        {p.medications.map((m, i: number) => (
                           <Badge key={i} variant="secondary" className="text-xs">
-                            {typeof m === "string" ? m : m.name ?? "Medicamento"}
+                            {typeof m === "string" ? m : (m as Record<string, unknown>)?.name as string ?? "Medicamento"}
                           </Badge>
                         ))}
                       </div>

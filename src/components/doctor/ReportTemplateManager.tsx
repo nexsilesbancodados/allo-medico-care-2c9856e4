@@ -44,6 +44,7 @@ const ReportTemplateManager = () => {
   const [bodyText, setBodyText] = useState("");
   const [saving, setSaving] = useState(false);
 
+  /* eslint-disable @typescript-eslint/no-explicit-any -- report_templates not in generated types */
   const { data: templates, isLoading } = useQuery({
     queryKey: ["report-templates-manage"],
     queryFn: async () => {
@@ -52,9 +53,10 @@ const ReportTemplateManager = () => {
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as any[];
+      return data as unknown as { id: string; title: string; exam_type: string; body_text: string; is_active: boolean; created_at: string }[];
     },
   });
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   const resetForm = () => {
     setTitle("");
@@ -63,7 +65,7 @@ const ReportTemplateManager = () => {
     setEditingId(null);
   };
 
-  const openEdit = (tpl: any) => {
+  const openEdit = (tpl: { id: string; title: string; exam_type: string; body_text: string }) => {
     setEditingId(tpl.id);
     setTitle(tpl.title);
     setExamType(tpl.exam_type);
@@ -98,8 +100,8 @@ const ReportTemplateManager = () => {
       queryClient.invalidateQueries({ queryKey: ["report-templates-manage"] });
       setDialogOpen(false);
       resetForm();
-    } catch (err: any) {
-      toast.error("Erro", { description: err.message });
+    } catch (err: unknown) {
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro desconhecido" });
     } finally {
       setSaving(false);
     }
@@ -114,8 +116,8 @@ const ReportTemplateManager = () => {
       if (error) throw error;
       toast.success("Template removido!");
       queryClient.invalidateQueries({ queryKey: ["report-templates-manage"] });
-    } catch (err: any) {
-      toast.error("Erro", { description: err.message });
+    } catch (err: unknown) {
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro desconhecido" });
     }
   };
 
@@ -190,7 +192,7 @@ const ReportTemplateManager = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {templates.map((tpl: any) => (
+                {templates.map((tpl) => (
                   <TableRow key={tpl.id}>
                     <TableCell className="font-medium">{tpl.title}</TableCell>
                     <TableCell>{tpl.exam_type}</TableCell>

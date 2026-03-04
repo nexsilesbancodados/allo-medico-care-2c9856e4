@@ -64,7 +64,7 @@ const USER_ROLE_FILTER = [
   { value: "admin", label: "Admins" },
 ];
 
-const getLogSeverity = (log: any): "error" | "warn" | "info" => {
+const getLogSeverity = (log: { action?: string }): "error" | "warn" | "info" => {
   const a = (log.action ?? "").toLowerCase();
   if (a.includes("error") || a.includes("failed") || a.includes("cancel")) return "error";
   if (a.includes("warn") || a.includes("timeout") || a.includes("no_show")) return "warn";

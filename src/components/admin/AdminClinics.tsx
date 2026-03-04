@@ -11,12 +11,23 @@ import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Search, Eye, Edit } from "lucide-react";
 
+interface ClinicItem {
+  id: string;
+  user_id: string;
+  name: string;
+  cnpj: string | null;
+  phone: string | null;
+  address: string | null;
+  is_approved: boolean | null;
+  created_at: string;
+}
+
 const AdminClinics = () => {
   
-  const [clinics, setClinics] = useState<any[]>([]);
+  const [clinics, setClinics] = useState<ClinicItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<any>(null);
+  const [selected, setSelected] = useState<ClinicItem | null>(null);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", cnpj: "", phone: "", address: "" });
 
@@ -36,7 +47,7 @@ const AdminClinics = () => {
     fetchClinics();
   };
 
-  const openDetail = (c: any) => {
+  const openDetail = (c: ClinicItem) => {
     setSelected(c);
     setEditForm({ name: c.name, cnpj: c.cnpj || "", phone: c.phone || "", address: c.address || "" });
   };

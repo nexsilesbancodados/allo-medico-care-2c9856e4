@@ -99,7 +99,7 @@ serve(async (req) => {
       })
       .join("\n");
 
-    const results: { email?: any; whatsapp?: any } = {};
+    const results: { email?: unknown; whatsapp?: unknown } = {};
 
     // ─── Send Email ───
     if (email) {
