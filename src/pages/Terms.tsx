@@ -69,7 +69,7 @@ const Terms = () => (
           <li><strong>Plano Familiar:</strong> cobertura para o titular e dependentes.</li>
         </ul>
         <p>7.2. Os valores dos planos e consultas avulsas são informados de forma clara antes da contratação, incluindo eventuais taxas e impostos aplicáveis.</p>
-        <p>7.3. Os pagamentos são processados por meio de plataformas de pagamento terceirizadas (Stripe/Mercado Pago), estando sujeitos às políticas dessas plataformas.</p>
+        <p>7.3. Os pagamentos são processados por meio da plataforma de pagamento Asaas, estando sujeitos às políticas dessa plataforma.</p>
         <p>7.4. A AloClinica se reserva o direito de alterar os preços dos planos a qualquer momento, garantindo que as alterações não afetarão assinaturas vigentes até a próxima renovação.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">8. Política de Cancelamento e Reembolso</h2>

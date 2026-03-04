@@ -19,7 +19,7 @@ const PaymentSuccess = () => {
       return;
     }
 
-    // Verify subscription exists after Stripe webhook processes
+    // Verify subscription exists after Asaas webhook processes
     const verifySubscription = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {

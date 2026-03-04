@@ -73,7 +73,7 @@ const Privacy = () => (
         <p>Seus dados pessoais poderão ser compartilhados nas seguintes situações:</p>
         <ul className="list-disc pl-6 space-y-1">
           <li><strong>Médico ↔ Paciente:</strong> dados de saúde são compartilhados exclusivamente entre o paciente e o médico responsável pelo atendimento;</li>
-          <li><strong>Processadores de pagamento:</strong> dados transacionais são compartilhados com Stripe e/ou Mercado Pago para processamento;</li>
+          <li><strong>Processadores de pagamento:</strong> dados transacionais são compartilhados com o Asaas para processamento;</li>
           <li><strong>Infraestrutura em nuvem:</strong> dados são armazenados em servidores seguros (Supabase/AWS);</li>
           <li><strong>Autoridades judiciais:</strong> mediante ordem judicial ou obrigação legal;</li>
           <li><strong>Clínicas parceiras:</strong> quando a consulta for intermediada por uma clínica cadastrada.</li>
