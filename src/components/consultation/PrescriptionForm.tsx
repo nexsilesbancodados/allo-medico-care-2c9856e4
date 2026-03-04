@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { warn } from "@/lib/logger";
 import { supabase } from "@/integrations/supabase/client";
 import { useConsultationStore } from "@/stores/consultationStore";
 import { useAuth } from "@/contexts/AuthContext";
@@ -44,7 +45,7 @@ const PrescriptionForm = () => {
   const [patientName, setPatientName] = useState("");
   const [patientCpf, setPatientCpf] = useState("");
   const [patientId, setPatientId] = useState("");
-  const [doctorInfo, setDoctorInfo] = useState<any>(null);
+  const [doctorInfo, setDoctorInfo] = useState<{ id: string; crm: string; crm_state: string; user_id: string; first_name: string; last_name: string } | null>(null);
   const [diagnosis, setDiagnosis] = useState(store.appointmentId === appointmentId ? store.diagnosis : "");
   const [observations, setObservations] = useState(store.appointmentId === appointmentId ? store.observations : "");
   const [medications, setMedications] = useState<Medication[]>(
@@ -323,8 +324,8 @@ const PrescriptionForm = () => {
       doc.setTextColor(130, 130, 130);
       doc.text("Verificação digital", 27.5, footerY + 23, { align: "center" });
       doc.text(prescriptionId, 27.5, footerY + 27, { align: "center" });
-    } catch (e) {
-      console.warn("QR generation failed:", e);
+    } catch {
+      // QR generation failed - non-critical
     }
 
     // Digital signature line
@@ -396,7 +397,7 @@ const PrescriptionForm = () => {
       document_hash: documentHash,
       details: { medications: validMeds.length, diagnosis: diagnosis || null },
     } as any).then(({ error: verErr }) => {
-      if (verErr) console.error("Failed to persist verification:", verErr);
+      if (verErr) warn("Failed to persist verification:", verErr);
     });
 
     setSaving(false);
@@ -414,24 +415,24 @@ const PrescriptionForm = () => {
           medications: validMeds.map(m => ({ name: m.name, dosage: m.dosage, frequency: m.frequency })),
           diagnosis: diagnosis || undefined,
         },
-      }).then(({ data, error: sendErr }) => {
+      }).then(({ data: respData, error: sendErr }) => {
         if (sendErr) {
-          console.error("Send prescription notification error:", sendErr);
+          warn("Send prescription notification error:", sendErr);
         } else {
-          const sentEmail = data?.sent_to?.email;
-          const sentWhatsapp = data?.sent_to?.whatsapp;
+          const sentEmail = respData?.sent_to?.email;
+          const sentWhatsapp = respData?.sent_to?.whatsapp;
           const channels = [sentEmail && "e-mail", sentWhatsapp && "WhatsApp"].filter(Boolean).join(" e ");
           if (channels) {
             toast.success(`📩 Receita enviada por ${channels}`);
           }
         }
-      }).catch(console.error);
+      }).catch(() => {});
 
       // In-app + Push notification for prescription
       if (patientId) {
         const { notifyPrescriptionSent } = await import("@/lib/notifications");
         const medsSummary = validMeds.map(m => `${m.name} ${m.dosage}`).join(", ");
-        notifyPrescriptionSent(patientId, doctorFullName, diagnosis || undefined, medsSummary).catch(console.error);
+        notifyPrescriptionSent(patientId, doctorFullName, diagnosis || undefined, medsSummary).catch(() => {});
       }
       store.clearDraft();
       toast.success("Receita salva com sucesso! ✅");

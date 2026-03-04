@@ -1,14 +1,21 @@
 import { toast } from "sonner";
+import { warn } from "@/lib/logger";
+
+interface SupabaseError {
+  message?: string;
+  status?: number;
+  code?: string;
+}
 
 /**
  * Wraps a Supabase query with automatic retry on rate-limit (429) or network errors.
  * Shows a toast on final failure.
  */
 export async function withRetry<T>(
-  fn: () => Promise<{ data: T | null; error: any }>,
+  fn: () => Promise<{ data: T | null; error: SupabaseError | null }>,
   maxRetries = 3,
   baseDelay = 1000
-): Promise<{ data: T | null; error: any }> {
+): Promise<{ data: T | null; error: SupabaseError | null }> {
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     const result = await fn();
 
@@ -28,10 +35,10 @@ export async function withRetry<T>(
   }
 
   // Should never reach here, but just in case
-  return { data: null, error: new Error("Max retries exceeded") };
+  return { data: null, error: { message: "Max retries exceeded" } };
 }
 
-function showErrorToast(error: any) {
+function showErrorToast(error: SupabaseError | null) {
   const message = error?.message || "Ocorreu um erro inesperado.";
   const isRateLimit = error?.status === 429;
   const isNetwork = !navigator.onLine || message.includes("fetch");

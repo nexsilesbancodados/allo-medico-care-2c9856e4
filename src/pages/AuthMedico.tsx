@@ -147,8 +147,8 @@ const AuthMedico = () => {
       if (error) throw error;
       setStep("applied");
       toast.success("Solicitação enviada!", { description: "Analisaremos seus dados e retornaremos por email." });
-    } catch (err: any) {
-      toast.error("Erro ao enviar", { description: err?.message || "Tente novamente." });
+    } catch (err: unknown) {
+      toast.error("Erro ao enviar", { description: err instanceof Error ? err.message : "Tente novamente." });
     }
     setSubmittingApplication(false);
   };
@@ -218,7 +218,7 @@ const AuthMedico = () => {
     if (data.user) {
       await supabase.functions.invoke("assign-role", { body: { user_id: data.user.id, role: "doctor", profile_data: { crm, crm_state: crmState, invite_code_id: validatedCodeId } } });
       await registerConsent(data.user.id, "terms_and_privacy_doctor");
-      supabase.functions.invoke("send-email", { body: { type: "welcome_doctor", to: email, data: { name: `${firstName} ${lastName}`, crm: `${crm}/${crmState}` } } }).catch(console.error);
+      supabase.functions.invoke("send-email", { body: { type: "welcome_doctor", to: email, data: { name: `${firstName} ${lastName}`, crm: `${crm}/${crmState}` } } }).catch(() => {});
     }
     setLoading(false);
     toast.success("Cadastro realizado!", { description: "Aguarde a aprovação do seu CRM." });

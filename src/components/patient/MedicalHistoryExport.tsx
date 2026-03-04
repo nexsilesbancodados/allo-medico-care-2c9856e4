@@ -107,10 +107,11 @@ const MedicalHistoryExport = () => {
         doc.text(`${format(new Date(rx.created_at), "dd/MM/yyyy")} · ${doctorNames[rx.doctor_id] || "Médico"} · ${rx.diagnosis || "Sem diagnóstico"}`, 19, y);
         y += 5;
         const meds = Array.isArray(rx.medications) ? rx.medications : [];
-        meds.forEach((m: any) => {
+        meds.forEach((m: unknown) => {
           checkPage(6);
           doc.setTextColor(80, 80, 80);
-          doc.text(`  💊 ${typeof m === "string" ? m : m.name || "Medicamento"} ${m.dosage ? `- ${m.dosage}` : ""}`, 19, y);
+          const med = m as Record<string, string>;
+          doc.text(`  💊 ${typeof m === "string" ? m : med.name || "Medicamento"} ${med.dosage ? `- ${med.dosage}` : ""}`, 19, y);
           y += 5;
         });
         y += 3;
@@ -134,7 +135,7 @@ const MedicalHistoryExport = () => {
       const diary = diaryRes.data ?? [];
       if (diary.length > 0) {
         sectionTitle(`DIÁRIO DE SINTOMAS (últimos 30 registros)`);
-        diary.forEach((d: any) => {
+        diary.forEach((d: Record<string, unknown>) => {
           checkPage(8);
           doc.setFontSize(8);
           doc.setTextColor(30, 30, 30);
@@ -156,8 +157,7 @@ const MedicalHistoryExport = () => {
 
       doc.save(`prontuario-${profile?.first_name}-${format(new Date(), "yyyy-MM-dd")}.pdf`);
       toast.success("Prontuário exportado com sucesso!");
-    } catch (err) {
-      console.error("Export error:", err);
+    } catch {
       toast.error("Erro ao exportar prontuário");
     } finally {
       setExporting(false);

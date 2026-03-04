@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { warn } from "@/lib/logger";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -65,9 +66,9 @@ const MemedPrescription = ({
         return data.token;
       }
       throw new Error("Token não retornado");
-    } catch (err: any) {
-      console.error("Memed token error:", err);
-      setErrorMsg(err.message || "Erro ao obter token Memed");
+    } catch (err: unknown) {
+      warn("Memed token error:", err);
+      setErrorMsg(err instanceof Error ? err.message : "Erro ao obter token Memed");
       setStatus("error");
       return null;
     }
@@ -132,8 +133,8 @@ const MemedPrescription = ({
                   }
                 );
                 // Patient set on Memed
-              } catch (e) {
-                console.warn("Error setting patient:", e);
+              } catch {
+                warn("Error setting patient on Memed");
               }
 
               // Listen for prescription printed event
@@ -169,8 +170,8 @@ const MemedPrescription = ({
                         pdf_url: prescriptionData?.url_pdf || null,
                       } as any);
                     }
-                  } catch (e) {
-                    console.error("Error saving Memed prescription:", e);
+                  } catch {
+                    warn("Error saving Memed prescription");
                   }
 
                   onPrescriptionCreated?.(prescriptionData);

@@ -140,7 +140,7 @@ const AIChatTab = ({ primaryRole }: Props) => {
     recognition.lang = "pt-BR";
     recognition.continuous = false;
     recognition.interimResults = false;
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       const transcript = event.results[0][0].transcript;
       setInput(prev => prev + (prev ? " " : "") + transcript);
     };

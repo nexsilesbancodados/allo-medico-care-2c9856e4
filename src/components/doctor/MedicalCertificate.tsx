@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { warn } from "@/lib/logger";
 import { useAuth } from "@/contexts/AuthContext";
 import { notifyCertificateSent } from "@/lib/notifications";
 import { supabase } from "@/integrations/supabase/client";
@@ -187,7 +188,7 @@ const MedicalCertificate = () => {
       document_hash: documentHash,
       details: { days: certType === "absence" ? days : null, cid: cid || null, reason: reason || null },
     } as any).then(({ error }) => {
-      if (error) console.error("Failed to persist verification:", error);
+      if (error) warn("Failed to persist verification:", error);
     });
 
     setGenerating(false);

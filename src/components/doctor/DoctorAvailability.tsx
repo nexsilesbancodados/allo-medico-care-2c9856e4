@@ -80,14 +80,12 @@ const DoctorAvailability = () => {
         available_now_since: newVal ? new Date().toISOString() : null,
       }).eq("id", doctorProfileId);
       if (error) {
-        console.error("Toggle available_now error:", error);
         toast.error("Erro ao atualizar disponibilidade", { description: error.message });
       } else {
         setAvailableNow(newVal);
         toast.success(newVal ? "🟢 Você está disponível para consultas imediatas!" : "Modo plantão desativado.");
       }
-    } catch (err) {
-      console.error("Toggle available_now exception:", err);
+    } catch {
       toast.error("Erro inesperado");
     } finally {
       setTogglingAvailability(false);
