@@ -140,6 +140,13 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "appointment_waitlist_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       appointments: {
@@ -224,6 +231,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "appointments_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "appointments_guest_patient_id_fkey"
             columns: ["guest_patient_id"]
             isOneToOne: false
@@ -266,6 +280,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "availability_slots_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -355,6 +376,13 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "clinic_affiliations_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       clinic_profiles: {
@@ -434,6 +462,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consultation_notes_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -571,6 +606,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_absences_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -767,6 +809,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "doctor_specialties_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "doctor_specialties_specialty_id_fkey"
             columns: ["specialty_id"]
             isOneToOne: false
@@ -872,6 +921,13 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "exam_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       exam_requests: {
@@ -944,10 +1000,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "exam_requests_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "exam_requests_requesting_doctor_id_fkey"
             columns: ["requesting_doctor_id"]
             isOneToOne: false
             referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_requests_requesting_doctor_id_fkey"
+            columns: ["requesting_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1019,6 +1089,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorite_doctors_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1221,6 +1298,13 @@ export type Database = {
             referencedRelation: "doctor_profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "medical_records_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       messages: {
@@ -1374,6 +1458,13 @@ export type Database = {
             columns: ["assigned_doctor_id"]
             isOneToOne: false
             referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "on_demand_queue_assigned_doctor_id_fkey"
+            columns: ["assigned_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -1655,6 +1746,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "prescription_renewals_assigned_doctor_id_fkey"
+            columns: ["assigned_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "prescription_renewals_new_prescription_id_fkey"
             columns: ["new_prescription_id"]
             isOneToOne: false
@@ -1758,6 +1856,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "prescriptions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2045,6 +2150,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "satisfaction_surveys_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
             referencedColumns: ["id"]
           },
         ]
@@ -2447,7 +2559,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      doctor_profiles_public: {
+        Row: {
+          available_now: boolean | null
+          available_now_since: string | null
+          bio: string | null
+          consultation_price: number | null
+          created_at: string | null
+          crm: string | null
+          crm_state: string | null
+          crm_verified: boolean | null
+          education: string | null
+          experience_years: number | null
+          id: string | null
+          is_approved: boolean | null
+          rating: number | null
+          total_reviews: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          available_now?: boolean | null
+          available_now_since?: string | null
+          bio?: string | null
+          consultation_price?: number | null
+          created_at?: string | null
+          crm?: string | null
+          crm_state?: string | null
+          crm_verified?: boolean | null
+          education?: string | null
+          experience_years?: number | null
+          id?: string | null
+          is_approved?: boolean | null
+          rating?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          available_now?: boolean | null
+          available_now_since?: string | null
+          bio?: string | null
+          consultation_price?: number | null
+          created_at?: string | null
+          crm?: string | null
+          crm_state?: string | null
+          crm_verified?: boolean | null
+          education?: string | null
+          experience_years?: number | null
+          id?: string | null
+          is_approved?: boolean | null
+          rating?: number | null
+          total_reviews?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       cleanup_rate_limits: { Args: never; Returns: undefined }
