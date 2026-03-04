@@ -58,7 +58,7 @@ describe("PrescriptionRenewalForm", () => {
     const { default: PrescriptionRenewalForm } = await import("@/components/patient/PrescriptionRenewalForm");
     render(<PrescriptionRenewalForm />);
 
-    const submitButton = screen.getByText("Enviar Solicitação — R$ 80,00");
+    const submitButton = screen.getByText("Prosseguir para Pagamento — R$ 80,00");
     expect(submitButton).toBeDisabled();
   });
 });
