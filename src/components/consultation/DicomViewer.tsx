@@ -71,8 +71,8 @@ const DicomViewer = ({ fileUrl, fileName }: DicomViewerProps) => {
         };
         img.src = imgUrl;
       }
-    } catch (err: any) {
-      setError(err.message || "Erro ao carregar arquivo DICOM.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro ao carregar arquivo DICOM.");
       setLoading(false);
     }
   };
@@ -180,8 +180,8 @@ const DicomViewer = ({ fileUrl, fileName }: DicomViewerProps) => {
       } else {
         setError("Pixel data não encontrado no arquivo DICOM.");
       }
-    } catch (err: any) {
-      setError("Erro ao interpretar arquivo DICOM: " + err.message);
+    } catch (err: unknown) {
+      setError("Erro ao interpretar arquivo DICOM: " + (err instanceof Error ? err.message : "desconhecido"));
     }
     setLoading(false);
   };

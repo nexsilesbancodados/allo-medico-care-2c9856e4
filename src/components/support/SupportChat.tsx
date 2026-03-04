@@ -171,11 +171,11 @@ const SupportChat = () => {
         setMessages((prev) => [...prev, { role: "assistant", content: fallback }]);
         persistMessage("assistant", fallback);
       }
-    } catch (error: any) {
-      console.error("Support chat error:", error);
+    } catch (error: unknown) {
+      const errMsg = error instanceof Error ? error.message : "Erro ao conectar com o assistente. Tente novamente.";
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `❌ ${error.message || "Erro ao conectar com o assistente. Tente novamente."}` },
+        { role: "assistant", content: `❌ ${errMsg}` },
       ]);
     } finally {
       setIsLoading(false);

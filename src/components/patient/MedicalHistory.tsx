@@ -14,11 +14,40 @@ import { getPatientNav } from "./patientNav";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
+interface DoctorInfo {
+  id: string;
+  user_id: string;
+  crm: string;
+  crm_state: string;
+  name: string;
+}
+
+interface PrescriptionItem {
+  id: string;
+  appointment_id: string;
+  diagnosis: string | null;
+  medications: unknown;
+  observations: string | null;
+  created_at: string;
+}
+
+interface HistoryAppointment {
+  id: string;
+  scheduled_at: string;
+  status: string;
+  doctor_id: string;
+  notes: string | null;
+  duration_minutes: number | null;
+  doctor: DoctorInfo | undefined;
+  prescriptions: PrescriptionItem[];
+  consultation_notes: string | null;
+}
+
 const MedicalHistory = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<HistoryAppointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [summaries, setSummaries] = useState<Record<string, string>>({});
   const [loadingSummary, setLoadingSummary] = useState<Record<string, boolean>>({});
@@ -46,16 +75,16 @@ const MedicalHistory = () => {
     const docUserIds = docsRes.data?.map(d => d.user_id) ?? [];
     const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", docUserIds);
 
-    const docMap = new Map<string, any>();
+    const docMap = new Map<string, DoctorInfo>();
     docsRes.data?.forEach(d => {
       const p = profiles?.find(pr => pr.user_id === d.user_id);
       docMap.set(d.id, { ...d, name: p ? `Dr(a). ${p.first_name} ${p.last_name}` : "Médico" });
     });
 
-    const prescMap = new Map<string, any[]>();
+    const prescMap = new Map<string, PrescriptionItem[]>();
     prescRes.data?.forEach(p => {
       const list = prescMap.get(p.appointment_id) ?? [];
-      list.push(p);
+      list.push(p as PrescriptionItem);
       prescMap.set(p.appointment_id, list);
     });
 
@@ -71,7 +100,7 @@ const MedicalHistory = () => {
     setLoading(false);
   };
 
-  const generateSummary = async (appt: any) => {
+  const generateSummary = async (appt: HistoryAppointment) => {
     if (summaries[appt.id]) {
       setExpandedId(expandedId === appt.id ? null : appt.id);
       return;
@@ -92,8 +121,7 @@ const MedicalHistory = () => {
 
       if (error) throw error;
       setSummaries(prev => ({ ...prev, [appt.id]: data.summary }));
-    } catch (e) {
-      console.error(e);
+    } catch {
       toast.error("Erro ao gerar resumo", { description: "Tente novamente em alguns segundos." });
       setExpandedId(null);
     } finally {
@@ -101,7 +129,7 @@ const MedicalHistory = () => {
     }
   };
 
-  const downloadPrescription = (prescription: any, doctorName: string) => {
+  const downloadPrescription = (prescription: PrescriptionItem, doctorName: string) => {
     const doc = new jsPDF();
     doc.setFontSize(18);
     doc.text("Receita Médica Digital", 20, 20);
@@ -113,8 +141,9 @@ const MedicalHistory = () => {
     }
     doc.text("Medicamentos:", 20, 68);
     const meds = Array.isArray(prescription.medications) ? prescription.medications : [];
-    meds.forEach((med: any, i: number) => {
-      const text = typeof med === "string" ? med : `${med.name || med.medication || "—"} - ${med.dosage || ""} - ${med.instructions || ""}`;
+    meds.forEach((med: unknown, i: number) => {
+      const m = med as Record<string, string>;
+      const text = typeof med === "string" ? med : `${m.name || m.medication || "—"} - ${m.dosage || ""} - ${m.instructions || ""}`;
       doc.text(`${i + 1}. ${text}`, 25, 78 + i * 8);
     });
     if (prescription.observations) {
@@ -205,7 +234,7 @@ const MedicalHistory = () => {
                   {a.prescriptions.length > 0 && (
                     <div>
                       <p className="text-xs font-medium text-muted-foreground mb-2">Receitas</p>
-                      {a.prescriptions.map((p: any) => (
+                      {a.prescriptions.map((p) => (
                         <div key={p.id} className="flex items-center justify-between p-2 border border-border rounded-lg mb-1">
                           <div>
                             <p className="text-sm text-foreground">{p.diagnosis || "Receita médica"}</p>

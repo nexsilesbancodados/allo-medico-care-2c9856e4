@@ -42,21 +42,29 @@ const PatientExamResults = () => {
     enabled: !!user,
   });
 
+  interface ExamReportRow {
+    id: string;
+    exam_request_id: string;
+    verification_code: string | null;
+    pdf_url: string | null;
+    signed_at: string | null;
+  }
+
   const { data: examReports } = useQuery({
     queryKey: ["patient-exam-reports", user?.id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("exam_reports")
-        .select("*, exam_requests!inner(id, exam_type, patient_id)")
+        .select("id, exam_request_id, verification_code, pdf_url, signed_at")
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data as any[];
+      return data as ExamReportRow[];
     },
     enabled: !!user,
   });
 
   const getReportForExam = (examId: string) => {
-    return examReports?.find((r: any) => r.exam_request_id === examId);
+    return examReports?.find((r) => r.exam_request_id === examId);
   };
 
   const handleDownloadPdf = async (pdfUrl: string) => {

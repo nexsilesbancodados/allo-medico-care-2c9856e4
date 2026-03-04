@@ -46,7 +46,7 @@ const ExamReportEditor = () => {
   // Voice dictation state
   const [listening, setListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(true);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<Record<string, unknown> | null>(null);
   const [interimText, setInterimText] = useState("");
 
   // AI structuring state
@@ -59,7 +59,7 @@ const ExamReportEditor = () => {
 
   // ---- Audio Noise Suppression + Speech Recognition Setup ----
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setVoiceSupported(false);
       return;
@@ -79,17 +79,17 @@ const ExamReportEditor = () => {
           },
         });
         // STT noise suppression active
-      } catch (err) {
-        console.warn("[STT] Noise filter unavailable, using raw mic:", err);
+      } catch {
+        // Noise filter unavailable, using raw mic
       }
     };
 
-    const recognition = new SpeechRecognition();
+    const recognition = new (SpeechRecognition as unknown as { new(): { lang: string; continuous: boolean; interimResults: boolean; onresult: ((e: SpeechRecognitionEvent) => void) | null; onerror: ((e: SpeechRecognitionErrorEvent) => void) | null; onend: (() => void) | null; start: () => void; stop: () => void } })();
     recognition.lang = "pt-BR";
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       let interim = "";
       let finalText = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -114,8 +114,7 @@ const ExamReportEditor = () => {
       }
     };
 
-    recognition.onerror = (event: any) => {
-      console.error("Speech error:", event.error);
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
       if (event.error === "not-allowed") {
         toast.error("Microfone bloqueado", { description: "Permita o acesso ao microfone." });
       }
@@ -124,7 +123,8 @@ const ExamReportEditor = () => {
     };
 
     recognition.onend = () => {
-      if (recognitionRef.current?._shouldRestart) {
+      const ref = recognitionRef.current as Record<string, unknown> | null;
+      if (ref?._shouldRestart) {
         try { recognition.start(); } catch {}
       } else {
         setListening(false);
@@ -132,35 +132,35 @@ const ExamReportEditor = () => {
       }
     };
 
-    recognitionRef.current = recognition;
-    recognitionRef.current._initNoise = initNoiseFilter;
+    recognitionRef.current = recognition as unknown as Record<string, unknown>;
+    (recognitionRef.current as Record<string, unknown>)._initNoise = initNoiseFilter;
 
     return () => {
-      try { recognition.stop(); } catch {}
+      try { (recognition as { stop: () => void }).stop(); } catch {}
       if (audioStream) audioStream.getTracks().forEach((t) => t.stop());
     };
   }, []);
 
   const toggleListening = useCallback(async () => {
-    if (!recognitionRef.current) return;
+    const ref = recognitionRef.current as Record<string, unknown> | null;
+    if (!ref) return;
     if (listening) {
-      recognitionRef.current._shouldRestart = false;
-      recognitionRef.current.stop();
+      ref._shouldRestart = false;
+      (ref as unknown as { stop: () => void }).stop();
       setListening(false);
       setInterimText("");
     } else {
       try {
-        // Init noise suppression before first use
-        if (recognitionRef.current._initNoise) {
-          await recognitionRef.current._initNoise();
-          recognitionRef.current._initNoise = null;
+        if (typeof ref._initNoise === "function") {
+          await (ref._initNoise as () => Promise<void>)();
+          ref._initNoise = null;
         }
-        recognitionRef.current._shouldRestart = true;
-        recognitionRef.current.start();
+        ref._shouldRestart = true;
+        (ref as unknown as { start: () => void }).start();
         setListening(true);
         toast("🎙️ Ditado ativado", { description: "Filtro de ruído ativo. Fale e o texto será transcrito. Use /comandos para macros." });
-      } catch (e) {
-        console.error(e);
+      } catch {
+        // Speech recognition start failed
       }
     }
   }, [listening]);
@@ -273,7 +273,7 @@ const ExamReportEditor = () => {
 
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplateId(templateId);
-    const tpl = templates?.find((t: any) => t.id === templateId);
+    const tpl = templates?.find((t: { id: string; body_text: string }) => t.id === templateId);
     if (tpl) setContent(tpl.body_text);
   };
 
@@ -304,8 +304,8 @@ const ExamReportEditor = () => {
         }
         toast.success("✨ IA aplicada", { description: mode === "structure" ? "Laudo estruturado com sucesso!" : mode === "improve" ? "Texto melhorado!" : "Conclusão sugerida!" });
       }
-    } catch (err: any) {
-      toast.error("Erro na IA", { description: err.message || "Tente novamente." });
+    } catch (err: unknown) {
+      toast.error("Erro na IA", { description: err instanceof Error ? err.message : "Tente novamente." });
     } finally {
       setAiProcessing(false);
     }
@@ -409,7 +409,7 @@ const ExamReportEditor = () => {
         if (patientProfile) {
           await supabase.from("notifications").insert({ user_id: patientProfile.user_id, title: "📋 Seu laudo está pronto!", message: `O laudo do exame ${examRequest.exam_type} foi concluído.`, type: "exam_report", link: "/dashboard/health" });
           if (patientProfile.phone) {
-            supabase.functions.invoke("send-whatsapp", { body: { phone: patientProfile.phone, message: `🩺 *Allo Médico* — Laudo Pronto!\n\nOlá, ${patientProfile.first_name}!\nSeu laudo de *${examRequest.exam_type}* foi finalizado pelo Dr(a). ${doctorName}.\n\nCódigo: ${verificationCode}` } }).catch(console.error);
+            supabase.functions.invoke("send-whatsapp", { body: { phone: patientProfile.phone, message: `🩺 *Allo Médico* — Laudo Pronto!\n\nOlá, ${patientProfile.first_name}!\nSeu laudo de *${examRequest.exam_type}* foi finalizado pelo Dr(a). ${doctorName}.\n\nCódigo: ${verificationCode}` } }).catch(() => {});
           }
         }
       }
@@ -417,8 +417,8 @@ const ExamReportEditor = () => {
       toast.success("Laudo assinado e finalizado!", { description: `Código: ${verificationCode}` });
       queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
       navigate(backRoute);
-    } catch (err: any) {
-      toast.error("Erro ao assinar", { description: err.message });
+    } catch (err: unknown) {
+      toast.error("Erro ao assinar", { description: err instanceof Error ? err.message : "Erro desconhecido" });
     } finally {
       setSigning(false);
     }
@@ -500,7 +500,7 @@ const ExamReportEditor = () => {
                       <SelectValue placeholder="Template..." />
                     </SelectTrigger>
                     <SelectContent>
-                      {templates.map((t: any) => (
+                      {templates.map((t: { id: string; title: string; exam_type: string }) => (
                         <SelectItem key={t.id} value={t.id}>{t.title} ({t.exam_type})</SelectItem>
                       ))}
                     </SelectContent>

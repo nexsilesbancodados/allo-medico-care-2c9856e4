@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { warn } from "@/lib/logger";
 
 export const sendWhatsApp = async (phone: string, message: string) => {
   try {
@@ -6,12 +7,12 @@ export const sendWhatsApp = async (phone: string, message: string) => {
       body: { phone, message },
     });
     if (error) {
-      console.error("WhatsApp send error:", error);
+      warn("WhatsApp send error:", error);
       return { success: false, error };
     }
     return { success: true, data };
   } catch (err) {
-    console.error("WhatsApp send exception:", err);
+    warn("WhatsApp send exception:", err);
     return { success: false, error: err };
   }
 };
@@ -22,12 +23,12 @@ export const triggerAppointmentConfirmed = async (appointmentId: string) => {
       body: { appointment_id: appointmentId },
     });
     if (error) {
-      console.error("Appointment confirmed trigger error:", error);
+      warn("Appointment confirmed trigger error:", error);
       return { success: false, error };
     }
     return { success: true, data };
   } catch (err) {
-    console.error("Appointment confirmed exception:", err);
+    warn("Appointment confirmed exception:", err);
     return { success: false, error: err };
   }
 };
