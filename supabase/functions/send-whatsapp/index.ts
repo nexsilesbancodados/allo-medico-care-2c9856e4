@@ -37,7 +37,7 @@ serve(async (req) => {
     const instancesRes = await fetch(`${baseUrl}/instance/fetchInstances`, { method: "GET", headers: apiHeaders });
     const allInstances = await instancesRes.json();
     const connectedInstance = Array.isArray(allInstances)
-      ? allInstances.find((i: any) => i?.instance?.status === "open")
+      ? allInstances.find((i: Record<string, Record<string, string>>) => i?.instance?.status === "open")
       : null;
     
     if (!connectedInstance) {

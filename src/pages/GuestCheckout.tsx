@@ -112,7 +112,7 @@ const GuestCheckout = () => {
 
     if (!specDocs || specDocs.length === 0) { setDoctors([]); setLoadingDoctors(false); return; }
 
-    const docIds = specDocs.map((s: any) => s.doctor_id);
+    const docIds = specDocs.map((s: { doctor_id: string }) => s.doctor_id);
     const { data: docData } = await supabase
       .from("doctor_profiles")
       .select("id, user_id, crm, crm_state, consultation_price, rating, total_reviews, experience_years")
@@ -131,14 +131,14 @@ const GuestCheckout = () => {
     ]);
 
     const profileMap = new Map(profilesRes.data?.map(p => [p.user_id, p]) ?? []);
-    const slotsMap = new Map<string, any[]>();
+    const slotsMap = new Map<string, { doctor_id: string; day_of_week: number; start_time: string; end_time: string }[]>();
     slotsRes.data?.forEach(s => {
       const arr = slotsMap.get(s.doctor_id) ?? [];
       arr.push(s);
       slotsMap.set(s.doctor_id, arr);
     });
     const specsMap = new Map<string, string[]>();
-    allSpecsRes.data?.forEach((s: any) => {
+    allSpecsRes.data?.forEach((s: { doctor_id: string; specialties: { name: string } | null }) => {
       const arr = specsMap.get(s.doctor_id) ?? [];
       if (s.specialties?.name) arr.push(s.specialties.name);
       specsMap.set(s.doctor_id, arr);
@@ -150,8 +150,8 @@ const GuestCheckout = () => {
         ...d,
         consultation_price: Number(d.consultation_price),
         rating: Number(d.rating),
-        first_name: (p as any)?.first_name ?? "",
-        last_name: (p as any)?.last_name ?? "",
+        first_name: (p as { first_name?: string })?.first_name ?? "",
+        last_name: (p as { last_name?: string })?.last_name ?? "",
         specialties: specsMap.get(d.id) ?? [],
         slots: slotsMap.get(d.id) ?? [],
       };
@@ -350,8 +350,8 @@ const GuestCheckout = () => {
 
       setConsultationUrl(data.consultation_url);
       setStep("success");
-    } catch (err: any) {
-      toast.error("Erro ao agendar", { description: err.message || "Tente novamente." });
+    } catch (err: unknown) {
+      toast.error("Erro ao agendar", { description: err instanceof Error ? err.message : "Tente novamente." });
     } finally {
       setProcessing(false);
     }

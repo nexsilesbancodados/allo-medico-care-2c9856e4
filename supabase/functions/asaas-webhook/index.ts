@@ -314,9 +314,10 @@ serve(async (req) => {
     return new Response(JSON.stringify({ received: true, status: newPaymentStatus }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : "Unknown error";
     console.error("[Asaas Webhook] Fatal error:", error);
-    return new Response(JSON.stringify({ received: true, error: error.message }), {
+    return new Response(JSON.stringify({ received: true, error: msg }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

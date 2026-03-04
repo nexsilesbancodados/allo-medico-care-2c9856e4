@@ -85,13 +85,13 @@ const PatientExamUpload = () => {
     if (fileRef.current) fileRef.current.value = "";
   };
 
-  const viewDocument = async (doc: any) => {
+  const viewDocument = async (doc: { file_url: string }) => {
     const { data } = await supabase.storage.from("patient-documents").createSignedUrl(doc.file_url, 3600);
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
     else toast.error("Erro ao abrir documento");
   };
 
-  const deleteDocument = async (doc: any) => {
+  const deleteDocument = async (doc: { id: string; file_url: string }) => {
     await supabase.storage.from("patient-documents").remove([doc.file_url]);
     await supabase.from("patient_documents").delete().eq("id", doc.id);
     toast.success("Documento removido");

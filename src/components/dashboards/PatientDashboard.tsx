@@ -332,7 +332,7 @@ const PatientDashboard = () => {
                   </div>
                   <div className="flex-1 p-4 flex items-center gap-3 min-w-0">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">{(nextAppt as any).doctor_name}</p>
+                      <p className="text-sm font-bold text-foreground truncate">{(nextAppt as Record<string, unknown>).doctor_name as string}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {format(new Date(nextAppt.scheduled_at), "HH:mm", { locale: ptBR })} · {nextAppt.duration_minutes || 30}min
                       </p>
@@ -368,7 +368,7 @@ const PatientDashboard = () => {
 
         {/* Subscription banner */}
         {activeSub && (() => {
-          const daysLeft = (activeSub as any).expires_at ? differenceInDays(new Date((activeSub as any).expires_at), new Date()) : null;
+          const daysLeft = (activeSub as Record<string, unknown>).expires_at ? differenceInDays(new Date((activeSub as Record<string, unknown>).expires_at as string), new Date()) : null;
           const isExpiringSoon = daysLeft !== null && daysLeft <= 7;
           return (
             <motion.div variants={fadeUp}>
@@ -376,7 +376,7 @@ const PatientDashboard = () => {
                 className={`flex items-center gap-3 p-4 rounded-2xl border cursor-pointer active:scale-[0.98] transition-all ${
                   isExpiringSoon ? "border-warning/30 bg-warning/5" : "border-success/30 bg-success/5"
                 }`}
-                onClick={() => navigate(isExpiringSoon ? `/dashboard/plans?action=renew&plan_id=${(activeSub as any).plan_id}` : "/dashboard/payment-history")}
+                onClick={() => navigate(isExpiringSoon ? `/dashboard/plans?action=renew&plan_id=${(activeSub as Record<string, unknown>).plan_id}` : "/dashboard/payment-history")}
               >
                 {isExpiringSoon
                   ? <AlertCircle className="w-5 h-5 text-warning shrink-0" />
@@ -385,7 +385,7 @@ const PatientDashboard = () => {
                   <p className={`text-sm font-semibold ${isExpiringSoon ? "text-warning" : "text-success"}`}>
                     {isExpiringSoon ? `Plano expira em ${daysLeft}d — Renovar agora` : "Plano ativo"}
                   </p>
-                  <p className="text-xs text-muted-foreground truncate">{(activeSub as any).plans?.name ?? "Assinatura"}</p>
+                  <p className="text-xs text-muted-foreground truncate">{((activeSub as Record<string, unknown>).plans as Record<string, unknown>)?.name as string ?? "Assinatura"}</p>
                 </div>
                 <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
               </div>

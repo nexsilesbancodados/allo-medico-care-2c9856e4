@@ -73,7 +73,7 @@ const LaudistaMyReports = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reports.map((report: any) => (
+                  {reports.map((report: { id: string; created_at: string; signed_at: string | null; verification_code: string | null; pdf_url: string | null; exam_request_id: string; exam_requests?: { exam_type: string } | null }) => (
                     <TableRow key={report.id}>
                       <TableCell className="font-medium">{report.exam_requests?.exam_type ?? "—"}</TableCell>
                       <TableCell>

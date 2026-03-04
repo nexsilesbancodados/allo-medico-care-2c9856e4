@@ -98,8 +98,8 @@ const AdminDoctorApplications = () => {
       setGeneratedCode(code);
       toast.success("Aprovado!", { description: `Código ${code} enviado para ${selectedApp.email}` });
       fetchApplications();
-    } catch (err: any) {
-      toast.error("Erro", { description: err?.message || "Falha ao aprovar." });
+    } catch (err: unknown) {
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Falha ao aprovar." });
     }
     setProcessing(false);
   };
@@ -133,8 +133,8 @@ const AdminDoctorApplications = () => {
       setSelectedApp(null);
       setAdminNotes("");
       fetchApplications();
-    } catch (err: any) {
-      toast.error("Erro", { description: err?.message || "Falha ao rejeitar." });
+    } catch (err: unknown) {
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Falha ao rejeitar." });
     }
     setProcessing(false);
   };

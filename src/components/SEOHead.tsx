@@ -5,7 +5,7 @@ interface SEOHeadProps {
   description?: string;
   canonical?: string;
   ogImage?: string;
-  jsonLd?: Record<string, any>;
+  jsonLd?: Record<string, unknown>;
 }
 
 const SITE_NAME = "AloClinica – Telemedicina Online";
@@ -32,7 +32,7 @@ const upsertLink = (rel: string, href: string) => {
   el.href = href;
 };
 
-const upsertJsonLd = (data: Record<string, any>) => {
+const upsertJsonLd = (data: Record<string, unknown>) => {
   const id = "seo-jsonld";
   let el = document.getElementById(id) as HTMLScriptElement | null;
   if (!el) {
