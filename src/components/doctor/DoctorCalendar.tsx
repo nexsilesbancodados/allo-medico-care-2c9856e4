@@ -102,8 +102,8 @@ const DoctorCalendar = () => {
       guestIds.length ? supabase.from("guest_patients").select("id, full_name").in("id", guestIds) : { data: [] },
     ]);
 
-    const pMap = new Map((pRes.data ?? []).map((p: any) => [p.user_id, `${p.first_name} ${p.last_name}`]));
-    const gMap = new Map((gRes.data ?? []).map((g: any) => [g.id, g.full_name]));
+    const pMap = new Map((pRes.data ?? []).map((p: { user_id: string; first_name: string; last_name: string }) => [p.user_id, `${p.first_name} ${p.last_name}`]));
+    const gMap = new Map((gRes.data ?? []).map((g: { id: string; full_name: string }) => [g.id, g.full_name]));
 
     setAppointments(data.map(a => ({
       ...a,

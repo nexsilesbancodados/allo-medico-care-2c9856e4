@@ -57,7 +57,7 @@ const ClinicDashboard = () => {
     if (!clinic) { setLoading(false); return; }
     const { data: affiliations } = await supabase.from("clinic_affiliations").select("*, doctor_profiles(*, profiles(first_name, last_name))").eq("clinic_id", clinic.id);
     setDoctors(affiliations ?? []);
-    const doctorIds = (affiliations ?? []).map((a: any) => a.doctor_id);
+    const doctorIds = (affiliations ?? []).map((a: { doctor_id: string }) => a.doctor_id);
     if (doctorIds.length > 0) {
       const { data: appts } = await supabase.from("appointments").select("*, doctor_profiles(consultation_price)").in("doctor_id", doctorIds).gte("scheduled_at", subMonths(new Date(), 6).toISOString()).order("scheduled_at", { ascending: false });
       setAppointments(appts ?? []);
@@ -296,14 +296,15 @@ const ClinicDashboard = () => {
                       <div className="text-center py-8"><Sparkles className="w-8 h-8 text-muted-foreground/40 mx-auto mb-3" /><p className="text-sm text-muted-foreground">Nenhum médico vinculado.</p></div>
                     ) : (
                       <div className="space-y-2">
-                        {doctors.map((d: any) => {
-                          const profile = d.doctor_profiles?.profiles;
+                        {doctors.map((d: Record<string, unknown>) => {
+                          const docProfiles = d.doctor_profiles as Record<string, unknown> | undefined;
+                          const profile = docProfiles?.profiles as { first_name?: string; last_name?: string } | undefined;
                           const name = profile ? `${profile.first_name} ${profile.last_name}` : "Médico";
                           return (
-                            <div key={d.id} className="flex items-center justify-between p-3.5 rounded-xl bg-muted/30 border border-border/40">
+                            <div key={d.id as string} className="flex items-center justify-between p-3.5 rounded-xl bg-muted/30 border border-border/40">
                               <div>
                                 <p className="text-sm font-medium text-foreground">{name}</p>
-                                <p className="text-xs text-muted-foreground">CRM: {d.doctor_profiles?.crm ?? "—"}</p>
+                                <p className="text-xs text-muted-foreground">CRM: {(docProfiles?.crm as string) ?? "—"}</p>
                               </div>
                               <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${d.status === "active" ? "bg-success/10 text-success border-success/20" : "bg-muted text-muted-foreground border-border"}`}>
                                 {d.status === "active" ? "Ativo" : "Pendente"}

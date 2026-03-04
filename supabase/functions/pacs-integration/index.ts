@@ -142,7 +142,7 @@ serve(async (req) => {
       let filtered = exams || [];
       if (search_query) {
         const q = search_query.toLowerCase();
-        filtered = filtered.filter((e: any) => e.exam_type?.toLowerCase().includes(q) || e.clinical_info?.toLowerCase().includes(q) || e.id?.toLowerCase().includes(q));
+        filtered = filtered.filter((e: { exam_type?: string; clinical_info?: string; id?: string }) => e.exam_type?.toLowerCase().includes(q) || e.clinical_info?.toLowerCase().includes(q) || e.id?.toLowerCase().includes(q));
       }
 
       return new Response(JSON.stringify({ studies: filtered, configured: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -158,7 +158,7 @@ serve(async (req) => {
       if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 
       const withUrls = await Promise.all(
-        (files || []).map(async (f: any) => {
+        (files || []).map(async (f: { name: string }) => {
           const filePath = `${folder}/${f.name}`;
           const { data: signedData } = await supabase.storage.from("exam-files").createSignedUrl(filePath, 3600);
           return { name: f.name, size: f.metadata?.size || 0, type: f.metadata?.mimetype || "application/octet-stream", created_at: f.created_at, path: filePath, url: signedData?.signedUrl || null };

@@ -14,7 +14,7 @@ serve(async (req) => {
     if (!DEEPSEEK_API_KEY) throw new Error("DEEPSEEK_API_KEY não configurada");
 
     const medsText = Array.isArray(medications)
-      ? medications.map((m: any) => typeof m === "string" ? m : `${m.name || m.medication || ""} ${m.dosage || ""} ${m.instructions || ""}`).join("; ")
+      ? medications.map((m: Record<string, string>) => typeof m === "string" ? m : `${m.name || m.medication || ""} ${m.dosage || ""} ${m.instructions || ""}`).join("; ")
       : "";
 
     const response = await fetch("https://api.deepseek.com/v1/chat/completions", {

@@ -124,7 +124,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
     return nps === i ? "bg-green-600 text-white" : "border-green-500/30 text-green-600 hover:bg-green-50 dark:hover:bg-green-950/20";
   };
 
-  const StarRow = ({ label, value, onChange, icon: Icon }: { label: string; value: number; onChange: (v: number) => void; icon: any }) => (
+  const StarRow = ({ label, value, onChange, icon: Icon }: { label: string; value: number; onChange: (v: number) => void; icon: React.ElementType }) => (
     <div>
       <div className="flex items-center gap-1.5 mb-1.5">
         <Icon className="w-3.5 h-3.5 text-muted-foreground" />

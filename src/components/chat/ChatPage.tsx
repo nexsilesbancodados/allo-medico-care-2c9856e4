@@ -87,7 +87,7 @@ const ChatPage = () => {
       .neq("sender_id", user!.id);
 
     const unreadMap = new Map<string, number>();
-    (unreadMsgs ?? []).forEach((m: any) => {
+    (unreadMsgs ?? []).forEach((m: { appointment_id: string }) => {
       unreadMap.set(m.appointment_id, (unreadMap.get(m.appointment_id) ?? 0) + 1);
     });
 

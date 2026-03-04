@@ -158,8 +158,8 @@ const CardSubscriptionCheckout = ({
         toast.success("Assinatura criada!", { description: "Aguardando confirmação do pagamento." });
         onSuccess();
       }
-    } catch (err: any) {
-      toast.error("Erro", { description: err.message });
+    } catch (err: unknown) {
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro desconhecido" });
     } finally {
       setProcessing(false);
     }

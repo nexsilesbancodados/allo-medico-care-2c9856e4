@@ -11,11 +11,11 @@ interface SpeechToTextProps {
 const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(true);
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<ReturnType<typeof Object> | null>(null);
   
 
   useEffect(() => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = (window as unknown as { SpeechRecognition?: typeof globalThis.SpeechRecognition; webkitSpeechRecognition?: typeof globalThis.SpeechRecognition }).SpeechRecognition || (window as unknown as { webkitSpeechRecognition?: typeof globalThis.SpeechRecognition }).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       setSupported(false);
       return;
@@ -26,7 +26,7 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
     recognition.continuous = true;
     recognition.interimResults = true;
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       let finalTranscript = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         if (event.results[i].isFinal) {
@@ -38,8 +38,8 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
       }
     };
 
-    recognition.onerror = (event: any) => {
-      console.error("Speech error:", event.error);
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      if (import.meta.env.DEV) console.error("Speech error:", event.error);
       if (event.error === "not-allowed") {
         toast.error("Microfone bloqueado", { description: "Permita o acesso ao microfone nas configurações do navegador." });
       }
