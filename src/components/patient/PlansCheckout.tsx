@@ -403,7 +403,7 @@ const PlansCheckout = () => {
           return;
         }
         appointmentId = appt.id;
-      }
+        setCurrentAppointmentId(appt.id);
 
       const billingTypeMap: Record<PaymentMethod, string> = {
         pix: "PIX",
