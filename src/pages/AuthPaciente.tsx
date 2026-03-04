@@ -14,6 +14,17 @@ import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 import { translateAuthError } from "@/lib/authErrors";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
+import pingoSolitario from "@/assets/pingo-solitario.png";
+import pingoMiniFamilia from "@/assets/pingo-mini-familia.png";
+import pingoKingFamilia from "@/assets/pingo-king-familia.png";
+import pingoPrimeFamilia from "@/assets/pingo-prime-familia.png";
+
+const PLAN_IMAGE_MAP: Record<string, string> = {
+  "Solitário": pingoSolitario,
+  "Mini Família": pingoMiniFamilia,
+  "King Família": pingoKingFamilia,
+  "Prime Família": pingoPrimeFamilia,
+};
 
 const PLAN_MAP: Record<string, { icon: React.ComponentType<{ className?: string }>; color: string; highlighted: boolean }> = {
   "Solitário": { icon: Shield, color: "from-secondary to-primary", highlighted: true },
@@ -498,13 +509,14 @@ const AuthPaciente = () => {
                           </motion.div>
                         )}
 
-                        {/* Icon */}
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                          isPremium
-                            ? "bg-white/15 backdrop-blur-sm"
-                            : `bg-gradient-to-br ${plan.color} shadow-md`
-                        }`}>
-                          <PlanIcon className={`w-6 h-6 ${isPremium ? "text-primary-foreground" : "text-primary-foreground"}`} />
+                        {/* Pingo mascot image */}
+                        <div className="flex justify-center mb-4">
+                          <img
+                            src={PLAN_IMAGE_MAP[plan.name] || pingoSolitario}
+                            alt={`Pingo - ${plan.name}`}
+                            className="w-24 h-24 object-contain drop-shadow-lg"
+                            loading="lazy"
+                          />
                         </div>
 
                         {/* Name & description */}
