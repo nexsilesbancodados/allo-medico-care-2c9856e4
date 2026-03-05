@@ -120,16 +120,39 @@ const DiscountCard = () => {
     try {
       const { data: existing } = await supabase.from("discount_cards").select("id, status").eq("user_id", user.id).eq("status", "active").maybeSingle();
       if (existing) { toast.info("Você já possui um cartão ativo!"); setSubscribing(null); return; }
+
+      // Fetch profile for required Asaas fields
+      const { data: profile } = await supabase.from("profiles").select("first_name, last_name, cpf, phone").eq("user_id", user.id).single();
+      if (!profile?.cpf) {
+        toast.error("CPF obrigatório", { description: "Complete seu perfil com o CPF antes de assinar." });
+        setSubscribing(null);
+        return;
+      }
+
+      const customerName = `${profile.first_name} ${profile.last_name}`.trim();
       const planName = plans.find(p => p.id === planId)?.name || planId;
+
       const { data: paymentData, error: paymentError } = await supabase.functions.invoke("create-asaas-payment", {
-        body: { customer_email: user.email, customer_name: user.user_metadata?.first_name || "Paciente", amount: price, description: `Cartão de Benefícios - ${planName}`, billing_type: "PIX" },
+        body: {
+          customerName,
+          customerCpf: profile.cpf,
+          customerEmail: user.email || "",
+          customerMobilePhone: profile.phone || "",
+          billingType: "PIX",
+          value: price,
+          description: `Cartão de Benefícios - ${planName}`,
+          cycle: "MONTHLY",
+          planId: `card_${planId}_${user.id}`,
+        },
       });
       if (paymentError) throw paymentError;
+      if (!paymentData?.success) throw new Error(paymentData?.error || "Erro no gateway de pagamento");
+
       const validUntil = new Date(); validUntil.setMonth(validUntil.getMonth() + 1);
-      const { error: cardError } = await supabase.from("discount_cards").insert({ user_id: user.id, plan_type: planId, price_monthly: price, discount_percent: 30, status: "active", valid_until: validUntil.toISOString(), payment_id: paymentData?.payment?.id || null });
+      const { error: cardError } = await supabase.from("discount_cards").insert({ user_id: user.id, plan_type: planId, price_monthly: price, discount_percent: 30, status: "active", valid_until: validUntil.toISOString(), payment_id: paymentData?.paymentId || null });
       if (cardError) throw cardError;
       toast.success("Cartão de Benefícios ativado! 🎉", { description: "Aproveite todos os benefícios agora mesmo." });
-      if (paymentData?.payment?.invoiceUrl) window.open(paymentData.payment.invoiceUrl, "_blank");
+      if (paymentData?.invoiceUrl) window.open(paymentData.invoiceUrl, "_blank");
       navigate("/dashboard");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Tente novamente.";
