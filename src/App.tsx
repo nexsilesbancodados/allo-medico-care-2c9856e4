@@ -7,7 +7,7 @@ import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
 import { lazy, Suspense, useEffect } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+
 const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
 const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -70,11 +70,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <Loader2 className="w-8 h-8 animate-spin text-primary" />
-  </div>
-);
+const PageLoader = () => null;
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();

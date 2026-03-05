@@ -69,41 +69,13 @@
   </head>
 
   <body>
-    <div id="initial-loader" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#f8fafc;font-family:system-ui,sans-serif">
-      <div style="text-align:center">
-        <div style="width:40px;height:40px;border:3px solid #e2e8f0;border-top-color:#1a6fc4;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto"></div>
-        <p id="loader-text" style="margin-top:16px;color:#64748b;font-size:14px">Carregando...</p>
-      </div>
-    </div>
     <div id="root"></div>
-    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     <script>
-      // Unregister stale service workers that may cache broken bundles
       if('serviceWorker' in navigator){
         navigator.serviceWorker.getRegistrations().then(function(regs){
           regs.forEach(function(r){ if(r.active && r.active.scriptURL.includes('sw.js')) r.unregister(); });
         });
       }
-      // Remove loader when React mounts (new children appear in #root)
-      var _rootEl = document.getElementById('root');
-      var _obs = new MutationObserver(function(){
-        var el = document.getElementById('initial-loader');
-        if(el){ el.style.opacity='0'; setTimeout(function(){ el.remove(); },300); _obs.disconnect(); }
-      });
-      if(_rootEl) _obs.observe(_rootEl, { childList: true });
-      // Safety: if React never mounts after 6s, show reload button
-      setTimeout(function(){
-        var el = document.getElementById('initial-loader');
-        if(el){
-          var p = document.getElementById('loader-text');
-          if(p) p.textContent = 'O carregamento está demorando...';
-          var btn = document.createElement('button');
-          btn.textContent = 'Recarregar';
-          btn.style.cssText = 'margin-top:12px;padding:8px 20px;border-radius:8px;border:1px solid #cbd5e1;cursor:pointer;font-size:14px;background:#fff';
-          btn.onclick = function(){ caches.keys().then(function(k){k.forEach(function(n){caches.delete(n);})}); location.reload(); };
-          el.querySelector('div').appendChild(btn);
-        }
-      }, 6000);
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
