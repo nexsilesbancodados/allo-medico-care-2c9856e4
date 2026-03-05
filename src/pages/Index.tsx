@@ -1,24 +1,21 @@
-import { useEffect, lazy, Suspense, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
-import { SectionSkeleton, StatsSkeleton, TestimonialsSkeleton } from "@/components/landing/SectionSkeleton";
 import { Button } from "@/components/ui/button";
 import { Stethoscope } from "lucide-react";
-
-// Lazy load below-the-fold sections (core landing only)
-const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
-const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection"));
-const SpecialtiesSection = lazy(() => import("@/components/landing/SpecialtiesSection"));
-const PlansSection = lazy(() => import("@/components/landing/PlansSection"));
-const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
-const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
-const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
-const Footer = lazy(() => import("@/components/landing/Footer"));
-const SpecialtyQuiz = lazy(() => import("@/components/landing/SpecialtyQuiz"));
+import StatsSection from "@/components/landing/StatsSection";
+import HowItWorksSection from "@/components/landing/HowItWorksSection";
+import SpecialtiesSection from "@/components/landing/SpecialtiesSection";
+import PlansSection from "@/components/landing/PlansSection";
+import TestimonialsSection from "@/components/landing/TestimonialsSection";
+import CTABanner from "@/components/landing/CTABanner";
+import FAQSection from "@/components/landing/FAQSection";
+import Footer from "@/components/landing/Footer";
+import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
 
 const Index = () => {
   const { setTheme, theme } = useTheme();
@@ -113,27 +110,13 @@ const Index = () => {
         </div>
       </section>
 
-      <Suspense fallback={<StatsSkeleton />}>
-        <StatsSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <HowItWorksSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <SpecialtiesSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <PlansSection />
-      </Suspense>
-      <Suspense fallback={<TestimonialsSkeleton />}>
-        <TestimonialsSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <CTABanner />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <FAQSection />
-      </Suspense>
+      <StatsSection />
+      <HowItWorksSection />
+      <SpecialtiesSection />
+      <PlansSection />
+      <TestimonialsSection />
+      <CTABanner />
+      <FAQSection />
 
       <section aria-labelledby="triage-heading" className="py-16 px-4">
         <div className="container mx-auto max-w-2xl text-center space-y-5">
@@ -157,15 +140,11 @@ const Index = () => {
         </div>
       </section>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <Footer />
-      </Suspense>
+      <Footer />
 
       <FloatingMobileCTA />
       {showQuiz && (
-        <Suspense fallback={null}>
-          <SpecialtyQuiz onClose={() => setShowQuiz(false)} />
-        </Suspense>
+        <SpecialtyQuiz onClose={() => setShowQuiz(false)} />
       )}
     </div>
   );
