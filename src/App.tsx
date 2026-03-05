@@ -70,7 +70,16 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = () => null;
+const PageLoader = () => (
+  <div className="min-h-screen flex flex-col items-center justify-center bg-background gap-4">
+    <img src="/pwa-192x192.png" alt="Pingo" className="w-16 h-16 animate-bounce drop-shadow-lg" />
+    <div className="flex gap-1.5">
+      <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+      <span className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:150ms]" />
+      <span className="w-2 h-2 rounded-full bg-primary animate-pulse [animation-delay:300ms]" />
+    </div>
+  </div>
+);
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();
