@@ -140,15 +140,11 @@ const Index = () => {
         </div>
       </section>
 
-      <Suspense fallback={<SectionSkeleton />}>
-        <Footer />
-      </Suspense>
+      <Footer />
 
       <FloatingMobileCTA />
       {showQuiz && (
-        <Suspense fallback={null}>
-          <SpecialtyQuiz onClose={() => setShowQuiz(false)} />
-        </Suspense>
+        <SpecialtyQuiz onClose={() => setShowQuiz(false)} />
       )}
     </div>
   );
