@@ -69,18 +69,6 @@
   </head>
 
   <body>
-    <div id="pingo-loader" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f8fafc;font-family:'Plus Jakarta Sans',system-ui,sans-serif;gap:16px;transition:opacity .4s">
-      <img src="/pwa-192x192.png" alt="Pingo" width="72" height="72" style="animation:pingo-bounce 1s ease-in-out infinite;filter:drop-shadow(0 8px 20px rgba(26,111,196,.25))" />
-      <div style="display:flex;gap:6px;align-items:center">
-        <span style="width:8px;height:8px;border-radius:50%;background:#1a6fc4;animation:pingo-dot .6s ease-in-out infinite"></span>
-        <span style="width:8px;height:8px;border-radius:50%;background:#1a6fc4;animation:pingo-dot .6s ease-in-out .15s infinite"></span>
-        <span style="width:8px;height:8px;border-radius:50%;background:#1a6fc4;animation:pingo-dot .6s ease-in-out .3s infinite"></span>
-      </div>
-    </div>
-    <style>
-      @keyframes pingo-bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-12px) scale(1.05)}}
-      @keyframes pingo-dot{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
-    </style>
     <div id="root"></div>
     <script>
       if('serviceWorker' in navigator){
@@ -88,12 +76,6 @@
           regs.forEach(function(r){ if(r.active && r.active.scriptURL.includes('sw.js')) r.unregister(); });
         });
       }
-      var _rootEl=document.getElementById('root');
-      var _obs=new MutationObserver(function(){
-        var el=document.getElementById('pingo-loader');
-        if(el){el.style.opacity='0';setTimeout(function(){el.remove()},400);_obs.disconnect()}
-      });
-      if(_rootEl)_obs.observe(_rootEl,{childList:true});
     </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
