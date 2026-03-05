@@ -110,27 +110,13 @@ const Index = () => {
         </div>
       </section>
 
-      <Suspense fallback={<StatsSkeleton />}>
-        <StatsSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <HowItWorksSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <SpecialtiesSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <PlansSection />
-      </Suspense>
-      <Suspense fallback={<TestimonialsSkeleton />}>
-        <TestimonialsSection />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <CTABanner />
-      </Suspense>
-      <Suspense fallback={<SectionSkeleton />}>
-        <FAQSection />
-      </Suspense>
+      <StatsSection />
+      <HowItWorksSection />
+      <SpecialtiesSection />
+      <PlansSection />
+      <TestimonialsSection />
+      <CTABanner />
+      <FAQSection />
 
       <section aria-labelledby="triage-heading" className="py-16 px-4">
         <div className="container mx-auto max-w-2xl text-center space-y-5">
