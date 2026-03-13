@@ -21,7 +21,7 @@ const benefits = [
   { icon: Heart, text: "Mais de 50 especialidades" },
 ];
 
-const CTABanner = () => {
+const CTABanner = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
 
   return (
