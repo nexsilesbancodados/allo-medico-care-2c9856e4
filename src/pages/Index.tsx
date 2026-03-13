@@ -22,6 +22,8 @@ import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
 const Index = () => {
   const { setTheme, theme } = useTheme();
   const [showQuiz, setShowQuiz] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const prev = theme;
