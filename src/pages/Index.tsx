@@ -156,6 +156,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       )}
     </div>
   );
-};
-
+});
+Index.displayName = "Index";
 export default Index;
