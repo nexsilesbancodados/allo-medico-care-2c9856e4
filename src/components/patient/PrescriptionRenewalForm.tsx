@@ -306,7 +306,7 @@ const PrescriptionRenewalForm = () => {
                       <div><Label className="text-xs text-muted-foreground">CVV</Label><Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="•••" className="mt-1 font-mono" maxLength={4} type="password" /></div>
                     </div>
                     <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>
-                      {processing ? "Processando..." : <><Lock className="w-4 h-4 mr-2" /> Pagar R$ {RENEWAL_PRICE},00</>}
+                      {processing ? "Processando..." : <><Lock className="w-4 h-4 mr-2" /> Pagar R$ {finalPrice.toFixed(2).replace(".", ",")}</>}
                     </Button>
                   </motion.div>
                 )}
