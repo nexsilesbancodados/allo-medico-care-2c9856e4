@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
