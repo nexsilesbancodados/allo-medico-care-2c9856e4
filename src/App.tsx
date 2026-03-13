@@ -145,7 +145,7 @@ const App = () => {
             <Route path="/validar" element={<ValidateDocument />} />
             <Route path="/cartao-beneficios" element={<DiscountCard />} />
             <Route path="/cartao-desconto" element={<Navigate to="/cartao-beneficios" replace />} />
-            <Route path="/para-empresas" element={<Navigate to="/para-empresas/cartao" replace />} />
+            <Route path="/para-empresas" element={<B2BLanding />} />
             <Route path="/para-empresas/cartao" element={<B2BCartao />} />
             <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
             <Route path="/teleconsulta" element={<Teleconsulta />} />

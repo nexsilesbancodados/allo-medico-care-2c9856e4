@@ -30,6 +30,7 @@ const PrescriptionRenewalForm = () => {
   const [sideEffects, setSideEffects] = useState("");
   const [notes, setNotes] = useState("");
   const [myRenewals, setMyRenewals] = useState<any[]>([]);
+  const [discountPercent, setDiscountPercent] = useState(0);
 
   // Payment state
   const [showPayment, setShowPayment] = useState(false);
@@ -45,7 +46,20 @@ const PrescriptionRenewalForm = () => {
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
 
-  useEffect(() => { if (user) fetchRenewals(); }, [user]);
+  const finalPrice = discountPercent > 0 ? RENEWAL_PRICE * (1 - discountPercent / 100) : RENEWAL_PRICE;
+
+  useEffect(() => {
+    if (user) {
+      fetchRenewals();
+      checkDiscountCard();
+    }
+  }, [user]);
+
+  const checkDiscountCard = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("discount_cards").select("discount_percent").eq("user_id", user.id).eq("status", "active").maybeSingle();
+    if (data) setDiscountPercent(Number(data.discount_percent));
+  };
 
   const fetchRenewals = async () => {
     if (!user) return;
@@ -115,7 +129,7 @@ const PrescriptionRenewalForm = () => {
         customerEmail: user.email || "",
         customerMobilePhone: profile.phone || "",
         billingType: billingTypeMap[paymentMethod],
-        value: RENEWAL_PRICE,
+        value: finalPrice,
         description: `Renovação de Receita - AloClínica`,
         appointmentId: `renewal_${renewalId}`,
       };
@@ -219,7 +233,7 @@ const PrescriptionRenewalForm = () => {
               </div>
 
               <Button onClick={handleSubmit} disabled={submitting || !prescriptionUrl} className="w-full">
-                {submitting ? "Enviando..." : `Prosseguir para Pagamento — R$ ${RENEWAL_PRICE},00`}
+                {submitting ? "Enviando..." : `Prosseguir para Pagamento — R$ ${finalPrice.toFixed(2).replace(".", ",")}`}
               </Button>
               <p className="text-xs text-muted-foreground text-center">Análise em até 3 dias úteis após pagamento</p>
             </CardContent>
@@ -230,7 +244,16 @@ const PrescriptionRenewalForm = () => {
               <div className="text-center mb-6">
                 <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-2" />
                 <h2 className="text-lg font-bold text-foreground">Pagamento — Renovação de Receita</h2>
-                <p className="text-muted-foreground text-sm">R$ {RENEWAL_PRICE},00 • Pagamento via Asaas</p>
+                <p className="text-muted-foreground text-sm">
+                  {discountPercent > 0 ? (
+                    <>
+                      <span className="line-through text-muted-foreground/60">R$ {RENEWAL_PRICE},00</span>{" "}
+                      <span className="text-secondary font-bold">R$ {finalPrice.toFixed(2).replace(".", ",")} ({discountPercent}% off)</span>
+                    </>
+                  ) : (
+                    <>R$ {RENEWAL_PRICE},00</>
+                  )} • Pagamento via Asaas
+                </p>
               </div>
 
               <div className="grid grid-cols-3 gap-2 mb-5">
@@ -267,7 +290,7 @@ const PrescriptionRenewalForm = () => {
                       <>
                         <QrCode className="w-12 h-12 mx-auto text-primary/60 mb-4" />
                         <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>
-                          {processing ? "Gerando PIX..." : `Gerar PIX • R$ ${RENEWAL_PRICE},00`}
+                          {processing ? "Gerando PIX..." : `Gerar PIX • R$ ${finalPrice.toFixed(2).replace(".", ",")}`}
                         </Button>
                       </>
                     )}
@@ -283,7 +306,7 @@ const PrescriptionRenewalForm = () => {
                       <div><Label className="text-xs text-muted-foreground">CVV</Label><Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="•••" className="mt-1 font-mono" maxLength={4} type="password" /></div>
                     </div>
                     <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>
-                      {processing ? "Processando..." : <><Lock className="w-4 h-4 mr-2" /> Pagar R$ {RENEWAL_PRICE},00</>}
+                      {processing ? "Processando..." : <><Lock className="w-4 h-4 mr-2" /> Pagar R$ {finalPrice.toFixed(2).replace(".", ",")}</>}
                     </Button>
                   </motion.div>
                 )}
@@ -294,7 +317,7 @@ const PrescriptionRenewalForm = () => {
                       <><CheckCircle2 className="w-12 h-12 mx-auto text-secondary mb-4" /><a href={boletoUrl} target="_blank" rel="noopener noreferrer"><Button className="w-full">📄 Abrir Boleto</Button></a></>
                     ) : (
                       <><FileBarChart className="w-12 h-12 mx-auto text-primary/60 mb-4" /><Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>
-                        {processing ? "Gerando boleto..." : `Gerar Boleto • R$ ${RENEWAL_PRICE},00`}
+                        {processing ? "Gerando boleto..." : `Gerar Boleto • R$ ${finalPrice.toFixed(2).replace(".", ",")}`}
                       </Button></>
                     )}
                   </motion.div>

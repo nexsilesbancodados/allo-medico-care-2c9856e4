@@ -207,7 +207,7 @@ const Header = memo(() => {
                   </NavigationMenuTrigger>
                   <NavigationMenuContent>
                     <ul className="grid w-[340px] gap-1 p-2">
-                      <ListItem href="/para-empresas/cartao" title="Cartão de Benefícios" icon={CreditCard}>
+                      <ListItem href="/para-empresas/cartao" title="Cartão Corporativo" icon={CreditCard}>
                         Telemedicina 24h e descontos para seus colaboradores.
                       </ListItem>
                       <ListItem href="/para-empresas/telelaudo" title="Telelaudo para Clínicas" icon={FileText}>

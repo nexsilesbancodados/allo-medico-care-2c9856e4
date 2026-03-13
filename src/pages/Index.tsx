@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
@@ -20,6 +22,8 @@ import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
 const Index = () => {
   const { setTheme, theme } = useTheme();
   const [showQuiz, setShowQuiz] = useState(false);
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const prev = theme;
@@ -101,7 +105,7 @@ const Index = () => {
             <Button
               size="lg"
               className="bg-white text-primary hover:bg-white/90 rounded-full px-7 gap-2 shadow-lg font-semibold shrink-0"
-              onClick={() => window.location.href = "/consulta-avulsa"}
+              onClick={() => navigate(user ? "/dashboard/urgent-care" : "/consulta-avulsa")}
             >
               <Stethoscope className="w-4 h-4" />
               Acessar Plantão
