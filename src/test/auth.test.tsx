@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, act } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 
 // Mock supabase
@@ -32,13 +32,15 @@ const TestConsumer = () => {
 
 describe("AuthContext", () => {
   it("provides default guest state", async () => {
-    render(
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <AuthProvider>
-          <TestConsumer />
-        </AuthProvider>
-      </BrowserRouter>
-    );
+    await act(async () => {
+      render(
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <AuthProvider>
+            <TestConsumer />
+          </AuthProvider>
+        </BrowserRouter>
+      );
+    });
     // Initially loading, then resolves to guest
     expect(screen.getByTestId("user")).toHaveTextContent("guest");
   });

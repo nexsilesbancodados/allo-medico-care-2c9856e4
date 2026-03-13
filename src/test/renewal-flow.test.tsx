@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 
 const mockFrom = vi.fn();
 
@@ -57,7 +57,9 @@ describe("PrescriptionRenewalForm", () => {
     const { default: PrescriptionRenewalForm } = await import("@/components/patient/PrescriptionRenewalForm");
     render(<PrescriptionRenewalForm />);
 
-    expect(screen.getByText("💊 Renovar Receita")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText("💊 Renovar Receita")).toBeInTheDocument();
+    });
     expect(screen.getByText("1. Envie a receita vencida")).toBeInTheDocument();
     expect(screen.getByText("2. Questionário de saúde")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Ex: Dipirona, Penicilina...")).toBeInTheDocument();
@@ -68,7 +70,7 @@ describe("PrescriptionRenewalForm", () => {
     const { default: PrescriptionRenewalForm } = await import("@/components/patient/PrescriptionRenewalForm");
     render(<PrescriptionRenewalForm />);
 
-    const submitButton = screen.getByText("Prosseguir para Pagamento — R$ 80,00");
+    const submitButton = await screen.findByText("Prosseguir para Pagamento — R$ 80,00");
     expect(submitButton).toBeDisabled();
   });
 });

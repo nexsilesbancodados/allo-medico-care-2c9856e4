@@ -15,7 +15,7 @@ const Terms = () => (
 
         <h2 className="text-xl font-bold text-foreground mt-8">1. Aceitação dos Termos</h2>
         <p>Ao acessar, cadastrar-se ou utilizar de qualquer forma a plataforma AloClinica (doravante "Plataforma"), disponível via web e aplicativos, você declara ter lido, compreendido e concordado integralmente com estes Termos de Uso. Caso não concorde com quaisquer condições aqui estabelecidas, deverá interromper imediatamente o uso da Plataforma.</p>
-        <p>Estes Termos constituem um contrato vinculante entre o usuário e a AloClinica Tecnologia em Saúde Ltda., inscrita no CNPJ sob nº XX.XXX.XXX/0001-XX, com sede em São Paulo/SP.</p>
+        <p>Estes Termos constituem um contrato vinculante entre o usuário e a AloClinica Tecnologia em Saúde Ltda., inscrita no CNPJ sob nº 00.000.000/0001-00, com sede em São Paulo/SP.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">2. Definições</h2>
         <ul className="list-disc pl-6 space-y-1">
