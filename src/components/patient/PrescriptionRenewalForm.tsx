@@ -290,7 +290,7 @@ const PrescriptionRenewalForm = () => {
                       <>
                         <QrCode className="w-12 h-12 mx-auto text-primary/60 mb-4" />
                         <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>
-                          {processing ? "Gerando PIX..." : `Gerar PIX • R$ ${RENEWAL_PRICE},00`}
+                          {processing ? "Gerando PIX..." : `Gerar PIX • R$ ${finalPrice.toFixed(2).replace(".", ",")}`}
                         </Button>
                       </>
                     )}
