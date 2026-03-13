@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Stethoscope, ArrowRight } from "lucide-react";
@@ -34,7 +35,7 @@ const specialtyGrid = [
   { name: "Clínico Geral", image: specGeneral },
 ];
 
-const SpecialtiesSection = () => {
+const SpecialtiesSection = forwardRef<HTMLElement>((_, ref) => {
   const [isPaused, setIsPaused] = useState(false);
   const navigate = useNavigate();
 
@@ -148,6 +149,6 @@ const SpecialtiesSection = () => {
       </div>
     </section>
   );
-};
-
+});
+SpecialtiesSection.displayName = "SpecialtiesSection";
 export default SpecialtiesSection;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { useTheme } from "next-themes";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,7 +19,7 @@ import FAQSection from "@/components/landing/FAQSection";
 import Footer from "@/components/landing/Footer";
 import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
 
-const Index = () => {
+const Index = forwardRef<HTMLDivElement>((_, ref) => {
   const { setTheme, theme } = useTheme();
   const [showQuiz, setShowQuiz] = useState(false);
   const { user } = useAuth();
@@ -156,6 +156,6 @@ const Index = () => {
       )}
     </div>
   );
-};
-
+});
+Index.displayName = "Index";
 export default Index;

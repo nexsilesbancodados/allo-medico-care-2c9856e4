@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Video, Shield, Clock, ArrowRight, Stethoscope, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, forwardRef } from "react";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
 import heroDoctor from "@/assets/hero-doctor.png";
 
@@ -18,7 +18,7 @@ const trustItems = [
   "Nota 4.9 no Google",
 ];
 
-const HeroSection = memo(() => {
+const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
   const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
   const prefetchConsulta = usePrefetchRoute(() => import("@/pages/GuestCheckout"));
@@ -174,7 +174,7 @@ const HeroSection = memo(() => {
       </div>
     </section>
   );
-});
+}));
 
 HeroSection.displayName = "HeroSection";
 export default HeroSection;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MessageCircle, HelpCircle, ArrowRight, Sparkles, ThumbsUp, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -33,7 +33,7 @@ const categories = [
 // Top 2 most viewed
 const featuredFaqs = [...faqs].sort((a, b) => b.views - a.views).slice(0, 2);
 
-const FAQSection = () => {
+const FAQSection = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
@@ -278,6 +278,6 @@ const FAQSection = () => {
       </div>
     </section>
   );
-};
-
+});
+FAQSection.displayName = "FAQSection";
 export default FAQSection;

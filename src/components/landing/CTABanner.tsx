@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, Clock, Star, Check, X, Heart, Zap } from "lucide-react";
@@ -20,7 +21,7 @@ const benefits = [
   { icon: Heart, text: "Mais de 50 especialidades" },
 ];
 
-const CTABanner = () => {
+const CTABanner = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
 
   return (
@@ -202,6 +203,6 @@ const CTABanner = () => {
       </div>
     </section>
   );
-};
-
+});
+CTABanner.displayName = "CTABanner";
 export default CTABanner;

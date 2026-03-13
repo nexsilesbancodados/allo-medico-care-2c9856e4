@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ShieldCheck, Heart, Quote, X } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
@@ -25,7 +26,7 @@ const allTestimonials = [
   { name: "Fernanda Lima", handle: "@fer.lima", text: "Melhor investimento em saúde que já fiz. Atendimento humanizado mesmo sendo online. Parabéns! 👏", rating: 5, avatar: avatarFernanda, verified: true, likes: 331, time: "4d" },
 ];
 
-const TestimonialsSection = () => {
+const TestimonialsSection = forwardRef<HTMLElement>((_, ref) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [viewed, setViewed] = useState<Set<number>>(new Set());
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -197,6 +198,6 @@ const TestimonialsSection = () => {
       </div>
     </section>
   );
-};
-
+});
+TestimonialsSection.displayName = "TestimonialsSection";
 export default TestimonialsSection;

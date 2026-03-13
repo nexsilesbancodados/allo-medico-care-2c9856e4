@@ -1,4 +1,4 @@
-import { useState, memo } from "react";
+import { useState, memo, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, LayoutDashboard, UserRound, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Shield, Users } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
@@ -62,7 +62,7 @@ const ListItem = ({
   );
 };
 
-const Header = memo(() => {
+const Header = memo(forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t } = useTranslation();
@@ -350,6 +350,6 @@ const Header = memo(() => {
       </motion.header>
     </>
   );
-});
+}));
 Header.displayName = "Header";
 export default Header;

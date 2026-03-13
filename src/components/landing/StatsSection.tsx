@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Users, Stethoscope, Star, Clock } from "lucide-react";
@@ -41,7 +42,7 @@ const fallbackStats = [
   { icon: Clock, value: 15, suffix: "min", label: "Tempo médio de espera", gradient: "from-success to-success/70" },
 ];
 
-const StatsSection = () => {
+const StatsSection = forwardRef<HTMLElement>((_, ref) => {
   const [stats, setStats] = useState(fallbackStats);
 
   useEffect(() => {
@@ -107,6 +108,6 @@ const StatsSection = () => {
       </div>
     </section>
   );
-};
-
+});
+StatsSection.displayName = "StatsSection";
 export default StatsSection;

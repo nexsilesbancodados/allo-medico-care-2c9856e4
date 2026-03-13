@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { motion } from "framer-motion";
 import { Mail, MapPin, Phone, Instagram, Linkedin, Youtube, ArrowRight, Heart, Shield, Lock, Verified, Award } from "lucide-react";
@@ -15,7 +15,7 @@ const trustBadges = [
   { icon: Award, label: "ISO 27001" },
 ];
 
-const Footer = () => {
+const Footer = forwardRef<HTMLElement>((_, ref) => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -213,6 +213,6 @@ const Footer = () => {
       </div>
     </footer>
   );
-};
-
+});
+Footer.displayName = "Footer";
 export default Footer;

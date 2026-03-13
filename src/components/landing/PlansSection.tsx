@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check, ShieldCheck, Zap, Award, Heart, Diamond, ArrowRight, Sparkles, Stethoscope, Brain, Eye, Bone, Baby, Activity } from "lucide-react";
@@ -77,7 +78,7 @@ const benefitCards = [
   },
 ];
 
-const PlansSection = () => {
+const PlansSection = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
 
   return (
@@ -259,6 +260,6 @@ const PlansSection = () => {
       </section>
     </>
   );
-};
-
+});
+PlansSection.displayName = "PlansSection";
 export default PlansSection;

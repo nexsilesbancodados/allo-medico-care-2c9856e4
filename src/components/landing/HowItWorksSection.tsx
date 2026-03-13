@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { UserPlus, Search, Video, FileText, Clock } from "lucide-react";
 import howItWorksSignup from "@/assets/how-it-works-signup.png";
@@ -12,7 +13,7 @@ const steps = [
   { icon: FileText, title: "Receba sua receita", description: "Receita digital válida na hora.", image: howItWorksPrescription, time: "Instantâneo" },
 ];
 
-const HowItWorksSection = () => {
+const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
   return (
     <section id="como-funciona" className="py-16 md:py-24">
       <div className="container mx-auto px-4">
@@ -155,6 +156,6 @@ const HowItWorksSection = () => {
       </div>
     </section>
   );
-};
-
+});
+HowItWorksSection.displayName = "HowItWorksSection";
 export default HowItWorksSection;
