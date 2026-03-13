@@ -2,23 +2,55 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 
+const CHUNK_RELOAD_PARAM = "__chunk_reloaded";
+
+const forceChunkRecoveryReload = () => {
+  const url = new URL(window.location.href);
+  if (url.searchParams.get(CHUNK_RELOAD_PARAM) === "1") return;
+  url.searchParams.set(CHUNK_RELOAD_PARAM, "1");
+  window.location.replace(url.toString());
+};
+
+const clearChunkReloadParam = () => {
+  const url = new URL(window.location.href);
+  if (!url.searchParams.has(CHUNK_RELOAD_PARAM)) return;
+  url.searchParams.delete(CHUNK_RELOAD_PARAM);
+  window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+};
+
+window.addEventListener("vite:preloadError", (event) => {
+  event.preventDefault();
+  forceChunkRecoveryReload();
+});
+
+window.addEventListener("error", (event) => {
+  const message = String((event as ErrorEvent).error?.message ?? event.message ?? "");
+  if (/Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed/i.test(message)) {
+    forceChunkRecoveryReload();
+  }
+});
+
 console.log("[main] Starting app...");
 
 // Initialize Sentry lazily — don't block render if it fails
 try {
-  import("./lib/sentry").then(({ initSentry }) => {
-    initSentry();
-    console.log("[main] Sentry initialized");
-  }).catch((e) => console.warn("[main] Sentry init skipped:", e));
+  import("./lib/sentry")
+    .then(({ initSentry }) => {
+      initSentry();
+      console.log("[main] Sentry initialized");
+    })
+    .catch((e) => console.warn("[main] Sentry init skipped:", e));
 } catch (e) {
   console.warn("[main] Sentry import failed:", e);
 }
 
 // Global network status toasts (lazy)
 try {
-  import("./lib/supabase-helpers").then(({ initNetworkListeners }) => {
-    initNetworkListeners();
-  }).catch(() => {});
+  import("./lib/supabase-helpers")
+    .then(({ initNetworkListeners }) => {
+      initNetworkListeners();
+    })
+    .catch(() => {});
 } catch {}
 
 // Register push notification service worker
@@ -33,6 +65,7 @@ const root = document.getElementById("root")!;
 try {
   console.log("[main] Mounting React...");
   createRoot(root).render(<App />);
+  clearChunkReloadParam();
   console.log("[main] React mounted");
 } catch (err) {
   console.error("Fatal render error:", err);

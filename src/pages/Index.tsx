@@ -35,8 +35,12 @@ const Index = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const refCode = params.get("ref");
-    if (refCode) {
+    if (!refCode) return;
+
+    try {
       sessionStorage.setItem("ref_code", refCode);
+    } catch (error) {
+      console.warn("Não foi possível salvar código de referência:", error);
     }
   }, []);
 
