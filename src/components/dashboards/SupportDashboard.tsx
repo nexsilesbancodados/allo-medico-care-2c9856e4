@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useDebounce } from "@/hooks/use-debounce";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -96,6 +97,8 @@ const SupportDashboard = () => {
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [searchLogs, setSearchLogs] = useState("");
   const [searchUsers, setSearchUsers] = useState("");
+  const debouncedSearchLogs = useDebounce(searchLogs, 300);
+  const debouncedSearchUsers = useDebounce(searchUsers, 300);
   const [logTypeFilter, setLogTypeFilter] = useState("all");
   const [userRoleFilter, setUserRoleFilter] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -175,13 +178,13 @@ const SupportDashboard = () => {
   };
 
   const filteredLogs = logs.filter(l => {
-    const matchesSearch = `${l.action} ${l.entity_type} ${l.entity_id}`.toLowerCase().includes(searchLogs.toLowerCase());
+    const matchesSearch = `${l.action} ${l.entity_type} ${l.entity_id}`.toLowerCase().includes(debouncedSearchLogs.toLowerCase());
     const matchesType = logTypeFilter === "all" || l.entity_type?.toLowerCase().includes(logTypeFilter) || l.action?.toLowerCase().includes(logTypeFilter);
     return matchesSearch && matchesType;
   });
 
   const filteredUsers = users.filter(u => {
-    const matchesSearch = `${u.first_name} ${u.last_name} ${u.phone}`.toLowerCase().includes(searchUsers.toLowerCase());
+    const matchesSearch = `${u.first_name} ${u.last_name} ${u.phone}`.toLowerCase().includes(debouncedSearchUsers.toLowerCase());
     const matchesRole = userRoleFilter === "all" || u.roles.includes(userRoleFilter);
     return matchesSearch && matchesRole;
   });

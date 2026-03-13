@@ -218,9 +218,9 @@ const ClinicDashboard = () => {
         )}
 
         {/* KPI Cards */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3" role="list" aria-label="Estatísticas da clínica">
           {loading ? (
-            [0,1,2,3].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" />)
+            [0,1,2,3].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" aria-hidden="true" />)
           ) : (
             [
               { label: "Médicos Ativos", value: activeDoctors, icon: Users, color: "text-primary", bg: "bg-primary/10" },
@@ -228,11 +228,11 @@ const ClinicDashboard = () => {
               { label: "Receita do Mês", value: `R$ ${revenue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "text-success", bg: "bg-success/10" },
               { label: "Ocupação", value: `${occupancy}%`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
             ].map(kpi => (
-              <div key={kpi.label} className="p-4 rounded-2xl bg-card border border-border/50">
+              <div key={kpi.label} className="p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${kpi.label}: ${kpi.value}`}>
                 <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
-                  <kpi.icon className={`w-4 h-4 ${kpi.color}`} />
+                  <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
                 </div>
-                <p className="text-xl font-bold text-foreground">{kpi.value}</p>
+                <p className="text-xl font-bold text-foreground" aria-hidden="true">{kpi.value}</p>
                 <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
               </div>
             ))

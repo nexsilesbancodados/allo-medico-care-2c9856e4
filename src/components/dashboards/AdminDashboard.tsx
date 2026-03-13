@@ -378,9 +378,9 @@ const AdminDashboard = () => {
         )}
 
         {/* KPI Cards with trend indicators */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3" role="list" aria-label="Indicadores chave do sistema">
           {loading ? (
-            Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-28 animate-pulse bg-muted/50 rounded-2xl" />)
+            Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-28 animate-pulse bg-muted/50 rounded-2xl" aria-hidden="true" />)
           ) : (
             [
               { label: "Receita (MRR)", value: `R$ ${stats.total_revenue.toFixed(0)}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", trend: stats.total_revenue > 0 ? "↑" : null },
@@ -396,22 +396,24 @@ const AdminDashboard = () => {
                 key={kpi.label}
                 onClick={() => (kpi as any).path && navigate((kpi as any).path)}
                 className="p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md transition-all text-left group"
+                role="listitem"
+                aria-label={`${kpi.label}: ${kpi.value}${(kpi as any).path ? " — clique para ver detalhes" : ""}`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    <kpi.icon className={`w-4 h-4 ${kpi.color}`} />
+                    <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
                   </div>
                   {(kpi as any).trend && (
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                      (kpi as any).trend === "⚠" ? "bg-destructive/10 text-destructive" 
+                      (kpi as any).trend === "⚠" ? "bg-destructive/10 text-destructive"
                       : (kpi as any).trend === "✓" ? "bg-success/10 text-success"
                       : "bg-success/10 text-success"
-                    }`}>
+                    }`} aria-hidden="true">
                       {(kpi as any).trend}
                     </span>
                   )}
                 </div>
-                <p className="text-xl font-bold text-foreground">{kpi.value}</p>
+                <p className="text-xl font-bold text-foreground" aria-hidden="true">{kpi.value}</p>
                 <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
               </button>
             ))

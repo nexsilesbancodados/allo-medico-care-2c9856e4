@@ -44,9 +44,18 @@ const DoctorDashboard = () => {
 
   const { data, isLoading: loading, isRefetching: refreshing } = useDoctorStats();
 
+  interface DoctorAppointment {
+    id: string;
+    scheduled_at: string;
+    status: string;
+    patient_id: string;
+    patient_name: string;
+    duration_minutes: number | null;
+  }
+
   const stats = data?.stats ?? { today: 0, total_patients: 0, prescriptions: 0, totalEarnings: 0 };
-  const todayAppts = (data?.todayAppts ?? []) as any[];
-  const upcomingAppts = (data?.upcomingAppts ?? []) as any[];
+  const todayAppts = (data?.todayAppts ?? []) as DoctorAppointment[];
+  const upcomingAppts = (data?.upcomingAppts ?? []) as DoctorAppointment[];
 
   useEffect(() => {
     if (!user) return;
@@ -136,9 +145,9 @@ const DoctorDashboard = () => {
             </div>
 
             {/* Inline KPIs */}
-            <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5">
+            <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5" role="list" aria-label="Estatísticas do médico">
               {loading ? (
-                Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl bg-white/10 animate-pulse" />)
+                Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl bg-white/10 animate-pulse" aria-hidden="true" />)
               ) : (
                 [
                   { label: "Hoje", value: stats.today, icon: Calendar },
@@ -152,13 +161,15 @@ const DoctorDashboard = () => {
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
                     className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10 hover:bg-white/15 transition-colors cursor-pointer"
+                    role="listitem"
+                    aria-label={`${kpi.label}: ${kpi.value}`}
                     onClick={() => {
                       const paths = [null, "/dashboard/patients", "/dashboard/prescriptions", "/dashboard/earnings"];
                       if (paths[i]) navigate(paths[i]!);
                     }}
                   >
-                    <kpi.icon className="w-4 h-4 text-white/70 mb-2" />
-                    <p className="text-2xl font-bold leading-none">{kpi.value}</p>
+                    <kpi.icon className="w-4 h-4 text-white/70 mb-2" aria-hidden="true" />
+                    <p className="text-2xl font-bold leading-none" aria-hidden="true">{kpi.value}</p>
                     <p className="text-[10px] text-white/60 mt-1">{kpi.label}</p>
                   </motion.div>
                 ))

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import jsPDF from "jspdf";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", waiting: "Na sala", in_progress: "Em consulta",
@@ -34,9 +35,24 @@ const statusColor: Record<string, string> = {
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
 const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
 
+interface ReceptionAppointment {
+  id: string;
+  scheduled_at: string;
+  status: string;
+  patient_id: string | null;
+  doctor_id: string;
+  duration_minutes: number | null;
+  appointment_type: string | null;
+  notes: string | null;
+  patient_name: string;
+  doctor_name: string;
+  patient_phone: string | null;
+}
+
 const ReceptionDashboard = () => {
-  const [todayAppts, setTodayAppts] = useState<any[]>([]);
+  const [todayAppts, setTodayAppts] = useState<ReceptionAppointment[]>([]);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -135,7 +151,7 @@ const ReceptionDashboard = () => {
   };
 
   const filteredAppts = todayAppts.filter(a => {
-    const matchSearch = !search || a.patient_name.toLowerCase().includes(search.toLowerCase()) || a.doctor_name.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !debouncedSearch || a.patient_name.toLowerCase().includes(debouncedSearch.toLowerCase()) || a.doctor_name.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchStatus = filterStatus === "all" || a.status === filterStatus;
     return matchSearch && matchStatus;
   });
@@ -263,16 +279,16 @@ const ReceptionDashboard = () => {
         </motion.div>
 
         {/* KPI Cards — unified style */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-3" role="list" aria-label="Resumo do dia">
           {loading ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" />)
+            [1, 2, 3, 4].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" aria-hidden="true" />)
           ) : (
             kpis.map((s) => (
-              <div key={s.label} className="p-4 rounded-2xl bg-card border border-border/50">
+              <div key={s.label} className="p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${s.label}: ${s.value}`}>
                 <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
-                  <s.icon className={`w-4 h-4 ${s.color}`} />
+                  <s.icon className={`w-4 h-4 ${s.color}`} aria-hidden="true" />
                 </div>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                <p className="text-2xl font-bold text-foreground" aria-hidden="true">{s.value}</p>
                 <p className="text-xs font-medium text-muted-foreground mt-0.5">{s.label}</p>
               </div>
             ))
@@ -290,7 +306,7 @@ const ReceptionDashboard = () => {
                 <div className="flex gap-2 flex-wrap">
                   <div className="relative w-full sm:w-44">
                     <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                    <Input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-8 text-sm rounded-xl" />
+                    <Input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-8 text-sm rounded-xl" aria-label="Buscar por paciente ou médico" />
                   </div>
                   <Select value={filterStatus} onValueChange={setFilterStatus}>
                     <SelectTrigger className="h-8 w-full sm:w-36 text-xs rounded-xl">

@@ -30,13 +30,37 @@ const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } 
 const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
 
 /* eslint-disable @typescript-eslint/no-explicit-any -- Affiliate tables not in generated types */
+interface AffiliateReferral {
+  id: string;
+  status: string;
+  created_at: string;
+  referred_user_id?: string;
+  commission_amount?: number;
+}
+
+interface AffiliateWithdrawal {
+  id: string;
+  amount: number;
+  status: string;
+  created_at: string;
+  pix_key?: string;
+}
+
+interface AffiliateProfile {
+  id: string;
+  user_id: string;
+  commission_percent: number;
+  pix_key?: string;
+  referral_code?: string;
+}
+
 const AffiliateDashboard = () => {
   const { user } = useAuth();
-  const [referrals, setReferrals] = useState<any[]>([]);
+  const [referrals, setReferrals] = useState<AffiliateReferral[]>([]);
   const location = useLocation();
   const currentPath = location.pathname;
-  const [withdrawals, setWithdrawals] = useState<any[]>([]);
-  const [affiliateProfile, setAffiliateProfile] = useState<any>(null);
+  const [withdrawals, setWithdrawals] = useState<AffiliateWithdrawal[]>([]);
+  const [affiliateProfile, setAffiliateProfile] = useState<AffiliateProfile | null>(null);
   const [stats, setStats] = useState({ total: 0, converted: 0, totalEarnings: 0, pendingBalance: 0, paidBalance: 0 });
   const [referralCode, setReferralCode] = useState("");
   const [loading, setLoading] = useState(true);
@@ -202,18 +226,18 @@ const AffiliateDashboard = () => {
         </motion.div>
 
         {/* KPIs */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3" role="list" aria-label="Estatísticas do afiliado">
           {[
             { label: "Indicações", value: String(stats.total), icon: Users, color: "text-primary", bg: "bg-primary/10" },
             { label: "Convertidos", value: String(stats.converted), icon: TrendingUp, color: "text-secondary", bg: "bg-secondary/10" },
             { label: "Ganhos Totais", value: formatCurrency(stats.totalEarnings), icon: DollarSign, color: "text-success", bg: "bg-success/10" },
             { label: "Saldo Disponível", value: formatCurrency(stats.pendingBalance), icon: Wallet, color: "text-warning", bg: "bg-warning/10" },
           ].map(kpi => (
-            <div key={kpi.label} className="p-4 rounded-2xl bg-card border border-border/50">
+            <div key={kpi.label} className="p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${kpi.label}: ${kpi.value}`}>
               <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
-                <kpi.icon className={`w-4 h-4 ${kpi.color}`} />
+                <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
               </div>
-              <p className="text-xl font-bold text-foreground">{kpi.value}</p>
+              <p className="text-xl font-bold text-foreground" aria-hidden="true">{kpi.value}</p>
               <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
             </div>
           ))}

@@ -128,17 +128,17 @@ const PartnerDashboard = () => {
         </motion.div>
 
         {/* KPI cards */}
-        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
+        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3" role="list" aria-label="Estatísticas do parceiro">
           {[
             { label: "Validações", value: validations.length, icon: Pill, color: "text-primary", bg: "bg-primary/10" },
             { label: "Dispensados", value: dispensedCount, icon: CheckCircle, color: "text-success", bg: "bg-success/10" },
             { label: "Conversão", value: `${conversionRate}%`, icon: TrendingUp, color: "text-warning", bg: "bg-warning/10" },
           ].map(kpi => (
-            <div key={kpi.label} className="p-4 rounded-2xl bg-card border border-border/50">
+            <div key={kpi.label} className="p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${kpi.label}: ${kpi.value}`}>
               <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
-                <kpi.icon className={`w-4 h-4 ${kpi.color}`} />
+                <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
               </div>
-              <p className="text-2xl font-bold text-foreground">{kpi.value}</p>
+              <p className="text-2xl font-bold text-foreground" aria-hidden="true">{kpi.value}</p>
               <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
             </div>
           ))}

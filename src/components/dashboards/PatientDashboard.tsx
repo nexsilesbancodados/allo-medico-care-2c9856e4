@@ -27,6 +27,7 @@ import CheckoutRecoveryBanner from "@/components/patient/CheckoutRecoveryBanner"
 import { usePatientStats, usePatientUpcoming, useReturnAppointments, useFavoriteDoctors, useRecentHealthMetrics } from "@/hooks/usePatientDashboard";
 import { useActiveSubscription, useUserCredits } from "@/hooks/useProfile";
 import { useQueryClient } from "@tanstack/react-query";
+import { useLocalStorage } from "@/hooks/use-local-storage";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -51,6 +52,7 @@ const PatientDashboard = () => {
   const queryClient = useQueryClient();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [onboardingDone] = useLocalStorage<boolean>(ONBOARDING_KEY, false);
   const now = new Date();
 
   const { data: stats, isLoading: statsLoading } = usePatientStats();
@@ -65,10 +67,10 @@ const PatientDashboard = () => {
   const waitingAppt = upcoming.find((a: { status: string }) => a.status === "waiting" || a.status === "in_progress") ?? null;
 
   useEffect(() => {
-    if (!loading && (stats?.total ?? 0) === 0 && !localStorage.getItem(ONBOARDING_KEY)) {
+    if (!loading && (stats?.total ?? 0) === 0 && !onboardingDone) {
       setShowOnboarding(true);
     }
-  }, [loading, stats?.total]);
+  }, [loading, stats?.total, onboardingDone]);
 
   useEffect(() => {
     if (!user) return;
@@ -287,7 +289,7 @@ const PatientDashboard = () => {
         </motion.div>
 
         {/* ═══ Quick Actions — Gradient icons ═══ */}
-        <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2.5">
+        <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2.5" role="list" aria-label="Ações rápidas">
           {quickActions.map((item, i) => (
             <motion.button
               key={item.label}
@@ -297,10 +299,12 @@ const PatientDashboard = () => {
               whileTap={{ scale: 0.93 }}
               whileHover={{ y: -3 }}
               onClick={() => navigate(item.path)}
+              aria-label={item.label}
+              role="listitem"
               className="flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl bg-card border border-border/40 shadow-sm hover:shadow-lg hover:border-border transition-all duration-200 group"
             >
               <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
-                <item.icon className="w-5 h-5 text-white" />
+                <item.icon className="w-5 h-5 text-white" aria-hidden="true" />
               </div>
               <span className="text-[11px] font-semibold text-foreground/80 leading-tight text-center">{item.label}</span>
             </motion.button>
