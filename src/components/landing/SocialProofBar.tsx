@@ -16,7 +16,7 @@ const badges = [
 
 const allBadges = [...badges, ...badges];
 
-const SocialProofBar = () => (
+const SocialProofBar = forwardRef<HTMLElement>((_, ref) => (
   <section className="py-5 md:py-6 border-y border-border/40 bg-muted/20 overflow-hidden">
     <div className="relative">
       <div className="absolute left-0 top-0 bottom-0 w-24 md:w-40 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
