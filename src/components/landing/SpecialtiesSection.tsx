@@ -35,7 +35,7 @@ const specialtyGrid = [
   { name: "Clínico Geral", image: specGeneral },
 ];
 
-const SpecialtiesSection = () => {
+const SpecialtiesSection = forwardRef<HTMLElement>((_, ref) => {
   const [isPaused, setIsPaused] = useState(false);
   const navigate = useNavigate();
 
