@@ -30,6 +30,7 @@ const PrescriptionRenewalForm = () => {
   const [sideEffects, setSideEffects] = useState("");
   const [notes, setNotes] = useState("");
   const [myRenewals, setMyRenewals] = useState<any[]>([]);
+  const [discountPercent, setDiscountPercent] = useState(0);
 
   // Payment state
   const [showPayment, setShowPayment] = useState(false);
@@ -45,7 +46,20 @@ const PrescriptionRenewalForm = () => {
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
 
-  useEffect(() => { if (user) fetchRenewals(); }, [user]);
+  const finalPrice = discountPercent > 0 ? RENEWAL_PRICE * (1 - discountPercent / 100) : RENEWAL_PRICE;
+
+  useEffect(() => {
+    if (user) {
+      fetchRenewals();
+      checkDiscountCard();
+    }
+  }, [user]);
+
+  const checkDiscountCard = async () => {
+    if (!user) return;
+    const { data } = await supabase.from("discount_cards").select("discount_percent").eq("user_id", user.id).eq("status", "active").maybeSingle();
+    if (data) setDiscountPercent(Number(data.discount_percent));
+  };
 
   const fetchRenewals = async () => {
     if (!user) return;
