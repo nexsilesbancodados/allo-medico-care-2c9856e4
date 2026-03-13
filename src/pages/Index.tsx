@@ -19,7 +19,7 @@ import FAQSection from "@/components/landing/FAQSection";
 import Footer from "@/components/landing/Footer";
 import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
 
-const Index = () => {
+const Index = forwardRef<HTMLDivElement>((_, ref) => {
   const { setTheme, theme } = useTheme();
   const [showQuiz, setShowQuiz] = useState(false);
   const { user } = useAuth();
