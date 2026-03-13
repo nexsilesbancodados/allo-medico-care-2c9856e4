@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Video, Shield, Clock, ArrowRight, Stethoscope, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, memo } from "react";
+import { useState, useEffect, memo, forwardRef } from "react";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
 import heroDoctor from "@/assets/hero-doctor.png";
 
