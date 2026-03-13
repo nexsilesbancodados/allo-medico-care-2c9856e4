@@ -91,24 +91,24 @@ const PostConsultationSummary = ({
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-6">
-          <Card className="bg-card border-border">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-5 sm:mb-6" role="list" aria-label="Resumo da consulta">
+          <Card className="bg-card border-border" role="listitem">
             <CardContent className="p-2.5 sm:p-3 text-center">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1" />
+              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1" aria-hidden="true" />
               <p className="text-base sm:text-lg font-bold text-foreground">{formatDuration(elapsed)}</p>
               <p className="text-[10px] text-muted-foreground">Duração</p>
             </CardContent>
           </Card>
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border" role="listitem">
             <CardContent className="p-2.5 sm:p-3 text-center">
-              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1" />
+              <MessageSquare className="w-4 h-4 sm:w-5 sm:h-5 text-primary mx-auto mb-1" aria-hidden="true" />
               <p className="text-base sm:text-lg font-bold text-foreground">{messageCount}</p>
               <p className="text-[10px] text-muted-foreground">Mensagens</p>
             </CardContent>
           </Card>
-          <Card className="bg-card border-border">
+          <Card className="bg-card border-border" role="listitem">
             <CardContent className="p-2.5 sm:p-3 text-center">
-              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-success mx-auto mb-1" />
+              <Shield className="w-4 h-4 sm:w-5 sm:h-5 text-success mx-auto mb-1" aria-hidden="true" />
               <p className="text-base sm:text-lg font-bold text-success">E2E</p>
               <p className="text-[10px] text-muted-foreground">Criptografada</p>
             </CardContent>

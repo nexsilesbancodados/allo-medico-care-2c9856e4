@@ -101,8 +101,11 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 20, scale: 0.9 }}
             className="fixed top-16 right-4 z-[55] flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[hsl(220,20%,8%,0.95)] backdrop-blur-md border border-[hsl(220,15%,18%)] shadow-2xl"
+            role="status"
+            aria-live="polite"
+            aria-label={`Qualidade da conexão: ${qualityConfig[networkQuality].label}`}
           >
-            <QualityIcon className="w-4 h-4" style={{ color: qualityConfig[networkQuality].color }} />
+            <QualityIcon className="w-4 h-4" style={{ color: qualityConfig[networkQuality].color }} aria-hidden="true" />
             <span className="text-xs font-medium" style={{ color: qualityConfig[networkQuality].color }}>
               {qualityConfig[networkQuality].label}
             </span>
@@ -121,24 +124,27 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
                 ? "bg-destructive/90 text-destructive-foreground"
                 : "bg-amber-500/90 text-amber-950"
             }`}
+            role="alert"
+            aria-live="assertive"
           >
             {!isOnline ? (
               <>
-                <WifiOff className="w-4 h-4" />
+                <WifiOff className="w-4 h-4" aria-hidden="true" />
                 <span>Sem conexão com a internet</span>
                 <Button
                   size="sm"
                   variant="secondary"
                   className="ml-2 h-7 px-3 text-xs rounded-full"
                   onClick={onReconnect}
+                  aria-label="Tentar reconectar à consulta"
                 >
-                  <RefreshCw className="w-3 h-3 mr-1" />
+                  <RefreshCw className="w-3 h-3 mr-1" aria-hidden="true" />
                   Reconectar
                 </Button>
               </>
             ) : (
               <>
-                <Wifi className="w-4 h-4 animate-pulse" />
+                <Wifi className="w-4 h-4 animate-pulse" aria-hidden="true" />
                 <span>Reconectando à consulta...</span>
               </>
             )}

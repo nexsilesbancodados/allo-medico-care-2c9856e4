@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Phone, Clock, Wifi, WifiOff, Shield } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { logError } from "@/lib/logger";
 
 interface VideoConsultationProps {
   appointmentId: string;
@@ -185,14 +186,14 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     script.src = "https://meet.jit.si/external_api.js";
     script.async = true;
     const loadTimeout = setTimeout(() => {
-      console.error("Jitsi load timeout (15s)");
+      logError("Jitsi load timeout (15s)", null, { appointmentId: roomName });
       setLoading(false);
       setJitsiFailed(true);
     }, 15000);
     script.onload = () => { clearTimeout(loadTimeout); loadAndInit(); };
     script.onerror = () => {
       clearTimeout(loadTimeout);
-      console.error("Failed to load Jitsi API");
+      logError("Failed to load Jitsi API script", null, { src: script.src });
       setLoading(false);
       setJitsiFailed(true);
     };

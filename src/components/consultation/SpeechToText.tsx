@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff, Loader2 } from "lucide-react";
+import { Mic, MicOff } from "lucide-react";
 import { toast } from "sonner";
+import { log } from "@/lib/logger";
 
 interface SpeechToTextProps {
   onTranscript: (text: string) => void;
@@ -39,7 +40,7 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      if (import.meta.env.DEV) console.error("Speech error:", event.error);
+      log("Speech recognition error:", event.error);
       if (event.error === "not-allowed") {
         toast.error("Microfone bloqueado", { description: "Permita o acesso ao microfone nas configurações do navegador." });
       }
@@ -76,7 +77,8 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
         setListening(true);
         toast.success("🎙️ Ditado ativado", { description: "Fale e o texto será transcrito automaticamente." });
       } catch (e) {
-        console.error(e);
+        log("SpeechToText start error:", e);
+        toast.error("Não foi possível ativar o ditado");
       }
     }
   }, [listening]);
@@ -90,16 +92,18 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
       size="sm"
       onClick={toggleListening}
       className={`rounded-full ${className || ""}`}
+      aria-label={listening ? "Parar ditado por voz" : "Ativar ditado por voz para preencher prontuário"}
+      aria-pressed={listening}
       title={listening ? "Parar ditado" : "Ditar prontuário (voz)"}
     >
       {listening ? (
         <>
-          <MicOff className="w-4 h-4 mr-1" />
+          <MicOff className="w-4 h-4 mr-1" aria-hidden="true" />
           <span className="animate-pulse">Ditando...</span>
         </>
       ) : (
         <>
-          <Mic className="w-4 h-4 mr-1" />
+          <Mic className="w-4 h-4 mr-1" aria-hidden="true" />
           Ditar
         </>
       )}

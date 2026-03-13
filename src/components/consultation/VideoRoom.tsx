@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { notifyConsultationStarted, notifyConsultationCompleted } from "@/lib/notifications";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { logError } from "@/lib/logger";
 import {
   MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft,
   UserRound, Pill, PhoneOff, Mic, MicOff, Video, VideoOff, Shield,
@@ -265,7 +266,7 @@ const VideoRoom = () => {
     if (isDoctor) {
       await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId);
       const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
-      notifyConsultationStarted(appointmentId!, docName).catch(console.error);
+      notifyConsultationStarted(appointmentId!, docName).catch(err => logError("notifyConsultationStarted failed", err));
     }
 
     const otherUserId = isDoctor ? data.patient_id : null;
@@ -507,7 +508,7 @@ const VideoRoom = () => {
 
         toast.success("✅ SOAP salvo e PDF gerado!", { description: "Documento salvo no prontuário do paciente." });
       } catch (pdfErr) {
-        console.error("PDF generation error:", pdfErr);
+        logError("PDF generation error in VideoRoom", pdfErr);
         toast.success("✅ Anotações salvas!", { description: "Não foi possível gerar o PDF." });
       }
     }
@@ -563,7 +564,7 @@ const VideoRoom = () => {
     // Notify patient that consultation is completed
     if (isDoctor) {
       const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
-      notifyConsultationCompleted(appointmentId!, docName).catch(console.error);
+      notifyConsultationCompleted(appointmentId!, docName).catch(err => logError("notifyConsultationCompleted failed", err));
     }
     
     toast.success("Consulta encerrada");
@@ -727,10 +728,11 @@ const VideoRoom = () => {
           onChange={(e) => setChatInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="Mensagem..."
+          aria-label="Digite uma mensagem"
           className="flex-1 bg-[hsl(220,20%,8%)] border border-[hsl(220,15%,16%)] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-[hsl(220,15%,30%)] outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
         />
-        <Button size="icon" onClick={() => sendMessage()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 w-10 shrink-0">
-          <Send className="w-4 h-4" />
+        <Button size="icon" onClick={() => sendMessage()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 w-10 shrink-0" aria-label="Enviar mensagem">
+          <Send className="w-4 h-4" aria-hidden="true" />
         </Button>
       </div>
     </>
@@ -812,7 +814,7 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
         }
       }
     } catch (err) {
-      console.error("AI SOAP fill error:", err);
+      logError("AI SOAP fill error in VideoRoom", err);
       toast.error("Erro ao preencher", { description: "Tente novamente em alguns segundos." });
     } finally {
       setAiFillingSOAP(false);
@@ -900,11 +902,13 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
           : "text-[hsl(220,15%,55%)] hover:text-white hover:bg-[hsl(220,20%,12%)] active:bg-[hsl(220,20%,16%)] border border-transparent"
       }`}
       onClick={onClick}
+      aria-label={badge && badge > 0 ? `${label} (${badge} não lida${badge !== 1 ? "s" : ""})` : label}
+      aria-pressed={active}
     >
       {icon}
-      {!isMobile && <span>{label}</span>}
+      {!isMobile && <span aria-hidden="true">{label}</span>}
       {badge && badge > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold shadow-lg animate-pulse">
+        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold shadow-lg animate-pulse" aria-hidden="true">
           {badge}
         </span>
       )}
@@ -981,9 +985,10 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
             <button
               onClick={toggleFullscreen}
               className="w-8 h-8 rounded-lg flex items-center justify-center text-[hsl(220,15%,45%)] hover:text-white hover:bg-[hsl(220,20%,12%)] transition-all"
+              aria-label={isFullscreen ? "Sair da tela cheia" : "Entrar em tela cheia"}
               title={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
             >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              {isFullscreen ? <Minimize2 className="w-4 h-4" aria-hidden="true" /> : <Maximize2 className="w-4 h-4" aria-hidden="true" />}
             </button>
           )}
 
@@ -992,8 +997,9 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
             onClick={endCall}
             size="sm"
             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground rounded-xl gap-1.5 shadow-lg shadow-destructive/20 hover:shadow-destructive/30 transition-all hover:scale-105 active:scale-95 h-9 md:h-9 px-3 md:px-4 min-w-[44px]"
+            aria-label="Encerrar consulta"
           >
-            <PhoneOff className="w-4 h-4" />
+            <PhoneOff className="w-4 h-4" aria-hidden="true" />
             {!isMobile && <span className="text-xs font-semibold">Encerrar</span>}
           </Button>
         </div>
