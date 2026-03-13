@@ -39,7 +39,17 @@ describe("PrescriptionRenewalForm", () => {
           insert: () => Promise.resolve({ error: null }),
         };
       }
-      return { select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data: null }) }) }) };
+      // discount_cards: suporta .eq().eq().maybeSingle()
+      return {
+        select: () => ({
+          eq: () => ({
+            eq: () => ({
+              maybeSingle: () => Promise.resolve({ data: null }),
+            }),
+            maybeSingle: () => Promise.resolve({ data: null }),
+          }),
+        }),
+      };
     });
   });
 
@@ -86,7 +96,16 @@ describe("RenewalQueue (Doctor)", () => {
           }),
         };
       }
-      return { select: () => ({ eq: () => ({ maybeSingle: () => Promise.resolve({ data: null }) }) }) };
+      return {
+        select: () => ({
+          eq: () => ({
+            eq: () => ({
+              maybeSingle: () => Promise.resolve({ data: null }),
+            }),
+            maybeSingle: () => Promise.resolve({ data: null }),
+          }),
+        }),
+      };
     });
   });
 
