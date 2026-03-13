@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { Users, Stethoscope, Star, Clock } from "lucide-react";
