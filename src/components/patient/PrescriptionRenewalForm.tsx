@@ -317,7 +317,7 @@ const PrescriptionRenewalForm = () => {
                       <><CheckCircle2 className="w-12 h-12 mx-auto text-secondary mb-4" /><a href={boletoUrl} target="_blank" rel="noopener noreferrer"><Button className="w-full">📄 Abrir Boleto</Button></a></>
                     ) : (
                       <><FileBarChart className="w-12 h-12 mx-auto text-primary/60 mb-4" /><Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>
-                        {processing ? "Gerando boleto..." : `Gerar Boleto • R$ ${RENEWAL_PRICE},00`}
+                        {processing ? "Gerando boleto..." : `Gerar Boleto • R$ ${finalPrice.toFixed(2).replace(".", ",")}`}
                       </Button></>
                     )}
                   </motion.div>
