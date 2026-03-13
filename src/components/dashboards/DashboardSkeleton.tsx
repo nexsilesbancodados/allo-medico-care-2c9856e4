@@ -3,9 +3,10 @@ import { motion } from "framer-motion";
 
 /**
  * Reusable dashboard skeleton with shimmer effect, KPI cards, chart and table placeholders.
+ * Announces loading state to screen readers via aria-busy and aria-label.
  */
 const ShimmerBlock = ({ className = "" }: { className?: string }) => (
-  <div className={`skeleton-shimmer rounded-2xl ${className}`} />
+  <div className={`skeleton-shimmer rounded-2xl ${className}`} aria-hidden="true" />
 );
 
 const DashboardSkeleton = () => (
@@ -14,6 +15,9 @@ const DashboardSkeleton = () => (
     animate={{ opacity: 1 }}
     transition={{ duration: 0.3 }}
     className="space-y-6 max-w-4xl"
+    role="status"
+    aria-busy="true"
+    aria-label="Carregando painel..."
   >
     {/* Greeting skeleton */}
     <div className="flex items-center justify-between">
@@ -86,6 +90,9 @@ const DashboardSkeleton = () => (
         ))}
       </CardContent>
     </Card>
+
+    {/* Visually hidden text for screen readers */}
+    <span className="sr-only">Carregando dados do painel, por favor aguarde.</span>
   </motion.div>
 );
 
