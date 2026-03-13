@@ -33,7 +33,7 @@ const categories = [
 // Top 2 most viewed
 const featuredFaqs = [...faqs].sort((a, b) => b.views - a.views).slice(0, 2);
 
-const FAQSection = () => {
+const FAQSection = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
