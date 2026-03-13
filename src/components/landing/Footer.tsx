@@ -15,7 +15,7 @@ const trustBadges = [
   { icon: Award, label: "ISO 27001" },
 ];
 
-const Footer = () => {
+const Footer = forwardRef<HTMLElement>((_, ref) => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
