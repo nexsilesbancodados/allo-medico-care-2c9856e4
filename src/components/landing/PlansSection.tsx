@@ -260,6 +260,6 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
       </section>
     </>
   );
-};
-
+});
+PlansSection.displayName = "PlansSection";
 export default PlansSection;

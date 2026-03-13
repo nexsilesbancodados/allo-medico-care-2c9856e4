@@ -108,6 +108,6 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
       </div>
     </section>
   );
-};
-
+});
+StatsSection.displayName = "StatsSection";
 export default StatsSection;

@@ -278,6 +278,6 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
       </div>
     </section>
   );
-};
-
+});
+FAQSection.displayName = "FAQSection";
 export default FAQSection;

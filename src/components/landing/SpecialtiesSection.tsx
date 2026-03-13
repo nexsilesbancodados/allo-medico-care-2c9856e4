@@ -149,6 +149,6 @@ const SpecialtiesSection = forwardRef<HTMLElement>((_, ref) => {
       </div>
     </section>
   );
-};
-
+});
+SpecialtiesSection.displayName = "SpecialtiesSection";
 export default SpecialtiesSection;

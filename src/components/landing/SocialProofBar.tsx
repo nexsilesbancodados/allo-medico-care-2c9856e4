@@ -42,6 +42,6 @@ const SocialProofBar = forwardRef<HTMLElement>((_, ref) => (
       </motion.div>
     </div>
   </section>
-);
-
+));
+SocialProofBar.displayName = "SocialProofBar";
 export default SocialProofBar;

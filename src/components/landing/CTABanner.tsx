@@ -203,6 +203,6 @@ const CTABanner = forwardRef<HTMLElement>((_, ref) => {
       </div>
     </section>
   );
-};
-
+});
+CTABanner.displayName = "CTABanner";
 export default CTABanner;

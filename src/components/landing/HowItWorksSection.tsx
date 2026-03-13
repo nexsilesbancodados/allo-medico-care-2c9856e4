@@ -156,6 +156,6 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
       </div>
     </section>
   );
-};
-
+});
+HowItWorksSection.displayName = "HowItWorksSection";
 export default HowItWorksSection;
