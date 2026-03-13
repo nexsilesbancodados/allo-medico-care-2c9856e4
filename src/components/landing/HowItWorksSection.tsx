@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { UserPlus, Search, Video, FileText, Clock } from "lucide-react";
 import howItWorksSignup from "@/assets/how-it-works-signup.png";
