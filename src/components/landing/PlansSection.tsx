@@ -78,7 +78,7 @@ const benefitCards = [
   },
 ];
 
-const PlansSection = () => {
+const PlansSection = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
 
   return (
