@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MessageCircle, HelpCircle, ArrowRight, Sparkles, ThumbsUp, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
