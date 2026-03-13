@@ -36,11 +36,17 @@ const I18nContext = createContext<I18nContextType>({
 });
 
 const getInitialLocale = (): Locale => {
-  const stored = localStorage.getItem("locale") as Locale | null;
-  if (stored && translations[stored]) return stored;
-  const browserLang = navigator.language;
-  if (browserLang.startsWith("es")) return "es";
-  if (browserLang.startsWith("en")) return "en";
+  try {
+    const stored = window.localStorage.getItem("locale") as Locale | null;
+    if (stored && translations[stored]) return stored;
+
+    const browserLang = navigator.language;
+    if (browserLang.startsWith("es")) return "es";
+    if (browserLang.startsWith("en")) return "en";
+  } catch (error) {
+    console.warn("[i18n] Falha ao recuperar locale inicial:", error);
+  }
+
   return "pt-BR";
 };
 
@@ -49,8 +55,16 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
 
   const setLocale = useCallback((l: Locale) => {
     setLocaleState(l);
-    localStorage.setItem("locale", l);
-    document.documentElement.lang = l === "pt-BR" ? "pt-BR" : l;
+
+    try {
+      window.localStorage.setItem("locale", l);
+    } catch (error) {
+      console.warn("[i18n] Falha ao persistir locale:", error);
+    }
+
+    if (typeof document !== "undefined") {
+      document.documentElement.lang = l === "pt-BR" ? "pt-BR" : l;
+    }
   }, []);
 
   const t = useCallback(
