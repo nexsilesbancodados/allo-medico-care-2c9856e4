@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion } from "framer-motion";
 import { Shield, Award, Heart, Verified, Star, Users, Clock, Zap, Lock } from "lucide-react";
 
