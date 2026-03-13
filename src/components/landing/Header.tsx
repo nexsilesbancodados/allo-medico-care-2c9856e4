@@ -350,6 +350,6 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
       </motion.header>
     </>
   );
-});
+}));
 Header.displayName = "Header";
 export default Header;
