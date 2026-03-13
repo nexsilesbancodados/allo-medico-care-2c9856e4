@@ -233,7 +233,7 @@ const PrescriptionRenewalForm = () => {
               </div>
 
               <Button onClick={handleSubmit} disabled={submitting || !prescriptionUrl} className="w-full">
-                {submitting ? "Enviando..." : `Prosseguir para Pagamento — R$ ${RENEWAL_PRICE},00`}
+                {submitting ? "Enviando..." : `Prosseguir para Pagamento — R$ ${finalPrice.toFixed(2).replace(".", ",")}`}
               </Button>
               <p className="text-xs text-muted-foreground text-center">Análise em até 3 dias úteis após pagamento</p>
             </CardContent>
