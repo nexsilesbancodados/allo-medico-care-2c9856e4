@@ -129,7 +129,7 @@ const PrescriptionRenewalForm = () => {
         customerEmail: user.email || "",
         customerMobilePhone: profile.phone || "",
         billingType: billingTypeMap[paymentMethod],
-        value: RENEWAL_PRICE,
+        value: finalPrice,
         description: `Renovação de Receita - AloClínica`,
         appointmentId: `renewal_${renewalId}`,
       };
