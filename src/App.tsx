@@ -7,12 +7,12 @@ import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
 import { lazy, Suspense, useEffect } from "react";
 import { toast } from "sonner";
-
-const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
-const Index = lazy(() => import("./pages/Index"));
-const Auth = lazy(() => import("./pages/Auth"));
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
+import Index from "./pages/Index";
+
+const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
+const Auth = lazy(() => import("./pages/Auth"));
 import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
 import { useSubdomainRedirect } from "./hooks/use-subdomain-redirect";
 import ScrollToTop from "./components/ScrollToTop";
@@ -70,7 +70,11 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = () => null;
+const PageLoader = () => (
+  <div className="min-h-[40vh] flex items-center justify-center" role="status" aria-live="polite" aria-label="Carregando página">
+    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+  </div>
+);
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();
