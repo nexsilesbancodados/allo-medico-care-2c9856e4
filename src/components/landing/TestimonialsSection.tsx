@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ShieldCheck, Heart, Quote, X } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
