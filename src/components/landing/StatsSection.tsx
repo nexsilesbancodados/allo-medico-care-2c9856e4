@@ -42,7 +42,7 @@ const fallbackStats = [
   { icon: Clock, value: 15, suffix: "min", label: "Tempo médio de espera", gradient: "from-success to-success/70" },
 ];
 
-const StatsSection = () => {
+const StatsSection = forwardRef<HTMLElement>((_, ref) => {
   const [stats, setStats] = useState(fallbackStats);
 
   useEffect(() => {
