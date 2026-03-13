@@ -18,7 +18,7 @@ const trustItems = [
   "Nota 4.9 no Google",
 ];
 
-const HeroSection = memo(() => {
+const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
   const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
   const prefetchConsulta = usePrefetchRoute(() => import("@/pages/GuestCheckout"));
