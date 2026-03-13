@@ -62,7 +62,7 @@ const ListItem = ({
   );
 };
 
-const Header = memo(() => {
+const Header = memo(forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const { t } = useTranslation();
