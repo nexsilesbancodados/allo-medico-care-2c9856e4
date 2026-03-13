@@ -9,7 +9,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { toast } from "sonner";
 
 const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
-import Index from "./pages/Index";
+const Index = lazy(() => import("./pages/Index"));
 const Auth = lazy(() => import("./pages/Auth"));
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
