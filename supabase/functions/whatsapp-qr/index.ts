@@ -6,6 +6,13 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Create an HTTP client that skips TLS certificate verification
+// Needed because the Evolution API server uses an invalid certificate
+const httpClient = Deno.createHttpClient({ caCerts: [], proxy: { url: "" } });
+
+const fetchInsecure = (url: string, opts: RequestInit = {}) =>
+  fetch(url, { ...opts, client: httpClient } as any);
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -34,7 +41,7 @@ serve(async (req) => {
     // Create instance
     if (action === "create") {
       const name = instanceName || `allo-medico-${Date.now()}`;
-      const res = await fetch(`${baseUrl}/instance/create`, {
+      const res = await fetchInsecure(`${baseUrl}/instance/create`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -62,7 +69,7 @@ serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const res = await fetch(`${baseUrl}/instance/connect/${instanceName}`, {
+      const res = await fetchInsecure(`${baseUrl}/instance/connect/${instanceName}`, {
         method: "GET",
         headers,
       });
@@ -85,7 +92,7 @@ serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const res = await fetch(`${baseUrl}/instance/connectionState/${instanceName}`, {
+      const res = await fetchInsecure(`${baseUrl}/instance/connectionState/${instanceName}`, {
         method: "GET",
         headers,
       });
@@ -97,7 +104,7 @@ serve(async (req) => {
 
     // List instances
     if (action === "list") {
-      const res = await fetch(`${baseUrl}/instance/fetchInstances`, {
+      const res = await fetchInsecure(`${baseUrl}/instance/fetchInstances`, {
         method: "GET",
         headers,
       });
@@ -114,7 +121,7 @@ serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const res = await fetch(`${baseUrl}/instance/delete/${instanceName}`, {
+      const res = await fetchInsecure(`${baseUrl}/instance/delete/${instanceName}`, {
         method: "DELETE",
         headers,
       });
