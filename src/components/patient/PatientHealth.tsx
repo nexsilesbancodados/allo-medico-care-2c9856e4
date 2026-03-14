@@ -30,10 +30,10 @@ const METRIC_TYPES = [
 
 const PatientHealth = () => {
   const { user } = useAuth();
-  const [consultations, setConsultations] = useState<Record<string, unknown>[]>([]);
-  const [prescriptions, setPrescriptions] = useState<Record<string, unknown>[]>([]);
-  const [documents, setDocuments] = useState<Record<string, unknown>[]>([]);
-  const [metrics, setMetrics] = useState<Record<string, unknown>[]>([]);
+  const [consultations, setConsultations] = useState<any[]>([]);
+  const [prescriptions, setPrescriptions] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [selectedMetricType, setSelectedMetricType] = useState("blood_pressure_sys");

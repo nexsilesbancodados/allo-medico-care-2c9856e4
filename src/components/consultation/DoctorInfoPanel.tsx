@@ -80,7 +80,7 @@ const DoctorInfoPanel = ({ doctorId, appointmentId }: DoctorInfoPanelProps) => {
       .order("created_at", { ascending: false })
       .limit(5);
 
-    if (prescData) setPrescriptions(prescData as { id: string; medications: unknown; created_at: string }[]);
+    if (prescData) setPrescriptions(prescData as unknown as PrescriptionInfo[]);
     setLoading(false);
   };
 

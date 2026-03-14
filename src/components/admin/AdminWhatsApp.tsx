@@ -67,7 +67,7 @@ const AdminWhatsApp = () => {
         toast.error("Erro ao criar instância");
       }
     } catch (err: unknown) {
-      toast.error(err.message || "Erro ao criar instância");
+      toast.error(err instanceof Error ? err.message : "Erro ao criar instância");
     } finally {
       setLoading(false);
     }
@@ -95,7 +95,7 @@ const AdminWhatsApp = () => {
         }
       }
     } catch (err: unknown) {
-      toast.error(err.message || "Erro ao obter QR code");
+      toast.error(err instanceof Error ? err.message : "Erro ao obter QR code");
     } finally {
       setLoading(false);
     }
@@ -145,7 +145,7 @@ const AdminWhatsApp = () => {
       }
       fetchInstances();
     } catch (err: unknown) {
-      toast.error(err.message || "Erro ao excluir");
+      toast.error(err instanceof Error ? err.message : "Erro ao excluir");
     }
   };
 

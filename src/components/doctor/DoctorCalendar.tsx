@@ -41,13 +41,17 @@ const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR
 
 interface CalendarEvent {
   id: string;
-  title: string;
-  start: Date;
-  end: Date;
+  title?: string;
+  start?: Date;
+  end?: Date;
   status: string;
   patient_name?: string;
   patient_id?: string | null;
   duration_minutes?: number | null;
+  scheduled_at?: string;
+  appointment_type?: string | null;
+  guest_patient_id?: string | null;
+  notes?: string | null;
 }
 
 interface AvailabilitySlot {

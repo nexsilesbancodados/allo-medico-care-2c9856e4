@@ -24,7 +24,7 @@ const AISummaryTab = ({ primaryRole }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [result, setResult] = useState("");
-  const [patientData, setPatientData] = useState<{ first_name: string; last_name: string; cpf?: string | null; date_of_birth?: string | null } | null>(null);
+  const [patientData, setPatientData] = useState<any>(null);
   const [copied, setCopied] = useState(false);
 
   const fetchPatientData = useCallback(async () => {
@@ -59,7 +59,7 @@ const AISummaryTab = ({ primaryRole }: Props) => {
     setIsFetching(false);
   }, [patientSearch, user]);
 
-  const loadPatientDetails = async (patient: { id: string; first_name: string; last_name: string }) => {
+  const loadPatientDetails = async (patient: any) => {
     setIsFetching(true);
     const [recordsRes, appointmentsRes, prescriptionsRes, metricsRes] = await Promise.all([
       supabase.from("medical_records")
@@ -250,7 +250,7 @@ Estruture em:
           {patientData?.multiple && (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Múltiplos pacientes encontrados. Selecione:</p>
-              {patientData.multiple.map((p: { id: string; first_name: string; last_name: string }) => (
+              {patientData.multiple.map((p: any) => (
                 <button
                   key={p.user_id}
                   onClick={() => loadPatientDetails(p)}

@@ -96,7 +96,7 @@ const LaudistaDashboard = () => {
         .order("created_at", { ascending: true })
         .limit(10);
       if (error) throw error;
-      return (data ?? []) as ExamRequest[];
+      return (data ?? []) as any[];
     },
     enabled: !!user,
   });

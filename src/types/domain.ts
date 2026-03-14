@@ -1,7 +1,7 @@
 /** Shared domain types used across components */
 
 /** Generic chart data — any key/value shape for Recharts */
-export type ChartDataPoint = Record<string, string | number>;
+export type ChartDataPoint = Record<string, any>;
 
 export interface SpecialtyJoinRow {
   doctor_id: string;
@@ -141,6 +141,16 @@ export interface ExamRequest {
   created_at: string;
   updated_at?: string;
   notes?: string | null;
+  clinical_info?: string | null;
+  file_urls?: any;
+  priority?: string;
+  sla_hours?: number | null;
+  sla_deadline?: string | null;
+  orthanc_study_uid?: string | null;
+  source?: string | null;
+  specialty_required?: string | null;
+  started_at?: string | null;
+  completed_at?: string | null;
 }
 
 export interface ExamReport {
@@ -151,14 +161,21 @@ export interface ExamReport {
   signed_at?: string | null;
   verification_code?: string | null;
   created_at: string;
+  updated_at?: string;
+  pdf_url?: string | null;
+  document_hash?: string | null;
+  template_id?: string | null;
 }
 
 export interface ReportTemplate {
   id: string;
   title: string;
-  content: string;
+  body_text: string;
+  content?: string;
+  exam_type: string;
   is_active: boolean;
   created_at: string;
+  created_by?: string;
 }
 
 // ─── AI Conversation Types ────────────────────────────────────────────────────
@@ -297,11 +314,18 @@ export interface SubscriptionRow {
   user_id: string;
   plan_id: string;
   status: string;
-  started_at: string;
-  ends_at: string | null;
+  starts_at: string;
+  expires_at: string | null;
+  current_period_end?: string | null;
+  cancelled_at?: string | null;
   payment_method: string | null;
   notes: string | null;
   created_at: string;
+  updated_at?: string;
+  stripe_subscription_id?: string | null;
+  // Joined/computed fields
+  user_name?: string;
+  plan_name?: string;
   profiles?: { first_name: string; last_name: string; email?: string } | null;
   plans?: { name: string; price: number } | null;
 }
@@ -358,11 +382,14 @@ export interface PlanRow {
   name: string;
   price: number;
   description: string | null;
-  features: string[] | null;
+  features: unknown;
   is_active: boolean;
+  interval?: string;
   billing_period?: string | null;
   max_appointments?: number | null;
   created_at?: string;
+  updated_at?: string;
+  stripe_price_id?: string | null;
 }
 
 export interface DoctorPerformanceRow {

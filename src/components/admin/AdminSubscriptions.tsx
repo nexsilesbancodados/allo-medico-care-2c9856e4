@@ -12,7 +12,7 @@ import { getAdminNav } from "./adminNav";
 import { Plus, Search } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { SubscriptionRow } from "@/types/domain";
+import type { SubscriptionRow, PlanRow } from "@/types/domain";
 
 const statusLabel: Record<string, string> = { active: "Ativa", cancelled: "Cancelada", expired: "Expirada", paused: "Pausada" };
 const statusVariant: Record<string, "default" | "destructive" | "outline"> = { active: "default", cancelled: "destructive", expired: "outline", paused: "outline" };
@@ -25,7 +25,7 @@ const AdminSubscriptions = () => {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showForm, setShowForm] = useState(false);
-  const [allUsers, setAllUsers] = useState<{ id: string; first_name: string; last_name: string; email?: string }[]>([]);
+  const [allUsers, setAllUsers] = useState<{ user_id: string; first_name: string; last_name: string; email?: string }[]>([]);
   const [form, setForm] = useState({ user_id: "", plan_id: "", status: "active", notes: "" });
   const [userSearch, setUserSearch] = useState("");
 
@@ -36,7 +36,7 @@ const AdminSubscriptions = () => {
       supabase.from("subscriptions").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("plans").select("id, name, price, interval"),
     ]);
-    setPlans(plansRes.data ?? []);
+    setPlans((plansRes.data ?? []) as unknown as PlanRow[]);
 
     const subsData = subsRes.data ?? [];
     if (subsData.length === 0) { setSubs([]); setLoading(false); return; }
@@ -44,15 +44,15 @@ const AdminSubscriptions = () => {
     const userIds = [...new Set(subsData.map(s => s.user_id))];
     const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds);
     const pMap = new Map(profiles?.map(p => [p.user_id, `${p.first_name} ${p.last_name}`]) ?? []);
-    const planMap = new Map(plansRes.data?.map(p => [p.id, p.name]) ?? []);
+    const planMap = new Map(plansRes.data?.map((p: any) => [p.id, p.name]) ?? []);
 
-    setSubs(subsData.map(s => ({ ...s, user_name: pMap.get(s.user_id) ?? "—", plan_name: planMap.get(s.plan_id) ?? "—" })));
+    setSubs(subsData.map(s => ({ ...s, user_name: pMap.get(s.user_id) ?? "—", plan_name: planMap.get(s.plan_id) ?? "—" } as SubscriptionRow)));
     setLoading(false);
   };
 
   const openCreateForm = async () => {
     const { data } = await supabase.from("profiles").select("user_id, first_name, last_name").order("first_name");
-    setAllUsers(data ?? []);
+    setAllUsers((data ?? []).map((d: any) => ({ user_id: d.user_id, first_name: d.first_name, last_name: d.last_name })));
     setForm({ user_id: "", plan_id: "", status: "active", notes: "" });
     setUserSearch("");
     setShowForm(true);
@@ -65,8 +65,9 @@ const AdminSubscriptions = () => {
     }
     const plan = plans.find(p => p.id === form.plan_id);
     const expiresAt = new Date();
-    if (plan?.interval === "monthly") expiresAt.setMonth(expiresAt.getMonth() + 1);
-    else if (plan?.interval === "yearly") expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+    const interval = (plan as any)?.interval;
+    if (interval === "monthly") expiresAt.setMonth(expiresAt.getMonth() + 1);
+    else if (interval === "yearly") expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     else expiresAt.setMonth(expiresAt.getMonth() + 1);
 
     const { error } = await supabase.from("subscriptions").insert({
@@ -108,7 +109,7 @@ const AdminSubscriptions = () => {
 
   const filteredUsers = allUsers.filter(u =>
     `${u.first_name} ${u.last_name}`.toLowerCase().includes(userSearch.toLowerCase())
-  );
+  ) as any[];
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("subscriptions")}>

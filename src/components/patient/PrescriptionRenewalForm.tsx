@@ -29,7 +29,7 @@ const PrescriptionRenewalForm = () => {
   const [medications, setMedications] = useState("");
   const [sideEffects, setSideEffects] = useState("");
   const [notes, setNotes] = useState("");
-  const [myRenewals, setMyRenewals] = useState<Record<string, unknown>[]>([]);
+  const [myRenewals, setMyRenewals] = useState<any[]>([]);
   const [discountPercent, setDiscountPercent] = useState(0);
 
   // Payment state

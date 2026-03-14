@@ -62,7 +62,7 @@ const motivationalMessages = [
 const DoctorOnboarding = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [data, setData] = useState<{ crm: string; crm_state: string; bio?: string | null; consultation_price?: number | null; experience_years?: number | null } | null>(null);
+  const [data, setData] = useState<any>(null);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {

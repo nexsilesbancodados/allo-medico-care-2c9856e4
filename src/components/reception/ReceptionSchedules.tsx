@@ -9,9 +9,9 @@ import { format, addDays, startOfWeek } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 const ReceptionSchedules = () => {
-  const [doctors, setDoctors] = useState<Record<string, unknown>[]>([]);
+  const [doctors, setDoctors] = useState<any[]>([]);
   const [selectedDoctor, setSelectedDoctor] = useState("all");
-  const [weekAppts, setWeekAppts] = useState<Record<string, unknown>[]>([]);
+  const [weekAppts, setWeekAppts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { fetchDoctors(); }, []);

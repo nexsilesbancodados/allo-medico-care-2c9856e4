@@ -32,8 +32,8 @@ const PartnerDashboard = () => {
   const location = useLocation();
   const [prescriptionCode, setPrescriptionCode] = useState("");
   const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
-  const [foundPrescription, setFoundPrescription] = useState<{ id: string; diagnosis?: string; medications: unknown; created_at: string } | null>(null);
-  const [validations, setValidations] = useState<Record<string, unknown>[]>([]);
+  const [foundPrescription, setFoundPrescription] = useState<any>(null);
+  const [validations, setValidations] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
   const [loading, setLoading] = useState(true);
 

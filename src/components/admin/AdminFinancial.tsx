@@ -32,6 +32,7 @@ interface AppointmentPayment {
   doctor_name?: string;
   patient_name?: string;
   consultation_price?: number;
+  price_at_booking?: number | null;
 }
 
 const statusColors: Record<string, string> = {

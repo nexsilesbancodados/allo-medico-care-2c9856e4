@@ -19,7 +19,7 @@ import { useEffect } from "react";
 const PatientExamUpload = () => {
   const { user } = useAuth();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [documents, setDocuments] = useState<Record<string, unknown>[]>([]);
+  const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [description, setDescription] = useState("");

@@ -31,7 +31,7 @@ const AdminNPS = () => {
       .select("*")
       .order("created_at", { ascending: false });
 
-    const all = (data as { id: string; nps_score: number; feedback?: string | null; created_at: string; appointment_id?: string | null }[]) ?? [];
+    const all = (data as unknown as SurveyRow[]) ?? [];
     setSurveys(all);
 
     if (all.length === 0) { setLoading(false); return; }
@@ -182,7 +182,7 @@ const AdminNPS = () => {
                   <div className="flex items-center gap-6">
                     <ResponsiveContainer width={200} height={200}>
                       <PieChart>
-                        <Pie data={npsDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ percent }) => `${(percent * 100).toFixed(0)}%`}>
+                        <Pie data={npsDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ percent }: { percent: number }) => `${(percent * 100).toFixed(0)}%`}>
                           {npsDistribution.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
                         </Pie>
                         <Tooltip />

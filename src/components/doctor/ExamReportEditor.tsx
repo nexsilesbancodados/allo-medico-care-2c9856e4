@@ -190,7 +190,7 @@ const ExamReportEditor = () => {
     queryFn: async () => {
       const { data, error } = await supabase.from("exam_requests" as any).select("*").eq("id", examId!).maybeSingle();
       if (error) throw error;
-      return data as ExamRequest | null;
+      return data as unknown as ExamRequest | null;
     },
     enabled: !!examId,
   });
@@ -199,7 +199,7 @@ const ExamReportEditor = () => {
     queryKey: ["exam-report-existing", examId],
     queryFn: async () => {
       const { data } = await supabase.from("exam_reports" as any).select("*").eq("exam_request_id", examId!).maybeSingle();
-      return data as ExamReport | null;
+      return data as unknown as ExamReport | null;
     },
     enabled: !!examId,
   });
@@ -208,7 +208,7 @@ const ExamReportEditor = () => {
     queryKey: ["report-templates"],
     queryFn: async () => {
       const { data } = await supabase.from("report_templates" as any).select("*").eq("is_active", true).order("title");
-      return (data ?? []) as ReportTemplate[];
+      return (data ?? []) as unknown as ReportTemplate[];
     },
   });
 
