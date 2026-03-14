@@ -131,11 +131,7 @@ const DoctorDashboard = () => {
                   <p className="text-sm text-muted-foreground mt-0.5">
                     {!loading && (
                       <>
-                        Você tem <span className="font-semibold text-foreground">{stats.today} consultas</span> agendadas para hoje
-                        {data?.pendingReports !== undefined && data.pendingReports > 0 && (
-                          <> e <span className="font-semibold text-foreground">{data.pendingReports} laudos</span> pendentes na fila</>
-                        )}
-                        .
+                        Você tem <span className="font-semibold text-foreground">{stats.today} consultas</span> agendadas para hoje.
                       </>
                     )}
                   </p>
