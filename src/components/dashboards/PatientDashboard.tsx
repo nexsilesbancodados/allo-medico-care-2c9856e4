@@ -595,46 +595,6 @@ const PatientDashboard = () => {
           <CreditsWidget />
         </motion.div>
 
-        {/* ═══ Referral card — gradient accent ═══ */}
-        {referralCode && (
-          <motion.div variants={fadeUp}>
-            <Card className="relative border-0 overflow-hidden rounded-2xl shadow-lg">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-card to-secondary/10" />
-              <CardContent className="relative p-5">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-                    <Share2 className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <p className="text-sm font-bold text-foreground tracking-tight">Indique e Ganhe</p>
-                      {credits > 0 && (
-                        <Badge className="text-[10px] font-bold bg-success/15 text-success border-0 px-2 py-0.5">
-                          R$ {credits.toFixed(2)}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Convide amigos e ganhe <span className="font-semibold text-foreground">R$ 10</span> de crédito.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 text-[11px] bg-card/80 border border-border/50 rounded-xl px-3.5 py-3 truncate font-mono text-muted-foreground select-all backdrop-blur-sm">
-                    {window.location.origin}/convite/{referralCode}
-                  </div>
-                  <Button
-                    size="icon"
-                    className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
-                    onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/convite/${referralCode}`); }}
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
       </motion.div>
     </DashboardLayout>
   );
