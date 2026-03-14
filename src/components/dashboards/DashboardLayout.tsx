@@ -36,7 +36,7 @@ interface BeforeInstallPromptEvent extends Event {
 const ROLE_LABELS: Record<string, string> = {
   patient:"Paciente", doctor:"Médico", admin:"Administrador",
   receptionist:"Recepção", support:"Suporte", clinic:"Clínica",
-  partner:"Parceiro", affiliate:"Afiliado", ai:"Assistente IA",
+  partner:"Parceiro", ai:"Assistente IA",
 };
 const ROLE_COLORS: Record<string, string> = {
   patient:"bg-primary/10 text-primary border-primary/20",
