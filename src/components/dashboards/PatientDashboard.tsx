@@ -14,7 +14,7 @@ import { motion } from "framer-motion";
 import {
   Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp,
   Bell, CheckCircle2, AlertCircle, Star, Activity, RefreshCw,
-  Gift, Share2, Copy, ClipboardList, Stethoscope, Smile, ChevronRight,
+  Gift, ClipboardList, Stethoscope, Smile, ChevronRight,
   Pill, User, CreditCard, ArrowRight, Sparkles, CalendarPlus, Shield, Flame
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";

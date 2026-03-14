@@ -19,7 +19,7 @@ const SUBDOMAIN_ROUTES: Record<string, string> = {
   admin: "/admin",
   clinica: "/clinica",
   parceiro: "/parceiro",
-  afiliado: "/afiliado",
+  
   recepcionista: "/recepcionista",
   suporte: "/suporte",
   laudista: "/laudista",

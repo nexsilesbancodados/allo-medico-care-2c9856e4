@@ -144,7 +144,7 @@ const App = () => {
             <Route path="/recepcionista" element={<AuthRecepcionista />} />
             <Route path="/suporte" element={<AuthSuporte />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/convite/:code" element={<AuthPaciente />} />
+            
             <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
             <Route path="/l/:id" element={<LinkRedirect />} />
             <Route path="/validar/:id" element={<ValidateDocument />} />
