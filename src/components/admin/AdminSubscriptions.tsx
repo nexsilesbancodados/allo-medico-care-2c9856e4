@@ -52,7 +52,7 @@ const AdminSubscriptions = () => {
 
   const openCreateForm = async () => {
     const { data } = await supabase.from("profiles").select("user_id, first_name, last_name").order("first_name");
-    setAllUsers(data ?? []);
+    setAllUsers((data ?? []).map((d: any) => ({ user_id: d.user_id, first_name: d.first_name, last_name: d.last_name })));
     setForm({ user_id: "", plan_id: "", status: "active", notes: "" });
     setUserSearch("");
     setShowForm(true);
