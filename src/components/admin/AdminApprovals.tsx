@@ -165,7 +165,7 @@ const AdminApprovals = () => {
   const totalPending = pendingDoctors.length + pendingClinics.length + pendingPartners.length;
   const partnerTypeLabel: Record<string, string> = { pharmacy: "Farmácia", laboratory: "Laboratório", clinic: "Clínica", other: "Outro" };
 
-  const renderApprovalCard = (item: ApprovalItem, type: "doctor" | "clinic" | "partner" | "affiliate", isApproved: boolean) => (
+  const renderApprovalCard = (item: ApprovalItem, type: "doctor" | "clinic" | "partner", isApproved: boolean) => (
     <Card key={item.id} className="border-border hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
