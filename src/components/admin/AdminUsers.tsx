@@ -112,7 +112,7 @@ const AdminUsers = () => {
       await supabase.from("user_roles").upsert({ user_id: selected.user_id, role: role as "admin" | "clinic" | "doctor" | "partner" | "patient" | "receptionist" | "support" });
     }
     for (const role of toRemove) {
-      await supabase.from("user_roles").delete().eq("user_id", selected.user_id).eq("role", role as "admin" | "affiliate" | "clinic" | "doctor" | "partner" | "patient" | "receptionist" | "support");
+      await supabase.from("user_roles").delete().eq("user_id", selected.user_id).eq("role", role as "admin" | "clinic" | "doctor" | "partner" | "patient" | "receptionist" | "support");
     }
 
     toast.success("Roles atualizadas! ✅");
