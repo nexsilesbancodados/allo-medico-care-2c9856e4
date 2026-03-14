@@ -136,9 +136,13 @@ const VideoRoom = () => {
     };
   }, [appointmentId]);
 
-  // ─── Queue position check (patients only) ───
+  // ─── Queue position check (patients only) — realtime + polling fallback ───
   useEffect(() => {
     if (!appointment || isDoctor) return;
+    let pollActive = true;
+    let pollInterval = 8000;
+    let pollTimeout: ReturnType<typeof setTimeout>;
+
     const checkQueue = async () => {
       const { data: activeAppts } = await supabase
         .from("appointments")
@@ -164,14 +168,28 @@ const VideoRoom = () => {
     };
     checkQueue();
 
+    // Primary: realtime
     const queueChannel = supabase
       .channel(`queue-${appointment.doctor_id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "appointments", filter: `doctor_id=eq.${appointment.doctor_id}` }, () => {
         checkQueue();
+        pollInterval = 8000; // reset backoff on realtime event
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(queueChannel); };
+    // Fallback: polling with exponential backoff
+    const poll = async () => {
+      await checkQueue();
+      pollInterval = Math.min(pollInterval * 1.3, 30000);
+      if (pollActive) pollTimeout = setTimeout(poll, pollInterval);
+    };
+    pollTimeout = setTimeout(poll, pollInterval);
+
+    return () => {
+      pollActive = false;
+      clearTimeout(pollTimeout);
+      supabase.removeChannel(queueChannel);
+    };
   }, [appointment, isDoctor]);
 
   // ─── Timer ───
@@ -181,26 +199,101 @@ const VideoRoom = () => {
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, [deviceChecked]);
 
-  // ─── Realtime chat ───
+  // ─── Load persisted chat messages on mount ───
+  useEffect(() => {
+    if (!appointmentId) return;
+    const loadMessages = async () => {
+      const { data } = await supabase
+        .from("messages")
+        .select("id, content, sender_id, created_at")
+        .eq("appointment_id", appointmentId)
+        .order("created_at", { ascending: true });
+      if (data && data.length > 0) {
+        const loaded: ChatMessage[] = data.map(m => ({
+          id: m.id,
+          sender: m.sender_id === user?.id ? (isDoctor ? "doctor" : "patient") : (isDoctor ? "patient" : "doctor"),
+          text: m.content,
+          time: format(new Date(m.created_at), "HH:mm"),
+        }));
+        setMessages(loaded);
+      }
+    };
+    loadMessages();
+  }, [appointmentId, user, isDoctor]);
+
+  // ─── Realtime chat (postgres_changes + broadcast fallback) ───
+  const lastMsgIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!appointmentId || !user) return;
 
-    const roomChannel = supabase.channel(`video-room-${appointmentId}`, {
-      config: { broadcast: { self: false } },
-    });
-    channelRef.current = roomChannel;
-
-    roomChannel
-      .on("broadcast", { event: "chat-message" }, ({ payload }) => {
-        setMessages((prev) => [...prev, payload as ChatMessage]);
-        if (!showChat) setUnreadCount(prev => prev + 1);
-      })
+    // Primary: postgres_changes for persisted messages
+    const roomChannel = supabase.channel(`video-room-${appointmentId}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "messages", filter: `appointment_id=eq.${appointmentId}` },
+        (payload) => {
+          const newMsg = payload.new as any;
+          if (newMsg.sender_id === user.id) return; // skip own messages
+          if (lastMsgIdRef.current === newMsg.id) return; // deduplicate
+          lastMsgIdRef.current = newMsg.id;
+          const msg: ChatMessage = {
+            id: newMsg.id,
+            sender: isDoctor ? "patient" : "doctor",
+            text: newMsg.content,
+            time: format(new Date(newMsg.created_at), "HH:mm"),
+          };
+          setMessages(prev => [...prev, msg]);
+          if (!showChat) setUnreadCount(prev => prev + 1);
+        }
+      )
       .subscribe();
 
+    channelRef.current = roomChannel;
+
+    // Fallback polling: every 5s check for new messages
+    let pollActive = true;
+    let pollInterval = 5000;
+    let lastPollTime = new Date().toISOString();
+    let pollTimeout: ReturnType<typeof setTimeout>;
+
+    const pollChat = async () => {
+      const { data } = await supabase
+        .from("messages")
+        .select("id, content, sender_id, created_at")
+        .eq("appointment_id", appointmentId)
+        .gt("created_at", lastPollTime)
+        .neq("sender_id", user.id)
+        .order("created_at", { ascending: true });
+
+      if (data && data.length > 0) {
+        lastPollTime = data[data.length - 1].created_at;
+        setMessages(prev => {
+          const existingIds = new Set(prev.map(m => m.id));
+          const newMsgs = data
+            .filter(m => !existingIds.has(m.id))
+            .map(m => ({
+              id: m.id,
+              sender: (isDoctor ? "patient" : "doctor") as "patient" | "doctor",
+              text: m.content,
+              time: format(new Date(m.created_at), "HH:mm"),
+            }));
+          if (newMsgs.length > 0 && !showChat) setUnreadCount(c => c + newMsgs.length);
+          return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev;
+        });
+        pollInterval = 5000; // reset on activity
+      } else {
+        pollInterval = Math.min(pollInterval * 1.3, 15000); // back off
+      }
+      if (pollActive) pollTimeout = setTimeout(pollChat, pollInterval);
+    };
+    pollTimeout = setTimeout(pollChat, pollInterval);
+
     return () => {
+      pollActive = false;
+      clearTimeout(pollTimeout);
       supabase.removeChannel(roomChannel);
     };
-  }, [appointmentId, user]);
+  }, [appointmentId, user, isDoctor]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -317,8 +410,9 @@ const VideoRoom = () => {
     return `${h > 0 ? `${h}:` : ""}${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
-  const sendMessage = (fileUrl?: string, fileName?: string, fileType?: string) => {
+  const sendMessage = async (fileUrl?: string, fileName?: string, fileType?: string) => {
     if (!chatInput.trim() && !fileUrl) return;
+    const content = chatInput.trim() || (fileName ? `[Arquivo: ${fileName}]` : "");
     const msg: ChatMessage = {
       id: Date.now().toString(),
       sender: isDoctor ? "doctor" : "patient",
@@ -329,8 +423,21 @@ const VideoRoom = () => {
       fileType,
     };
     setMessages((prev) => [...prev, msg]);
-    channelRef.current?.send({ type: "broadcast", event: "chat-message", payload: msg });
     setChatInput("");
+
+    // Persist to DB
+    if (appointmentId && user) {
+      const { data: inserted } = await supabase.from("messages").insert({
+        appointment_id: appointmentId,
+        sender_id: user.id,
+        content: fileUrl ? `${content}\n${fileUrl}` : content,
+      }).select("id").single();
+      // Update local ID with DB id for deduplication
+      if (inserted) {
+        msg.id = inserted.id;
+        lastMsgIdRef.current = inserted.id;
+      }
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
