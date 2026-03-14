@@ -43,7 +43,7 @@ const GuestCheckout = lazy(() => import("./pages/GuestCheckout"));
 const GuestConsultation = lazy(() => import("./pages/GuestConsultation"));
 const GuestRating = lazy(() => import("./pages/GuestRating"));
 const AuthParceiro = lazy(() => import("./pages/AuthParceiro"));
-const AuthAfiliado = lazy(() => import("./pages/AuthAfiliado"));
+
 const AuthClinica = lazy(() => import("./pages/AuthClinica"));
 const AuthRecepcionista = lazy(() => import("./pages/AuthRecepcionista"));
 const AuthSuporte = lazy(() => import("./pages/AuthSuporte"));
