@@ -123,9 +123,9 @@ serve(async (req) => {
         });
         results.email = await emailRes.json();
         console.log("Email sent:", results.email);
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("Email send error:", e);
-        results.email = { error: e.message };
+        results.email = { error: e instanceof Error ? e.message : String(e) };
       }
     }
 
