@@ -173,7 +173,6 @@ const Dashboard = () => {
     : roles.includes("support") ? "support"
     : roles.includes("clinic") ? "clinic"
     : roles.includes("partner") ? "partner"
-    : roles.includes("affiliate") ? "affiliate"
     : "patient";
 
   // Determine which dashboard to show at index based on the current role context
