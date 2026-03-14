@@ -46,7 +46,7 @@ const ClinicDoctorsManagement = () => {
   const [doctors, setDoctors] = useState<ClinicDoctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchCrm, setSearchCrm] = useState("");
-  const [searchResult, setSearchResult] = useState<{ id: string; user_id: string; crm: string; crm_state: string } | null>(null);
+  const [searchResult, setSearchResult] = useState<any>(null);
   const [searching, setSearching] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [inviteEmail, setInviteEmail] = useState("");

@@ -250,7 +250,7 @@ Estruture em:
           {patientData?.multiple && (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Múltiplos pacientes encontrados. Selecione:</p>
-              {patientData.multiple.map((p: { id: string; first_name: string; last_name: string }) => (
+              {patientData.multiple.map((p: any) => (
                 <button
                   key={p.user_id}
                   onClick={() => loadPatientDetails(p)}
