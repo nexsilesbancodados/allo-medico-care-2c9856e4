@@ -12,7 +12,7 @@ import { getAdminNav } from "./adminNav";
 import { Plus, Search } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import type { SubscriptionRow } from "@/types/domain";
+import type { SubscriptionRow, PlanRow } from "@/types/domain";
 
 const statusLabel: Record<string, string> = { active: "Ativa", cancelled: "Cancelada", expired: "Expirada", paused: "Pausada" };
 const statusVariant: Record<string, "default" | "destructive" | "outline"> = { active: "default", cancelled: "destructive", expired: "outline", paused: "outline" };
@@ -25,7 +25,7 @@ const AdminSubscriptions = () => {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showForm, setShowForm] = useState(false);
-  const [allUsers, setAllUsers] = useState<{ id: string; first_name: string; last_name: string; email?: string }[]>([]);
+  const [allUsers, setAllUsers] = useState<{ user_id: string; first_name: string; last_name: string; email?: string }[]>([]);
   const [form, setForm] = useState({ user_id: "", plan_id: "", status: "active", notes: "" });
   const [userSearch, setUserSearch] = useState("");
 
