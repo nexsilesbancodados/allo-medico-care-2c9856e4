@@ -51,8 +51,8 @@ const SupportChat = () => {
       .channel("support-chat-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_chat_messages", filter: `user_id=eq.${user.id}` }, (payload) => {
         const newMsg = payload.new as any;
-        if (newMsg.sender_id !== user?.id) {
-          setMessages(prev => [...prev, { role: "support" as const, content: newMsg.message || newMsg.content || "" }]);
+        if (newMsg.role === "support" || newMsg.role === "assistant") {
+          setMessages(prev => [...prev, { role: newMsg.role as "support" | "assistant", content: newMsg.content || "" }]);
           setOtherTyping(false);
         }
       })
