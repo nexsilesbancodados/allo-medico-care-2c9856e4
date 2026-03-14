@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -97,8 +97,8 @@ const faqItems = [
 
 const AuthMedico = () => {
   const [searchParams] = useSearchParams();
-  const hasLoginAccess = useMemo(() => searchParams.get("acesso") === "entrar", [searchParams]);
-  const [step, setStep] = useState<Step>(hasLoginAccess ? "welcome" : "quiz");
+  const hasLoginAccess = true; // Login always accessible
+  const [step, setStep] = useState<Step>(searchParams.get("acesso") === "entrar" ? "welcome" : "quiz");
   const [inviteCode, setInviteCode] = useState("");
   const [validatedCodeId, setValidatedCodeId] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
@@ -251,8 +251,8 @@ const AuthMedico = () => {
                 <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl" onClick={scrollToForm}>
                   Cadastrar como Médico <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-                <Button size="default" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl px-6 font-semibold" asChild>
-                  <a href="#como-funciona">Como funciona</a>
+                <Button size="default" variant="ghost" className="text-white border border-white/30 hover:bg-white/10 rounded-2xl px-6 font-semibold" onClick={() => { setStep("login"); scrollToForm(); }}>
+                  <LogIn className="w-4 h-4 mr-2" /> Já sou cadastrado
                 </Button>
               </div>
               <div className="flex flex-wrap items-center gap-4 mt-6">
@@ -413,7 +413,11 @@ const AuthMedico = () => {
                     <Button className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={!specialty || !consultationType} onClick={() => setStep("apply")}>
                       Continuar para Cadastro <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
-                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => hasLoginAccess ? setStep("welcome") : navigate("/")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
+                    <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                      <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                      <span className="text-border">|</span>
+                      <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Já tenho conta</button>
+                    </div>
                   </div>
                 )}
 
@@ -445,7 +449,11 @@ const AuthMedico = () => {
                     <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={submittingApplication}>
                       {submittingApplication ? <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2"><Sparkles className="w-4 h-4 animate-spin" /> Enviando...</motion.span> : "Enviar Solicitação"}
                     </Button>
-                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => setStep("quiz")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
+                    <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                      <button type="button" onClick={() => setStep("quiz")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                      <span className="text-border">|</span>
+                      <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Já tenho conta</button>
+                    </div>
                   </form>
                 )}
 
