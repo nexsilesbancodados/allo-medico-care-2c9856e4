@@ -94,10 +94,13 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
     };
   }, []);
 
-  // Poll appointment status for doctor presence
+  // Poll appointment status for doctor presence — realtime + polling fallback
   useEffect(() => {
     if (!appointmentId || isDoctor) return;
     setPollingStatus(true);
+    let pollActive = true;
+    let statusPollInterval = 5000;
+    let statusPollTimeout: ReturnType<typeof setTimeout>;
 
     const channel = supabase
       .channel(`precall-${appointmentId}`)
@@ -108,6 +111,7 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
           if (payload.new.status === "medico_presente" || payload.new.status === "in_progress") {
             setDoctorPresent(true);
           }
+          statusPollInterval = 5000; // reset on realtime event
         }
       )
       .subscribe();
@@ -116,9 +120,20 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
       const { data } = await supabase.from("appointments").select("status").eq("id", appointmentId).single();
       if (data && (data.status === "medico_presente" || data.status === "in_progress")) {
         setDoctorPresent(true);
+        return true;
       }
+      return false;
     };
     checkNow();
+
+    // Fallback polling for doctor presence
+    const pollStatus = async () => {
+      const found = await checkNow();
+      if (found) return; // stop polling once doctor is present
+      statusPollInterval = Math.min(statusPollInterval * 1.2, 20000);
+      if (pollActive) statusPollTimeout = setTimeout(pollStatus, statusPollInterval);
+    };
+    statusPollTimeout = setTimeout(pollStatus, statusPollInterval);
 
     const checkPosition = async () => {
       const { data } = await supabase
@@ -135,7 +150,12 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
     checkPosition();
     const posInterval = setInterval(checkPosition, 15000);
 
-    return () => { supabase.removeChannel(channel); clearInterval(posInterval); };
+    return () => {
+      pollActive = false;
+      clearTimeout(statusPollTimeout);
+      supabase.removeChannel(channel);
+      clearInterval(posInterval);
+    };
   }, [appointmentId, isDoctor]);
 
   // Waiting room chat
