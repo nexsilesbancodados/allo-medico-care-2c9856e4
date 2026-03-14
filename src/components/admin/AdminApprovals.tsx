@@ -301,10 +301,6 @@ const AdminApprovals = () => {
               <Handshake className="w-4 h-4 mr-1" /> Parceiros
               {pendingPartners.length > 0 && <Badge variant="destructive" className="ml-1 text-xs h-5 w-5 p-0 flex items-center justify-center">{pendingPartners.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="affiliates" className="gap-1">
-              <Megaphone className="w-4 h-4 mr-1" /> Afiliados
-              {pendingAffiliates.length > 0 && <Badge variant="destructive" className="ml-1 text-xs h-5 w-5 p-0 flex items-center justify-center">{pendingAffiliates.length}</Badge>}
-            </TabsTrigger>
           </TabsList>
 
           {loading ? <p className="text-sm text-muted-foreground mt-4">Carregando...</p> : (
