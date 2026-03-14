@@ -52,7 +52,7 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
+  
   const [onboardingDone] = useLocalStorage<boolean>(ONBOARDING_KEY, false);
   const kpiRef = useGsapEntrance({ stagger: 0.07, y: 12, delay: 0.3 });
   const sectionsRef = useGsapEntrance({ stagger: 0.08, y: 18, scroll: true });
