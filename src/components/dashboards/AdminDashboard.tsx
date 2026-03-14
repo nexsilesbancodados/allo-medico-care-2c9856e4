@@ -292,7 +292,7 @@ const AdminDashboard = () => {
                 const created = data?.users?.filter((u: any) => u.status === "created").length ?? 0;
                 const existing = data?.users?.filter((u: any) => u.status === "already_exists").length ?? 0;
                 toast.success(`${created} criados, ${existing} já existiam`);
-              } catch (e: unknown) { toast.dismiss(); toast.error(e.message); }
+              } catch (e: unknown) { toast.dismiss(); toast.error(e instanceof Error ? e.message : "Erro"); }
             }}>
               <UserPlus className="w-4 h-4" /> Seed
             </Button>

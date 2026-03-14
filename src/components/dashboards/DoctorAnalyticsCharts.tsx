@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ComposedChart, Line, PieChart, Pie, Cell, RadialBarChart, RadialBar } from "recharts";
 import { format, subDays, startOfDay, getDay, getHours, subMonths, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { ChartDataPoint } from "@/types/domain";
 
 const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--destructive))", "hsl(var(--muted-foreground))", "hsl(var(--accent))"];
