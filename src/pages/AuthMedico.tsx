@@ -449,7 +449,11 @@ const AuthMedico = () => {
                     <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={submittingApplication}>
                       {submittingApplication ? <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2"><Sparkles className="w-4 h-4 animate-spin" /> Enviando...</motion.span> : "Enviar Solicitação"}
                     </Button>
-                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => setStep("quiz")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
+                    <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                      <button type="button" onClick={() => setStep("quiz")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                      <span className="text-border">|</span>
+                      <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Já tenho conta</button>
+                    </div>
                   </form>
                 )}
 
