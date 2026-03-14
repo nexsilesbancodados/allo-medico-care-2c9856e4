@@ -35,7 +35,7 @@ serve(async (req) => {
     const results: Record<string, unknown>[] = [];
 
     for (const u of TEST_USERS) {
-      const existingUser = existingMap.get(u.email);
+      const existingUser = existingMap.get(u.email) as any;
 
       if (existingUser) {
         const userId = existingUser.id;
