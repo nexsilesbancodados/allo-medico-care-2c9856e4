@@ -181,7 +181,7 @@ const DoctorDashboard = () => {
             ) : (
               [
                 { label: "Pacientes de Hoje", value: stats.today, icon: Users, sub: `+${done} concluído${done !== 1 ? 's' : ''}`, color: "text-primary", bg: "bg-primary/10" },
-                { label: "Laudos Pendentes", value: data?.pendingReports ?? 0, icon: FileText, sub: "Necessário atenção", color: "text-warning", bg: "bg-warning/10" },
+                { label: "Receitas", value: stats.prescriptions, icon: FileText, sub: "Total emitidas", color: "text-warning", bg: "bg-warning/10" },
                 { label: "Ganhos Mensais", value: `R$ ${(stats.totalEarnings / 1000).toFixed(1)}k`, icon: DollarSign, sub: "Este mês", color: "text-success", bg: "bg-success/10" },
                 { label: "Tempo Médio", value: "30m", icon: Clock, sub: "Por consulta", color: "text-secondary", bg: "bg-secondary/10" },
               ].map((kpi, i) => (
