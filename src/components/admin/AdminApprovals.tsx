@@ -174,7 +174,6 @@ const AdminApprovals = () => {
               <AvatarFallback className="bg-primary/10 text-primary">
                 {type === "doctor" ? `${item.first_name?.[0] ?? ""}${item.last_name?.[0] ?? ""}` :
                   type === "clinic" ? item.name?.[0] ?? "C" : 
-                  type === "affiliate" ? `${item.first_name?.[0] ?? ""}${item.last_name?.[0] ?? ""}` :
                   item.business_name?.[0] ?? "P"}
               </AvatarFallback>
             </Avatar>
