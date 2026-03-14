@@ -83,8 +83,8 @@ serve(async (req) => {
           }),
         });
         results.push(`email: ${emailRes.ok ? "sent" : "failed"}`);
-      } catch (e) {
-        results.push(`email: error - ${e.message}`);
+      } catch (e: unknown) {
+        results.push(`email: error - ${e instanceof Error ? e.message : String(e)}`);
       }
     }
 
