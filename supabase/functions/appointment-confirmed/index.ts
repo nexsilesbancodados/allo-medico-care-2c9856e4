@@ -101,8 +101,8 @@ serve(async (req) => {
           body: JSON.stringify({ phone: patient.phone, message: msg }),
         });
         results.push(`whatsapp: ${waRes.ok ? "sent" : "failed"}`);
-      } catch (e) {
-        results.push(`whatsapp: error - ${e.message}`);
+      } catch (e: unknown) {
+        results.push(`whatsapp: error - ${e instanceof Error ? e.message : String(e)}`);
       }
     }
 
