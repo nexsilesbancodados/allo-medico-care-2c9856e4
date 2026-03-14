@@ -95,7 +95,7 @@ const AdminWhatsApp = () => {
         }
       }
     } catch (err: unknown) {
-      toast.error(err.message || "Erro ao obter QR code");
+      toast.error(err instanceof Error ? err.message : "Erro ao obter QR code");
     } finally {
       setLoading(false);
     }
