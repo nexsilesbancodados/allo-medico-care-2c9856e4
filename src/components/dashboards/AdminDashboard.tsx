@@ -26,7 +26,7 @@ const panelOptions = [
   { label: "Suporte", role: "support", icon: "🎧", description: "Ver como suporte" },
   { label: "Clínica", role: "clinic", icon: "🏢", description: "Ver como clínica" },
   { label: "Parceiro", role: "partner", icon: "🤝", description: "Ver como parceiro" },
-  { label: "Afiliado", role: "affiliate", icon: "📣", description: "Ver como afiliado" },
+  
   { label: "Assistente IA", role: "ai-assistant", icon: "🤖", description: "Chat inteligente com IA" },
 ];
 

@@ -45,7 +45,7 @@ const roleColor: Record<string, string> = {
   clinic: "bg-accent text-accent-foreground border-border",
   receptionist: "bg-muted text-muted-foreground border-border",
   partner: "bg-success/10 text-success border-success/20",
-  affiliate: "bg-muted text-muted-foreground border-border",
+  
 };
 
 const LOG_TYPES = [

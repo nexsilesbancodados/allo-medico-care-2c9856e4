@@ -32,18 +32,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
     return () => { if (prev && prev !== "light") setTheme(prev); };
   }, []);
 
-  // Capture affiliate referral code from URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const refCode = params.get("ref");
-    if (!refCode) return;
-
-    try {
-      sessionStorage.setItem("ref_code", refCode);
-    } catch (error) {
-      logError("Index referral code save failed", error);
-    }
-  }, []);
 
   useEffect(() => {
     const handler = () => setShowQuiz(true);

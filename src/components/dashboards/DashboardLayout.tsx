@@ -61,7 +61,7 @@ const ROLE_GRADIENT: Record<string, string> = {
   support:"from-yellow-500 to-amber-500",
   clinic:"from-blue-500 to-indigo-500",
   partner:"from-green-500 to-emerald-500",
-  affiliate:"from-purple-500 to-violet-500",
+  
   ai:"from-sky-500 to-blue-500",
 };
 
