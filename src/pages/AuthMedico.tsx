@@ -97,8 +97,8 @@ const faqItems = [
 
 const AuthMedico = () => {
   const [searchParams] = useSearchParams();
-  const hasLoginAccess = useMemo(() => searchParams.get("acesso") === "entrar", [searchParams]);
-  const [step, setStep] = useState<Step>(hasLoginAccess ? "welcome" : "quiz");
+  const hasLoginAccess = true; // Login always accessible
+  const [step, setStep] = useState<Step>(searchParams.get("acesso") === "entrar" ? "welcome" : "quiz");
   const [inviteCode, setInviteCode] = useState("");
   const [validatedCodeId, setValidatedCodeId] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
