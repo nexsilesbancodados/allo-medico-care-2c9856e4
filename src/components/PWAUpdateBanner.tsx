@@ -2,27 +2,40 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RefreshCw, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRegisterSW } from "virtual:pwa-register/react";
 
 /**
- * Shows a toast-style banner when a new PWA version is available.
- * Uses vite-plugin-pwa's useRegisterSW hook.
+ * Shows a banner when a new PWA service worker version is available.
+ * Uses native Service Worker API — no virtual module dependencies.
  */
 const PWAUpdateBanner = () => {
   const [show, setShow] = useState(false);
-
-  const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
-    onRegistered: () => {},
-    onRegisterError: () => {},
-  });
+  const [waitingWorker, setWaitingWorker] = useState<ServiceWorker | null>(null);
 
   useEffect(() => {
-    if (needRefresh) setShow(true);
-  }, [needRefresh]);
+    if (!("serviceWorker" in navigator)) return;
+
+    navigator.serviceWorker.ready.then((registration) => {
+      if (registration.waiting) {
+        setWaitingWorker(registration.waiting);
+        setShow(true);
+      }
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+        if (!newWorker) return;
+        newWorker.addEventListener("statechange", () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            setWaitingWorker(newWorker);
+            setShow(true);
+          }
+        });
+      });
+    }).catch(() => {});
+  }, []);
 
   const handleUpdate = () => {
-    updateServiceWorker(true);
+    waitingWorker?.postMessage({ type: "SKIP_WAITING" });
     setShow(false);
+    window.location.reload();
   };
 
   return (
@@ -37,8 +50,7 @@ const PWAUpdateBanner = () => {
           role="alert"
           aria-live="polite"
         >
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl"
-            style={{ boxShadow: "0 20px 48px -8px rgba(0,0,0,0.25)" }}>
+          <div className="relative rounded-2xl overflow-hidden shadow-2xl">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/15 pointer-events-none" />
             <div className="relative bg-card/97 backdrop-blur-2xl m-[1px] rounded-[15px] p-4">
               <div className="flex items-center gap-3">
