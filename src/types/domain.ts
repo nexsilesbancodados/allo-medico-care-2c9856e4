@@ -141,6 +141,16 @@ export interface ExamRequest {
   created_at: string;
   updated_at?: string;
   notes?: string | null;
+  clinical_info?: string | null;
+  file_urls?: any;
+  priority?: string;
+  sla_hours?: number | null;
+  sla_deadline?: string | null;
+  orthanc_study_uid?: string | null;
+  source?: string | null;
+  specialty_required?: string | null;
+  started_at?: string | null;
+  completed_at?: string | null;
 }
 
 export interface ExamReport {
@@ -151,14 +161,21 @@ export interface ExamReport {
   signed_at?: string | null;
   verification_code?: string | null;
   created_at: string;
+  updated_at?: string;
+  pdf_url?: string | null;
+  document_hash?: string | null;
+  template_id?: string | null;
 }
 
 export interface ReportTemplate {
   id: string;
   title: string;
-  content: string;
+  body_text: string;
+  content?: string;
+  exam_type: string;
   is_active: boolean;
   created_at: string;
+  created_by?: string;
 }
 
 // ─── AI Conversation Types ────────────────────────────────────────────────────
