@@ -20,7 +20,7 @@ const ROLE_LABELS: Record<string, string> = {
   receptionist: "Recepção",
   support: "Suporte",
   partner: "Parceiro",
-  affiliate: "Afiliado",
+  
 };
 
 const ROLE_COLORS: Record<string, string> = {
