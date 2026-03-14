@@ -22,7 +22,7 @@ async function generatePKCE() {
 }
 
 function base64UrlEncode(buffer: Uint8Array): string {
-  const base64 = base64Encode(buffer);
+  const base64 = base64Encode(buffer as unknown as ArrayBuffer);
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
