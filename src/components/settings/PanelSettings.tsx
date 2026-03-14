@@ -23,7 +23,6 @@ const roleLabels: Record<string, string> = {
   support: "Suporte",
   clinic: "Clínica",
   partner: "Parceiro",
-  affiliate: "Afiliado",
 };
 
 function getNavForRole(role: string) {
