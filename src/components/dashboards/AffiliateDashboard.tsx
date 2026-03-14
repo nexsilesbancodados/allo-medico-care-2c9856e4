@@ -34,8 +34,12 @@ interface AffiliateReferral {
   id: string;
   status: string;
   created_at: string;
-  referred_user_id?: string;
-  commission_amount?: number;
+  referred_user_id?: string | null;
+  referrer_id?: string;
+  referral_code?: string;
+  source?: string | null;
+  converted_at?: string | null;
+  commission_amount?: number | null;
 }
 
 interface AffiliateWithdrawal {
