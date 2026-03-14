@@ -136,9 +136,13 @@ const VideoRoom = () => {
     };
   }, [appointmentId]);
 
-  // ─── Queue position check (patients only) ───
+  // ─── Queue position check (patients only) — realtime + polling fallback ───
   useEffect(() => {
     if (!appointment || isDoctor) return;
+    let pollActive = true;
+    let pollInterval = 8000;
+    let pollTimeout: ReturnType<typeof setTimeout>;
+
     const checkQueue = async () => {
       const { data: activeAppts } = await supabase
         .from("appointments")
@@ -164,14 +168,28 @@ const VideoRoom = () => {
     };
     checkQueue();
 
+    // Primary: realtime
     const queueChannel = supabase
       .channel(`queue-${appointment.doctor_id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "appointments", filter: `doctor_id=eq.${appointment.doctor_id}` }, () => {
         checkQueue();
+        pollInterval = 8000; // reset backoff on realtime event
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(queueChannel); };
+    // Fallback: polling with exponential backoff
+    const poll = async () => {
+      await checkQueue();
+      pollInterval = Math.min(pollInterval * 1.3, 30000);
+      if (pollActive) pollTimeout = setTimeout(poll, pollInterval);
+    };
+    pollTimeout = setTimeout(poll, pollInterval);
+
+    return () => {
+      pollActive = false;
+      clearTimeout(pollTimeout);
+      supabase.removeChannel(queueChannel);
+    };
   }, [appointment, isDoctor]);
 
   // ─── Timer ───
