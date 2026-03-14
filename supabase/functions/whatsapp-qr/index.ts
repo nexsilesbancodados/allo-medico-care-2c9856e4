@@ -6,12 +6,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Create an HTTP client that skips TLS certificate verification
-// Needed because the Evolution API server uses an invalid certificate
-const httpClient = Deno.createHttpClient({ caCerts: [], proxy: { url: "" } });
+// Workaround: Evolution API has an invalid TLS certificate (CaUsedAsEndEntity).
+// Use Deno.createHttpClient to create a client that doesn't verify certs.
+let httpClient: Deno.HttpClient | undefined;
+try {
+  httpClient = Deno.createHttpClient({ caCerts: [] });
+} catch {
+  // Fallback if createHttpClient not available
+}
 
-const fetchInsecure = (url: string, opts: RequestInit = {}) =>
-  fetch(url, { ...opts, client: httpClient } as any);
+const fetchEvo = (url: string, opts: RequestInit = {}): Promise<Response> => {
+  if (httpClient) {
+    return fetch(url, { ...opts, client: httpClient } as RequestInit & { client: Deno.HttpClient });
+  }
+  return fetch(url, opts);
+};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
