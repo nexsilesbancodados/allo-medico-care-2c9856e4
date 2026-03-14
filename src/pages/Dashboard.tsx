@@ -19,7 +19,7 @@ const AdminDashboard = lazy(() => import("@/components/dashboards/AdminDashboard
 const ReceptionDashboard = lazy(() => import("@/components/dashboards/ReceptionDashboard"));
 const SupportDashboard = lazy(() => import("@/components/dashboards/SupportDashboard"));
 const PartnerDashboard = lazy(() => import("@/components/dashboards/PartnerDashboard"));
-const AffiliateDashboard = lazy(() => import("@/components/dashboards/AffiliateDashboard"));
+
 
 // Patient
 const DoctorSearch = lazy(() => import("@/components/patient/DoctorSearch"));
@@ -128,7 +128,7 @@ const Dashboard = () => {
   usePresence();
 
   // Check if patient has active plan
-  const isPatientOnly = !loading && user && roles.includes("patient") && !roles.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "affiliate", "laudista"].includes(r));
+  const isPatientOnly = !loading && user && roles.includes("patient") && !roles.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "laudista"].includes(r));
 
   useEffect(() => {
     if (loading) return;
@@ -161,7 +161,7 @@ const Dashboard = () => {
   if (!user) return <Navigate to="/auth" replace />;
 
   const isAdmin = roles.includes("admin");
-  const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "affiliate", "admin", "laudista"];
+  const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "admin", "laudista"];
   
   // Determine primary role - admin always defaults to admin unless explicitly forced
   const primaryRole = isAdmin && forceRole && validForceRoles.includes(forceRole)
@@ -173,7 +173,6 @@ const Dashboard = () => {
     : roles.includes("support") ? "support"
     : roles.includes("clinic") ? "clinic"
     : roles.includes("partner") ? "partner"
-    : roles.includes("affiliate") ? "affiliate"
     : "patient";
 
   // Determine which dashboard to show at index based on the current role context
@@ -189,7 +188,6 @@ const Dashboard = () => {
       case "support": return <SupportDashboard />;
       case "clinic": return <ClinicDashboard />;
       case "partner": return <PartnerDashboard />;
-      case "affiliate": return <AffiliateDashboard />;
       default: return <PatientDashboard />;
     }
   };
@@ -208,10 +206,6 @@ const Dashboard = () => {
       <Route path="receptionist" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
       <Route path="support" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
       <Route path="partner" element={<RoleGuard allowed={["partner"]} roles={roles}><PartnerDashboard /></RoleGuard>} />
-      <Route path="affiliate" element={<RoleGuard allowed={["affiliate"]} roles={roles}><AffiliateDashboard /></RoleGuard>} />
-      <Route path="affiliate/referrals" element={<RoleGuard allowed={["affiliate"]} roles={roles}><AffiliateDashboard /></RoleGuard>} />
-      <Route path="affiliate/earnings" element={<RoleGuard allowed={["affiliate"]} roles={roles}><AffiliateDashboard /></RoleGuard>} />
-      <Route path="affiliate/withdrawals" element={<RoleGuard allowed={["affiliate"]} roles={roles}><AffiliateDashboard /></RoleGuard>} />
 
       {/* Shared routes */}
       <Route path="profile" element={<UserProfile />} />

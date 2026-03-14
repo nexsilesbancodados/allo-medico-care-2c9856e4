@@ -34,7 +34,7 @@ const getSupportNav = (active: string) => [
 
 const roleLabel: Record<string, string> = {
   patient: "Paciente", doctor: "Médico", clinic: "Clínica", admin: "Admin",
-  receptionist: "Recepção", support: "Suporte", partner: "Parceiro", affiliate: "Afiliado",
+  receptionist: "Recepção", support: "Suporte", partner: "Parceiro",
 };
 
 const roleColor: Record<string, string> = {
@@ -45,7 +45,7 @@ const roleColor: Record<string, string> = {
   clinic: "bg-accent text-accent-foreground border-border",
   receptionist: "bg-muted text-muted-foreground border-border",
   partner: "bg-success/10 text-success border-success/20",
-  affiliate: "bg-muted text-muted-foreground border-border",
+  
 };
 
 const LOG_TYPES = [

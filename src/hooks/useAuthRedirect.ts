@@ -19,7 +19,7 @@ export function useAuthRedirect() {
     const roleList = roles?.map((r: any) => r.role) ?? [];
     const isPatient = roleList.includes("patient");
     const isOtherRole = roleList.some((r: string) =>
-      ["doctor", "admin", "clinic", "receptionist", "support", "partner", "affiliate"].includes(r)
+      ["doctor", "admin", "clinic", "receptionist", "support", "partner"].includes(r)
     );
 
     if (isPatient && !isOtherRole) {

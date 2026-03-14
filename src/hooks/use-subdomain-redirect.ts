@@ -9,7 +9,6 @@ import { useNavigate, useLocation } from "react-router-dom";
  *   admin.aloclinica.com → /admin
  *   clinica.aloclinica.com → /clinica
  *   parceiro.aloclinica.com → /parceiro
- *   afiliado.aloclinica.com → /afiliado
  *   recepcionista.aloclinica.com → /recepcionista
  *   suporte.aloclinica.com → /suporte
  */
@@ -19,7 +18,7 @@ const SUBDOMAIN_ROUTES: Record<string, string> = {
   admin: "/admin",
   clinica: "/clinica",
   parceiro: "/parceiro",
-  afiliado: "/afiliado",
+  
   recepcionista: "/recepcionista",
   suporte: "/suporte",
   laudista: "/laudista",

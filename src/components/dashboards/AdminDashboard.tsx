@@ -26,7 +26,7 @@ const panelOptions = [
   { label: "Suporte", role: "support", icon: "🎧", description: "Ver como suporte" },
   { label: "Clínica", role: "clinic", icon: "🏢", description: "Ver como clínica" },
   { label: "Parceiro", role: "partner", icon: "🤝", description: "Ver como parceiro" },
-  { label: "Afiliado", role: "affiliate", icon: "📣", description: "Ver como afiliado" },
+  
   { label: "Assistente IA", role: "ai-assistant", icon: "🤖", description: "Chat inteligente com IA" },
 ];
 
@@ -402,7 +402,7 @@ const AdminDashboard = () => {
               <button
                 key={kpi.label}
                 onClick={() => kpi.path && navigate(kpi.path)}
-                className="kpi-card p-4 rounded-2xl bg-card border border-border/50 text-left group"
+                className="p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md transition-all text-left group"
                 role="listitem"
                 aria-label={`${kpi.label}: ${kpi.value}${kpi.path ? " — clique para ver detalhes" : ""}`}
               >

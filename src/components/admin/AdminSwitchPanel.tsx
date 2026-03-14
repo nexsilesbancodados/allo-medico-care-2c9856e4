@@ -12,7 +12,7 @@ const panelOptions = [
   { label: "Suporte", role: "support", icon: "🎧", description: "Logs, usuários e chat de atendimento" },
   { label: "Clínica", role: "clinic", icon: "🏢", description: "Gestão de médicos vinculados" },
   { label: "Parceiro", role: "partner", icon: "🤝", description: "Validação de receitas e relatórios" },
-  { label: "Afiliado", role: "affiliate", icon: "📣", description: "Referências e comissões" },
+  
   { label: "Médico Laudista", role: "laudista", icon: "🔬", description: "Fila de exames, laudos e templates" },
   { label: "Assistente IA", role: "ai-assistant", icon: "🤖", description: "Chat inteligente com IA contextual" },
 ];

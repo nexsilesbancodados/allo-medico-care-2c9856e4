@@ -43,7 +43,7 @@ const GuestCheckout = lazy(() => import("./pages/GuestCheckout"));
 const GuestConsultation = lazy(() => import("./pages/GuestConsultation"));
 const GuestRating = lazy(() => import("./pages/GuestRating"));
 const AuthParceiro = lazy(() => import("./pages/AuthParceiro"));
-const AuthAfiliado = lazy(() => import("./pages/AuthAfiliado"));
+
 const AuthClinica = lazy(() => import("./pages/AuthClinica"));
 const AuthRecepcionista = lazy(() => import("./pages/AuthRecepcionista"));
 const AuthSuporte = lazy(() => import("./pages/AuthSuporte"));
@@ -139,12 +139,12 @@ const App = () => {
             <Route path="/consulta" element={<GuestConsultation />} />
             <Route path="/consulta/avaliacao" element={<GuestRating />} />
             <Route path="/parceiro" element={<AuthParceiro />} />
-            <Route path="/afiliado" element={<AuthAfiliado />} />
+            
             <Route path="/clinica" element={<AuthClinica />} />
             <Route path="/recepcionista" element={<AuthRecepcionista />} />
             <Route path="/suporte" element={<AuthSuporte />} />
             <Route path="/payment-success" element={<PaymentSuccess />} />
-            <Route path="/convite/:code" element={<AuthPaciente />} />
+            
             <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
             <Route path="/l/:id" element={<LinkRedirect />} />
             <Route path="/validar/:id" element={<ValidateDocument />} />

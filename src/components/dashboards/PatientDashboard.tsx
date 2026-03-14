@@ -14,7 +14,7 @@ import { motion } from "framer-motion";
 import {
   Calendar, FileText, Heart, Video, Clock, Zap, Upload, TrendingUp,
   Bell, CheckCircle2, AlertCircle, Star, Activity, RefreshCw,
-  Gift, Share2, Copy, ClipboardList, Stethoscope, Smile, ChevronRight,
+  Gift, ClipboardList, Stethoscope, Smile, ChevronRight,
   Pill, User, CreditCard, ArrowRight, Sparkles, CalendarPlus, Shield, Flame
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
@@ -52,7 +52,7 @@ const PatientDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
+  
   const [onboardingDone] = useLocalStorage<boolean>(ONBOARDING_KEY, false);
   const kpiRef = useGsapEntrance({ stagger: 0.07, y: 12, delay: 0.3 });
   const sectionsRef = useGsapEntrance({ stagger: 0.08, y: 18, scroll: true });
@@ -94,19 +94,6 @@ const PatientDashboard = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user, queryClient]);
 
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data: profileData } = await supabase.from("profiles").select("referral_code").eq("user_id", user.id).single();
-      if (profileData?.referral_code) {
-        setReferralCode(profileData.referral_code);
-      } else {
-        const code = (profile?.first_name || "user").toLowerCase().slice(0, 4) + user.id.slice(0, 6);
-        await supabase.from("profiles").update({ referral_code: code }).eq("user_id", user.id);
-        setReferralCode(code);
-      }
-    })();
-  }, [user, profile?.first_name]);
 
   const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = async () => {
@@ -261,7 +248,7 @@ const PatientDashboard = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 15 }}
-                    className="kpi-card p-3 rounded-2xl bg-card border border-border/50 hover:border-primary/30 cursor-pointer group"
+                    className="p-3 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all cursor-pointer group"
                     onClick={() => navigate("/dashboard/patient/health")}
                   >
                     <span className="text-base group-hover:scale-110 inline-block transition-transform">{meta.icon}</span>
@@ -308,7 +295,7 @@ const PatientDashboard = () => {
               onClick={() => navigate(item.path)}
               aria-label={item.label}
               role="listitem"
-              className="card-interactive flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl bg-card border border-border/40 shadow-sm group"
+              className="flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl bg-card border border-border/40 shadow-sm hover:shadow-lg hover:border-border transition-all duration-200 group"
             >
               <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
                 <item.icon className="w-5 h-5 text-white" aria-hidden="true" />
@@ -608,46 +595,6 @@ const PatientDashboard = () => {
           <CreditsWidget />
         </motion.div>
 
-        {/* ═══ Referral card — gradient accent ═══ */}
-        {referralCode && (
-          <motion.div variants={fadeUp}>
-            <Card className="relative border-0 overflow-hidden rounded-2xl shadow-lg">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-card to-secondary/10" />
-              <CardContent className="relative p-5">
-                <div className="flex items-start gap-3 mb-4">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-                    <Share2 className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-0.5">
-                      <p className="text-sm font-bold text-foreground tracking-tight">Indique e Ganhe</p>
-                      {credits > 0 && (
-                        <Badge className="text-[10px] font-bold bg-success/15 text-success border-0 px-2 py-0.5">
-                          R$ {credits.toFixed(2)}
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Convide amigos e ganhe <span className="font-semibold text-foreground">R$ 10</span> de crédito.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 text-[11px] bg-card/80 border border-border/50 rounded-xl px-3.5 py-3 truncate font-mono text-muted-foreground select-all backdrop-blur-sm">
-                    {window.location.origin}/convite/{referralCode}
-                  </div>
-                  <Button
-                    size="icon"
-                    className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-r from-primary to-secondary text-white shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
-                    onClick={() => { navigator.clipboard.writeText(`${window.location.origin}/convite/${referralCode}`); }}
-                  >
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
       </motion.div>
     </DashboardLayout>
   );

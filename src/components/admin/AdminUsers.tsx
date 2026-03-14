@@ -20,7 +20,7 @@ const ROLE_LABELS: Record<string, string> = {
   receptionist: "Recepção",
   support: "Suporte",
   partner: "Parceiro",
-  affiliate: "Afiliado",
+  
 };
 
 const ROLE_COLORS: Record<string, string> = {
@@ -31,7 +31,7 @@ const ROLE_COLORS: Record<string, string> = {
   receptionist: "bg-primary/5 text-primary",
   support: "bg-muted text-muted-foreground",
   partner: "bg-secondary/5 text-secondary",
-  affiliate: "bg-accent text-accent-foreground",
+  
 };
 
 const ROLE_DESCRIPTIONS: Record<string, string> = {
@@ -42,7 +42,7 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
   receptionist: "Agenda multimédico, check-in e confirmações",
   support: "Logs de conexão, reset de acessos e helpdesk",
   partner: "Validação de receitas (farmácias/labs)",
-  affiliate: "Rastreamento de indicações e comissões",
+  
 };
 
 interface UserWithRoles {
@@ -109,10 +109,10 @@ const AdminUsers = () => {
     const toRemove = currentRoles.filter(r => !userRoles.includes(r));
 
     for (const role of toAdd) {
-      await supabase.from("user_roles").upsert({ user_id: selected.user_id, role: role as "admin" | "affiliate" | "clinic" | "doctor" | "partner" | "patient" | "receptionist" | "support" });
+      await supabase.from("user_roles").upsert({ user_id: selected.user_id, role: role as "admin" | "clinic" | "doctor" | "partner" | "patient" | "receptionist" | "support" });
     }
     for (const role of toRemove) {
-      await supabase.from("user_roles").delete().eq("user_id", selected.user_id).eq("role", role as "admin" | "affiliate" | "clinic" | "doctor" | "partner" | "patient" | "receptionist" | "support");
+      await supabase.from("user_roles").delete().eq("user_id", selected.user_id).eq("role", role as "admin" | "clinic" | "doctor" | "partner" | "patient" | "receptionist" | "support");
     }
 
     toast.success("Roles atualizadas! ✅");
@@ -208,7 +208,7 @@ const AdminUsers = () => {
 
               <div className="space-y-3">
                 <p className="text-sm font-medium text-foreground">Roles do usuário:</p>
-                {(["patient", "doctor", "clinic", "admin", "receptionist", "support", "partner", "affiliate"] as const).map(role => (
+                {(["patient", "doctor", "clinic", "admin", "receptionist", "support", "partner"] as const).map(role => (
                   <label key={role} className="flex items-center gap-3 p-2 rounded-lg border border-border hover:bg-muted/50 cursor-pointer">
                     <Checkbox
                       checked={userRoles.includes(role)}

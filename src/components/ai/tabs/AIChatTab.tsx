@@ -69,11 +69,6 @@ const quickActionsByRole: Record<string, QuickAction[]> = {
     { label: "Integração", prompt: "Quais são as melhores práticas para integrar minha farmácia/laboratório à plataforma?", icon: Brain, color: "text-emerald-500" },
     { label: "Relatório", prompt: "Gere um resumo das validações realizadas neste mês.", icon: BarChart3, color: "text-purple-500" },
   ],
-  affiliate: [
-    { label: "Estratégias", prompt: "Quais estratégias posso usar para aumentar minhas indicações na plataforma?", icon: Brain, color: "text-blue-500" },
-    { label: "Comissões", prompt: "Explique como funciona o sistema de comissões e quando recebo pagamento.", icon: BarChart3, color: "text-emerald-500" },
-    { label: "Material", prompt: "Gere um texto de divulgação para eu compartilhar com potenciais pacientes.", icon: MessageSquare, color: "text-purple-500" },
-  ],
 };
 
 interface Props {

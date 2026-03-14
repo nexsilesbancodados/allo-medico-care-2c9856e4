@@ -22,7 +22,7 @@ import {
 const roleLabels: Record<string, string> = {
   patient: "Paciente", doctor: "Médico", admin: "Administração",
   receptionist: "Recepção", support: "Suporte", clinic: "Clínica",
-  partner: "Parceiro", affiliate: "Afiliado",
+  partner: "Parceiro",
 };
 
 function getNavForRole(role: string) {
@@ -49,7 +49,6 @@ const UserProfile = () => {
     : roles.includes("support") ? "support"
     : roles.includes("clinic") ? "clinic"
     : roles.includes("partner") ? "partner"
-    : roles.includes("affiliate") ? "affiliate"
     : "patient";
   const nav = getNavForRole(activeRole);
   const [firstName, setFirstName] = useState("");

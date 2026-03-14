@@ -36,7 +36,7 @@ interface BeforeInstallPromptEvent extends Event {
 const ROLE_LABELS: Record<string, string> = {
   patient:"Paciente", doctor:"Médico", admin:"Administrador",
   receptionist:"Recepção", support:"Suporte", clinic:"Clínica",
-  partner:"Parceiro", affiliate:"Afiliado", ai:"Assistente IA",
+  partner:"Parceiro", ai:"Assistente IA",
 };
 const ROLE_COLORS: Record<string, string> = {
   patient:"bg-primary/10 text-primary border-primary/20",
@@ -46,12 +46,12 @@ const ROLE_COLORS: Record<string, string> = {
   support:"bg-warning/10 text-warning border-warning/20",
   clinic:"bg-primary/10 text-primary border-primary/20",
   partner:"bg-success/10 text-success border-success/20",
-  affiliate:"bg-muted text-muted-foreground border-border",
+  
   ai:"bg-primary/10 text-primary border-primary/20",
 };
 const ROLE_ICON: Record<string, string> = {
   patient:"👤", doctor:"🩺", admin:"⚙️", receptionist:"🏥",
-  support:"🎧", clinic:"🏢", partner:"🤝", affiliate:"📣", ai:"🤖",
+  support:"🎧", clinic:"🏢", partner:"🤝", ai:"🤖",
 };
 const ROLE_GRADIENT: Record<string, string> = {
   patient:"from-blue-500 to-cyan-500",
@@ -61,7 +61,7 @@ const ROLE_GRADIENT: Record<string, string> = {
   support:"from-yellow-500 to-amber-500",
   clinic:"from-blue-500 to-indigo-500",
   partner:"from-green-500 to-emerald-500",
-  affiliate:"from-purple-500 to-violet-500",
+  
   ai:"from-sky-500 to-blue-500",
 };
 
