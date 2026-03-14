@@ -231,6 +231,7 @@ const Dashboard = () => {
       <Route path="urgent-care" element={<RoleGuard allowed={["patient"]} roles={roles}><UrgentCareQueue /></RoleGuard>} />
       <Route path="prescription-renewal" element={<RoleGuard allowed={["patient"]} roles={roles}><PrescriptionRenewalForm /></RoleGuard>} />
       <Route path="patient/exam-results" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientExamResults /></RoleGuard>} />
+      <Route path="discount-card" element={<RoleGuard allowed={["patient"]} roles={roles}><DiscountCardPage /></RoleGuard>} />
 
       {/* Doctor routes */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />
