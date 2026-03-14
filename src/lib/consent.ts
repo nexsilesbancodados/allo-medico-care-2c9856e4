@@ -1,6 +1,11 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/lib/logger";
 
-export const registerConsent = async (userId: string, consentType = "terms_and_privacy", version = "1.0") => {
+export const registerConsent = async (
+  userId: string,
+  consentType = "terms_and_privacy",
+  version = "1.0",
+) => {
   try {
     await supabase.from("user_consents").insert({
       user_id: userId,
@@ -9,6 +14,6 @@ export const registerConsent = async (userId: string, consentType = "terms_and_p
       user_agent: navigator.userAgent,
     } as any);
   } catch (err) {
-    console.error("Failed to register consent:", err);
+    logError("Failed to register consent", err, { userId, consentType, version });
   }
 };

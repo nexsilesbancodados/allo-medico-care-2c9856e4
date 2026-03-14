@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -511,7 +512,7 @@ const PlansCheckout = () => {
       setStep("success");
       clearCheckoutDraft();
     } catch (err: any) {
-      console.error("Payment error:", err);
+      logError("PlansCheckout payment error", err);
       toast.error("Erro", { description: err.message || "Erro inesperado." });
       setProcessing(false);
     }

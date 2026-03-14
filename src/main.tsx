@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
@@ -55,7 +56,7 @@ const root = document.getElementById("root")!;
 try {
   createRoot(root).render(<App />);
 } catch (err) {
-  console.error("Fatal mount error:", err);
+  logError("Fatal React mount error", err);
   if (isChunkError(err)) { recover(); }
   else {
     root.innerHTML =

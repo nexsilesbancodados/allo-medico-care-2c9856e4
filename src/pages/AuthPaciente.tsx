@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -294,7 +295,7 @@ const AuthPaciente = () => {
       const planId = currentPlan.id;
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
       if (!uuidRegex.test(planId)) {
-        console.error("Invalid plan ID, cannot create subscription:", planId);
+        logError("AuthPaciente invalid plan ID", null, { planId });
         toast.error("Erro interno", { description: "ID de plano inválido. Entre em contato com o suporte." });
         return;
       }
@@ -306,7 +307,7 @@ const AuthPaciente = () => {
         notes: (payData as Record<string, string>).paymentId || (payData as Record<string, string>).subscriptionId || null,
       }]);
     } catch (e) {
-      console.error("Error creating subscription:", e);
+      logError("AuthPaciente create subscription error", e);
     }
   };
 

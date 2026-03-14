@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/landing/Header";
@@ -333,7 +334,7 @@ const GuestCheckout = () => {
       });
 
       if (payError || !payData?.success) {
-        console.error("Payment error:", payError, payData);
+        logError("GuestCheckout payment error", payError, { payData });
         toast.success("Consulta agendada, mas pagamento pendente", { description: payData?.error || "Você receberá instruções de pagamento por email." });
       } else {
         // Handle fallback from PIX to BOLETO

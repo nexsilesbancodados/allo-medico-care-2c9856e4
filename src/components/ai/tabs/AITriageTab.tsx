@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -127,7 +128,7 @@ IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
         }
       }
     } catch (e) {
-      console.error(e);
+      logError("AI tab error", e);
       setResult({ content: "😕 Erro ao processar triagem. Tente novamente." });
     }
     setIsLoading(false);

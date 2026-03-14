@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useEffect, useState, forwardRef } from "react";
 import { useTheme } from "next-themes";
 import { useNavigate } from "react-router-dom";
@@ -40,7 +41,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
     try {
       sessionStorage.setItem("ref_code", refCode);
     } catch (error) {
-      console.warn("Não foi possível salvar código de referência:", error);
+      logError("Index referral code save failed", error);
     }
   }, []);
 

@@ -1,6 +1,15 @@
 import { useEffect, forwardRef } from "react";
 import { useLocation } from "react-router-dom";
 
+// Augment the Window interface so we don't need `as any` for analytics globals
+declare global {
+  interface Window {
+    gtag?: (...args: unknown[]) => void;
+    fbq?: (...args: unknown[]) => void;
+    dataLayer?: unknown[];
+  }
+}
+
 // Configure these IDs when ready for production
 const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_MEASUREMENT_ID || "";
 const META_PIXEL_ID = import.meta.env.VITE_META_PIXEL_ID || "";
@@ -11,29 +20,29 @@ export const usePageTracking = () => {
 
   useEffect(() => {
     // Google Analytics pageview
-    if (GA_MEASUREMENT_ID && (window as any).gtag) {
-      (window as any).gtag("config", GA_MEASUREMENT_ID, {
+    if (GA_MEASUREMENT_ID && window.gtag) {
+      window.gtag("config", GA_MEASUREMENT_ID, {
         page_path: location.pathname + location.search,
       });
     }
 
     // Meta Pixel pageview
-    if (META_PIXEL_ID && (window as any).fbq) {
-      (window as any).fbq("track", "PageView");
+    if (META_PIXEL_ID && window.fbq) {
+      window.fbq("track", "PageView");
     }
   }, [location]);
 };
 
 // Track custom events
-export const trackEvent = (eventName: string, params?: Record<string, any>) => {
+export const trackEvent = (eventName: string, params?: Record<string, unknown>) => {
   // Google Analytics
-  if (GA_MEASUREMENT_ID && (window as any).gtag) {
-    (window as any).gtag("event", eventName, params);
+  if (GA_MEASUREMENT_ID && window.gtag) {
+    window.gtag("event", eventName, params);
   }
 
   // Meta Pixel
-  if (META_PIXEL_ID && (window as any).fbq) {
-    (window as any).fbq("track", eventName, params);
+  if (META_PIXEL_ID && window.fbq) {
+    window.fbq("track", eventName, params);
   }
 };
 

@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -118,7 +119,7 @@ const SpecialtyQuiz = ({ onClose }: { onClose: () => void }) => {
       if (error) throw error;
       showResult(data);
     } catch (e) {
-      console.error(e);
+      logError("SpecialtyQuiz error", e);
       showResult({
         specialty: "Clínico Geral",
         reason: "Recomendamos uma avaliação geral com um clínico.",

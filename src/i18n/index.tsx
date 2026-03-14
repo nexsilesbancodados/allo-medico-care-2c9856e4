@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useCallback, ReactNode } from "rea
 import ptBR, { type TranslationKeys } from "./locales/pt-BR";
 import en from "./locales/en";
 import es from "./locales/es";
-
+import { warn } from "@/lib/logger";
 export type Locale = "pt-BR" | "en" | "es";
 
 const translations: Record<Locale, Record<TranslationKeys, string>> = {
@@ -44,7 +44,7 @@ const getInitialLocale = (): Locale => {
     if (browserLang.startsWith("es")) return "es";
     if (browserLang.startsWith("en")) return "en";
   } catch (error) {
-    console.warn("[i18n] Falha ao recuperar locale inicial:", error);
+    warn("[i18n] Falha ao recuperar locale inicial:", error);
   }
 
   return "pt-BR";
@@ -59,7 +59,7 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     try {
       window.localStorage.setItem("locale", l);
     } catch (error) {
-      console.warn("[i18n] Falha ao persistir locale:", error);
+      warn("[i18n] Falha ao persistir locale:", error);
     }
 
     if (typeof document !== "undefined") {

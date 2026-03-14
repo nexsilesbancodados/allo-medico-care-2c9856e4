@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { notifyDoctorApproval, notifyClinicApproval } from "@/lib/notifications";
+import { logError } from "@/lib/logger";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -126,7 +127,7 @@ const AdminApprovals = () => {
         },
       });
     } catch (e) {
-      console.warn("Email notification attempted", e);
+      logError("Affiliate approval email failed", e);
     }
 
     // Create notification in-app
@@ -149,12 +150,12 @@ const AdminApprovals = () => {
     if (type === "doctor") {
       const doc = [...pendingDoctors, ...approvedDoctors].find(d => d.id === id);
       if (doc) {
-        notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, true).catch(console.error);
+        notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, true).catch(err => logError("notifyDoctorApproval failed", err));
       }
     } else if (type === "clinic") {
       const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === id);
       if (clinic) {
-        notifyClinicApproval(clinic.user_id, clinic.name, true).catch(console.error);
+        notifyClinicApproval(clinic.user_id, clinic.name, true).catch(err => logError("notifyClinicApproval failed", err));
       }
     }
 
@@ -215,12 +216,12 @@ const AdminApprovals = () => {
       if (rejectTarget.type === "doctor") {
         const doc = [...pendingDoctors, ...approvedDoctors].find(d => d.id === rejectTarget.id);
         if (doc) {
-          notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, false, rejectReason).catch(console.error);
+          notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, false, rejectReason).catch(err => logError("notifyDoctorApproval reject failed", err));
         }
       } else if (rejectTarget.type === "clinic") {
         const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === rejectTarget.id);
         if (clinic) {
-          notifyClinicApproval(clinic.user_id, clinic.name, false, rejectReason).catch(console.error);
+          notifyClinicApproval(clinic.user_id, clinic.name, false, rejectReason).catch(err => logError("notifyClinicApproval reject failed", err));
         }
       }
     }

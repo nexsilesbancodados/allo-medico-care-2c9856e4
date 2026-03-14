@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -104,7 +105,7 @@ IMPORTANTE: Este é apenas um RASCUNHO para revisão do médico. O documento fin
         }
       }
     } catch (e) {
-      console.error(e);
+      logError("AI tab error", e);
       setResult("😕 Erro ao gerar documento. Tente novamente.");
     }
     setIsLoading(false);

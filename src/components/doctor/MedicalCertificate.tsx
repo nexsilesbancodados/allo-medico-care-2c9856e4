@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect } from "react";
 import { warn } from "@/lib/logger";
 import { useAuth } from "@/contexts/AuthContext";
@@ -199,7 +200,7 @@ const MedicalCertificate = () => {
     notifyCertificateSent(
       patientName, patientCpf, doctorName, certConfig.label, verificationCode,
       certType === "absence" ? days : undefined
-    ).catch(console.error);
+    ).catch(err => logError("MedicalCertificate notify failed", err));
   };
 
   return (

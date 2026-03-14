@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Index from "./pages/Index";
+import { logError } from "@/lib/logger";
 
 const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -90,7 +91,7 @@ const App = () => {
   // Global safety net for unhandled async errors (prevents white screen)
   useEffect(() => {
     const handleRejection = (event: PromiseRejectionEvent) => {
-      console.error("Unhandled rejection:", event.reason);
+      logError("Unhandled promise rejection", event.reason);
       toast.error("Ocorreu um erro. Tente novamente.");
       event.preventDefault();
     };

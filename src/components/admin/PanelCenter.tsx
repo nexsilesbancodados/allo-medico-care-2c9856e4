@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -156,7 +157,7 @@ const PanelCenter = () => {
       const uniqueUserIds = new Set((allRoles ?? []).map(r => r.user_id));
       setTotalUsers(uniqueUserIds.size);
     } catch (e) {
-      console.error("PanelCenter fetch error:", e);
+      logError("PanelCenter fetch error", e);
     }
 
     setRefreshing(false);

@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -111,7 +112,7 @@ const GuestConsultation = () => {
       });
 
       if (fnError || !data?.roomURL) {
-        console.error("Failed to create room:", fnError, data);
+        logError("GuestConsultation create room failed", fnError, { data });
         setVideoError("Não foi possível criar a sala de vídeo.");
         setVideoLoading(false);
         return;
@@ -121,7 +122,7 @@ const GuestConsultation = () => {
 
       // Load Metered Frame SDK
       await new Promise<void>((resolve, reject) => {
-        if ((window as any).MeteredFrame) { resolve(); return; }
+        if (window.MeteredFrame) { resolve(); return; }
         const script = document.createElement("script");
         script.src = "https://cdn.metered.ca/sdk/frame/1.4.3/sdk-frame.min.js";
         script.async = true;
@@ -132,7 +133,7 @@ const GuestConsultation = () => {
 
       if (!frameContainerRef.current) return;
 
-      const frame = new (window as any).MeteredFrame();
+      const frame = new window.MeteredFrame();
       frame.init(
         {
           roomURL,
@@ -149,7 +150,7 @@ const GuestConsultation = () => {
       frame.on("meetingEnded", () => endCall());
       setTimeout(() => setVideoLoading(false), 5000);
     } catch (err) {
-      console.error("Video init error:", err);
+      logError("GuestConsultation video init error", err);
       setVideoError("Erro ao inicializar a videochamada.");
       setVideoLoading(false);
     }

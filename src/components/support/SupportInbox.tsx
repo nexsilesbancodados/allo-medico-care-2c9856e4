@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -73,7 +74,7 @@ const SupportInbox = () => {
   const playNotificationSound = useCallback(() => {
     if (!soundEnabled) return;
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
@@ -93,7 +94,7 @@ const SupportInbox = () => {
         osc2.stop(ctx.currentTime + 0.15);
       }, 250);
     } catch (e) {
-      console.warn("Audio not available:", e);
+      logError("SupportInbox audio unavailable", e);
     }
   }, [soundEnabled]);
 
@@ -104,7 +105,7 @@ const SupportInbox = () => {
       .order("updated_at", { ascending: false });
 
     if (error || !ticketsData) {
-      console.error("Error fetching tickets:", error);
+      logError("SupportInbox fetch tickets error", error);
       setLoading(false);
       return;
     }

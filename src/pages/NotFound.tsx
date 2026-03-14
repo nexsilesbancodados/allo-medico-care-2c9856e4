@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useLocation, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Home, ArrowLeft } from "lucide-react";
@@ -18,7 +19,7 @@ const NotFound = () => {
   const [countdown, setCountdown] = useState(15);
 
   useEffect(() => {
-    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+    logError("404 - route not found", null, { pathname: location.pathname });
   }, [location.pathname]);
 
   // Auto-redirect countdown

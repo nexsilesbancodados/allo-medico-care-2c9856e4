@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -132,10 +133,10 @@ const AuthClinica = () => {
     const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin, data: { first_name: firstName, last_name: lastName } } });
     if (error) { toast.error("Erro no cadastro", { description: translateAuthError(error.message) }); setLoading(false); return; }
     if (data.user) {
-      await supabase.from("clinic_profiles").insert({ user_id: data.user.id, name: clinicName, cnpj: cnpj.replace(/\D/g, ""), phone: phone.replace(/\D/g, ""), address }).then(r => r.error && console.error(r.error));
-      await supabase.functions.invoke("assign-role", { body: { user_id: data.user.id, role: "clinic" } }).catch(console.error);
+      await supabase.from("clinic_profiles").insert({ user_id: data.user.id, name: clinicName, cnpj: cnpj.replace(/\D/g, ""), phone: phone.replace(/\D/g, ""), address }).then(r => r.error && logError("AuthClinica insert clinic_profiles error", r.error));
+      await supabase.functions.invoke("assign-role", { body: { user_id: data.user.id, role: "clinic" } }).catch(err => logError("AuthClinica assign-role failed", err));
       await registerConsent(data.user.id, "terms_and_privacy_clinic");
-      supabase.functions.invoke("send-email", { body: { type: "welcome_clinic", to: email, data: { name: `${firstName} ${lastName}`, clinic_name: clinicName } } }).catch(console.error);
+      supabase.functions.invoke("send-email", { body: { type: "welcome_clinic", to: email, data: { name: `${firstName} ${lastName}`, clinic_name: clinicName } } }).catch(err => logError("AuthClinica assign-role failed", err));
     }
     setLoading(false);
     toast.success("Cadastro realizado! 🏥", { description: "Sua clínica será analisada para aprovação." });

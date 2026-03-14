@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -126,7 +127,7 @@ const AIChatTab = ({ primaryRole }: Props) => {
   };
 
   const toggleVoice = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
       toast.error("Navegador não suporta reconhecimento de voz");
       return;
@@ -250,7 +251,7 @@ const AIChatTab = ({ primaryRole }: Props) => {
         }
       }
     } catch (e) {
-      console.error(e);
+      logError("AI tab error", e);
       setMessages(prev => [...prev, { role: "assistant", content: "😕 Ocorreu um erro. Tente novamente." }]);
     }
     setIsLoading(false);

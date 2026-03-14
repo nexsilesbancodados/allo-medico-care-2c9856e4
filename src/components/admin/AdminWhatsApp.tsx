@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -41,7 +42,7 @@ const AdminWhatsApp = () => {
         })));
       }
     } catch (err) {
-      console.error("Fetch instances error:", err);
+      logError("AdminWhatsApp fetch instances error", err);
     }
   }, []);
 
@@ -114,7 +115,7 @@ const AdminWhatsApp = () => {
         return state;
       }
     } catch (err) {
-      console.error("Status check error:", err);
+      logError("AdminWhatsApp status check error", err);
     }
     return null;
   };

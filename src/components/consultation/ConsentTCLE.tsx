@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -102,7 +103,7 @@ const ConsentTCLE = ({ appointmentId, doctorName, onConsented }: ConsentTCLEProp
       toast.success("Consentimento registrado ✅", { description: "Seu TCLE foi aceito e registrado com segurança." });
       onConsented();
     } catch (err: unknown) {
-      if (import.meta.env.DEV) console.error("Consent error:", err);
+      logError("ConsentTCLE error", err);
       toast.error("Erro ao registrar consentimento", { description: err instanceof Error ? err.message : "Tente novamente." });
     } finally {
       setSubmitting(false);

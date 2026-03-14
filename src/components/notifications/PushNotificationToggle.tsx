@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +53,7 @@ const PushNotificationToggle = () => {
       setSubscribed(true);
       toast.success("Notificações ativadas!");
     } catch (err: unknown) {
-      if (import.meta.env.DEV) console.error("Push subscription error:", err);
+      logError("Push subscription error", err);
       toast.error("Erro ao ativar notificações. Tente novamente.");
     }
     setLoading(false);
@@ -74,7 +75,7 @@ const PushNotificationToggle = () => {
       setSubscribed(false);
       toast.success("Notificações desativadas");
     } catch (err) {
-      console.error("Push unsubscribe error:", err);
+      logError("Push unsubscribe error", err);
     }
     setLoading(false);
   };

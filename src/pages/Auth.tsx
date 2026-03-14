@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState } from "react";
 import SEOHead from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
@@ -131,13 +132,13 @@ const Auth = () => {
       if (userType === "doctor") {
         await supabase.from("doctor_profiles").insert({ user_id: data.user.id, crm, crm_state: crmState });
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: "doctor" });
-        notifyWelcomeDoctor(`${firstName} ${lastName}`, email, crm).catch(console.error);
+        notifyWelcomeDoctor(`${firstName} ${lastName}`, email, crm).catch(err => logError("notifyWelcomeDoctor failed", err));
       } else if (userType === "clinic") {
         await supabase.from("clinic_profiles").insert({ user_id: data.user.id, name: clinicName, cnpj });
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: "clinic" });
       } else {
         // Patient welcome
-        notifyWelcomePatient(`${firstName} ${lastName}`, email).catch(console.error);
+        notifyWelcomePatient(`${firstName} ${lastName}`, email).catch(err => logError("notifyWelcomePatient failed", err));
       }
     }
 

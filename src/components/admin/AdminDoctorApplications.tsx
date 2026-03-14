@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -46,7 +47,7 @@ const AdminDoctorApplications = () => {
     if (filter !== "all") query = query.eq("status", filter);
     if (search.trim()) query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,crm.ilike.%${search}%`);
     const { data, error } = await query;
-    if (error) console.error(error);
+    if (error) logError("AdminDoctorApplications fetch error", error);
     setApplications((data as any) || []);
     setLoading(false);
   };

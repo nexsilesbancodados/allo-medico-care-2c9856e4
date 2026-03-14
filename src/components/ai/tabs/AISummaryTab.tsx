@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -52,7 +53,7 @@ const AISummaryTab = ({ primaryRole }: Props) => {
         setPatientData({ multiple: profiles });
       }
     } catch (e) {
-      console.error(e);
+      logError("AI tab error", e);
       setPatientData({ error: "Erro ao buscar dados" });
     }
     setIsFetching(false);
@@ -175,7 +176,7 @@ Estruture em:
         }
       }
     } catch (e) {
-      console.error(e);
+      logError("AI tab error", e);
       setResult("😕 Erro ao gerar resumo. Tente novamente.");
     }
     setIsLoading(false);

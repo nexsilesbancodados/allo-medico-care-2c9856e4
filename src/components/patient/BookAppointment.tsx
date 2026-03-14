@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { triggerAppointmentConfirmed } from "@/lib/whatsapp";
 import { notifyNewAppointment } from "@/lib/notifications";
 import { useAuth } from "@/contexts/AuthContext";
+import { logError } from "@/lib/logger";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -211,7 +212,7 @@ const BookAppointment = () => {
       }
 
       if (!firstApptId) firstApptId = insertedAppt.id;
-      triggerAppointmentConfirmed(insertedAppt.id).catch(console.error);
+      triggerAppointmentConfirmed(insertedAppt.id).catch(err => logError("triggerAppointmentConfirmed failed", err));
     }
 
     setBooking(false);
@@ -223,7 +224,7 @@ const BookAppointment = () => {
       const pName = `${patientProfile?.first_name || ""} ${patientProfile?.last_name || ""}`.trim() || "Paciente";
       const dateStr = format(scheduledAt, "dd/MM/yyyy", { locale: ptBR });
       const timeStr = format(scheduledAt, "HH:mm");
-      notifyNewAppointment(firstApptId, doctor.id, pName, dateStr, timeStr).catch(console.error);
+      notifyNewAppointment(firstApptId, doctor.id, pName, dateStr, timeStr).catch(err => logError("notifyNewAppointment failed", err));
 
       const msg = recurrence !== "none"
         ? `${datesToBook.length} consultas agendadas com Dr(a). ${doctor.first_name}`

@@ -68,7 +68,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
   // Play entry sound
   useEffect(() => {
     try {
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain);
@@ -87,7 +87,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     if (jitsiApiRef.current) return;
 
     const loadAndInit = () => {
-      const JitsiMeetExternalAPI = (window as any).JitsiMeetExternalAPI;
+      const JitsiMeetExternalAPI = window.JitsiMeetExternalAPI;
       if (!JitsiMeetExternalAPI || !jitsiContainerRef.current) return;
 
       // Mobile-optimized toolbar — fewer buttons, bigger targets
@@ -176,7 +176,7 @@ const VideoConsultation = ({ appointmentId, userName, onEndCall }: VideoConsulta
     };
 
     // Check if script already loaded
-    if ((window as any).JitsiMeetExternalAPI) {
+    if (window.JitsiMeetExternalAPI) {
       loadAndInit();
       return;
     }

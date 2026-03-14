@@ -1,3 +1,4 @@
+import { logError } from "@/lib/logger";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -81,7 +82,7 @@ const DicomViewerPanel = ({ arquivoUrl }: { arquivoUrl: string | null }) => {
         app.loadURLs([url]);
         app.addEventListener("loadend", () => setLoaded(true));
       } catch (err) {
-        console.error("DICOM load error:", err);
+        logError("TelelaudoWorkspace DICOM load error", err);
         toast.error("Erro ao carregar imagem DICOM");
       }
     };
@@ -182,7 +183,7 @@ const LaudoEditorPanel = ({
   }, [text, exame, isSigned, onSave]);
 
   const startNoiseFilteredRecognition = useCallback(async () => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { toast.error("Reconhecimento de voz não suportado neste navegador"); return; }
 
     // Web Audio API noise suppression

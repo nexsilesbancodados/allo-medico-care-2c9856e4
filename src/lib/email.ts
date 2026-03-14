@@ -1,4 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
+import { logError } from "@/lib/logger";
 
 interface SendEmailParams {
   type: "appointment_confirmation" | "appointment_reminder" | "prescription_sent" | "welcome";
@@ -12,12 +13,12 @@ export const sendEmail = async (params: SendEmailParams) => {
       body: params,
     });
     if (error) {
-      console.error("Email send error:", error);
+      logError("Email send error", error, { type: params.type });
       return { success: false, error };
     }
     return { success: true, data };
   } catch (err) {
-    console.error("Email send exception:", err);
+    logError("Email send exception", err, { type: params.type });
     return { success: false, error: err };
   }
 };
