@@ -128,7 +128,7 @@ const Dashboard = () => {
   usePresence();
 
   // Check if patient has active plan
-  const isPatientOnly = !loading && user && roles.includes("patient") && !roles.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "affiliate", "laudista"].includes(r));
+  const isPatientOnly = !loading && user && roles.includes("patient") && !roles.some(r => ["doctor", "admin", "clinic", "receptionist", "support", "partner", "laudista"].includes(r));
 
   useEffect(() => {
     if (loading) return;
