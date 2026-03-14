@@ -244,15 +244,6 @@ const AdminApprovals = () => {
                   </p>
                 </>
               )}
-              {type === "affiliate" && (
-                <>
-                  <p className="font-semibold text-foreground text-lg">{item.first_name} {item.last_name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Comissão: <Badge variant="outline" className="text-xs">{item.commission_percent}%</Badge>
-                    {item.pix_key && <> · PIX: {item.pix_key}</>}
-                  </p>
-                </>
-              )}
               <p className="text-xs text-muted-foreground">Cadastro: {new Date(item.created_at).toLocaleDateString("pt-BR")}</p>
             </div>
           </div>
