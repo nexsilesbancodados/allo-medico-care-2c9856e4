@@ -6,20 +6,19 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// Workaround: Evolution API has an invalid TLS certificate (CaUsedAsEndEntity).
-// Use Deno.createHttpClient to create a client that doesn't verify certs.
-let httpClient: Deno.HttpClient | undefined;
-try {
-  httpClient = Deno.createHttpClient({ caCerts: [] });
-} catch {
-  // Fallback if createHttpClient not available
-}
-
-const fetchEvo = (url: string, opts: RequestInit = {}): Promise<Response> => {
-  if (httpClient) {
-    return fetch(url, { ...opts, client: httpClient } as RequestInit & { client: Deno.HttpClient });
+// Workaround: Evolution API server has an invalid TLS certificate (CaUsedAsEndEntity).
+// Try HTTPS first, if it fails with a cert error, retry with HTTP.
+const fetchEvo = async (url: string, opts: RequestInit = {}): Promise<Response> => {
+  try {
+    return await fetch(url, opts);
+  } catch (err) {
+    if (String(err).includes("certificate") || String(err).includes("tls") || String(err).includes("CaUsedAsEndEntity")) {
+      console.warn("TLS error, retrying with HTTP:", err.message || err);
+      const httpUrl = url.replace(/^https:\/\//, "http://");
+      return await fetch(httpUrl, opts);
+    }
+    throw err;
   }
-  return fetch(url, opts);
 };
 
 serve(async (req) => {
