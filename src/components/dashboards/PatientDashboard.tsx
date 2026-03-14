@@ -94,19 +94,6 @@ const PatientDashboard = () => {
     return () => { supabase.removeChannel(channel); };
   }, [user, queryClient]);
 
-  useEffect(() => {
-    if (!user) return;
-    (async () => {
-      const { data: profileData } = await supabase.from("profiles").select("referral_code").eq("user_id", user.id).single();
-      if (profileData?.referral_code) {
-        setReferralCode(profileData.referral_code);
-      } else {
-        const code = (profile?.first_name || "user").toLowerCase().slice(0, 4) + user.id.slice(0, 6);
-        await supabase.from("profiles").update({ referral_code: code }).eq("user_id", user.id);
-        setReferralCode(code);
-      }
-    })();
-  }, [user, profile?.first_name]);
 
   const [refreshing, setRefreshing] = useState(false);
   const handleRefresh = async () => {
