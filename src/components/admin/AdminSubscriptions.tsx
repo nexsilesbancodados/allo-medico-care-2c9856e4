@@ -36,7 +36,7 @@ const AdminSubscriptions = () => {
       supabase.from("subscriptions").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("plans").select("id, name, price, interval"),
     ]);
-    setPlans(plansRes.data ?? []);
+    setPlans((plansRes.data ?? []) as unknown as PlanRow[]);
 
     const subsData = subsRes.data ?? [];
     if (subsData.length === 0) { setSubs([]); setLoading(false); return; }
@@ -44,9 +44,9 @@ const AdminSubscriptions = () => {
     const userIds = [...new Set(subsData.map(s => s.user_id))];
     const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds);
     const pMap = new Map(profiles?.map(p => [p.user_id, `${p.first_name} ${p.last_name}`]) ?? []);
-    const planMap = new Map(plansRes.data?.map(p => [p.id, p.name]) ?? []);
+    const planMap = new Map(plansRes.data?.map((p: any) => [p.id, p.name]) ?? []);
 
-    setSubs(subsData.map(s => ({ ...s, user_name: pMap.get(s.user_id) ?? "—", plan_name: planMap.get(s.plan_id) ?? "—" })));
+    setSubs(subsData.map(s => ({ ...s, user_name: pMap.get(s.user_id) ?? "—", plan_name: planMap.get(s.plan_id) ?? "—" } as SubscriptionRow)));
     setLoading(false);
   };
 
