@@ -150,7 +150,7 @@ serve(async (req) => {
     // ─── Step 1: Find or create customer (per docs: POST /v3/customers) ───
     const cleanCpf = customerCpf.replace(/\D/g, "");
     const searchRes = await asaasFetch(`${baseUrl}/customers?cpfCnpj=${cleanCpf}`, { headers });
-    const searchData = await safeJson(searchRes);
+    const searchData: any = await safeJson(searchRes);
 
     let customerId: string;
 
