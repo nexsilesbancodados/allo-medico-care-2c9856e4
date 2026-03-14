@@ -538,7 +538,7 @@ const TelelaudoWorkspace = () => {
             />
           </div>
           {/* Filter tabs */}
-          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as string)}>
+          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as "all" | "assinado" | "pendente")}>
             <TabsList className="w-full h-7">
               <TabsTrigger value="all" className="text-[10px] flex-1 h-5">
                 Todos ({exames.length})

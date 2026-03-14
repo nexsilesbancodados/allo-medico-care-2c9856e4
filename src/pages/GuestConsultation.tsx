@@ -133,7 +133,7 @@ const GuestConsultation = () => {
 
       if (!frameContainerRef.current) return;
 
-      const frame = new window.MeteredFrame();
+      const frame = new (window as any).MeteredFrame();
       frame.init(
         {
           roomURL,
