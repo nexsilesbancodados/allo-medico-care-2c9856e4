@@ -413,7 +413,11 @@ const AuthMedico = () => {
                     <Button className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={!specialty || !consultationType} onClick={() => setStep("apply")}>
                       Continuar para Cadastro <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
-                    <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => hasLoginAccess ? setStep("welcome") : navigate("/")} className="text-primary font-semibold hover:underline">← Voltar</button></p>
+                    <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+                      <button type="button" onClick={() => setStep("welcome")} className="text-primary font-semibold hover:underline">← Voltar</button>
+                      <span className="text-border">|</span>
+                      <button type="button" onClick={() => setStep("login")} className="text-primary font-semibold hover:underline">Já tenho conta</button>
+                    </div>
                   </div>
                 )}
 
