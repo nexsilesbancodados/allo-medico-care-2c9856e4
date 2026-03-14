@@ -37,8 +37,7 @@ function getNavForRole(role: string) {
 }
 
 // Settings context to share state between components
-type SettingsValue = boolean | string | number | null;
-type SettingsState = Record<string, SettingsValue>;
+type SettingsState = Record<string, any>;
 
 const defaultSettings: Record<string, SettingsState> = {
   patient: {

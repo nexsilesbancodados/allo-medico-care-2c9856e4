@@ -34,8 +34,8 @@ const AuthAfiliado = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: affiliateProfile } = await supabase
-          .from("affiliate_profiles")
-          .select("is_approved")
+          .from("profiles" as any)
+          .select("user_id")
           .eq("user_id", user.id)
           .maybeSingle();
         

@@ -111,7 +111,7 @@ export function useGsapCounter(target: number, duration = 1.4, decimals = 0) {
         if (el) el.textContent = decimals > 0 ? obj.val.toFixed(decimals) : Math.round(obj.val).toLocaleString("pt-BR");
       },
     });
-    return () => tw.kill();
+    return () => { tw.kill(); };
   }, [target, duration, decimals]);
 
   return ref;

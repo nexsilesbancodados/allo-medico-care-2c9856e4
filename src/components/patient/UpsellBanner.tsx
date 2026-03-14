@@ -66,7 +66,7 @@ const UpsellBanner = () => {
   }, [user]);
 
   const dismiss = () => {
-    localStoragesnooze(user?.id ?? "");
+    snooze(user?.id ?? "");
     setShow(false);
   };
 

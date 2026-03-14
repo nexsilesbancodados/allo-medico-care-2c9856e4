@@ -513,7 +513,7 @@ const PlansCheckout = () => {
       clearCheckoutDraft();
     } catch (err: unknown) {
       logError("PlansCheckout payment error", err);
-      toast.error("Erro", { description: err.message || "Erro inesperado." });
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro inesperado." });
       setProcessing(false);
     }
   };
