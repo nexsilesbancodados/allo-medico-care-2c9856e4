@@ -51,10 +51,10 @@ const AdminDashboard = () => {
     live_now: 0, waiting_now: 0, no_show_rate: 0, cancel_rate: 0, avg_rating: 0,
     total_laudos: 0, avg_nps: 0,
   });
-  const [recentSubs, setRecentSubs] = useState<SubscriptionRow[]>([]);
-  const [overdueSubs, setOverdueSubs] = useState<SubscriptionRow[]>([]);
-  const [pendingDoctors, setPendingDoctors] = useState<ApprovalItem[]>([]);
-  const [liveAppts, setLiveAppts] = useState<AdminAppointmentRow[]>([]);
+  const [recentSubs, setRecentSubs] = useState<any[]>([]);
+  const [overdueSubs, setOverdueSubs] = useState<any[]>([]);
+  const [pendingDoctors, setPendingDoctors] = useState<any[]>([]);
+  const [liveAppts, setLiveAppts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { fetchAll(); }, [periodFilter]);
