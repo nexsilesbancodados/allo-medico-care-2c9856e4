@@ -29,7 +29,7 @@ const GuestConsultation = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [videoError, setVideoError] = useState<string | null>(null);
-  const [appointment, setAppointment] = useState<AppointmentRow | null>(null);
+  const [appointment, setAppointment] = useState<any>(null);
   const [guestPatient, setGuestPatient] = useState<{ full_name: string; phone: string; email?: string | null } | null>(null);
   const [doctorName, setDoctorName] = useState("");
 
