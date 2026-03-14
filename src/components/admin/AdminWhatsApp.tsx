@@ -67,7 +67,7 @@ const AdminWhatsApp = () => {
         toast.error("Erro ao criar instância");
       }
     } catch (err: unknown) {
-      toast.error(err.message || "Erro ao criar instância");
+      toast.error(err instanceof Error ? err.message : "Erro ao criar instância");
     } finally {
       setLoading(false);
     }
