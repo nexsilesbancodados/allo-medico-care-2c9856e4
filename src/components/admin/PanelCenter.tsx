@@ -39,7 +39,7 @@ const PANELS: Omit<PanelInfo, "onlineCount" | "totalUsers" | "recentUsers">[] = 
   { id: "receptionist", label: "Recepção", description: "Agendas, check-in e cobranças", icon: Monitor, emoji: "🏥", color: "text-amber-500", bgColor: "bg-amber-500/10", route: "/dashboard?role=receptionist", roleKey: "receptionist" },
   { id: "support", label: "Suporte", description: "Tickets, logs e monitoramento", icon: Headphones, emoji: "🎧", color: "text-rose-500", bgColor: "bg-rose-500/10", route: "/dashboard?role=support", roleKey: "support" },
   { id: "partner", label: "Parceiro", description: "Validações e integrações", icon: Handshake, emoji: "🤝", color: "text-teal-500", bgColor: "bg-teal-500/10", route: "/dashboard?role=partner", roleKey: "partner" },
-  { id: "affiliate", label: "Afiliado", description: "Indicações e comissões", icon: Megaphone, emoji: "📣", color: "text-orange-500", bgColor: "bg-orange-500/10", route: "/dashboard?role=affiliate", roleKey: "affiliate" },
+  
   { id: "admin", label: "Administração", description: "Controle total do sistema", icon: ShieldCheck, emoji: "🛡️", color: "text-primary", bgColor: "bg-primary/10", route: "/dashboard?role=admin", roleKey: "admin" },
   { id: "ai-assistant", label: "Assistente IA", description: "Chat, triagem e documentos", icon: Bot, emoji: "🤖", color: "text-purple-500", bgColor: "bg-purple-500/10", route: "/dashboard/ai-assistant", roleKey: "ai-assistant" },
 ];
