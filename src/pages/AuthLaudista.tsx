@@ -135,7 +135,7 @@ const AuthLaudista = () => {
       if (error) throw error;
       setStep("applied");
       toast.success("Solicitação enviada!", { description: "Analisaremos seus dados e retornaremos por email." });
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error("Erro ao enviar", { description: err?.message || "Tente novamente." });
     }
     setSubmittingApplication(false);

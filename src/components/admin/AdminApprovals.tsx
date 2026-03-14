@@ -14,18 +14,19 @@ import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck, Megaphone } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import type { ApprovalItem } from "@/types/domain";
 
 const AdminApprovals = () => {
   
   /* eslint-disable @typescript-eslint/no-explicit-any -- Admin approval items have varying shapes across entity types */
-  const [pendingDoctors, setPendingDoctors] = useState<any[]>([]);
-  const [approvedDoctors, setApprovedDoctors] = useState<any[]>([]);
-  const [pendingClinics, setPendingClinics] = useState<any[]>([]);
-  const [approvedClinics, setApprovedClinics] = useState<any[]>([]);
-  const [pendingPartners, setPendingPartners] = useState<any[]>([]);
-  const [approvedPartners, setApprovedPartners] = useState<any[]>([]);
-  const [pendingAffiliates, setPendingAffiliates] = useState<any[]>([]);
-  const [approvedAffiliates, setApprovedAffiliates] = useState<any[]>([]);
+  const [pendingDoctors, setPendingDoctors] = useState<ApprovalItem[]>([]);
+  const [approvedDoctors, setApprovedDoctors] = useState<ApprovalItem[]>([]);
+  const [pendingClinics, setPendingClinics] = useState<ApprovalItem[]>([]);
+  const [approvedClinics, setApprovedClinics] = useState<ApprovalItem[]>([]);
+  const [pendingPartners, setPendingPartners] = useState<ApprovalItem[]>([]);
+  const [approvedPartners, setApprovedPartners] = useState<ApprovalItem[]>([]);
+  const [pendingAffiliates, setPendingAffiliates] = useState<ApprovalItem[]>([]);
+  const [approvedAffiliates, setApprovedAffiliates] = useState<ApprovalItem[]>([]);
   /* eslint-enable @typescript-eslint/no-explicit-any */
 
   const [loading, setLoading] = useState(true);
@@ -110,7 +111,7 @@ const AdminApprovals = () => {
     return null;
   };
 
-  const approveAffiliate = async (item: any) => {
+  const approveAffiliate = async (item: ApprovalItem) => {
     await (supabase as any).from("affiliate_profiles").update({ is_approved: true }).eq("id", item.id);
     
     // Send approval email via edge function
@@ -175,7 +176,7 @@ const AdminApprovals = () => {
 
   const [verifyingCrmId, setVerifyingCrmId] = useState<string | null>(null);
 
-  const autoVerifyCrm = useCallback(async (item: any) => {
+  const autoVerifyCrm = useCallback(async (item: ApprovalItem) => {
     setVerifyingCrmId(item.id);
     try {
       const { data, error } = await supabase.functions.invoke("verify-crm", {
@@ -236,7 +237,7 @@ const AdminApprovals = () => {
   const totalPending = pendingDoctors.length + pendingClinics.length + pendingPartners.length + pendingAffiliates.length;
   const partnerTypeLabel: Record<string, string> = { pharmacy: "Farmácia", laboratory: "Laboratório", clinic: "Clínica", other: "Outro" };
 
-  const renderApprovalCard = (item: any, type: "doctor" | "clinic" | "partner" | "affiliate", isApproved: boolean) => (
+  const renderApprovalCard = (item: ApprovalItem, type: "doctor" | "clinic" | "partner" | "affiliate", isApproved: boolean) => (
     <Card key={item.id} className="border-border hover:shadow-md transition-shadow">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">

@@ -289,7 +289,7 @@ const GuestCheckout = () => {
 
       const [expiryMonth, expiryYear] = (cardExpiry || "/").split("/");
 
-      const paymentPayload: Record<string, any> = {
+      const paymentPayload: Record<string, string | number | boolean | null | undefined> = {
         customerName: guestName,
         customerCpf: guestCpf,
         customerEmail: guestEmail,

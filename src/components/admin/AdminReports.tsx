@@ -12,6 +12,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { format, subMonths, startOfMonth, endOfMonth, subDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import jsPDF from "jspdf";
+import type { DoctorPerformanceRow } from "@/types/domain";
 
 const COLORS = ["hsl(210,90%,45%)", "hsl(160,55%,45%)", "hsl(40,90%,55%)", "hsl(0,84%,60%)", "hsl(270,60%,55%)"];
 
@@ -26,7 +27,7 @@ const AdminReports = () => {
   const [specialtyData, setSpecialtyData] = useState<{ name: string; value: number }[]>([]);
   const [cancellationData, setCancellationData] = useState<ChartDataPoint[]>([]);
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  const [topDoctors, setTopDoctors] = useState<any[]>([]);
+  const [topDoctors, setTopDoctors] = useState<DoctorPerformanceRow[]>([]);
   /* eslint-enable @typescript-eslint/no-explicit-any */
   const [summaryStats, setSummaryStats] = useState({
     totalRevenue: 0, totalAppts: 0, totalCancelled: 0, totalNoShow: 0, avgTicket: 0, avgNps: 0,
@@ -159,13 +160,23 @@ const AdminReports = () => {
 
   const exportCSV = (data: Record<string, unknown>[], filename: string) => {
     if (data.length === 0) return;
-    const headers = Object.keys(data[0]).join(",");
-    const rows = data.map(r => Object.values(r).join(",")).join("\n");
-    const blob = new Blob([`${headers}\n${rows}`], { type: "text/csv" });
+    const BOM = "\uFEFF";
+    const escape = (v: unknown) => {
+      const s = String(v ?? "");
+      return s.includes(",") || s.includes('"') || s.includes("\n")
+        ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const headers = Object.keys(data[0]).map(escape).join(",");
+    const rows = data.map(r => Object.values(r).map(escape).join(",")).join("\n");
+    const blob = new Blob([BOM + headers + "\n" + rows], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `${filename}.csv`; a.click();
-    URL.revokeObjectURL(url);
+    a.href = url;
+    a.setAttribute("download", `${filename}_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
   };
 
   const exportPDF = () => {

@@ -12,12 +12,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Search, Eye, Edit, Check, X } from "lucide-react";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const AdminDoctors = () => {
   
   const [doctors, setDoctors] = useState<DoctorWithProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [filterStatus, setFilterStatus] = useState("all");
   const [selected, setSelected] = useState<DoctorWithProfile | null>(null);
   const [editing, setEditing] = useState(false);
@@ -65,7 +67,7 @@ const AdminDoctors = () => {
   };
 
   const filtered = doctors.filter(d => {
-    const matchSearch = `${d.first_name} ${d.last_name} ${d.crm}`.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = `${d.first_name} ${d.last_name} ${d.crm}`.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchStatus = filterStatus === "all" || (filterStatus === "approved" && d.is_approved) || (filterStatus === "pending" && !d.is_approved);
     return matchSearch && matchStatus;
   });

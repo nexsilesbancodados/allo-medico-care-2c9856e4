@@ -25,7 +25,7 @@ const DoctorWaitingRoom = () => {
   const navigate = useNavigate();
   
   const [doctorId, setDoctorId] = useState<string | null>(null);
-  const [waitingPatients, setWaitingPatients] = useState<any[]>([]);
+  const [waitingPatients, setWaitingPatients] = useState<Record<string, unknown>[]>([]);
   const [triageAlerts, setTriageAlerts] = useState<Map<string, any>>(new Map());
   const [avgDuration, setAvgDuration] = useState(20);
   const [loading, setLoading] = useState(true);

@@ -8,7 +8,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const DISMISS_KEY = "upsell-dismissed";
+const DISMISS_KEY_PREFIX = "upsell-dismissed";
+const getDismissKey = (userId: string) => `${DISMISS_KEY_PREFIX}-${userId}`;
+const isDismissed = (userId: string) => {
+  try {
+    const raw = localStorage.getItem(getDismissKey(userId));
+    if (!raw) return false;
+    const until = Number(raw);
+    return !isNaN(until) && Date.now() < until;
+  } catch { return false; }
+};
+const snooze = (userId: string, days = 7) => {
+  try {
+    localStorage.setItem(getDismissKey(userId), String(Date.now() + days * 86400000));
+  } catch {}
+};
 
 const UpsellBanner = () => {
   const { user } = useAuth();
@@ -18,7 +32,7 @@ const UpsellBanner = () => {
   const [consultCount, setConsultCount] = useState(0);
 
   useEffect(() => {
-    if (!user || localStorage.getItem(DISMISS_KEY)) return;
+    if (!user || isDismissed(user.id)) return;
 
     const check = async () => {
       // Check if has active subscription
@@ -52,7 +66,7 @@ const UpsellBanner = () => {
   }, [user]);
 
   const dismiss = () => {
-    localStorage.setItem(DISMISS_KEY, Date.now().toString());
+    localStoragesnooze(user?.id ?? "");
     setShow(false);
   };
 

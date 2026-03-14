@@ -10,6 +10,8 @@ import { getAdminNav } from "./adminNav";
 import { Search, Video, Clock, Activity } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useDebounce } from "@/hooks/use-debounce";
+import type { AdminAppointmentRow } from "@/types/domain";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", waiting: "Esperando", in_progress: "Em andamento",
@@ -21,9 +23,10 @@ const statusVariant: Record<string, "default" | "destructive" | "outline" | "sec
 };
 
 const AdminAppointments = () => {
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<AdminAppointmentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [filterStatus, setFilterStatus] = useState("all");
   const [liveCount, setLiveCount] = useState(0);
   const [waitingCount, setWaitingCount] = useState(0);
@@ -76,7 +79,7 @@ const AdminAppointments = () => {
   };
 
   const filtered = appointments.filter(a => {
-    const matchSearch = `${a.patient_name} ${a.doctor_name}`.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = `${a.patient_name} ${a.doctor_name}`.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchStatus = filterStatus === "all" || a.status === filterStatus;
     return matchSearch && matchStatus;
   });

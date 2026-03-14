@@ -121,8 +121,16 @@ const AIChatTab = ({ primaryRole }: Props) => {
     const a = document.createElement("a");
     a.href = url;
     a.download = `chat-ia-${new Date().toISOString().slice(0, 10)}.md`;
+    document.body.appendChild(a);
+
     a.click();
-    URL.revokeObjectURL(url);
+
+    document.body.removeChild(a);
+
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("Chat exportado!");
   };
 

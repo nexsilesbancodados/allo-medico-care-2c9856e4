@@ -11,6 +11,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import type { SpecialtyRow } from "@/types/domain";
 
 interface OnboardingStep {
   id: string;
@@ -61,7 +62,7 @@ const motivationalMessages = [
 const DoctorOnboarding = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<{ crm: string; crm_state: string; bio?: string | null; consultation_price?: number | null; experience_years?: number | null } | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {

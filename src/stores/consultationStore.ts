@@ -53,3 +53,22 @@ export const useConsultationStore = create<ConsultationState>()(
     }
   )
 );
+
+// ─── Selector hooks for performance (avoid re-renders) ────────────────────────
+
+/** Use individual fields to prevent unnecessary re-renders */
+export const useDiagnosis       = () => useConsultationStore(s => s.diagnosis);
+export const useObservations    = () => useConsultationStore(s => s.observations);
+export const useMedications     = () => useConsultationStore(s => s.medications);
+export const useNotesDraft      = () => useConsultationStore(s => s.notesDraft);
+export const useConsultationId  = () => useConsultationStore(s => s.appointmentId);
+
+/** Use only actions (stable references — never triggers re-renders) */
+export const useConsultationActions = () => useConsultationStore(s => ({
+  setAppointmentId: s.setAppointmentId,
+  setDiagnosis:     s.setDiagnosis,
+  setObservations:  s.setObservations,
+  setMedications:   s.setMedications,
+  setNotesDraft:    s.setNotesDraft,
+  clearDraft:       s.clearDraft,
+}));

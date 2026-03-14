@@ -54,7 +54,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
   const [chatExpired, setChatExpired] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
-  const channelRef = useRef<any>(null);
+  const channelRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   // Check 48h chat window expiration
   useEffect(() => {
@@ -136,7 +136,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
       .order("created_at", { ascending: true });
     setMessages((data as Message[]) ?? []);
 
-    const unread = (data ?? []).filter((m: any) => !m.is_read && m.sender_id !== user!.id);
+    const unread = (data ?? []).filter((m: { is_read: boolean; sender_id: string }) => !m.is_read && m.sender_id !== user!.id);
     if (unread.length > 0) {
       await supabase.from("messages").update({ is_read: true }).in("id", unread.map((m: any) => m.id));
     }

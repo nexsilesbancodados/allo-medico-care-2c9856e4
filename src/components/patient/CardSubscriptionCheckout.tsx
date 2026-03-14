@@ -105,7 +105,7 @@ const CardSubscriptionCheckout = ({
         boleto: "BOLETO",
       };
 
-      const payload: Record<string, any> = {
+      const payload: Record<string, string | number | boolean | null | undefined> = {
         customerName,
         customerCpf,
         customerEmail,

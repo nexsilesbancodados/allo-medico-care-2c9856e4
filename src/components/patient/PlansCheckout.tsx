@@ -511,7 +511,7 @@ const PlansCheckout = () => {
       setProcessing(false);
       setStep("success");
       clearCheckoutDraft();
-    } catch (err: any) {
+    } catch (err: unknown) {
       logError("PlansCheckout payment error", err);
       toast.error("Erro", { description: err.message || "Erro inesperado." });
       setProcessing(false);

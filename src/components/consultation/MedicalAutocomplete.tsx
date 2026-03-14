@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { useDebounce } from "@/hooks/use-debounce";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +15,7 @@ interface MedicalAutocompleteProps {
 const MedicalAutocomplete = ({ value, onChange, field, placeholder, className }: MedicalAutocompleteProps) => {
   const [suggestion, setSuggestion] = useState("");
   const [loading, setLoading] = useState(false);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
   const fetchSuggestion = useCallback(async (text: string) => {
     if (text.length < 10) { setSuggestion(""); return; }

@@ -9,11 +9,14 @@ import { getAdminNav } from "./adminNav";
 import { Search } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { useDebounce } from "@/hooks/use-debounce";
+import type { AuditLog } from "@/types/domain";
 
 const AdminLogs = () => {
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [filterType, setFilterType] = useState("all");
 
   useEffect(() => { fetchLogs(); }, []);
@@ -28,7 +31,7 @@ const AdminLogs = () => {
   };
 
   const filtered = logs.filter(l => {
-    const matchSearch = `${l.action} ${l.entity_type}`.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = `${l.action} ${l.entity_type}`.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchType = filterType === "all" || l.entity_type === filterType;
     return matchSearch && matchType;
   });

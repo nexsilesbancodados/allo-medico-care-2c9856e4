@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Search, Eye, Edit, Download, ChevronLeft, ChevronRight, Users, Calendar, Filter } from "lucide-react";
+import { useDebounce } from "@/hooks/use-debounce";
 
 const PAGE_SIZE = 20;
 
@@ -37,6 +38,7 @@ const AdminPatients = () => {
   const [patients, setPatients] = useState<PatientProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [selected, setSelected] = useState<PatientProfile | null>(null);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ first_name: "", last_name: "", phone: "", cpf: "" });
@@ -61,7 +63,7 @@ const AdminPatients = () => {
 
   const filtered = useMemo(() => {
     let result = patients.filter(p =>
-      `${p.first_name} ${p.last_name} ${p.cpf || ""} ${p.phone || ""}`.toLowerCase().includes(search.toLowerCase())
+      `${p.first_name} ${p.last_name} ${p.cpf || ""} ${p.phone || ""}`.toLowerCase().includes(debouncedSearch.toLowerCase())
     );
 
     // Date filter
@@ -133,8 +135,16 @@ const AdminPatients = () => {
     const a = document.createElement("a");
     a.href = url;
     a.download = `pacientes_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+
     a.click();
-    URL.revokeObjectURL(url);
+
+    document.body.removeChild(a);
+
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("CSV exportado!");
   };
 

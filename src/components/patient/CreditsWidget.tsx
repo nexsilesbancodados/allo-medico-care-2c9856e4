@@ -17,7 +17,8 @@ const levels = [
 const CreditsWidget = () => {
   const { user } = useAuth();
   const [credits, setCredits] = useState(0);
-  const [history, setHistory] = useState<any[]>([]);
+  interface CreditEntry { amount: number; reason: string; created_at: string; }
+  const [history, setHistory] = useState<CreditEntry[]>([]);
   const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {

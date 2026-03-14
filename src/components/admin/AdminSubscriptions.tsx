@@ -12,19 +12,20 @@ import { getAdminNav } from "./adminNav";
 import { Plus, Search } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { SubscriptionRow } from "@/types/domain";
 
 const statusLabel: Record<string, string> = { active: "Ativa", cancelled: "Cancelada", expired: "Expirada", paused: "Pausada" };
 const statusVariant: Record<string, "default" | "destructive" | "outline"> = { active: "default", cancelled: "destructive", expired: "outline", paused: "outline" };
 
 const AdminSubscriptions = () => {
   
-  const [subs, setSubs] = useState<any[]>([]);
-  const [plans, setPlans] = useState<any[]>([]);
+  const [subs, setSubs] = useState<SubscriptionRow[]>([]);
+  const [plans, setPlans] = useState<PlanRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [showForm, setShowForm] = useState(false);
-  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [allUsers, setAllUsers] = useState<{ id: string; first_name: string; last_name: string; email?: string }[]>([]);
   const [form, setForm] = useState({ user_id: "", plan_id: "", status: "active", notes: "" });
   const [userSearch, setUserSearch] = useState("");
 
@@ -86,7 +87,7 @@ const AdminSubscriptions = () => {
   };
 
   const updateStatus = async (id: string, newStatus: string) => {
-    const payload: any = { status: newStatus };
+    const payload: Record<string, string | number | null | undefined> = { status: newStatus };
     if (newStatus === "cancelled") payload.cancelled_at = new Date().toISOString();
     await supabase.from("subscriptions").update(payload).eq("id", id);
     toast.success("Status atualizado!");

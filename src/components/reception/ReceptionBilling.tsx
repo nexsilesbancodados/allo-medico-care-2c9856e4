@@ -18,7 +18,7 @@ import { toast } from "sonner";
 
 const ReceptionBilling = () => {
   const { user } = useAuth();
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [showUpload, setShowUpload] = useState(false);

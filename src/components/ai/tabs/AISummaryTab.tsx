@@ -24,7 +24,7 @@ const AISummaryTab = ({ primaryRole }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [result, setResult] = useState("");
-  const [patientData, setPatientData] = useState<any>(null);
+  const [patientData, setPatientData] = useState<{ first_name: string; last_name: string; cpf?: string | null; date_of_birth?: string | null } | null>(null);
   const [copied, setCopied] = useState(false);
 
   const fetchPatientData = useCallback(async () => {
@@ -59,7 +59,7 @@ const AISummaryTab = ({ primaryRole }: Props) => {
     setIsFetching(false);
   }, [patientSearch, user]);
 
-  const loadPatientDetails = async (patient: any) => {
+  const loadPatientDetails = async (patient: { id: string; first_name: string; last_name: string }) => {
     setIsFetching(true);
     const [recordsRes, appointmentsRes, prescriptionsRes, metricsRes] = await Promise.all([
       supabase.from("medical_records")
@@ -110,16 +110,16 @@ const AISummaryTab = ({ primaryRole }: Props) => {
 **Condições Crônicas:** ${patient.chronic_conditions?.join(", ") || "Nenhuma registrada"}
 
 **Registros Médicos (${records.length}):**
-${records.map((r: any) => `- ${r.record_type}: ${r.title} ${r.cid_code ? `(CID: ${r.cid_code})` : ""} - ${r.severity || ""} - ${r.is_active ? "Ativo" : "Inativo"}`).join("\n") || "Nenhum registro"}
+${records.map((r: { record_type?: string; title?: string; cid_code?: string; severity?: string; is_active?: boolean }) => `- ${r.record_type}: ${r.title} ${r.cid_code ? `(CID: ${r.cid_code})` : ""} - ${r.severity || ""} - ${r.is_active ? "Ativo" : "Inativo"}`).join("\n") || "Nenhum registro"}
 
 **Últimas Consultas (${appointments.length}):**
-${appointments.map((a: any) => `- ${a.scheduled_at}: ${a.status} ${a.notes ? `- ${a.notes}` : ""}`).join("\n") || "Nenhuma consulta"}
+${appointments.map((a: { scheduled_at: string; status: string; notes?: string }) => `- ${a.scheduled_at}: ${a.status} ${a.notes ? `- ${a.notes}` : ""}`).join("\n") || "Nenhuma consulta"}
 
 **Prescrições Recentes (${prescriptions.length}):**
-${prescriptions.map((p: any) => `- ${p.created_at}: ${p.diagnosis || "Sem diagnóstico"} - Meds: ${JSON.stringify(p.medications)}`).join("\n") || "Nenhuma"}
+${prescriptions.map((p: { created_at: string; diagnosis?: string; medications?: unknown }) => `- ${p.created_at}: ${p.diagnosis || "Sem diagnóstico"} - Meds: ${JSON.stringify(p.medications)}`).join("\n") || "Nenhuma"}
 
 **Métricas de Saúde (${metrics.length}):**
-${metrics.map((m: any) => `- ${m.type}: ${m.value} ${m.unit} (${m.measured_at})`).join("\n") || "Nenhuma"}
+${metrics.map((m: { type: string; value: number | string; unit?: string; measured_at: string }) => `- ${m.type}: ${m.value} ${m.unit} (${m.measured_at})`).join("\n") || "Nenhuma"}
 
 Estruture em:
 1. 📊 **Dados Demográficos e Perfil**
@@ -250,7 +250,7 @@ Estruture em:
           {patientData?.multiple && (
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Múltiplos pacientes encontrados. Selecione:</p>
-              {patientData.multiple.map((p: any) => (
+              {patientData.multiple.map((p: { id: string; first_name: string; last_name: string }) => (
                 <button
                   key={p.user_id}
                   onClick={() => loadPatientDetails(p)}

@@ -222,16 +222,29 @@ const AdminFinancial = () => {
   });
 
   const exportCSV = () => {
-    const headers = "ID,Paciente,Médico,Data,Status,Pagamento\n";
-    const rows = filtered.map(a =>
-      `${a.id},"${a.patient_name}","${a.doctor_name}",${format(new Date(a.created_at), "dd/MM/yyyy HH:mm")},${statusLabels[a.status] || a.status},${statusLabels[a.payment_status || "pending"] || a.payment_status}`
-    ).join("\n");
-    const blob = new Blob([headers + rows], { type: "text/csv" });
+    // BOM for Excel to recognize UTF-8 encoding correctly
+    const BOM = "\uFEFF";
+    const headers = "ID,Paciente,Médico,Data,Status,Pagamento,Valor\n";
+    const rows = filtered.map(a => {
+      const date = format(new Date(a.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR });
+      const status = statusLabels[a.status] ?? a.status;
+      const payment = statusLabels[a.payment_status ?? "pending"] ?? a.payment_status ?? "";
+      const price = a.price_at_booking != null ? `R$ ${Number(a.price_at_booking).toFixed(2)}` : "";
+      // Escape fields that may contain commas or quotes
+      const escape = (s: string) => `"${s.replace(/"/g, '""')}"`;
+      return [escape(a.id), escape(a.patient_name ?? ""), escape(a.doctor_name ?? ""), date, status, payment, price].join(",");
+    }).join("\n");
+    const csv = BOM + headers + rows;
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `financeiro_${format(new Date(), "yyyy-MM-dd")}.csv`;
+    link.setAttribute("download", `financeiro_${format(new Date(), "yyyy-MM-dd")}.csv`);
+    document.body.appendChild(link);
     link.click();
+    document.body.removeChild(link);
+    // Clean up object URL after download
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
   };
 
   return (

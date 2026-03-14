@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Search, Eye, Edit } from "lucide-react";
+import { useDebounce } from "@/hooks/use-debounce";
 
 interface ClinicItem {
   id: string;
@@ -27,6 +28,7 @@ const AdminClinics = () => {
   const [clinics, setClinics] = useState<ClinicItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const debouncedSearch = useDebounce(search, 300);
   const [selected, setSelected] = useState<ClinicItem | null>(null);
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState({ name: "", cnpj: "", phone: "", address: "" });
@@ -61,7 +63,7 @@ const AdminClinics = () => {
     else { toast.success("Clínica atualizada!"); setEditing(false); setSelected(null); fetchClinics(); }
   };
 
-  const filtered = clinics.filter(c => `${c.name} ${c.cnpj || ""}`.toLowerCase().includes(search.toLowerCase()));
+  const filtered = clinics.filter(c => `${c.name} ${c.cnpj || ""}`.toLowerCase().includes(debouncedSearch.toLowerCase()));
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("clinics")}>

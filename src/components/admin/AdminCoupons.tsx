@@ -14,11 +14,12 @@ import { toast } from "sonner";
 import { Plus, Tag, Copy, Check, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { CouponRow } from "@/types/domain";
 
 const AdminCoupons = () => {
   
   const nav = getAdminNav("coupons");
-  const [coupons, setCoupons] = useState<any[]>([]);
+  const [coupons, setCoupons] = useState<CouponRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);

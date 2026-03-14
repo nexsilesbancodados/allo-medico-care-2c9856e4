@@ -39,13 +39,31 @@ const START_HOUR = 7;
 const END_HOUR = 22;
 const HOURS = Array.from({ length: END_HOUR - START_HOUR }, (_, i) => START_HOUR + i);
 
+interface CalendarEvent {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  status: string;
+  patient_name?: string;
+  patient_id?: string | null;
+  duration_minutes?: number | null;
+}
+
+interface AvailabilitySlot {
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  is_active: boolean;
+}
+
 const DoctorCalendar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const [view, setView] = useState<"day" | "week" | "month">(isMobile ? "day" : "week");
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointments, setAppointments] = useState<CalendarEvent[]>([]);
   const [absences, setAbsences] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const gridRef = useRef<HTMLDivElement>(null);

@@ -14,13 +14,13 @@ const COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--destr
 
 const DoctorAnalyticsCharts = () => {
   const { user } = useAuth();
-  const [weeklyData, setWeeklyData] = useState<any[]>([]);
-  const [ratingData, setRatingData] = useState<any[]>([]);
-  const [earningsData, setEarningsData] = useState<any[]>([]);
-  const [heatmapData, setHeatmapData] = useState<any[]>([]);
-  const [statusData, setStatusData] = useState<any[]>([]);
-  const [monthlyTrend, setMonthlyTrend] = useState<any[]>([]);
-  const [patientDemographics, setPatientDemographics] = useState<any[]>([]);
+  const [weeklyData, setWeeklyData] = useState<ChartDataPoint[]>([]);
+  const [ratingData, setRatingData] = useState<ChartDataPoint[]>([]);
+  const [earningsData, setEarningsData] = useState<ChartDataPoint[]>([]);
+  const [heatmapData, setHeatmapData] = useState<ChartDataPoint[]>([]);
+  const [statusData, setStatusData] = useState<ChartDataPoint[]>([]);
+  const [monthlyTrend, setMonthlyTrend] = useState<ChartDataPoint[]>([]);
+  const [patientDemographics, setPatientDemographics] = useState<ChartDataPoint[]>([]);
   const [summaryStats, setSummaryStats] = useState({ completionRate: 0, avgRating: 0, totalEarnings: 0, totalPatients: 0, returnRate: 0 });
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

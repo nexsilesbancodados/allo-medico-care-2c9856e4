@@ -12,15 +12,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import type { PlanRow } from "@/types/domain";
 
 const intervalLabel: Record<string, string> = { monthly: "Mensal", yearly: "Anual", single: "Avulso" };
 
 const AdminPlans = () => {
   
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState<PlanRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [editingPlan, setEditingPlan] = useState<any>(null);
+  const [editingPlan, setEditingPlan] = useState<PlanRow | null>(null);
   const [form, setForm] = useState({ name: "", description: "", price: "", interval: "monthly", max_appointments: "", is_active: true });
 
   useEffect(() => { fetchPlans(); }, []);
@@ -37,7 +38,7 @@ const AdminPlans = () => {
     setShowForm(false);
   };
 
-  const openEdit = (p: any) => {
+  const openEdit = (p: PlanRow) => {
     setEditingPlan(p);
     setForm({
       name: p.name, description: p.description || "", price: String(p.price),

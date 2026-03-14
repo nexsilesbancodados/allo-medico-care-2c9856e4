@@ -35,7 +35,7 @@ const extraFeatures = [
 ];
 
 const MultiPlatformSection = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
 

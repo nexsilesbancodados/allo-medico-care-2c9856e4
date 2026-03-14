@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { format, subDays, startOfDay, getDay, getHours } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { ChartDataPoint } from "@/types/domain";
 
 const COLORS = [
   "hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--destructive))",
@@ -20,20 +21,20 @@ const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 const AdminAnalyticsCharts = () => {
   /* eslint-disable @typescript-eslint/no-explicit-any -- Recharts data shapes vary per chart type; strict typing adds complexity without safety here */
-  const [dailyAppts, setDailyAppts] = useState<Record<string, any>[]>([]);
-  const [statusBreakdown, setStatusBreakdown] = useState<Record<string, any>[]>([]);
-  const [specialtyData, setSpecialtyData] = useState<Record<string, any>[]>([]);
-  const [revenueData, setRevenueData] = useState<Record<string, any>[]>([]);
-  const [patientGrowth, setPatientGrowth] = useState<Record<string, any>[]>([]);
-  const [retentionData, setRetentionData] = useState<Record<string, any>[]>([]);
-  const [funnelData, setFunnelData] = useState<Record<string, any>[]>([]);
-  const [heatmapData, setHeatmapData] = useState<Record<string, any>[]>([]);
-  const [npsTrend, setNpsTrend] = useState<Record<string, any>[]>([]);
-  const [urgentCareData, setUrgentCareData] = useState<Record<string, any>[]>([]);
-  const [renewalData, setRenewalData] = useState<Record<string, any>[]>([]);
-  const [specialtyRevenueData, setSpecialtyRevenueData] = useState<Record<string, any>[]>([]);
-  const [specialtyConversionData, setSpecialtyConversionData] = useState<Record<string, any>[]>([]);
-  const [doctorPerformanceData, setDoctorPerformanceData] = useState<Record<string, any>[]>([]);
+  const [dailyAppts, setDailyAppts] = useState<ChartDataPoint[]>([]);
+  const [statusBreakdown, setStatusBreakdown] = useState<ChartDataPoint[]>([]);
+  const [specialtyData, setSpecialtyData] = useState<ChartDataPoint[]>([]);
+  const [revenueData, setRevenueData] = useState<ChartDataPoint[]>([]);
+  const [patientGrowth, setPatientGrowth] = useState<ChartDataPoint[]>([]);
+  const [retentionData, setRetentionData] = useState<ChartDataPoint[]>([]);
+  const [funnelData, setFunnelData] = useState<ChartDataPoint[]>([]);
+  const [heatmapData, setHeatmapData] = useState<ChartDataPoint[]>([]);
+  const [npsTrend, setNpsTrend] = useState<ChartDataPoint[]>([]);
+  const [urgentCareData, setUrgentCareData] = useState<ChartDataPoint[]>([]);
+  const [renewalData, setRenewalData] = useState<ChartDataPoint[]>([]);
+  const [specialtyRevenueData, setSpecialtyRevenueData] = useState<ChartDataPoint[]>([]);
+  const [specialtyConversionData, setSpecialtyConversionData] = useState<ChartDataPoint[]>([]);
+  const [doctorPerformanceData, setDoctorPerformanceData] = useState<ChartDataPoint[]>([]);
   /* eslint-enable @typescript-eslint/no-explicit-any */
   const [urgentCareKPIs, setUrgentCareKPIs] = useState({ total: 0, waiting: 0, completed: 0, refunded: 0, avgWait: 0, revenue: 0 });
   const [renewalKPIs, setRenewalKPIs] = useState({ total: 0, pending: 0, approved: 0, rejected: 0, avgReviewDays: 0 });

@@ -8,19 +8,20 @@ import { Star, TrendingUp, ThumbsUp, ThumbsDown, MessageSquare } from "lucide-re
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import { format, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { SurveyRow, DoctorPerformanceRow, ChartDataPoint } from "@/types/domain";
 
 const NPS_COLORS = { detractor: "hsl(0,84%,60%)", passive: "hsl(40,90%,55%)", promoter: "hsl(140,60%,45%)" };
 
 const AdminNPS = () => {
-  const [surveys, setSurveys] = useState<any[]>([]);
+  const [surveys, setSurveys] = useState<SurveyRow[]>([]);
   const [npsScore, setNpsScore] = useState(0);
-  const [npsDistribution, setNpsDistribution] = useState<any[]>([]);
-  const [npsTrend, setNpsTrend] = useState<any[]>([]);
+  const [npsDistribution, setNpsDistribution] = useState<ChartDataPoint[]>([]);
+  const [npsTrend, setNpsTrend] = useState<ChartDataPoint[]>([]);
   const [avgEase, setAvgEase] = useState(0);
   const [avgQuality, setAvgQuality] = useState(0);
   const [recommendRate, setRecommendRate] = useState(0);
-  const [topDoctors, setTopDoctors] = useState<any[]>([]);
-  const [recentComments, setRecentComments] = useState<any[]>([]);
+  const [topDoctors, setTopDoctors] = useState<DoctorPerformanceRow[]>([]);
+  const [recentComments, setRecentComments] = useState<SurveyRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { fetchData(); }, []);
@@ -110,7 +111,7 @@ const AdminNPS = () => {
         name: docNameMap.get(docId) ?? "Médico",
         nps: Math.round(((p - d) / surveys.length) * 100),
         responses: surveys.length,
-        avgQuality: surveys.filter(s => s.quality_score).reduce((a: number, s: any) => a + s.quality_score, 0) / (surveys.filter(s => s.quality_score).length || 1),
+        avgQuality: surveys.filter(s => (s as SurveyRow & { quality_score?: number }).quality_score).reduce((a: number, s: SurveyRow & { quality_score?: number }) => a + (s.quality_score ?? 0), 0) / (surveys.filter(s => s.quality_score).length || 1),
       };
     }).sort((a, b) => b.nps - a.nps).slice(0, 5);
     setTopDoctors(doctorStats);

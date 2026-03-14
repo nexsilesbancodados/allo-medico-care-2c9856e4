@@ -15,7 +15,7 @@ import { ptBR } from "date-fns/locale";
 const AdminInviteCodes = () => {
   const { user } = useAuth();
   
-  const [codes, setCodes] = useState<any[]>([]);
+  const [codes, setCodes] = useState<InviteCode[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);

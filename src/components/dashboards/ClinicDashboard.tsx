@@ -40,9 +40,9 @@ const ClinicDashboard = () => {
   const navigate = useNavigate();
   const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
   const location = useLocation();
-  const [clinicProfile, setClinicProfile] = useState<any>(null);
-  const [doctors, setDoctors] = useState<any[]>([]);
-  const [appointments, setAppointments] = useState<any[]>([]);
+  const [clinicProfile, setClinicProfile] = useState<{ id: string; name: string; cnpj?: string | null; address?: string | null; phone?: string | null } | null>(null);
+  const [doctors, setDoctors] = useState<Record<string, unknown>[]>([]);
+  const [appointments, setAppointments] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Route-based active nav detection

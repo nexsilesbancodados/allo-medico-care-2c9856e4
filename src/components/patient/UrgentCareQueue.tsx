@@ -16,7 +16,7 @@ const UrgentCareQueue = () => {
   const [shiftInfo, setShiftInfo] = useState<{ shift: string; price: number; label: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
-  const [myEntry, setMyEntry] = useState<any>(null);
+  const [myEntry, setMyEntry] = useState<{ id: string; status: string; position?: number; created_at: string } | null>(null);
   const [queuePosition, setQueuePosition] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [discountPercent, setDiscountPercent] = useState(0);

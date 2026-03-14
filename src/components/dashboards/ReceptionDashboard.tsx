@@ -147,8 +147,16 @@ const ReceptionDashboard = () => {
     const a = document.createElement("a");
     a.href = url;
     a.download = `agenda-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(a);
+
     a.click();
-    URL.revokeObjectURL(url);
+
+    document.body.removeChild(a);
+
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("Agenda exportada em CSV!");
   };
 

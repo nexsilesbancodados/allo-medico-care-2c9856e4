@@ -15,7 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface Conversation {
   id: string;
   title: string;
-  messages: any[];
+  messages: { role: "user" | "assistant"; content: string }[];
   role_context: string;
   created_at: string;
   updated_at: string;
@@ -73,20 +73,28 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
   };
 
   const exportConversation = (conv: Conversation) => {
-    const text = conv.messages.map((m: any) => `[${m.role === "user" ? "Você" : "IA"}]\n${m.content}`).join("\n\n---\n\n");
+    const text = conv.messages.map((m) => `[${m.role === "user" ? "Você" : "IA"}]\n${m.content}`).join("\n\n---\n\n");
     const blob = new Blob([text], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = `${conv.title.slice(0, 30)}.md`;
+    document.body.appendChild(a);
+
     a.click();
-    URL.revokeObjectURL(url);
+
+    document.body.removeChild(a);
+
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("Conversa exportada!");
   };
 
   const filtered = conversations.filter(c => {
     const matchSearch = !searchQuery || c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.messages.some((m: any) => m.content.toLowerCase().includes(searchQuery.toLowerCase()));
+      c.messages.some((m) => m.content.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchRole = filterRole === "all" || c.role_context === filterRole;
     return matchSearch && matchRole;
   });
@@ -126,7 +134,7 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
         </div>
 
         <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-          {selectedConv.messages.map((msg: any, i: number) => (
+          {selectedConv.messages.map((msg, i: number) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, y: 4 }}

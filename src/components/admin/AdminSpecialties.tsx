@@ -8,10 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { Plus, Trash2 } from "lucide-react";
+import type { SpecialtyRow } from "@/types/domain";
 
 const AdminSpecialties = () => {
   
-  const [specialties, setSpecialties] = useState<any[]>([]);
+  const [specialties, setSpecialties] = useState<SpecialtyRow[]>([]);
   const [newName, setNewName] = useState("");
   const [newDesc, setNewDesc] = useState("");
   const [newPrice, setNewPrice] = useState("");

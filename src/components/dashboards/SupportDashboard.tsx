@@ -93,10 +93,10 @@ const SupportDashboard = () => {
   const pathSegment = location.pathname.split("/").pop() || "";
   const activeNav = ["inbox", "chat", "logs", "users", "online", "audit"].includes(pathSegment) ? pathSegment : "overview";
   const defaultTab = ["inbox", "chat", "logs", "users", "online", "audit"].includes(pathSegment) ? pathSegment : "inbox";
-  const [logs, setLogs] = useState<any[]>([]);
+  const [logs, setLogs] = useState<Record<string, unknown>[]>([]);
   const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
-  const [users, setUsers] = useState<any[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<Record<string, unknown>[]>([]);
   const [searchLogs, setSearchLogs] = useState("");
   const [searchUsers, setSearchUsers] = useState("");
   const debouncedSearchLogs = useDebounce(searchLogs, 300);
@@ -105,7 +105,7 @@ const SupportDashboard = () => {
   const [userRoleFilter, setUserRoleFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [viewAs, setViewAs] = useState<any>(null);
+  const [viewAs, setViewAs] = useState<{ id: string; first_name: string; last_name: string; email?: string } | null>(null);
   const lastFetch = useRef<Date>(new Date());
 
   // Fetch online users
@@ -209,8 +209,12 @@ const SupportDashboard = () => {
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `usuarios-${format(new Date(), "yyyy-MM-dd")}.csv`; a.click();
-    URL.revokeObjectURL(url);
+    a.href = url;
+    a.setAttribute("download", `usuarios-${format(new Date(), "yyyy-MM-dd")}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("Usuários exportados em CSV!");
   };
 
@@ -227,8 +231,12 @@ const SupportDashboard = () => {
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
-    a.href = url; a.download = `logs-${format(new Date(), "yyyy-MM-dd")}.csv`; a.click();
-    URL.revokeObjectURL(url);
+    a.href = url;
+    a.setAttribute("download", `logs-${format(new Date(), "yyyy-MM-dd")}.csv`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("Logs exportados em CSV!");
   };
 
