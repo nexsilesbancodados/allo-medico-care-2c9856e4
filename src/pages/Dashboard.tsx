@@ -19,7 +19,7 @@ const AdminDashboard = lazy(() => import("@/components/dashboards/AdminDashboard
 const ReceptionDashboard = lazy(() => import("@/components/dashboards/ReceptionDashboard"));
 const SupportDashboard = lazy(() => import("@/components/dashboards/SupportDashboard"));
 const PartnerDashboard = lazy(() => import("@/components/dashboards/PartnerDashboard"));
-const AffiliateDashboard = lazy(() => import("@/components/dashboards/AffiliateDashboard"));
+
 
 // Patient
 const DoctorSearch = lazy(() => import("@/components/patient/DoctorSearch"));
