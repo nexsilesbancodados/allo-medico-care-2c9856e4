@@ -202,7 +202,7 @@ const B2BLanding = () => {
                   { icon: <Shield className="w-6 h-6" />, title: "Custo Acessível", desc: "Muito mais barato que plano de saúde tradicional, sem reajuste por sinistralidade" },
                   { icon: <Heart className="w-6 h-6" />, title: "Bem-estar Integral", desc: "Saúde física e mental com acesso a diversas especialidades" },
                 ].map((item, i) => (
-                  <motion.div key={i} variants={fadeUp} className="flex items-start gap-4 p-5 rounded-2xl border border-border/50 hover:border-border hover:shadow-md transition-all">
+                  <motion.div key={i} variants={fadeUp} className="card-interactive flex items-start gap-4 p-5 rounded-2xl border border-border/50 hover:border-border hover:shadow-md transition-all">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 text-primary">{item.icon}</div>
                     <div>
                       <h3 className="font-bold text-foreground mb-1">{item.title}</h3>

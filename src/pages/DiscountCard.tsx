@@ -244,7 +244,7 @@ const DiscountCard = () => {
               </motion.div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {extras.map(({ icon: Icon, label }, i) => (
-                  <motion.div key={i} variants={fadeUp} className="flex flex-col items-center gap-3 p-5 rounded-2xl bg-card border border-border/50 hover:shadow-lg hover:border-primary/20 transition-all group text-center">
+                  <motion.div key={i} variants={fadeUp} className="card-interactive flex flex-col items-center gap-3 p-5 rounded-2xl bg-card border border-border/50 hover:shadow-lg hover:border-primary/20 transition-all group text-center">
                     <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform">
                       <Icon className="w-6 h-6 text-primary" />
                     </div>

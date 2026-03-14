@@ -157,7 +157,7 @@ const B2BTelelaudo = () => {
                   { icon: <Brain className="w-6 h-6" />, title: "IA Assistente", desc: "Sugestão de achados e estruturação automática de laudos por IA" },
                   { icon: <Upload className="w-6 h-6" />, title: "Integração PACS", desc: "Receba estudos DICOM automaticamente via webhook Orthanc" },
                 ].map((item, i) => (
-                  <motion.div key={i} variants={fadeUp} className="flex items-start gap-4 p-5 rounded-2xl border border-border/50 hover:border-border hover:shadow-md transition-all">
+                  <motion.div key={i} variants={fadeUp} className="card-interactive flex items-start gap-4 p-5 rounded-2xl border border-border/50 hover:border-border hover:shadow-md transition-all">
                     <div className="w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0 text-secondary">{item.icon}</div>
                     <div>
                       <h3 className="font-bold text-foreground mb-1">{item.title}</h3>

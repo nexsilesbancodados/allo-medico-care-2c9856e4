@@ -245,7 +245,7 @@ const AuthLaudista = () => {
           </motion.div>
           <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {benefits.map(({ icon: Icon, title, desc }) => (
-              <motion.div key={title} variants={fadeUp} whileHover={{ y: -4 }} className="p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-lg transition-all">
+              <motion.div key={title} variants={fadeUp} whileHover={{ y: -4 }} className="card-interactive p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-lg transition-all">
                 <div className="w-12 h-12 rounded-xl bg-[hsl(210,85%,45%)]/10 flex items-center justify-center mb-4">
                   <Icon className="w-6 h-6 text-[hsl(210,85%,45%)]" />
                 </div>
@@ -286,7 +286,7 @@ const AuthLaudista = () => {
             </motion.div>
             <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-5">
               {telelaudoSteps.map((item, i) => (
-                <motion.div key={i} variants={fadeUp} whileHover={{ y: -4 }} className="p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-lg transition-all">
+                <motion.div key={i} variants={fadeUp} whileHover={{ y: -4 }} className="card-interactive p-6 rounded-2xl bg-card border border-border shadow-sm hover:shadow-lg transition-all">
                   <div className="flex items-center gap-3 mb-4">
                     <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg`}>{item.icon}</div>
                     <span className="text-3xl font-black text-muted-foreground/20">{item.step}</span>
@@ -308,7 +308,7 @@ const AuthLaudista = () => {
             <motion.p variants={fadeUp} className="text-muted-foreground text-center mb-10">Laudamos as principais modalidades diagnósticas</motion.p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {supportedExamTypes.map((exam, i) => (
-                <motion.div key={i} variants={fadeUp} whileHover={{ y: -4 }} className="p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-lg transition-all flex items-center gap-3">
+                <motion.div key={i} variants={fadeUp} whileHover={{ y: -4 }} className="card-interactive p-5 rounded-2xl bg-card border border-border shadow-sm hover:shadow-lg transition-all flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${exam.gradient} flex items-center justify-center shadow-md shrink-0`}>{exam.icon}</div>
                   <span className="font-semibold text-foreground text-sm">{exam.title}</span>
                 </motion.div>

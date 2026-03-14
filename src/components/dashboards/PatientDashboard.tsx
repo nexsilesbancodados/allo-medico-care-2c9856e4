@@ -295,7 +295,7 @@ const PatientDashboard = () => {
               onClick={() => navigate(item.path)}
               aria-label={item.label}
               role="listitem"
-              className="flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl bg-card border border-border/40 shadow-sm hover:shadow-lg hover:border-border transition-all duration-200 group"
+              className="flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl bg-card border border-border/40 shadow-sm hover:shadow-xl hover:border-primary/20 hover:-translate-y-1 transition-all duration-200 group"
             >
               <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
                 <item.icon className="w-5 h-5 text-white" aria-hidden="true" />
@@ -310,7 +310,7 @@ const PatientDashboard = () => {
           <motion.div variants={fadeUp}>
             <Card
               className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-200 hover:shadow-xl ${
-                daysUntilNext === 0 ? "border-primary/40 shadow-lg shadow-primary/10" : "border-border/50 hover:shadow-lg"
+                daysUntilNext === 0 ? "border-primary/40 shadow-xl shadow-primary/15" : "border-border/50 hover:shadow-xl hover:border-primary/20"
               }`}
               onClick={() => navigate("/dashboard/appointments")}
             >

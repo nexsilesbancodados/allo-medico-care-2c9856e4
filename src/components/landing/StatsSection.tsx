@@ -101,7 +101,7 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
       <div className="container mx-auto px-4">
         <div ref={sectionRef} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {stats.map((stat, i) => (
-            <div key={i} className="stat-card relative group rounded-2xl bg-card border border-border/40 p-5 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/20 hover:shadow-primary/5 cursor-default">
+            <div key={i} className="card-interactive stat-card relative group rounded-2xl bg-card border border-border/40 p-5 sm:p-6 hover:-translate-y-1 hover:border-primary/20 hover:shadow-primary/5 cursor-default">
               {/* Top-left gradient orb */}
               <div className={`absolute top-0 right-0 w-24 h-24 rounded-full bg-gradient-to-br ${stat.gradient} opacity-[0.06] blur-2xl pointer-events-none group-hover:opacity-[0.10] transition-opacity`} />
 

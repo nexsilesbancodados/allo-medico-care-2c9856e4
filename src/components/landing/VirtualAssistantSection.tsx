@@ -134,7 +134,7 @@ const VirtualAssistantSection = () => {
                   viewport={{ once: true }}
                   transition={{ delay: 0.15 + i * 0.05, type: "spring", stiffness: 200, damping: 15 }}
                   whileHover={{ y: -4 }}
-                  className="p-4 rounded-2xl bg-card border border-border/40 hover:border-primary/20 hover:shadow-md transition-all cursor-default group"
+                  className="card-interactive p-4 rounded-2xl bg-card border border-border/40 hover:border-primary/20 cursor-default group"
                 >
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/15 transition-colors">
                     <cap.icon className="w-5 h-5 text-primary" />
