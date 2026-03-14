@@ -46,7 +46,7 @@ const ROLE_COLORS: Record<string, string> = {
   support:"bg-warning/10 text-warning border-warning/20",
   clinic:"bg-primary/10 text-primary border-primary/20",
   partner:"bg-success/10 text-success border-success/20",
-  affiliate:"bg-muted text-muted-foreground border-border",
+  
   ai:"bg-primary/10 text-primary border-primary/20",
 };
 const ROLE_ICON: Record<string, string> = {
