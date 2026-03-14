@@ -207,7 +207,7 @@ const LaudistaDashboard = () => {
           <motion.div variants={fadeUp}>
             <Card className="border-border/50 overflow-hidden">
               <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-4 gap-3">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-success to-success/70 flex items-center justify-center shadow-md shadow-success/15">
                       <Target className="w-4.5 h-4.5 text-white" />

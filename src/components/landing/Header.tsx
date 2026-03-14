@@ -119,7 +119,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
           backgroundColor: scrolled ? "hsl(var(--background) / 0.97)" : "hsl(var(--background) / 0.8)",
           borderColor: scrolled ? "hsl(var(--border))" : "transparent",
           backdropFilter: scrolled ? "blur(24px)" : "blur(12px)",
-          boxShadow: scrolled ? "0 4px 24px hsl(var(--primary) / 0.08), 0 1px 0 hsl(var(--border))" : "none",
+          boxShadow: scrolled ? "0 1px 12px hsl(var(--primary) / 0.06)" : "none",
         }}
         style={{ WebkitBackdropFilter: scrolled ? "blur(24px)" : "blur(12px)" }}
       >
@@ -255,7 +255,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                 </Button>
                 <Button
                   size="sm"
-                  className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-success to-secondary text-white shadow-md shadow-success/25 hover:shadow-xl hover:shadow-success/30 hover:scale-105 transition-all px-5"
+                  className="rounded-full gap-1.5 text-xs font-bold bg-gradient-to-r from-success to-success/80 text-success-foreground shadow-md shadow-success/20 hover:shadow-lg hover:opacity-90 transition-all px-5"
                   onClick={() => navigate("/paciente")}
                 >
                   <CreditCard className="w-3.5 h-3.5" />

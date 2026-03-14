@@ -43,7 +43,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
   };
 
   return (
-    <footer aria-label="Rodapé" className="bg-foreground text-background relative overflow-hidden">
+    <footer aria-label="Rodapé" className="bg-foreground text-background">
       {/* Trust badges strip */}
       <div className="border-b border-background/8">
         <div className="container mx-auto px-4 py-6">
