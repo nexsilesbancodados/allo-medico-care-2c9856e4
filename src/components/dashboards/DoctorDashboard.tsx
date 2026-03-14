@@ -105,7 +105,7 @@ const DoctorDashboard = () => {
 
         {/* ═══ Hero Header — gradient card ═══ */}
         <motion.div variants={fadeUp}>
-          <div ref={heroRef} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-secondary/90 to-primary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-secondary/20">
+          <div ref={heroRef} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-secondary/90 to-primary/90 p-5 sm:p-6 text-primary-foreground shadow-2xl shadow-secondary/25">
             <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
 
