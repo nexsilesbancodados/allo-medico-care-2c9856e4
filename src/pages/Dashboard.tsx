@@ -64,6 +64,7 @@ const LaudistaTemplates = lazy(() => import("@/components/doctor/ReportTemplateM
 const LaudistaExamRequest = lazy(() => import("@/components/doctor/ExamRequestForm"));
 const LaudistaReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
 const RenewalQueue = lazy(() => import("@/components/doctor/RenewalQueue"));
+const DiscountCardPage = lazy(() => import("@/pages/DiscountCard"));
 
 // Consultation
 const VideoRoom = lazy(() => import("@/components/consultation/VideoRoom"));
@@ -231,6 +232,7 @@ const Dashboard = () => {
       <Route path="urgent-care" element={<RoleGuard allowed={["patient"]} roles={roles}><UrgentCareQueue /></RoleGuard>} />
       <Route path="prescription-renewal" element={<RoleGuard allowed={["patient"]} roles={roles}><PrescriptionRenewalForm /></RoleGuard>} />
       <Route path="patient/exam-results" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientExamResults /></RoleGuard>} />
+      <Route path="discount-card" element={<RoleGuard allowed={["patient"]} roles={roles}><DiscountCardPage /></RoleGuard>} />
 
       {/* Doctor routes */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />
