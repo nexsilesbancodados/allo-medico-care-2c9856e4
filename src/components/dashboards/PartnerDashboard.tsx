@@ -136,11 +136,11 @@ const PartnerDashboard = () => {
             { label: "Dispensados", value: dispensedCount, icon: CheckCircle, color: "text-success", bg: "bg-success/10" },
             { label: "Conversão", value: `${conversionRate}%`, icon: TrendingUp, color: "text-warning", bg: "bg-warning/10" },
           ].map(kpi => (
-            <div key={kpi.label} className="p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${kpi.label}: ${kpi.value}`}>
+            <div key={kpi.label} className="kpi-card p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${kpi.label}: ${kpi.value}`}>
               <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
                 <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
               </div>
-              <p className="text-2xl font-bold text-foreground" aria-hidden="true">{kpi.value}</p>
+              <p className="text-2xl font-bold text-foreground tabular-nums" aria-hidden="true">{kpi.value}</p>
               <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
             </div>
           ))}

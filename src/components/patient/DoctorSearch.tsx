@@ -404,7 +404,7 @@ const DoctorSearch = () => {
                   variants={fadeUp}
                   initial="hidden"
                   animate="show"
-                  className={`relative p-4 rounded-2xl border bg-card active:scale-[0.98] transition-all cursor-pointer hover:shadow-lg ${
+                  className={`kpi-card relative p-4 rounded-2xl border bg-card cursor-pointer ${
                     doctor.available_now
                       ? "border-secondary/40 shadow-md shadow-secondary/10"
                       : "border-border/50 hover:border-border"
