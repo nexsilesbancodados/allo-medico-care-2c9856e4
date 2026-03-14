@@ -162,7 +162,7 @@ const AdminApprovals = () => {
     fetchAll();
   };
 
-  const totalPending = pendingDoctors.length + pendingClinics.length + pendingPartners.length + pendingAffiliates.length;
+  const totalPending = pendingDoctors.length + pendingClinics.length + pendingPartners.length;
   const partnerTypeLabel: Record<string, string> = { pharmacy: "Farmácia", laboratory: "Laboratório", clinic: "Clínica", other: "Outro" };
 
   const renderApprovalCard = (item: ApprovalItem, type: "doctor" | "clinic" | "partner" | "affiliate", isApproved: boolean) => (
