@@ -24,7 +24,7 @@ const AISummaryTab = ({ primaryRole }: Props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
   const [result, setResult] = useState("");
-  const [patientData, setPatientData] = useState<{ first_name: string; last_name: string; cpf?: string | null; date_of_birth?: string | null } | null>(null);
+  const [patientData, setPatientData] = useState<any>(null);
   const [copied, setCopied] = useState(false);
 
   const fetchPatientData = useCallback(async () => {
