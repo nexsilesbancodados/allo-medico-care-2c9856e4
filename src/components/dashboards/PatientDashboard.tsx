@@ -261,7 +261,7 @@ const PatientDashboard = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 15 }}
-                    className="p-3 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all cursor-pointer group"
+                    className="kpi-card p-3 rounded-2xl bg-card border border-border/50 hover:border-primary/30 cursor-pointer group"
                     onClick={() => navigate("/dashboard/patient/health")}
                   >
                     <span className="text-base group-hover:scale-110 inline-block transition-transform">{meta.icon}</span>
@@ -308,7 +308,7 @@ const PatientDashboard = () => {
               onClick={() => navigate(item.path)}
               aria-label={item.label}
               role="listitem"
-              className="flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl bg-card border border-border/40 shadow-sm hover:shadow-lg hover:border-border transition-all duration-200 group"
+              className="card-interactive flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl bg-card border border-border/40 shadow-sm group"
             >
               <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
                 <item.icon className="w-5 h-5 text-white" aria-hidden="true" />
