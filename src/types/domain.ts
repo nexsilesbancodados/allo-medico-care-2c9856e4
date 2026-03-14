@@ -1,7 +1,7 @@
 /** Shared domain types used across components */
 
 /** Generic chart data — any key/value shape for Recharts */
-export type ChartDataPoint = Record<string, string | number>;
+export type ChartDataPoint = Record<string, any>;
 
 export interface SpecialtyJoinRow {
   doctor_id: string;
