@@ -34,7 +34,7 @@ const getSupportNav = (active: string) => [
 
 const roleLabel: Record<string, string> = {
   patient: "Paciente", doctor: "Médico", clinic: "Clínica", admin: "Admin",
-  receptionist: "Recepção", support: "Suporte", partner: "Parceiro", affiliate: "Afiliado",
+  receptionist: "Recepção", support: "Suporte", partner: "Parceiro",
 };
 
 const roleColor: Record<string, string> = {
