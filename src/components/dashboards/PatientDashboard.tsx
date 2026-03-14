@@ -525,7 +525,7 @@ const PatientDashboard = () => {
                 onClick={() => navigate(item.path)}
                 className="flex flex-col items-center gap-2 py-3"
               >
-                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-md hover:-translate-y-1 transition-all duration-200 hover:border-primary/20 active:scale-95 transition-all">
+                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-md hover:-translate-y-1 transition-all duration-200 hover:border-primary/20 active:scale-95">
                   <item.icon className="w-5 h-5" />
                 </div>
                 <span className="text-[11px] font-semibold text-muted-foreground">{item.label}</span>

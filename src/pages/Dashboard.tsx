@@ -64,6 +64,7 @@ const LaudistaTemplates = lazy(() => import("@/components/doctor/ReportTemplateM
 const LaudistaExamRequest = lazy(() => import("@/components/doctor/ExamRequestForm"));
 const LaudistaReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
 const RenewalQueue = lazy(() => import("@/components/doctor/RenewalQueue"));
+const DiscountCardPage = lazy(() => import("@/pages/DiscountCard"));
 
 // Consultation
 const VideoRoom = lazy(() => import("@/components/consultation/VideoRoom"));
