@@ -33,7 +33,7 @@ const AdminSwitchPanel = () => {
           {panelOptions.map((opt) => (
             <Card
               key={opt.role}
-              className="border-border hover:border-primary/50 hover:shadow-md transition-all cursor-pointer group"
+              className="border-border hover:border-primary/50 hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer group"
               onClick={() => navigate(opt.role === "ai-assistant" ? "/dashboard/ai-assistant" : `/dashboard?role=${opt.role}`)}
             >
               <CardContent className="pt-6 pb-5 text-center">

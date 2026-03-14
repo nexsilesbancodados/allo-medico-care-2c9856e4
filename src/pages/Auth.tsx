@@ -159,7 +159,7 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex">
       <SEOHead title="Login e Cadastro" description="Acesse sua conta ou cadastre-se na AloClinica para consultas médicas online por vídeo." />
       {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[45%] bg-gradient-hero items-center justify-center p-12 relative overflow-hidden">
+      <div className="hidden lg:flex lg:w-[45%] bg-gradient-hero items-center justify-center p-12 relative overflow-hidden mesh-gradient">
         {/* Background pattern */}
         <div className="absolute inset-0 opacity-10"
           style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "32px 32px" }}
@@ -301,7 +301,7 @@ const Auth = () => {
                       setUserType(ut.type);
                       setMode("register");
                     }}
-                      className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border hover:border-primary/50 hover:bg-muted/40 transition-all text-left group"
+                      className="card-interactive w-full flex items-center gap-4 p-4 rounded-2xl border border-border hover:border-primary/50 text-left group"
                     >
                       <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${ut.color}`}>
                         <ut.icon className="w-6 h-6" />

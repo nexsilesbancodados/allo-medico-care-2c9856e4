@@ -146,7 +146,7 @@ const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
               className="flex flex-wrap gap-x-6 gap-y-2"
             >
               {trustItems.map((item, i) => (
-                <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <div key={i} className="flex items-center gap-2 text-sm text-muted-foreground/80 font-medium">
                   <CheckCircle className="w-4 h-4 text-success shrink-0" />
                   <span>{item}</span>
                 </div>

@@ -32,7 +32,7 @@ const CTABanner = forwardRef<HTMLElement>((_, ref) => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, type: "spring", stiffness: 120, damping: 20 }}
-          className="relative overflow-hidden rounded-[2rem] bg-gradient-hero shadow-elevated"
+          className="relative overflow-hidden rounded-[2rem] bg-gradient-to-br from-primary via-primary/90 to-secondary shadow-elevated"
         >
           {/* Decorative shapes */}
           <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-white/5 -translate-y-1/3 translate-x-1/3" />
