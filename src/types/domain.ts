@@ -358,11 +358,14 @@ export interface PlanRow {
   name: string;
   price: number;
   description: string | null;
-  features: string[] | null;
+  features: unknown;
   is_active: boolean;
+  interval?: string;
   billing_period?: string | null;
   max_appointments?: number | null;
   created_at?: string;
+  updated_at?: string;
+  stripe_price_id?: string | null;
 }
 
 export interface DoctorPerformanceRow {
