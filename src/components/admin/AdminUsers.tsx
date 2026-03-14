@@ -42,7 +42,7 @@ const ROLE_DESCRIPTIONS: Record<string, string> = {
   receptionist: "Agenda multimédico, check-in e confirmações",
   support: "Logs de conexão, reset de acessos e helpdesk",
   partner: "Validação de receitas (farmácias/labs)",
-  affiliate: "Rastreamento de indicações e comissões",
+  
 };
 
 interface UserWithRoles {
