@@ -392,7 +392,7 @@ serve(async (req) => {
       headers,
       body: JSON.stringify(paymentBody),
     });
-    let payData = await safeJson(payRes);
+    let payData: any = await safeJson(payRes);
     let actualBillingType = billingType;
     let fallbackUsed = false;
 
