@@ -392,8 +392,9 @@ const VideoRoom = () => {
     return `${h > 0 ? `${h}:` : ""}${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
-  const sendMessage = (fileUrl?: string, fileName?: string, fileType?: string) => {
+  const sendMessage = async (fileUrl?: string, fileName?: string, fileType?: string) => {
     if (!chatInput.trim() && !fileUrl) return;
+    const content = chatInput.trim() || (fileName ? `[Arquivo: ${fileName}]` : "");
     const msg: ChatMessage = {
       id: Date.now().toString(),
       sender: isDoctor ? "doctor" : "patient",
@@ -404,8 +405,21 @@ const VideoRoom = () => {
       fileType,
     };
     setMessages((prev) => [...prev, msg]);
-    channelRef.current?.send({ type: "broadcast", event: "chat-message", payload: msg });
     setChatInput("");
+
+    // Persist to DB
+    if (appointmentId && user) {
+      const { data: inserted } = await supabase.from("messages").insert({
+        appointment_id: appointmentId,
+        sender_id: user.id,
+        content: fileUrl ? `${content}\n${fileUrl}` : content,
+      }).select("id").single();
+      // Update local ID with DB id for deduplication
+      if (inserted) {
+        msg.id = inserted.id;
+        lastMsgIdRef.current = inserted.id;
+      }
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
