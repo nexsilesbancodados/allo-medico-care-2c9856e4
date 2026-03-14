@@ -212,7 +212,7 @@ const DoctorDashboard = () => {
           <motion.div variants={fadeUp}>
             <Card className="border-border/50 overflow-hidden">
               <CardContent className="p-5">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center justify-between mb-4 gap-3">
                   <div className="flex items-center gap-2.5">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-md shadow-primary/15">
                       <Target className="w-4.5 h-4.5 text-white" />
@@ -486,7 +486,7 @@ const DoctorDashboard = () => {
                     <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${s.gradient} flex items-center justify-center mx-auto mb-2 shadow-sm`}>
                       <span className="text-xs font-bold text-white">{typeof s.value === 'number' && s.value > 0 ? '✓' : '–'}</span>
                     </div>
-                    <p className="text-lg font-bold text-foreground">{s.value}</p>
+                    <p className="text-lg font-bold text-foreground tracking-tight">{s.value}</p>
                     <p className="text-[10px] text-muted-foreground mt-0.5">{s.label}</p>
                   </div>
                 ))}

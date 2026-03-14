@@ -201,7 +201,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => (
     <Link to={item.href} onClick={onClick}
-      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 relative ${
+      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 relative font-medium ${
         item.active ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
       }`}
     >
@@ -319,7 +319,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
         <button
           onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }))}
-          className="flex flex-1 max-w-sm items-center gap-2 px-3 py-1.5 rounded-xl border border-border/40 bg-muted/30 hover:bg-muted/50 text-xs text-muted-foreground transition-all group"
+          className="flex flex-1 max-w-sm items-center gap-2 px-3 py-1.5 rounded-xl border border-border/35 bg-muted/25 hover:bg-muted/45 hover:border-border/60 text-xs text-muted-foreground transition-all group"
           aria-label="Buscar">
           <Search className="w-3.5 h-3.5 group-hover:text-foreground transition-colors shrink-0" aria-hidden="true" />
           <span className="flex-1 text-left hidden sm:block">Buscar...</span>
@@ -378,7 +378,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {/* Body */}
       <div className="flex flex-1 min-h-0">
         {nav && nav.length > 0 && (
-          <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-border/25 bg-card/40 sticky top-14 h-[calc(100vh-3.5rem)]">
+          <aside className="hidden md:flex w-60 shrink-0 flex-col border-r border-border/25 bg-card/50 backdrop-blur-sm sticky top-14 h-[calc(100vh-3.5rem)]">
             <SidebarContent />
           </aside>
         )}

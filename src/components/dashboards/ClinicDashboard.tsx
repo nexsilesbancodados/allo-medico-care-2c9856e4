@@ -234,7 +234,7 @@ const ClinicDashboard = () => {
                 <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
                   <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
                 </div>
-                <p className="text-xl font-bold text-foreground" aria-hidden="true">{kpi.value}</p>
+                <p className="text-xl font-bold text-foreground tracking-tight" aria-hidden="true">{kpi.value}</p>
                 <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
               </div>
             ))
