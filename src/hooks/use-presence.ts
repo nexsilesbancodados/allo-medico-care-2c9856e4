@@ -22,7 +22,7 @@ export const usePresence = () => {
           last_seen_at: new Date().toISOString(),
           current_page: location.pathname,
           is_online: true,
-        } as any,
+        },
         { onConflict: "user_id" }
       );
     };
@@ -32,7 +32,7 @@ export const usePresence = () => {
 
     const setOffline = async () => {
       await supabase.from("user_presence").upsert(
-        { user_id: user.id, is_online: false, last_seen_at: new Date().toISOString() } as any,
+        { user_id: user.id, is_online: false, last_seen_at: new Date().toISOString() },
         { onConflict: "user_id" }
       );
     };

@@ -102,3 +102,116 @@ export interface PaymentResponse {
     invoiceUrl?: string;
   };
 }
+
+// ─── Admin Types ──────────────────────────────────────────────────────────────
+
+export type TrendIndicator = "↑" | "↓" | "⚠" | "✓" | null;
+
+export interface AdminKpiItem {
+  label: string;
+  value: string | number;
+  icon: React.ComponentType<{ className?: string }>;
+  color: string;
+  bg: string;
+  path?: string;
+  trend?: TrendIndicator;
+}
+
+export interface AdminStats {
+  total_revenue: number;
+  active_subs: number;
+  overdue_subs: number;
+  total_patients: number;
+  total_doctors: number;
+  monthly_appts: number;
+  total_laudos: number;
+  avg_nps: number;
+  period?: string;
+}
+
+// ─── Exam / Laudo Types ───────────────────────────────────────────────────────
+
+export interface ExamRequest {
+  id: string;
+  requesting_doctor_id: string;
+  patient_id?: string | null;
+  exam_type: string;
+  status: string;
+  assigned_to?: string | null;
+  created_at: string;
+  updated_at?: string;
+  notes?: string | null;
+}
+
+export interface ExamReport {
+  id: string;
+  exam_request_id: string;
+  reporter_id: string;
+  content_text: string;
+  signed_at?: string | null;
+  verification_code?: string | null;
+  created_at: string;
+}
+
+export interface ReportTemplate {
+  id: string;
+  title: string;
+  content: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+// ─── AI Conversation Types ────────────────────────────────────────────────────
+
+export interface AiConversation {
+  id: string;
+  user_id: string;
+  role: "user" | "assistant";
+  content: string;
+  context?: string | null;
+  created_at: string;
+}
+
+// ─── NPS Types ────────────────────────────────────────────────────────────────
+
+export interface NpsRow {
+  id: string;
+  appointment_id?: string | null;
+  patient_id?: string | null;
+  nps_score: number;
+  feedback?: string | null;
+  created_at: string;
+}
+
+// ─── Doctor Earnings ──────────────────────────────────────────────────────────
+
+export interface DoctorAffiliation {
+  id: string;
+  doctor_id: string;
+  clinic_id: string;
+  commission_percent: number;
+  clinic_profiles?: { name: string } | null;
+}
+
+// ─── Plans ────────────────────────────────────────────────────────────────────
+
+export interface PlanPayload {
+  name: string;
+  price: number;
+  description?: string | null;
+  features?: string[] | null;
+  is_active?: boolean;
+  billing_period?: "monthly" | "annual";
+}
+
+// ─── Affiliate ────────────────────────────────────────────────────────────────
+
+export interface AffiliateProfile {
+  id: string;
+  user_id: string;
+  referral_code: string;
+  commission_percent: number;
+  total_earned: number;
+  is_approved: boolean;
+  created_at: string;
+}

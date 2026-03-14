@@ -86,7 +86,7 @@ const ReceptionCheckin = () => {
       payment_status: "confirmed",
       payment_confirmed_by: user?.id,
       payment_confirmed_at: new Date().toISOString(),
-    } as any).eq("id", id);
+    }).eq("id", id);
     toast.success("Pagamento confirmado!");
   };
 

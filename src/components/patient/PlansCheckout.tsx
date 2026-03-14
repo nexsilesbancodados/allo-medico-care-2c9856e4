@@ -235,8 +235,8 @@ const PlansCheckout = () => {
         ...d,
         consultation_price: Number(d.consultation_price),
         rating: Number(d.rating),
-        first_name: (p as any)?.first_name ?? "",
-        last_name: (p as any)?.last_name ?? "",
+        first_name: (p as { first_name?: string })?.first_name ?? "",
+        last_name: (p as { last_name?: string })?.last_name ?? "",
         specialties: specsMap.get(d.id) ?? [],
         slots: slotsMap.get(d.id) ?? [],
       };

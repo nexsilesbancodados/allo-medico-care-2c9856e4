@@ -49,7 +49,7 @@ const DoctorWaitingRoom = () => {
         },
         (payload) => {
           fetchWaitingPatients(doctorId);
-          if (payload.eventType === "UPDATE" && (payload.new as any).status === "waiting") {
+          if (payload.eventType === "UPDATE" && (payload.new as { status?: string }).status === "waiting") {
             toast.success("🔔 Paciente na sala de espera!", {
               description: "Um paciente entrou na sala de espera virtual.",
             });
@@ -59,7 +59,7 @@ const DoctorWaitingRoom = () => {
               audio.play().catch(() => {});
             } catch {}
           }
-          if (payload.eventType === "UPDATE" && (payload.new as any).status === "cancelled") {
+          if (payload.eventType === "UPDATE" && (payload.new as { status?: string }).status === "cancelled") {
             toast.error("⚠️ Consulta cancelada", {
               description: "Um paciente cancelou a consulta.",
             });

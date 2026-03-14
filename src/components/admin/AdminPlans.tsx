@@ -61,7 +61,7 @@ const AdminPlans = () => {
       if (error) { toast.error("Erro", { description: error.message }); return; }
       toast.success("Plano atualizado!");
     } else {
-      const { error } = await supabase.from("plans").insert(payload as any);
+      const { error } = await supabase.from("plans").insert(payload);
       if (error) { toast.error("Erro", { description: error.message }); return; }
       toast.success("Plano criado!");
     }

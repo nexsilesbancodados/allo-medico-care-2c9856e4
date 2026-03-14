@@ -139,7 +139,7 @@ const DoctorSearch = () => {
       ...d,
       consultation_price: Number(d.consultation_price),
       rating: Number(d.rating),
-      profile: profilesMap.get(d.user_id) as any ?? null,
+      profile: profilesMap.get(d.user_id) ?? null,
       specialties: specsMap.get(d.id) ?? [],
     }));
 
@@ -155,20 +155,20 @@ const DoctorSearch = () => {
         `${d.profile?.first_name} ${d.profile?.last_name}`.toLowerCase().includes(search.toLowerCase()) ||
         d.crm.includes(search);
       const specMatch = !selectedSpecialty || d.specialties.some(s => s === selectedSpecialty);
-      const urgencyMatch = !isUrgency || availableNowIds.has(d.id) || (d as any).available_now;
+      const urgencyMatch = !isUrgency || availableNowIds.has(d.id) || Boolean((d as { available_now?: boolean }).available_now);
       const priceMatch = d.consultation_price >= priceRange[0] && d.consultation_price <= priceRange[1];
       const ratingMatch = d.rating >= minRating;
       const availMatch = availabilityFilter === "all" ||
         (availabilityFilter === "today" && availableNowIds.has(d.id)) ||
-        (availabilityFilter === "on_duty" && (d as any).available_now);
+        (availabilityFilter === "on_duty" && Boolean((d as { available_now?: boolean }).available_now));
       return nameMatch && specMatch && urgencyMatch && priceMatch && ratingMatch && availMatch;
     })
     .sort((a, b) => {
       const aFav = favoriteIds.has(a.id) ? 1 : 0;
       const bFav = favoriteIds.has(b.id) ? 1 : 0;
       if (bFav !== aFav) return bFav - aFav;
-      const aOnDuty = (a as any).available_now ? 1 : 0;
-      const bOnDuty = (b as any).available_now ? 1 : 0;
+      const aOnDuty = (a as { available_now?: boolean }).available_now ? 1 : 0;
+      const bOnDuty = (b as { available_now?: boolean }).available_now ? 1 : 0;
       if (bOnDuty !== aOnDuty) return bOnDuty - aOnDuty;
       if (sortBy === "rating") return b.rating - a.rating;
       if (sortBy === "price_asc") return a.consultation_price - b.consultation_price;
@@ -403,7 +403,7 @@ const DoctorSearch = () => {
                   initial="hidden"
                   animate="show"
                   className={`relative p-4 rounded-2xl border bg-card active:scale-[0.98] transition-all cursor-pointer hover:shadow-lg ${
-                    (doctor as any).available_now
+                    (doctor as { available_now?: boolean }).available_now
                       ? "border-secondary/40 shadow-md shadow-secondary/10"
                       : "border-border/50 hover:border-border"
                   }`}
@@ -446,13 +446,13 @@ const DoctorSearch = () => {
                       )}
 
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        {(doctor as any).available_now && (
+                        {(doctor as { available_now?: boolean }).available_now && (
                           <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/15 text-secondary font-semibold flex items-center gap-1">
                             <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
                             Plantão
                           </span>
                         )}
-                        {availableNowIds.has(doctor.id) && !(doctor as any).available_now && (
+                        {availableNowIds.has(doctor.id) && !(doctor as { available_now?: boolean }).available_now && (
                           <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/10 text-secondary font-medium flex items-center gap-1">
                             <Zap className="w-3 h-3" /> Disponível
                           </span>

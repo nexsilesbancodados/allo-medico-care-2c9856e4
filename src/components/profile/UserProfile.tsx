@@ -80,9 +80,9 @@ const UserProfile = () => {
       setCpf(profile.cpf || "");
       setDateOfBirth(profile.date_of_birth || "");
       setAvatarUrl(profile.avatar_url);
-      setAllergies(((profile as any).allergies ?? []).join(", "));
-      setBloodType((profile as any).blood_type ?? "");
-      setChronicConditions(((profile as any).chronic_conditions ?? []).join(", "));
+      setAllergies(((profile as { allergies?: string[] }).allergies ?? []).join(", "));
+      setBloodType((profile as { blood_type?: string }).blood_type ?? "");
+      setChronicConditions(((profile as { chronic_conditions?: string[] }).chronic_conditions ?? []).join(", "));
     }
     if (isDoctor && user) fetchDoctorProfile();
   }, [profile, user]);
@@ -124,7 +124,7 @@ const UserProfile = () => {
     const { error } = await supabase.from("profiles").update({
       first_name: firstName, last_name: lastName, phone, cpf, date_of_birth: dateOfBirth || null,
       allergies: allergyArr, blood_type: bloodType || null, chronic_conditions: conditionArr,
-    } as any).eq("user_id", user.id);
+    }).eq("user_id", user.id);
 
     if (isDoctor) {
       await supabase.from("doctor_profiles").update({
@@ -151,7 +151,7 @@ const UserProfile = () => {
         entity_id: user.id,
         user_id: user.id,
         details: { email: user.email, requested_at: new Date().toISOString() },
-      } as any);
+      });
 
       // Anonymize profile data
       await supabase.from("profiles").update({
@@ -164,7 +164,7 @@ const UserProfile = () => {
         allergies: null,
         blood_type: null,
         chronic_conditions: null,
-      } as any).eq("user_id", user.id);
+      }).eq("user_id", user.id);
 
       // Cancel active discount cards
       await supabase.from("discount_cards")

@@ -17,6 +17,7 @@ import jsPDF from "jspdf";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
+import type { AdminKpiItem } from "@/types/domain";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -396,22 +397,22 @@ const AdminDashboard = () => {
             ].map((kpi) => (
               <button
                 key={kpi.label}
-                onClick={() => (kpi as any).path && navigate((kpi as any).path)}
+                onClick={() => kpi.path && navigate(kpi.path)}
                 className="p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md transition-all text-left group"
                 role="listitem"
-                aria-label={`${kpi.label}: ${kpi.value}${(kpi as any).path ? " — clique para ver detalhes" : ""}`}
+                aria-label={`${kpi.label}: ${kpi.value}${kpi.path ? " — clique para ver detalhes" : ""}`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
                     <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
                   </div>
-                  {(kpi as any).trend && (
+                  {kpi.trend && (
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
-                      (kpi as any).trend === "⚠" ? "bg-destructive/10 text-destructive"
-                      : (kpi as any).trend === "✓" ? "bg-success/10 text-success"
+                      kpi.trend === "⚠" ? "bg-destructive/10 text-destructive"
+                      : kpi.trend === "✓" ? "bg-success/10 text-success"
                       : "bg-success/10 text-success"
                     }`} aria-hidden="true">
-                      {(kpi as any).trend}
+                      {kpi.trend}
                     </span>
                   )}
                 </div>

@@ -12,7 +12,7 @@ export const registerConsent = async (
       consent_type: consentType,
       version,
       user_agent: navigator.userAgent,
-    } as any);
+    });
   } catch (err) {
     logError("Failed to register consent", err, { userId, consentType, version });
   }

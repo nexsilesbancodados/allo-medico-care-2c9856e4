@@ -171,7 +171,7 @@ const ExamRequestForm = () => {
         file_urls: fileUrls,
         priority,
         status: "pending",
-      } as any);
+      });
 
       if (error) throw error;
 

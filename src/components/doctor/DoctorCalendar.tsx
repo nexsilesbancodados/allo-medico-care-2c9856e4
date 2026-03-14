@@ -409,7 +409,7 @@ const DoctorCalendar = () => {
               Hoje
             </Button>
           </div>
-          <Tabs value={view} onValueChange={(v) => setView(v as any)}>
+          <Tabs value={view} onValueChange={(v) => setView(v as "day" | "week" | "month")}>
             <TabsList className="w-full grid grid-cols-3 h-9">
               <TabsTrigger value="day" className="text-xs">Dia</TabsTrigger>
               <TabsTrigger value="week" className="text-xs">Semana</TabsTrigger>

@@ -188,7 +188,7 @@ const MedicalCertificate = () => {
       doctor_crm: crmText,
       document_hash: documentHash,
       details: { days: certType === "absence" ? days : null, cid: cid || null, reason: reason || null },
-    } as any).then(({ error }) => {
+    }).then(({ error }) => {
       if (error) warn("Failed to persist verification:", error);
     });
 

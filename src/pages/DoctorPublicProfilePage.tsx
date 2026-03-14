@@ -79,7 +79,7 @@ const DoctorPublicProfilePage = () => {
             supabase.from("doctor_specialties").select("specialties(name)").eq("doctor_id", doc.id).limit(1),
           ]);
           const name = pRes.data ? `Dr(a). ${pRes.data.first_name} ${pRes.data.last_name}` : "Médico";
-          const specialty = (sRes.data as any)?.[0]?.specialties?.name || "Clínica Geral";
+          const specialty = (sRes.data as { specialties?: { name?: string } | null }[])?.[0]?.specialties?.name ?? "Clínica Geral";
           setDoctorMeta({ name, specialty });
         }
       }

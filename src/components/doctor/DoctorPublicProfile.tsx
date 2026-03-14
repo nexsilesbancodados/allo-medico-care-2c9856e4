@@ -57,7 +57,7 @@ const DoctorPublicProfile = () => {
       supabase.from("satisfaction_surveys").select("nps_score, quality_score, comment, created_at, patient_id").eq("doctor_id", doc.id).order("created_at", { ascending: false }).limit(10),
     ]);
 
-    const specialties = (specsRes.data as any[])?.map((s: any) => s.specialties?.name).filter(Boolean) ?? [];
+    const specialties = (specsRes.data as { specialties?: { name?: string } | null }[])?.map(s => s.specialties?.name).filter((n): n is string => Boolean(n)) ?? [];
 
     // Get patient names for reviews
     const patientIds = [...new Set(surveysRes.data?.map(s => s.patient_id) ?? [])];

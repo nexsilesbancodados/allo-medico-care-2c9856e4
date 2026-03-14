@@ -93,7 +93,7 @@ const ExamReportQueue = () => {
     try {
       const { error } = await supabase
         .from("exam_requests" as any)
-        .update({ assigned_to: doctorProfile.id, status: "in_review" } as any)
+        .update({ assigned_to: doctorProfile.id, status: "in_review" })
         .eq("id", examId);
       if (error) throw error;
       toast.success("Exame assumido!", { description: "Você pode iniciar o laudo agora." });

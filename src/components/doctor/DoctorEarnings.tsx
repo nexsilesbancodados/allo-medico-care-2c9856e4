@@ -50,7 +50,7 @@ const DoctorEarnings = () => {
     const doctorPercent = affiliation ? Number(affiliation.commission_percent) : DEFAULT_DOCTOR_PERCENT;
     if (affiliation) {
       setClinicInfo({
-        name: (affiliation as any).clinic_profiles?.name || "Clínica",
+        name: (affiliation as { clinic_profiles?: { name?: string } | null }).clinic_profiles?.name ?? "Clínica",
         percent: doctorPercent,
       });
     }

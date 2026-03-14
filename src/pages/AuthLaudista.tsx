@@ -131,7 +131,7 @@ const AuthLaudista = () => {
         crm_state: crmState,
         specialty: specialty || "Laudista",
         bio: enrichedBio || null,
-      } as any);
+      });
       if (error) throw error;
       setStep("applied");
       toast.success("Solicitação enviada!", { description: "Analisaremos seus dados e retornaremos por email." });

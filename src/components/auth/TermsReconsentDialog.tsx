@@ -29,7 +29,7 @@ const TermsReconsentDialog = forwardRef<HTMLDivElement>((_, _ref) => {
       .eq("key", CURRENT_TERMS_VERSION_KEY)
       .single();
 
-    const version = (setting as any)?.value || "1.0.0";
+    const version = (setting as { value?: string } | null)?.value ?? "1.0.0";
     setRequiredVersion(version);
 
     // Check if user already accepted this version

@@ -48,7 +48,7 @@ const AdminDoctorApplications = () => {
     if (search.trim()) query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,crm.ilike.%${search}%`);
     const { data, error } = await query;
     if (error) logError("AdminDoctorApplications fetch error", error);
-    setApplications((data as any) || []);
+    setApplications((data as DoctorApplication[]) ?? []);
     setLoading(false);
   };
 

@@ -380,11 +380,11 @@ const PrescriptionForm = () => {
       appointment_id: appointmentId,
       doctor_id: doctorInfo.id,
       patient_id: patientId,
-      medications: validMeds as any,
+      medications: validMeds,
       diagnosis: diagnosis || null,
       observations: observations || null,
       document_hash: documentHash,
-    } as any);
+    });
 
     // Also persist verification record
     supabase.from("document_verifications").insert({
@@ -396,7 +396,7 @@ const PrescriptionForm = () => {
       doctor_crm: `CRM ${doctorInfo?.crm}/${doctorInfo?.crm_state}`,
       document_hash: documentHash,
       details: { medications: validMeds.length, diagnosis: diagnosis || null },
-    } as any).then(({ error: verErr }) => {
+    }).then(({ error: verErr }) => {
       if (verErr) warn("Failed to persist verification:", verErr);
     });
 

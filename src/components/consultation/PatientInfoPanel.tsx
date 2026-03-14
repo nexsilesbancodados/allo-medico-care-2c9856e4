@@ -101,10 +101,10 @@ const PatientInfoPanel = ({ patientId, appointmentId }: PatientInfoPanelProps) =
         .limit(5),
     ]);
 
-    if (profileRes.data) setPatient(profileRes.data as any);
-    if (symptomsRes.data) setPreConsult(symptomsRes.data as any);
+    if (profileRes.data) setPatient(profileRes.data as { first_name: string; last_name: string; phone?: string; cpf?: string; birth_date?: string; allergies?: string; blood_type?: string });
+    if (symptomsRes.data) setPreConsult(symptomsRes.data as { chief_complaint?: string; current_medications?: string; allergies?: string; notes?: string });
     if (pastRes.data) setPastConsults(pastRes.data);
-    if (prescRes.data) setPrescriptions(prescRes.data as any);
+    if (prescRes.data) setPrescriptions(prescRes.data as { id: string; diagnosis?: string; created_at: string }[]);
     setLoading(false);
   };
 

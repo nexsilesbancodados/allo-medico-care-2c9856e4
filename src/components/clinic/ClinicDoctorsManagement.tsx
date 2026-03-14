@@ -115,7 +115,7 @@ const ClinicDoctorsManagement = () => {
         crm: doc?.crm ?? "",
         crm_state: doc?.crm_state ?? "",
         specialties: specMap.get(a.doctor_id) ?? [],
-        commission_percent: (a as any).commission_percent ?? 70,
+        commission_percent: (a as { commission_percent?: number }).commission_percent ?? 70,
       };
     });
 
@@ -206,7 +206,7 @@ const ClinicDoctorsManagement = () => {
   const saveCommission = async () => {
     if (!editingDoctor) return;
     await supabase.from("clinic_affiliations")
-      .update({ commission_percent: commissionValue } as any)
+      .update({ commission_percent: commissionValue })
       .eq("id", editingDoctor.affiliation_id);
     toast.success(`Repasse atualizado: ${commissionValue}% para o médico`);
     setCommissionDialogOpen(false);

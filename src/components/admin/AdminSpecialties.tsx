@@ -27,7 +27,7 @@ const AdminSpecialties = () => {
 
   const addSpecialty = async () => {
     if (!newName.trim()) return;
-    const { error } = await supabase.from("specialties").insert({ name: newName.trim(), description: newDesc.trim() || null, consultation_price: newPrice ? Number(newPrice) : null } as any);
+    const { error } = await supabase.from("specialties").insert({ name: newName.trim(), description: newDesc.trim() || null, consultation_price: newPrice ? Number(newPrice) : null });
     if (error) toast.error("Erro", { description: error.message });
     else { setNewName(""); setNewDesc(""); setNewPrice(""); fetchSpecialties(); toast.success("Especialidade adicionada!"); }
   };
@@ -38,7 +38,7 @@ const AdminSpecialties = () => {
   };
 
   const updatePrice = async (id: string, price: string) => {
-    await supabase.from("specialties").update({ consultation_price: price ? Number(price) : null } as any).eq("id", id);
+    await supabase.from("specialties").update({ consultation_price: price ? Number(price) : null }).eq("id", id);
     fetchSpecialties();
     toast.success("Preço atualizado!");
   };

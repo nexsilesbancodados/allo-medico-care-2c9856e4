@@ -23,6 +23,7 @@ import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
 import jsPDF from "jspdf";
 import DicomViewer from "@/components/consultation/DicomViewer";
+import type { ExamRequest, ExamReport, ReportTemplate } from "@/types/domain";
 
 const ExamReportEditor = () => {
   const { examId } = useParams<{ examId: string }>();
@@ -189,7 +190,7 @@ const ExamReportEditor = () => {
     queryFn: async () => {
       const { data, error } = await supabase.from("exam_requests" as any).select("*").eq("id", examId!).maybeSingle();
       if (error) throw error;
-      return data as any;
+      return data as ExamRequest | null;
     },
     enabled: !!examId,
   });
@@ -198,7 +199,7 @@ const ExamReportEditor = () => {
     queryKey: ["exam-report-existing", examId],
     queryFn: async () => {
       const { data } = await supabase.from("exam_reports" as any).select("*").eq("exam_request_id", examId!).maybeSingle();
-      return data as any;
+      return data as ExamReport | null;
     },
     enabled: !!examId,
   });
@@ -207,7 +208,7 @@ const ExamReportEditor = () => {
     queryKey: ["report-templates"],
     queryFn: async () => {
       const { data } = await supabase.from("report_templates" as any).select("*").eq("is_active", true).order("title");
-      return data as any[];
+      return (data ?? []) as ReportTemplate[];
     },
   });
 
@@ -217,9 +218,9 @@ const ExamReportEditor = () => {
     setAutoSaveStatus("saving");
     try {
       if (existingReport?.id) {
-        await supabase.from("exam_reports" as any).update({ content_text: text } as any).eq("id", existingReport.id);
+        await supabase.from("exam_reports" as any).update({ content_text: text }).eq("id", existingReport.id);
       } else {
-        await supabase.from("exam_reports" as any).insert({ exam_request_id: examId, reporter_id: doctorProfile.id, content_text: text } as any);
+        await supabase.from("exam_reports" as any).insert({ exam_request_id: examId, reporter_id: doctorProfile.id, content_text: text });
         queryClient.invalidateQueries({ queryKey: ["exam-report-existing", examId] });
       }
       setAutoSaveStatus("saved");
@@ -371,14 +372,14 @@ const ExamReportEditor = () => {
         const { error } = await supabase.from("exam_reports" as any).update({
           content_text: content, template_id: selectedTemplateId || null, pdf_url: pdfPath,
           document_hash: documentHash, verification_code: verificationCode, signed_at: new Date().toISOString(),
-        } as any).eq("id", existingReport.id);
+        }).eq("id", existingReport.id);
         if (error) throw error;
       } else {
         const { error } = await supabase.from("exam_reports" as any).insert({
           exam_request_id: examId, reporter_id: doctorProfile.id, content_text: content,
           template_id: selectedTemplateId || null, pdf_url: pdfPath, document_hash: documentHash,
           verification_code: verificationCode, signed_at: new Date().toISOString(),
-        } as any);
+        });
         if (error) throw error;
       }
 

@@ -80,7 +80,8 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
           accessed_by: user.id,
           access_type: "view",
           user_agent: navigator.userAgent,
-        } as any).then(() => {});
+        })
+        .then(() => {});
       }
     }
   }, [targetPatientId]);

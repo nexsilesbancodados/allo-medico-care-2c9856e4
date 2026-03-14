@@ -181,7 +181,7 @@ const SupportInbox = () => {
       .channel("support-tickets-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets" }, (payload) => {
         fetchTickets();
-        if (payload.eventType === "UPDATE" && (payload.new as any).status === "waiting_human") {
+        if (payload.eventType === "UPDATE" && (payload.new as { status?: string }).status === "waiting_human") {
           playNotificationSound();
           toast.info("🔔 Novo atendimento aguardando!", { duration: 5000 });
         }

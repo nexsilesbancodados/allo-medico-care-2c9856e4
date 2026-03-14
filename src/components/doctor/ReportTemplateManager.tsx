@@ -83,7 +83,7 @@ const ReportTemplateManager = () => {
       if (editingId) {
         const { error } = await supabase
           .from("report_templates" as any)
-          .update({ title, exam_type: examType, body_text: bodyText } as any)
+          .update({ title, exam_type: examType, body_text: bodyText })
           .eq("id", editingId);
         if (error) throw error;
         toast.success("Template atualizado!");
@@ -93,7 +93,7 @@ const ReportTemplateManager = () => {
           exam_type: examType,
           body_text: bodyText,
           created_by: user!.id,
-        } as any);
+        });
         if (error) throw error;
         toast.success("Template criado!");
       }
