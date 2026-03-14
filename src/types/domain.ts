@@ -221,17 +221,6 @@ export interface PlanPayload {
   billing_period?: "monthly" | "annual";
 }
 
-// ─── Affiliate ────────────────────────────────────────────────────────────────
-
-export interface AffiliateProfile {
-  id: string;
-  user_id: string;
-  referral_code: string;
-  commission_percent: number;
-  total_earned: number;
-  is_approved: boolean;
-  created_at: string;
-}
 
 // ─── Admin Component Row Types ────────────────────────────────────────────────
 
