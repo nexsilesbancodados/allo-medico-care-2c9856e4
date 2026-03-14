@@ -65,8 +65,9 @@ const AdminSubscriptions = () => {
     }
     const plan = plans.find(p => p.id === form.plan_id);
     const expiresAt = new Date();
-    if (plan?.interval === "monthly") expiresAt.setMonth(expiresAt.getMonth() + 1);
-    else if (plan?.interval === "yearly") expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+    const interval = (plan as any)?.interval;
+    if (interval === "monthly") expiresAt.setMonth(expiresAt.getMonth() + 1);
+    else if (interval === "yearly") expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     else expiresAt.setMonth(expiresAt.getMonth() + 1);
 
     const { error } = await supabase.from("subscriptions").insert({
