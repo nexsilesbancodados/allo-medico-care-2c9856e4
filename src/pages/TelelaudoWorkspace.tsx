@@ -183,7 +183,7 @@ const LaudoEditorPanel = ({
   }, [text, exame, isSigned, onSave]);
 
   const startNoiseFilteredRecognition = useCallback(async () => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { toast.error("Reconhecimento de voz não suportado neste navegador"); return; }
 
     // Web Audio API noise suppression
@@ -538,7 +538,7 @@ const TelelaudoWorkspace = () => {
             />
           </div>
           {/* Filter tabs */}
-          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as string)}>
+          <Tabs value={statusFilter} onValueChange={(v) => setStatusFilter(v as "all" | "assinado" | "pendente")}>
             <TabsList className="w-full h-7">
               <TabsTrigger value="all" className="text-[10px] flex-1 h-5">
                 Todos ({exames.length})

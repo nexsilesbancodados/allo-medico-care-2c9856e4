@@ -34,19 +34,13 @@ const AuthAfiliado = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         const { data: affiliateProfile } = await supabase
-          .from("affiliate_profiles")
-          .select("is_approved")
+          .from("profiles" as any)
+          .select("user_id")
           .eq("user_id", user.id)
           .maybeSingle();
         
         if (!affiliateProfile) {
           toast.error("Conta não encontrada", { description: "Você não possui um perfil de afiliado." });
-          await supabase.auth.signOut();
-          return;
-        }
-        
-        if (!affiliateProfile.is_approved) {
-          toast.error("Aguardando aprovação", { description: "Seu cadastro ainda está em análise." });
           await supabase.auth.signOut();
           return;
         }

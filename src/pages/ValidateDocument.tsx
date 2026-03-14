@@ -12,7 +12,7 @@ import { ptBR } from "date-fns/locale";
 const ValidateDocument = () => {
   const { id: paramId } = useParams<{ id?: string }>();
   const [searchId, setSearchId] = useState(paramId || "");
-  const [result, setResult] = useState<{ valid: boolean; doctor_name?: string; patient_name?: string; document_type?: string; issued_at?: string; verification_code?: string } | null>(null);
+  const [result, setResult] = useState<any>(null);
   const [notFound, setNotFound] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);

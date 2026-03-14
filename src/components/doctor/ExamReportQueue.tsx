@@ -99,7 +99,7 @@ const ExamReportQueue = () => {
       toast.success("Exame assumido!", { description: "Você pode iniciar o laudo agora." });
       queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
     } catch (err: unknown) {
-      toast.error("Erro", { description: err.message });
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro desconhecido" });
     } finally {
       setClaimingId(null);
     }

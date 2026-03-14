@@ -41,7 +41,7 @@ const AISummaryTab = ({ primaryRole }: Props) => {
         .limit(5);
 
       if (!profiles || profiles.length === 0) {
-        setPatientData({ error: "Paciente não encontrado. Verifique o nome." });
+        setPatientData({ error: "Paciente não encontrado. Verifique o nome." } as any);
         setIsFetching(false);
         return;
       }

@@ -1,11 +1,6 @@
-import { forwardRef } from "react";
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-gsap.registerPlugin(ScrollTrigger);
+import { forwardRef, useEffect, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ShieldCheck, Heart, Quote, X } from "lucide-react";
-import { useState, useRef, useCallback } from "react";
 import avatarMaria from "@/assets/avatar-maria.png";
 import avatarCarlos from "@/assets/avatar-carlos.png";
 import avatarAna from "@/assets/avatar-ana.png";

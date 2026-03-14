@@ -178,7 +178,7 @@ const ExamRequestForm = () => {
       toast.success("Solicitação enviada!", { description: "O exame foi enviado para a fila de laudos." });
       navigate(getBackRoute());
     } catch (err: unknown) {
-      toast.error("Erro ao enviar", { description: err.message });
+      toast.error("Erro ao enviar", { description: err instanceof Error ? err.message : "Erro desconhecido" });
     } finally {
       setUploading(false);
     }

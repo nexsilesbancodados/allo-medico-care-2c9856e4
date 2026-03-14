@@ -184,7 +184,7 @@ const UserProfile = () => {
       toast.success("Conta excluída", { description: "Seus dados foram anonimizados conforme a LGPD." });
       navigate("/");
     } catch (err: unknown) {
-      toast.error("Erro", { description: err.message });
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro desconhecido" });
     } finally {
       setDeleting(false);
     }
