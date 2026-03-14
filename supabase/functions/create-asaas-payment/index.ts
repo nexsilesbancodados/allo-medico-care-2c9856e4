@@ -328,7 +328,7 @@ serve(async (req) => {
         headers,
         body: JSON.stringify(paymentBody),
       });
-      const payData = await safeJson(payRes);
+      const payData: any = await safeJson(payRes);
 
       if (!payRes.ok) {
         console.error("Asaas payment error:", payData);
