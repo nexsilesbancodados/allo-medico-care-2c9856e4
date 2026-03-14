@@ -402,7 +402,7 @@ const AdminDashboard = () => {
               <button
                 key={kpi.label}
                 onClick={() => kpi.path && navigate(kpi.path)}
-                className="kpi-card p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md transition-all text-left group"
+                className="kpi-card p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md hover:-translate-y-1 transition-all duration-200 transition-all text-left group"
                 role="listitem"
                 aria-label={`${kpi.label}: ${kpi.value}${kpi.path ? " — clique para ver detalhes" : ""}`}
               >

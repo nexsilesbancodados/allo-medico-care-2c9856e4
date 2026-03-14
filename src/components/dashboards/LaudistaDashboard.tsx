@@ -275,7 +275,7 @@ const LaudistaDashboard = () => {
                   {recentExams.map(exam => (
                     <div
                       key={exam.id}
-                      className={`flex items-center justify-between p-3.5 rounded-xl border transition-all hover:shadow-md ${
+                      className={`flex items-center justify-between p-3.5 rounded-xl border transition-all hover:shadow-md hover:-translate-y-1 transition-all duration-200 ${
                         exam.priority === "urgent" ? "border-destructive/30 bg-destructive/5" : "border-border/40 hover:border-primary/20"
                       }`}
                     >
@@ -342,7 +342,7 @@ const LaudistaDashboard = () => {
               <button
                 key={action.label}
                 onClick={() => navigate(action.href)}
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/40 bg-card hover:shadow-lg hover:border-primary/20 transition-all group"
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/40 bg-card hover:shadow-lg hover:-translate-y-1 transition-all duration-200 hover:border-primary/20 transition-all group"
               >
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}>
                   <action.icon className="w-5 h-5 text-white" />

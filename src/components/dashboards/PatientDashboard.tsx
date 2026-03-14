@@ -283,7 +283,7 @@ const PatientDashboard = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 15 }}
-                    className="p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group"
+                    className="p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-md hover:-translate-y-1 transition-all duration-200 transition-all cursor-pointer group"
                     onClick={() => navigate("/dashboard/patient/health")}
                   >
                     <span className="text-base group-hover:scale-110 inline-block transition-transform">{meta.icon}</span>
@@ -336,7 +336,7 @@ const PatientDashboard = () => {
                 role="listitem"
                 className="flex flex-col items-center gap-2 py-3"
               >
-                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-lg hover:border-primary/25 hover:-translate-y-1 transition-all duration-200">
+                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-lg hover:-translate-y-1 transition-all duration-200 hover:border-primary/25 hover:-translate-y-1 transition-all duration-200">
                   <item.icon className="w-6 h-6" aria-hidden="true" />
                 </div>
                 <span className="text-[11px] font-semibold text-muted-foreground">{item.label}</span>
@@ -356,7 +356,7 @@ const PatientDashboard = () => {
             </div>
             <div className="space-y-3">
               <Card
-                className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-all border-border/50 hover:shadow-md ${
+                className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-all border-border/50 hover:shadow-md hover:-translate-y-1 transition-all duration-200 ${
                   daysUntilNext === 0 ? "border-primary/30" : ""
                 }`}
                 onClick={() => navigate("/dashboard/appointments")}
@@ -403,7 +403,7 @@ const PatientDashboard = () => {
 
               {/* Additional upcoming */}
               {upcoming.slice(1).map((a: { id: string; scheduled_at: string; status: string; doctor_name: string; duration_minutes?: number | null }) => (
-                <Card key={a.id} className="border-border/50 overflow-hidden hover:shadow-md transition-all cursor-pointer active:scale-[0.98]" onClick={() => navigate("/dashboard/appointments")}>
+                <Card key={a.id} className="border-border/50 overflow-hidden hover:shadow-md hover:-translate-y-1 transition-all duration-200 transition-all cursor-pointer active:scale-[0.98]" onClick={() => navigate("/dashboard/appointments")}>
                   <CardContent className="p-4">
                     <div className="flex items-center gap-4">
                       <div className="size-12 rounded-xl bg-muted/50 flex flex-col items-center justify-center shrink-0 text-muted-foreground">
@@ -525,7 +525,7 @@ const PatientDashboard = () => {
                 onClick={() => navigate(item.path)}
                 className="flex flex-col items-center gap-2 py-3"
               >
-                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-md hover:border-primary/20 active:scale-95 transition-all">
+                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-md hover:-translate-y-1 transition-all duration-200 hover:border-primary/20 active:scale-95 transition-all">
                   <item.icon className="w-5 h-5" />
                 </div>
                 <span className="text-[11px] font-semibold text-muted-foreground">{item.label}</span>
@@ -593,7 +593,7 @@ const PatientDashboard = () => {
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory scrollbar-none">
               {favDoctors.slice(0, 6).map((doc: { id: string; name: string; specs: string[]; rating: number | null }) => (
-                <Card key={doc.id} className="border-border/50 shrink-0 w-32 snap-start cursor-pointer active:scale-[0.97] transition-all hover:shadow-md overflow-hidden group" onClick={() => navigate(`/dashboard/schedule/${doc.id}`)}>
+                <Card key={doc.id} className="border-border/50 shrink-0 w-32 snap-start cursor-pointer active:scale-[0.97] transition-all hover:shadow-md hover:-translate-y-1 transition-all duration-200 overflow-hidden group" onClick={() => navigate(`/dashboard/schedule/${doc.id}`)}>
                   <CardContent className="p-0">
                     <div className="h-20 bg-muted/50 group-hover:bg-primary/5 flex items-center justify-center transition-colors">
                       <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-base font-bold text-primary group-hover:scale-110 transition-transform">

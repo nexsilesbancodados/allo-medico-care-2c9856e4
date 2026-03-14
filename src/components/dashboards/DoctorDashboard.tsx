@@ -186,7 +186,7 @@ const DoctorDashboard = () => {
         {!loading && nextPatient && (
           <motion.div variants={fadeUp}>
             <div 
-              className="card-interactive flex items-center gap-3 p-4 rounded-2xl bg-card border border-primary/20 cursor-pointer active:scale-[0.99] transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30" 
+              className="card-interactive flex items-center gap-3 p-4 rounded-2xl bg-card border border-primary/20 cursor-pointer active:scale-[0.99] transition-all hover:shadow-lg hover:-translate-y-1 transition-all duration-200 hover:shadow-primary/10 hover:border-primary/30" 
               onClick={() => navigate(`/dashboard/consultation/${nextPatient.id}`)}
             >
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex flex-col items-center justify-center shrink-0 shadow-lg shadow-primary/20">
@@ -259,7 +259,7 @@ const DoctorDashboard = () => {
                 <p className="text-sm font-bold text-foreground">⚠️ {waitingCount} pacientes aguardando</p>
                 <p className="text-xs text-muted-foreground">Acesse a sala de espera para iniciar os atendimentos</p>
               </div>
-              <Button size="sm" className="bg-gradient-to-r from-warning to-warning/80 text-white rounded-xl shrink-0 shadow-md shadow-warning/20 hover:shadow-lg transition-shadow">
+              <Button size="sm" className="bg-gradient-to-r from-warning to-warning/80 text-white rounded-xl shrink-0 shadow-md shadow-warning/20 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 transition-shadow">
                 Atender
               </Button>
             </div>
@@ -330,7 +330,7 @@ const DoctorDashboard = () => {
                       {todayAppts.map(a => (
                         <div
                           key={a.id}
-                          className={`flex items-center justify-between p-3.5 rounded-xl border transition-all hover:shadow-md ${
+                          className={`flex items-center justify-between p-3.5 rounded-xl border transition-all hover:shadow-md hover:-translate-y-1 transition-all duration-200 ${
                             a.status === "in_progress" ? "border-success/30 bg-success/5 hover:shadow-success/10" : a.status === "waiting" ? "border-warning/30 bg-warning/5 hover:shadow-warning/10" : "border-border/50 hover:bg-muted/30"
                           }`}
                         >
@@ -353,7 +353,7 @@ const DoctorDashboard = () => {
                           </div>
                           <div className="flex items-center gap-2 shrink-0">
                             {(a.status === "scheduled" || a.status === "waiting") && (
-                              <Button size="sm" className="bg-gradient-to-r from-primary to-secondary text-white text-xs h-9 px-4 rounded-xl gap-1.5 shadow-md shadow-primary/15 hover:shadow-lg transition-shadow font-semibold" onClick={() => navigate(`/dashboard/consultation/${a.id}`)}>
+                              <Button size="sm" className="bg-gradient-to-r from-primary to-secondary text-white text-xs h-9 px-4 rounded-xl gap-1.5 shadow-md shadow-primary/15 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 transition-shadow font-semibold" onClick={() => navigate(`/dashboard/consultation/${a.id}`)}>
                                 <Video className="w-3.5 h-3.5" /> Iniciar
                               </Button>
                             )}
@@ -425,9 +425,9 @@ const DoctorDashboard = () => {
                     whileHover={{ y: -3, scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}
                   >
-                    <Card className="border-border/50 hover:shadow-lg hover:border-border transition-all duration-200 cursor-pointer group overflow-hidden" onClick={() => navigate(item.path)}>
+                    <Card className="border-border/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 hover:border-border transition-all duration-200 cursor-pointer group overflow-hidden" onClick={() => navigate(item.path)}>
                       <CardContent className="p-4 flex flex-col items-start gap-3">
-                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg`}>
+                        <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg hover:-translate-y-1 transition-all duration-200`}>
                           <item.icon className="w-5 h-5 text-white" />
                         </div>
                         <div>
@@ -441,7 +441,7 @@ const DoctorDashboard = () => {
               </div>
 
               {/* Memed — gradient accent */}
-              <Card className="border-border/50 hover:shadow-lg transition-all overflow-hidden">
+              <Card className="border-border/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 transition-all overflow-hidden">
                 <CardContent className="p-5 relative">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/[0.03] to-secondary/[0.03]" />
                   <div className="relative flex flex-col sm:flex-row sm:items-center gap-4">
@@ -482,7 +482,7 @@ const DoctorDashboard = () => {
                   { label: "Aguardando", value: waitingCount, gradient: "from-warning to-warning/70" },
                   { label: "Taxa conclusão", value: `${pct}%`, gradient: "from-secondary to-secondary/70" },
                 ].map(s => (
-                  <div key={s.label} className="p-4 rounded-xl bg-card border border-border/40 text-center hover:shadow-md transition-all">
+                  <div key={s.label} className="p-4 rounded-xl bg-card border border-border/40 text-center hover:shadow-md hover:-translate-y-1 transition-all duration-200 transition-all">
                     <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${s.gradient} flex items-center justify-center mx-auto mb-2 shadow-sm`}>
                       <span className="text-xs font-bold text-white">{typeof s.value === 'number' && s.value > 0 ? '✓' : '–'}</span>
                     </div>

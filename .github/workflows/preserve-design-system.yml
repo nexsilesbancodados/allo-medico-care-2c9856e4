@@ -1,0 +1,82 @@
+name: Preserve Design System Classes
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  reapply-design-system:
+    runs-on: ubuntu-latest
+    # Só executa em commits do Lovable, não nos nossos
+    if: contains(github.event.head_commit.message, 'Preceding changes') || contains(github.event.head_commit.message, 'Corrig') || contains(github.event.head_commit.message, 'Restyle') || contains(github.event.head_commit.message, 'Apply') || contains(github.event.head_commit.message, 'Fix') || startsWith(github.event.head_commit.author.name, 'gpt-engineer')
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 2
+
+      - name: Re-apply design system classes
+        run: |
+          python3 << 'PYEOF'
+          import re, os
+
+          def apply_kpi_card(content):
+              """Apply kpi-card to stat card divs"""
+              # Mini KPI cards inside gradient hero (white/10)
+              content = re.sub(
+                  r'className="((?:bg-white/\d+ )?backdrop-blur-\w+ rounded-xl p-3[^"]*text-center border[^"]*)"(?![^>]*kpi-card)',
+                  lambda m: f'className="kpi-card {m.group(1)}"',
+                  content
+              )
+              # Standalone KPI cards
+              content = re.sub(
+                  r'className="(p-4 rounded-2xl bg-card border border-border/50[^"]*)"(?![^>]*kpi-card)',
+                  lambda m: f'className="kpi-card {m.group(1)}"',
+                  content
+              )
+              return content
+
+          def apply_card_interactive(content):
+              """Apply card-interactive to clickable list items"""
+              content = re.sub(
+                  r'className="(flex items-center gap-3 p-[34] rounded-2xl[^"]*cursor-pointer[^"]*)"(?![^>]*card-interactive)',
+                  lambda m: f'className="card-interactive {m.group(1)}"',
+                  content
+              )
+              return content
+
+          dashboards = [
+              "src/components/dashboards/PatientDashboard.tsx",
+              "src/components/dashboards/DoctorDashboard.tsx",
+              "src/components/dashboards/AdminDashboard.tsx",
+              "src/components/dashboards/ClinicDashboard.tsx",
+              "src/components/dashboards/PartnerDashboard.tsx",
+              "src/components/dashboards/ReceptionDashboard.tsx",
+              "src/components/dashboards/SupportDashboard.tsx",
+              "src/components/dashboards/LaudistaDashboard.tsx",
+          ]
+
+          changed = []
+          for path in dashboards:
+              if not os.path.exists(path): continue
+              original = open(path).read()
+              content = apply_kpi_card(original)
+              content = apply_card_interactive(content)
+              if content != original:
+                  open(path, "w").write(content)
+                  changed.append(path)
+                  print(f"Re-applied classes: {path}")
+
+          if changed:
+              print(f"Updated {len(changed)} files")
+          else:
+              print("No changes needed")
+          PYEOF
+
+      - name: Commit if changed
+        run: |
+          git config user.name "Design System Bot"
+          git config user.email "bot@aloclinica.com"
+          git diff --quiet || (git add src/components/dashboards/ && git commit -m "style: re-apply design system classes [skip ci]" && git push)
