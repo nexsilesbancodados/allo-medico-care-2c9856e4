@@ -31,7 +31,7 @@ const ROLE_COLORS: Record<string, string> = {
   receptionist: "bg-primary/5 text-primary",
   support: "bg-muted text-muted-foreground",
   partner: "bg-secondary/5 text-secondary",
-  affiliate: "bg-accent text-accent-foreground",
+  
 };
 
 const ROLE_DESCRIPTIONS: Record<string, string> = {
