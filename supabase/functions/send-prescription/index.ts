@@ -162,9 +162,9 @@ serve(async (req) => {
         });
         results.whatsapp = await whatsRes.json();
         console.log("WhatsApp sent:", results.whatsapp);
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("WhatsApp send error:", e);
-        results.whatsapp = { error: e.message };
+        results.whatsapp = { error: e instanceof Error ? e.message : String(e) };
       }
     }
 
