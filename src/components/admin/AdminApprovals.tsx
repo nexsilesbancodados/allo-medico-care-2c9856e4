@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
-import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck, Megaphone } from "lucide-react";
+import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ApprovalItem } from "@/types/domain";
 
