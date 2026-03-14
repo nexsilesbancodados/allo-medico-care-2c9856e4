@@ -35,7 +35,7 @@ const AdminApprovals = () => {
   useEffect(() => { fetchAll(); }, []);
 
   const fetchAll = async () => {
-    await Promise.all([fetchDoctors(), fetchClinics(), fetchPartners(), fetchAffiliates()]);
+    await Promise.all([fetchDoctors(), fetchClinics(), fetchPartners()]);
     setLoading(false);
   };
 
