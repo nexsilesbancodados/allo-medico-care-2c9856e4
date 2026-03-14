@@ -170,7 +170,8 @@ const NotificationBell = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl">
+        <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-xl"
+              aria-label="Ação">
           <Bell className="w-4.5 h-4.5" />
           <AnimatePresence>
             {unreadCount > 0 && (
@@ -249,6 +250,7 @@ const NotificationBell = () => {
                   <Button
                     variant="ghost" size="icon"
                     className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
+                    aria-label="Excluir notificação"
                     onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
                   >
                     <Trash2 className="w-3 h-3 text-muted-foreground" />

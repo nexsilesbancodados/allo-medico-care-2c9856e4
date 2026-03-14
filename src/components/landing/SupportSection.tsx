@@ -42,7 +42,7 @@ const SupportSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="bg-muted/60 rounded-3xl p-8 md:p-12 lg:p-16 border border-border/50 transition-all duration-500 hover:shadow-elevated"
+          className="bg-muted/60 rounded-3xl p-8 md:p-12 lg:p-16 border border-border/50 transition-all duration-500 hover:shadow-xl hover:-translate-y-1"
         >
           <div className="grid lg:grid-cols-2 gap-10 items-center">
             <div>

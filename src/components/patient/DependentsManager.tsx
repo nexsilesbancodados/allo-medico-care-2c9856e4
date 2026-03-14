@@ -177,7 +177,7 @@ const DependentsManager = () => {
 
         {loading ? (
           <div className="grid gap-3">
-            {[1, 2].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-xl" />)}
+            {[1, 2].map(i => <div key={i} className="h-24 shimmer-v2 rounded-xl" />)}
           </div>
         ) : dependents.length === 0 ? (
           <Card className="border-border/50">

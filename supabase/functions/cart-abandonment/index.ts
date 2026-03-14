@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -39,7 +39,7 @@ serve(async (req) => {
 
     for (const appt of abandoned) {
       const scheduledAt = new Date(appt.scheduled_at);
-      const dateStr = scheduledAt.toLocaleDateString("pt-BR");
+      const dateStr = scheduledAt.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
       const timeStr = scheduledAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
 
       // Get patient info (registered or guest)

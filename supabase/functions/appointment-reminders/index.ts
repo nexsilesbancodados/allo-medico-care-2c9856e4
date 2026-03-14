@@ -1,4 +1,4 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
@@ -84,6 +84,11 @@ serve(async (req) => {
 
       const patient = patientMap.get(appt.patient_id);
       const scheduledAt = new Date(appt.scheduled_at);
+      const scheduledAtBRT = scheduledAt.toLocaleString("pt-BR", { 
+        timeZone: "America/Sao_Paulo",
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit" 
+      });
       const diffMin = Math.round((scheduledAt.getTime() - now.getTime()) / 60000);
       const timeUntil = diffMin <= 18 ? "15 minutos" : diffMin <= 33 ? "30 minutos" : "1 hora";
       const jitsiLink = appt.jitsi_link || `https://meet.jit.si/allo-medico-${appt.id}`;
@@ -102,8 +107,8 @@ serve(async (req) => {
             data: {
               patient_name: patientName,
               doctor_name: doctorName,
-              date: scheduledAt.toLocaleDateString("pt-BR"),
-              time: scheduledAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+              date: scheduledAt.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+              time: scheduledAt.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }),
               time_until: timeUntil,
             },
           }),
@@ -167,7 +172,17 @@ serve(async (req) => {
         }
       }
 
-      // 6. In-app notification
+      // 6. In-app notification (deduped: skip if same appt reminded in last 10 min)
+      const dedupeKey = `reminder_${appt.id}_${timeUntil}`;
+      const { data: existing } = await supabase.from("notifications")
+        .select("id").eq("user_id", appt.patient_id)
+        .like("message", `%${appt.id.slice(0,8)}%`)
+        .gte("created_at", new Date(Date.now() - 10 * 60000).toISOString())
+        .limit(1);
+      if (existing && existing.length > 0) {
+        console.log(`Skipping duplicate notification for ${appt.id}`);
+        continue;
+      }
       try {
         await supabase.from("notifications").insert([
           {

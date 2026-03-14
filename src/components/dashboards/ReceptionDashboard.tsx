@@ -291,7 +291,7 @@ const ReceptionDashboard = () => {
         {/* KPI Cards — unified style */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-3" role="list" aria-label="Resumo do dia">
           {loading ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" aria-hidden="true" />)
+            [1, 2, 3, 4].map(i => <div key={i} className="h-24 shimmer-v2/50 rounded-2xl" aria-hidden="true" />)
           ) : (
             kpis.map((s) => (
               <div key={s.label} className="kpi-card p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${s.label}: ${s.value}`}>

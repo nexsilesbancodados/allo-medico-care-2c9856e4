@@ -202,7 +202,7 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
                 >
                   <AccordionItem
                     value={faq.q}
-                    className="bg-card rounded-xl border border-border px-6 shadow-card transition-all duration-300 hover:border-primary/20 hover:shadow-elevated data-[state=open]:border-primary/30 data-[state=open]:shadow-elevated"
+                    className="bg-card rounded-xl border border-border px-6 shadow-card transition-all duration-300 hover:border-primary/20 hover:shadow-xl hover:-translate-y-1 data-[state=open]:border-primary/30 data-[state=open]:shadow-elevated"
                   >
                     <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline py-5 text-sm md:text-base">
                       <div className="flex-1">

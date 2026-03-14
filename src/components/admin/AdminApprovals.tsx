@@ -166,7 +166,7 @@ const AdminApprovals = () => {
   const partnerTypeLabel: Record<string, string> = { pharmacy: "Farmácia", laboratory: "Laboratório", clinic: "Clínica", other: "Outro" };
 
   const renderApprovalCard = (item: ApprovalItem, type: "doctor" | "clinic" | "partner", isApproved: boolean) => (
-    <Card key={item.id} className="border-border hover:shadow-md transition-shadow">
+    <Card key={item.id} className="card-interactive border-border">
       <CardContent className="p-4">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4">

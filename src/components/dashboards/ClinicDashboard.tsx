@@ -222,7 +222,7 @@ const ClinicDashboard = () => {
         {/* KPI Cards */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3" role="list" aria-label="Estatísticas da clínica">
           {loading ? (
-            [0,1,2,3].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" aria-hidden="true" />)
+            [0,1,2,3].map(i => <div key={i} className="h-24 shimmer-v2/50 rounded-2xl" aria-hidden="true" />)
           ) : (
             [
               { label: "Médicos Ativos", value: activeDoctors, icon: Users, color: "text-primary", bg: "bg-primary/10" },

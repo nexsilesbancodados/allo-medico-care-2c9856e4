@@ -269,7 +269,7 @@ const SupportDashboard = () => {
         {/* KPI Cards — unified style (no more BlobKPICard) */}
         <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {loading ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" />)
+            [1, 2, 3, 4].map(i => <div key={i} className="h-24 shimmer-v2/50 rounded-2xl" />)
           ) : (
             [
               { label: "Usuários", value: users.length, icon: Users, color: "text-primary", bg: "bg-primary/10", sub: `${filteredUsers.length} filtrados` },
