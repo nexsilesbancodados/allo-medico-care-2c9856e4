@@ -208,7 +208,7 @@ const AdminUsers = () => {
 
               <div className="space-y-3">
                 <p className="text-sm font-medium text-foreground">Roles do usuário:</p>
-                {(["patient", "doctor", "clinic", "admin", "receptionist", "support", "partner", "affiliate"] as const).map(role => (
+                {(["patient", "doctor", "clinic", "admin", "receptionist", "support", "partner"] as const).map(role => (
                   <label key={role} className="flex items-center gap-3 p-2 rounded-lg border border-border hover:bg-muted/50 cursor-pointer">
                     <Checkbox
                       checked={userRoles.includes(role)}
