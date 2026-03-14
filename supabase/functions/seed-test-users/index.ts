@@ -30,12 +30,12 @@ serve(async (req) => {
     });
 
     const { data: existing } = await supabase.auth.admin.listUsers({ perPage: 1000 });
-    const existingMap = new Map((existing?.users ?? []).map((u: { email?: string }) => [u.email, u]));
+    const existingMap = new Map((existing?.users ?? []).map((u: any) => [u.email, u]));
 
     const results: Record<string, unknown>[] = [];
 
     for (const u of TEST_USERS) {
-      const existingUser = existingMap.get(u.email);
+      const existingUser = existingMap.get(u.email) as any;
 
       if (existingUser) {
         const userId = existingUser.id;
@@ -160,8 +160,8 @@ serve(async (req) => {
     return new Response(JSON.stringify({ success: true, users: results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: unknown) {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

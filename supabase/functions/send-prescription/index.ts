@@ -123,9 +123,9 @@ serve(async (req) => {
         });
         results.email = await emailRes.json();
         console.log("Email sent:", results.email);
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("Email send error:", e);
-        results.email = { error: e.message };
+        results.email = { error: e instanceof Error ? e.message : String(e) };
       }
     }
 
@@ -162,9 +162,9 @@ serve(async (req) => {
         });
         results.whatsapp = await whatsRes.json();
         console.log("WhatsApp sent:", results.whatsapp);
-      } catch (e) {
+      } catch (e: unknown) {
         console.error("WhatsApp send error:", e);
-        results.whatsapp = { error: e.message };
+        results.whatsapp = { error: e instanceof Error ? e.message : String(e) };
       }
     }
 
@@ -176,9 +176,9 @@ serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

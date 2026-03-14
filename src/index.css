@@ -255,20 +255,12 @@
 
 /* ── Dashboard card interactive hover ── */
 .card-interactive {
-  transition: transform 220ms var(--ease-spring, cubic-bezier(0.22,1,0.36,1)),
-              box-shadow 220ms var(--ease-spring, cubic-bezier(0.22,1,0.36,1)),
-              border-color 200ms ease;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
   cursor: pointer;
 }
 .card-interactive:hover {
-  transform: translateY(-3px) scale(1.005);
-  box-shadow: 0 12px 32px -8px rgb(0 0 0 / 0.14), 0 4px 12px -4px rgb(0 0 0 / 0.08);
-  border-color: hsl(var(--primary) / 0.25) !important;
-}
-.card-interactive:active {
-  transform: translateY(0) scale(0.99);
-  box-shadow: 0 2px 8px -2px rgb(0 0 0 / 0.08);
-  transition-duration: 80ms;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-card);
 }
 
 /* ── Stagger fade-in for list children ── */
@@ -565,22 +557,33 @@
 
 /* ─── Glass Morphism ─────────────────────────────────────────────────── */
 .glass {
-  background: hsl(var(--background) / 0.80);
-  backdrop-filter: blur(20px) saturate(190%);
-  -webkit-backdrop-filter: blur(20px) saturate(190%);
-  border: 1px solid hsl(var(--border) / 0.55);
-  box-shadow: 0 4px 16px -4px rgb(0 0 0 / 0.08);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid var(--glass-border);
 }
 .glass-strong {
-  background: hsl(var(--background) / 0.96);
-  backdrop-filter: blur(28px) saturate(210%);
-  -webkit-backdrop-filter: blur(28px) saturate(210%);
-  border: 1px solid hsl(var(--border) / 0.75);
-  box-shadow: 0 2px 12px -2px rgb(0 0 0 / 0.06);
+  background: hsl(var(--background) / 0.95);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid hsl(var(--border) / 0.7);
 }
 
 /* ─── Card Interactions ──────────────────────────────────────────────── */
-/* card-interactive defined above */
+.card-interactive {
+  transition: transform 220ms var(--ease-spring),
+              box-shadow 220ms var(--ease-spring),
+              border-color 220ms ease;
+}
+.card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: hsl(var(--primary) / 0.2);
+}
+.card-interactive:active {
+  transform: translateY(0) scale(0.99);
+  box-shadow: var(--shadow-sm);
+}
 
 /* ─── KPI Cards ──────────────────────────────────────────────────────── */
 .kpi-card {
@@ -598,7 +601,7 @@
   pointer-events: none;
 }
 .kpi-card:hover::before { opacity: 1; }
-.kpi-card:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 16px 40px -8px rgb(0 0 0 / 0.16), 0 6px 16px -4px rgb(0 0 0 / 0.10); }
+.kpi-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
 
 /* ─── Mobile — App Feel ──────────────────────────────────────────────── */
 @media (max-width: 767px) {
@@ -617,11 +620,10 @@
 
 /* ─── Gradient Text ──────────────────────────────────────────────────── */
 .text-gradient-brand {
-  background: linear-gradient(135deg, hsl(var(--primary)) 20%, hsl(var(--secondary)) 80%);
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-weight: 800;
 }
 
 /* ─── Decorative mesh background ─────────────────────────────────────── */
@@ -645,15 +647,9 @@
   100% { background-position: 600px 0; }
 }
 .shimmer-v2 {
-  background: linear-gradient(
-    90deg,
-    hsl(var(--muted)) 0%,
-    hsl(var(--background) / 0.9) 40%,
-    hsl(var(--muted) / 0.5) 55%,
-    hsl(var(--muted)) 100%
-  );
+  background: linear-gradient(90deg, hsl(var(--muted)) 0%, hsl(var(--muted) / 0.4) 50%, hsl(var(--muted)) 100%);
   background-size: 1200px 100%;
-  animation: shimmer-v2 1.6s ease-in-out infinite;
+  animation: shimmer-v2 1.8s ease-in-out infinite;
 }
 
 /* ─── Page enter ─────────────────────────────────────────────────────── */

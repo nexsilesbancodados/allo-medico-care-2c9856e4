@@ -11,9 +11,9 @@ const corsHeaders = {
 const fetchEvo = async (url: string, opts: RequestInit = {}): Promise<Response> => {
   try {
     return await fetch(url, opts);
-  } catch (err) {
+  } catch (err: unknown) {
     if (String(err).includes("certificate") || String(err).includes("tls") || String(err).includes("CaUsedAsEndEntity")) {
-      console.warn("TLS error, retrying with HTTP:", err.message || err);
+      console.warn("TLS error, retrying with HTTP:", err instanceof Error ? err.message : err);
       const httpUrl = url.replace(/^https:\/\//, "http://");
       return await fetch(httpUrl, opts);
     }
@@ -49,7 +49,7 @@ serve(async (req) => {
     // Create instance
     if (action === "create") {
       const name = instanceName || `allo-medico-${Date.now()}`;
-      const res = await fetchInsecure(`${baseUrl}/instance/create`, {
+      const res = await fetchEvo(`${baseUrl}/instance/create`, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -77,7 +77,7 @@ serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const res = await fetchInsecure(`${baseUrl}/instance/connect/${instanceName}`, {
+      const res = await fetchEvo(`${baseUrl}/instance/connect/${instanceName}`, {
         method: "GET",
         headers,
       });
@@ -100,7 +100,7 @@ serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const res = await fetchInsecure(`${baseUrl}/instance/connectionState/${instanceName}`, {
+      const res = await fetchEvo(`${baseUrl}/instance/connectionState/${instanceName}`, {
         method: "GET",
         headers,
       });
@@ -112,7 +112,7 @@ serve(async (req) => {
 
     // List instances
     if (action === "list") {
-      const res = await fetchInsecure(`${baseUrl}/instance/fetchInstances`, {
+      const res = await fetchEvo(`${baseUrl}/instance/fetchInstances`, {
         method: "GET",
         headers,
       });
@@ -129,7 +129,7 @@ serve(async (req) => {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const res = await fetchInsecure(`${baseUrl}/instance/delete/${instanceName}`, {
+      const res = await fetchEvo(`${baseUrl}/instance/delete/${instanceName}`, {
         method: "DELETE",
         headers,
       });
@@ -142,9 +142,9 @@ serve(async (req) => {
     return new Response(JSON.stringify({ error: "Invalid action. Use: create, qrcode, status, list, delete" }), {
       status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
