@@ -380,7 +380,7 @@ const PrescriptionForm = () => {
       appointment_id: appointmentId,
       doctor_id: doctorInfo.id,
       patient_id: patientId,
-      medications: validMeds as any,
+      medications: validMeds as unknown as Parameters<typeof supabase.from>[0],
       diagnosis: diagnosis || null,
       observations: observations || null,
       document_hash: documentHash,

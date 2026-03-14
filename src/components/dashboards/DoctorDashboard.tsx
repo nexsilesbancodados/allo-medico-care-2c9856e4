@@ -217,7 +217,7 @@ const DoctorDashboard = () => {
                 transition={{ delay: i * 0.08, type: "spring", stiffness: 180, damping: 18 }}
                 role="listitem"
                 aria-label={`${kpi.label}: ${kpi.value}`}
-                className={`bg-card rounded-xl border border-border/50 border-l-4 ${kpi.borderColor} p-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 cursor-pointer`}
+                className={`bg-card rounded-xl border border-border/50 border-l-4 ${kpi.borderColor} p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer hover:border-primary/30`}
                 onClick={() => {
                   const paths = [null, "/dashboard/doctor/waiting-room", "/dashboard/prescriptions", "/dashboard/earnings"];
                   if (paths[i]) navigate(paths[i]!);
@@ -461,7 +461,7 @@ const DoctorDashboard = () => {
                   whileHover={{ y: -3 }}
                   whileTap={{ scale: 0.97 }}
                 >
-                  <Card className="border-border/50 hover:shadow-md transition-all duration-200 cursor-pointer group overflow-hidden" onClick={() => navigate(item.path)}>
+                  <Card className="card-interactive border-border/50 cursor-pointer group overflow-hidden" onClick={() => navigate(item.path)}>
                     <CardContent className="p-4 flex flex-col items-start gap-3">
                       <div className={`size-10 rounded-xl ${item.bg} flex items-center justify-center transition-transform group-hover:scale-110`}>
                         <item.icon className={`w-5 h-5 ${item.color}`} />
@@ -517,7 +517,7 @@ const DoctorDashboard = () => {
                 { label: "Aguardando", value: waitingCount, color: "text-warning", bg: "bg-warning/10" },
                 { label: "Taxa conclusão", value: `${pct}%`, color: "text-secondary", bg: "bg-secondary/10" },
               ].map(s => (
-                <div key={s.label} className="p-4 rounded-xl bg-card border border-border/40 text-center hover:shadow-md transition-all duration-200">
+                <div key={s.label} className="kpi-card p-4 rounded-xl bg-card border border-border/40 text-center">
                   <div className={`size-8 rounded-lg ${s.bg} flex items-center justify-center mx-auto mb-2`}>
                     <span className={`text-xs font-bold ${s.color}`}>{typeof s.value === 'number' && s.value > 0 ? '✓' : '–'}</span>
                   </div>

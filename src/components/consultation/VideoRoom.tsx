@@ -232,7 +232,7 @@ const VideoRoom = () => {
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages", filter: `appointment_id=eq.${appointmentId}` },
         (payload) => {
-          const newMsg = payload.new as any;
+          const newMsg = payload.new as { id: string; sender_id: string; content: string; created_at: string; is_read: boolean };
           if (newMsg.sender_id === user.id) return; // skip own messages
           if (lastMsgIdRef.current === newMsg.id) return; // deduplicate
           lastMsgIdRef.current = newMsg.id;

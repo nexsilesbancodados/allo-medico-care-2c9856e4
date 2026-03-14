@@ -144,7 +144,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
 
   const broadcastTyping = useCallback(() => {
     if (!channelRef.current || !user) return;
-    (channelRef.current as any).send({
+    (channelRef.current as { send: (msg: unknown) => void }).send({
       type: "broadcast",
       event: "typing",
       payload: { user_id: user.id },
@@ -206,7 +206,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
             }).catch(() => {});
           }
         }
-      } catch {}
+      } catch (err: unknown) { /* silent failure */ }
     }
     setSending(false);
   };

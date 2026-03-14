@@ -50,7 +50,7 @@ const SupportChat = () => {
     const channel = supabase
       .channel("support-chat-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_chat_messages", filter: `user_id=eq.${user.id}` }, (payload) => {
-        const newMsg = payload.new as any;
+        const newMsg = payload.new as { id: string; sender_id: string; content: string; created_at: string };
         if (newMsg.role === "support" || newMsg.role === "assistant") {
           setMessages(prev => [...prev, { role: newMsg.role as "support" | "assistant", content: newMsg.content || "" }]);
           setOtherTyping(false);

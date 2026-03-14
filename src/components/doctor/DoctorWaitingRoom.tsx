@@ -57,7 +57,7 @@ const DoctorWaitingRoom = () => {
               const audio = new Audio("data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH+LkI2GfHJ0fIGIjIqFf3p2enuAhYeGhIJ/fXt7fH+CgoODg4KBgH9+fn5+f4CBgoKCgoGAf39+fn5/gIGBgoKBgYCAf39+fn+AgYGBgYGBgIB/f39/f4CAgYGBgYGAgIB/f39/gICBgYGBgICAf39/f3+AgIGBgYGAgIB/f3+Af4CAgYGBgYCAgH9/f4B/gICBgYGBgICAf39/f3+AgIGBgYGAgIB/f39/f4CAf4A=");
               audio.volume = 0.5;
               audio.play().catch(() => {});
-            } catch {}
+            } catch (err: unknown) { /* silent failure */ }
           }
           if (payload.eventType === "UPDATE" && (payload.new as { status?: string }).status === "cancelled") {
             toast.error("⚠️ Consulta cancelada", {

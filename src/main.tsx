@@ -30,7 +30,7 @@ const recover = () => {
         const keys = await caches.keys();
         await Promise.all(keys.map((k) => caches.delete(k)));
       }
-    } catch {}
+    } catch (err: unknown) { /* silent failure */ }
     window.location.reload();
   };
   void reset();

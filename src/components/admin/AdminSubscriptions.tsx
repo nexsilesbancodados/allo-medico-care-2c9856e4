@@ -65,7 +65,7 @@ const AdminSubscriptions = () => {
     }
     const plan = plans.find(p => p.id === form.plan_id);
     const expiresAt = new Date();
-    const interval = (plan as any)?.interval;
+    const interval = (plan as { interval?: string })?.interval;
     if (interval === "monthly") expiresAt.setMonth(expiresAt.getMonth() + 1);
     else if (interval === "yearly") expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     else expiresAt.setMonth(expiresAt.getMonth() + 1);
