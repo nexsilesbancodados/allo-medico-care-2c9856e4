@@ -190,7 +190,7 @@ const ExamReportEditor = () => {
     queryFn: async () => {
       const { data, error } = await supabase.from("exam_requests" as any).select("*").eq("id", examId!).maybeSingle();
       if (error) throw error;
-      return data as ExamRequest | null;
+      return data as unknown as ExamRequest | null;
     },
     enabled: !!examId,
   });
