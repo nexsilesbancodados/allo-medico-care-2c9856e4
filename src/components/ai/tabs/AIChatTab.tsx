@@ -135,7 +135,7 @@ const AIChatTab = ({ primaryRole }: Props) => {
   };
 
   const toggleVoice = () => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
       toast.error("Navegador não suporta reconhecimento de voz");
       return;

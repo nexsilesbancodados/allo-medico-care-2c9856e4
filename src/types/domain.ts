@@ -297,11 +297,18 @@ export interface SubscriptionRow {
   user_id: string;
   plan_id: string;
   status: string;
-  started_at: string;
-  ends_at: string | null;
+  starts_at: string;
+  expires_at: string | null;
+  current_period_end?: string | null;
+  cancelled_at?: string | null;
   payment_method: string | null;
   notes: string | null;
   created_at: string;
+  updated_at?: string;
+  stripe_subscription_id?: string | null;
+  // Joined/computed fields
+  user_name?: string;
+  plan_name?: string;
   profiles?: { first_name: string; last_name: string; email?: string } | null;
   plans?: { name: string; price: number } | null;
 }

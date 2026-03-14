@@ -51,8 +51,12 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
       .limit(100);
 
     if (!error && data) {
-      setConversations((data as { id: string; messages: string; context?: string; created_at: string }[]).map((c) => ({
-        ...c,
+      setConversations((data as unknown as any[]).map((c: any) => ({
+        id: c.id,
+        title: c.title ?? "Conversa",
+        role_context: c.role_context ?? c.context ?? "patient",
+        created_at: c.created_at,
+        updated_at: c.updated_at ?? c.created_at,
         messages: typeof c.messages === "string" ? JSON.parse(c.messages) : c.messages,
       })));
     }

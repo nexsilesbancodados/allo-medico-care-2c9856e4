@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { KeyRound, Copy, Plus, Check } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import type { InviteCode } from "@/types/domain";
 
 const AdminInviteCodes = () => {
   const { user } = useAuth();

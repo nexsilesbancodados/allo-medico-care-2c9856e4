@@ -59,7 +59,7 @@ const AISummaryTab = ({ primaryRole }: Props) => {
     setIsFetching(false);
   }, [patientSearch, user]);
 
-  const loadPatientDetails = async (patient: { id: string; first_name: string; last_name: string }) => {
+  const loadPatientDetails = async (patient: any) => {
     setIsFetching(true);
     const [recordsRes, appointmentsRes, prescriptionsRes, metricsRes] = await Promise.all([
       supabase.from("medical_records")

@@ -145,7 +145,7 @@ const AdminWhatsApp = () => {
       }
       fetchInstances();
     } catch (err: unknown) {
-      toast.error(err.message || "Erro ao excluir");
+      toast.error(err instanceof Error ? err.message : "Erro ao excluir");
     }
   };
 
