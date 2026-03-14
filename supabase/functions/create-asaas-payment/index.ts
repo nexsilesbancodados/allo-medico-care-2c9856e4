@@ -187,7 +187,7 @@ serve(async (req) => {
         headers,
         body: JSON.stringify(customerBody),
       });
-      const customerData = await safeJson(createCustomerRes);
+      const customerData: any = await safeJson(createCustomerRes);
       if (!createCustomerRes.ok) {
         console.error("Asaas customer error:", customerData);
         return new Response(
