@@ -342,7 +342,7 @@ const LaudistaDashboard = () => {
               <button
                 key={action.label}
                 onClick={() => navigate(action.href)}
-                className="kpi-card flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/40 bg-card group"
+                className="flex flex-col items-center gap-2 p-4 rounded-2xl border border-border/40 bg-card hover:shadow-lg hover:border-primary/20 transition-all group"
               >
                 <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${action.color} flex items-center justify-center shadow-md group-hover:scale-110 transition-transform`}>
                   <action.icon className="w-5 h-5 text-white" />

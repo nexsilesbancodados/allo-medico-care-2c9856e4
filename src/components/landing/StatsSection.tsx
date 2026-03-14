@@ -110,7 +110,7 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
                   <stat.icon className="w-5 h-5 text-white" aria-hidden="true" />
                 </div>
                 <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground leading-none tabular-nums text-gradient-brand">
+                  <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground leading-none tabular-nums">
                     <GsapCounter target={stat.target} suffix={stat.suffix} decimals={(stat as {decimals?: number}).decimals} />
                   </p>
                   <p className="text-xs text-muted-foreground mt-1.5 font-medium">{stat.label}</p>

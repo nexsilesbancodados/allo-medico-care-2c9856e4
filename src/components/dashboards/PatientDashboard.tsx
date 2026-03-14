@@ -157,7 +157,7 @@ const PatientDashboard = () => {
 
         {/* ═══ Hero greeting card ═══ */}
         <motion.div variants={fadeUp}>
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary p-5 sm:p-6 text-primary-foreground shadow-2xl shadow-primary/30">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-primary/20">
             {/* Decorative orbs */}
             <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
             <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-white/5 blur-2xl" />
@@ -460,7 +460,7 @@ const PatientDashboard = () => {
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className="card-interactive flex flex-col items-center gap-2 p-3.5 rounded-2xl bg-card border border-border/40 group"
+                className="flex flex-col items-center gap-2 p-3.5 rounded-2xl bg-card border border-border/40 hover:border-primary/30 hover:bg-primary/[0.03] hover:shadow-md hover:shadow-primary/5 active:scale-[0.95] transition-all group"
               >
                 <div className="w-9 h-9 rounded-xl bg-muted/60 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
                   <item.icon className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors" />

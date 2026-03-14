@@ -6,6 +6,21 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Workaround: Evolution API server has an invalid TLS certificate.
+// Try HTTPS first, if cert error, retry with HTTP.
+const fetchEvo = async (url: string, opts: RequestInit = {}): Promise<Response> => {
+  try {
+    return await fetch(url, opts);
+  } catch (err) {
+    if (String(err).includes("certificate") || String(err).includes("tls") || String(err).includes("CaUsedAsEndEntity")) {
+      console.warn("TLS error, retrying with HTTP:", err.message || err);
+      const httpUrl = url.replace(/^https:\/\//, "http://");
+      return await fetch(httpUrl, opts);
+    }
+    throw err;
+  }
+};
+
 interface WhatsAppRequest {
   phone: string;
   message: string;
@@ -34,7 +49,7 @@ serve(async (req) => {
     const baseUrl = EVOLUTION_API_URL.replace(/\/+$/, "");
     const apiHeaders = { "Content-Type": "application/json", apikey: EVOLUTION_API_KEY };
     
-    const instancesRes = await fetch(`${baseUrl}/instance/fetchInstances`, { method: "GET", headers: apiHeaders });
+    const instancesRes = await fetchEvo(`${baseUrl}/instance/fetchInstances`, { method: "GET", headers: apiHeaders });
     const allInstances = await instancesRes.json();
     const connectedInstance = Array.isArray(allInstances)
       ? allInstances.find((i: Record<string, Record<string, string>>) => i?.instance?.status === "open")
@@ -67,7 +82,7 @@ serve(async (req) => {
 
     const apiUrl = `${baseUrl}/message/sendText/${instanceName}`;
 
-    const res = await fetch(apiUrl, {
+    const res = await fetchEvo(apiUrl, {
       method: "POST",
       headers: apiHeaders,
       body: JSON.stringify({

@@ -294,11 +294,11 @@ const ReceptionDashboard = () => {
             [1, 2, 3, 4].map(i => <div key={i} className="h-24 animate-pulse bg-muted/50 rounded-2xl" aria-hidden="true" />)
           ) : (
             kpis.map((s) => (
-              <div key={s.label} className="kpi-card p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${s.label}: ${s.value}`}>
+              <div key={s.label} className="p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${s.label}: ${s.value}`}>
                 <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
                   <s.icon className={`w-4 h-4 ${s.color}`} aria-hidden="true" />
                 </div>
-                <p className="text-2xl font-bold text-foreground tabular-nums" aria-hidden="true">{s.value}</p>
+                <p className="text-2xl font-bold text-foreground" aria-hidden="true">{s.value}</p>
                 <p className="text-xs font-medium text-muted-foreground mt-0.5">{s.label}</p>
               </div>
             ))

@@ -105,7 +105,7 @@ const DoctorDashboard = () => {
 
         {/* ═══ Hero Header — gradient card ═══ */}
         <motion.div variants={fadeUp}>
-          <div ref={heroRef} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary/95 via-secondary/85 to-primary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-secondary/20">
+          <div ref={heroRef} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-secondary/90 to-primary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-secondary/20">
             <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
 
@@ -164,7 +164,7 @@ const DoctorDashboard = () => {
                     initial={{ opacity: 0, scale: 0.85 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
-                    className="kpi-card bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10 hover:bg-white/15 transition-all cursor-pointer"
+                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10 hover:bg-white/15 transition-colors cursor-pointer"
                     role="listitem"
                     aria-label={`${kpi.label}: ${kpi.value}`}
                     onClick={() => {
@@ -186,7 +186,7 @@ const DoctorDashboard = () => {
         {!loading && nextPatient && (
           <motion.div variants={fadeUp}>
             <div 
-              className="card-interactive flex items-center gap-3 p-4 rounded-2xl bg-card border border-primary/20 cursor-pointer" 
+              className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-primary/20 cursor-pointer active:scale-[0.99] transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30" 
               onClick={() => navigate(`/dashboard/consultation/${nextPatient.id}`)}
             >
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex flex-col items-center justify-center shrink-0 shadow-lg shadow-primary/20">

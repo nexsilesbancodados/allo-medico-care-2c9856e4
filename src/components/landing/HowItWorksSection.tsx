@@ -71,7 +71,7 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
                 transition={{ delay: i * 0.1, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="group"
               >
-                <div className="card-interactive bg-card rounded-2xl border border-border/50 p-6 h-full">
+                <div className="bg-card rounded-2xl border border-border/50 p-6 hover:shadow-elevated hover:border-primary/15 transition-all duration-300 h-full">
                   {/* Step number + time */}
                   <div className="flex items-center justify-between mb-5">
                     <div className="w-10 h-10 rounded-xl bg-primary/[0.08] flex items-center justify-center">
