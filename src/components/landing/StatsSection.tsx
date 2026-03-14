@@ -30,7 +30,7 @@ const GsapCounter = ({ target, suffix, decimals = 0 }: { target: number; suffix:
             : Math.round(obj.val).toLocaleString("pt-BR");
       },
     });
-    return () => animRef.current?.kill();
+    return () => { animRef.current?.kill(); };
   }, [isInView, target, decimals]);
 
   return (

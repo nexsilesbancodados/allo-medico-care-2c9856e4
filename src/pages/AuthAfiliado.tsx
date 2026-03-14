@@ -44,12 +44,6 @@ const AuthAfiliado = () => {
           await supabase.auth.signOut();
           return;
         }
-        
-        if (!affiliateProfile.is_approved) {
-          toast.error("Aguardando aprovação", { description: "Seu cadastro ainda está em análise." });
-          await supabase.auth.signOut();
-          return;
-        }
       }
       navigate("/dashboard?role=affiliate");
     }
