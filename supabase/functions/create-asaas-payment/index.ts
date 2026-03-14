@@ -363,7 +363,7 @@ serve(async (req) => {
         headers,
         body: JSON.stringify(cardBody),
       });
-      const cardData = await safeJson(cardRes);
+      const cardData: any = await safeJson(cardRes);
 
       if (!cardRes.ok) {
         console.error("Asaas credit card error:", cardData);
