@@ -109,7 +109,7 @@ const AdminSubscriptions = () => {
 
   const filteredUsers = allUsers.filter(u =>
     `${u.first_name} ${u.last_name}`.toLowerCase().includes(userSearch.toLowerCase())
-  );
+  ) as any[];
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("subscriptions")}>

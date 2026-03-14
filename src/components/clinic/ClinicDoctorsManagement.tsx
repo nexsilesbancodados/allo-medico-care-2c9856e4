@@ -149,7 +149,7 @@ const ClinicDoctorsManagement = () => {
       ...data,
       first_name: profile?.first_name ?? "",
       last_name: profile?.last_name ?? "",
-    });
+    } as any);
     setSearching(false);
   };
 

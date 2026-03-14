@@ -144,7 +144,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
 
   const broadcastTyping = useCallback(() => {
     if (!channelRef.current || !user) return;
-    channelRef.current.send({
+    (channelRef.current as any).send({
       type: "broadcast",
       event: "typing",
       payload: { user_id: user.id },
