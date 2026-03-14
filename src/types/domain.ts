@@ -240,31 +240,48 @@ export interface AuditLog {
   entity_type: string;
   entity_id: string | null;
   user_id: string | null;
-  metadata: Record<string, unknown> | null;
   created_at: string;
+  metadata?: Record<string, unknown> | null;
+  details?: unknown;
+  consent_reference?: string | null;
+  ip_address?: string | null;
+  performed_by?: string | null;
+  user_agent?: string | null;
 }
 
 export interface CouponRow {
   id: string;
   code: string;
-  discount_type: "percent" | "fixed";
-  discount_value: number;
-  max_uses: number | null;
-  uses_count: number;
-  valid_from: string | null;
-  valid_until: string | null;
   is_active: boolean;
   created_at: string;
+  max_uses?: number | null;
+
+  // Current coupons table fields
+  discount_percentage?: number;
+  times_used?: number;
+  expires_at?: string | null;
+
+  // Legacy/alternative model fields (kept for compatibility)
+  discount_type?: "percent" | "fixed" | null;
+  discount_value?: number | null;
+  uses_count?: number | null;
+  valid_from?: string | null;
+  valid_until?: string | null;
 }
 
 export interface InviteCode {
   id: string;
   code: string;
-  role: string;
-  uses_left: number | null;
-  created_by: string | null;
+  created_by: string;
   created_at: string;
   expires_at: string | null;
+  is_used?: boolean;
+  used_at?: string | null;
+  used_by?: string | null;
+
+  // Compatibility with old shape
+  role?: string;
+  uses_left?: number | null;
 }
 
 export interface SpecialtyRow {
@@ -291,25 +308,48 @@ export interface SubscriptionRow {
 
 export interface SurveyRow {
   id: string;
-  appointment_id: string | null;
-  patient_id: string | null;
   nps_score: number;
-  feedback: string | null;
-  doctor_id?: string | null;
   created_at: string;
+  appointment_id?: string | null;
+  patient_id?: string | null;
+  doctor_id?: string | null;
+  feedback?: string | null;
+  comment?: string | null;
+  ease_score?: number | null;
+  quality_score?: number | null;
+  would_recommend?: boolean | null;
 }
 
 export interface ApprovalItem {
   id: string;
   user_id: string;
+  is_approved: boolean | null;
+  created_at: string;
+
   first_name?: string;
   last_name?: string;
   name?: string;
   email?: string;
-  is_approved: boolean | null;
-  created_at: string;
+  phone?: string | null;
+  cpf?: string | null;
+
   crm?: string;
   crm_state?: string;
+  crm_verified?: boolean;
+  crm_verified_at?: string | null;
+  specialties?: string[];
+  education?: string | null;
+
+  cnpj?: string | null;
+  address?: string | null;
+  owner_name?: string;
+
+  business_name?: string;
+  partner_type?: string;
+
+  commission_percent?: number | null;
+  pix_key?: string | null;
+
   rejection_reason?: string | null;
 }
 
@@ -326,11 +366,24 @@ export interface PlanRow {
 }
 
 export interface DoctorPerformanceRow {
-  doctor_id: string;
-  doctor_name: string;
-  total: number;
-  avg_rating: number;
-  revenue: number;
+  // NPS ranking shape
+  id?: string;
+  name?: string;
+  nps?: number;
+  responses?: number;
+  avgQuality?: number;
+
+  // Reports/analytics shape
+  doctor_id?: string;
+  doctor_name?: string;
+  total?: number;
+  avg_rating?: number;
+  revenue?: number;
+
+  // doctor_profiles compatibility
+  rating?: number | null;
+  total_reviews?: number | null;
+  consultation_price?: number | null;
 }
 
 export interface RevenueDataRow {

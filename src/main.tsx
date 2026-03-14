@@ -46,8 +46,25 @@ window.addEventListener("error", (e) => {
 import("./lib/sentry").then(({ initSentry }) => initSentry()).catch(() => {});
 import("./lib/supabase-helpers").then(({ initNetworkListeners }) => initNetworkListeners()).catch(() => {});
 
+const isPreviewEnvironment = window.location.hostname.startsWith("id-preview--");
+
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/push-sw.js").catch(() => {});
+  if (isPreviewEnvironment) {
+    // Ensure preview always reflects latest code edits immediately
+    void navigator.serviceWorker
+      .getRegistrations()
+      .then((regs) => Promise.all(regs.map((r) => r.unregister())))
+      .catch(() => {});
+
+    if ("caches" in window) {
+      void caches
+        .keys()
+        .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+        .catch(() => {});
+    }
+  } else {
+    navigator.serviceWorker.register("/push-sw.js").catch(() => {});
+  }
 }
 
 /* ── Mount React synchronously ────────────────────────── */
