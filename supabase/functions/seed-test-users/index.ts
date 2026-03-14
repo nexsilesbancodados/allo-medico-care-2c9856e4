@@ -30,7 +30,7 @@ serve(async (req) => {
     });
 
     const { data: existing } = await supabase.auth.admin.listUsers({ perPage: 1000 });
-    const existingMap = new Map((existing?.users ?? []).map((u: { email?: string }) => [u.email, u]));
+    const existingMap = new Map((existing?.users ?? []).map((u: any) => [u.email, u]));
 
     const results: Record<string, unknown>[] = [];
 
