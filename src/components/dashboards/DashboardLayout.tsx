@@ -51,7 +51,7 @@ const ROLE_COLORS: Record<string, string> = {
 };
 const ROLE_ICON: Record<string, string> = {
   patient:"👤", doctor:"🩺", admin:"⚙️", receptionist:"🏥",
-  support:"🎧", clinic:"🏢", partner:"🤝", affiliate:"📣", ai:"🤖",
+  support:"🎧", clinic:"🏢", partner:"🤝", ai:"🤖",
 };
 const ROLE_GRADIENT: Record<string, string> = {
   patient:"from-blue-500 to-cyan-500",
