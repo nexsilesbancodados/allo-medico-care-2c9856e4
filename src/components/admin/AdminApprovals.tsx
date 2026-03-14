@@ -25,8 +25,6 @@ const AdminApprovals = () => {
   const [approvedClinics, setApprovedClinics] = useState<ApprovalItem[]>([]);
   const [pendingPartners, setPendingPartners] = useState<ApprovalItem[]>([]);
   const [approvedPartners, setApprovedPartners] = useState<ApprovalItem[]>([]);
-  const [pendingAffiliates, setPendingAffiliates] = useState<ApprovalItem[]>([]);
-  const [approvedAffiliates, setApprovedAffiliates] = useState<ApprovalItem[]>([]);
   /* eslint-enable @typescript-eslint/no-explicit-any */
 
   const [loading, setLoading] = useState(true);
