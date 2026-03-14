@@ -257,7 +257,7 @@ const AdminApprovals = () => {
                   setRejectTarget({ 
                     id: item.id, 
                     type, 
-                    name: type === "doctor" ? `${item.first_name} ${item.last_name}` : type === "affiliate" ? `${item.first_name} ${item.last_name}` : item.name || item.business_name 
+                    name: type === "doctor" ? `${item.first_name} ${item.last_name}` : item.name || item.business_name 
                   }); 
                   setShowReject(true); 
                 }}>
