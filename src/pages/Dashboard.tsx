@@ -161,7 +161,7 @@ const Dashboard = () => {
   if (!user) return <Navigate to="/auth" replace />;
 
   const isAdmin = roles.includes("admin");
-  const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "affiliate", "admin", "laudista"];
+  const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "admin", "laudista"];
   
   // Determine primary role - admin always defaults to admin unless explicitly forced
   const primaryRole = isAdmin && forceRole && validForceRoles.includes(forceRole)
