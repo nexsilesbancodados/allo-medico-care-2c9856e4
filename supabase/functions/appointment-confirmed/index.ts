@@ -83,8 +83,8 @@ serve(async (req) => {
           }),
         });
         results.push(`email: ${emailRes.ok ? "sent" : "failed"}`);
-      } catch (e: unknown) {
-        results.push(`email: error - ${e instanceof Error ? e.message : String(e)}`);
+      } catch (e) {
+        results.push(`email: error - ${e.message}`);
       }
     }
 
@@ -101,8 +101,8 @@ serve(async (req) => {
           body: JSON.stringify({ phone: patient.phone, message: msg }),
         });
         results.push(`whatsapp: ${waRes.ok ? "sent" : "failed"}`);
-      } catch (e: unknown) {
-        results.push(`whatsapp: error - ${e instanceof Error ? e.message : String(e)}`);
+      } catch (e) {
+        results.push(`whatsapp: error - ${e.message}`);
       }
     }
 
@@ -121,9 +121,9 @@ serve(async (req) => {
     return new Response(JSON.stringify({ success: true, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

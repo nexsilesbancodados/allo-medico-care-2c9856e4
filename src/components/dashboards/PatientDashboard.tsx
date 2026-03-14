@@ -109,10 +109,10 @@ const PatientDashboard = () => {
   const hoursUntilNext = nextAppt ? Math.max(0, Math.round((new Date(nextAppt.scheduled_at).getTime() - Date.now()) / 3600000)) : null;
 
   const quickActions = [
-    { label: "Agendar", icon: Calendar, gradient: "from-primary to-primary/70", path: "/dashboard/schedule" },
-    { label: "Urgência", icon: Zap, gradient: "from-destructive to-destructive/70", path: "/dashboard/schedule?urgency=true" },
-    { label: "Exames", icon: Upload, gradient: "from-secondary to-secondary/70", path: "/dashboard/patient/documents" },
-    { label: "Diário", icon: Smile, gradient: "from-warning to-warning/70", path: "/dashboard/patient/diary" },
+    { label: "Agendar", icon: Calendar, path: "/dashboard/schedule" },
+    { label: "Urgência", icon: Zap, path: "/dashboard/schedule?urgency=true" },
+    { label: "Exames", icon: Upload, path: "/dashboard/patient/documents" },
+    { label: "Diário", icon: Smile, path: "/dashboard/patient/diary" },
   ];
 
   const shortcuts = [
@@ -153,70 +153,105 @@ const PatientDashboard = () => {
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-2xl mx-auto space-y-5">
+      <motion.div variants={container} initial="hidden" animate="show" className="max-w-md mx-auto w-full space-y-4 pb-24">
 
-        {/* ═══ Hero greeting card ═══ */}
+        {/* ═══ Profile card — clean white ═══ */}
         <motion.div variants={fadeUp}>
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-primary/20">
-            {/* Decorative orbs */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
-            <div className="absolute -bottom-8 -left-8 w-28 h-28 rounded-full bg-white/5 blur-2xl" />
-            
-            <div className="relative flex items-start gap-4">
-              <Avatar className="h-14 w-14 shrink-0 ring-2 ring-white/30 shadow-lg">
-                {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                <AvatarFallback className="bg-white/20 text-primary-foreground text-lg font-bold backdrop-blur-sm">
-                  {(profile?.first_name?.[0] ?? "") + (profile?.last_name?.[0] ?? "")}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-white/70 mb-0.5">
-                  {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+          <div className="flex items-center gap-4 bg-card p-4 rounded-xl shadow-sm border border-border/50">
+            <Avatar className="h-16 w-16 shrink-0 border-2 border-primary/20">
+              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+              <AvatarFallback className="bg-muted text-foreground text-lg font-bold">
+                {(profile?.first_name?.[0] ?? "") + (profile?.last_name?.[0] ?? "")}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-bold leading-tight text-foreground">
+                {greeting()}, {profile?.first_name || "Paciente"}
+              </h2>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="size-2 bg-success rounded-full" />
+                <p className="text-sm text-muted-foreground font-medium">
+                  {activeSub ? ((activeSub as Record<string, unknown>).plans as Record<string, unknown>)?.name as string ?? "Plano Ativo" : "Sem plano"}
                 </p>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight leading-tight">
-                  {greeting()}, {profile?.first_name || "Paciente"} {greetingEmoji()}
-                </h1>
-                <p className="text-xs text-white/60 mt-1 line-clamp-1">{todayTip}</p>
               </div>
-              <div className="flex items-center gap-1.5 shrink-0">
-                <MedicalHistoryExport />
+              <p className="text-xs text-muted-foreground/60 mt-1">
+                {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 shrink-0">
+              <MedicalHistoryExport />
+              <Button 
+                size="icon" 
+                variant="ghost" 
+                className="h-10 w-10 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted" 
+                onClick={handleRefresh} 
+                disabled={refreshing}
+              >
+                <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* ═══ Digital Card Banner — gradient primary ═══ */}
+        <motion.div variants={fadeUp}>
+          <div className="relative overflow-hidden rounded-xl bg-primary p-6 shadow-lg shadow-primary/20">
+            {/* Decorative orbs */}
+            <div className="absolute -right-12 -top-12 size-48 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute -left-12 -bottom-12 size-32 bg-black/10 rounded-full blur-2xl" />
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <p className="text-primary-foreground/70 text-xs font-medium uppercase tracking-widest mb-1">Cartão Digital</p>
+                  <h3 className="text-primary-foreground text-xl font-bold">Acesso Rápido</h3>
+                </div>
+                <Sparkles className="w-7 h-7 text-primary-foreground/60" />
+              </div>
+
+              {/* Inline KPIs */}
+              {!loading && (
+                <div ref={kpiRef} className="grid grid-cols-3 gap-3 mb-5">
+                  {[
+                    { label: "Consultas", value: stats?.total ?? 0, icon: Calendar },
+                    { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText },
+                    { label: "Documentos", value: stats?.documents ?? 0, icon: Upload },
+                  ].map((kpi) => (
+                    <div
+                      key={kpi.label}
+                      className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10"
+                    >
+                      <kpi.icon className="w-4 h-4 mx-auto mb-1.5 text-primary-foreground/70" aria-hidden="true" />
+                      <p className="text-xl font-bold leading-none text-primary-foreground tabular-nums">{kpi.value.toLocaleString('pt-BR')}</p>
+                      <p className="text-[10px] text-primary-foreground/60 mt-1">{kpi.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {loading && (
+                <div className="grid grid-cols-3 gap-3 mb-5">
+                  {[1,2,3].map(i => <div key={i} className="h-20 rounded-xl bg-white/10 animate-pulse" />)}
+                </div>
+              )}
+
+              <div className="flex items-end justify-between">
+                <div className="space-y-1">
+                  <p className="text-primary-foreground/60 text-[10px] uppercase tracking-wider">Válido até</p>
+                  <p className="text-primary-foreground font-mono font-medium text-sm">
+                    {activeSub && (activeSub as Record<string, unknown>).expires_at
+                      ? format(new Date((activeSub as Record<string, unknown>).expires_at as string), "MM/yyyy")
+                      : "—"
+                    }
+                  </p>
+                </div>
                 <Button 
-                  size="icon" 
-                  variant="ghost" 
-                  className="h-9 w-9 rounded-xl text-white/70 hover:text-white hover:bg-white/10" 
-                  onClick={handleRefresh} 
-                  disabled={refreshing}
+                  size="sm" 
+                  className="bg-white text-primary hover:bg-white/90 rounded-lg text-sm font-bold shadow-sm h-9 px-4"
+                  onClick={() => navigate("/dashboard/discount-card")}
                 >
-                  <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
+                  Ver Cartão
                 </Button>
               </div>
             </div>
-
-            {/* Inline KPIs */}
-            {!loading && (
-              <div ref={kpiRef} className="relative grid grid-cols-3 gap-3 mt-5">
-                {[
-                  { label: "Consultas", value: stats?.total ?? 0, icon: Calendar },
-                  { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText },
-                  { label: "Documentos", value: stats?.documents ?? 0, icon: Upload },
-                ].map((kpi) => (
-                  <motion.div
-                    key={kpi.label}
-                    whileTap={{ scale: 0.96 }}
-                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10 hover:bg-white/15 transition-colors cursor-default"
-                  >
-                    <kpi.icon className="w-4 h-4 mx-auto mb-1.5 text-white/70" aria-hidden="true" />
-                    <p className="text-xl font-bold leading-none tabular-nums">{kpi.value.toLocaleString('pt-BR')}</p>
-                    <p className="text-[10px] text-white/60 mt-1">{kpi.label}</p>
-                  </motion.div>
-                ))}
-              </div>
-            )}
-            {loading && (
-              <div className="grid grid-cols-3 gap-3 mt-5">
-                {[1,2,3].map(i => <div key={i} className="h-20 rounded-xl bg-white/10 animate-pulse" />)}
-              </div>
-            )}
           </div>
         </motion.div>
 
@@ -248,7 +283,7 @@ const PatientDashboard = () => {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 15 }}
-                    className="p-3 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-md hover:shadow-primary/5 transition-all cursor-pointer group"
+                    className="p-3 rounded-xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group"
                     onClick={() => navigate("/dashboard/patient/health")}
                   >
                     <span className="text-base group-hover:scale-110 inline-block transition-transform">{meta.icon}</span>
@@ -282,85 +317,113 @@ const PatientDashboard = () => {
           </SectionErrorBoundary>
         </motion.div>
 
-        {/* ═══ Quick Actions — Gradient icons ═══ */}
-        <motion.div variants={fadeUp} className="grid grid-cols-4 gap-2.5" role="list" aria-label="Ações rápidas">
-          {quickActions.map((item, i) => (
-            <motion.button
-              key={item.label}
-              initial={{ opacity: 0, scale: 0.8, y: 14 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
-              whileTap={{ scale: 0.93 }}
-              whileHover={{ y: -3 }}
-              onClick={() => navigate(item.path)}
-              aria-label={item.label}
-              role="listitem"
-              className="flex flex-col items-center gap-2.5 py-4 px-2 rounded-2xl bg-card border border-border/40 shadow-sm hover:shadow-xl hover:border-primary/20 hover:-translate-y-1 transition-all duration-200 group"
-            >
-              <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-md group-hover:scale-110 group-hover:shadow-lg transition-all duration-300`}>
-                <item.icon className="w-5 h-5 text-white" aria-hidden="true" />
-              </div>
-              <span className="text-[11px] font-semibold text-foreground/80 leading-tight text-center">{item.label}</span>
-            </motion.button>
-          ))}
+        {/* ═══ Quick Actions — clean white cards with primary icons ═══ */}
+        <motion.div variants={fadeUp}>
+          <h3 className="text-foreground font-bold mb-3 flex items-center gap-2 px-1">
+            <Zap className="w-4 h-4 text-primary" />
+            Ações Rápidas
+          </h3>
+          <div className="grid grid-cols-4 gap-3" role="list" aria-label="Ações rápidas">
+            {quickActions.map((item, i) => (
+              <motion.button
+                key={item.label}
+                initial={{ opacity: 0, scale: 0.8, y: 14 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
+                whileTap={{ scale: 0.93 }}
+                onClick={() => navigate(item.path)}
+                aria-label={item.label}
+                role="listitem"
+                className="flex flex-col items-center gap-2 py-3"
+              >
+                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-md hover:border-primary/20 transition-all">
+                  <item.icon className="w-6 h-6" aria-hidden="true" />
+                </div>
+                <span className="text-[11px] font-semibold text-muted-foreground">{item.label}</span>
+              </motion.button>
+            ))}
+          </div>
         </motion.div>
 
-        {/* ═══ Next appointment — hero card ═══ */}
+        {/* ═══ Next appointment — clean card with date badge ═══ */}
         {!loading && nextAppt && (
           <motion.div variants={fadeUp}>
-            <Card
-              className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-200 hover:shadow-xl ${
-                daysUntilNext === 0 ? "border-primary/40 shadow-xl shadow-primary/15" : "border-border/50 hover:shadow-xl hover:border-primary/20"
-              }`}
-              onClick={() => navigate("/dashboard/appointments")}
-            >
-              <CardContent className="p-0">
-                <div className="flex items-stretch">
-                  <div className={`w-20 shrink-0 flex flex-col items-center justify-center gap-1 ${
-                    daysUntilNext === 0 
-                      ? "bg-gradient-to-b from-primary/20 to-primary/5" 
-                      : "bg-gradient-to-b from-muted/60 to-muted/20"
-                  }`}>
-                    <span className={`text-2xl font-black leading-none ${daysUntilNext === 0 ? "text-primary" : "text-foreground"}`}>
-                      {format(new Date(nextAppt.scheduled_at), "dd")}
-                    </span>
-                    <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
-                      {format(new Date(nextAppt.scheduled_at), "MMM", { locale: ptBR })}
-                    </span>
-                  </div>
-                  <div className="flex-1 p-4 flex items-center gap-3 min-w-0">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <h3 className="text-foreground font-bold">Próximas Consultas</h3>
+              <Button variant="link" size="sm" className="text-xs text-primary h-auto p-0" onClick={() => navigate("/dashboard/appointments")}>
+                Ver tudo
+              </Button>
+            </div>
+            <div className="space-y-3">
+              <Card
+                className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-all border-border/50 hover:shadow-md ${
+                  daysUntilNext === 0 ? "border-primary/30" : ""
+                }`}
+                onClick={() => navigate("/dashboard/appointments")}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-4">
+                    <div className={`size-12 rounded-xl flex flex-col items-center justify-center shrink-0 ${
+                      daysUntilNext === 0 ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"
+                    }`}>
+                      <span className="text-[10px] font-bold uppercase leading-none">
+                        {format(new Date(nextAppt.scheduled_at), "MMM", { locale: ptBR })}
+                      </span>
+                      <span className="text-lg font-bold leading-none">
+                        {format(new Date(nextAppt.scheduled_at), "dd")}
+                      </span>
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-foreground truncate">{(nextAppt as Record<string, unknown>).doctor_name as string}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <h4 className="text-sm font-bold text-foreground truncate">{(nextAppt as Record<string, unknown>).doctor_name as string}</h4>
+                      <p className="text-xs text-muted-foreground">
                         {format(new Date(nextAppt.scheduled_at), "HH:mm", { locale: ptBR })} · {nextAppt.duration_minutes || 30}min
                       </p>
-                      <p className="text-xs mt-1.5">
-                        {daysUntilNext === 0 ? (
+                      {daysUntilNext === 0 && (
+                        <p className="text-xs mt-1">
                           <span className="inline-flex items-center gap-1 text-primary font-semibold">
                             <Flame className="w-3 h-3" /> Hoje em {hoursUntilNext}h
                           </span>
-                        ) : (
-                          <span className="text-muted-foreground/70">📅 Em {daysUntilNext} dia{daysUntilNext !== 1 ? "s" : ""}</span>
-                        )}
-                      </p>
+                        </p>
+                      )}
                     </div>
                     {daysUntilNext === 0 ? (
                       <Button
                         size="sm"
-                        className="bg-gradient-to-r from-primary to-secondary text-primary-foreground shrink-0 rounded-xl h-10 px-5 text-xs font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
+                        className="bg-primary text-primary-foreground shrink-0 rounded-xl h-10 px-5 text-xs font-bold shadow-md shadow-primary/20"
                         onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/consultation/${nextAppt.id}`); }}
                       >
                         <Video className="w-3.5 h-3.5 mr-1.5" /> Entrar
                       </Button>
                     ) : (
-                      <Badge variant="outline" className={`shrink-0 text-[10px] ${statusColor[nextAppt.status]}`}>
-                        {statusLabel[nextAppt.status]}
-                      </Badge>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground/30 shrink-0" />
                     )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              {/* Additional upcoming */}
+              {upcoming.slice(1).map((a: { id: string; scheduled_at: string; status: string; doctor_name: string; duration_minutes?: number | null }) => (
+                <Card key={a.id} className="border-border/50 overflow-hidden hover:shadow-md transition-all cursor-pointer active:scale-[0.98]" onClick={() => navigate("/dashboard/appointments")}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="size-12 rounded-xl bg-muted/50 flex flex-col items-center justify-center shrink-0 text-muted-foreground">
+                        <span className="text-[10px] font-bold uppercase leading-none">
+                          {format(new Date(a.scheduled_at), "MMM", { locale: ptBR })}
+                        </span>
+                        <span className="text-lg font-bold leading-none">
+                          {format(new Date(a.scheduled_at), "dd")}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-bold text-foreground truncate">{a.doctor_name}</h4>
+                        <p className="text-xs text-muted-foreground">{format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min</p>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-muted-foreground/30 shrink-0" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </motion.div>
         )}
 
@@ -371,7 +434,7 @@ const PatientDashboard = () => {
           return (
             <motion.div variants={fadeUp}>
               <div
-                className={`flex items-center gap-3 p-4 rounded-2xl border cursor-pointer active:scale-[0.98] transition-all ${
+                className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer active:scale-[0.98] transition-all ${
                   isExpiringSoon ? "border-warning/30 bg-warning/5" : "border-success/30 bg-success/5"
                 }`}
                 onClick={() => navigate(isExpiringSoon ? `/dashboard/plans?action=renew&plan_id=${(activeSub as Record<string, unknown>).plan_id}` : "/dashboard/payment-history")}
@@ -394,11 +457,11 @@ const PatientDashboard = () => {
         {/* Return appointments */}
         {returnAppts.length > 0 && (
           <motion.div variants={fadeUp}>
-            <Card className="border-warning/30 bg-warning/5 overflow-hidden">
+            <Card className="border-warning/30 bg-warning/5 overflow-hidden rounded-xl">
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-warning to-warning/70 flex items-center justify-center">
-                    <Gift className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-lg bg-warning/20 flex items-center justify-center">
+                    <Gift className="w-4 h-4 text-warning" />
                   </div>
                   <p className="text-sm font-bold text-warning">Retorno Grátis</p>
                 </div>
@@ -416,7 +479,7 @@ const PatientDashboard = () => {
                       </div>
                       <Button
                         size="sm"
-                        className="bg-gradient-to-r from-warning to-warning/80 text-white text-xs h-8 rounded-xl shrink-0 shadow-md shadow-warning/20"
+                        className="bg-warning text-warning-foreground text-xs h-8 rounded-xl shrink-0 shadow-md shadow-warning/20"
                         onClick={() => navigate(`/dashboard/schedule/${ra.doctor_id}?return=true&original=${ra.id}`)}
                       >
                         Agendar
@@ -441,7 +504,7 @@ const PatientDashboard = () => {
               return (
                 <div className="space-y-2">
                   {alerts.map((alert, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3.5 rounded-2xl bg-card border border-border/40 hover:border-primary/20 transition-colors">
+                    <div key={i} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50 hover:border-primary/20 transition-colors">
                       <span className="text-base">{alert.icon}</span>
                       <p className={`text-xs font-medium ${alert.color}`}>{alert.text}</p>
                     </div>
@@ -452,96 +515,60 @@ const PatientDashboard = () => {
           </motion.div>
         )}
 
-        {/* ═══ Shortcuts — compact grid ═══ */}
+        {/* ═══ Shortcuts — clean grid ═══ */}
         <motion.div variants={fadeUp}>
-          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest mb-3 px-1">Acesso rápido</p>
-          <div className="grid grid-cols-4 gap-2.5">
+          <p className="text-foreground font-bold mb-3 px-1">Acesso Rápido</p>
+          <div className="grid grid-cols-4 gap-3">
             {shortcuts.map((item) => (
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className="flex flex-col items-center gap-2 p-3.5 rounded-2xl bg-card border border-border/40 hover:border-primary/30 hover:bg-primary/[0.03] hover:shadow-md hover:shadow-primary/5 active:scale-[0.95] transition-all group"
+                className="flex flex-col items-center gap-2 py-3"
               >
-                <div className="w-9 h-9 rounded-xl bg-muted/60 group-hover:bg-primary/10 flex items-center justify-center transition-colors">
-                  <item.icon className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-md hover:border-primary/20 active:scale-95 transition-all">
+                  <item.icon className="w-5 h-5" />
                 </div>
-                <span className="text-[11px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">{item.label}</span>
+                <span className="text-[11px] font-semibold text-muted-foreground">{item.label}</span>
               </button>
             ))}
           </div>
         </motion.div>
 
-        {/* Upcoming appointments list */}
-        {!loading && upcoming.length > 1 && (
-          <motion.div variants={fadeUp}>
-            <div className="flex items-center justify-between mb-3 px-1">
-              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Próximas consultas</p>
-              <Button variant="link" size="sm" className="text-xs text-primary h-auto p-0 gap-1" onClick={() => navigate("/dashboard/appointments")}>
-                Ver todas <ArrowRight className="w-3 h-3" />
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {upcoming.slice(1).map((a: { id: string; scheduled_at: string; status: string; doctor_name: string; duration_minutes?: number | null }) => (
-                <Card key={a.id} className="border-border/40 overflow-hidden hover:border-primary/20 hover:shadow-md transition-all">
-                  <CardContent className="p-0">
-                    <div className="flex items-center gap-3 p-3.5">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/5 flex flex-col items-center justify-center shrink-0">
-                        <span className="text-xs font-bold text-primary leading-none">{format(new Date(a.scheduled_at), "dd")}</span>
-                        <span className="text-[8px] text-primary/60 uppercase">{format(new Date(a.scheduled_at), "MMM", { locale: ptBR })}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-foreground truncate">{a.doctor_name}</p>
-                        <p className="text-xs text-muted-foreground">{format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min</p>
-                      </div>
-                      <Badge variant="outline" className={`text-[9px] shrink-0 ${statusColor[a.status]}`}>
-                        {statusLabel[a.status]}
-                      </Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
         {/* No appointments CTA */}
         {!loading && upcoming.length === 0 && (
           <motion.div variants={fadeUp}>
-            <Card className="border border-border/40 overflow-hidden rounded-3xl shadow-xl shadow-primary/5">
+            <Card className="border border-border/50 overflow-hidden rounded-xl">
               <CardContent className="p-0">
-                <div className="relative bg-gradient-to-b from-primary/[0.06] via-card to-card p-8 sm:p-10 text-center">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
-
+                <div className="relative bg-card p-8 text-center">
                   <motion.div
-                    initial={{ scale: 0.6, opacity: 0, rotate: -10 }}
-                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                    initial={{ scale: 0.6, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
-                    className="relative w-[72px] h-[72px] mx-auto rounded-[20px] bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-5 shadow-xl shadow-primary/25"
+                    className="relative w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-5"
                   >
-                    <CalendarPlus className="w-8 h-8 text-white" />
+                    <CalendarPlus className="w-7 h-7 text-primary" />
                   </motion.div>
 
-                  <h3 className="text-xl font-bold text-foreground mb-2 tracking-tight">Nenhuma consulta agendada</h3>
-                  <p className="text-sm text-muted-foreground mb-7 max-w-[280px] mx-auto leading-relaxed">
-                    Encontre o médico ideal e agende sua primeira consulta por vídeo
+                  <h3 className="text-lg font-bold text-foreground mb-2 tracking-tight">Nenhuma consulta agendada</h3>
+                  <p className="text-sm text-muted-foreground mb-6 max-w-[280px] mx-auto leading-relaxed">
+                    Encontre o médico ideal e agende sua primeira consulta
                   </p>
 
                   <Button 
-                    className="bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground rounded-2xl h-12 px-8 text-sm font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-all group" 
+                    className="w-full bg-primary text-primary-foreground rounded-xl h-14 text-sm font-bold shadow-lg shadow-primary/20"
                     onClick={() => navigate("/dashboard/schedule")}
                   >
                     <Calendar className="w-4 h-4 mr-2" /> 
                     Agendar consulta
-                    <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1.5" />
                   </Button>
 
-                  <div className="flex items-center justify-center gap-5 mt-6">
+                  <div className="flex items-center justify-center gap-5 mt-5">
                     {[
                       { icon: <Shield className="w-3.5 h-3.5 text-success" />, label: "Seguro" },
                       { icon: <Video className="w-3.5 h-3.5 text-primary" />, label: "HD" },
                       { icon: <Star className="w-3.5 h-3.5 text-warning" />, label: "4.9★" },
                     ].map((item, i) => (
-                      <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground/80">
+                      <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                         {item.icon} {item.label}
                       </span>
                     ))}
@@ -558,7 +585,7 @@ const PatientDashboard = () => {
             <div className="flex items-center justify-between mb-3 px-1">
               <div className="flex items-center gap-1.5">
                 <Stethoscope className="w-3.5 h-3.5 text-primary" />
-                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Meus médicos</p>
+                <p className="text-foreground font-bold text-sm">Meus Médicos</p>
               </div>
               <Button variant="link" size="sm" className="text-xs text-primary h-auto p-0 gap-1" onClick={() => navigate("/dashboard/doctors")}>
                 Ver todos <ArrowRight className="w-3 h-3" />
@@ -566,10 +593,10 @@ const PatientDashboard = () => {
             </div>
             <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1 snap-x snap-mandatory scrollbar-none">
               {favDoctors.slice(0, 6).map((doc: { id: string; name: string; specs: string[]; rating: number | null }) => (
-                <Card key={doc.id} className="border-border/40 shrink-0 w-32 snap-start cursor-pointer active:scale-[0.97] transition-all hover:shadow-lg hover:border-primary/20 overflow-hidden group" onClick={() => navigate(`/dashboard/schedule/${doc.id}`)}>
+                <Card key={doc.id} className="border-border/50 shrink-0 w-32 snap-start cursor-pointer active:scale-[0.97] transition-all hover:shadow-md overflow-hidden group" onClick={() => navigate(`/dashboard/schedule/${doc.id}`)}>
                   <CardContent className="p-0">
-                    <div className="h-20 bg-gradient-to-br from-primary/10 to-secondary/10 group-hover:from-primary/15 group-hover:to-secondary/15 flex items-center justify-center transition-colors">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center text-base font-bold text-primary group-hover:scale-110 transition-transform">
+                    <div className="h-20 bg-muted/50 group-hover:bg-primary/5 flex items-center justify-center transition-colors">
+                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-base font-bold text-primary group-hover:scale-110 transition-transform">
                         {doc.name.charAt(6) || "M"}
                       </div>
                     </div>
@@ -589,6 +616,23 @@ const PatientDashboard = () => {
             </div>
           </motion.div>
         )}
+
+        {/* Locate hospitals banner */}
+        <motion.div variants={fadeUp}>
+          <div 
+            className="bg-primary/5 rounded-xl p-4 border border-primary/10 flex items-center gap-4 cursor-pointer active:scale-[0.98] transition-all hover:bg-primary/[0.08]"
+            onClick={() => navigate("/dashboard/schedule")}
+          >
+            <div className="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
+              <Activity className="w-5 h-5" />
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-bold text-primary">Dica de Saúde</h4>
+              <p className="text-xs text-muted-foreground mt-0.5">{todayTip}</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-primary/40 shrink-0" />
+          </div>
+        </motion.div>
 
         {/* Credits widget */}
         <motion.div variants={fadeUp}>

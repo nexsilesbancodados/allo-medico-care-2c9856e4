@@ -22,7 +22,7 @@ async function generatePKCE() {
 }
 
 function base64UrlEncode(buffer: Uint8Array): string {
-  const base64 = base64Encode(buffer as unknown as ArrayBuffer);
+  const base64 = base64Encode(buffer);
   return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
@@ -267,7 +267,7 @@ serve(async (req) => {
       }
 
       // Format hashes for VIDaaS API
-      const formattedHashes = hashes.map((h: any, i: number) => ({
+      const formattedHashes = hashes.map((h: { id?: string; alias?: string; hash: string }, i: number) => ({
         id: h.id || `doc-${i}`,
         alias: h.alias || `Documento ${i + 1}`,
         hash: h.hash,
@@ -343,10 +343,10 @@ serve(async (req) => {
       }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err: unknown) {
+  } catch (err) {
     console.error("VIDaaS sign error:", err);
     return new Response(
-      JSON.stringify({ error: err instanceof Error ? err.message : "Unknown error" }),
+      JSON.stringify({ error: err.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

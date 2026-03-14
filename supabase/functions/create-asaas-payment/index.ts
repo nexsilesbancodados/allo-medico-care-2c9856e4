@@ -150,7 +150,7 @@ serve(async (req) => {
     // ─── Step 1: Find or create customer (per docs: POST /v3/customers) ───
     const cleanCpf = customerCpf.replace(/\D/g, "");
     const searchRes = await asaasFetch(`${baseUrl}/customers?cpfCnpj=${cleanCpf}`, { headers });
-    const searchData: any = await safeJson(searchRes);
+    const searchData = await safeJson(searchRes);
 
     let customerId: string;
 
@@ -187,7 +187,7 @@ serve(async (req) => {
         headers,
         body: JSON.stringify(customerBody),
       });
-      const customerData: any = await safeJson(createCustomerRes);
+      const customerData = await safeJson(createCustomerRes);
       if (!createCustomerRes.ok) {
         console.error("Asaas customer error:", customerData);
         return new Response(
@@ -245,7 +245,7 @@ serve(async (req) => {
         headers,
         body: JSON.stringify(subBody),
       });
-      const subData: any = await safeJson(subRes);
+      const subData = await safeJson(subRes);
 
       if (!subRes.ok) {
         console.error("Asaas subscription error:", subData);
@@ -299,7 +299,7 @@ serve(async (req) => {
           headers,
           body: JSON.stringify(paymentBody),
         });
-        const payData: any = await safeJson(payRes);
+        const payData = await safeJson(payRes);
 
         if (!payRes.ok) {
           console.error("Asaas token payment error:", payData);
@@ -328,7 +328,7 @@ serve(async (req) => {
         headers,
         body: JSON.stringify(paymentBody),
       });
-      const payData: any = await safeJson(payRes);
+      const payData = await safeJson(payRes);
 
       if (!payRes.ok) {
         console.error("Asaas payment error:", payData);
@@ -363,7 +363,7 @@ serve(async (req) => {
         headers,
         body: JSON.stringify(cardBody),
       });
-      const cardData: any = await safeJson(cardRes);
+      const cardData = await safeJson(cardRes);
 
       if (!cardRes.ok) {
         console.error("Asaas credit card error:", cardData);
@@ -392,7 +392,7 @@ serve(async (req) => {
       headers,
       body: JSON.stringify(paymentBody),
     });
-    let payData: any = await safeJson(payRes);
+    let payData = await safeJson(payRes);
     let actualBillingType = billingType;
     let fallbackUsed = false;
 
@@ -453,10 +453,10 @@ serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("Error:", error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      JSON.stringify({ error: error.message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -11,9 +11,9 @@ const corsHeaders = {
 const fetchEvo = async (url: string, opts: RequestInit = {}): Promise<Response> => {
   try {
     return await fetch(url, opts);
-  } catch (err: unknown) {
+  } catch (err) {
     if (String(err).includes("certificate") || String(err).includes("tls") || String(err).includes("CaUsedAsEndEntity")) {
-      console.warn("TLS error, retrying with HTTP:", err instanceof Error ? err.message : err);
+      console.warn("TLS error, retrying with HTTP:", err.message || err);
       const httpUrl = url.replace(/^https:\/\//, "http://");
       return await fetch(httpUrl, opts);
     }
@@ -104,9 +104,9 @@ serve(async (req) => {
     return new Response(JSON.stringify({ success: true, data: result }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
