@@ -30,7 +30,7 @@ const AdminApprovals = () => {
   const [loading, setLoading] = useState(true);
   const [rejectReason, setRejectReason] = useState("");
   const [showReject, setShowReject] = useState(false);
-  const [rejectTarget, setRejectTarget] = useState<{ id: string; type: "doctor" | "clinic" | "partner" | "affiliate"; name: string; email?: string } | null>(null);
+  const [rejectTarget, setRejectTarget] = useState<{ id: string; type: "doctor" | "clinic" | "partner"; name: string; email?: string } | null>(null);
 
   useEffect(() => { fetchAll(); }, []);
 
