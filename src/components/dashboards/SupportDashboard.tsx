@@ -93,10 +93,10 @@ const SupportDashboard = () => {
   const pathSegment = location.pathname.split("/").pop() || "";
   const activeNav = ["inbox", "chat", "logs", "users", "online", "audit"].includes(pathSegment) ? pathSegment : "overview";
   const defaultTab = ["inbox", "chat", "logs", "users", "online", "audit"].includes(pathSegment) ? pathSegment : "inbox";
-  const [logs, setLogs] = useState<Record<string, unknown>[]>([]);
+  const [logs, setLogs] = useState<any[]>([]);
   const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
-  const [users, setUsers] = useState<Record<string, unknown>[]>([]);
-  const [onlineUsers, setOnlineUsers] = useState<Record<string, unknown>[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [searchLogs, setSearchLogs] = useState("");
   const [searchUsers, setSearchUsers] = useState("");
   const debouncedSearchLogs = useDebounce(searchLogs, 300);
@@ -105,7 +105,7 @@ const SupportDashboard = () => {
   const [userRoleFilter, setUserRoleFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [viewAs, setViewAs] = useState<{ id: string; first_name: string; last_name: string; email?: string } | null>(null);
+  const [viewAs, setViewAs] = useState<any>(null);
   const lastFetch = useRef<Date>(new Date());
 
   // Fetch online users

@@ -23,8 +23,8 @@ const DoctorEarnings = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [stats, setStats] = useState({ total: 0, pending: 0, thisMonth: 0, totalAppts: 0, available: 0 });
-  const [monthlyData, setMonthlyData] = useState<Record<string, unknown>[]>([]);
-  const [withdrawals, setWithdrawals] = useState<Record<string, unknown>[]>([]);
+  const [monthlyData, setMonthlyData] = useState<any[]>([]);
+  const [withdrawals, setWithdrawals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [pixKey, setPixKey] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");

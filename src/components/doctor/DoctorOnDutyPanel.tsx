@@ -14,7 +14,7 @@ import { ptBR } from "date-fns/locale";
 
 const DoctorOnDutyPanel = () => {
   const { user } = useAuth();
-  const [queue, setQueue] = useState<Record<string, unknown>[]>([]);
+  const [queue, setQueue] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
   const [accepting, setAccepting] = useState(false);
