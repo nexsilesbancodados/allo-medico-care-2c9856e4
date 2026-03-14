@@ -208,7 +208,7 @@ const ExamReportEditor = () => {
     queryKey: ["report-templates"],
     queryFn: async () => {
       const { data } = await supabase.from("report_templates" as any).select("*").eq("is_active", true).order("title");
-      return (data ?? []) as ReportTemplate[];
+      return (data ?? []) as unknown as ReportTemplate[];
     },
   });
 

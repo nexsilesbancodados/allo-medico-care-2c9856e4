@@ -12,7 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 
 const ReceptionCheckin = () => {
-  const [appointments, setAppointments] = useState<Record<string, unknown>[]>([]);
+  const [appointments, setAppointments] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
