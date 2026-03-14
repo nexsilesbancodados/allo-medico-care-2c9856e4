@@ -15,6 +15,7 @@
   "dependencies": {
     "@capacitor/cli": "^8.1.0",
     "@capacitor/core": "^8.1.0",
+    "@gsap/react": "^2.1.2",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -57,6 +58,7 @@
     "dwv": "^0.33.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.34.0",
+    "gsap": "^3.14.2",
     "input-otp": "^1.4.2",
     "jspdf": "^4.1.0",
     "lucide-react": "^0.462.0",

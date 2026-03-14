@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import jsPDF from "jspdf";
 import { useDebounce } from "@/hooks/use-debounce";
+import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", waiting: "Na sala", in_progress: "Em consulta",
@@ -51,6 +52,7 @@ interface ReceptionAppointment {
 
 const ReceptionDashboard = () => {
   const [todayAppts, setTodayAppts] = useState<ReceptionAppointment[]>([]);
+  const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 300);
   const [filterStatus, setFilterStatus] = useState("all");

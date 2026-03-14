@@ -18,6 +18,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import { toast } from "sonner";
+import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } } };
@@ -44,6 +45,7 @@ const priorityColors: Record<string, string> = {
 const LaudistaDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
   const queryClient = useQueryClient();
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const now = new Date();

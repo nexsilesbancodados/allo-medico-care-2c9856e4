@@ -1,4 +1,7 @@
-import { forwardRef } from "react";
+import { forwardRef, useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 import { motion } from "framer-motion";
 import { UserPlus, Search, Video, FileText, Clock } from "lucide-react";
 import howItWorksSignup from "@/assets/how-it-works-signup.png";
@@ -14,6 +17,24 @@ const steps = [
 ];
 
 const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
+  const stepsRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = stepsRef.current;
+    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const ctx = gsap.context(() => {
+      const cards = el.querySelectorAll(".step-card");
+      ScrollTrigger.create({
+        trigger: el, start: "top 80%", once: true,
+        onEnter: () => gsap.fromTo(cards,
+          { opacity: 0, y: 28, scale: 0.97 },
+          { opacity: 1, y: 0, scale: 1, stagger: 0.1, duration: 0.55, ease: "power3.out", clearProps: "transform,opacity" }
+        ),
+      });
+    }, el);
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section id="como-funciona" className="py-16 md:py-24">
       <div className="container mx-auto px-4">

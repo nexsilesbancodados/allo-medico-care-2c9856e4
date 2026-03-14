@@ -28,6 +28,7 @@ import { usePatientStats, usePatientUpcoming, useReturnAppointments, useFavorite
 import { useActiveSubscription, useUserCredits } from "@/hooks/useProfile";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -53,6 +54,8 @@ const PatientDashboard = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [onboardingDone] = useLocalStorage<boolean>(ONBOARDING_KEY, false);
+  const kpiRef = useGsapEntrance({ stagger: 0.07, y: 12, delay: 0.3 });
+  const sectionsRef = useGsapEntrance({ stagger: 0.08, y: 18, scroll: true });
   const now = new Date();
 
   const { data: stats, isLoading: statsLoading } = usePatientStats();
@@ -204,17 +207,21 @@ const PatientDashboard = () => {
 
             {/* Inline KPIs */}
             {!loading && (
-              <div className="relative grid grid-cols-3 gap-3 mt-5">
+              <div ref={kpiRef} className="relative grid grid-cols-3 gap-3 mt-5">
                 {[
                   { label: "Consultas", value: stats?.total ?? 0, icon: Calendar },
                   { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText },
                   { label: "Documentos", value: stats?.documents ?? 0, icon: Upload },
                 ].map((kpi) => (
-                  <div key={kpi.label} className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10">
-                    <kpi.icon className="w-4 h-4 mx-auto mb-1.5 text-white/70" />
-                    <p className="text-xl font-bold leading-none">{kpi.value}</p>
+                  <motion.div
+                    key={kpi.label}
+                    whileTap={{ scale: 0.96 }}
+                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10 hover:bg-white/15 transition-colors cursor-default"
+                  >
+                    <kpi.icon className="w-4 h-4 mx-auto mb-1.5 text-white/70" aria-hidden="true" />
+                    <p className="text-xl font-bold leading-none tabular-nums">{kpi.value.toLocaleString('pt-BR')}</p>
                     <p className="text-[10px] text-white/60 mt-1">{kpi.label}</p>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             )}

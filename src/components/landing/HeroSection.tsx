@@ -2,9 +2,13 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { Video, Shield, Clock, ArrowRight, Stethoscope, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect, memo, forwardRef } from "react";
+import { useState, memo, forwardRef } from "react";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
 import heroDoctor from "@/assets/hero-doctor.png";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 
 const poseContent = [
   { title: "Sua saúde a um", highlight: "clique de distância", description: "Conecte-se com médicos especialistas de qualquer lugar. Consultas por vídeo, receitas digitais e acompanhamento completo." },
@@ -23,12 +27,46 @@ const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
   const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
   const prefetchConsulta = usePrefetchRoute(() => import("@/pages/GuestCheckout"));
   const [poseIndex, setPoseIndex] = useState(0);
+  const heroTextRef = useRef<HTMLDivElement>(null);
+  const heroImageRef = useRef<HTMLDivElement>(null);
+  const trustRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setPoseIndex((prev) => (prev + 1) % poseContent.length);
     }, 5000);
     return () => clearInterval(interval);
+  }, []);
+
+  // GSAP entrance — staggered hero elements
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const ctx = gsap.context(() => {
+      // Text content enters left → right
+      if (heroTextRef.current) {
+        const items = heroTextRef.current.querySelectorAll(".gsap-hero-item");
+        gsap.fromTo(items,
+          { opacity: 0, y: 28 },
+          { opacity: 1, y: 0, stagger: 0.1, duration: 0.65, ease: "power3.out", delay: 0.1, clearProps: "transform,opacity" }
+        );
+      }
+      // Image floats in from right
+      if (heroImageRef.current) {
+        gsap.fromTo(heroImageRef.current,
+          { opacity: 0, x: 32, scale: 0.97 },
+          { opacity: 1, x: 0, scale: 1, duration: 0.8, ease: "power3.out", delay: 0.35, clearProps: "transform,opacity" }
+        );
+      }
+      // Trust bar
+      if (trustRef.current) {
+        const items = trustRef.current.querySelectorAll(".trust-item");
+        gsap.fromTo(items,
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, stagger: 0.08, duration: 0.45, ease: "power2.out", delay: 0.55, clearProps: "transform,opacity" }
+        );
+      }
+    });
+    return () => ctx.revert();
   }, []);
 
   return (
@@ -43,11 +81,7 @@ const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
 
       <div className="container mx-auto px-4 py-16 lg:py-20">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 24 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          >
+          <div ref={heroTextRef}>
             {/* Corporate badge */}
             <motion.div
               initial={{ opacity: 0, y: 8 }}
@@ -118,7 +152,7 @@ const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
                 </div>
               ))}
             </motion.div>
-          </motion.div>
+          </div>
 
           {/* Hero image */}
           <motion.div

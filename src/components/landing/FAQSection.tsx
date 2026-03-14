@@ -1,4 +1,8 @@
 import { useEffect, useState, forwardRef } from "react";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, MessageCircle, HelpCircle, ArrowRight, Sparkles, ThumbsUp, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";

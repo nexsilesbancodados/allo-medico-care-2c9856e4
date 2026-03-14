@@ -16,6 +16,7 @@ import { ptBR } from "date-fns/locale";
 import jsPDF from "jspdf";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -42,6 +43,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [periodFilter, setPeriodFilter] = useState("month");
   const [refreshing, setRefreshing] = useState(false);
+  const kpiRef = useGsapEntrance({ stagger: 0.05, y: 12, delay: 0.15 });
   const [stats, setStats] = useState({
     total_revenue: 0, active_subs: 0, overdue_subs: 0, total_patients: 0,
     total_doctors: 0, monthly_appts: 0,
@@ -378,7 +380,7 @@ const AdminDashboard = () => {
         )}
 
         {/* KPI Cards with trend indicators */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3" role="list" aria-label="Indicadores chave do sistema">
+        <motion.div variants={fadeUp} ref={kpiRef} className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3" role="list" aria-label="Indicadores chave do sistema">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-28 animate-pulse bg-muted/50 rounded-2xl" aria-hidden="true" />)
           ) : (

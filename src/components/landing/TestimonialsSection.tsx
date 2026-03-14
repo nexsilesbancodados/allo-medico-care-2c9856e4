@@ -1,4 +1,8 @@
 import { forwardRef } from "react";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ShieldCheck, Heart, Quote, X } from "lucide-react";
 import { useState, useRef, useCallback } from "react";

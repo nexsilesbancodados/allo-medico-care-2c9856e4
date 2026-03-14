@@ -18,6 +18,7 @@ import DoctorOnboarding from "@/components/doctor/DoctorOnboarding";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import { useDoctorStats } from "@/hooks/useDoctorDashboard";
 import { useQueryClient } from "@tanstack/react-query";
+import { useGsapEntrance, useGsapFadeIn } from "@/hooks/use-gsap-entrance";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", completed: "Concluída", cancelled: "Cancelada",
@@ -41,6 +42,9 @@ const DoctorDashboard = () => {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("overview");
   const now = new Date();
+
+  const kpiRef  = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
+  const heroRef = useGsapFadeIn({ y: 16, delay: 0.05 });
 
   const { data, isLoading: loading, isRefetching: refreshing } = useDoctorStats();
 
@@ -101,7 +105,7 @@ const DoctorDashboard = () => {
 
         {/* ═══ Hero Header — gradient card ═══ */}
         <motion.div variants={fadeUp}>
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-secondary/90 to-primary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-secondary/20">
+          <div ref={heroRef} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-secondary via-secondary/90 to-primary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-secondary/20">
             <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
             <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
 
@@ -145,7 +149,7 @@ const DoctorDashboard = () => {
             </div>
 
             {/* Inline KPIs */}
-            <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5" role="list" aria-label="Estatísticas do médico">
+            <div ref={kpiRef} className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5" role="list" aria-label="Estatísticas do médico">
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl bg-white/10 animate-pulse" aria-hidden="true" />)
               ) : (

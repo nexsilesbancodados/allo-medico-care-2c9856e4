@@ -18,7 +18,9 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
+      injectRegister: "auto",
       includeAssets: ["favicon.ico", "pwa-192x192.png", "pwa-512x512.png"],
+      devOptions: { enabled: false },
       workbox: {
         navigateFallback: null,
         globPatterns: ["**/*.{ico,png,svg,woff2}"],
@@ -90,27 +92,38 @@ export default defineConfig(({ mode }) => ({
         theme_color: "#1a6fc4",
         background_color: "#f8fafc",
         display: "standalone",
+        display_override: ["window-controls-overlay", "standalone", "minimal-ui"],
         orientation: "portrait-primary",
-        start_url: "/",
+        start_url: "/?source=pwa",
         scope: "/",
+        id: "/?source=pwa",
         categories: ["medical", "health"],
+        lang: "pt-BR",
+        dir: "ltr",
         shortcuts: [
           {
             name: "Agendar Consulta",
             short_name: "Agendar",
-            url: "/paciente",
+            url: "/paciente?source=pwa-shortcut",
             icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
           },
           {
             name: "Meu Painel",
-            short_name: "Dashboard",
-            url: "/dashboard",
+            short_name: "Painel",
+            url: "/dashboard?source=pwa-shortcut",
+            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
+          },
+          {
+            name: "Plantão 24h",
+            short_name: "Urgência",
+            url: "/dashboard/schedule?urgency=true&source=pwa-shortcut",
             icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
           },
         ],
         icons: [
           { src: "pwa-192x192.png", sizes: "192x192", type: "image/png" },
           { src: "pwa-512x512.png", sizes: "512x512", type: "image/png" },
+          { src: "pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "any" },
           { src: "pwa-512x512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
         ],
       },
@@ -133,6 +146,7 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("node_modules/react/")) return "vendor-react-core";
           if (id.includes("lucide-react")) return "vendor-icons";
           if (id.includes("framer-motion")) return "vendor-motion";
+          if (id.includes("gsap")) return "vendor-gsap";
           if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
           if (id.includes("@supabase")) return "vendor-supabase";
           if (id.includes("@tanstack")) return "vendor-query";

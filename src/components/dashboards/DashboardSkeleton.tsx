@@ -1,97 +1,116 @@
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
-/**
- * Reusable dashboard skeleton with shimmer effect, KPI cards, chart and table placeholders.
- * Announces loading state to screen readers via aria-busy and aria-label.
- */
-const ShimmerBlock = ({ className = "" }: { className?: string }) => (
-  <div className={`skeleton-shimmer rounded-2xl ${className}`} aria-hidden="true" />
+const Bone = ({ className = "" }: { className?: string }) => (
+  <div className={`shimmer-v2 rounded-xl ${className}`} aria-hidden="true" />
 );
 
+const containerVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.06 } },
+};
+const itemVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.3 } },
+};
+
+/**
+ * Premium dashboard skeleton — uses shimmer-v2 with staggered reveal.
+ */
 const DashboardSkeleton = () => (
   <motion.div
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    transition={{ duration: 0.3 }}
-    className="space-y-6 max-w-4xl"
+    variants={containerVariants}
+    initial="hidden"
+    animate="show"
+    className="space-y-5 max-w-2xl mx-auto"
     role="status"
     aria-busy="true"
     aria-label="Carregando painel..."
   >
-    {/* Greeting skeleton */}
-    <div className="flex items-center justify-between">
-      <div className="space-y-2">
-        <ShimmerBlock className="h-7 w-48" />
-        <ShimmerBlock className="h-4 w-32" />
-      </div>
-      <ShimmerBlock className="h-9 w-9 rounded-xl" />
-    </div>
-
-    {/* KPI cards */}
-    <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-      {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="p-4 rounded-2xl border border-border/30 bg-card/50 space-y-3">
-          <div className="flex items-center gap-2">
-            <ShimmerBlock className="h-4 w-4 rounded-lg" />
-            <ShimmerBlock className="h-3 w-16" />
-          </div>
-          <ShimmerBlock className="h-8 w-12" />
-        </div>
-      ))}
-    </div>
-
-    {/* Quick actions */}
-    <div className="grid grid-cols-4 gap-3">
-      {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="flex flex-col items-center gap-2.5 p-4 rounded-2xl border border-border/30 bg-card/50">
-          <ShimmerBlock className="h-11 w-11 rounded-xl" />
-          <ShimmerBlock className="h-3 w-12" />
-        </div>
-      ))}
-    </div>
-
-    {/* Chart placeholder */}
-    <Card className="border-border/40 overflow-hidden">
-      <CardHeader className="pb-3">
-        <ShimmerBlock className="h-5 w-40" />
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-end gap-1.5 h-44">
-          {Array.from({ length: 12 }).map((_, i) => (
-            <div
-              key={i}
-              className="flex-1 skeleton-shimmer rounded-t-lg"
-              style={{
-                height: `${20 + Math.random() * 70}%`,
-                animationDelay: `${i * 80}ms`,
-              }}
-            />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-
-    {/* Table rows */}
-    <Card className="border-border/40">
-      <CardHeader className="pb-3">
-        <ShimmerBlock className="h-5 w-32" />
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex items-center gap-3 p-2.5 rounded-xl">
-            <ShimmerBlock className="h-10 w-10 rounded-xl shrink-0" />
+    {/* Hero card */}
+    <motion.div variants={itemVariants}>
+      <div className="rounded-2xl overflow-hidden" style={{ background: "hsl(var(--primary) / 0.08)" }}>
+        <div className="p-5 sm:p-6 space-y-4">
+          <div className="flex items-center gap-4">
+            <Bone className="h-14 w-14 rounded-full shrink-0" />
             <div className="flex-1 space-y-2">
-              <ShimmerBlock className="h-4 w-3/4" />
-              <ShimmerBlock className="h-3 w-1/2" />
+              <Bone className="h-3 w-24" />
+              <Bone className="h-6 w-48" />
+              <Bone className="h-3 w-32" />
             </div>
-            <ShimmerBlock className="h-6 w-16 rounded-full shrink-0" />
+          </div>
+          <div className="grid grid-cols-3 gap-3 pt-1">
+            {[0,1,2].map(i => (
+              <div key={i} className="rounded-xl p-3 space-y-2" style={{ background: "hsl(var(--primary) / 0.06)" }}>
+                <Bone className="h-4 w-4 mx-auto rounded-lg" />
+                <Bone className="h-6 w-8 mx-auto" />
+                <Bone className="h-2.5 w-14 mx-auto" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+
+    {/* Health metrics row */}
+    <motion.div variants={itemVariants}>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="p-3 rounded-2xl border border-border/40 bg-card/50 space-y-2">
+            <Bone className="h-5 w-5 rounded-lg" />
+            <Bone className="h-6 w-16" />
+            <Bone className="h-2.5 w-12" />
           </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+    </motion.div>
 
-    {/* Visually hidden text for screen readers */}
+    {/* Quick actions */}
+    <motion.div variants={itemVariants}>
+      <div className="grid grid-cols-4 gap-3">
+        {[0,1,2,3].map(i => (
+          <div key={i} className="flex flex-col items-center gap-2.5 p-3 rounded-2xl border border-border/40 bg-card/50">
+            <Bone className="h-11 w-11 rounded-xl" />
+            <Bone className="h-2.5 w-12" />
+          </div>
+        ))}
+      </div>
+    </motion.div>
+
+    {/* Appointment card */}
+    <motion.div variants={itemVariants}>
+      <div className="p-4 rounded-2xl border border-border/40 bg-card/50 space-y-3">
+        <div className="flex items-center gap-3">
+          <Bone className="h-12 w-12 rounded-xl shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Bone className="h-4 w-3/4" />
+            <Bone className="h-3 w-1/2" />
+          </div>
+          <Bone className="h-8 w-20 rounded-xl shrink-0" />
+        </div>
+      </div>
+    </motion.div>
+
+    {/* List section */}
+    <motion.div variants={itemVariants}>
+      <div className="rounded-2xl border border-border/40 bg-card/50 overflow-hidden">
+        <div className="p-4 border-b border-border/30">
+          <Bone className="h-5 w-36" />
+        </div>
+        <div className="divide-y divide-border/30">
+          {[0,1,2].map(i => (
+            <div key={i} className="flex items-center gap-3 p-4">
+              <Bone className="h-10 w-10 rounded-xl shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Bone className="h-4 w-3/4" />
+                <Bone className="h-3 w-1/2" />
+              </div>
+              <Bone className="h-6 w-16 rounded-full shrink-0" />
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+
     <span className="sr-only">Carregando dados do painel, por favor aguarde.</span>
   </motion.div>
 );

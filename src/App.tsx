@@ -23,6 +23,7 @@ const PingoChatbot = lazy(() => import("./components/PingoChatbot"));
 const OfflineIndicator = lazy(() => import("./components/OfflineIndicator"));
 const CookieConsent = lazy(() => import("./components/CookieConsent"));
 const TermsReconsentDialog = lazy(() => import("./components/auth/TermsReconsentDialog"));
+const PWAUpdateBanner = lazy(() => import("./components/PWAUpdateBanner"));
 
 // Lazy-loaded pages for code splitting
 const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
@@ -175,6 +176,7 @@ const App = () => {
             <CookieConsent />
             <TermsReconsentDialog />
             <OfflineIndicator />
+            <PWAUpdateBanner />
           </Suspense>
         </AuthProvider>
       </BrowserRouter>

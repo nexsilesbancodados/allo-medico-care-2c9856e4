@@ -15,6 +15,7 @@ import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 import { motion } from "framer-motion";
+import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
 const getClinicNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard?role=clinic", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -37,6 +38,7 @@ const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transi
 const ClinicDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
   const location = useLocation();
   const [clinicProfile, setClinicProfile] = useState<any>(null);
   const [doctors, setDoctors] = useState<any[]>([]);

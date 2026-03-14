@@ -18,6 +18,7 @@ import SupportChat from "@/components/support/SupportChat";
 import SupportInbox from "@/components/support/SupportInbox";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
 const getSupportNav = (active: string) => [
   { label: "Helpdesk", href: "/dashboard?role=support", icon: <Activity className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -93,6 +94,7 @@ const SupportDashboard = () => {
   const activeNav = ["inbox", "chat", "logs", "users", "online", "audit"].includes(pathSegment) ? pathSegment : "overview";
   const defaultTab = ["inbox", "chat", "logs", "users", "online", "audit"].includes(pathSegment) ? pathSegment : "inbox";
   const [logs, setLogs] = useState<any[]>([]);
+  const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
   const [users, setUsers] = useState<any[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<any[]>([]);
   const [searchLogs, setSearchLogs] = useState("");

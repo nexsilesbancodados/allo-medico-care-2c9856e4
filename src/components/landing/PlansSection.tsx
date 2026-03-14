@@ -1,4 +1,8 @@
 import { forwardRef } from "react";
+import { useEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+gsap.registerPlugin(ScrollTrigger);
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check, ShieldCheck, Zap, Award, Heart, Diamond, ArrowRight, Sparkles, Stethoscope, Brain, Eye, Bone, Baby, Activity } from "lucide-react";

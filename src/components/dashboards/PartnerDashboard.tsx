@@ -13,6 +13,7 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
 const getPartnerNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard?role=partner", icon: <TrendingUp className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -30,6 +31,7 @@ const PartnerDashboard = () => {
   const { user } = useAuth();
   const location = useLocation();
   const [prescriptionCode, setPrescriptionCode] = useState("");
+  const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
   const [foundPrescription, setFoundPrescription] = useState<any>(null);
   const [validations, setValidations] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);

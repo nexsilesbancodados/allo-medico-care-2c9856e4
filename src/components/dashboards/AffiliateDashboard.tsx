@@ -16,6 +16,7 @@ import { ptBR } from "date-fns/locale";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { motion } from "framer-motion";
 import { useLocation } from "react-router-dom";
+import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
 const getAffiliateNav = (active: string) => [
   { label: "Painel", href: "/dashboard?role=affiliate", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview" },
@@ -61,6 +62,7 @@ interface AffiliateProfile {
 const AffiliateDashboard = () => {
   const { user } = useAuth();
   const [referrals, setReferrals] = useState<AffiliateReferral[]>([]);
+  const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
   const location = useLocation();
   const currentPath = location.pathname;
   const [withdrawals, setWithdrawals] = useState<AffiliateWithdrawal[]>([]);
