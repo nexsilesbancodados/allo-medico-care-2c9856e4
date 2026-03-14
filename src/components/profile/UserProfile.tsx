@@ -50,7 +50,6 @@ const UserProfile = () => {
     : roles.includes("clinic") ? "clinic"
     : roles.includes("partner") ? "partner"
     : "patient";
-    : "patient";
   const nav = getNavForRole(activeRole);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");

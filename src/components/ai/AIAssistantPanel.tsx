@@ -23,7 +23,6 @@ const AIAssistantPanel = () => {
     : roles.includes("clinic") ? "clinic"
     : roles.includes("partner") ? "partner"
     : "patient";
-    : "patient";
 
   const aiNav = [
     { label: "Chat IA", href: "/dashboard/ai-assistant", icon: <Bot className="w-4 h-4" />, active: true, group: "Assistente" },
