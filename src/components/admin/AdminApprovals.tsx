@@ -359,23 +359,6 @@ const AdminApprovals = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="affiliates" className="mt-4 space-y-4">
-                {pendingAffiliates.length > 0 && (
-                  <>
-                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1"><Clock className="w-4 h-4" /> Pendentes</h3>
-                    {pendingAffiliates.map(a => renderApprovalCard(a, "affiliate", false))}
-                  </>
-                )}
-                {approvedAffiliates.length > 0 && (
-                  <>
-                    <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-1 mt-6"><Check className="w-4 h-4" /> Aprovados ({approvedAffiliates.length})</h3>
-                    {approvedAffiliates.map(a => renderApprovalCard(a, "affiliate", true))}
-                  </>
-                )}
-                {pendingAffiliates.length === 0 && approvedAffiliates.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">Nenhum afiliado cadastrado.</p>
-                )}
-              </TabsContent>
             </>
           )}
         </Tabs>
