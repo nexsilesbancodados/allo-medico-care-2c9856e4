@@ -84,63 +84,6 @@ const AdminApprovals = () => {
     setApprovedPartners(enriched.filter(p => p.is_approved));
   };
 
-  const fetchAffiliates = async () => {
-    const { data } = await (supabase as any).from("affiliate_profiles").select("*").order("created_at", { ascending: false });
-    if (!data) return;
-    const userIds = data.map(a => a.user_id);
-    const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds);
-    const pMap = new Map(profiles?.map(p => [p.user_id, p] as const) ?? []);
-    const enriched = data.map(a => ({
-      ...a,
-      first_name: pMap.get(a.user_id)?.first_name ?? "",
-      last_name: pMap.get(a.user_id)?.last_name ?? "",
-    }));
-    setPendingAffiliates(enriched.filter(a => !a.is_approved));
-    setApprovedAffiliates(enriched.filter(a => a.is_approved));
-  };
-
-  const getEmailForUser = async (userId: string): Promise<string | null> => {
-    // We need the service role to get auth user email, but we can check profiles or use admin API
-    // For now we'll use the edge function approach
-    const { data } = await supabase.from("profiles").select("user_id").eq("user_id", userId).single();
-    // We can't get email from profiles, so we'll pass it through the auth admin
-    // Actually let's use supabase auth admin - but we don't have access from client
-    // We'll get the email from auth.users via an RPC or just skip - the edge function will handle it
-    return null;
-  };
-
-  const approveAffiliate = async (item: ApprovalItem) => {
-    await (supabase as any).from("affiliate_profiles").update({ is_approved: true }).eq("id", item.id);
-    
-    // Send approval email via edge function
-    // Get user email from auth - we need to use the admin function for this
-    try {
-      await supabase.functions.invoke("send-email", {
-        body: {
-          type: "affiliate_approved",
-          to: "", // Will be resolved by checking user
-          data: {
-            name: `${item.first_name} ${item.last_name}`,
-            login_url: `${window.location.origin}/afiliado`,
-          },
-        },
-      });
-    } catch (e) {
-      logError("Affiliate approval email failed", e);
-    }
-
-    // Create notification in-app
-    await supabase.from("notifications").insert({
-      user_id: item.user_id,
-      title: "🎉 Afiliação Aprovada!",
-      message: "Seu pedido de afiliação foi aprovado! Acesse o painel para gerar seu link de indicação.",
-      type: "success",
-      link: "/dashboard?role=affiliate",
-    });
-
-    toast.success("Afiliado aprovado! ✅");
-    fetchAll();
-  };
 
   const approve = async (id: string, type: "doctor" | "clinic" | "partner") => {
     const table = type === "doctor" ? "doctor_profiles" : type === "clinic" ? "clinic_profiles" : "partner_profiles";
