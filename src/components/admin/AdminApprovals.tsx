@@ -140,31 +140,18 @@ const AdminApprovals = () => {
   const reject = async () => {
     if (!rejectTarget) return;
     
-    if (rejectTarget.type === "affiliate") {
-      await (supabase as any).from("affiliate_profiles").update({ is_approved: false }).eq("id", rejectTarget.id);
-      const item = [...pendingAffiliates, ...approvedAffiliates].find(a => a.id === rejectTarget.id);
-      if (item) {
-        await supabase.from("notifications").insert({
-          user_id: item.user_id,
-          title: "❌ Afiliação não aprovada",
-          message: rejectReason ? `Motivo: ${rejectReason}` : "Sua solicitação de afiliação não foi aprovada neste momento.",
-          type: "warning",
-        });
-      }
-    } else {
-      const table = rejectTarget.type === "doctor" ? "doctor_profiles" : rejectTarget.type === "clinic" ? "clinic_profiles" : "partner_profiles";
-      await supabase.from(table).update({ is_approved: false }).eq("id", rejectTarget.id);
+    const table = rejectTarget.type === "doctor" ? "doctor_profiles" : rejectTarget.type === "clinic" ? "clinic_profiles" : "partner_profiles";
+    await supabase.from(table).update({ is_approved: false }).eq("id", rejectTarget.id);
 
-      if (rejectTarget.type === "doctor") {
-        const doc = [...pendingDoctors, ...approvedDoctors].find(d => d.id === rejectTarget.id);
-        if (doc) {
-          notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, false, rejectReason).catch(err => logError("notifyDoctorApproval reject failed", err));
-        }
-      } else if (rejectTarget.type === "clinic") {
-        const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === rejectTarget.id);
-        if (clinic) {
-          notifyClinicApproval(clinic.user_id, clinic.name, false, rejectReason).catch(err => logError("notifyClinicApproval reject failed", err));
-        }
+    if (rejectTarget.type === "doctor") {
+      const doc = [...pendingDoctors, ...approvedDoctors].find(d => d.id === rejectTarget.id);
+      if (doc) {
+        notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, false, rejectReason).catch(err => logError("notifyDoctorApproval reject failed", err));
+      }
+    } else if (rejectTarget.type === "clinic") {
+      const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === rejectTarget.id);
+      if (clinic) {
+        notifyClinicApproval(clinic.user_id, clinic.name, false, rejectReason).catch(err => logError("notifyClinicApproval reject failed", err));
       }
     }
     
