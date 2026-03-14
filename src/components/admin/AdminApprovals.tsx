@@ -250,7 +250,7 @@ const AdminApprovals = () => {
           <div className="flex flex-col gap-2 shrink-0">
             {!isApproved ? (
               <>
-                <Button size="sm" onClick={() => type === "affiliate" ? approveAffiliate(item) : approve(item.id, type)} className="bg-secondary text-secondary-foreground">
+                <Button size="sm" onClick={() => approve(item.id, type)} className="bg-secondary text-secondary-foreground">
                   <Check className="w-4 h-4 mr-1" /> Aprovar
                 </Button>
                 <Button size="sm" variant="outline" className="text-destructive border-destructive/30" onClick={() => { 
