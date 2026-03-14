@@ -245,7 +245,7 @@ serve(async (req) => {
         headers,
         body: JSON.stringify(subBody),
       });
-      const subData = await safeJson(subRes);
+      const subData: any = await safeJson(subRes);
 
       if (!subRes.ok) {
         console.error("Asaas subscription error:", subData);
