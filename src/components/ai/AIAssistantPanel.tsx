@@ -22,7 +22,7 @@ const AIAssistantPanel = () => {
     : roles.includes("support") ? "support"
     : roles.includes("clinic") ? "clinic"
     : roles.includes("partner") ? "partner"
-    : roles.includes("affiliate") ? "affiliate"
+    : "patient";
     : "patient";
 
   const aiNav = [
