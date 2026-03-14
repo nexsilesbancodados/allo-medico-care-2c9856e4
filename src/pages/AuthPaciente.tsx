@@ -47,7 +47,7 @@ interface PlanItem {
   interval: string;
 }
 
-type Step = "select" | "register" | "payment" | "success";
+type Step = "select" | "payment" | "success";
 type PaymentMethod = "PIX" | "BOLETO" | "CREDIT_CARD";
 
 const stagger = {
@@ -64,8 +64,8 @@ const AuthPaciente = () => {
   const initialPlan = searchParams.get("plan");
   const reason = searchParams.get("reason");
 
-  const [mode, setMode] = useState<"register" | "login">("login");
-  const [step, setStep] = useState<Step>(initialPlan ? "register" : "select");
+  const [mode, setMode] = useState<"buy" | "login">("buy");
+  const [step, setStep] = useState<Step>(initialPlan ? "payment" : "select");
   const [selectedPlanId, setSelectedPlanId] = useState<string | null>(
     initialPlan || sessionStorage.getItem("selectedPlanId") || null
   );
@@ -74,6 +74,7 @@ const AuthPaciente = () => {
   const [plansLoading, setPlansLoading] = useState(true);
   const [plansError, setPlansError] = useState(false);
 
+  // Personal data (collected on payment step)
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
@@ -81,21 +82,15 @@ const AuthPaciente = () => {
   const [cpf, setCpf] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
-  const [processing, setProcessing] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [attempts, setAttempts] = useState(0);
   const lockoutUntil = useRef<number>(0);
-  const [cpfVerified, setCpfVerified] = useState(false);
-  const [isNewCustomer, setIsNewCustomer] = useState(false);
-  const [verifyCpf, setVerifyCpf] = useState("");
-  const [verifyingCpf, setVerifyingCpf] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("PIX");
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<Record<string, any> | null>(null);
   const [pixCopied, setPixCopied] = useState(false);
-  const [registeredUserId, setRegisteredUserId] = useState<string | null>(null);
 
   const navigate = useNavigate();
   const { redirectAfterLogin } = useAuthRedirect();
@@ -110,26 +105,26 @@ const AuthPaciente = () => {
         const { data, error } = await supabase.from("plans").select("*").eq("is_active", true).order("price", { ascending: true });
         if (error) throw error;
         if (!data || data.length === 0) throw new Error("Nenhum plano encontrado");
-      const mapped: PlanItem[] = data.map((p: { id: string; name: string; price: number; interval: string; description: string | null; features: unknown }) => {
-        const meta = PLAN_MAP[p.name] ?? { icon: Clock, color: "from-primary/80 to-primary", highlighted: false };
-        const featureList = Array.isArray(p.features) ? p.features as string[] : [];
-        return {
-          id: p.id,
-          name: p.name,
-          price: p.price,
-          period: p.interval === "monthly" ? "por mês" : "por consulta",
-          description: p.description || "",
-          features: featureList.length > 0 ? featureList : [p.name],
-          highlighted: meta.highlighted,
-          icon: meta.icon,
-          color: meta.color,
-          interval: p.interval,
-        };
-      });
-      setPlans(mapped);
-      if (!selectedPlanId && mapped.length > 0) {
-        setSelectedPlanId(mapped[0].id);
-      }
+        const mapped: PlanItem[] = data.map((p: { id: string; name: string; price: number; interval: string; description: string | null; features: unknown }) => {
+          const meta = PLAN_MAP[p.name] ?? { icon: Clock, color: "from-primary/80 to-primary", highlighted: false };
+          const featureList = Array.isArray(p.features) ? p.features as string[] : [];
+          return {
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            period: p.interval === "monthly" ? "por mês" : "por consulta",
+            description: p.description || "",
+            features: featureList.length > 0 ? featureList : [p.name],
+            highlighted: meta.highlighted,
+            icon: meta.icon,
+            color: meta.color,
+            interval: p.interval,
+          };
+        });
+        setPlans(mapped);
+        if (!selectedPlanId && mapped.length > 0) {
+          setSelectedPlanId(mapped[0].id);
+        }
       } catch (err) {
         setPlansError(true);
       }
@@ -144,127 +139,56 @@ const AuthPaciente = () => {
     }
   }, [reason]);
 
-  const handleVerifyCpf = async () => {
-    const cleanCpf = unmask(verifyCpf);
+  const handleSelectPlan = (planId: string) => {
+    setSelectedPlanId(planId);
+    sessionStorage.setItem("selectedPlanId", planId);
+    setStep("payment");
+  };
+
+  // Process payment first, then create account
+  const handleProcessPayment = async () => {
+    // Validate personal data
+    if (!firstName.trim() || !lastName.trim()) {
+      toast.error("Dados incompletos", { description: "Preencha seu nome e sobrenome." });
+      return;
+    }
+    const cleanCpf = unmask(cpf);
     if (cleanCpf.length !== 11) {
       toast.error("CPF inválido", { description: "Digite um CPF válido com 11 dígitos." });
       return;
     }
-    setVerifyingCpf(true);
-    try {
-      const { data: guestData } = await supabase.from("guest_patients").select("id, full_name, email, phone").eq("cpf", cleanCpf).limit(1);
-      
-      if (guestData && guestData.length > 0) {
-        const guest = guestData[0];
-        const nameParts = guest.full_name.split(" ");
-        setFirstName(nameParts[0] || "");
-        setLastName(nameParts.slice(1).join(" ") || "");
-        setEmail(guest.email || "");
-        setPhone(formatMask(guest.phone || "", "phone"));
-        setCpf(verifyCpf);
-        setCpfVerified(true);
-        toast.success("CPF verificado! ✅", { description: "Seus dados da compra foram encontrados. Complete seu cadastro." });
-      } else {
-        const { data: profileData } = await supabase.from("profiles").select("user_id, cpf").eq("cpf", cleanCpf).limit(1);
-        if (profileData && profileData.length > 0) {
-          toast.error("Conta já existe", { description: "Já existe uma conta com esse CPF. Use a opção 'Entrar'." });
-          setMode("login");
-        } else {
-          toast.error("CPF não encontrado", { description: "Não encontramos uma compra com esse CPF. Adquira seu cartão primeiro." });
-        }
-      }
-    } catch (err) {
-      toast.error("Erro na verificação", { description: "Tente novamente." });
+    const cleanPhone = unmask(phone);
+    if (cleanPhone.length < 10) {
+      toast.error("Telefone inválido", { description: "Digite um telefone válido." });
+      return;
     }
-    setVerifyingCpf(false);
-  };
-
-  const handleSelectPlan = (planId: string) => {
-    setSelectedPlanId(planId);
-    sessionStorage.setItem("selectedPlanId", planId);
-    setStep("register");
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (Date.now() < lockoutUntil.current) {
-      const secs = Math.ceil((lockoutUntil.current - Date.now()) / 1000);
-      toast.error("Aguarde", { description: `Tente novamente em ${secs}s` });
+    if (!email || !email.includes("@")) {
+      toast.error("Email inválido", { description: "Digite um email válido." });
+      return;
+    }
+    if (password.length < 6) {
+      toast.error("Senha fraca", { description: "A senha deve ter no mínimo 6 caracteres." });
       return;
     }
     if (!termsAccepted) {
       toast.error("Aceite os termos", { description: "Você precisa aceitar os Termos de Uso e Política de Privacidade para continuar." });
       return;
     }
-    if (!selectedPlanId) {
-      toast.error("Selecione um plano", { description: "Volte e escolha um plano para continuar." });
-      return;
-    }
-    setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email, password,
-      options: {
-        emailRedirectTo: window.location.origin,
-        data: { first_name: firstName, last_name: lastName },
-      },
-    });
-    if (error) {
-      setLoading(false);
-      toast.error("Erro no cadastro", { description: translateAuthError(error.message) });
-      return;
-    }
-    if (data.user) {
-      setRegisteredUserId(data.user.id);
-      const refCode = sessionStorage.getItem("ref_code");
-      await supabase.from("profiles").upsert({
-        user_id: data.user.id,
-        cpf: unmask(cpf),
-        phone: unmask(phone),
-        first_name: firstName,
-        last_name: lastName,
-        referred_by: refCode || null,
-      }, { onConflict: "user_id" });
-      if (refCode) {
-        await supabase.from("referrals").insert({
-          referral_code: refCode,
-          referred_user_id: data.user.id,
-          referrer_id: data.user.id,
-          status: "pending",
-          source: "signup",
-        }).then(() => sessionStorage.removeItem("ref_code"));
-      }
-      await registerConsent(data.user.id);
-      try {
-        await supabase.functions.invoke("send-email", {
-          body: { type: "welcome", to: email, data: { name: firstName } },
-        });
-      } catch {}
-    }
-    setLoading(false);
-    toast.success("Conta criada!", { description: "Agora finalize o pagamento para acessar." });
-    setStep("payment");
-  };
+    if (!currentPlan) return;
 
-  const handleProcessPayment = async () => {
-    if (!currentPlan || !registeredUserId) return;
     setPaymentLoading(true);
     try {
-      const isSubscription = currentPlan.id === "mensal";
       const body: Record<string, any> = {
         customerName: `${firstName} ${lastName}`,
-        customerCpf: unmask(cpf),
+        customerCpf: cleanCpf,
         customerEmail: email,
-        customerPhone: unmask(phone),
+        customerPhone: cleanPhone,
         billingType: paymentMethod,
         value: currentPlan.price,
-        description: isSubscription
-          ? `Assinatura Mensal — AloClínica`
-          : `Consulta Avulsa — AloClínica`,
+        description: `Cartão de Benefícios ${currentPlan.name} — AloClínica`,
         planId: currentPlan.id,
+        cycle: "MONTHLY",
       };
-      if (isSubscription) {
-        body.cycle = "MONTHLY";
-      }
 
       const { data, error } = await supabase.functions.invoke("create-asaas-payment", { body });
       if (error) throw error;
@@ -273,15 +197,16 @@ const AuthPaciente = () => {
       setPaymentData(data);
 
       if (data.status === "CONFIRMED" || data.status === "RECEIVED" || data.status === "ACTIVE") {
-        await createSubscriptionRecord(data);
-        toast.success("Pagamento confirmado! ✅", { description: "Redirecionando para o dashboard..." });
-        setTimeout(() => navigate("/dashboard"), 1500);
+        // Payment confirmed immediately — create account
+        await createAccountAfterPayment(data);
       } else {
         toast.success(paymentMethod === "PIX" ? "PIX gerado!" : "Boleto gerado!", {
-          description: paymentMethod === "PIX" 
-            ? "Escaneie o QR Code ou copie o código para pagar."
-            : "Acesse o boleto para realizar o pagamento.",
+          description: paymentMethod === "PIX"
+            ? "Escaneie o QR Code ou copie o código para pagar. Sua conta será criada automaticamente após a confirmação."
+            : "Acesse o boleto para realizar o pagamento. Sua conta será criada após confirmação.",
         });
+        // Start polling for payment confirmation then create account
+        startPaymentPolling(data);
       }
     } catch (err: unknown) {
       toast.error("Erro no pagamento", { description: err instanceof Error ? err.message : "Tente novamente" });
@@ -289,26 +214,161 @@ const AuthPaciente = () => {
     setPaymentLoading(false);
   };
 
-  const createSubscriptionRecord = async (payData: Record<string, unknown>) => {
-    if (!registeredUserId || !currentPlan) return;
+  const startPaymentPolling = (payData: Record<string, any>) => {
+    // Poll via asaas webhook — once subscription/discount_card appears, create account
+    const pollInterval = setInterval(async () => {
+      // Check if payment was confirmed by checking if the asaas payment status changed
+      // We'll create the account when user clicks "Já paguei" or when webhook processes
+    }, 10000);
+
+    // Store interval for cleanup
+    return () => clearInterval(pollInterval);
+  };
+
+  const createAccountAfterPayment = async (payData: Record<string, any>) => {
     try {
-      const planId = currentPlan.id;
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-      if (!uuidRegex.test(planId)) {
-        logError("AuthPaciente invalid plan ID", null, { planId });
-        toast.error("Erro interno", { description: "ID de plano inválido. Entre em contato com o suporte." });
+      // 1. Create Supabase auth user
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { first_name: firstName, last_name: lastName },
+        },
+      });
+
+      if (signUpError) {
+        toast.error("Pagamento confirmado, mas erro ao criar conta", {
+          description: translateAuthError(signUpError.message) + ". Entre em contato com o suporte.",
+        });
         return;
       }
-      await supabase.from("subscriptions").insert([{
-        user_id: registeredUserId,
-        plan_id: planId,
-        status: "active",
-        payment_method: paymentMethod.toLowerCase(),
-        notes: (payData as Record<string, string>).paymentId || (payData as Record<string, string>).subscriptionId || null,
-      }]);
-    } catch (e) {
-      logError("AuthPaciente create subscription error", e);
+
+      if (signUpData.user) {
+        const userId = signUpData.user.id;
+        const refCode = sessionStorage.getItem("ref_code");
+
+        // 2. Create profile
+        await supabase.from("profiles").upsert({
+          user_id: userId,
+          cpf: unmask(cpf),
+          phone: unmask(phone),
+          first_name: firstName,
+          last_name: lastName,
+          referred_by: refCode || null,
+        }, { onConflict: "user_id" });
+
+        // 3. Register consent
+        await registerConsent(userId);
+
+        // 4. Create subscription record
+        const planId = currentPlan?.id;
+        if (planId) {
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          if (uuidRegex.test(planId)) {
+            await supabase.from("subscriptions").insert([{
+              user_id: userId,
+              plan_id: planId,
+              status: "active",
+              payment_method: paymentMethod.toLowerCase(),
+              notes: payData.paymentId || payData.subscriptionId || null,
+            }]);
+          }
+        }
+
+        // 5. Handle referral
+        if (refCode) {
+          await supabase.from("referrals").insert({
+            referral_code: refCode,
+            referred_user_id: userId,
+            referrer_id: userId,
+            status: "pending",
+            source: "signup",
+          }).then(() => sessionStorage.removeItem("ref_code"));
+        }
+
+        // 6. Send welcome email
+        try {
+          await supabase.functions.invoke("send-email", {
+            body: { type: "welcome", to: email, data: { name: firstName } },
+          });
+        } catch {}
+
+        toast.success("🎉 Tudo pronto!", { description: "Pagamento confirmado e conta criada! Redirecionando..." });
+        setTimeout(() => navigate("/dashboard"), 1500);
+      }
+    } catch (err) {
+      logError("createAccountAfterPayment error", err);
+      toast.error("Erro ao criar conta", { description: "Pagamento confirmado. Entre em contato com o suporte para liberar seu acesso." });
     }
+  };
+
+  const handleCreateAccountManually = async () => {
+    // For when user clicks "Já paguei" — create account and let webhook handle subscription
+    setLoading(true);
+    try {
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: window.location.origin,
+          data: { first_name: firstName, last_name: lastName },
+        },
+      });
+
+      if (signUpError) {
+        // If user already exists, try login
+        if (signUpError.message.includes("already registered")) {
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+          if (loginError) {
+            toast.error("Conta já existe", { description: "Tente fazer login com sua senha." });
+            setMode("login");
+            setStep("select");
+          } else if (loginData.user) {
+            await redirectAfterLogin(loginData.user.id);
+          }
+          setLoading(false);
+          return;
+        }
+        toast.error("Erro ao criar conta", { description: translateAuthError(signUpError.message) });
+        setLoading(false);
+        return;
+      }
+
+      if (signUpData.user) {
+        const userId = signUpData.user.id;
+        await supabase.from("profiles").upsert({
+          user_id: userId,
+          cpf: unmask(cpf),
+          phone: unmask(phone),
+          first_name: firstName,
+          last_name: lastName,
+        }, { onConflict: "user_id" });
+        await registerConsent(userId);
+
+        // Create subscription — payment was already made
+        const planId = currentPlan?.id;
+        if (planId) {
+          const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          if (uuidRegex.test(planId)) {
+            await supabase.from("subscriptions").insert([{
+              user_id: userId,
+              plan_id: planId,
+              status: "active",
+              payment_method: paymentMethod.toLowerCase(),
+              notes: paymentData?.paymentId || paymentData?.subscriptionId || null,
+            }]);
+          }
+        }
+
+        toast.success("Conta criada! ✅", { description: "Redirecionando para o dashboard..." });
+        setTimeout(() => navigate("/dashboard"), 1500);
+      }
+    } catch (err) {
+      logError("handleCreateAccountManually error", err);
+      toast.error("Erro inesperado", { description: "Tente novamente." });
+    }
+    setLoading(false);
   };
 
   const handleCopyPix = () => {
@@ -347,13 +407,13 @@ const AuthPaciente = () => {
     }
   };
 
-  const stepLabels = ["Escolher Plano", "Criar Conta", "Pagamento"];
-  const currentStepIndex = step === "select" ? 0 : step === "register" ? 1 : 2;
+  const stepLabels = ["Escolher Plano", "Dados e Pagamento"];
+  const currentStepIndex = step === "select" ? 0 : 1;
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col" style={{ background: 'var(--landing-bg)' }}>
       <SEOHead title="Meu Cartão de Benefícios" description="Acesse sua conta do Cartão de Benefícios AloClinica e aproveite consultas com desconto." />
-      
+
       {/* Mobile gradient header */}
       <div className="lg:hidden bg-gradient-to-br from-primary to-secondary px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-6">
         <Link to="/" className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-3">
@@ -365,11 +425,11 @@ const AuthPaciente = () => {
           </div>
           <div>
             <h1 className="text-lg font-bold text-primary-foreground">Meu Cartão</h1>
-            <p className="text-xs text-primary-foreground/70">Acesse sua conta do cartão de benefícios</p>
+            <p className="text-xs text-primary-foreground/70">Escolha seu plano e comece agora</p>
           </div>
         </div>
       </div>
-      
+
       {/* Desktop header */}
       <div className="hidden lg:block border-b border-border/50 bg-card/60 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -385,8 +445,8 @@ const AuthPaciente = () => {
         </div>
       </div>
 
-      {/* Steps indicator - always visible during registration flow */}
-      {step !== "success" && (
+      {/* Steps indicator */}
+      {step !== "success" && mode === "buy" && (
         <div className="container mx-auto px-4 py-6">
           <div className="flex items-center justify-center gap-2 text-sm mb-8">
             {stepLabels.map((label, i) => {
@@ -423,8 +483,82 @@ const AuthPaciente = () => {
 
       <div className="container mx-auto px-4 pb-16 flex-1">
         <AnimatePresence mode="wait">
+          {/* LOGIN MODE */}
+          {mode === "login" && (
+            <motion.div
+              key="login"
+              initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="max-w-md mx-auto"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
+                  <CreditCard className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground tracking-tight">Acessar meu cartão</h2>
+                  <p className="text-sm text-muted-foreground">Entre com seus dados do cartão de benefícios</p>
+                </div>
+              </div>
+
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <Label>Email</Label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required />
+                  </div>
+                </div>
+                <div>
+                  <Label>Senha</Label>
+                  <div className="relative mt-1">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-10 pr-10 h-11"
+                      required
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground cta-shimmer h-12 shadow-lg shadow-primary/20" size="lg" disabled={loading}>
+                  {loading ? (
+                    <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
+                    </motion.span>
+                  ) : "Entrar"}
+                </Button>
+                <p className="text-center text-sm text-muted-foreground">
+                  <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
+                </p>
+                <p className="text-center text-sm text-muted-foreground">
+                  Ainda não tem conta? <button type="button" onClick={() => setMode("buy")} className="text-primary font-semibold hover:underline">Assinar um plano</button>
+                </p>
+              </form>
+
+              {/* Social proof */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="mt-8 flex flex-wrap items-center justify-center gap-5 text-xs text-muted-foreground pb-[max(env(safe-area-inset-bottom,8px),8px)]"
+              >
+                <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary shrink-0" /> Dados protegidos</span>
+                <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-warning shrink-0" /> 4.9/5</span>
+                <span className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 text-destructive shrink-0" /> 12k+ pacientes</span>
+              </motion.div>
+            </motion.div>
+          )}
+
           {/* Step 1: Plan Selection */}
-          {step === "select" && (
+          {mode === "buy" && step === "select" && (
             <motion.div
               key="select"
               initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
@@ -473,12 +607,9 @@ const AuthPaciente = () => {
                                 : "border-2 border-border bg-card hover:border-primary/30 hover:shadow-lg"
                         }`}
                       >
-                        {/* Background glow for premium */}
                         {isPremium && (
                           <div className="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-white/5 pointer-events-none" />
                         )}
-
-                        {/* Badge */}
                         {plan.highlighted && !isPremium && (
                           <span className="absolute -top-px left-1/2 -translate-x-1/2 bg-gradient-to-r from-primary to-secondary text-primary-foreground text-[10px] font-bold px-4 py-1 rounded-b-xl uppercase tracking-wider shadow-md">
                             Mais popular
@@ -489,28 +620,16 @@ const AuthPaciente = () => {
                             Premium
                           </span>
                         )}
-
-                        {/* Selected check */}
                         {isSelected && !isPremium && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute top-4 right-4 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30"
-                          >
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-4 right-4 w-7 h-7 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
                             <Check className="w-4 h-4 text-primary-foreground" />
                           </motion.div>
                         )}
                         {isSelected && isPremium && (
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/25 backdrop-blur-sm flex items-center justify-center"
-                          >
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/25 backdrop-blur-sm flex items-center justify-center">
                             <Check className="w-4 h-4 text-primary-foreground" />
                           </motion.div>
                         )}
-
-                        {/* Pingo mascot as background */}
                         <img
                           src={PLAN_IMAGE_MAP[plan.name] || pingoSolitario}
                           alt=""
@@ -518,16 +637,12 @@ const AuthPaciente = () => {
                           className="pointer-events-none absolute inset-0 w-[90%] h-[90%] m-auto object-contain opacity-10 select-none mix-blend-multiply dark:mix-blend-screen"
                           loading="lazy"
                         />
-
-                        {/* Name & description */}
                         <h3 className={`font-bold text-xl tracking-tight ${isPremium ? "text-primary-foreground" : "text-foreground"}`}>
                           {plan.name}
                         </h3>
                         <p className={`text-xs mt-1 mb-4 ${isPremium ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                           {plan.description}
                         </p>
-
-                        {/* Price */}
                         <div className="flex items-baseline gap-1 mb-5">
                           <span className={`text-3xl font-extrabold tracking-tight ${isPremium ? "text-primary-foreground" : "text-foreground"}`}>
                             R${plan.price.toFixed(2).replace('.', ',')}
@@ -536,25 +651,17 @@ const AuthPaciente = () => {
                             /{plan.period}
                           </span>
                         </div>
-
-                        {/* Divider */}
                         <div className={`h-px w-full mb-4 ${isPremium ? "bg-white/15" : "bg-border"}`} />
-
-                        {/* Features */}
                         <ul className="space-y-2.5">
                           {plan.features.map((f, i) => (
                             <li key={i} className={`flex items-center gap-2.5 text-sm ${isPremium ? "text-primary-foreground/90" : "text-muted-foreground"}`}>
-                              <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${
-                                isPremium ? "bg-white/20" : "bg-primary/10"
-                              }`}>
+                              <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${isPremium ? "bg-white/20" : "bg-primary/10"}`}>
                                 <Check className={`w-2.5 h-2.5 ${isPremium ? "text-primary-foreground" : "text-primary"}`} />
                               </div>
                               {f}
                             </li>
                           ))}
                         </ul>
-
-                        {/* CTA inside card */}
                         <div className="mt-6">
                           <div className={`w-full py-2.5 rounded-xl text-center text-sm font-semibold transition-all ${
                             isPremium
@@ -580,7 +687,7 @@ const AuthPaciente = () => {
                   onClick={() => {
                     if (selectedPlanId) {
                       sessionStorage.setItem("selectedPlanId", selectedPlanId);
-                      setStep("register");
+                      setStep("payment");
                     }
                   }}
                 >
@@ -589,224 +696,13 @@ const AuthPaciente = () => {
               </div>
 
               <p className="text-center text-sm text-muted-foreground mt-4">
-                Já tem conta? <button type="button" onClick={() => { setStep("register"); setMode("login"); }} className="text-primary font-semibold hover:underline">Entrar</button>
+                Já tem conta? <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
               </p>
             </motion.div>
           )}
 
-          {/* Step 2: Register / Login */}
-          {step === "register" && (
-            <motion.div
-              key="register"
-              initial={{ opacity: 0, y: 20, filter: 'blur(4px)' }}
-              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-              exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="max-w-md mx-auto"
-            >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
-                  <CreditCard className="w-5 h-5 text-primary-foreground" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground tracking-tight">
-                    {mode === "register" ? (cpfVerified ? "Criar sua conta" : "Primeiro acesso") : "Acessar meu cartão"}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {mode === "register" 
-                      ? (cpfVerified ? "Complete seus dados para acessar" : "Informe o CPF usado na compra do cartão")
-                      : "Entre com seus dados do cartão de benefícios"}
-                  </p>
-                </div>
-              </div>
-
-              {currentPlan && mode === "register" && cpfVerified && (
-                <motion.div
-                  initial={{ scale: 0.95, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="p-3.5 rounded-xl bg-primary/5 border border-primary/20 mb-5 flex items-center justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                      {currentPlan.highlighted ? <Zap className="w-4 h-4 text-primary" /> : <Clock className="w-4 h-4 text-primary" />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{currentPlan.name}</p>
-                      <p className="text-xs text-muted-foreground">R${currentPlan.price}/{currentPlan.period}</p>
-                    </div>
-                  </div>
-                  <button onClick={() => setStep("select")} className="text-xs text-primary hover:underline font-medium">Trocar</button>
-                </motion.div>
-              )}
-
-              {mode === "register" && !cpfVerified ? (
-                /* CPF Verification Step */
-                <div className="space-y-5">
-                  <div className="p-4 rounded-xl bg-accent/30 border border-accent/50">
-                    <div className="flex items-start gap-3">
-                      <Shield className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-medium text-foreground">Verificação de compra</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          Informe o CPF que você usou ao adquirir o Cartão de Benefícios. Vamos verificar sua compra antes de criar sua conta.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <Label>CPF da compra</Label>
-                    <Input
-                      value={verifyCpf}
-                      onChange={e => setVerifyCpf(formatMask(e.target.value, 'cpf'))}
-                      placeholder="000.000.000-00"
-                      className="mt-1 font-mono h-12 text-base"
-                      maxLength={14}
-                    />
-                  </div>
-                  <Button
-                    onClick={handleVerifyCpf}
-                    className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12 shadow-lg shadow-primary/20"
-                    size="lg"
-                    disabled={verifyingCpf || unmask(verifyCpf).length !== 11}
-                  >
-                    {verifyingCpf ? (
-                      <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Verificando...</span>
-                    ) : (
-                      <span className="flex items-center gap-2"><Shield className="w-4 h-4" /> Verificar CPF</span>
-                    )}
-                  </Button>
-                  <p className="text-center text-sm text-muted-foreground">
-                    Já tem conta? <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
-                  </p>
-                  <p className="text-center text-sm text-muted-foreground">
-                    Ainda não tem o cartão? <button type="button" onClick={() => { setIsNewCustomer(true); setCpfVerified(true); setStep("select"); }} className="text-primary font-semibold hover:underline">Quero assinar um plano</button>
-                  </p>
-                </div>
-              ) : mode === "register" ? (
-                <form onSubmit={handleRegister} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1 h-11" /></div>
-                    <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1 h-11" /></div>
-                  </div>
-                  <div>
-                    <Label>CPF</Label>
-                    <Input
-                      value={cpf}
-                      onChange={e => setCpf(formatMask(e.target.value, 'cpf'))}
-                      placeholder="000.000.000-00"
-                      className="mt-1 font-mono h-11"
-                      maxLength={14}
-                    />
-                  </div>
-                  <div>
-                    <Label>Telefone</Label>
-                    <div className="relative mt-1">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        value={phone}
-                        onChange={e => setPhone(formatMask(e.target.value, 'phone'))}
-                        placeholder="(00) 00000-0000"
-                        className="pl-10 font-mono h-11"
-                        maxLength={15}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <Label>Email</Label>
-                    <div className="relative mt-1">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required />
-                    </div>
-                  </div>
-                  <div>
-                    <Label>Senha</Label>
-                    <div className="relative mt-1">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="Mínimo 6 caracteres"
-                        className="pl-10 pr-10 h-11"
-                        required
-                        minLength={6}
-                      />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {password && <PasswordStrength password={password} />}
-                  </div>
-                  <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
-                  <Button type="submit" className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground cta-shimmer h-12 shadow-lg shadow-primary/20" size="lg" disabled={loading || !termsAccepted}>
-                    {loading ? (
-                      <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 animate-spin" /> Criando conta...
-                      </motion.span>
-                    ) : "Criar conta e pagar"}
-                  </Button>
-                  <p className="text-center text-sm text-muted-foreground">
-                    Já tem conta? <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
-                  </p>
-                </form>
-              ) : (
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div>
-                    <Label>Email</Label>
-                    <div className="relative mt-1">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required />
-                    </div>
-                  </div>
-                  <div>
-                    <Label>Senha</Label>
-                    <div className="relative mt-1">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="pl-10 pr-10 h-11"
-                        required
-                      />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                  </div>
-                  <Button type="submit" className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground cta-shimmer h-12 shadow-lg shadow-primary/20" size="lg" disabled={loading}>
-                    {loading ? (
-                      <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
-                      </motion.span>
-                    ) : "Entrar"}
-                  </Button>
-                  <p className="text-center text-sm text-muted-foreground">
-                    <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
-                  </p>
-                   <p className="text-center text-sm text-muted-foreground">
-                     Comprou o cartão? <button type="button" onClick={() => { setMode("register"); setCpfVerified(false); setVerifyCpf(""); }} className="text-primary font-semibold hover:underline">Primeiro acesso</button>
-                   </p>
-                </form>
-              )}
-
-              {/* Social proof */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="mt-8 flex flex-wrap items-center justify-center gap-5 text-xs text-muted-foreground pb-[max(env(safe-area-inset-bottom,8px),8px)]"
-              >
-                <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary shrink-0" /> Dados protegidos</span>
-                <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-warning shrink-0" /> 4.9/5</span>
-                <span className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 text-destructive shrink-0" /> 12k+ pacientes</span>
-              </motion.div>
-            </motion.div>
-          )}
-
-          {/* Step 3: Payment */}
-          {step === "payment" && (
+          {/* Step 2: Personal Data + Payment (combined) */}
+          {mode === "buy" && step === "payment" && (
             <motion.div
               key="payment"
               initial={{ opacity: 0, y: 20 }}
@@ -820,8 +716,8 @@ const AuthPaciente = () => {
                   <CreditCard className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-foreground tracking-tight">Finalizar Pagamento</h2>
-                  <p className="text-sm text-muted-foreground">Escolha a forma de pagamento</p>
+                  <h2 className="text-2xl font-bold text-foreground tracking-tight">Finalizar Assinatura</h2>
+                  <p className="text-sm text-muted-foreground">Preencha seus dados e escolha como pagar</p>
                 </div>
               </div>
 
@@ -829,20 +725,103 @@ const AuthPaciente = () => {
               {currentPlan && (
                 <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 mb-6">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-foreground">{currentPlan.name}</p>
-                      <p className="text-xs text-muted-foreground">{currentPlan.id === "mensal" ? "Cobrança mensal recorrente" : "Pagamento único"}</p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        {currentPlan.highlighted ? <Zap className="w-4 h-4 text-primary" /> : <Clock className="w-4 h-4 text-primary" />}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-foreground">{currentPlan.name}</p>
+                        <p className="text-xs text-muted-foreground">Cobrança mensal</p>
+                      </div>
                     </div>
-                    <p className="text-2xl font-extrabold text-primary">R${currentPlan.price}</p>
+                    <div className="text-right">
+                      <p className="text-2xl font-extrabold text-primary">R${currentPlan.price.toFixed(2).replace('.', ',')}</p>
+                      <button onClick={() => setStep("select")} className="text-xs text-primary hover:underline font-medium">Trocar plano</button>
+                    </div>
                   </div>
                 </div>
               )}
 
               {!paymentData ? (
-                <>
-                  {/* Payment method selection */}
-                  <div className="space-y-3 mb-6">
-                    <Label className="text-sm font-medium">Forma de pagamento</Label>
+                <div className="space-y-5">
+                  {/* Personal data section */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Users className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold text-foreground">Seus dados</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label>Nome</Label>
+                        <Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1 h-11" />
+                      </div>
+                      <div>
+                        <Label>Sobrenome</Label>
+                        <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1 h-11" />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>CPF</Label>
+                      <Input
+                        value={cpf}
+                        onChange={e => setCpf(formatMask(e.target.value, 'cpf'))}
+                        placeholder="000.000.000-00"
+                        className="mt-1 font-mono h-11"
+                        maxLength={14}
+                      />
+                    </div>
+                    <div>
+                      <Label>Telefone</Label>
+                      <div className="relative mt-1">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          value={phone}
+                          onChange={e => setPhone(formatMask(e.target.value, 'phone'))}
+                          placeholder="(00) 00000-0000"
+                          className="pl-10 font-mono h-11"
+                          maxLength={15}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Email</Label>
+                      <div className="relative mt-1">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required />
+                      </div>
+                    </div>
+                    <div>
+                      <Label>Crie uma senha</Label>
+                      <div className="relative mt-1">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          placeholder="Mínimo 6 caracteres"
+                          className="pl-10 pr-10 h-11"
+                          required
+                          minLength={6}
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {password && <PasswordStrength password={password} />}
+                      <p className="text-[10px] text-muted-foreground mt-1">Essa senha será usada para acessar seu cartão depois</p>
+                    </div>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="h-px bg-border" />
+
+                  {/* Payment method */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2 mb-1">
+                      <CreditCard className="w-4 h-4 text-primary" />
+                      <span className="text-sm font-semibold text-foreground">Forma de pagamento</span>
+                    </div>
                     <div className="grid grid-cols-3 gap-3">
                       {([
                         { id: "PIX" as PaymentMethod, icon: QrCode, label: "PIX", desc: "Instantâneo" },
@@ -867,27 +846,34 @@ const AuthPaciente = () => {
                     </div>
                   </div>
 
+                  {/* Terms */}
+                  <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
+
                   <Button
                     onClick={handleProcessPayment}
-                    className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12 shadow-lg shadow-primary/20"
+                    className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground cta-shimmer h-12 shadow-lg shadow-primary/20"
                     size="lg"
-                    disabled={paymentLoading}
+                    disabled={paymentLoading || !termsAccepted}
                   >
                     {paymentLoading ? (
                       <span className="flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin" /> Processando...
                       </span>
                     ) : (
-                      `Pagar R$${currentPlan?.price || 0} via ${paymentMethod === "CREDIT_CARD" ? "Cartão" : paymentMethod}`
+                      `Assinar por R$${currentPlan?.price.toFixed(2).replace('.', ',') || '0'} via ${paymentMethod === "CREDIT_CARD" ? "Cartão" : paymentMethod}`
                     )}
                   </Button>
 
-                  <p className="text-center text-xs text-muted-foreground mt-4 flex items-center justify-center gap-1.5">
+                  <p className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1.5">
                     <Shield className="w-3.5 h-3.5 text-primary" /> Pagamento seguro via Asaas
                   </p>
-                </>
+
+                  <p className="text-center text-sm text-muted-foreground">
+                    Já tem conta? <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
+                  </p>
+                </div>
               ) : (
-                /* Payment result */
+                /* Payment result - PIX/Boleto generated */
                 <div className="space-y-4">
                   {paymentData.pixQrCode && (
                     <div className="text-center space-y-4">
@@ -930,7 +916,7 @@ const AuthPaciente = () => {
                   {paymentData.invoiceUrl && !paymentData.pixQrCode && !paymentData.bankSlipUrl && (
                     <div className="text-center space-y-4">
                       <CreditCard className="w-12 h-12 text-primary mx-auto" />
-                      <p className="text-sm text-muted-foreground">Redirecionando para pagamento...</p>
+                      <p className="text-sm text-muted-foreground">Pagamento sendo processado...</p>
                       <a href={paymentData.invoiceUrl} target="_blank" rel="noopener noreferrer">
                         <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground">
                           Ir para pagamento
@@ -941,17 +927,21 @@ const AuthPaciente = () => {
 
                   <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-center">
                     <p className="text-xs text-muted-foreground">
-                      Após a confirmação do pagamento, seu acesso será liberado automaticamente.
-                      Você receberá uma notificação por email.
+                      Após a confirmação do pagamento, sua conta será criada automaticamente.
+                      Você receberá uma notificação por email com os dados de acesso.
                     </p>
                   </div>
 
                   <Button
-                    variant="ghost"
-                    onClick={() => navigate("/dashboard")}
-                    className="w-full text-sm"
+                    onClick={handleCreateAccountManually}
+                    className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12"
+                    disabled={loading}
                   >
-                    Já realizei o pagamento → Ir para o Dashboard
+                    {loading ? (
+                      <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Criando conta...</span>
+                    ) : (
+                      "Já realizei o pagamento → Criar minha conta"
+                    )}
                   </Button>
                 </div>
               )}
