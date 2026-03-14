@@ -230,7 +230,7 @@ const ClinicDashboard = () => {
               { label: "Receita do Mês", value: `R$ ${revenue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "text-success", bg: "bg-success/10" },
               { label: "Ocupação", value: `${occupancy}%`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
             ].map(kpi => (
-              <div key={kpi.label} className="p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${kpi.label}: ${kpi.value}`}>
+              <div key={kpi.label} className="kpi-card p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${kpi.label}: ${kpi.value}`}>
                 <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
                   <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
                 </div>

@@ -186,7 +186,7 @@ const DoctorDashboard = () => {
         {!loading && nextPatient && (
           <motion.div variants={fadeUp}>
             <div 
-              className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-primary/20 cursor-pointer active:scale-[0.99] transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30" 
+              className="card-interactive flex items-center gap-3 p-4 rounded-2xl bg-card border border-primary/20 cursor-pointer active:scale-[0.99] transition-all hover:shadow-lg hover:shadow-primary/10 hover:border-primary/30" 
               onClick={() => navigate(`/dashboard/consultation/${nextPatient.id}`)}
             >
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex flex-col items-center justify-center shrink-0 shadow-lg shadow-primary/20">

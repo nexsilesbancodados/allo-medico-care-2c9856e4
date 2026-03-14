@@ -277,7 +277,7 @@ const SupportDashboard = () => {
               { label: "Erros", value: errorCount, icon: ShieldAlert, color: "text-destructive", bg: "bg-destructive/10", sub: `${warnCount} avisos` },
               { label: "Alertas", value: errorCount + warnCount, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10", sub: "Revisão necessária" },
             ].map(s => (
-              <div key={s.label} className="p-4 rounded-2xl bg-card border border-border/50">
+              <div key={s.label} className="kpi-card p-4 rounded-2xl bg-card border border-border/50">
                 <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
                   <s.icon className={`w-4 h-4 ${s.color}`} />
                 </div>

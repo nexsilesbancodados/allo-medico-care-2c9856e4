@@ -218,7 +218,7 @@ const PatientDashboard = () => {
                   ].map((kpi) => (
                     <div
                       key={kpi.label}
-                      className="bg-white/12 backdrop-blur-md rounded-xl p-3 text-center border border-white/15 hover:bg-white/18 transition-colors"
+                      className="kpi-card bg-white/12 backdrop-blur-md rounded-xl p-3 text-center border border-white/15 hover:bg-white/18 transition-colors"
                     >
                       <kpi.icon className="w-4 h-4 mx-auto mb-1.5 text-primary-foreground/70" aria-hidden="true" />
                       <p className="text-2xl font-black leading-none text-primary-foreground tabular-nums">{kpi.value.toLocaleString('pt-BR')}</p>
