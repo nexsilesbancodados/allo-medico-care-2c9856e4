@@ -709,3 +709,77 @@ input:focus, textarea:focus {
 .pb-safe { padding-bottom: env(safe-area-inset-bottom, 1rem); }
 .mb-safe { margin-bottom: env(safe-area-inset-bottom, 1rem); }
 
+
+/* ─── Global hover enhancement for all Tailwind card patterns ───────────── */
+/* These selectors target cards that use Tailwind hover but not our CSS classes */
+
+/* Cards with hover:shadow-md/lg/xl + rounded-2xl */
+[class*="rounded-2xl"][class*="hover:shadow-md"],
+[class*="rounded-2xl"][class*="hover:shadow-lg"],
+[class*="rounded-2xl"][class*="hover:shadow-xl"] {
+  transition: transform 220ms cubic-bezier(0.22,1,0.36,1),
+              box-shadow 220ms cubic-bezier(0.22,1,0.36,1);
+}
+
+/* Ensure translate works on hover */
+[class*="hover:-translate-y"] {
+  transition: transform 220ms cubic-bezier(0.22,1,0.36,1),
+              box-shadow 220ms cubic-bezier(0.22,1,0.36,1),
+              border-color 200ms ease !important;
+}
+
+/* Better focus ring for all interactive elements */
+[class*="rounded-xl"]:focus-visible,
+[class*="rounded-2xl"]:focus-visible {
+  outline: 2px solid hsl(var(--primary) / 0.7);
+  outline-offset: 2px;
+}
+
+/* ─── Micro-interactions on Buttons ─────────────────────────────────────── */
+button[class*="rounded-xl"],
+button[class*="rounded-2xl"],
+button[class*="rounded-full"] {
+  transition: transform 150ms cubic-bezier(0.22,1,0.36,1),
+              box-shadow 150ms ease,
+              opacity 100ms ease;
+}
+button[class*="rounded-xl"]:not(:disabled):active,
+button[class*="rounded-2xl"]:not(:disabled):active,
+button[class*="rounded-full"]:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+/* ─── Input field transitions ────────────────────────────────────────────── */
+input[class*="rounded"],
+textarea[class*="rounded"],
+select[class*="rounded"] {
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+input[class*="rounded"]:focus,
+textarea[class*="rounded"]:focus {
+  box-shadow: 0 0 0 3px hsl(var(--primary) / 0.15) !important;
+}
+
+/* ─── Link hover underline ───────────────────────────────────────────────── */
+a[class*="text-primary"]:not([class*="button"]):not([class*="btn"]) {
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* ─── Gradient buttons glow on hover ────────────────────────────────────── */
+[class*="bg-gradient"][class*="text-white"]:not(:disabled):hover,
+[class*="bg-gradient-to"][class*="text-primary-foreground"]:not(:disabled):hover {
+  filter: brightness(1.06);
+}
+
+/* ─── Badge premium look ─────────────────────────────────────────────────── */
+.badge-glow {
+  box-shadow: 0 0 12px currentColor;
+  opacity: 0.8;
+}
+
+/* ─── Smooth page scrolling ──────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+

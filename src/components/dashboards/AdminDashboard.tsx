@@ -420,7 +420,7 @@ const AdminDashboard = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-xl font-bold text-foreground tabular-nums" aria-hidden="true">{kpi.value}</p>
+                <p className="text-2xl font-black text-foreground tabular-nums" aria-hidden="true">{kpi.value}</p>
                 <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
               </button>
             ))

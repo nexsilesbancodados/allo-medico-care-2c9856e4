@@ -87,7 +87,7 @@ const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/[0.07] border border-primary/10 text-primary text-sm font-semibold mb-6"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/[0.09] border border-primary/20 text-primary text-sm font-semibold mb-6 shadow-sm shadow-primary/10"
             >
               <span className="relative flex h-2.5 w-2.5">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
@@ -120,7 +120,7 @@ const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
             <div className="flex flex-col sm:flex-row gap-3 mb-8">
               <Button
                 size="lg"
-                className="bg-gradient-hero text-primary-foreground rounded-full px-8 h-13 text-base font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:opacity-95 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                className="bg-gradient-to-r from-primary to-secondary text-white rounded-full px-8 h-13 text-base font-bold shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 hover:scale-[1.03] active:scale-[0.97] transition-all duration-200"
                 onClick={() => navigate("/paciente")}
                 onMouseEnter={prefetchPaciente}
               >
@@ -161,7 +161,7 @@ const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
             transition={{ duration: 0.8, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
             className="relative"
           >
-            <div className="relative w-full max-w-[200px] sm:max-w-[280px] md:max-w-sm lg:max-w-lg mx-auto">
+            <div className="relative w-full max-w-[200px] sm:max-w-[280px] md:max-w-sm lg:max-w-lg mx-auto drop-shadow-2xl">
               {/* Subtle glow */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/15 to-secondary/15 blur-[80px] rounded-full scale-75" />
               

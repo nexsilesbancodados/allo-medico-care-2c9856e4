@@ -175,7 +175,7 @@ const LaudistaDashboard = () => {
                     aria-label={`${kpi.label}: ${kpi.value}`}
                   >
                     <kpi.icon className="w-4 h-4 text-white/70 mb-2" aria-hidden="true" />
-                    <p className="text-2xl font-bold leading-none" aria-hidden="true">{kpi.value}</p>
+                    <p className="text-2xl font-bold leading-none tabular-nums" aria-hidden="true">{kpi.value}</p>
                     <p className="text-[10px] text-white/60 mt-1">{kpi.label}</p>
                   </motion.div>
                 ))
