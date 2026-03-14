@@ -31,7 +31,7 @@ const AdminNPS = () => {
       .select("*")
       .order("created_at", { ascending: false });
 
-    const all = (data as { id: string; nps_score: number; feedback?: string | null; created_at: string; appointment_id?: string | null }[]) ?? [];
+    const all = (data as unknown as SurveyRow[]) ?? [];
     setSurveys(all);
 
     if (all.length === 0) { setLoading(false); return; }
