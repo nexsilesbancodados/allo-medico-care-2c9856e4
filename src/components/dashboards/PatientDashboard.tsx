@@ -157,7 +157,7 @@ const PatientDashboard = () => {
 
         {/* ═══ Profile card — clean white ═══ */}
         <motion.div variants={fadeUp}>
-          <div className="flex items-center gap-4 bg-card p-4 rounded-xl shadow-sm border border-border/50">
+          <div className="flex items-center gap-4 bg-card p-4 rounded-2xl shadow-md border border-border/40">
             <Avatar className="h-16 w-16 shrink-0 border-2 border-primary/20">
               {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
               <AvatarFallback className="bg-muted text-foreground text-lg font-bold">
@@ -195,7 +195,7 @@ const PatientDashboard = () => {
 
         {/* ═══ Digital Card Banner — gradient primary ═══ */}
         <motion.div variants={fadeUp}>
-          <div className="relative overflow-hidden rounded-xl bg-primary p-6 shadow-lg shadow-primary/20">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/95 to-secondary p-6 shadow-xl shadow-primary/25">
             {/* Decorative orbs */}
             <div className="absolute -right-12 -top-12 size-48 bg-white/10 rounded-full blur-3xl" />
             <div className="absolute -left-12 -bottom-12 size-32 bg-black/10 rounded-full blur-2xl" />
@@ -218,10 +218,10 @@ const PatientDashboard = () => {
                   ].map((kpi) => (
                     <div
                       key={kpi.label}
-                      className="bg-white/10 backdrop-blur-sm rounded-xl p-3 text-center border border-white/10"
+                      className="bg-white/12 backdrop-blur-md rounded-xl p-3 text-center border border-white/15 hover:bg-white/18 transition-colors"
                     >
                       <kpi.icon className="w-4 h-4 mx-auto mb-1.5 text-primary-foreground/70" aria-hidden="true" />
-                      <p className="text-xl font-bold leading-none text-primary-foreground tabular-nums">{kpi.value.toLocaleString('pt-BR')}</p>
+                      <p className="text-2xl font-black leading-none text-primary-foreground tabular-nums">{kpi.value.toLocaleString('pt-BR')}</p>
                       <p className="text-[10px] text-primary-foreground/60 mt-1">{kpi.label}</p>
                     </div>
                   ))}
@@ -229,7 +229,7 @@ const PatientDashboard = () => {
               )}
               {loading && (
                 <div className="grid grid-cols-3 gap-3 mb-5">
-                  {[1,2,3].map(i => <div key={i} className="h-20 rounded-xl bg-white/10 animate-pulse" />)}
+                  {[1,2,3].map(i => <div key={i} className="h-20 rounded-xl shimmer-v2 bg-white/10" />)}
                 </div>
               )}
 
@@ -319,7 +319,7 @@ const PatientDashboard = () => {
 
         {/* ═══ Quick Actions — clean white cards with primary icons ═══ */}
         <motion.div variants={fadeUp}>
-          <h3 className="text-foreground font-bold mb-3 flex items-center gap-2 px-1">
+          <h3 className="text-foreground font-bold mb-3 flex items-center gap-2 px-1 text-sm tracking-tight">
             <Zap className="w-4 h-4 text-primary" />
             Ações Rápidas
           </h3>
@@ -336,7 +336,7 @@ const PatientDashboard = () => {
                 role="listitem"
                 className="flex flex-col items-center gap-2 py-3"
               >
-                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-md hover:border-primary/20 transition-all">
+                <div className="size-14 rounded-2xl bg-card border border-border/50 shadow-sm flex items-center justify-center text-primary hover:shadow-lg hover:border-primary/25 hover:-translate-y-1 transition-all duration-200">
                   <item.icon className="w-6 h-6" aria-hidden="true" />
                 </div>
                 <span className="text-[11px] font-semibold text-muted-foreground">{item.label}</span>

@@ -387,7 +387,7 @@ const AdminDashboard = () => {
         {/* KPI Cards with trend indicators */}
         <motion.div variants={fadeUp} ref={kpiRef} className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3" role="list" aria-label="Indicadores chave do sistema">
           {loading ? (
-            Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-28 animate-pulse bg-muted/50 rounded-2xl" aria-hidden="true" />)
+            Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-28 shimmer-v2 rounded-2xl" aria-hidden="true" />)
           ) : (
             [
               { label: "Receita (MRR)", value: `R$ ${stats.total_revenue.toFixed(0)}`, icon: DollarSign, color: "text-success", bg: "bg-success/10", trend: stats.total_revenue > 0 ? "↑" : null },
@@ -421,7 +421,7 @@ const AdminDashboard = () => {
                   )}
                 </div>
                 <p className="text-2xl font-black text-foreground tabular-nums" aria-hidden="true">{kpi.value}</p>
-                <p className="text-[11px] font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
+                <p className="text-[11px] font-semibold text-muted-foreground/80 mt-0.5">{kpi.label}</p>
               </button>
             ))
           )}

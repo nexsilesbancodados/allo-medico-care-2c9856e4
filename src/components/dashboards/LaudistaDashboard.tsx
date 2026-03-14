@@ -162,7 +162,7 @@ const LaudistaDashboard = () => {
             {/* KPIs */}
             <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5" role="list" aria-label="Estatísticas do laudista">
               {loadingStats ? (
-                Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl bg-white/10 animate-pulse" aria-hidden="true" />)
+                Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl shimmer-v2 bg-white/10" aria-hidden="true" />)
               ) : (
                 kpis.map((kpi, i) => (
                   <motion.div
