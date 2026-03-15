@@ -418,14 +418,14 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             {moreNav.length > 0 && (
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
                 <SheetTrigger asChild>
-                  <motion.button whileTap={{ scale: 0.85 }}
-                    className={`flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium select-none ${moreNav.some(i => i.active) ? "text-primary" : "text-muted-foreground"}`}
+                  <button
+                    className={`flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium select-none active:scale-95 transition-transform ${moreNav.some(i => i.active) ? "text-primary" : "text-muted-foreground"}`}
                     aria-label="Mais opções">
-                    <span className={`w-9 h-7 rounded-xl flex items-center justify-center transition-all duration-150 ${moreNav.some(i => i.active) ? "bg-primary/12" : ""}`}>
+                    <span className={`w-9 h-7 rounded-xl flex items-center justify-center transition-colors duration-150 ${moreNav.some(i => i.active) ? "bg-primary/12" : ""}`}>
                       <MoreHorizontal className="w-4 h-4" aria-hidden="true" />
                     </span>
                     <span>Mais</span>
-                  </motion.button>
+                  </button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="rounded-t-3xl border-border/25 bg-card/98 backdrop-blur-2xl max-h-[70vh]"
                   style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}>
