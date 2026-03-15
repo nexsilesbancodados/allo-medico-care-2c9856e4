@@ -218,9 +218,9 @@ const ExamReportEditor = () => {
     setAutoSaveStatus("saving");
     try {
       if (existingReport?.id) {
-        await supabase.from("exam_reports" as never).update({ content_text: text }).eq("id", existingReport.id);
+        await supabase.from("exam_reports" as any).update({ content_text: text } as any).eq("id", existingReport.id);
       } else {
-        await supabase.from("exam_reports" as never).insert({ exam_request_id: examId, reporter_id: doctorProfile.id, content_text: text });
+        await supabase.from("exam_reports" as any).insert({ exam_request_id: examId, reporter_id: doctorProfile.id, content_text: text } as any);
         queryClient.invalidateQueries({ queryKey: ["exam-report-existing", examId] });
       }
       setAutoSaveStatus("saved");
