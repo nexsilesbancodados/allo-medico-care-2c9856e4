@@ -164,11 +164,11 @@ const MemedPrescription = ({
                         appointment_id: appointmentId,
                         doctor_id: doctorProfile.id,
                         patient_id: patientId,
-                        medications: medications as unknown,
+                        medications: medications as any,
                         diagnosis: prescriptionData?.diagnostico || null,
                         observations: "Receita emitida via Memed Digital",
                         pdf_url: prescriptionData?.url_pdf || null,
-                      } as Record<string, unknown>);
+                      } as any);
                     }
                   } catch {
                     warn("Error saving Memed prescription");

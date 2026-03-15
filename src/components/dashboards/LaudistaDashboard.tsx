@@ -96,7 +96,7 @@ const LaudistaDashboard = () => {
         .order("created_at", { ascending: true })
         .limit(10);
       if (error) throw error;
-      return (data ?? []) as Record<string, unknown>[];
+      return (data ?? []) as { id: string; exam_type: string; status: string; priority: string; created_at: string; assigned_to: string | null; [key: string]: any }[];
     },
     enabled: !!user,
   });

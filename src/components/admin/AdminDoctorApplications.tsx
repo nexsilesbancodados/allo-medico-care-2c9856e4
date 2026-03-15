@@ -75,13 +75,13 @@ const AdminDoctorApplications = () => {
       if (codeError) throw codeError;
 
       // Update application
-      await (supabase.from("doctor_applications" as never)).update({
+      await (supabase.from("doctor_applications" as any)).update({
         status: "approved",
         admin_notes: adminNotes || null,
         reviewed_by: adminId,
         reviewed_at: new Date().toISOString(),
         invite_code_id: codeData.id,
-      }).eq("id", selectedApp.id);
+      } as any).eq("id", selectedApp.id);
 
       // Send email with the code
       await supabase.functions.invoke("send-email", {
@@ -110,12 +110,12 @@ const AdminDoctorApplications = () => {
     setProcessing(true);
     try {
       const { data: session } = await supabase.auth.getSession();
-      await (supabase.from("doctor_applications" as never)).update({
+      await (supabase.from("doctor_applications" as any)).update({
         status: "rejected",
         admin_notes: adminNotes || null,
         reviewed_by: session?.session?.user?.id,
         reviewed_at: new Date().toISOString(),
-      }).eq("id", selectedApp.id);
+      } as any).eq("id", selectedApp.id);
 
       // Notify by email
       await supabase.functions.invoke("send-email", {

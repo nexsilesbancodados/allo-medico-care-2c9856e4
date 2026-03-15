@@ -44,19 +44,19 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase
-      .from("ai_conversations" as unknown as Parameters<typeof import("@supabase/supabase-js").SupabaseClient.prototype.from>[0])
+      .from("ai_conversations" as any)
       .select("*")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false })
       .limit(100);
 
     if (!error && data) {
-      setConversations((data as unknown[]).map((c: Record<string, unknown>) => ({
-        id: c.id,
-        title: c.title ?? "Conversa",
-        role_context: c.role_context ?? c.context ?? "patient",
-        created_at: c.created_at,
-        updated_at: c.updated_at ?? c.created_at,
+      setConversations((data as any[]).map((c: any) => ({
+        id: c.id as string,
+        title: (c.title ?? "Conversa") as string,
+        role_context: (c.role_context ?? c.context ?? "patient") as string,
+        created_at: c.created_at as string,
+        updated_at: (c.updated_at ?? c.created_at) as string,
         messages: typeof c.messages === "string" ? JSON.parse(c.messages) : c.messages,
       })));
     }
@@ -68,7 +68,7 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
   }, [user]);
 
   const deleteConversation = async (id: string) => {
-    const { error } = await supabase.from("ai_conversations" as unknown as Parameters<typeof import("@supabase/supabase-js").SupabaseClient.prototype.from>[0]).delete().eq("id", id);
+    const { error } = await supabase.from("ai_conversations" as any).delete().eq("id", id);
     if (!error) {
       setConversations(prev => prev.filter(c => c.id !== id));
       if (selectedConv?.id === id) setSelectedConv(null);
@@ -256,13 +256,13 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                       <Button variant="ghost" size="icon"
                         className="h-8 w-8 text-muted-foreground"
-                        aria-label="Ação" onClick={() =>  { e.stopPropagation(); exportConversation(conv); }}
+                        aria-label="Exportar" onClick={(ev) => { ev.stopPropagation(); exportConversation(conv); }}
                       >
                         <Download className="w-3.5 h-3.5" />
                       </Button>
                       <Button variant="ghost" size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        aria-label="Ação" onClick={() =>  { e.stopPropagation(); deleteConversation(conv.id); }}
+                        aria-label="Excluir" onClick={(ev) => { ev.stopPropagation(); deleteConversation(conv.id); }}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>

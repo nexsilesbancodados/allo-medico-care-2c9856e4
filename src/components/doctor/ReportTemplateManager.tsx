@@ -82,18 +82,18 @@ const ReportTemplateManager = () => {
     try {
       if (editingId) {
         const { error } = await supabase
-          .from("report_templates" as never)
-          .update({ title, exam_type: examType, body_text: bodyText })
+          .from("report_templates" as any)
+          .update({ title, exam_type: examType, body_text: bodyText } as any)
           .eq("id", editingId);
         if (error) throw error;
         toast.success("Template atualizado!");
       } else {
-        const { error } = await supabase.from("report_templates" as never).insert({
+        const { error } = await supabase.from("report_templates" as any).insert({
           title,
           exam_type: examType,
           body_text: bodyText,
           created_by: user!.id,
-        });
+        } as any);
         if (error) throw error;
         toast.success("Template criado!");
       }

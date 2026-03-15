@@ -123,7 +123,7 @@ const AuthLaudista = () => {
         examTypes && `Tipos de exame: ${examTypes}`,
         howFound && `Como conheceu: ${howFound}`,
       ].filter(Boolean).join("\n");
-      const { error } = await supabase.from("doctor_applications" as never).insert({
+      const { error } = await supabase.from("doctor_applications" as any).insert({
         full_name: fullName,
         email,
         phone: phone || null,
@@ -131,7 +131,7 @@ const AuthLaudista = () => {
         crm_state: crmState,
         specialty: specialty || "Laudista",
         bio: enrichedBio || null,
-      });
+      } as any);
       if (error) throw error;
       setStep("applied");
       toast.success("Solicitação enviada!", { description: "Analisaremos seus dados e retornaremos por email." });
