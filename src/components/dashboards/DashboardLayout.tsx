@@ -383,12 +383,10 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           </aside>
         )}
         <main className="flex-1 min-w-0 overflow-auto pb-24 md:pb-8">
-          <AnimatePresence mode="wait">
-            <motion.div key={location.pathname} {...pageVariants} className="px-3 py-3 sm:p-6">
-              <DashboardBreadcrumbs />
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          <div className="px-3 py-3 sm:p-6">
+            <DashboardBreadcrumbs />
+            {children}
+          </div>
         </main>
       </div>
 
