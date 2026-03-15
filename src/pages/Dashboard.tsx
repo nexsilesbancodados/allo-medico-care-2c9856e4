@@ -13,22 +13,6 @@ const PageLoader = () => (
   </div>
 );
 
-const PLAN_CHECK_TIMEOUT_MS = 6000;
-
-const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number) =>
-  new Promise<T>((resolve, reject) => {
-    const timer = window.setTimeout(() => reject(new Error("plan-check-timeout")), timeoutMs);
-    promise
-      .then((value) => {
-        window.clearTimeout(timer);
-        resolve(value);
-      })
-      .catch((error) => {
-        window.clearTimeout(timer);
-        reject(error);
-      });
-  });
-
 // ── EAGER imports: dashboard shells (loaded once, cached) ──
 import PatientDashboard from "@/components/dashboards/PatientDashboard";
 import DoctorDashboard from "@/components/dashboards/DoctorDashboard";
