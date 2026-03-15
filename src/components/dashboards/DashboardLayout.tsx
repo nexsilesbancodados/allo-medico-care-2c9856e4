@@ -187,9 +187,11 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const bottomNav = nav?.slice(0, BOTTOM_COUNT) ?? [];
   const moreNav  = nav && nav.length > BOTTOM_COUNT ? nav.slice(BOTTOM_COUNT) : [];
 
-  // GSAP sidebar entrance
+  // GSAP sidebar entrance — only on first mount
+  const sidebarAnimated = useRef(false);
   useEffect(() => {
-    if (!sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (sidebarAnimated.current || !sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    sidebarAnimated.current = true;
     const items = sidebarRef.current.querySelectorAll(".nav-item");
     gsap.fromTo(items, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.035, ease: "power2.out", clearProps: "transform,opacity" });
   }, [nav]);
