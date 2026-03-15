@@ -5,12 +5,13 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Index from "./pages/Index";
 import { logError } from "@/lib/logger";
+import { Button } from "@/components/ui/button";
 
 const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
 const Auth = lazy(() => import("./pages/Auth"));
@@ -72,11 +73,26 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = () => (
-  <div className="min-h-[40vh] flex items-center justify-center" role="status" aria-live="polite" aria-label="Carregando página">
-    <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
-  </div>
-);
+const PageLoader = () => {
+  const [showRecovery, setShowRecovery] = useState(false);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setShowRecovery(true), 8000);
+    return () => window.clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="min-h-[40vh] flex flex-col items-center justify-center gap-4 px-4" role="status" aria-live="polite" aria-label="Carregando página">
+      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+      <p className="text-sm text-muted-foreground">Carregando com segurança...</p>
+      {showRecovery && (
+        <Button size="sm" variant="outline" onClick={() => window.location.reload()}>
+          Recarregar aplicativo
+        </Button>
+      )}
+    </div>
+  );
+};
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();

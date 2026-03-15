@@ -4,6 +4,7 @@ import { usePresence } from "@/hooks/use-presence";
 import { lazy, Suspense, ReactNode, useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { warn } from "@/lib/logger";
 
 // ── Lightweight inline loader (no spinner delay) ──
 const PageLoader = () => (
@@ -102,6 +103,22 @@ const AdminCoupons = lazy(() => import("@/components/admin/AdminCoupons"));
 const AdminDoctorApplications = lazy(() => import("@/components/admin/AdminDoctorApplications"));
 const SupportInbox = lazy(() => import("@/components/support/SupportInbox"));
 
+const PLAN_CHECK_TIMEOUT_MS = 6000;
+
+const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number) =>
+  new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error("plan-check-timeout")), timeoutMs);
+    promise
+      .then((value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      });
+  });
+
 const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: string[]; children: ReactNode }) => {
   const isAdmin = roles.includes("admin");
   if (isAdmin) return <>{children}</>;
@@ -140,21 +157,36 @@ const Dashboard = () => {
     }
     const checkPlan = async () => {
       try {
-        const [{ data: subs }, { data: cards }] = await Promise.all([
-          supabase.from("subscriptions").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
-          supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
-        ]);
+        const [{ data: subs }, { data: cards }] = await withTimeout(
+          Promise.all([
+            supabase.from("subscriptions").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
+            supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
+          ]),
+          PLAN_CHECK_TIMEOUT_MS,
+        );
         const hasPlan = (subs && subs.length > 0) || (cards && cards.length > 0);
         if (!hasPlan) {
           navigate("/paciente?reason=no-subscription");
           return;
         }
+      } catch (error) {
+        warn("checkPlan fallback activated", error);
       } finally {
         setCheckingPlan(false);
       }
     };
     checkPlan();
-  }, [isPatientOnly, user, loading]);
+  }, [isPatientOnly, user, loading, navigate]);
+
+  useEffect(() => {
+    if (loading || !checkingPlan) return;
+    const timer = window.setTimeout(() => {
+      warn("plan gate safety timeout reached");
+      setCheckingPlan(false);
+    }, PLAN_CHECK_TIMEOUT_MS + 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [loading, checkingPlan]);
 
   // Prefetch secondary routes after dashboard renders
   useEffect(() => {
