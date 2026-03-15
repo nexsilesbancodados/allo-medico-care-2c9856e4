@@ -105,13 +105,35 @@ const SubdomainRedirectProvider = () => {
 };
 
 const App = () => {
+  const lastUnhandledToastRef = useRef(0);
+
   // Global safety net for unhandled async errors (prevents white screen)
   useEffect(() => {
+    const NON_FATAL_REJECTION_RE = /AbortError|The user aborted a request|Network request failed while offline/i;
+    const CHUNK_REJECTION_RE = /Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i;
+
     const handleRejection = (event: PromiseRejectionEvent) => {
-      logError("Unhandled promise rejection", event.reason);
-      toast.error("Ocorreu um erro. Tente novamente.");
-      event.preventDefault();
+      const reason = event.reason;
+      const reasonText =
+        reason instanceof Error
+          ? `${reason.name}: ${reason.message}`
+          : typeof reason === "string"
+            ? reason
+            : JSON.stringify(reason ?? "unknown");
+
+      if (NON_FATAL_REJECTION_RE.test(reasonText) || CHUNK_REJECTION_RE.test(reasonText)) {
+        return;
+      }
+
+      logError("Unhandled promise rejection", reason);
+
+      const now = Date.now();
+      if (now - lastUnhandledToastRef.current > 4000) {
+        toast.error("Ocorreu um erro inesperado. Tente novamente.");
+        lastUnhandledToastRef.current = now;
+      }
     };
+
     window.addEventListener("unhandledrejection", handleRejection);
     return () => window.removeEventListener("unhandledrejection", handleRejection);
   }, []);
