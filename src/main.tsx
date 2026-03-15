@@ -1,7 +1,4 @@
-import { logError } from "@/lib/logger";
 import { createRoot } from "react-dom/client";
-import App from "./App";
-import ErrorBoundary from "./components/ErrorBoundary";
 import "./index.css";
 
 /* ── Chunk-error recovery ─────────────────────────────── */
@@ -13,14 +10,46 @@ const isChunkError = (v: unknown) => {
   return CHUNK_RE.test(msg);
 };
 
-const recover = () => {
-  if (sessionStorage.getItem(CHUNK_RELOAD_KEY)) {
+const getReloadFlag = () => {
+  try {
+    return sessionStorage.getItem(CHUNK_RELOAD_KEY) === "1";
+  } catch {
+    return false;
+  }
+};
+
+const setReloadFlag = () => {
+  try {
+    sessionStorage.setItem(CHUNK_RELOAD_KEY, "1");
+  } catch {
+    // no-op (private mode / blocked storage)
+  }
+};
+
+const clearReloadFlag = () => {
+  try {
     sessionStorage.removeItem(CHUNK_RELOAD_KEY);
+  } catch {
+    // no-op
+  }
+};
+
+const reportFatal = async (message: string, error?: unknown) => {
+  try {
+    const { logError } = await import("@/lib/logger");
+    logError(message, error);
+  } catch {
+    console.error(`[boot] ${message}`, error);
+  }
+};
+
+const recover = () => {
+  if (getReloadFlag()) {
+    clearReloadFlag();
     return; // already tried once
   }
-  sessionStorage.setItem(CHUNK_RELOAD_KEY, "1");
+  setReloadFlag();
 
-  // clear caches then reload
   const reset = async () => {
     try {
       if ("serviceWorker" in navigator) {
@@ -31,17 +60,32 @@ const recover = () => {
         const keys = await caches.keys();
         await Promise.all(keys.map((k) => caches.delete(k)));
       }
-    } catch (err: unknown) { /* silent failure */ }
+    } catch {
+      // silent failure
+    }
     window.location.reload();
   };
+
   void reset();
 };
 
-window.addEventListener("vite:preloadError", (e) => { e.preventDefault(); recover(); });
-window.addEventListener("unhandledrejection", (e) => { if (isChunkError(e.reason)) { e.preventDefault(); recover(); } });
-window.addEventListener("error", (e) => {
-  if (isChunkError((e as ErrorEvent).error ?? (e as ErrorEvent).message)) recover();
-}, true);
+window.addEventListener("vite:preloadError", (e) => {
+  e.preventDefault();
+  recover();
+});
+window.addEventListener("unhandledrejection", (e) => {
+  if (isChunkError(e.reason)) {
+    e.preventDefault();
+    recover();
+  }
+});
+window.addEventListener(
+  "error",
+  (e) => {
+    if (isChunkError((e as ErrorEvent).error ?? (e as ErrorEvent).message)) recover();
+  },
+  true,
+);
 
 /* ── Lazy side-effects (non-blocking) ─────────────────── */
 import("./lib/sentry").then(({ initSentry }) => initSentry()).catch(() => {});
@@ -51,7 +95,6 @@ const isPreviewEnvironment = window.location.hostname.startsWith("id-preview--")
 
 if ("serviceWorker" in navigator) {
   if (isPreviewEnvironment) {
-    // Ensure preview always reflects latest code edits immediately
     void navigator.serviceWorker
       .getRegistrations()
       .then((regs) => Promise.all(regs.map((r) => r.unregister())))
@@ -68,7 +111,7 @@ if ("serviceWorker" in navigator) {
   }
 }
 
-/* ── Mount React synchronously ────────────────────────── */
+/* ── Safe mount with deferred imports ─────────────────── */
 const BOOT_PLACEHOLDER_ID = "app-boot-placeholder";
 
 const renderFatalFallback = (root: HTMLElement) => {
@@ -78,7 +121,8 @@ const renderFatalFallback = (root: HTMLElement) => {
 
 const root = document.getElementById("root");
 if (!root) {
-  document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif">Erro crítico: elemento #root não encontrado.</div>';
+  document.body.innerHTML =
+    '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif">Erro crítico: elemento #root não encontrado.</div>';
   throw new Error("Root element not found");
 }
 
@@ -87,24 +131,33 @@ root.innerHTML = `<div id="${BOOT_PLACEHOLDER_ID}" style="display:flex;align-ite
 window.setTimeout(() => {
   const firstChild = root.firstElementChild as HTMLElement | null;
   const onlyBootPlaceholder = root.childElementCount === 1 && firstChild?.id === BOOT_PLACEHOLDER_ID;
-  const hasRenderedContent = root.childElementCount > 0 || (root.textContent?.trim().length ?? 0) > 0;
+  const hasRenderedContent = (root.textContent?.trim().length ?? 0) > 0;
 
   if (!hasRenderedContent || onlyBootPlaceholder) {
     renderFatalFallback(root);
   }
 }, 7000);
 
-try {
-  createRoot(root).render(
-    <ErrorBoundary>
-      <App />
-    </ErrorBoundary>,
-  );
-} catch (err) {
-  logError("Fatal React mount error", err);
-  if (isChunkError(err)) {
-    recover();
-  } else {
-    renderFatalFallback(root);
+const mountApp = async () => {
+  try {
+    const [{ default: App }, { default: ErrorBoundary }] = await Promise.all([
+      import("./App"),
+      import("./components/ErrorBoundary"),
+    ]);
+
+    createRoot(root).render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>,
+    );
+  } catch (err) {
+    void reportFatal("Fatal React mount/import error", err);
+    if (isChunkError(err)) {
+      recover();
+    } else {
+      renderFatalFallback(root);
+    }
   }
-}
+};
+
+void mountApp();

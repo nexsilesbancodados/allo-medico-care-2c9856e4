@@ -5,12 +5,46 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://oaixgmuocuwhsabidpei.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haXhnbXVvY3V3aHNhYmlkcGVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExODUyNjksImV4cCI6MjA4Njc2MTI2OX0.J9KUdJRNxSFdhI4hNu4V9CDQw4rl7wHPvRy3WU8mqrc";
 
+type AuthStorageLike = {
+  getItem: (key: string) => string | null;
+  setItem: (key: string, value: string) => void;
+  removeItem: (key: string) => void;
+};
+
+const createMemoryStorage = (): AuthStorageLike => {
+  const mem = new Map<string, string>();
+
+  return {
+    getItem: (key: string) => mem.get(key) ?? null,
+    setItem: (key: string, value: string) => {
+      mem.set(key, value);
+    },
+    removeItem: (key: string) => {
+      mem.delete(key);
+    },
+  };
+};
+
+const resolveAuthStorage = (): AuthStorageLike => {
+  if (typeof window === 'undefined') return createMemoryStorage();
+
+  try {
+    const storage = window.localStorage;
+    const probeKey = '__supabase_storage_probe__';
+    storage.setItem(probeKey, '1');
+    storage.removeItem(probeKey);
+    return storage;
+  } catch {
+    return createMemoryStorage();
+  }
+};
+
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    storage: localStorage,
+    storage: resolveAuthStorage(),
     persistSession: true,
     autoRefreshToken: true,
   }
