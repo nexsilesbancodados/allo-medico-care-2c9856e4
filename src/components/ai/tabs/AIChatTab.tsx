@@ -173,7 +173,7 @@ const AIChatTab = ({ primaryRole }: Props) => {
       title,
       messages: JSON.stringify(messages),
       role_context: primaryRole,
-    } as any);
+    });
     if (error) {
       toast.error("Erro ao salvar", { description: error.message });
     } else {

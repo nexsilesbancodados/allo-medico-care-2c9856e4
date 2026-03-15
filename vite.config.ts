@@ -137,6 +137,9 @@ export default defineConfig(({ mode }) => ({
   },
   build: {
     target: "es2020",
+    chunkSizeWarningLimit: 600,
+    minify: "esbuild",
+    sourcemap: false,
     cssCodeSplit: true,
     rollupOptions: {
       output: {
@@ -144,6 +147,12 @@ export default defineConfig(({ mode }) => ({
           if (id.includes("react-dom")) return "vendor-react-dom";
           if (id.includes("react-router-dom")) return "vendor-router";
           if (id.includes("node_modules/react/")) return "vendor-react-core";
+          // Split admin code (heavy, rarely needed by patients)
+          if (id.includes("src/components/admin/") || id.includes("src/components/dashboards/Admin")) return "chunk-admin";
+          // Split telelaudo (large, only for laudistas)
+          if (id.includes("TelelaudoWorkspace") || id.includes("telelaudo") || id.includes("dwv")) return "chunk-telelaudo";
+          // Split consultation (video, rarely loaded)
+          if (id.includes("VideoRoom") || id.includes("consultation/")) return "chunk-consultation";
           if (id.includes("lucide-react")) return "vendor-icons";
           if (id.includes("framer-motion")) return "vendor-motion";
           if (id.includes("gsap")) return "vendor-gsap";

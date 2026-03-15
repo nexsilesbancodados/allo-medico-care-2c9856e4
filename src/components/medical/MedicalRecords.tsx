@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -131,11 +131,11 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
     fetchRecords();
   };
 
-  const filtered = records.filter(r =>
+  const filtered = useMemo(() => records.filter(r =>
     !searchQuery || r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.cid_code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [records, searchQuery, typeFilter, sortBy]);
 
   const allergies = filtered.filter(r => r.record_type === "allergy");
   const medications = filtered.filter(r => r.record_type === "medication");

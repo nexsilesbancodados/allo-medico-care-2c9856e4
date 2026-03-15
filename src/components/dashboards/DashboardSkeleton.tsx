@@ -115,4 +115,4 @@ const DashboardSkeleton = () => (
   </motion.div>
 );
 
-export default DashboardSkeleton;
+export default memo(DashboardSkeleton);

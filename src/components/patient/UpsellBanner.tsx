@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -122,4 +122,4 @@ const UpsellBanner = () => {
   );
 };
 
-export default UpsellBanner;
+export default memo(UpsellBanner);

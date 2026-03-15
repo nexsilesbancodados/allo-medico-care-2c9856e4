@@ -39,7 +39,7 @@ const LaudistaMyReports = () => {
         .order("created_at", { ascending: false })
         .limit(50);
       if (error) throw error;
-      return (data ?? []) as any[];
+      return (data ?? []) as Record<string, unknown>[];
     },
     enabled: !!doctorProfile?.id,
   });

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Input } from "@/components/ui/input";
@@ -30,11 +30,11 @@ const AdminLogs = () => {
     setLoading(false);
   };
 
-  const filtered = logs.filter(l => {
+  const filtered = useMemo(() => logs.filter(l => {
     const matchSearch = `${l.action} ${l.entity_type}`.toLowerCase().includes(debouncedSearch.toLowerCase());
     const matchType = filterType === "all" || l.entity_type === filterType;
     return matchSearch && matchType;
-  });
+  }), [logs, debouncedSearch, filterType]);
 
   const entityColor: Record<string, string> = {
     patient: "bg-primary/10 text-primary",

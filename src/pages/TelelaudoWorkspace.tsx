@@ -183,7 +183,7 @@ const LaudoEditorPanel = ({
   }, [text, exame, isSigned, onSave]);
 
   const startNoiseFilteredRecognition = useCallback(async () => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const SR = window.SpeechRecognition || (window as { webkitSpeechRecognition?: typeof window.SpeechRecognition }).webkitSpeechRecognition;
     if (!SR) { toast.error("Reconhecimento de voz não suportado neste navegador"); return; }
 
     // Web Audio API noise suppression
