@@ -44,19 +44,19 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase
-      .from("ai_conversations" as unknown as Parameters<typeof import("@supabase/supabase-js").SupabaseClient.prototype.from>[0])
+      .from("ai_conversations" as any)
       .select("*")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false })
       .limit(100);
 
     if (!error && data) {
-      setConversations((data as unknown[]).map((c: Record<string, unknown>) => ({
-        id: c.id,
-        title: c.title ?? "Conversa",
-        role_context: c.role_context ?? c.context ?? "patient",
-        created_at: c.created_at,
-        updated_at: c.updated_at ?? c.created_at,
+      setConversations((data as any[]).map((c: any) => ({
+        id: c.id as string,
+        title: (c.title ?? "Conversa") as string,
+        role_context: (c.role_context ?? c.context ?? "patient") as string,
+        created_at: c.created_at as string,
+        updated_at: (c.updated_at ?? c.created_at) as string,
         messages: typeof c.messages === "string" ? JSON.parse(c.messages) : c.messages,
       })));
     }
