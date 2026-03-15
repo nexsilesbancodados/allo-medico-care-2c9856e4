@@ -157,21 +157,26 @@ const Dashboard = () => {
     }
     const checkPlan = async () => {
       try {
-        const [{ data: subs }, { data: cards }] = await Promise.all([
-          supabase.from("subscriptions").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
-          supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
-        ]);
+        const [{ data: subs }, { data: cards }] = await withTimeout(
+          Promise.all([
+            supabase.from("subscriptions").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
+            supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").limit(1),
+          ]),
+          PLAN_CHECK_TIMEOUT_MS,
+        );
         const hasPlan = (subs && subs.length > 0) || (cards && cards.length > 0);
         if (!hasPlan) {
           navigate("/paciente?reason=no-subscription");
           return;
         }
+      } catch (error) {
+        warn("checkPlan fallback activated", error);
       } finally {
         setCheckingPlan(false);
       }
     };
     checkPlan();
-  }, [isPatientOnly, user, loading]);
+  }, [isPatientOnly, user, loading, navigate]);
 
   // Prefetch secondary routes after dashboard renders
   useEffect(() => {
