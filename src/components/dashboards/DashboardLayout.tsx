@@ -1,5 +1,5 @@
 import { ReactNode, useState, useMemo, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -63,11 +63,6 @@ const ROLE_GRADIENT: Record<string, string> = {
   ai:"from-sky-500 to-blue-500",
 };
 
-const pageVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { duration: 0.15, ease: "easeOut" as const } },
-  exit:    { opacity: 0, transition: { duration: 0.08 } },
-};
 
 // ── PWA Banner ────────────────────────────────────────────────────────────────
 const PWABanner = ({ role }: { role: string }) => {
@@ -204,7 +199,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => (
     <Link to={item.href} onClick={onClick}
-      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 relative ${
+      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors duration-150 relative ${
         item.active ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
       }`}
     >
@@ -403,7 +398,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           <div className="flex items-stretch h-[64px]">
             {bottomNav.map(item => (
               <Link key={item.href} to={item.href}
-                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-all duration-150 select-none ${item.active ? "text-primary" : "text-muted-foreground"}`}
+                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-colors duration-150 select-none ${item.active ? "text-primary" : "text-muted-foreground"}`}
               >
                 {item.active && (
                   <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-primary" />
@@ -423,14 +418,14 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             {moreNav.length > 0 && (
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
                 <SheetTrigger asChild>
-                  <motion.button whileTap={{ scale: 0.85 }}
-                    className={`flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium select-none ${moreNav.some(i => i.active) ? "text-primary" : "text-muted-foreground"}`}
+                  <button
+                    className={`flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium select-none active:scale-95 transition-transform ${moreNav.some(i => i.active) ? "text-primary" : "text-muted-foreground"}`}
                     aria-label="Mais opções">
-                    <span className={`w-9 h-7 rounded-xl flex items-center justify-center transition-all duration-150 ${moreNav.some(i => i.active) ? "bg-primary/12" : ""}`}>
+                    <span className={`w-9 h-7 rounded-xl flex items-center justify-center transition-colors duration-150 ${moreNav.some(i => i.active) ? "bg-primary/12" : ""}`}>
                       <MoreHorizontal className="w-4 h-4" aria-hidden="true" />
                     </span>
                     <span>Mais</span>
-                  </motion.button>
+                  </button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="rounded-t-3xl border-border/25 bg-card/98 backdrop-blur-2xl max-h-[70vh]"
                   style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}>
