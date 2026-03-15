@@ -207,9 +207,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       }`}
     >
       {item.active && (
-        <motion.div layoutId={`sidebar-pill-${role}`}
-          className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full bg-primary"
-          transition={{ type: "spring", stiffness: 500, damping: 30 }} />
+        <span className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full bg-primary" />
       )}
       <span className={`shrink-0 transition-colors ${item.active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}>
         {item.icon}
