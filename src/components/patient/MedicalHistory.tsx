@@ -162,7 +162,7 @@ const MedicalHistory = () => {
         <h1 className="text-2xl font-bold text-foreground mb-1">Histórico Médico</h1>
         <p className="text-muted-foreground mb-6">Consultas realizadas, receitas e prontuários</p>
 
-        {loading ? <p className="text-muted-foreground">Carregando...</p> :
+        {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> :
         appointments.length === 0 ? (
           <Card className="border-border"><CardContent className="py-12 text-center text-muted-foreground">Nenhuma consulta realizada ainda.</CardContent></Card>
         ) : (

@@ -123,7 +123,7 @@ const RenewalQueue = () => {
         <h1 className="text-2xl font-bold text-foreground mb-1">💊 Renovações de Receita</h1>
         <p className="text-muted-foreground text-sm mb-6">Analise e aprove solicitações de renovação</p>
 
-        {loading ? <p className="text-muted-foreground">Carregando...</p> : renewals.length === 0 ? (
+        {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> : renewals.length === 0 ? (
           <Card><CardContent className="p-12 text-center">
             <FileText className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
             <h3 className="font-semibold text-foreground mb-1">Nenhuma renovação pendente</h3>

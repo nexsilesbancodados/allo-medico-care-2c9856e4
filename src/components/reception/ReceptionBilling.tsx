@@ -114,7 +114,7 @@ const ReceptionBilling = () => {
           <Input placeholder="Buscar guia..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
         </div>
 
-        {loading ? <p className="text-muted-foreground">Carregando...</p> : (
+        {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> : (
           <div className="rounded-lg border border-border overflow-hidden">
             <Table>
               <TableHeader>

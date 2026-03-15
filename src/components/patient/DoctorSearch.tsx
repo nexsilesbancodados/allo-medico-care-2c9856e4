@@ -403,7 +403,7 @@ const DoctorSearch = () => {
                   variants={fadeUp}
                   initial="hidden"
                   animate="show"
-                  className={`kpi-card relative p-4 rounded-2xl border bg-card cursor-pointer group ${
+                  className={`card-interactive kpi-card relative p-4 rounded-2xl border bg-card cursor-pointer group ${
                     doctor.available_now
                       ? "border-secondary/40 shadow-md shadow-secondary/10"
                       : "border-border/50 hover:border-border"

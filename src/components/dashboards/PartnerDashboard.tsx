@@ -247,7 +247,7 @@ const PartnerDashboard = () => {
               <Card className="border-border/50">
                 <CardHeader><CardTitle className="text-sm font-semibold">Validações Recentes</CardTitle></CardHeader>
                 <CardContent>
-                  {loading ? <p className="text-muted-foreground">Carregando...</p> : validations.length === 0 ? (
+                  {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> : validations.length === 0 ? (
                     <div className="text-center py-10">
                       <Sparkles className="w-8 h-8 text-muted-foreground/40 mx-auto mb-3" />
                       <p className="text-sm text-muted-foreground">Nenhuma validação realizada.</p>

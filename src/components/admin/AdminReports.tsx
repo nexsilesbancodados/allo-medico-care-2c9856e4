@@ -266,7 +266,7 @@ const AdminReports = () => {
           </div>
         </div>
 
-        {loading ? <p className="text-muted-foreground">Carregando...</p> : (
+        {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> : (
           <>
             {/* Summary KPIs */}
             <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-6">

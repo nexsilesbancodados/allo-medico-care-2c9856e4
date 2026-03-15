@@ -111,7 +111,7 @@ const ReceptionCheckin = () => {
           <Input placeholder="Buscar paciente..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
         </div>
 
-        {loading ? <p className="text-muted-foreground">Carregando...</p> : filtered.length === 0 ? (
+        {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> : filtered.length === 0 ? (
           <Card className="border-border"><CardContent className="py-8 text-center text-muted-foreground">Nenhuma consulta pendente hoje.</CardContent></Card>
         ) : (
           <div className="space-y-3">
