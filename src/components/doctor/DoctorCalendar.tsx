@@ -442,11 +442,11 @@ const DoctorCalendar = () => {
 
         {/* Navigation */}
         <div className="flex items-center justify-between mb-4">
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigateDate(-1)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Ação" onClick={() =>  navigateDate(-1)}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <h2 className="text-sm sm:text-lg font-semibold text-foreground capitalize">{headerLabel}</h2>
-          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => navigateDate(1)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Ação" onClick={() =>  navigateDate(1)}>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>

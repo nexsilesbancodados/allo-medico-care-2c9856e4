@@ -12,10 +12,9 @@ const ThemeToggle = () => {
   if (!mounted) return null;
 
   return (
-    <Button
-      variant="ghost"
+    <Button variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      aria-label="Ação" onClick={() =>  setTheme(theme === "dark" ? "light" : "dark")}
       className="w-9 h-9"
       aria-label="Alternar tema"
     >

@@ -268,7 +268,7 @@ const AdminFinancial = () => {
                 <SelectItem value="365">Último ano</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon" onClick={fetchData}>
+            <Button variant="outline" size="icon" onClick={fetchData} aria-label="Atualizar">
               <RefreshCw className="w-4 h-4" />
             </Button>
           </div>

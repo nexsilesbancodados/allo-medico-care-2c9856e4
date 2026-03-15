@@ -290,16 +290,16 @@ const DicomViewer = ({ fileUrl, fileName }: DicomViewerProps) => {
       <CardContent className="flex-1 flex flex-col gap-2 min-h-0">
         {/* Toolbar */}
         <div className="flex items-center gap-1 flex-wrap">
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleZoomIn} title="Zoom In">
+          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleZoomIn} title="Zoom In" aria-label="Ampliar">
             <ZoomIn className="w-3.5 h-3.5" />
           </Button>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleZoomOut} title="Zoom Out">
+          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleZoomOut} title="Zoom Out" aria-label="Reduzir">
             <ZoomOut className="w-3.5 h-3.5" />
           </Button>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleRotate} title="Rotacionar">
+          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleRotate} title="Rotacionar" aria-label="Girar">
             <RotateCw className="w-3.5 h-3.5" />
           </Button>
-          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleFullscreen} title="Tela Cheia">
+          <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleFullscreen} title="Tela Cheia" aria-label="Tela cheia">
             <Maximize2 className="w-3.5 h-3.5" />
           </Button>
           <div className="flex items-center gap-1 ml-2">

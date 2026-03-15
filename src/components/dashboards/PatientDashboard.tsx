@@ -180,12 +180,11 @@ const PatientDashboard = () => {
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <MedicalHistoryExport />
-              <Button 
-                size="icon" 
+              <Button size="icon" 
                 variant="ghost" 
                 className="h-10 w-10 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted" 
                 onClick={handleRefresh} 
-                disabled={refreshing}
+                disabled={refreshing} aria-label="Ação"
               >
                 <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
               </Button>

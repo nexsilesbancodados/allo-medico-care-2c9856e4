@@ -98,7 +98,7 @@ const CheckoutRecoveryBanner = () => {
               <Button size="sm" className="h-7 text-xs px-3" onClick={handleResume}>
                 Retomar <ArrowRight className="w-3 h-3 ml-1" />
               </Button>
-              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleDismiss}>
+              <Button size="icon" variant="ghost" className="h-7 w-7" onClick={handleDismiss} aria-label="Fechar">
                 <X className="w-3 h-3" />
               </Button>
             </div>

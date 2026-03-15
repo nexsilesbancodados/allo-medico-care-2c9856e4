@@ -84,57 +84,51 @@ const TipTapEditor = ({ content, onChange, disabled }: TipTapEditorProps) => {
     <div className="flex flex-col h-full relative">
       {/* Toolbar */}
       <div className="flex items-center gap-1 p-1.5 border-b border-border bg-card/30 flex-wrap">
-        <Button
-          size="icon"
+        <Button size="icon"
           variant={editor.isActive("bold") ? "default" : "ghost"}
           className="h-7 w-7"
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          aria-label="Ação" onClick={() =>  editor.chain().focus().toggleBold().run()}
           disabled={disabled}
         >
           <Bold className="w-3.5 h-3.5" />
         </Button>
-        <Button
-          size="icon"
+        <Button size="icon"
           variant={editor.isActive("italic") ? "default" : "ghost"}
           className="h-7 w-7"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          aria-label="Ação" onClick={() =>  editor.chain().focus().toggleItalic().run()}
           disabled={disabled}
         >
           <Italic className="w-3.5 h-3.5" />
         </Button>
-        <Button
-          size="icon"
+        <Button size="icon"
           variant={editor.isActive("heading") ? "default" : "ghost"}
           className="h-7 w-7"
-          onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+          aria-label="Ação" onClick={() =>  editor.chain().focus().toggleHeading({ level: 3 }).run()}
           disabled={disabled}
         >
           <Heading2 className="w-3.5 h-3.5" />
         </Button>
-        <Button
-          size="icon"
+        <Button size="icon"
           variant={editor.isActive("bulletList") ? "default" : "ghost"}
           className="h-7 w-7"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          aria-label="Ação" onClick={() =>  editor.chain().focus().toggleBulletList().run()}
           disabled={disabled}
         >
           <List className="w-3.5 h-3.5" />
         </Button>
         <div className="w-px h-5 bg-border mx-1" />
-        <Button
-          size="icon"
+        <Button size="icon"
           variant="ghost"
           className="h-7 w-7"
-          onClick={() => editor.chain().focus().undo().run()}
+          aria-label="Ação" onClick={() =>  editor.chain().focus().undo().run()}
           disabled={disabled}
         >
           <Undo className="w-3.5 h-3.5" />
         </Button>
-        <Button
-          size="icon"
+        <Button size="icon"
           variant="ghost"
           className="h-7 w-7"
-          onClick={() => editor.chain().focus().redo().run()}
+          aria-label="Ação" onClick={() =>  editor.chain().focus().redo().run()}
           disabled={disabled}
         >
           <Redo className="w-3.5 h-3.5" />

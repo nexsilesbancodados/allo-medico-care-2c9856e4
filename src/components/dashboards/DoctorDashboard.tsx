@@ -159,7 +159,7 @@ const DoctorDashboard = () => {
             />
           </div>
           <div className="flex items-center gap-2">
-            <Button size="icon" variant="outline" className="h-10 w-10 rounded-xl relative" onClick={() => navigate("/dashboard/doctor/waiting-room")}>
+            <Button size="icon" variant="outline" className="h-10 w-10 rounded-xl relative" aria-label="Ação" onClick={() =>  navigate("/dashboard/doctor/waiting-room")}>
               <Bell className="w-4 h-4 text-muted-foreground" />
               {waitingCount > 0 && <span className="absolute -top-1 -right-1 size-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center font-bold">{waitingCount}</span>}
             </Button>
@@ -340,7 +340,7 @@ const DoctorDashboard = () => {
                                 <FileText className="w-3 h-3" /> Receita
                               </Button>
                             )}
-                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground">
+                            <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground" aria-label="Mais opções">
                               <MoreVertical className="w-4 h-4" />
                             </Button>
                           </div>

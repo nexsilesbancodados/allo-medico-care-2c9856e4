@@ -315,7 +315,7 @@ const AppointmentsList = () => {
           {/* Export menu */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="rounded-xl h-10 w-10 shrink-0">
+              <Button size="icon" variant="outline" className="rounded-xl h-10 w-10 shrink-0" aria-label="Mais opções">
                 <MoreHorizontal className="w-5 h-5" />
               </Button>
             </SheetTrigger>
@@ -346,7 +346,7 @@ const AppointmentsList = () => {
           </div>
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon" className="h-11 w-11 rounded-2xl shrink-0 relative">
+              <Button variant="outline" size="icon" className="h-11 w-11 rounded-2xl shrink-0 relative" aria-label="Filtrar">
                 <Filter className="w-4.5 h-4.5" />
                 {activeFilterCount > 0 && (
                   <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">

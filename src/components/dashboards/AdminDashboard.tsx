@@ -274,7 +274,7 @@ const AdminDashboard = () => {
                 {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button size="icon" variant="outline" className="h-9 w-9 rounded-xl" onClick={() => fetchAll(true)} disabled={refreshing}>
+            <Button size="icon" variant="outline" className="h-9 w-9 rounded-xl" aria-label="Ação" onClick={() =>  fetchAll(true)} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
             <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportAdminCSV} disabled={loading}>

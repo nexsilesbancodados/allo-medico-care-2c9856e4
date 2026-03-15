@@ -838,7 +838,7 @@ const VideoRoom = () => {
           aria-label="Digite uma mensagem"
           className="flex-1 bg-[hsl(220,20%,8%)] border border-[hsl(220,15%,16%)] rounded-xl px-3.5 py-2.5 text-sm text-white placeholder:text-[hsl(220,15%,30%)] outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all"
         />
-        <Button size="icon" onClick={() => sendMessage()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 w-10 shrink-0" aria-label="Enviar mensagem">
+        <Button size="icon" aria-label="Ação" onClick={() =>  sendMessage()} className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl h-10 w-10 shrink-0" aria-label="Enviar mensagem">
           <Send className="w-4 h-4" aria-hidden="true" />
         </Button>
       </div>

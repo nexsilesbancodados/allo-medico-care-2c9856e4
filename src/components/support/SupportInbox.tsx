@@ -296,7 +296,7 @@ const SupportInbox = () => {
       <Card className="border-border h-[600px] flex flex-col">
         <CardHeader className="pb-3 border-b border-border">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" onClick={() => setSelectedTicket(null)}>
+            <Button variant="ghost" size="icon" className="shrink-0 h-8 w-8" aria-label="Ação" onClick={() =>  setSelectedTicket(null)}>
               <ArrowLeft className="w-4 h-4" />
             </Button>
             <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -380,7 +380,7 @@ const SupportInbox = () => {
                 disabled={sending}
                 className="flex-1"
               />
-              <Button size="icon" onClick={sendReply} disabled={sending || !input.trim()}>
+              <Button size="icon" onClick={sendReply} disabled={sending || !input.trim()} aria-label="Ação">
                 {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
               </Button>
             </div>
@@ -404,11 +404,10 @@ const SupportInbox = () => {
               </Badge>
             )}
           </CardTitle>
-          <Button
-            variant={soundEnabled ? "default" : "outline"}
+          <Button variant={soundEnabled ? "default" : "outline"}
             size="icon"
             className="h-7 w-7"
-            onClick={() => setSoundEnabled(!soundEnabled)}
+            aria-label="Ação" onClick={() =>  setSoundEnabled(!soundEnabled)}
             title={soundEnabled ? "Som ativado" : "Som desativado"}
           >
             <Volume2 className={`w-3.5 h-3.5 ${soundEnabled ? "" : "opacity-50"}`} />

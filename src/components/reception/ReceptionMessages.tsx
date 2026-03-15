@@ -137,7 +137,7 @@ const ReceptionMessages = () => {
                       rows={1}
                       className="resize-none"
                     />
-                    <Button size="icon" className="shrink-0">
+                    <Button size="icon" className="shrink-0" aria-label="Enviar">
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>

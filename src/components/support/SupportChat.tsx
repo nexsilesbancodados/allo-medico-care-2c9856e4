@@ -263,7 +263,7 @@ const SupportChat = () => {
             disabled={isLoading}
             className="flex-1"
           />
-          <Button size="icon" onClick={sendMessage} disabled={isLoading || !input.trim()}>
+          <Button size="icon" onClick={sendMessage} disabled={isLoading || !input.trim()} aria-label="Enviar">
             <Send className="w-4 h-4" />
           </Button>
         </div>

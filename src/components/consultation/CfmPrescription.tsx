@@ -274,11 +274,10 @@ const CfmPrescription = ({
                 Conexão Segura
               </Badge>
             </div>
-            <Button
-              variant="ghost"
+            <Button variant="ghost"
               size="icon"
               onClick={handleCloseIframe}
-              className="h-8 w-8"
+              className="h-8 w-8" aria-label="Fechar"
             >
               <X className="w-4 h-4" />
             </Button>

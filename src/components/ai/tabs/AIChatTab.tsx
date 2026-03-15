@@ -436,7 +436,7 @@ const AIChatTab = ({ primaryRole }: Props) => {
             </button>
           </div>
           <Button type="submit" size="icon" disabled={isLoading || !input.trim()} className="shrink-0 h-11 w-11 rounded-xl"
-              aria-label="Ação">
+              aria-label="Enviar">
             <Send className="w-4 h-4" />
           </Button>
         </form>

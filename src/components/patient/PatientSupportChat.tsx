@@ -168,7 +168,7 @@ const PatientSupportChat = () => {
           <Card className="border-border h-[550px] flex flex-col">
             <CardHeader className="pb-3 border-b border-border">
               <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedTicket(null)}>
+                <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Ação" onClick={() =>  setSelectedTicket(null)}>
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
                 <div className="flex-1 min-w-0">
@@ -222,7 +222,7 @@ const PatientSupportChat = () => {
                     disabled={sending}
                     className="flex-1"
                   />
-                  <Button size="icon" onClick={sendMessage} disabled={sending || !input.trim()}>
+                  <Button size="icon" onClick={sendMessage} disabled={sending || !input.trim()} aria-label="Ação">
                     {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   </Button>
                 </div>

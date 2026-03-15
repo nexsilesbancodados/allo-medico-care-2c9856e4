@@ -326,11 +326,10 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
             placeholder="Digite sua mensagem..."
             className="flex-1 rounded-xl"
           />
-          <Button
-            size="icon"
+          <Button size="icon"
             onClick={sendMessage}
             disabled={!input.trim() || sending}
-            className="rounded-xl shrink-0"
+            className="rounded-xl shrink-0" aria-label="Enviar"
           >
             <Send className="w-4 h-4" />
           </Button>

@@ -319,10 +319,9 @@ const DoctorSearch = () => {
           </div>
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
-              <Button
-                variant="outline"
+              <Button variant="outline"
                 size="icon"
-                className="h-12 w-12 rounded-2xl shrink-0 relative"
+                className="h-12 w-12 rounded-2xl shrink-0 relative" aria-label="Ação"
               >
                 <SlidersHorizontal className="w-5 h-5" />
                 {activeFilters > 0 && (

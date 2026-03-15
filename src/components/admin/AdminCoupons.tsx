@@ -134,7 +134,7 @@ const AdminCoupons = () => {
                       <Switch checked={c.is_active} onCheckedChange={() => toggleActive(c.id, c.is_active)} />
                     </TableCell>
                     <TableCell>
-                      <Button variant="ghost" size="icon" onClick={() => deleteCoupon(c.id)} className="text-destructive hover:text-destructive">
+                      <Button variant="ghost" size="icon" aria-label="Ação" onClick={() =>  deleteCoupon(c.id)} className="text-destructive hover:text-destructive">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>
