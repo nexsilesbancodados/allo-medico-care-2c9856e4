@@ -178,6 +178,16 @@ const Dashboard = () => {
     checkPlan();
   }, [isPatientOnly, user, loading, navigate]);
 
+  useEffect(() => {
+    if (loading || !checkingPlan) return;
+    const timer = window.setTimeout(() => {
+      warn("plan gate safety timeout reached");
+      setCheckingPlan(false);
+    }, PLAN_CHECK_TIMEOUT_MS + 1000);
+
+    return () => window.clearTimeout(timer);
+  }, [loading, checkingPlan]);
+
   // Prefetch secondary routes after dashboard renders
   useEffect(() => {
     if (loading || checkingPlan) return;
