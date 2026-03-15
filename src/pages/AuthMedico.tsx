@@ -135,7 +135,7 @@ const AuthMedico = () => {
         consultationType && `Tipo de atendimento: ${consultationType}`,
         howFound && `Como conheceu: ${howFound}`,
       ].filter(Boolean).join("\n");
-      const { error } = await supabase.from("doctor_applications" as never).insert({
+      const { error } = await supabase.from("doctor_applications" as any).insert({
         full_name: fullName,
         email,
         phone: phone || null,
@@ -143,7 +143,7 @@ const AuthMedico = () => {
         crm_state: crmState,
         specialty: specialty || null,
         bio: enrichedBio || null,
-      });
+      } as any);
       if (error) throw error;
       setStep("applied");
       toast.success("Solicitação enviada!", { description: "Analisaremos seus dados e retornaremos por email." });

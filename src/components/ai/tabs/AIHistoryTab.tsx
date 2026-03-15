@@ -256,13 +256,13 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                       <Button variant="ghost" size="icon"
                         className="h-8 w-8 text-muted-foreground"
-                        aria-label="Ação" onClick={() =>  { e.stopPropagation(); exportConversation(conv); }}
+                        aria-label="Exportar" onClick={(ev) => { ev.stopPropagation(); exportConversation(conv); }}
                       >
                         <Download className="w-3.5 h-3.5" />
                       </Button>
                       <Button variant="ghost" size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        aria-label="Ação" onClick={() =>  { e.stopPropagation(); deleteConversation(conv.id); }}
+                        aria-label="Excluir" onClick={(ev) => { ev.stopPropagation(); deleteConversation(conv.id); }}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>

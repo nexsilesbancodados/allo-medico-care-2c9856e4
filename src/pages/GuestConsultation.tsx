@@ -133,8 +133,8 @@ const GuestConsultation = () => {
 
       if (!frameContainerRef.current) return;
 
-      const frame = new (window as { MeteredFrame?: new() => { join: (opts: unknown) => Promise<void> } }).MeteredFrame!();
-      frame.init(
+      const frame = new (window as any).MeteredFrame!();
+      (frame as any).init(
         {
           roomURL,
           autoJoin: true,
@@ -146,8 +146,8 @@ const GuestConsultation = () => {
         frameContainerRef.current
       );
 
-      frame.on("participantJoined", () => setVideoLoading(false));
-      frame.on("meetingEnded", () => endCall());
+      (frame as any).on("participantJoined", () => setVideoLoading(false));
+      (frame as any).on("meetingEnded", () => endCall());
       setTimeout(() => setVideoLoading(false), 5000);
     } catch (err) {
       logError("GuestConsultation video init error", err);
