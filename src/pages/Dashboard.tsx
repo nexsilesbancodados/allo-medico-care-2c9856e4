@@ -4,6 +4,7 @@ import { usePresence } from "@/hooks/use-presence";
 import { lazy, Suspense, ReactNode, useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { warn } from "@/lib/logger";
 
 // ── Lightweight inline loader (no spinner delay) ──
 const PageLoader = () => (
