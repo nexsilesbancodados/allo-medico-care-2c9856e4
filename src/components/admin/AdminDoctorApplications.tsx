@@ -182,7 +182,7 @@ const AdminDoctorApplications = () => {
       ) : (
         <div className="grid gap-3">
           {applications.map(app => (
-            <Card key={app.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => { setSelectedApp(app); setAdminNotes(app.admin_notes || ""); setGeneratedCode(null); }}>
+            <Card key={app.id} className="card-interactive cursor-pointer" onClick={() => { setSelectedApp(app); setAdminNotes(app.admin_notes || ""); setGeneratedCode(null); }}>
               <CardContent className="p-4">
                 <div className="flex items-center justify-between gap-4">
                   <div className="flex items-center gap-4 min-w-0">

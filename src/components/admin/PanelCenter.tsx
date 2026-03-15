@@ -260,7 +260,7 @@ const PanelCenter = () => {
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
               >
                 <Card
-                  className="border-border/50 hover:border-primary/30 hover:shadow-lg transition-all cursor-pointer group relative overflow-hidden"
+                  className="card-interactive border-border/50 hover:border-primary/30 cursor-pointer group relative overflow-hidden"
                   onClick={() => navigate(panel.route)}
                 >
                   {/* Online indicator */}

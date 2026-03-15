@@ -327,7 +327,7 @@ const AIChatTab = ({ primaryRole }: Props) => {
                     whileHover={{ scale: 1.02, y: -2 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => send(action.prompt)}
-                    className="flex items-center gap-3 text-left p-3 rounded-xl border border-border bg-card hover:bg-muted/50 hover:border-primary/30 hover:shadow-md transition-all group"
+                    className="card-interactive flex items-center gap-3 text-left p-3 rounded-xl border border-border bg-card hover:bg-muted/50 hover:border-primary/30 hover:shadow-md transition-all group"
                   >
                     <div className={`w-9 h-9 rounded-lg bg-muted flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
                       <Icon className={`w-4 h-4 ${action.color || "text-primary"}`} />

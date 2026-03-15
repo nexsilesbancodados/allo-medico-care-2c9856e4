@@ -1256,7 +1256,7 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
                 animate={{ y: 0 }}
                 exit={{ y: "100%" }}
                 transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                className="absolute bottom-0 left-0 right-0 z-40 bg-[hsl(220,25%,6%)] rounded-t-3xl border-t border-[hsl(220,15%,12%)] flex flex-col shadow-2xl"
+                className="absolute bottom-0 left-0 right-0 z-40 bg-[hsl(220,25%,8%)/95] backdrop-blur-xl rounded-t-3xl border-t border-[hsl(220,15%,12%)] flex flex-col shadow-2xl"
                 style={{
                   maxHeight: "85dvh",
                   paddingBottom: "max(env(safe-area-inset-bottom, 0px), 16px)",
