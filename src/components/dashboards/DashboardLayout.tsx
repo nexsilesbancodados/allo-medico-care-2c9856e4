@@ -187,9 +187,11 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const bottomNav = nav?.slice(0, BOTTOM_COUNT) ?? [];
   const moreNav  = nav && nav.length > BOTTOM_COUNT ? nav.slice(BOTTOM_COUNT) : [];
 
-  // GSAP sidebar entrance
+  // GSAP sidebar entrance — only on first mount
+  const sidebarAnimated = useRef(false);
   useEffect(() => {
-    if (!sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (sidebarAnimated.current || !sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    sidebarAnimated.current = true;
     const items = sidebarRef.current.querySelectorAll(".nav-item");
     gsap.fromTo(items, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.035, ease: "power2.out", clearProps: "transform,opacity" });
   }, [nav]);
@@ -207,9 +209,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       }`}
     >
       {item.active && (
-        <motion.div layoutId={`sidebar-pill-${role}`}
-          className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full bg-primary"
-          transition={{ type: "spring", stiffness: 500, damping: 30 }} />
+        <span className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full bg-primary" />
       )}
       <span className={`shrink-0 transition-colors ${item.active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}>
         {item.icon}
@@ -406,19 +406,16 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                 className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-all duration-150 select-none ${item.active ? "text-primary" : "text-muted-foreground"}`}
               >
                 {item.active && (
-                  <motion.span layoutId={`bottom-pill-${role}`}
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-primary"
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }} />
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-primary" />
                 )}
-                <motion.span whileTap={{ scale: 0.85 }}
-                  className={`relative flex items-center justify-center w-9 h-7 rounded-xl transition-all duration-150 ${item.active ? "bg-primary/12 scale-110" : ""}`}>
+                <span className={`relative flex items-center justify-center w-9 h-7 rounded-xl transition-colors duration-150 ${item.active ? "bg-primary/12 scale-110" : ""}`}>
                   {item.icon}
                   {(item.badge ?? 0) > 0 && (
                     <span className="absolute -top-1 -right-1 text-[8px] font-bold w-4 h-4 rounded-full bg-destructive text-white flex items-center justify-center tabular-nums">
                       {(item.badge ?? 0) > 9 ? "9+" : item.badge}
                     </span>
                   )}
-                </motion.span>
+                </span>
                 <span className={`text-[10px] font-medium truncate max-w-[48px] leading-none ${item.active ? "font-semibold" : ""}`}>{item.label}</span>
               </Link>
             ))}
