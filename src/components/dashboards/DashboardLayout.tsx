@@ -413,7 +413,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                       {(item.badge ?? 0) > 9 ? "9+" : item.badge}
                     </span>
                   )}
-                </motion.span>
+                </span>
                 <span className={`text-[10px] font-medium truncate max-w-[48px] leading-none ${item.active ? "font-semibold" : ""}`}>{item.label}</span>
               </Link>
             ))}
