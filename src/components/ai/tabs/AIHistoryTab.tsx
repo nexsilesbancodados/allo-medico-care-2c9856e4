@@ -68,7 +68,7 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
   }, [user]);
 
   const deleteConversation = async (id: string) => {
-    const { error } = await supabase.from("ai_conversations" as unknown as Parameters<typeof import("@supabase/supabase-js").SupabaseClient.prototype.from>[0]).delete().eq("id", id);
+    const { error } = await supabase.from("ai_conversations" as any).delete().eq("id", id);
     if (!error) {
       setConversations(prev => prev.filter(c => c.id !== id));
       if (selectedConv?.id === id) setSelectedConv(null);

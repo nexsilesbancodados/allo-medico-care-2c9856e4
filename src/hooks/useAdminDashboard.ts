@@ -107,7 +107,7 @@ export function useAdminExpiringSubscriptions() {
       const sevenDays = new Date(Date.now() + 7 * 86400000).toISOString();
       const { data } = await supabase
         .from("subscriptions")
-        .select("id, user_id, plan_id, status, started_at, ends_at, payment_method, notes, created_at")
+        .select("*")
         .eq("status", "active")
         .lt("ends_at", sevenDays)
         .order("ends_at", { ascending: true })

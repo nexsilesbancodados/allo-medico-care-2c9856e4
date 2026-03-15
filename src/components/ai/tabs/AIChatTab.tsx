@@ -168,12 +168,12 @@ const AIChatTab = ({ primaryRole }: Props) => {
   const saveConversation = async () => {
     if (!user || messages.length === 0) return;
     const title = messages[0]?.content.slice(0, 60) || "Nova conversa";
-    const { error } = await supabase.from("ai_conversations" as never).insert({
+    const { error } = await supabase.from("ai_conversations" as any).insert({
       user_id: user.id,
       title,
       messages: JSON.stringify(messages),
       role_context: primaryRole,
-    });
+    } as any);
     if (error) {
       toast.error("Erro ao salvar", { description: error.message });
     } else {

@@ -135,7 +135,7 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
     !searchQuery || r.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.cid_code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     r.description?.toLowerCase().includes(searchQuery.toLowerCase())
-  ), [records, searchQuery, typeFilter, sortBy]);
+  ), [records, searchQuery]);
 
   const allergies = filtered.filter(r => r.record_type === "allergy");
   const medications = filtered.filter(r => r.record_type === "medication");
