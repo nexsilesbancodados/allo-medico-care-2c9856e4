@@ -187,7 +187,7 @@ const SystemHealth = () => {
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-4xl space-y-6">
         <motion.div variants={fadeUp} className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Saúde do Sistema</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Saúde do Sistema</h1>
             <p className="text-sm text-muted-foreground">Diagnóstico em tempo real · {checks.filter(c => c.status === "ok").length}/{checks.length} serviços ok</p>
           </div>
           <div className="flex items-center gap-3">

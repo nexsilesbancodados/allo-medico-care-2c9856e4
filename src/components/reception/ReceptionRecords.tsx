@@ -46,7 +46,7 @@ const ReceptionRecords = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Prontuários Médicos</h2>
+            <h2 className="text-2xl font-bold text-foreground tabular-nums">Prontuários Médicos</h2>
             <p className="text-muted-foreground text-sm">Consulta e organização de prontuários dos pacientes</p>
           </div>
           <Badge variant="secondary" className="gap-1">

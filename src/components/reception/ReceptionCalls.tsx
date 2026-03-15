@@ -49,7 +49,7 @@ const ReceptionCalls = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Registro de Chamadas</h2>
+            <h2 className="text-2xl font-bold text-foreground tabular-nums">Registro de Chamadas</h2>
             <p className="text-muted-foreground text-sm">Controle de ligações telefônicas da recepção</p>
           </div>
           <Dialog>

@@ -131,7 +131,7 @@ const UrgentCareQueue = () => {
         <p className="text-muted-foreground text-sm mb-6">Pronto-atendimento digital com clínico geral</p>
 
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Carregando...</div>
+          <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" />
         ) : myEntry ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="border-primary/30 bg-primary/5">

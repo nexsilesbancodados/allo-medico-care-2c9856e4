@@ -80,7 +80,7 @@ const DoctorPrescriptions = () => {
         <p className="text-muted-foreground mb-6">Histórico de prescrições</p>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
+          <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" />
         ) : prescriptions.length === 0 ? (
           <Card className="border-border">
             <CardContent className="py-8 text-center">

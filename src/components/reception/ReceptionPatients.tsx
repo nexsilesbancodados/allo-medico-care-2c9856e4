@@ -37,7 +37,7 @@ const ReceptionPatients = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground">Cadastro de Pacientes</h2>
+            <h2 className="text-2xl font-bold text-foreground tabular-nums">Cadastro de Pacientes</h2>
             <p className="text-muted-foreground text-sm">Gerencie os dados dos pacientes da clínica</p>
           </div>
           <Badge variant="secondary" className="gap-1">

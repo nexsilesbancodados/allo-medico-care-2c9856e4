@@ -68,7 +68,7 @@ const GuestRating = () => {
           </motion.div>
 
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-foreground">Obrigado pela sua avaliação!</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Obrigado pela sua avaliação!</h1>
             <p className="text-muted-foreground">
               Sua opinião nos ajuda a melhorar cada vez mais o atendimento.
             </p>
@@ -120,7 +120,7 @@ const GuestRating = () => {
           >
             <Heart className="w-10 h-10 text-primary" />
           </motion.div>
-          <h1 className="text-2xl font-bold text-foreground">Como foi sua consulta?</h1>
+          <h1 className="text-2xl font-bold text-foreground tabular-nums">Como foi sua consulta?</h1>
           <p className="text-muted-foreground text-sm">
             Avalie seu atendimento com <span className="font-medium text-foreground">{doctorName}</span>
           </p>

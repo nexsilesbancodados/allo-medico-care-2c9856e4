@@ -91,7 +91,7 @@ const AdminCoupons = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Cupons</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Cupons</h1>
             <p className="text-sm text-muted-foreground">{coupons.length} cupons cadastrados</p>
           </div>
           <Button onClick={() => setShowForm(true)} className="rounded-xl">
@@ -114,7 +114,7 @@ const AdminCoupons = () => {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground"><span className="text-muted-foreground text-sm">Carregando...</span></TableCell></TableRow>
                 ) : coupons.length === 0 ? (
                   <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhum cupom cadastrado</TableCell></TableRow>
                 ) : coupons.map(c => (

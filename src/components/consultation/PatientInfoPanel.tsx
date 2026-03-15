@@ -113,7 +113,7 @@ const PatientInfoPanel = ({ patientId, appointmentId }: PatientInfoPanelProps) =
       <div className="flex items-center justify-center py-12">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
-          <p className="text-xs text-[hsl(220,15%,40%)]">Carregando dados...</p>
+          <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" />
         </div>
       </div>
     );

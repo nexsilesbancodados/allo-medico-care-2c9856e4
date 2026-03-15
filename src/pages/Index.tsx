@@ -120,7 +120,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
             <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
           </div>
-          <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
             Não sabe qual especialidade procurar?
           </h2>
           <p className="text-muted-foreground max-w-md mx-auto">

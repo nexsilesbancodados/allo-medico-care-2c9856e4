@@ -126,7 +126,7 @@ const AdminAppointments = () => {
           </Select>
         </div>
 
-        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
+        {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
           <div className="rounded-lg border border-border overflow-hidden">
             <Table>
               <TableHeader>
@@ -155,7 +155,7 @@ const AdminAppointments = () => {
                     <TableCell className="text-muted-foreground">{a.duration_minutes || 30} min</TableCell>
                     <TableCell>
                       <Badge variant={statusVariant[a.status] ?? "outline"}>
-                        {a.status === "in_progress" && <span className="w-1.5 h-1.5 rounded-full bg-white mr-1 animate-pulse inline-block" />}
+                        {a.status === "in_progress" && <span className="w-1.5 h-1.5 rounded-full bg-white mr-1 shimmer-v2 inline-block" />}
                         {statusLabel[a.status] ?? a.status}
                       </Badge>
                     </TableCell>

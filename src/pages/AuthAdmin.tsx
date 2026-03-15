@@ -80,7 +80,7 @@ const AuthAdmin = () => {
                 <Shield className="w-5 h-5 text-background" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">Acesso Administrativo</h2>
+                <h2 className="text-2xl font-bold text-foreground tabular-nums">Acesso Administrativo</h2>
                 <p className="text-sm text-muted-foreground">Área restrita</p>
               </div>
             </div>

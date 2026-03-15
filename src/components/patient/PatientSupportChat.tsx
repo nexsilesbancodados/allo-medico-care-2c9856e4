@@ -248,7 +248,7 @@ const PatientSupportChat = () => {
         </Button>
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Suporte</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Suporte</h1>
             <p className="text-sm text-muted-foreground">Fale com nossa equipe de atendimento</p>
           </div>
           <Button onClick={createNewTicket} className="gap-2">

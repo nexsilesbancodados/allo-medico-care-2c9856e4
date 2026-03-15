@@ -253,7 +253,7 @@ const AdminFinancial = () => {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Painel Financeiro</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Painel Financeiro</h1>
             <p className="text-sm text-muted-foreground">Receita, pagamentos e inadimplência</p>
           </div>
           <div className="flex items-center gap-2">
@@ -282,7 +282,7 @@ const AdminFinancial = () => {
                 <DollarSign className="w-4 h-4 text-emerald-500" />
                 Receita Estimada
               </div>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-2xl font-bold text-foreground tabular-nums">
                 R$ {totalRevenue.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
               </p>
               <p className="text-xs text-emerald-600 flex items-center gap-1 mt-1">
@@ -297,7 +297,7 @@ const AdminFinancial = () => {
                 <Clock className="w-4 h-4 text-amber-500" />
                 Pendentes
               </div>
-              <p className="text-2xl font-bold text-foreground">{pendingPayments}</p>
+              <p className="text-2xl font-bold text-foreground tabular-nums">{pendingPayments}</p>
               <p className="text-xs text-muted-foreground mt-1">aguardando pagamento</p>
             </CardContent>
           </Card>
@@ -308,7 +308,7 @@ const AdminFinancial = () => {
                 <AlertTriangle className="w-4 h-4 text-red-500" />
                 Inadimplentes
               </div>
-              <p className="text-2xl font-bold text-foreground">{overduePayments}</p>
+              <p className="text-2xl font-bold text-foreground tabular-nums">{overduePayments}</p>
               <p className="text-xs text-red-600 flex items-center gap-1 mt-1">
                 <TrendingDown className="w-3 h-3" /> vencidos
               </p>
@@ -321,7 +321,7 @@ const AdminFinancial = () => {
                 <Receipt className="w-4 h-4 text-primary" />
                 Total Consultas
               </div>
-              <p className="text-2xl font-bold text-foreground">{totalAppointments}</p>
+              <p className="text-2xl font-bold text-foreground tabular-nums">{totalAppointments}</p>
               <p className="text-xs text-muted-foreground mt-1">no período</p>
             </CardContent>
           </Card>

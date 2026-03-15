@@ -1077,7 +1077,7 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
 
         {/* Center: Timer (always visible) */}
         <div className="flex items-center gap-1.5 px-2.5 md:px-3 py-1 md:py-1.5 rounded-xl bg-[hsl(220,20%,8%)] border border-[hsl(220,15%,12%)]">
-          <div className={`w-2 h-2 rounded-full animate-pulse ${
+          <div className={`w-2 h-2 rounded-full shimmer-v2 ${
             elapsed > 3600 ? "bg-destructive" : elapsed > 1800 ? "bg-amber-400" : "bg-[hsl(150,60%,45%)]"
           }`} />
           <span className={`text-xs font-mono font-bold tracking-wider ${timerColor}`}>

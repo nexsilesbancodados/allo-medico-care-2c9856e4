@@ -188,7 +188,7 @@ const PaymentHistory = () => {
 
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Histórico de Pagamentos</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Histórico de Pagamentos</h1>
             <p className="text-muted-foreground text-sm mt-0.5">Suas assinaturas e pagamentos realizados</p>
           </div>
           <Button
@@ -366,7 +366,7 @@ const PaymentHistory = () => {
                   )}
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-2xl font-bold text-foreground">
+                  <p className="text-2xl font-bold text-foreground tabular-nums">
                     R$ {Number(activeSub.plan_price).toFixed(2)}
                   </p>
                   <p className="text-xs text-muted-foreground capitalize">
@@ -487,7 +487,7 @@ const PaymentHistory = () => {
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-muted animate-pulse" />
+                      <div className="w-10 h-10 rounded-xl shimmer-v2" />
                       <div className="space-y-2">
                         <div className="h-4 w-32 bg-muted rounded animate-pulse" />
                         <div className="h-3 w-24 bg-muted rounded animate-pulse" />

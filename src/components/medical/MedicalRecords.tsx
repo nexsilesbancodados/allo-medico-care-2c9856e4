@@ -297,7 +297,7 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
           </div>
         </div>
 
-        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
+        {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="timeline">Timeline</TabsTrigger>

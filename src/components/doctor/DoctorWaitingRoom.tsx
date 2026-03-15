@@ -210,7 +210,7 @@ const DoctorWaitingRoom = () => {
       <div className="max-w-3xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Sala de Espera Virtual</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Sala de Espera Virtual</h1>
           <p className="text-sm text-muted-foreground">
               {waitingCount} aguardando · {inProgressCount} em atendimento · ~{avgDuration}min/consulta
               {criticalCount > 0 && (

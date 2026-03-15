@@ -94,7 +94,7 @@ const AuthSimpleRole = ({
                 <Icon className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">{title}</h2>
+                <h2 className="text-2xl font-bold text-foreground tabular-nums">{title}</h2>
                 <p className="text-sm text-muted-foreground">Acesso restrito</p>
               </div>
             </div>

@@ -303,7 +303,7 @@ const AdminApprovals = () => {
             </TabsTrigger>
           </TabsList>
 
-          {loading ? <p className="text-sm text-muted-foreground mt-4">Carregando...</p> : (
+          {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
             <>
               <TabsContent value="doctors" className="mt-4 space-y-4">
                 {pendingDoctors.length > 0 && (

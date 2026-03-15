@@ -144,7 +144,7 @@ const DoctorPublicProfile = () => {
                 </div>
 
                 <div className="text-center sm:text-left flex-1">
-                  <h1 className="text-2xl font-bold text-foreground">Dr(a). {doctor.name}</h1>
+                  <h1 className="text-2xl font-bold text-foreground tabular-nums">Dr(a). {doctor.name}</h1>
                   <p className="text-sm text-muted-foreground mt-1">CRM {doctor.crm}/{doctor.crm_state}</p>
 
                   {/* Specialties */}

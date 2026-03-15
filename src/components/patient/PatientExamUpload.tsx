@@ -195,7 +195,7 @@ const PatientExamUpload = () => {
           </Select>
         </div>
 
-        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
+        {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
           <div className="rounded-lg border border-border overflow-hidden">
             <Table>
               <TableHeader>

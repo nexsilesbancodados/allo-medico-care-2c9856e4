@@ -114,7 +114,7 @@ const SupportSection = () => {
               >
                 <Clock className="w-3.5 h-3.5" />
                 <span>Tempo médio de resposta: <strong className="text-foreground">menos de 5 min</strong></span>
-                <span className="w-2 h-2 rounded-full bg-medical-green animate-pulse ml-1" />
+                <span className="w-2 h-2 rounded-full bg-medical-green shimmer-v2 ml-1" />
               </motion.div>
             </div>
 

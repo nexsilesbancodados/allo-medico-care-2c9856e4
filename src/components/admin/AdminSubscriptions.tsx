@@ -116,7 +116,7 @@ const AdminSubscriptions = () => {
       <div className="max-w-5xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Assinaturas</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Assinaturas</h1>
             <p className="text-muted-foreground text-sm">{filtered.length} assinatura(s)</p>
           </div>
           <Button onClick={openCreateForm} className="bg-gradient-hero text-primary-foreground">
@@ -141,7 +141,7 @@ const AdminSubscriptions = () => {
           </Select>
         </div>
 
-        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
+        {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
           <div className="rounded-lg border border-border overflow-hidden">
             <Table>
               <TableHeader>

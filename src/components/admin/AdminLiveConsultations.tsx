@@ -97,7 +97,7 @@ const AdminLiveConsultations = () => {
       <div className="max-w-4xl space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Consultas ao Vivo</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Consultas ao Vivo</h1>
             <p className="text-sm text-muted-foreground">Monitoramento em tempo real de consultas ativas e atrasos</p>
           </div>
           <Button variant="outline" size="sm" onClick={fetchLive} disabled={loading}>
@@ -113,7 +113,7 @@ const AdminLiveConsultations = () => {
                 <Video className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{inProgress.length}</p>
+                <p className="text-2xl font-bold text-foreground tabular-nums">{inProgress.length}</p>
                 <p className="text-xs text-muted-foreground">Em andamento</p>
               </div>
             </CardContent>
@@ -124,7 +124,7 @@ const AdminLiveConsultations = () => {
                 <Clock className="w-5 h-5 text-warning" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{appointments.length}</p>
+                <p className="text-2xl font-bold text-foreground tabular-nums">{appointments.length}</p>
                 <p className="text-xs text-muted-foreground">Total ativas</p>
               </div>
             </CardContent>
@@ -137,7 +137,7 @@ const AdminLiveConsultations = () => {
                   : <CheckCircle2 className="w-5 h-5 text-success" />}
               </div>
               <div>
-                <p className="text-2xl font-bold text-foreground">{delayed.length}</p>
+                <p className="text-2xl font-bold text-foreground tabular-nums">{delayed.length}</p>
                 <p className="text-xs text-muted-foreground">Com atraso</p>
               </div>
             </CardContent>

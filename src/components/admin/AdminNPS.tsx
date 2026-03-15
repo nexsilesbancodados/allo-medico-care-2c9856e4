@@ -138,7 +138,7 @@ const AdminNPS = () => {
         <h1 className="text-2xl font-bold text-foreground mb-1">NPS & Satisfação</h1>
         <p className="text-muted-foreground mb-6">Análise de satisfação dos pacientes</p>
 
-        {loading ? <p className="text-muted-foreground">Carregando...</p> : surveys.length === 0 ? (
+        {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : surveys.length === 0 ? (
           <Card className="border-border">
             <CardContent className="py-12 text-center">
               <Star className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
@@ -155,27 +155,27 @@ const AdminNPS = () => {
                 <Badge variant="outline" className="text-[10px] mt-1">{npsLabel}</Badge>
               </div>
               <div className="text-center p-4 rounded-lg bg-muted/50">
-                <p className="text-3xl font-bold text-foreground">{surveys.length}</p>
+                <p className="text-3xl font-bold text-foreground tabular-nums">{surveys.length}</p>
                 <p className="text-xs text-muted-foreground">Respostas</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-muted/50">
                 <div className="flex items-center justify-center gap-1">
                   <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <p className="text-2xl font-bold text-foreground">{avgEase.toFixed(1)}</p>
+                  <p className="text-2xl font-bold text-foreground tabular-nums">{avgEase.toFixed(1)}</p>
                 </div>
                 <p className="text-xs text-muted-foreground">Facilidade</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-muted/50">
                 <div className="flex items-center justify-center gap-1">
                   <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                  <p className="text-2xl font-bold text-foreground">{avgQuality.toFixed(1)}</p>
+                  <p className="text-2xl font-bold text-foreground tabular-nums">{avgQuality.toFixed(1)}</p>
                 </div>
                 <p className="text-xs text-muted-foreground">Qualidade</p>
               </div>
               <div className="text-center p-4 rounded-lg bg-muted/50">
                 <div className="flex items-center justify-center gap-1">
                   <ThumbsUp className="w-4 h-4 text-green-500" />
-                  <p className="text-2xl font-bold text-foreground">{recommendRate.toFixed(0)}%</p>
+                  <p className="text-2xl font-bold text-foreground tabular-nums">{recommendRate.toFixed(0)}%</p>
                 </div>
                 <p className="text-xs text-muted-foreground">Recomendariam</p>
               </div>

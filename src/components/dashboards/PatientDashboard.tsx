@@ -202,7 +202,7 @@ const PatientDashboard = () => {
               <div className="flex justify-between items-start mb-6">
                 <div>
                   <p className="text-primary-foreground/70 text-xs font-medium uppercase tracking-widest mb-1">Cartão Digital</p>
-                  <h3 className="text-primary-foreground text-xl font-bold">Acesso Rápido</h3>
+                  <h3 className="text-primary-foreground text-xl font-bold tabular-nums">Acesso Rápido</h3>
                 </div>
                 <Sparkles className="w-7 h-7 text-primary-foreground/60" />
               </div>

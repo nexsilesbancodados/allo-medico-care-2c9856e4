@@ -116,7 +116,7 @@ const AuthParceiro = () => {
                 <Handshake className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-foreground">
+                <h2 className="text-2xl font-bold text-foreground tabular-nums">
                   {step === "welcome" ? "Portal do Parceiro" : step === "login" ? "Entrar" : "Cadastro de Parceiro"}
                 </h2>
                 <p className="text-sm text-muted-foreground">Farmácias & Laboratórios</p>

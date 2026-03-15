@@ -192,13 +192,13 @@ const DoctorEarnings = () => {
           <Card className="border-border bg-gradient-to-br from-primary/5 to-transparent">
             <CardContent className="pt-6">
               <p className="text-xs text-muted-foreground">Ganho Confirmado</p>
-              <p className="text-2xl font-bold text-foreground">R$ {stats.total.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-foreground tabular-nums">R$ {stats.total.toFixed(2)}</p>
             </CardContent>
           </Card>
           <Card className="border-border">
             <CardContent className="pt-6">
               <p className="text-xs text-muted-foreground">Este Mês</p>
-              <p className="text-2xl font-bold text-foreground">R$ {stats.thisMonth.toFixed(2)}</p>
+              <p className="text-2xl font-bold text-foreground tabular-nums">R$ {stats.thisMonth.toFixed(2)}</p>
             </CardContent>
           </Card>
           <Card className="border-border">

@@ -121,7 +121,7 @@ const ChatPage = () => {
         <div className="grid md:grid-cols-[300px_1fr] gap-4">
           {/* Conversations list */}
           <div className="space-y-2 max-h-[500px] overflow-y-auto">
-            {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : conversations.length === 0 ? (
+            {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : conversations.length === 0 ? (
               <Card className="border-border">
                 <CardContent className="py-8 text-center">
                   <MessageCircle className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />

@@ -886,7 +886,7 @@ const PlansCheckout = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <div className="text-center mb-8">
               <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-2" />
-              <h1 className="text-2xl font-bold text-foreground">Checkout Seguro</h1>
+              <h1 className="text-2xl font-bold text-foreground tabular-nums">Checkout Seguro</h1>
               <p className="text-muted-foreground text-sm">Ambiente protegido • Pagamento via Asaas</p>
             </div>
 

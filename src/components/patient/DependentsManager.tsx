@@ -127,7 +127,7 @@ const DependentsManager = () => {
       <div className="max-w-3xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Dependentes</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Dependentes</h1>
             <p className="text-sm text-muted-foreground">Cadastre familiares para agendar consultas para eles</p>
           </div>
           <Dialog open={dialogOpen} onOpenChange={v => { setDialogOpen(v); if (!v) resetForm(); }}>

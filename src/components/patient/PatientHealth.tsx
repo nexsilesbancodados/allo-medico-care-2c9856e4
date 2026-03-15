@@ -162,7 +162,7 @@ const PatientHealth = () => {
       <div className="max-w-4xl">
         <div className="flex items-center gap-3 mb-1">
           <Heart className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Minha Saúde</h1>
+          <h1 className="text-2xl font-bold text-foreground tabular-nums">Minha Saúde</h1>
         </div>
         <p className="text-muted-foreground text-sm mb-6">Seu histórico médico completo em um só lugar</p>
 

@@ -49,7 +49,7 @@ const OptimizedImage = ({
     >
       {/* Skeleton placeholder */}
       {!loaded && (
-        <div className="absolute inset-0 bg-muted/40 animate-pulse rounded-inherit" />
+        <div className="absolute inset-0 bg-muted/40 shimmer-v2 rounded-inherit" />
       )}
       <img
         ref={imgRef}

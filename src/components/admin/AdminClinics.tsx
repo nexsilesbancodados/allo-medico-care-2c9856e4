@@ -76,7 +76,7 @@ const AdminClinics = () => {
           <Input placeholder="Buscar por nome ou CNPJ..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
         </div>
 
-        {loading ? <p className="text-sm text-muted-foreground">Carregando...</p> : (
+        {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
           <div className="rounded-lg border border-border overflow-hidden">
             <Table>
               <TableHeader>

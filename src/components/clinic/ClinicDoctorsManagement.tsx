@@ -224,7 +224,7 @@ const ClinicDoctorsManagement = () => {
       <div className="max-w-3xl">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Médicos Vinculados</h1>
+            <h1 className="text-2xl font-bold text-foreground tabular-nums">Médicos Vinculados</h1>
             <p className="text-muted-foreground">Gerencie os médicos da sua clínica</p>
           </div>
           <div className="flex gap-2">
@@ -295,7 +295,7 @@ const ClinicDoctorsManagement = () => {
         </div>
 
         {loading ? (
-          <p className="text-sm text-muted-foreground">Carregando...</p>
+          <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" />
         ) : doctors.length === 0 ? (
           <Card className="border-border">
             <CardContent className="py-8 text-center">
