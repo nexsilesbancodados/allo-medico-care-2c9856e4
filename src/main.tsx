@@ -138,6 +138,18 @@ window.setTimeout(() => {
   }
 }, 7000);
 
+const notifyBootReady = () => {
+  clearReloadFlag();
+  window.dispatchEvent(new Event("app:booted"));
+};
+
+const notifyBootFailure = () => {
+  const failHandler = (window as Window & { __APP_BOOT_FAIL__?: () => void }).__APP_BOOT_FAIL__;
+  if (typeof failHandler === "function") {
+    failHandler();
+  }
+};
+
 const mountApp = async () => {
   try {
     const [{ default: App }, { default: ErrorBoundary }] = await Promise.all([
@@ -150,8 +162,11 @@ const mountApp = async () => {
         <App />
       </ErrorBoundary>,
     );
+
+    notifyBootReady();
   } catch (err) {
     void reportFatal("Fatal React mount/import error", err);
+    notifyBootFailure();
     if (isChunkError(err)) {
       recover();
     } else {
