@@ -9,13 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { motion } from "framer-motion";
 import {
   Calendar, FileText, Heart, Video, Clock, Zap, Upload,
   Bell, CheckCircle2, AlertCircle, Star, Activity, RefreshCw,
   Gift, ClipboardList, Stethoscope, Smile, ChevronRight,
   Pill, User, CreditCard, ArrowRight, Sparkles, CalendarPlus, Shield, Flame,
-  FolderLock, FileCheck, MessageCircle
+  FolderLock, FileCheck, MessageCircle, TrendingUp, Sun, Moon, CloudSun
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import MedicalHistoryExport from "@/components/patient/MedicalHistoryExport";
@@ -28,6 +27,7 @@ import { usePatientStats, usePatientUpcoming, useReturnAppointments, useFavorite
 import { useActiveSubscription, useUserCredits } from "@/hooks/useProfile";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import mascotImg from "@/assets/mascot-wave.png";
 
 const statusColor: Record<string, string> = {
   scheduled: "bg-primary/10 text-primary border-primary/20",
@@ -37,9 +37,6 @@ const statusColor: Record<string, string> = {
   cancelled: "bg-destructive/10 text-destructive border-destructive/20",
   no_show: "bg-destructive/10 text-destructive border-destructive/20",
 };
-
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
-const fadeUp = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] as const } } };
 
 const PatientDashboard = () => {
   const { profile, user } = useAuth();
@@ -98,28 +95,30 @@ const PatientDashboard = () => {
   const hoursUntilNext = nextAppt ? Math.max(0, Math.round((new Date(nextAppt.scheduled_at).getTime() - Date.now()) / 3600000)) : null;
 
   const quickActions = [
-    { label: "Agendar", icon: Calendar, path: "/dashboard/schedule?role=patient", color: "text-primary bg-primary/10" },
-    { label: "Urgência", icon: Zap, path: "/dashboard/urgent-care?role=patient", color: "text-destructive bg-destructive/10" },
-    { label: "Exames", icon: FileCheck, path: "/dashboard/patient/exam-results?role=patient", color: "text-secondary bg-secondary/10" },
-    { label: "Documentos", icon: FolderLock, path: "/dashboard/patient/documents?role=patient", color: "text-warning bg-warning/10" },
+    { label: "Agendar", icon: Calendar, path: "/dashboard/schedule?role=patient", color: "text-primary", bg: "bg-primary/10", ring: "ring-primary/20" },
+    { label: "Urgência", icon: Zap, path: "/dashboard/urgent-care?role=patient", color: "text-destructive", bg: "bg-destructive/10", ring: "ring-destructive/20" },
+    { label: "Exames", icon: FileCheck, path: "/dashboard/patient/exam-results?role=patient", color: "text-secondary", bg: "bg-secondary/10", ring: "ring-secondary/20" },
+    { label: "Documentos", icon: FolderLock, path: "/dashboard/patient/documents?role=patient", color: "text-warning", bg: "bg-warning/10", ring: "ring-warning/20" },
   ];
 
   const shortcuts = [
-    { label: "Prontuário", icon: ClipboardList, path: "/dashboard/medical-records?role=patient" },
-    { label: "Minha Saúde", icon: Heart, path: "/dashboard/patient/health?role=patient" },
-    { label: "Receitas", icon: Pill, path: "/dashboard/prescription-renewal?role=patient" },
-    { label: "Pagamentos", icon: CreditCard, path: "/dashboard/payment-history?role=patient" },
-    { label: "Chat", icon: MessageCircle, path: "/dashboard/chat?role=patient" },
-    { label: "Perfil", icon: User, path: "/dashboard/profile?role=patient" },
+    { label: "Prontuário", icon: ClipboardList, path: "/dashboard/medical-records?role=patient", color: "text-primary" },
+    { label: "Minha Saúde", icon: Heart, path: "/dashboard/patient/health?role=patient", color: "text-destructive" },
+    { label: "Receitas", icon: Pill, path: "/dashboard/prescription-renewal?role=patient", color: "text-secondary" },
+    { label: "Pagamentos", icon: CreditCard, path: "/dashboard/payment-history?role=patient", color: "text-warning" },
+    { label: "Chat", icon: MessageCircle, path: "/dashboard/chat?role=patient", color: "text-primary" },
+    { label: "Perfil", icon: User, path: "/dashboard/profile?role=patient", color: "text-muted-foreground" },
   ];
 
   const greeting = () => {
     const h = new Date().getHours();
-    if (h < 6) return "Boa madrugada";
-    if (h < 12) return "Bom dia";
-    if (h < 18) return "Boa tarde";
-    return "Boa noite";
+    if (h < 6) return { text: "Boa madrugada", icon: Moon };
+    if (h < 12) return { text: "Bom dia", icon: Sun };
+    if (h < 18) return { text: "Boa tarde", icon: CloudSun };
+    return { text: "Boa noite", icon: Moon };
   };
+
+  const greetData = greeting();
 
   const healthTips = [
     "💧 Beba pelo menos 2L de água hoje",
@@ -136,142 +135,255 @@ const PatientDashboard = () => {
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-lg mx-auto w-full space-y-5 pb-24">
+      <div className="max-w-lg mx-auto w-full space-y-5 pb-24">
 
-        {/* ═══ Welcome header ═══ */}
-        <motion.div variants={fadeUp}>
-          <div className="flex items-center gap-3.5">
-            <Avatar className="h-14 w-14 shrink-0 ring-2 ring-primary/15 ring-offset-2 ring-offset-background">
+        {/* ═══ Welcome Hero ═══ */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 via-background to-secondary/6 border border-border/40 p-5">
+          <div className="absolute -right-6 -bottom-4 opacity-15 pointer-events-none">
+            <img src={mascotImg} alt="" className="w-28 h-28 object-contain" loading="lazy" />
+          </div>
+          <div className="relative z-10 flex items-start gap-4">
+            <Avatar className="h-14 w-14 shrink-0 ring-[3px] ring-primary/15 ring-offset-2 ring-offset-background shadow-lg">
               {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
               <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-white text-lg font-bold">
                 {(profile?.first_name?.[0] ?? "") + (profile?.last_name?.[0] ?? "")}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <h2 className="text-xl font-bold leading-tight text-foreground tracking-tight">
-                {greeting()}, {profile?.first_name || "Paciente"} 👋
+              <div className="flex items-center gap-2 mb-1">
+                <greetData.icon className="w-4 h-4 text-warning" />
+                <span className="text-xs font-medium text-muted-foreground">{greetData.text}</span>
+              </div>
+              <h2 className="text-xl font-extrabold leading-tight text-foreground tracking-tight">
+                {profile?.first_name || "Paciente"} 👋
               </h2>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <p className="text-xs text-muted-foreground mt-1">
                 {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
               </p>
             </div>
             <div className="flex items-center gap-1 shrink-0">
               <MedicalHistoryExport />
               <Button size="icon" variant="ghost"
-                className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted"
+                className="h-9 w-9 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/60"
                 onClick={handleRefresh} disabled={refreshing} aria-label="Atualizar"
               >
                 <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
               </Button>
             </div>
           </div>
-        </motion.div>
 
-        {/* ═══ Digital Card ═══ */}
-        <motion.div variants={fadeUp}>
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/95 to-secondary p-5 shadow-xl shadow-primary/20">
-            <div className="absolute -right-10 -top-10 size-40 bg-white/10 rounded-full blur-3xl" />
-            <div className="absolute -left-10 -bottom-10 size-28 bg-black/10 rounded-full blur-2xl" />
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-5">
-                <div>
-                  <p className="text-primary-foreground/60 text-[10px] font-semibold uppercase tracking-[0.2em]">Cartão Digital</p>
-                  <h3 className="text-primary-foreground text-lg font-bold mt-0.5">{profile?.first_name} {profile?.last_name}</h3>
+          {/* Mini stats row */}
+          {!loading && (
+            <div className="relative z-10 flex items-center gap-3 mt-4 pt-4 border-t border-border/30">
+              {[
+                { label: "Consultas", value: stats?.total ?? 0, icon: Calendar, color: "text-primary" },
+                { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText, color: "text-secondary" },
+                { label: "Docs", value: stats?.documents ?? 0, icon: Upload, color: "text-warning" },
+              ].map(kpi => (
+                <div key={kpi.label} className="flex-1 flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-background/60 border border-border/30">
+                  <kpi.icon className={`w-4 h-4 ${kpi.color} shrink-0`} />
+                  <div className="min-w-0">
+                    <p className="text-base font-extrabold text-foreground leading-none tabular-nums">{kpi.value}</p>
+                    <p className="text-[9px] text-muted-foreground mt-0.5">{kpi.label}</p>
+                  </div>
                 </div>
-                <Sparkles className="w-6 h-6 text-primary-foreground/40" />
-              </div>
+              ))}
+            </div>
+          )}
+          {loading && (
+            <div className="flex items-center gap-3 mt-4 pt-4 border-t border-border/30">
+              {[1,2,3].map(i => <div key={i} className="flex-1 h-12 rounded-xl bg-muted/40 animate-pulse" />)}
+            </div>
+          )}
+        </div>
 
-              {/* KPIs */}
-              {!loading ? (
-                <div className="grid grid-cols-3 gap-2.5 mb-4">
-                  {[
-                    { label: "Consultas", value: stats?.total ?? 0, icon: Calendar },
-                    { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText },
-                    { label: "Documentos", value: stats?.documents ?? 0, icon: Upload },
-                  ].map((kpi) => (
-                    <div key={kpi.label} className="bg-white/12 backdrop-blur-md rounded-xl p-2.5 text-center border border-white/10">
-                      <kpi.icon className="w-3.5 h-3.5 mx-auto mb-1 text-primary-foreground/60" aria-hidden="true" />
-                      <p className="text-xl font-black leading-none text-primary-foreground tabular-nums">{kpi.value}</p>
-                      <p className="text-[9px] text-primary-foreground/50 mt-0.5">{kpi.label}</p>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 gap-2.5 mb-4">
-                  {[1,2,3].map(i => <div key={i} className="h-16 rounded-xl bg-white/10 animate-pulse" />)}
-                </div>
-              )}
-
-              <div className="flex items-end justify-between">
-                <div>
-                  <p className="text-primary-foreground/50 text-[9px] uppercase tracking-wider">Válido até</p>
-                  <p className="text-primary-foreground font-mono font-medium text-xs">
-                    {activeSub && (activeSub as Record<string, unknown>).expires_at
-                      ? format(new Date((activeSub as Record<string, unknown>).expires_at as string), "MM/yyyy")
-                      : "—"}
-                  </p>
-                </div>
-                <Button size="sm"
-                  className="bg-white text-primary hover:bg-white/90 rounded-lg text-xs font-bold shadow-sm h-8 px-3"
-                  onClick={() => navigate("/dashboard/discount-card?role=patient")}>
-                  Ver Cartão
-                </Button>
+        {/* ═══ Digital Card — compact ═══ */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-primary/90 to-secondary p-4 shadow-lg shadow-primary/15">
+          <div className="absolute -right-8 -top-8 size-32 bg-white/8 rounded-full blur-2xl pointer-events-none" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div className="flex items-center gap-3 min-w-0">
+              <Sparkles className="w-5 h-5 text-primary-foreground/50 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-primary-foreground/60 text-[9px] font-semibold uppercase tracking-[0.2em]">Cartão Digital</p>
+                <p className="text-primary-foreground text-sm font-bold truncate">{profile?.first_name} {profile?.last_name}</p>
               </div>
             </div>
+            <Button size="sm"
+              className="bg-white/20 backdrop-blur-sm text-primary-foreground hover:bg-white/30 rounded-xl h-8 px-3 text-xs font-bold border border-white/15 shrink-0"
+              onClick={() => navigate("/dashboard/discount-card?role=patient")}>
+              Ver Cartão
+            </Button>
           </div>
-        </motion.div>
+          {activeSub && (
+            <div className="relative z-10 mt-2 pt-2 border-t border-white/10 flex items-center justify-between">
+              <span className="text-[10px] text-primary-foreground/50 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" /> Plano ativo
+              </span>
+              <span className="text-primary-foreground font-mono text-[11px] font-medium">
+                {(activeSub as Record<string, unknown>).expires_at
+                  ? `Válido até ${format(new Date((activeSub as Record<string, unknown>).expires_at as string), "MM/yyyy")}`
+                  : "—"}
+              </span>
+            </div>
+          )}
+        </div>
 
         {/* Live consultation */}
         {waitingAppt && (
-          <motion.div variants={fadeUp}>
-            <SectionErrorBoundary fallbackTitle="Erro na sala de espera">
-              <PatientWaitingCard appointment={waitingAppt} />
-            </SectionErrorBoundary>
-          </motion.div>
+          <SectionErrorBoundary fallbackTitle="Erro na sala de espera">
+            <PatientWaitingCard appointment={waitingAppt} />
+          </SectionErrorBoundary>
         )}
 
-        <motion.div variants={fadeUp}>
-          <SectionErrorBoundary fallbackTitle="Erro no banner">
-            <CheckoutRecoveryBanner />
-          </SectionErrorBoundary>
-        </motion.div>
+        <SectionErrorBoundary fallbackTitle="Erro no banner">
+          <CheckoutRecoveryBanner />
+        </SectionErrorBoundary>
 
-        <motion.div variants={fadeUp}>
-          <SectionErrorBoundary fallbackTitle="Erro no banner">
-            <UpsellBanner />
-          </SectionErrorBoundary>
-        </motion.div>
+        <SectionErrorBoundary fallbackTitle="Erro no banner">
+          <UpsellBanner />
+        </SectionErrorBoundary>
 
         {/* ═══ Quick Actions ═══ */}
-        <motion.div variants={fadeUp}>
-          <div className="grid grid-cols-4 gap-3" role="list" aria-label="Ações rápidas">
-            {quickActions.map((item, i) => (
-              <motion.button
+        <div>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-0.5">Ações Rápidas</p>
+          <div className="grid grid-cols-4 gap-3">
+            {quickActions.map(item => (
+              <button
                 key={item.label}
-                whileTap={{ scale: 0.93 }}
                 onClick={() => navigate(item.path)}
-                aria-label={item.label}
-                role="listitem"
-                className="flex flex-col items-center gap-2 py-2"
+                className="flex flex-col items-center gap-2.5 py-3 rounded-2xl bg-card border border-border/40 hover:border-primary/25 hover:shadow-md active:scale-[0.96] transition-all duration-150"
               >
-                <div className={`size-14 rounded-2xl ${item.color} flex items-center justify-center shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all duration-150`}>
-                  <item.icon className="w-6 h-6" aria-hidden="true" />
+                <div className={`size-12 rounded-2xl ${item.bg} ring-1 ${item.ring} flex items-center justify-center`}>
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
                 </div>
                 <span className="text-[11px] font-semibold text-foreground">{item.label}</span>
-              </motion.button>
+              </button>
             ))}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Health metrics mini-cards */}
-        {healthMetrics.length > 0 && (
-          <motion.div variants={fadeUp}>
-            <div className="flex items-center justify-between mb-2.5 px-0.5">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                <Activity className="w-3.5 h-3.5 text-primary" /> Métricas de Saúde
+        {/* ═══ Next appointments ═══ */}
+        {!loading && nextAppt && (
+          <div>
+            <div className="flex items-center justify-between mb-3 px-0.5">
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary" />
+                Próximas Consultas
               </h3>
-              <Button variant="link" size="sm" className="text-xs text-primary h-auto p-0" onClick={() => navigate("/dashboard/patient/health?role=patient")}>
-                Ver tudo
+              <Button variant="link" size="sm" className="text-xs text-primary h-auto p-0 gap-1" onClick={() => navigate("/dashboard/appointments?role=patient")}>
+                Ver tudo <ArrowRight className="w-3 h-3" />
+              </Button>
+            </div>
+            <div className="space-y-2.5">
+              <Card
+                className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-150 border-border/50 hover:shadow-md ${
+                  daysUntilNext === 0 ? "border-primary/40 shadow-sm shadow-primary/10 bg-primary/[0.02]" : ""
+                }`}
+                onClick={() => navigate("/dashboard/appointments?role=patient")}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center gap-3.5">
+                    <div className={`size-13 rounded-xl flex flex-col items-center justify-center shrink-0 ${
+                      daysUntilNext === 0 ? "bg-primary text-primary-foreground shadow-md shadow-primary/25" : "bg-muted text-muted-foreground"
+                    }`} style={{ width: 52, height: 52 }}>
+                      <span className="text-[9px] font-bold uppercase leading-none">
+                        {format(new Date(nextAppt.scheduled_at), "MMM", { locale: ptBR })}
+                      </span>
+                      <span className="text-lg font-black leading-none">
+                        {format(new Date(nextAppt.scheduled_at), "dd")}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-sm font-bold text-foreground truncate">{(nextAppt as Record<string, unknown>).doctor_name as string}</h4>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                        <Clock className="w-3 h-3" />
+                        {format(new Date(nextAppt.scheduled_at), "HH:mm", { locale: ptBR })} · {nextAppt.duration_minutes || 30}min
+                      </p>
+                      {daysUntilNext === 0 && (
+                        <p className="text-xs mt-1 inline-flex items-center gap-1 text-primary font-bold">
+                          <Flame className="w-3 h-3" /> Hoje em {hoursUntilNext}h
+                        </p>
+                      )}
+                    </div>
+                    {daysUntilNext === 0 ? (
+                      <Button size="sm"
+                        className="bg-primary text-primary-foreground shrink-0 rounded-xl h-10 px-4 text-xs font-bold shadow-lg shadow-primary/25"
+                        onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/consultation/${nextAppt.id}`); }}>
+                        <Video className="w-4 h-4 mr-1.5" /> Entrar
+                      </Button>
+                    ) : (
+                      <div className="shrink-0 flex items-center gap-1 text-muted-foreground/40">
+                        <span className="text-[10px] font-medium">{daysUntilNext}d</span>
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {upcoming.slice(1, 3).map((a: { id: string; scheduled_at: string; status: string; doctor_name: string; duration_minutes?: number | null }) => (
+                <Card key={a.id} className="border-border/40 overflow-hidden hover:shadow-sm transition-colors duration-150 cursor-pointer active:scale-[0.98]" onClick={() => navigate("/dashboard/appointments?role=patient")}>
+                  <CardContent className="p-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="size-10 rounded-lg bg-muted/40 flex flex-col items-center justify-center shrink-0 text-muted-foreground">
+                        <span className="text-[8px] font-bold uppercase leading-none">{format(new Date(a.scheduled_at), "MMM", { locale: ptBR })}</span>
+                        <span className="text-sm font-bold leading-none">{format(new Date(a.scheduled_at), "dd")}</span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm font-semibold text-foreground truncate">{a.doctor_name}</h4>
+                        <p className="text-xs text-muted-foreground">{format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min</p>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* No appointments CTA */}
+        {!loading && upcoming.length === 0 && (
+          <Card className="border border-border/40 overflow-hidden rounded-2xl">
+            <CardContent className="p-0">
+              <div className="relative bg-card p-8 text-center">
+                <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4 ring-4 ring-primary/5">
+                  <CalendarPlus className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="text-lg font-extrabold text-foreground mb-1.5 tracking-tight">Nenhuma consulta agendada</h3>
+                <p className="text-sm text-muted-foreground mb-5 max-w-[260px] mx-auto">
+                  Encontre o médico ideal e agende sua primeira consulta
+                </p>
+                <Button
+                  className="w-full bg-primary text-primary-foreground rounded-xl h-12 text-sm font-bold shadow-lg shadow-primary/20"
+                  onClick={() => navigate("/dashboard/schedule?role=patient")}>
+                  <Calendar className="w-4 h-4 mr-2" /> Agendar consulta
+                </Button>
+                <div className="flex items-center justify-center gap-5 mt-4">
+                  {[
+                    { icon: <Shield className="w-3.5 h-3.5 text-success" />, label: "Seguro" },
+                    { icon: <Video className="w-3.5 h-3.5 text-primary" />, label: "HD" },
+                    { icon: <Star className="w-3.5 h-3.5 text-warning" />, label: "4.9★" },
+                  ].map((item, i) => (
+                    <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                      {item.icon} {item.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Health metrics */}
+        {healthMetrics.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3 px-0.5">
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                <Activity className="w-4 h-4 text-primary" /> Métricas de Saúde
+              </h3>
+              <Button variant="link" size="sm" className="text-xs text-primary h-auto p-0 gap-1" onClick={() => navigate("/dashboard/patient/health?role=patient")}>
+                Ver tudo <ArrowRight className="w-3 h-3" />
               </Button>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -288,126 +400,17 @@ const PatientDashboard = () => {
                 return (
                   <div
                     key={m.type}
-                    className="p-3 rounded-xl bg-card border border-border/50 hover:border-primary/20 hover:shadow-sm transition-all duration-150 cursor-pointer"
+                    className="p-3 rounded-xl bg-card border border-border/40 hover:border-primary/20 hover:shadow-sm transition-colors duration-150 cursor-pointer"
                     onClick={() => navigate("/dashboard/patient/health?role=patient")}
                   >
                     <span className="text-sm">{cfg.icon}</span>
-                    <p className={`text-base font-bold ${cfg.color} mt-1`}>{m.value}<span className="text-[10px] font-normal text-muted-foreground ml-0.5">{m.unit}</span></p>
+                    <p className={`text-base font-extrabold ${cfg.color} mt-1`}>{m.value}<span className="text-[10px] font-normal text-muted-foreground ml-0.5">{m.unit}</span></p>
                     <p className="text-[10px] text-muted-foreground">{cfg.label}</p>
                   </div>
                 );
               })}
             </div>
-          </motion.div>
-        )}
-
-        {/* ═══ Next appointments ═══ */}
-        {!loading && nextAppt && (
-          <motion.div variants={fadeUp}>
-            <div className="flex items-center justify-between mb-2.5 px-0.5">
-              <h3 className="text-sm font-bold text-foreground">Próximas Consultas</h3>
-              <Button variant="link" size="sm" className="text-xs text-primary h-auto p-0" onClick={() => navigate("/dashboard/appointments?role=patient")}>
-                Ver tudo
-              </Button>
-            </div>
-            <div className="space-y-2.5">
-              {/* Main next appointment */}
-              <Card
-                className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-150 border-border/50 hover:shadow-md ${
-                  daysUntilNext === 0 ? "border-primary/30 shadow-sm shadow-primary/10" : ""
-                }`}
-                onClick={() => navigate("/dashboard/appointments?role=patient")}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3.5">
-                    <div className={`size-12 rounded-xl flex flex-col items-center justify-center shrink-0 ${
-                      daysUntilNext === 0 ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                    }`}>
-                      <span className="text-[9px] font-bold uppercase leading-none">
-                        {format(new Date(nextAppt.scheduled_at), "MMM", { locale: ptBR })}
-                      </span>
-                      <span className="text-lg font-bold leading-none">
-                        {format(new Date(nextAppt.scheduled_at), "dd")}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-bold text-foreground truncate">{(nextAppt as Record<string, unknown>).doctor_name as string}</h4>
-                      <p className="text-xs text-muted-foreground">
-                        {format(new Date(nextAppt.scheduled_at), "HH:mm", { locale: ptBR })} · {nextAppt.duration_minutes || 30}min
-                      </p>
-                      {daysUntilNext === 0 && (
-                        <p className="text-xs mt-0.5 inline-flex items-center gap-1 text-primary font-semibold">
-                          <Flame className="w-3 h-3" /> Hoje em {hoursUntilNext}h
-                        </p>
-                      )}
-                    </div>
-                    {daysUntilNext === 0 ? (
-                      <Button size="sm"
-                        className="bg-primary text-primary-foreground shrink-0 rounded-xl h-9 px-4 text-xs font-bold shadow-md shadow-primary/20"
-                        onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/consultation/${nextAppt.id}`); }}>
-                        <Video className="w-3.5 h-3.5 mr-1.5" /> Entrar
-                      </Button>
-                    ) : (
-                      <ChevronRight className="w-5 h-5 text-muted-foreground/30 shrink-0" />
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {upcoming.slice(1).map((a: { id: string; scheduled_at: string; status: string; doctor_name: string; duration_minutes?: number | null }) => (
-                <Card key={a.id} className="border-border/50 overflow-hidden hover:shadow-sm transition-all duration-150 cursor-pointer active:scale-[0.98]" onClick={() => navigate("/dashboard/appointments?role=patient")}>
-                  <CardContent className="p-3.5">
-                    <div className="flex items-center gap-3.5">
-                      <div className="size-10 rounded-lg bg-muted/50 flex flex-col items-center justify-center shrink-0 text-muted-foreground">
-                        <span className="text-[8px] font-bold uppercase leading-none">{format(new Date(a.scheduled_at), "MMM", { locale: ptBR })}</span>
-                        <span className="text-sm font-bold leading-none">{format(new Date(a.scheduled_at), "dd")}</span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-semibold text-foreground truncate">{a.doctor_name}</h4>
-                        <p className="text-xs text-muted-foreground">{format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min</p>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* No appointments CTA */}
-        {!loading && upcoming.length === 0 && (
-          <motion.div variants={fadeUp}>
-            <Card className="border border-border/50 overflow-hidden rounded-2xl">
-              <CardContent className="p-0">
-                <div className="relative bg-card p-8 text-center">
-                  <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                    <CalendarPlus className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground mb-1.5 tracking-tight">Nenhuma consulta agendada</h3>
-                  <p className="text-sm text-muted-foreground mb-5 max-w-[260px] mx-auto">
-                    Encontre o médico ideal e agende sua primeira consulta
-                  </p>
-                  <Button
-                    className="w-full bg-primary text-primary-foreground rounded-xl h-12 text-sm font-bold shadow-lg shadow-primary/20"
-                    onClick={() => navigate("/dashboard/schedule?role=patient")}>
-                    <Calendar className="w-4 h-4 mr-2" /> Agendar consulta
-                  </Button>
-                  <div className="flex items-center justify-center gap-5 mt-4">
-                    {[
-                      { icon: <Shield className="w-3.5 h-3.5 text-success" />, label: "Seguro" },
-                      { icon: <Video className="w-3.5 h-3.5 text-primary" />, label: "HD" },
-                      { icon: <Star className="w-3.5 h-3.5 text-warning" />, label: "4.9★" },
-                    ].map((item, i) => (
-                      <span key={i} className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                        {item.icon} {item.label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+          </div>
         )}
 
         {/* Subscription status */}
@@ -415,112 +418,108 @@ const PatientDashboard = () => {
           const daysLeft = (activeSub as Record<string, unknown>).expires_at ? differenceInDays(new Date((activeSub as Record<string, unknown>).expires_at as string), new Date()) : null;
           const isExpiringSoon = daysLeft !== null && daysLeft <= 7;
           return (
-            <motion.div variants={fadeUp}>
-              <div
-                className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer active:scale-[0.98] transition-all duration-150 ${
-                  isExpiringSoon ? "border-warning/30 bg-warning/5" : "border-success/30 bg-success/5"
-                }`}
-                onClick={() => navigate(isExpiringSoon ? `/dashboard/plans?action=renew&plan_id=${(activeSub as Record<string, unknown>).plan_id}` : "/dashboard/payment-history?role=patient")}
-              >
-                {isExpiringSoon
-                  ? <AlertCircle className="w-5 h-5 text-warning shrink-0" />
-                  : <CheckCircle2 className="w-5 h-5 text-success shrink-0" />}
-                <div className="flex-1 min-w-0">
-                  <p className={`text-sm font-semibold ${isExpiringSoon ? "text-warning" : "text-success"}`}>
-                    {isExpiringSoon ? `Plano expira em ${daysLeft}d — Renovar` : "Plano ativo"}
-                  </p>
-                  <p className="text-xs text-muted-foreground truncate">{((activeSub as Record<string, unknown>).plans as Record<string, unknown>)?.name as string ?? "Assinatura"}</p>
-                </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+            <div
+              className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer active:scale-[0.98] transition-colors duration-150 ${
+                isExpiringSoon ? "border-warning/30 bg-warning/5" : "border-success/30 bg-success/5"
+              }`}
+              onClick={() => navigate(isExpiringSoon ? `/dashboard/plans?action=renew&plan_id=${(activeSub as Record<string, unknown>).plan_id}` : "/dashboard/payment-history?role=patient")}
+            >
+              {isExpiringSoon
+                ? <AlertCircle className="w-5 h-5 text-warning shrink-0" />
+                : <CheckCircle2 className="w-5 h-5 text-success shrink-0" />}
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-semibold ${isExpiringSoon ? "text-warning" : "text-success"}`}>
+                  {isExpiringSoon ? `Plano expira em ${daysLeft}d — Renovar` : "Plano ativo"}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">{((activeSub as Record<string, unknown>).plans as Record<string, unknown>)?.name as string ?? "Assinatura"}</p>
               </div>
-            </motion.div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground/40 shrink-0" />
+            </div>
           );
         })()}
 
         {/* Return appointments */}
         {returnAppts.length > 0 && (
-          <motion.div variants={fadeUp}>
-            <Card className="border-warning/30 bg-warning/5 overflow-hidden rounded-xl">
-              <CardContent className="p-4 space-y-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-warning/20 flex items-center justify-center">
-                    <Gift className="w-4 h-4 text-warning" />
-                  </div>
-                  <p className="text-sm font-bold text-warning">Retorno Grátis</p>
+          <Card className="border-warning/30 bg-warning/5 overflow-hidden rounded-xl">
+            <CardContent className="p-4 space-y-2.5">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-warning/20 flex items-center justify-center">
+                  <Gift className="w-4 h-4 text-warning" />
                 </div>
-                {returnAppts.map((ra: { id: string; return_deadline: string; doctor_name: string; doctor_id: string }) => {
-                  const daysRemaining = differenceInDays(new Date(ra.return_deadline), new Date());
-                  return (
-                    <div key={ra.id} className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/40">
-                      <div className="text-xs min-w-0">
-                        <p className="font-medium text-foreground truncate">{ra.doctor_name}</p>
-                        <p className="text-muted-foreground">
-                          {daysRemaining <= 3
-                            ? <span className="text-destructive font-semibold">⚠️ {daysRemaining}d</span>
-                            : `Até ${format(new Date(ra.return_deadline), "dd/MM")} (${daysRemaining}d)`}
-                        </p>
-                      </div>
-                      <Button size="sm"
-                        className="bg-warning text-warning-foreground text-xs h-8 rounded-xl shrink-0"
-                        onClick={() => navigate(`/dashboard/schedule/${ra.doctor_id}?return=true&original=${ra.id}`)}>
-                        Agendar
-                      </Button>
+                <p className="text-sm font-bold text-warning">Retorno Grátis</p>
+              </div>
+              {returnAppts.map((ra: { id: string; return_deadline: string; doctor_name: string; doctor_id: string }) => {
+                const daysRemaining = differenceInDays(new Date(ra.return_deadline), new Date());
+                return (
+                  <div key={ra.id} className="flex items-center justify-between p-3 rounded-xl bg-card border border-border/40">
+                    <div className="text-xs min-w-0">
+                      <p className="font-medium text-foreground truncate">{ra.doctor_name}</p>
+                      <p className="text-muted-foreground">
+                        {daysRemaining <= 3
+                          ? <span className="text-destructive font-semibold">⚠️ {daysRemaining}d</span>
+                          : `Até ${format(new Date(ra.return_deadline), "dd/MM")} (${daysRemaining}d)`}
+                      </p>
                     </div>
-                  );
-                })}
-              </CardContent>
-            </Card>
-          </motion.div>
+                    <Button size="sm"
+                      className="bg-warning text-warning-foreground text-xs h-8 rounded-xl shrink-0"
+                      onClick={() => navigate(`/dashboard/schedule/${ra.doctor_id}?return=true&original=${ra.id}`)}>
+                      Agendar
+                    </Button>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
         )}
 
         {/* ═══ Shortcuts grid ═══ */}
-        <motion.div variants={fadeUp}>
-          <p className="text-sm font-bold text-foreground mb-2.5 px-0.5">Acesso Rápido</p>
+        <div>
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3 px-0.5">Acesso Rápido</p>
           <div className="grid grid-cols-3 gap-2.5">
-            {shortcuts.map((item) => (
+            {shortcuts.map(item => (
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className="flex flex-col items-center gap-2 py-3 rounded-xl bg-card border border-border/40 hover:border-primary/20 hover:shadow-sm active:scale-[0.97] transition-all duration-150"
+                className="flex flex-col items-center gap-2 py-3.5 rounded-xl bg-card border border-border/40 hover:border-primary/20 hover:shadow-sm active:scale-[0.97] transition-all duration-150"
               >
-                <div className="size-10 rounded-xl bg-muted/60 flex items-center justify-center text-primary">
-                  <item.icon className="w-5 h-5" />
+                <div className="size-10 rounded-xl bg-muted/50 flex items-center justify-center">
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
                 </div>
                 <span className="text-[11px] font-semibold text-muted-foreground">{item.label}</span>
               </button>
             ))}
           </div>
-        </motion.div>
+        </div>
 
         {/* Health alerts */}
-        {!loading && (
-          <motion.div variants={fadeUp}>
-            {(() => {
-              const alerts: { icon: string; text: string; color: string }[] = [];
-              if ((stats?.total ?? 0) > 0 && upcoming.length === 0) alerts.push({ icon: "📅", text: "Sem consultas agendadas — cuide da sua saúde!", color: "text-warning" });
-              if ((stats?.prescriptions ?? 0) > 0 && (stats?.documents ?? 0) === 0) alerts.push({ icon: "📄", text: "Envie seus exames para o cofre de documentos", color: "text-primary" });
-              if (!activeSub) alerts.push({ icon: "💳", text: "Assine um plano e economize até 30%", color: "text-secondary" });
-              if (alerts.length === 0) return null;
-              return (
-                <div className="space-y-2">
-                  {alerts.map((alert, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border/40">
-                      <span className="text-base">{alert.icon}</span>
-                      <p className={`text-xs font-medium ${alert.color}`}>{alert.text}</p>
-                    </div>
-                  ))}
+        {!loading && (() => {
+          const alerts: { icon: string; text: string; color: string; action?: string }[] = [];
+          if ((stats?.total ?? 0) > 0 && upcoming.length === 0) alerts.push({ icon: "📅", text: "Sem consultas agendadas — cuide da sua saúde!", color: "text-warning", action: "/dashboard/schedule?role=patient" });
+          if ((stats?.prescriptions ?? 0) > 0 && (stats?.documents ?? 0) === 0) alerts.push({ icon: "📄", text: "Envie seus exames para o cofre de documentos", color: "text-primary", action: "/dashboard/patient/documents?role=patient" });
+          if (!activeSub) alerts.push({ icon: "💳", text: "Assine um plano e economize até 30%", color: "text-secondary", action: "/dashboard/plans?role=patient" });
+          if (alerts.length === 0) return null;
+          return (
+            <div className="space-y-2">
+              {alerts.map((alert, i) => (
+                <div key={i}
+                  className="flex items-center gap-3 p-3.5 rounded-xl bg-card border border-border/40 cursor-pointer hover:border-primary/20 hover:shadow-sm active:scale-[0.98] transition-all duration-150"
+                  onClick={() => alert.action && navigate(alert.action)}
+                >
+                  <span className="text-base shrink-0">{alert.icon}</span>
+                  <p className={`text-xs font-medium flex-1 ${alert.color}`}>{alert.text}</p>
+                  <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 shrink-0" />
                 </div>
-              );
-            })()}
-          </motion.div>
-        )}
+              ))}
+            </div>
+          );
+        })()}
 
         {/* Favorite doctors */}
         {favDoctors.length > 0 && (
-          <motion.div variants={fadeUp}>
-            <div className="flex items-center justify-between mb-2.5 px-0.5">
-              <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
-                <Stethoscope className="w-3.5 h-3.5 text-primary" /> Meus Médicos
+          <div>
+            <div className="flex items-center justify-between mb-3 px-0.5">
+              <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
+                <Stethoscope className="w-4 h-4 text-primary" /> Meus Médicos
               </h3>
               <Button variant="link" size="sm" className="text-xs text-primary h-auto p-0 gap-1" onClick={() => navigate("/dashboard/doctors?role=patient")}>
                 Ver todos <ArrowRight className="w-3 h-3" />
@@ -530,7 +529,7 @@ const PatientDashboard = () => {
               {favDoctors.slice(0, 6).map((doc: { id: string; name: string; specs: string[]; rating: number | null }) => (
                 <Card key={doc.id} className="border-border/40 shrink-0 w-28 snap-start cursor-pointer active:scale-[0.97] transition-all duration-150 hover:shadow-sm overflow-hidden" onClick={() => navigate(`/dashboard/schedule/${doc.id}?role=patient`)}>
                   <CardContent className="p-0">
-                    <div className="h-16 bg-muted/30 flex items-center justify-center">
+                    <div className="h-14 bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center">
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
                         {doc.name.charAt(6) || "M"}
                       </div>
@@ -549,28 +548,24 @@ const PatientDashboard = () => {
                 </Card>
               ))}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Health tip */}
-        <motion.div variants={fadeUp}>
-          <div className="bg-primary/5 rounded-xl p-3.5 border border-primary/10 flex items-center gap-3">
-            <div className="size-10 rounded-full bg-primary/15 flex items-center justify-center text-primary shrink-0">
-              <Activity className="w-5 h-5" />
-            </div>
-            <div className="flex-1">
-              <h4 className="text-xs font-bold text-primary">Dica do Dia</h4>
-              <p className="text-xs text-muted-foreground mt-0.5">{todayTip}</p>
-            </div>
+        <div className="bg-primary/5 rounded-xl p-4 border border-primary/10 flex items-center gap-3">
+          <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+            <TrendingUp className="w-5 h-5" />
           </div>
-        </motion.div>
+          <div className="flex-1 min-w-0">
+            <h4 className="text-xs font-bold text-primary">Dica do Dia</h4>
+            <p className="text-xs text-muted-foreground mt-0.5">{todayTip}</p>
+          </div>
+        </div>
 
         {/* Credits */}
-        <motion.div variants={fadeUp}>
-          <CreditsWidget />
-        </motion.div>
+        <CreditsWidget />
 
-      </motion.div>
+      </div>
     </DashboardLayout>
   );
 };
