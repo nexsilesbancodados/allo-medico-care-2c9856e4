@@ -207,7 +207,16 @@ const AdminWhatsApp = () => {
                 </p>
               ) : (
                 <div className="space-y-2">
-                  {instances.map(inst => (
+                  {loading ? (
+                Array.from({ length: 5 }).map((_, j) => (
+                  <tr key={j} className="border-b border-border/30">
+                                          <td key={j*4+0} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                      <td key={j*4+1} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                      <td key={j*4+2} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                      <td key={j*4+3} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                  </tr>
+                ))
+              ) : instances.map(inst => (
                     <div
                       key={inst.instanceName}
                       className={`flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors ${

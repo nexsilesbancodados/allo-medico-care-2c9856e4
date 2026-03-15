@@ -103,7 +103,21 @@ const AdminPlans = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {plans.map(p => (
+                {loading ? (
+
+                  Array.from({ length: 5 }).map((_, i) => (
+
+                    <tr key={i} className="border-b border-border/30">
+                            <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+
+                    </tr>
+                  ))
+
+                ) : plans.map(p => (
                   <TableRow key={p.id}>
                     <TableCell>
                       <div>

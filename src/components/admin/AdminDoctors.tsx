@@ -106,7 +106,21 @@ const AdminDoctors = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map(doc => (
+                {loading ? (
+
+                  Array.from({ length: 5 }).map((_, i) => (
+
+                    <tr key={i} className="border-b border-border/30">
+                            <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+
+                    </tr>
+                  ))
+
+                ) : filtered.map(doc => (
                   <TableRow key={doc.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">

@@ -125,6 +125,13 @@ const AdminNPS = () => {
   const npsLabel = npsScore >= 50 ? "Excelente" : npsScore >= 0 ? "Bom" : "Precisa melhorar";
   const npsColor = npsScore >= 50 ? "text-green-600" : npsScore >= 0 ? "text-yellow-600" : "text-destructive";
 
+  if (loading) return (
+    <DashboardLayout title="NPS" nav={getAdminNav("nps")} role="admin">
+      <div className="space-y-4 p-4">
+        {[1,2,3,4].map(i => <div key={i} className="shimmer-v2 h-32 rounded-2xl" />)}
+      </div>
+    </DashboardLayout>
+  );
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("nps")}>
       <div className="max-w-6xl">

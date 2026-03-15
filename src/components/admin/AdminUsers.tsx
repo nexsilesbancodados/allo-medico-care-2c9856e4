@@ -155,7 +155,21 @@ const AdminUsers = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map(u => (
+                {loading ? (
+
+                  Array.from({ length: 5 }).map((_, i) => (
+
+                    <tr key={i} className="border-b border-border/30">
+                            <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+
+                    </tr>
+                  ))
+
+                ) : filtered.map(u => (
                   <TableRow key={u.user_id}>
                     <TableCell>
                       <div className="flex items-center gap-3">

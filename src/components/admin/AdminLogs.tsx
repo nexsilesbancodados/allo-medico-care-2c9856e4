@@ -82,7 +82,18 @@ const AdminLogs = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.map(l => (
+                {loading ? (
+                Array.from({ length: 5 }).map((_, j) => (
+                  <tr key={j} className="border-b border-border/30">
+                                          <td key={j*6+0} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                      <td key={j*6+1} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                      <td key={j*6+2} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                      <td key={j*6+3} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                      <td key={j*6+4} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                      <td key={j*6+5} className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
+                  </tr>
+                ))
+              ) : filtered.map(l => (
                   <TableRow key={l.id}>
                     <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
                       {format(new Date(l.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
