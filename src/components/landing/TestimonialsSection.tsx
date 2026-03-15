@@ -110,7 +110,7 @@ const TestimonialsSection = forwardRef<HTMLElement>((_, ref) => {
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
                 transition={{ type: "spring", stiffness: 200, damping: 20 }}
-                className="w-full max-w-sm rounded-2xl border border-border/40 bg-card overflow-hidden shadow-elevated"
+                className="card-interactive w-full max-w-sm rounded-2xl border border-border/40 bg-card overflow-hidden shadow-elevated"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Progress bar */}

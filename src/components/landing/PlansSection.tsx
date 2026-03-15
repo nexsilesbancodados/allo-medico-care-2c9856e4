@@ -117,7 +117,7 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
                 transition={{ delay: i * 0.05 }}
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 onClick={() => navigate("/paciente")}
-                className="relative rounded-xl p-4 border border-border/50 bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06] transition-all duration-300 cursor-pointer group"
+                className="card-interactive relative rounded-xl p-4 border border-border/50 bg-card hover:border-primary/30 hover:shadow-lg hover:shadow-primary/[0.06] transition-all duration-300 cursor-pointer group"
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary/20 transition-colors">
                   <spec.icon className="w-5 h-5 text-primary" />

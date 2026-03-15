@@ -281,7 +281,7 @@ const SupportDashboard = () => {
                 <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
                   <s.icon className={`w-4 h-4 ${s.color}`} />
                 </div>
-                <p className="text-2xl font-bold text-foreground">{s.value}</p>
+                <p className="text-2xl font-bold text-foreground tabular-nums">{s.value}</p>
                 <p className="text-xs font-medium text-muted-foreground mt-0.5">{s.label}</p>
                 <p className="text-[10px] text-muted-foreground/70 mt-0.5">{s.sub}</p>
               </div>

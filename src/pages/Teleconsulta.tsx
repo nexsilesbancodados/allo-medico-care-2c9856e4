@@ -225,7 +225,7 @@ const Teleconsulta = () => {
               </motion.p>
               <div className="grid sm:grid-cols-2 gap-3">
                 {benefits.map((b, i) => (
-                  <motion.div key={i} variants={fadeUp} className="flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50 hover:shadow-lg hover:border-primary/20 transition-all group">
+                  <motion.div key={i} variants={fadeUp} className="card-interactive flex items-center gap-3 p-4 rounded-xl bg-card border border-border/50 hover:shadow-lg hover:border-primary/20 transition-all group">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-success to-success/70 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
                       <CheckCircle2 className="w-4 h-4 text-white" />
                     </div>

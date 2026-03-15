@@ -400,7 +400,7 @@ const ClinicDashboard = () => {
                 ].map(item => (
                   <Card key={item.label} className="border-border/50">
                     <CardContent className="p-5 text-center">
-                      <p className="text-2xl font-bold text-foreground">{item.value}</p>
+                      <p className="text-2xl font-bold text-foreground tabular-nums">{item.value}</p>
                       <p className="text-xs text-muted-foreground mt-1">{item.label}</p>
                     </CardContent>
                   </Card>

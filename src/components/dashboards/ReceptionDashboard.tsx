@@ -298,7 +298,7 @@ const ReceptionDashboard = () => {
                 <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
                   <s.icon className={`w-4 h-4 ${s.color}`} aria-hidden="true" />
                 </div>
-                <p className="text-2xl font-bold text-foreground" aria-hidden="true">{s.value}</p>
+                <p className="text-2xl font-bold text-foreground tabular-nums" aria-hidden="true">{s.value}</p>
                 <p className="text-xs font-medium text-muted-foreground mt-0.5">{s.label}</p>
               </div>
             ))

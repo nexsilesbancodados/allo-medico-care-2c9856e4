@@ -77,6 +77,10 @@ export default {
           navy: "hsl(var(--medical-navy))",
         },
       },
+      boxShadow: {
+        card:     "0 2px 12px -2px rgb(0 0 0 / 0.08), 0 1px 4px -1px rgb(0 0 0 / 0.06)",
+        elevated: "0 8px 24px -4px rgb(0 0 0 / 0.12), 0 4px 8px -2px rgb(0 0 0 / 0.08)",
+      },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
@@ -155,4 +159,11 @@ export default {
     },
   },
   plugins: [require("tailwindcss-animate")],
+  safelist: [
+    "card-interactive", "kpi-card", "glass", "glass-strong",
+    "shimmer-v2", "text-gradient-brand", "mesh-gradient",
+    "pulse-dot", "bell-ring", "tabular-nums",
+    { pattern: /^shadow-(card|elevated|glow)/ },
+    { pattern: /^animate-(bell-ring|glow-pulse|float|fade-in)/ },
+  ],
 } satisfies Config;
