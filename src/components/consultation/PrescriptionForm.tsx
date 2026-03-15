@@ -384,7 +384,7 @@ const PrescriptionForm = () => {
       diagnosis: diagnosis || null,
       observations: observations || null,
       document_hash: documentHash,
-    } as any);
+    });
 
     // Also persist verification record
     supabase.from("document_verifications").insert({

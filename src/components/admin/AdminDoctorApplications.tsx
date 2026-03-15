@@ -43,7 +43,7 @@ const AdminDoctorApplications = () => {
 
   const fetchApplications = async () => {
     setLoading(true);
-    let query = supabase.from("doctor_applications" as any).select("*").order("created_at", { ascending: false });
+    let query = supabase.from("doctor_applications" as never).select("*").order("created_at", { ascending: false });
     if (filter !== "all") query = query.eq("status", filter);
     if (search.trim()) query = query.or(`full_name.ilike.%${search}%,email.ilike.%${search}%,crm.ilike.%${search}%`);
     const { data, error } = await query;
@@ -75,7 +75,7 @@ const AdminDoctorApplications = () => {
       if (codeError) throw codeError;
 
       // Update application
-      await (supabase.from("doctor_applications" as any) as any).update({
+      await (supabase.from("doctor_applications" as never)).update({
         status: "approved",
         admin_notes: adminNotes || null,
         reviewed_by: adminId,
@@ -110,7 +110,7 @@ const AdminDoctorApplications = () => {
     setProcessing(true);
     try {
       const { data: session } = await supabase.auth.getSession();
-      await (supabase.from("doctor_applications" as any) as any).update({
+      await (supabase.from("doctor_applications" as never)).update({
         status: "rejected",
         admin_notes: adminNotes || null,
         reviewed_by: session?.session?.user?.id,

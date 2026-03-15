@@ -188,7 +188,7 @@ const ExamReportEditor = () => {
   const { data: examRequest, isLoading: loadingExam } = useQuery({
     queryKey: ["exam-request-detail", examId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("exam_requests" as any).select("*").eq("id", examId!).maybeSingle();
+      const { data, error } = await supabase.from("exam_requests" as never).select("*").eq("id", examId!).maybeSingle();
       if (error) throw error;
       return data as unknown as ExamRequest | null;
     },
@@ -198,7 +198,7 @@ const ExamReportEditor = () => {
   const { data: existingReport } = useQuery({
     queryKey: ["exam-report-existing", examId],
     queryFn: async () => {
-      const { data } = await supabase.from("exam_reports" as any).select("*").eq("exam_request_id", examId!).maybeSingle();
+      const { data } = await supabase.from("exam_reports" as never).select("*").eq("exam_request_id", examId!).maybeSingle();
       return data as unknown as ExamReport | null;
     },
     enabled: !!examId,
@@ -207,7 +207,7 @@ const ExamReportEditor = () => {
   const { data: templates } = useQuery({
     queryKey: ["report-templates"],
     queryFn: async () => {
-      const { data } = await supabase.from("report_templates" as any).select("*").eq("is_active", true).order("title");
+      const { data } = await supabase.from("report_templates" as never).select("*").eq("is_active", true).order("title");
       return (data ?? []) as unknown as ReportTemplate[];
     },
   });
@@ -218,9 +218,9 @@ const ExamReportEditor = () => {
     setAutoSaveStatus("saving");
     try {
       if (existingReport?.id) {
-        await supabase.from("exam_reports" as any).update({ content_text: text }).eq("id", existingReport.id);
+        await supabase.from("exam_reports" as never).update({ content_text: text }).eq("id", existingReport.id);
       } else {
-        await supabase.from("exam_reports" as any).insert({ exam_request_id: examId, reporter_id: doctorProfile.id, content_text: text });
+        await supabase.from("exam_reports" as never).insert({ exam_request_id: examId, reporter_id: doctorProfile.id, content_text: text });
         queryClient.invalidateQueries({ queryKey: ["exam-report-existing", examId] });
       }
       setAutoSaveStatus("saved");
@@ -369,13 +369,13 @@ const ExamReportEditor = () => {
       if (uploadError) throw uploadError;
 
       if (existingReport?.id) {
-        const { error } = await supabase.from("exam_reports" as any).update({
+        const { error } = await supabase.from("exam_reports" as never).update({
           content_text: content, template_id: selectedTemplateId || null, pdf_url: pdfPath,
           document_hash: documentHash, verification_code: verificationCode, signed_at: new Date().toISOString(),
         }).eq("id", existingReport.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("exam_reports" as any).insert({
+        const { error } = await supabase.from("exam_reports" as never).insert({
           exam_request_id: examId, reporter_id: doctorProfile.id, content_text: content,
           template_id: selectedTemplateId || null, pdf_url: pdfPath, document_hash: documentHash,
           verification_code: verificationCode, signed_at: new Date().toISOString(),
@@ -383,7 +383,7 @@ const ExamReportEditor = () => {
         if (error) throw error;
       }
 
-      await supabase.from("exam_requests" as any).update({ status: "reported" } as any).eq("id", examId);
+      await supabase.from("exam_requests" as never).update({ status: "reported" } as any).eq("id", examId);
 
       // ICP-Brasil (optional)
       try {

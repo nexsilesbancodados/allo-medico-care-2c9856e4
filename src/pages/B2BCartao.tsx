@@ -48,7 +48,7 @@ const B2BCartao = () => {
     if (!result.success) { toast.error(result.error.errors[0].message); return; }
     setSubmitting(true);
     const servicesInterested = [...quiz.interest, `segmento:${quiz.segment}`, `funcionarios:${quiz.employees}`, `beneficio_atual:${quiz.current_benefit}`, quiz.budget ? `orcamento:${quiz.budget}` : ""].filter(Boolean);
-    const { error } = await supabase.from("b2b_leads").insert({ ...form, company_type: quiz.segment, services_interested: servicesInterested as any });
+    const { error } = await supabase.from("b2b_leads").insert({ ...form, company_type: quiz.segment, services_interested: String(servicesInterested) });
     if (error) { toast.error("Erro ao enviar: " + error.message); setSubmitting(false); return; }
     await supabase.functions.invoke("b2b-lead-notification", { body: { ...form, services_interested: servicesInterested } }).catch(() => {});
     setSubmitted(true);

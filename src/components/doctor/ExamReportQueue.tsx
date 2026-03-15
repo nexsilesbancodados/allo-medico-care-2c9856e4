@@ -53,7 +53,7 @@ const ExamReportQueue = () => {
     queryKey: ["exam-requests-queue", statusFilter],
     queryFn: async () => {
       let query = supabase
-        .from("exam_requests" as any)
+        .from("exam_requests" as never)
         .select("*")
         .order("created_at", { ascending: false });
 
@@ -92,7 +92,7 @@ const ExamReportQueue = () => {
     setClaimingId(examId);
     try {
       const { error } = await supabase
-        .from("exam_requests" as any)
+        .from("exam_requests" as never)
         .update({ assigned_to: doctorProfile.id, status: "in_review" })
         .eq("id", examId);
       if (error) throw error;

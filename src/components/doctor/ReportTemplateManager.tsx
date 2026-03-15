@@ -49,7 +49,7 @@ const ReportTemplateManager = () => {
     queryKey: ["report-templates-manage"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("report_templates" as any)
+        .from("report_templates" as never)
         .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -82,13 +82,13 @@ const ReportTemplateManager = () => {
     try {
       if (editingId) {
         const { error } = await supabase
-          .from("report_templates" as any)
+          .from("report_templates" as never)
           .update({ title, exam_type: examType, body_text: bodyText })
           .eq("id", editingId);
         if (error) throw error;
         toast.success("Template atualizado!");
       } else {
-        const { error } = await supabase.from("report_templates" as any).insert({
+        const { error } = await supabase.from("report_templates" as never).insert({
           title,
           exam_type: examType,
           body_text: bodyText,
@@ -110,7 +110,7 @@ const ReportTemplateManager = () => {
   const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
-        .from("report_templates" as any)
+        .from("report_templates" as never)
         .delete()
         .eq("id", id);
       if (error) throw error;
