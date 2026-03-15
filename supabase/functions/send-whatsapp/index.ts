@@ -11,7 +11,7 @@ const corsHeaders = {
 const fetchEvo = async (url: string, opts: RequestInit = {}): Promise<Response> => {
   try {
     return await fetch(url, opts);
-  } catch (err) {
+  } catch (error) {
     if (String(err).includes("certificate") || String(err).includes("tls") || String(err).includes("CaUsedAsEndEntity")) {
       console.warn("TLS error, retrying with HTTP:", err.message || err);
       const httpUrl = url.replace(/^https:\/\//, "http://");
@@ -36,9 +36,9 @@ serve(async (req) => {
     const EVOLUTION_API_KEY = Deno.env.get("EVOLUTION_API_KEY");
 
     if (!EVOLUTION_API_URL || !EVOLUTION_API_KEY) {
-      console.log("[DEV] WhatsApp would be sent but Evolution API not configured");
+      console.info("[DEV] WhatsApp would be sent but Evolution API not configured");
       const body: WhatsAppRequest = await req.json();
-      console.log("[DEV] Message:", JSON.stringify(body));
+      console.info("[DEV] Message:", JSON.stringify(body));
       return new Response(
         JSON.stringify({ success: true, dev: true, message: "WhatsApp logged (Evolution API not configured)" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }

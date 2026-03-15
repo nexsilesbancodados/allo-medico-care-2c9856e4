@@ -83,8 +83,8 @@ serve(async (req) => {
           }),
         });
         results.push(`email: ${emailRes.ok ? "sent" : "failed"}`);
-      } catch (e) {
-        results.push(`email: error - ${e.message}`);
+      } catch (error) {
+        results.push(`email: error - ${(error instanceof Error ? error.message : String(error))}`);
       }
     }
 
@@ -101,8 +101,8 @@ serve(async (req) => {
           body: JSON.stringify({ phone: patient.phone, message: msg }),
         });
         results.push(`whatsapp: ${waRes.ok ? "sent" : "failed"}`);
-      } catch (e) {
-        results.push(`whatsapp: error - ${e.message}`);
+      } catch (error) {
+        results.push(`whatsapp: error - ${(error instanceof Error ? error.message : String(error))}`);
       }
     }
 

@@ -135,9 +135,9 @@ ${context ? `\n--- CONTEXTO DO USUÁRIO ---\n${context}\n---` : ""}`;
     return new Response(response.body, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
-  } catch (e) {
+  } catch (error) {
     console.error("ai-assistant error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Erro desconhecido" }), {
+    return new Response(JSON.stringify({ error: e instanceof Error ? (error instanceof Error ? error.message : String(error)) : "Erro desconhecido" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

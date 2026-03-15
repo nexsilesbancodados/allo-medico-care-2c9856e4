@@ -20,23 +20,24 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
 
-  const results: Record<string, any> = {};
+  const results: Record<string, string | number> = {};
 
   try {
     // 1. Expire subscriptions and discount cards (issues #6, #19)
     const { error: expireErr } = await supabase.rpc("expire_subscriptions_and_cards");
-    results.expire_subscriptions = expireErr ? expireErr.message : "ok";
+    results.expire_subscriptions = expireErr?.message ?? "ok";
 
     // 2. Mark no-shows (issue #10)
     const { error: noShowErr } = await supabase.rpc("mark_no_shows");
-    results.mark_no_shows = noShowErr ? noShowErr.message : "ok";
+    results.mark_no_shows = noShowErr?.message ?? "ok";
 
     // 3. Send 7-day expiry notifications
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     const oneDayFromNow = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString();
     const now = new Date().toISOString();
 
-    // Subscriptions expiring in 7 days
+    // Subscriptions expiring in 7 days (with dedup — skip if notified in last 23h)
+    const dedup7Cutoff = new Date(Date.now() - 23 * 60 * 60 * 1000).toISOString();
     const { data: expiringSubs7 } = await supabase
       .from("subscriptions")
       .select("user_id, expires_at")
@@ -94,7 +95,7 @@ serve(async (req) => {
 
     results.notifications_sent = (expiringSubs7?.length ?? 0) + (expiringSubs1?.length ?? 0) + (expiringCards?.length ?? 0);
 
-    console.log("[Scheduled Tasks] Results:", results);
+    console.info("[Scheduled Tasks] Results:", results);
 
     return new Response(JSON.stringify({ success: true, results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -22,7 +22,7 @@ serve(async (req) => {
     const event = body.event;
     const payment = body.payment;
 
-    console.log(`[Asaas Webhook] Event: ${event}, Payment ID: ${payment?.id}, ExternalRef: ${payment?.externalReference}`);
+    console.info(`[Asaas Webhook] Event: ${event}, Payment ID: ${payment?.id}, ExternalRef: ${payment?.externalReference}`);
 
     if (!payment) {
       return new Response(JSON.stringify({ received: true, message: "No payment data" }), {
@@ -60,7 +60,7 @@ serve(async (req) => {
     const isCardSubscription = externalRef.startsWith("card_");
     
     if (isCardSubscription) {
-      console.log(`[Asaas Webhook] Card subscription event: ${event}, ref: ${externalRef}`);
+      console.info(`[Asaas Webhook] Card subscription event: ${event}, ref: ${externalRef}`);
       
       // Parse: card_{planType}_{userId}
       const parts = externalRef.split("_");
@@ -89,7 +89,7 @@ serve(async (req) => {
               payment_id: payment.id,
             })
             .eq("id", existing.id);
-          console.log(`[Asaas Webhook] Renewed discount card ${existing.id}`);
+          console.info(`[Asaas Webhook] Renewed discount card ${existing.id}`);
         } else {
           // Determine price from plan type
           const priceMap: Record<string, number> = {
@@ -107,7 +107,7 @@ serve(async (req) => {
             valid_until: validUntil.toISOString(),
             payment_id: payment.id,
           });
-          console.log(`[Asaas Webhook] Created new discount card for user ${userId}`);
+          console.info(`[Asaas Webhook] Created new discount card for user ${userId}`);
         }
 
         // Notify user
@@ -138,7 +138,7 @@ serve(async (req) => {
           type: "payment",
           link: "/dashboard/plans",
         });
-        console.log(`[Asaas Webhook] Cancelled discount card for user ${userId}`);
+        console.info(`[Asaas Webhook] Cancelled discount card for user ${userId}`);
       }
     }
 
@@ -149,14 +149,14 @@ serve(async (req) => {
       await supabase.from("prescription_renewals")
         .update({ paid_at: new Date().toISOString(), status: "pending_review", payment_id: payment.id })
         .eq("id", renewalId);
-      console.log(`[Asaas Webhook] Renewal ${renewalId} payment confirmed`);
+      console.info(`[Asaas Webhook] Renewal ${renewalId} payment confirmed`);
     }
 
     // ─── Handle appointment payment events (existing logic) ───
     const appointmentId = !isCardSubscription && !isRenewal ? externalRef : null;
 
     if (!newPaymentStatus) {
-      console.log(`[Asaas Webhook] Unhandled event: ${event}`);
+      console.info(`[Asaas Webhook] Unhandled event: ${event}`);
       return new Response(JSON.stringify({ received: true, message: "Event not mapped" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -191,7 +191,7 @@ serve(async (req) => {
       if (updateError) {
         console.error("Error updating appointment:", updateError);
       } else {
-        console.log(`[Asaas Webhook] Appointment ${appointmentId} → payment_status: ${newPaymentStatus}`);
+        console.info(`[Asaas Webhook] Appointment ${appointmentId} → payment_status: ${newPaymentStatus}`);
 
         if (newPaymentStatus === "approved" && appointment) {
           const scheduledDate = new Date(appointment.scheduled_at).toLocaleString("pt-BR", {

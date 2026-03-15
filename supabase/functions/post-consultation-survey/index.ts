@@ -101,7 +101,7 @@ serve(async (req) => {
             }),
           });
           sent++;
-        } catch (e) {
+        } catch (error) {
           console.error(`Survey email failed for ${appt.id}:`, e);
         }
       }
@@ -118,7 +118,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({ phone: profile.phone, message: msg }),
           });
-        } catch (e) {
+        } catch (error) {
           console.error(`Survey WhatsApp failed for ${appt.id}:`, e);
         }
       }
@@ -133,7 +133,7 @@ serve(async (req) => {
       });
     }
 
-    console.log(`Post-consultation survey: processed ${completed.length}, sent ${sent}`);
+    console.info(`Post-consultation survey: processed ${completed.length}, sent ${sent}`);
     return new Response(JSON.stringify({ processed: completed.length, sent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

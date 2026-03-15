@@ -93,7 +93,7 @@ serve(async (req) => {
       const existingUser = getData.data[0];
       const memedToken = existingUser.attributes?.token;
       if (memedToken) {
-        console.log("Memed user found, returning existing token");
+        console.info("Memed user found, returning existing token");
         return new Response(
           JSON.stringify({ token: memedToken, status: "existing" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -102,7 +102,7 @@ serve(async (req) => {
     }
 
     // Register new user on Memed
-    console.log("Registering new prescriber on Memed...");
+    console.info("Registering new prescriber on Memed...");
 
     const dobFormatted = profile.date_of_birth
       ? new Date(profile.date_of_birth).toLocaleDateString("pt-BR")
@@ -162,7 +162,7 @@ serve(async (req) => {
       );
     }
 
-    console.log("Memed prescriber registered successfully");
+    console.info("Memed prescriber registered successfully");
 
     return new Response(
       JSON.stringify({ token: memedToken, status: "created" }),

@@ -11,7 +11,7 @@ const corsHeaders = {
 const fetchEvo = async (url: string, opts: RequestInit = {}): Promise<Response> => {
   try {
     return await fetch(url, opts);
-  } catch (err) {
+  } catch (error) {
     if (String(err).includes("certificate") || String(err).includes("tls") || String(err).includes("CaUsedAsEndEntity")) {
       console.warn("TLS error, retrying with HTTP:", err.message || err);
       const httpUrl = url.replace(/^https:\/\//, "http://");

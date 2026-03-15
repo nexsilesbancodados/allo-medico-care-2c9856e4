@@ -51,7 +51,7 @@ serve(async (req) => {
       .eq("user_id", user_id);
 
     if (subError || !subscriptions?.length) {
-      console.log("No push subscriptions found for user:", user_id);
+      console.info("No push subscriptions found for user:", user_id);
       return new Response(
         JSON.stringify({ success: true, sent: 0, reason: "No subscriptions" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -90,7 +90,7 @@ serve(async (req) => {
         failed++;
         if (statusCode === 404 || statusCode === 410) {
           await supabase.from("push_subscriptions").delete().eq("id", sub.id);
-          console.log("Removed expired subscription:", sub.id);
+          console.info("Removed expired subscription:", sub.id);
         }
       }
     }

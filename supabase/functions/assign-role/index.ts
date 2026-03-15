@@ -101,7 +101,7 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
+  } catch (error) {
     console.error("assign-role error:", err);
     return new Response(JSON.stringify({ error: "Internal error" }), {
       status: 500,

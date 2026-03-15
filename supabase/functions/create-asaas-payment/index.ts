@@ -128,7 +128,7 @@ serve(async (req) => {
           walletId: walletSetting.value,
           fixedValue: doctorValue,
         }];
-        console.log(`[Split] Doctor ${doctorProfileId} → wallet ${walletSetting.value}, commission: R$${doctorValue} (${DOCTOR_COMMISSION_PERCENT}%)`);
+        console.info(`[Split] Doctor ${doctorProfileId} → wallet ${walletSetting.value}, commission: R$${doctorValue} (${DOCTOR_COMMISSION_PERCENT}%)`);
       } else {
         console.warn(`[Split] Doctor ${doctorProfileId} has no Asaas wallet. Payment without split.`);
       }
@@ -431,7 +431,7 @@ serve(async (req) => {
         if (pixRes.ok) {
           pixData = await safeJson(pixRes);
         }
-      } catch (e) {
+      } catch (error) {
         console.warn("PIX QR code fetch failed, payment still created:", e);
       }
     }

@@ -114,7 +114,7 @@ serve(async (req) => {
           }),
         });
         sent++;
-      } catch (e) {
+      } catch (error) {
         console.error(`Email fail ${appt.id}:`, e);
       }
 
@@ -123,7 +123,7 @@ serve(async (req) => {
         try {
           const msg = `⏰ *Lembrete: consulta em ${timeUntil}!*\n\nOlá ${patient.first_name},\nSua consulta com ${doctorName} ${diffMin <= 18 ? "está prestes a começar" : `é em ${timeUntil}`}.\n\n📹 Sala: ${jitsiLink}\n\nEntre com antecedência. 🏥`;
           await fetch(sendWhatsAppUrl, { method: "POST", headers, body: JSON.stringify({ phone: patient.phone, message: msg }) });
-        } catch (e) {
+        } catch (error) {
           console.error(`WhatsApp patient fail ${appt.id}:`, e);
         }
       }
@@ -134,7 +134,7 @@ serve(async (req) => {
         try {
           const msg = `⏰ *Lembrete: consulta em ${timeUntil}!*\n\nDr(a). ${docProfile.first_name},\nSua consulta com ${patientName} ${diffMin <= 18 ? "está prestes a começar" : `é em ${timeUntil}`}.\n\n📹 Sala: ${jitsiLink}`;
           await fetch(sendWhatsAppUrl, { method: "POST", headers, body: JSON.stringify({ phone: docProfile.phone, message: msg }) });
-        } catch (e) {
+        } catch (error) {
           console.error(`WhatsApp doctor fail ${appt.id}:`, e);
         }
       }
@@ -150,7 +150,7 @@ serve(async (req) => {
             url: `/dashboard/consultation/${appt.id}`,
           }),
         });
-      } catch (e) {
+      } catch (error) {
         console.error(`Push patient fail ${appt.id}:`, e);
       }
 
@@ -167,7 +167,7 @@ serve(async (req) => {
               url: `/dashboard/consultation/${appt.id}`,
             }),
           });
-        } catch (e) {
+        } catch (error) {
           console.error(`Push doctor fail ${appt.id}:`, e);
         }
       }
@@ -180,7 +180,7 @@ serve(async (req) => {
         .gte("created_at", new Date(Date.now() - 10 * 60000).toISOString())
         .limit(1);
       if (existing && existing.length > 0) {
-        console.log(`Skipping duplicate notification for ${appt.id}`);
+        console.info(`Skipping duplicate notification for ${appt.id}`);
         continue;
       }
       try {
@@ -200,12 +200,12 @@ serve(async (req) => {
             link: `/dashboard/consultation/${appt.id}`,
           }] : []),
         ]);
-      } catch (e) {
+      } catch (error) {
         console.error(`In-app notification fail ${appt.id}:`, e);
       }
     }
 
-    console.log(`Sent ${sent} reminder sets (email+whatsapp+push+in-app)`);
+    console.info(`Sent ${sent} reminder sets (email+whatsapp+push+in-app)`);
     return new Response(JSON.stringify({ sent, appointments: appointments.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

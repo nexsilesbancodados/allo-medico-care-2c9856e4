@@ -306,6 +306,54 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
       </div>
     `,
   }),
+  password_reset: (d) => ({
+    subject: "🔐 Redefinição de Senha — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#1a6fc4;">Redefinição de Senha</h2>
+        <p>Olá${d.name ? ` <strong>${d.name}</strong>` : ""},</p>
+        <p>Recebemos um pedido para redefinir a senha da sua conta AloClinica.</p>
+        ${d.reset_link ? `<div style="text-align:center;margin:24px 0;"><a href="${d.reset_link}" style="background:#1a6fc4;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">Redefinir Senha</a></div>` : ""}
+        <p style="color:#666;font-size:13px;">Este link expira em 1 hora. Se não solicitou a redefinição, ignore este e-mail.</p>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  subscription_activated: (d) => ({
+    subject: "🎉 Plano Ativado com Sucesso — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#22c55e;">Plano Ativado!</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>Seu <strong>${d.plan_name || "plano"}</strong> foi ativado com sucesso.</p>
+        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #22c55e;">
+          <p><strong>Plano:</strong> ${d.plan_name || "—"}</p>
+          <p><strong>Válido até:</strong> ${d.expires_at || "—"}</p>
+          <p><strong>Consultas incluídas:</strong> ${d.max_appointments || "Ilimitadas"}</p>
+        </div>
+        <p>Acesse a plataforma para agendar sua primeira consulta!</p>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  subscription_expiring: (d) => ({
+    subject: "⚠️ Seu Plano Expira em Breve — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#f59e0b;">Plano Expirando</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>Seu plano <strong>${d.plan_name || "atual"}</strong> expira em <strong>${d.days_left || "poucos"} dias</strong>.</p>
+        <div style="background:#fff8f0;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #f59e0b;">
+          <p><strong>Data de expiração:</strong> ${d.expires_at || "—"}</p>
+        </div>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="${d.renew_link || "https://app.aloclinica.com.br/dashboard/plans"}" style="background:#1a6fc4;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">Renovar Plano</a>
+        </div>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+
 };
 
 serve(async (req) => {
@@ -317,7 +365,7 @@ serve(async (req) => {
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     if (!RESEND_API_KEY) {
       const body: EmailRequest = await req.json();
-      console.log("[DEV] Email would be sent:", JSON.stringify(body));
+      console.info("[DEV] Email would be sent:", JSON.stringify(body));
       return new Response(
         JSON.stringify({ success: true, dev: true, message: "Email logged (no RESEND_API_KEY configured)" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }

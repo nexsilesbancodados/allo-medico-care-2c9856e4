@@ -122,10 +122,10 @@ serve(async (req) => {
           }),
         });
         results.email = await emailRes.json();
-        console.log("Email sent:", results.email);
-      } catch (e) {
+        console.info("Email sent:", results.email);
+      } catch (error) {
         console.error("Email send error:", e);
-        results.email = { error: e.message };
+        results.email = { error: (error instanceof Error ? error.message : String(error)) };
       }
     }
 
@@ -161,10 +161,10 @@ serve(async (req) => {
           }),
         });
         results.whatsapp = await whatsRes.json();
-        console.log("WhatsApp sent:", results.whatsapp);
-      } catch (e) {
+        console.info("WhatsApp sent:", results.whatsapp);
+      } catch (error) {
         console.error("WhatsApp send error:", e);
-        results.whatsapp = { error: e.message };
+        results.whatsapp = { error: (error instanceof Error ? error.message : String(error)) };
       }
     }
 

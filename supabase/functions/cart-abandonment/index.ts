@@ -112,7 +112,7 @@ serve(async (req) => {
             }),
           });
           sent++;
-        } catch (e) {
+        } catch (error) {
           console.error(`Email failed for ${appt.id}:`, e);
         }
       }
@@ -129,7 +129,7 @@ serve(async (req) => {
             },
             body: JSON.stringify({ phone: patientPhone, message: msg }),
           });
-        } catch (e) {
+        } catch (error) {
           console.error(`WhatsApp failed for ${appt.id}:`, e);
         }
       }
@@ -146,7 +146,7 @@ serve(async (req) => {
       }
     }
 
-    console.log(`Cart abandonment: processed ${abandoned.length}, sent ${sent} reminders`);
+    console.info(`Cart abandonment: processed ${abandoned.length}, sent ${sent} reminders`);
     return new Response(JSON.stringify({ processed: abandoned.length, sent }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

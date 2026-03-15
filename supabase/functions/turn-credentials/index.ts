@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
 
     if (!secretKey || !appName) {
       // Return STUN-only fallback if TURN not configured
-      console.log("[TURN] Metered not configured, returning STUN fallback");
+      console.info("[TURN] Metered not configured, returning STUN fallback");
       return new Response(JSON.stringify({
         iceServers: [
           { urls: "stun:stun.l.google.com:19302" },
@@ -98,12 +98,12 @@ Deno.serve(async (req) => {
 
     const iceServers = await iceRes.json();
 
-    console.log(`[TURN] Returned ${iceServers.length} ICE servers for user ${user.id}`);
+    console.info(`[TURN] Returned ${iceServers.length} ICE servers for user ${user.id}`);
 
     return new Response(JSON.stringify({ iceServers }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err) {
+  } catch (error) {
     console.error("TURN credentials error:", err);
     return new Response(JSON.stringify({ error: "Internal server error" }), {
       status: 500,

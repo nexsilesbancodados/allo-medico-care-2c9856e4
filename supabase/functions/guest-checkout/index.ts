@@ -183,7 +183,7 @@ serve(async (req) => {
           });
         }
       } else {
-        console.log("[DEV] Guest checkout emails would be sent to:", email, doctorEmail);
+        console.info("[DEV] Guest checkout emails would be sent to:", email, doctorEmail);
       }
     } catch (emailErr) {
       console.error("Email sending error:", emailErr);

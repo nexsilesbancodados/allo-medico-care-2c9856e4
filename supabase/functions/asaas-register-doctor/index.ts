@@ -87,7 +87,7 @@ serve(async (req) => {
 
     if (searchData.data?.length > 0) {
       walletId = searchData.data[0].walletId || searchData.data[0].id;
-      console.log(`[Asaas] Doctor already registered as sub-account: ${walletId}`);
+      console.info(`[Asaas] Doctor already registered as sub-account: ${walletId}`);
     } else {
       // Create sub-account (subconta) for the doctor — required for splits
       // Per Asaas docs: POST /v3/accounts
@@ -128,7 +128,7 @@ serve(async (req) => {
       }
 
       walletId = createData.walletId || createData.id;
-      console.log(`[Asaas] Doctor registered as sub-account: ${walletId}, apiKey: ${createData.apiKey ? 'provided' : 'none'}`);
+      console.info(`[Asaas] Doctor registered as sub-account: ${walletId}, apiKey: ${createData.apiKey ? 'provided' : 'none'}`);
     }
 
     // Store walletId in doctor_profiles (we'll use pix_key_type field or a dedicated column)
