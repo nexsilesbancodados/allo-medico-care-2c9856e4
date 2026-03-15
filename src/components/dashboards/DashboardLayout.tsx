@@ -199,7 +199,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => (
     <Link to={item.href} onClick={onClick}
-      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150 relative ${
+      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors duration-150 relative ${
         item.active ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
       }`}
     >
