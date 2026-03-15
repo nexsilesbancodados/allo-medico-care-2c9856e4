@@ -733,7 +733,7 @@ const PlansCheckout = () => {
               {specialties.map(spec => (
                 <Card
                   key={spec.id}
-                  className="border-border hover:shadow-xl hover:-translate-y-1 transition-shadow cursor-pointer hover:border-primary/50"
+                  className="card-interactive border-border cursor-pointer hover:border-primary/50"
                   onClick={() => handleSelectSpecialty(spec.id)}
                 >
                   <CardContent className="p-4 text-center">
@@ -767,7 +767,7 @@ const PlansCheckout = () => {
             ) : (
               <div className="space-y-4">
                 {doctors.map(doc => (
-                  <Card key={doc.id} className="border-border hover:shadow-xl hover:-translate-y-1 transition-shadow cursor-pointer" onClick={() => handleSelectDoctor(doc)}>
+                  <Card key={doc.id} className="card-interactive border-border cursor-pointer" onClick={() => handleSelectDoctor(doc)}>
                     <CardContent className="p-5">
                       <div className="flex items-center gap-4">
                         <Avatar className="w-14 h-14 flex-shrink-0">

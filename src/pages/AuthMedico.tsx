@@ -135,7 +135,7 @@ const AuthMedico = () => {
         consultationType && `Tipo de atendimento: ${consultationType}`,
         howFound && `Como conheceu: ${howFound}`,
       ].filter(Boolean).join("\n");
-      const { error } = await supabase.from("doctor_applications" as any).insert({
+      const { error } = await supabase.from("doctor_applications" as never).insert({
         full_name: fullName,
         email,
         phone: phone || null,

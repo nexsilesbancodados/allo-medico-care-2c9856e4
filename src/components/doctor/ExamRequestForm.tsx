@@ -163,7 +163,7 @@ const ExamRequestForm = () => {
       }
 
       // Create exam request
-      const { error } = await supabase.from("exam_requests" as any).insert({
+      const { error } = await supabase.from("exam_requests" as never).insert({
         requesting_doctor_id: effectiveDoctorProfileId,
         patient_id: patientId || null,
         exam_type: finalExamType,

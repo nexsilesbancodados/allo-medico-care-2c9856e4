@@ -44,14 +44,14 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
     if (!user) return;
     setLoading(true);
     const { data, error } = await supabase
-      .from("ai_conversations" as any)
+      .from("ai_conversations" as unknown as Parameters<typeof import("@supabase/supabase-js").SupabaseClient.prototype.from>[0])
       .select("*")
       .eq("user_id", user.id)
       .order("updated_at", { ascending: false })
       .limit(100);
 
     if (!error && data) {
-      setConversations((data as unknown as any[]).map((c: any) => ({
+      setConversations((data as unknown[]).map((c: Record<string, unknown>) => ({
         id: c.id,
         title: c.title ?? "Conversa",
         role_context: c.role_context ?? c.context ?? "patient",
@@ -68,7 +68,7 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
   }, [user]);
 
   const deleteConversation = async (id: string) => {
-    const { error } = await supabase.from("ai_conversations" as any).delete().eq("id", id);
+    const { error } = await supabase.from("ai_conversations" as unknown as Parameters<typeof import("@supabase/supabase-js").SupabaseClient.prototype.from>[0]).delete().eq("id", id);
     if (!error) {
       setConversations(prev => prev.filter(c => c.id !== id));
       if (selectedConv?.id === id) setSelectedConv(null);

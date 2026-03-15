@@ -75,7 +75,7 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
       fetchRecords();
       // Log access for CFM compliance
       if (user && patientId && isDoctorRole) {
-        supabase.from("medical_record_access_logs" as any).insert({
+        supabase.from("medical_record_access_logs" as never).insert({
           patient_id: patientId,
           accessed_by: user.id,
           access_type: "view",

@@ -597,7 +597,7 @@ const AuthPaciente = () => {
                         whileHover={{ y: -4, transition: { duration: 0.2 } }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => setSelectedPlanId(plan.id)}
-                        className={`relative cursor-pointer rounded-2xl p-6 transition-all duration-300 group overflow-hidden ${
+                        className={`card-interactive relative cursor-pointer rounded-2xl p-6 group overflow-hidden ${
                           isPremium
                             ? "bg-gradient-to-br from-primary via-primary to-secondary text-primary-foreground border-2 border-primary shadow-2xl shadow-primary/30"
                             : isSelected

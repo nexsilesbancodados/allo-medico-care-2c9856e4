@@ -397,7 +397,7 @@ const GuestCheckout = () => {
 
   // Glass card styles
   const glassCard = "backdrop-blur-xl bg-white/70 dark:bg-white/5 border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.3)]";
-  const glassCardHover = `${glassCard} hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)] hover:border-primary/30 transition-all duration-300`;
+  const glassCardHover = `card-interactive ${glassCard} hover:shadow-[0_12px_40px_rgba(0,0,0,0.12)] dark:hover:shadow-[0_12px_40px_rgba(0,0,0,0.4)] hover:border-primary/30 transition-all duration-300`;
 
   return (
     <div className="min-h-screen flex flex-col relative overflow-hidden">
@@ -491,7 +491,7 @@ const GuestCheckout = () => {
                       transition={{ delay: i * 0.05 }}
                     >
                       <div
-                        className={`${glassCardHover} rounded-2xl p-5 text-center cursor-pointer group`}
+                        className={`card-interactive ${glassCardHover} rounded-2xl p-5 text-center cursor-pointer group`}
                         onClick={() => { setSelectedSpecialty(spec.id); setStep("doctor"); }}
                       >
                         <div className="w-10 h-10 rounded-xl bg-primary/10 mx-auto mb-3 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -545,7 +545,7 @@ const GuestCheckout = () => {
                         transition={{ delay: i * 0.08 }}
                       >
                         <div
-                          className={`${glassCardHover} rounded-2xl p-5 cursor-pointer group`}
+                          className={`card-interactive ${glassCardHover} rounded-2xl p-5 cursor-pointer group`}
                           onClick={() => { setSelectedDoctor(doc); setSelectedDate(undefined); setSelectedTime(null); setStep("datetime"); }}
                         >
                           <div className="flex items-center gap-4">

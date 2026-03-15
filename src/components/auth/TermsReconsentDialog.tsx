@@ -24,7 +24,7 @@ const TermsReconsentDialog = forwardRef<HTMLDivElement>((_, _ref) => {
   const checkConsent = async () => {
     // Get required version from app_settings
     const { data: setting } = await supabase
-      .from("app_settings" as any)
+      .from("app_settings" as unknown as never)
       .select("value")
       .eq("key", CURRENT_TERMS_VERSION_KEY)
       .single();
