@@ -398,7 +398,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           <div className="flex items-stretch h-[64px]">
             {bottomNav.map(item => (
               <Link key={item.href} to={item.href}
-                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-all duration-150 select-none ${item.active ? "text-primary" : "text-muted-foreground"}`}
+                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-colors duration-150 select-none ${item.active ? "text-primary" : "text-muted-foreground"}`}
               >
                 {item.active && (
                   <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-b-full bg-primary" />
