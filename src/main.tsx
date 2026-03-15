@@ -69,6 +69,8 @@ if ("serviceWorker" in navigator) {
 }
 
 /* ── Mount React synchronously ────────────────────────── */
+const BOOT_PLACEHOLDER_ID = "app-boot-placeholder";
+
 const renderFatalFallback = (root: HTMLElement) => {
   root.innerHTML =
     '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><div style="text-align:center"><h2>Erro ao carregar</h2><p>Detectamos uma falha de inicialização. Recarregue para recuperar.</p><button onclick="location.reload()" style="padding:8px 16px;margin-top:12px;cursor:pointer;border-radius:6px;border:1px solid #ccc">Recarregar</button></div></div>';
@@ -80,17 +82,29 @@ if (!root) {
   throw new Error("Root element not found");
 }
 
+root.innerHTML = `<div id="${BOOT_PLACEHOLDER_ID}" style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui,-apple-system,sans-serif;color:#475569">Carregando aplicativo...</div>`;
+
 window.setTimeout(() => {
+  const firstChild = root.firstElementChild as HTMLElement | null;
+  const onlyBootPlaceholder = root.childElementCount === 1 && firstChild?.id === BOOT_PLACEHOLDER_ID;
   const hasRenderedContent = root.childElementCount > 0 || (root.textContent?.trim().length ?? 0) > 0;
-  if (!hasRenderedContent) {
+
+  if (!hasRenderedContent || onlyBootPlaceholder) {
     renderFatalFallback(root);
   }
-}, 9000);
+}, 7000);
 
 try {
-  createRoot(root).render(<App />);
+  createRoot(root).render(
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>,
+  );
 } catch (err) {
   logError("Fatal React mount error", err);
-  if (isChunkError(err)) { recover(); }
-  else { renderFatalFallback(root); }
+  if (isChunkError(err)) {
+    recover();
+  } else {
+    renderFatalFallback(root);
+  }
 }
