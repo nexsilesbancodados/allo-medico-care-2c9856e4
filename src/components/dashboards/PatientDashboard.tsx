@@ -286,7 +286,7 @@ const PatientDashboard = () => {
               </Button>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
               {/* Primary next appointment */}
               <Card
                 className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-150 border-border/30 hover:shadow-md rounded-2xl ${
