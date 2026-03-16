@@ -138,15 +138,15 @@ const PatientDashboard = () => {
           {/* Decorative gradient background */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-secondary/[0.04] pointer-events-none" />
           <div className="absolute -right-10 -bottom-6 opacity-10 pointer-events-none">
-            <img src={mascotImg} alt="" className="w-32 h-32 object-contain" loading="lazy" />
+            <img src={mascotImg} alt="" className="w-32 h-32 lg:w-40 lg:h-40 object-contain" loading="lazy" />
           </div>
 
-          <div className="relative z-10 p-5 pb-4">
+          <div className="relative z-10 p-4 sm:p-5 lg:p-6 pb-4">
             {/* Top row: avatar + greeting + actions */}
-            <div className="flex items-start gap-4">
-              <Avatar className="h-[52px] w-[52px] shrink-0 ring-[3px] ring-primary/12 ring-offset-2 ring-offset-card shadow-md">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <Avatar className="h-11 w-11 sm:h-[52px] sm:w-[52px] shrink-0 ring-[3px] ring-primary/12 ring-offset-2 ring-offset-card shadow-md">
                 {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-lg font-bold">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-base sm:text-lg font-bold">
                   {(profile?.first_name?.[0] ?? "") + (profile?.last_name?.[0] ?? "")}
                 </AvatarFallback>
               </Avatar>
@@ -156,7 +156,7 @@ const PatientDashboard = () => {
                   <greetData.icon className="w-3.5 h-3.5 text-warning" />
                   <span className="text-[11px] font-medium text-muted-foreground">{greetData.text}</span>
                 </div>
-                <h1 className="text-[22px] font-extrabold leading-tight text-foreground tracking-tight truncate">
+                <h1 className="text-xl sm:text-[22px] lg:text-2xl font-extrabold leading-tight text-foreground tracking-tight truncate">
                   {profile?.first_name || "Paciente"}
                 </h1>
                 <p className="text-[11px] text-muted-foreground/70 mt-0.5 capitalize">
@@ -178,20 +178,20 @@ const PatientDashboard = () => {
 
           {/* KPI stats bar */}
           {!loading && (
-            <div className="relative z-10 px-5 pb-5">
-              <div className="grid grid-cols-3 gap-2">
+            <div className="relative z-10 px-4 sm:px-5 lg:px-6 pb-4 sm:pb-5">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {[
                   { label: "Consultas", value: stats?.total ?? 0, icon: Calendar, color: "text-primary", bgIcon: "bg-primary/8" },
                   { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText, color: "text-secondary", bgIcon: "bg-secondary/8" },
                   { label: "Documentos", value: stats?.documents ?? 0, icon: Upload, color: "text-warning", bgIcon: "bg-warning/8" },
                 ].map(kpi => (
-                  <div key={kpi.label} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-muted/30 border border-border/20">
-                    <div className={`size-8 rounded-lg ${kpi.bgIcon} flex items-center justify-center shrink-0`}>
-                      <kpi.icon className={`w-3.5 h-3.5 ${kpi.color}`} />
+                  <div key={kpi.label} className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-muted/30 border border-border/20">
+                    <div className={`size-7 sm:size-8 rounded-lg ${kpi.bgIcon} flex items-center justify-center shrink-0`}>
+                      <kpi.icon className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${kpi.color}`} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-lg font-black text-foreground leading-none tabular-nums">{kpi.value}</p>
-                      <p className="text-[9px] text-muted-foreground/70 font-medium mt-0.5">{kpi.label}</p>
+                      <p className="text-base sm:text-lg font-black text-foreground leading-none tabular-nums">{kpi.value}</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium mt-0.5">{kpi.label}</p>
                     </div>
                   </div>
                 ))}
@@ -199,7 +199,7 @@ const PatientDashboard = () => {
             </div>
           )}
           {loading && (
-            <div className="px-5 pb-5 grid grid-cols-3 gap-2">
+            <div className="px-4 sm:px-5 pb-4 sm:pb-5 grid grid-cols-3 gap-2 sm:gap-3">
               {[1,2,3].map(i => <div key={i} className="h-14 rounded-xl shimmer-v2" />)}
             </div>
           )}
