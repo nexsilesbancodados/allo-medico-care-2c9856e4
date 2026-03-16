@@ -1,39 +1,58 @@
-import { useState, useEffect, forwardRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WifiOff, Wifi, RefreshCw } from "lucide-react";
 import { useTranslation } from "@/i18n";
 
 const PING_URL = "/favicon.ico";
 const RETRY_INTERVAL_MS = 5000;
+const CONNECTIVITY_TIMEOUT_MS = 4000;
+
+const getInitialOnlineState = () => {
+  if (typeof navigator === "undefined") return true;
+  return navigator.onLine;
+};
+
+const createTimeoutSignal = (timeoutMs: number) => {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+
+  return {
+    signal: controller.signal,
+    cleanup: () => window.clearTimeout(timeoutId),
+  };
+};
 
 /** Pings the server to confirm real connectivity (not just navigator.onLine) */
 const checkRealConnectivity = async (): Promise<boolean> => {
+  const { signal, cleanup } = createTimeoutSignal(CONNECTIVITY_TIMEOUT_MS);
+
   try {
     const res = await fetch(`${PING_URL}?_=${Date.now()}`, {
       method: "HEAD",
       cache: "no-store",
-      signal: AbortSignal.timeout(4000),
+      signal,
     });
     return res.ok;
   } catch {
     return false;
+  } finally {
+    cleanup();
   }
 };
 
-const OfflineIndicator = forwardRef<HTMLDivElement>((_, _ref) => {
-  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+const OfflineIndicator = () => {
+  const [isOffline, setIsOffline] = useState(!getInitialOnlineState());
   const [showReconnected, setShowReconnected] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
   const { t } = useTranslation();
 
   const handleOnline = useCallback(async () => {
-    // Verify real connectivity before declaring online
     const real = await checkRealConnectivity();
     if (real) {
       setIsOffline(false);
       setShowReconnected(true);
       setRetryCount(0);
-      setTimeout(() => setShowReconnected(false), 3500);
+      window.setTimeout(() => setShowReconnected(false), 3500);
     }
   }, []);
 
@@ -52,19 +71,20 @@ const OfflineIndicator = forwardRef<HTMLDivElement>((_, _ref) => {
     };
   }, [handleOffline, handleOnline]);
 
-  // Active ping when offline
   useEffect(() => {
     if (!isOffline) return;
-    const interval = setInterval(async () => {
-      setRetryCount(c => c + 1);
+
+    const interval = window.setInterval(async () => {
+      setRetryCount((count) => count + 1);
       const real = await checkRealConnectivity();
       if (real) {
         setIsOffline(false);
         setShowReconnected(true);
-        setTimeout(() => setShowReconnected(false), 3500);
+        window.setTimeout(() => setShowReconnected(false), 3500);
       }
     }, RETRY_INTERVAL_MS);
-    return () => clearInterval(interval);
+
+    return () => window.clearInterval(interval);
   }, [isOffline]);
 
   const springConfig = { type: "spring", stiffness: 320, damping: 28 } as const;
@@ -112,7 +132,6 @@ const OfflineIndicator = forwardRef<HTMLDivElement>((_, _ref) => {
       )}
     </AnimatePresence>
   );
-});
+};
 
-OfflineIndicator.displayName = "OfflineIndicator";
 export default OfflineIndicator;

@@ -106,6 +106,12 @@ const SubdomainRedirectProvider = () => {
 
 const App = () => {
   const lastUnhandledToastRef = useRef(0);
+  const [showDeferredFeatures, setShowDeferredFeatures] = useState(false);
+
+  useEffect(() => {
+    const deferTimer = window.setTimeout(() => setShowDeferredFeatures(true), 250);
+    return () => window.clearTimeout(deferTimer);
+  }, []);
 
   // Global safety net for unhandled async errors (prevents white screen)
   useEffect(() => {
@@ -139,90 +145,93 @@ const App = () => {
   }, []);
 
   return (
-  <ErrorBoundary>
-  <I18nProvider>
-  <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <AuthProvider>
-          <KeyboardShortcutsProvider />
-          <SubdomainRedirectProvider />
-          <ScrollToTop />
-          <a
-            href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-medium focus:shadow-lg"
-          >
-            Pular para o conteúdo
-          </a>
-          <main id="main-content">
-          <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/paciente" element={<AuthPaciente />} />
-            <Route path="/medico" element={<AuthMedico />} />
-            <Route path="/admin" element={<AuthAdmin />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/lgpd" element={<LGPD />} />
-            <Route path="/cookies" element={<Cookies />} />
-            <Route path="/refund" element={<RefundPolicy />} />
-            <Route path="/doctor-terms" element={<DoctorTerms />} />
-            <Route path="/accessibility" element={<Accessibility />} />
-            <Route path="/consulta-avulsa" element={<GuestCheckout />} />
-            <Route path="/consulta" element={<GuestConsultation />} />
-            <Route path="/consulta/avaliacao" element={<GuestRating />} />
-            <Route path="/parceiro" element={<AuthParceiro />} />
-            
-            <Route path="/clinica" element={<AuthClinica />} />
-            <Route path="/recepcionista" element={<AuthRecepcionista />} />
-            <Route path="/suporte" element={<AuthSuporte />} />
-            <Route path="/payment-success" element={<PaymentSuccess />} />
-            
-            <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
-            <Route path="/l/:id" element={<LinkRedirect />} />
-            <Route path="/validar/:id" element={<ValidateDocument />} />
-            <Route path="/validar" element={<ValidateDocument />} />
-            <Route path="/cartao-beneficios" element={<DiscountCard />} />
-            <Route path="/cartao-desconto" element={<Navigate to="/cartao-beneficios" replace />} />
-            <Route path="/para-empresas" element={<B2BLanding />} />
-            <Route path="/para-empresas/cartao" element={<B2BCartao />} />
-            <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
-            <Route path="/teleconsulta" element={<Teleconsulta />} />
-            <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
-            <Route path="/laudista" element={<AuthLaudista />} />
-            <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
-            <Route
-              path="/dashboard/*"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          </Suspense>
-          </main>
-          <Suspense fallback={null}>
-            <AnalyticsScripts />
-            <PingoChatbot />
-            <CookieConsent />
-            <TermsReconsentDialog />
-            <OfflineIndicator />
-            <PWAUpdateBanner />
-          </Suspense>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-  </ThemeProvider>
-  </I18nProvider>
-  </ErrorBoundary>
+    <ErrorBoundary>
+      <I18nProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
+          <QueryClientProvider client={queryClient}>
+            <TooltipProvider>
+              <Sonner />
+              <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+                <AuthProvider>
+                  <KeyboardShortcutsProvider />
+                  <SubdomainRedirectProvider />
+                  <ScrollToTop />
+                  <a
+                    href="#main-content"
+                    className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:rounded-lg focus:bg-primary focus:text-primary-foreground focus:text-sm focus:font-medium focus:shadow-lg"
+                  >
+                    Pular para o conteúdo
+                  </a>
+                  <main id="main-content">
+                    <Suspense fallback={<PageLoader />}>
+                      <Routes>
+                        <Route path="/" element={<Index />} />
+                        <Route path="/auth" element={<Auth />} />
+                        <Route path="/paciente" element={<AuthPaciente />} />
+                        <Route path="/medico" element={<AuthMedico />} />
+                        <Route path="/admin" element={<AuthAdmin />} />
+                        <Route path="/forgot-password" element={<ForgotPassword />} />
+                        <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/terms" element={<Terms />} />
+                        <Route path="/privacy" element={<Privacy />} />
+                        <Route path="/lgpd" element={<LGPD />} />
+                        <Route path="/cookies" element={<Cookies />} />
+                        <Route path="/refund" element={<RefundPolicy />} />
+                        <Route path="/doctor-terms" element={<DoctorTerms />} />
+                        <Route path="/accessibility" element={<Accessibility />} />
+                        <Route path="/consulta-avulsa" element={<GuestCheckout />} />
+                        <Route path="/consulta" element={<GuestConsultation />} />
+                        <Route path="/consulta/avaliacao" element={<GuestRating />} />
+                        <Route path="/parceiro" element={<AuthParceiro />} />
+                        <Route path="/clinica" element={<AuthClinica />} />
+                        <Route path="/recepcionista" element={<AuthRecepcionista />} />
+                        <Route path="/suporte" element={<AuthSuporte />} />
+                        <Route path="/payment-success" element={<PaymentSuccess />} />
+                        <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
+                        <Route path="/l/:id" element={<LinkRedirect />} />
+                        <Route path="/validar/:id" element={<ValidateDocument />} />
+                        <Route path="/validar" element={<ValidateDocument />} />
+                        <Route path="/cartao-beneficios" element={<DiscountCard />} />
+                        <Route path="/cartao-desconto" element={<Navigate to="/cartao-beneficios" replace />} />
+                        <Route path="/para-empresas" element={<B2BLanding />} />
+                        <Route path="/para-empresas/cartao" element={<B2BCartao />} />
+                        <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
+                        <Route path="/teleconsulta" element={<Teleconsulta />} />
+                        <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
+                        <Route path="/laudista" element={<AuthLaudista />} />
+                        <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
+                        <Route
+                          path="/dashboard/*"
+                          element={
+                            <ProtectedRoute>
+                              <Dashboard />
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route path="*" element={<NotFound />} />
+                      </Routes>
+                    </Suspense>
+                  </main>
+
+                  {showDeferredFeatures && (
+                    <ErrorBoundary fallback={null}>
+                      <Suspense fallback={null}>
+                        <AnalyticsScripts />
+                        <PingoChatbot />
+                        <CookieConsent />
+                        <TermsReconsentDialog />
+                        <OfflineIndicator />
+                        <PWAUpdateBanner />
+                      </Suspense>
+                    </ErrorBoundary>
+                  )}
+                </AuthProvider>
+              </BrowserRouter>
+            </TooltipProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </I18nProvider>
+    </ErrorBoundary>
   );
 };
 
