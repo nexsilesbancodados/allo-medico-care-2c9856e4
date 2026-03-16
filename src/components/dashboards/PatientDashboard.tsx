@@ -257,17 +257,17 @@ const PatientDashboard = () => {
         {/* ═══ Quick Actions — 4-col grid ═══ */}
         <section>
           <h2 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Ações Rápidas</h2>
-          <div className="grid grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
             {quickActions.map(item => (
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className="group flex flex-col items-center gap-2 py-3.5 rounded-2xl bg-card border border-border/30 hover:border-primary/20 hover:shadow-md active:scale-[0.96] transition-all duration-150"
+                className="group flex flex-col items-center gap-2 py-3 sm:py-3.5 rounded-2xl bg-card border border-border/30 hover:border-primary/20 hover:shadow-md active:scale-[0.96] transition-all duration-150"
               >
-                <div className={`size-11 rounded-xl ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-105 transition-transform duration-150`}>
-                  <item.icon className={`w-[18px] h-[18px] ${item.color}`} />
+                <div className={`size-10 sm:size-11 rounded-xl ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-105 transition-transform duration-150`}>
+                  <item.icon className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${item.color}`} />
                 </div>
-                <span className="text-[10px] font-semibold text-foreground/80">{item.label}</span>
+                <span className="text-[10px] sm:text-[11px] font-semibold text-foreground/80">{item.label}</span>
               </button>
             ))}
           </div>
