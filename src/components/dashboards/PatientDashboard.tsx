@@ -418,7 +418,7 @@ const PatientDashboard = () => {
                 Ver tudo <ArrowRight className="w-3 h-3" />
               </Button>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-2.5">
               {healthMetrics.map((m: { type: string; value: number; unit: string; measured_at: string }) => {
                 const typeConfig: Record<string, { icon: string; color: string; label: string }> = {
                   "pressao_arterial": { icon: "🫀", color: "text-destructive", label: "Pressão" },
