@@ -10,14 +10,16 @@ import { toast } from "sonner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Index from "./pages/Index";
+import Dashboard from "./pages/Dashboard";
 import { logError } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
+import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
+import { useSubdomainRedirect } from "./hooks/use-subdomain-redirect";
+import { prefetchOnIdle } from "./hooks/use-prefetch-route";
+import ScrollToTop from "./components/ScrollToTop";
 
 const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
 const Auth = lazy(() => import("./pages/Auth"));
-import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
-import { useSubdomainRedirect } from "./hooks/use-subdomain-redirect";
-import ScrollToTop from "./components/ScrollToTop";
 
 // Lazy-loaded overlay components (not needed on initial render)
 const PingoChatbot = lazy(() => import("./components/PingoChatbot"));
@@ -39,12 +41,10 @@ const Cookies = lazy(() => import("./pages/Cookies"));
 const RefundPolicy = lazy(() => import("./pages/RefundPolicy"));
 const DoctorTerms = lazy(() => import("./pages/DoctorTerms"));
 const Accessibility = lazy(() => import("./pages/Accessibility"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
 const GuestCheckout = lazy(() => import("./pages/GuestCheckout"));
 const GuestConsultation = lazy(() => import("./pages/GuestConsultation"));
 const GuestRating = lazy(() => import("./pages/GuestRating"));
 const AuthParceiro = lazy(() => import("./pages/AuthParceiro"));
-
 const AuthClinica = lazy(() => import("./pages/AuthClinica"));
 const AuthRecepcionista = lazy(() => import("./pages/AuthRecepcionista"));
 const AuthSuporte = lazy(() => import("./pages/AuthSuporte"));
@@ -109,8 +109,64 @@ const App = () => {
   const [showDeferredFeatures, setShowDeferredFeatures] = useState(false);
 
   useEffect(() => {
-    const deferTimer = window.setTimeout(() => setShowDeferredFeatures(true), 250);
-    return () => window.clearTimeout(deferTimer);
+    const frameId = window.requestAnimationFrame(() => setShowDeferredFeatures(true));
+    return () => window.cancelAnimationFrame(frameId);
+  }, []);
+
+  useEffect(() => {
+    const cancelCriticalPrefetch = prefetchOnIdle(
+      [
+        () => import("./pages/Auth"),
+        () => import("./pages/AuthPaciente"),
+        () => import("./pages/AuthMedico"),
+        () => import("./pages/AuthAdmin"),
+        () => import("./pages/AuthClinica"),
+        () => import("./pages/AuthRecepcionista"),
+        () => import("./pages/AuthSuporte"),
+        () => import("./pages/AuthParceiro"),
+        () => import("./pages/AuthLaudista"),
+        () => import("./pages/GuestCheckout"),
+        () => import("./pages/GuestConsultation"),
+      ],
+      1200,
+    );
+
+    const cancelSecondaryPrefetch = prefetchOnIdle(
+      [
+        () => import("./pages/ForgotPassword"),
+        () => import("./pages/ResetPassword"),
+        () => import("./pages/Terms"),
+        () => import("./pages/Privacy"),
+        () => import("./pages/LGPD"),
+        () => import("./pages/Cookies"),
+        () => import("./pages/RefundPolicy"),
+        () => import("./pages/DoctorTerms"),
+        () => import("./pages/Accessibility"),
+        () => import("./pages/PaymentSuccess"),
+        () => import("./pages/DoctorPublicProfilePage"),
+        () => import("./pages/DiscountCard"),
+        () => import("./pages/B2BLanding"),
+        () => import("./pages/B2BCartao"),
+        () => import("./pages/B2BTelelaudo"),
+        () => import("./pages/Teleconsulta"),
+        () => import("./pages/Telelaudo"),
+        () => import("./pages/TelelaudoWorkspace"),
+        () => import("./pages/ValidateDocument"),
+        () => import("./pages/LinkRedirect"),
+        () => import("./components/analytics/AnalyticsScripts"),
+        () => import("./components/PingoChatbot"),
+        () => import("./components/OfflineIndicator"),
+        () => import("./components/CookieConsent"),
+        () => import("./components/auth/TermsReconsentDialog"),
+        () => import("./components/PWAUpdateBanner"),
+      ],
+      4000,
+    );
+
+    return () => {
+      cancelCriticalPrefetch();
+      cancelSecondaryPrefetch();
+    };
   }, []);
 
   // Global safety net for unhandled async errors (prevents white screen)
