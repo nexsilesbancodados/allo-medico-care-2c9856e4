@@ -385,8 +385,8 @@ const PatientDashboard = () => {
                   <p className="text-sm text-muted-foreground mb-6 max-w-[240px] mx-auto leading-relaxed">
                     Encontre o médico ideal e agende sua consulta
                   </p>
-                  <Button
-                    className="w-full bg-primary text-primary-foreground rounded-xl h-12 text-sm font-bold shadow-lg shadow-primary/15"
+                    <Button
+                    className="w-full sm:w-auto bg-primary text-primary-foreground rounded-xl h-12 text-sm font-bold shadow-lg shadow-primary/15 px-8"
                     onClick={() => navigate("/dashboard/schedule?role=patient")}>
                     <Calendar className="w-4 h-4 mr-2" /> Agendar consulta
                   </Button>
