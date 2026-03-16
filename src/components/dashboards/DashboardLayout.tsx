@@ -378,7 +378,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           </aside>
         )}
         <main className="flex-1 min-w-0 overflow-auto pb-24 md:pb-8">
-          <div className="px-3 py-3 sm:p-6">
+          <div className="px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
             <DashboardBreadcrumbs />
             {children}
           </div>
