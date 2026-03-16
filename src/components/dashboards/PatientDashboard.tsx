@@ -350,17 +350,17 @@ const PatientDashboard = () => {
               {/* Secondary appointments */}
               {upcoming.slice(1, 3).map((a: { id: string; scheduled_at: string; status: string; doctor_name: string; duration_minutes?: number | null }) => (
                 <Card key={a.id} className="border-border/30 overflow-hidden hover:shadow-sm transition-colors duration-150 cursor-pointer active:scale-[0.98] rounded-xl" onClick={() => navigate("/dashboard/appointments?role=patient")}>
-                  <CardContent className="p-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className="size-10 rounded-lg bg-muted/30 flex flex-col items-center justify-center shrink-0 text-muted-foreground">
+                  <CardContent className="p-3 sm:p-3.5">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="size-9 sm:size-10 rounded-lg bg-muted/30 flex flex-col items-center justify-center shrink-0 text-muted-foreground">
                         <span className="text-[8px] font-bold uppercase leading-none">{format(new Date(a.scheduled_at), "MMM", { locale: ptBR })}</span>
-                        <span className="text-sm font-bold leading-none">{format(new Date(a.scheduled_at), "dd")}</span>
+                        <span className="text-xs sm:text-sm font-bold leading-none">{format(new Date(a.scheduled_at), "dd")}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-[13px] font-semibold text-foreground truncate">{a.doctor_name}</h4>
-                        <p className="text-xs text-muted-foreground">{format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min</p>
+                        <h4 className="text-xs sm:text-[13px] font-semibold text-foreground truncate">{a.doctor_name}</h4>
+                        <p className="text-[11px] sm:text-xs text-muted-foreground">{format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min</p>
                       </div>
-                      <span className="text-[10px] text-muted-foreground/50 bg-muted/30 px-2 py-0.5 rounded-md font-medium shrink-0">
+                      <span className="text-[9px] sm:text-[10px] text-muted-foreground/50 bg-muted/30 px-1.5 sm:px-2 py-0.5 rounded-md font-medium shrink-0">
                         {statusLabel[a.status] ?? a.status}
                       </span>
                     </div>
