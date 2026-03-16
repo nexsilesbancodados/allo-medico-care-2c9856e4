@@ -131,7 +131,7 @@ const PatientDashboard = () => {
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
-      <div className="max-w-lg mx-auto w-full space-y-6 pb-24">
+      <div className="max-w-5xl mx-auto w-full space-y-6 pb-24">
 
         {/* ═══ HERO — Welcome + Avatar ═══ */}
         <section className="relative overflow-hidden rounded-3xl border border-border/30 bg-card shadow-sm">
