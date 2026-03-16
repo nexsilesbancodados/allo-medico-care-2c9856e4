@@ -510,17 +510,17 @@ const PatientDashboard = () => {
         {/* ═══ Shortcuts grid ═══ */}
         <section>
           <h2 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Acesso Rápido</h2>
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
             {shortcuts.map(item => (
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className="group flex flex-col items-center gap-2 py-4 rounded-xl bg-card border border-border/30 hover:border-primary/15 hover:shadow-sm active:scale-[0.97] transition-all duration-150"
+                className="group flex flex-col items-center gap-2 py-3 sm:py-4 rounded-xl bg-card border border-border/30 hover:border-primary/15 hover:shadow-sm active:scale-[0.97] transition-all duration-150"
               >
-                <div className="size-10 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 transition-colors duration-150">
-                  <item.icon className={`w-[18px] h-[18px] ${item.color}`} />
+                <div className="size-9 sm:size-10 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 transition-colors duration-150">
+                  <item.icon className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${item.color}`} />
                 </div>
-                <span className="text-[11px] font-semibold text-muted-foreground">{item.label}</span>
+                <span className="text-[10px] sm:text-[11px] font-semibold text-muted-foreground">{item.label}</span>
               </button>
             ))}
           </div>
