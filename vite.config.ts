@@ -136,7 +136,10 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
   build: {
-    target: "es2020",
+    // Lower target to avoid white-screen parse failures on older Safari/iOS WebViews
+    // that support modules but choke on ES2020 syntax before React can mount.
+    target: "es2018",
+    cssTarget: "safari13",
     chunkSizeWarningLimit: 600,
     minify: "esbuild",
     sourcemap: false,
