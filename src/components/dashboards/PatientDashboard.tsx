@@ -131,22 +131,22 @@ const PatientDashboard = () => {
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
-      <div className="max-w-lg mx-auto w-full space-y-6 pb-24">
+      <div className="max-w-5xl mx-auto w-full space-y-6 pb-24">
 
         {/* ═══ HERO — Welcome + Avatar ═══ */}
         <section className="relative overflow-hidden rounded-3xl border border-border/30 bg-card shadow-sm">
           {/* Decorative gradient background */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-secondary/[0.04] pointer-events-none" />
           <div className="absolute -right-10 -bottom-6 opacity-10 pointer-events-none">
-            <img src={mascotImg} alt="" className="w-32 h-32 object-contain" loading="lazy" />
+            <img src={mascotImg} alt="" className="w-32 h-32 lg:w-40 lg:h-40 object-contain" loading="lazy" />
           </div>
 
-          <div className="relative z-10 p-5 pb-4">
+          <div className="relative z-10 p-4 sm:p-5 lg:p-6 pb-4">
             {/* Top row: avatar + greeting + actions */}
-            <div className="flex items-start gap-4">
-              <Avatar className="h-[52px] w-[52px] shrink-0 ring-[3px] ring-primary/12 ring-offset-2 ring-offset-card shadow-md">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <Avatar className="h-11 w-11 sm:h-[52px] sm:w-[52px] shrink-0 ring-[3px] ring-primary/12 ring-offset-2 ring-offset-card shadow-md">
                 {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-lg font-bold">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-base sm:text-lg font-bold">
                   {(profile?.first_name?.[0] ?? "") + (profile?.last_name?.[0] ?? "")}
                 </AvatarFallback>
               </Avatar>
@@ -156,7 +156,7 @@ const PatientDashboard = () => {
                   <greetData.icon className="w-3.5 h-3.5 text-warning" />
                   <span className="text-[11px] font-medium text-muted-foreground">{greetData.text}</span>
                 </div>
-                <h1 className="text-[22px] font-extrabold leading-tight text-foreground tracking-tight truncate">
+                <h1 className="text-xl sm:text-[22px] lg:text-2xl font-extrabold leading-tight text-foreground tracking-tight truncate">
                   {profile?.first_name || "Paciente"}
                 </h1>
                 <p className="text-[11px] text-muted-foreground/70 mt-0.5 capitalize">
@@ -178,20 +178,20 @@ const PatientDashboard = () => {
 
           {/* KPI stats bar */}
           {!loading && (
-            <div className="relative z-10 px-5 pb-5">
-              <div className="grid grid-cols-3 gap-2">
+            <div className="relative z-10 px-4 sm:px-5 lg:px-6 pb-4 sm:pb-5">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {[
                   { label: "Consultas", value: stats?.total ?? 0, icon: Calendar, color: "text-primary", bgIcon: "bg-primary/8" },
                   { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText, color: "text-secondary", bgIcon: "bg-secondary/8" },
                   { label: "Documentos", value: stats?.documents ?? 0, icon: Upload, color: "text-warning", bgIcon: "bg-warning/8" },
                 ].map(kpi => (
-                  <div key={kpi.label} className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-muted/30 border border-border/20">
-                    <div className={`size-8 rounded-lg ${kpi.bgIcon} flex items-center justify-center shrink-0`}>
-                      <kpi.icon className={`w-3.5 h-3.5 ${kpi.color}`} />
+                  <div key={kpi.label} className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-muted/30 border border-border/20">
+                    <div className={`size-7 sm:size-8 rounded-lg ${kpi.bgIcon} flex items-center justify-center shrink-0`}>
+                      <kpi.icon className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${kpi.color}`} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-lg font-black text-foreground leading-none tabular-nums">{kpi.value}</p>
-                      <p className="text-[9px] text-muted-foreground/70 font-medium mt-0.5">{kpi.label}</p>
+                      <p className="text-base sm:text-lg font-black text-foreground leading-none tabular-nums">{kpi.value}</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium mt-0.5">{kpi.label}</p>
                     </div>
                   </div>
                 ))}
@@ -199,7 +199,7 @@ const PatientDashboard = () => {
             </div>
           )}
           {loading && (
-            <div className="px-5 pb-5 grid grid-cols-3 gap-2">
+            <div className="px-4 sm:px-5 pb-4 sm:pb-5 grid grid-cols-3 gap-2 sm:gap-3">
               {[1,2,3].map(i => <div key={i} className="h-14 rounded-xl shimmer-v2" />)}
             </div>
           )}
@@ -257,17 +257,17 @@ const PatientDashboard = () => {
         {/* ═══ Quick Actions — 4-col grid ═══ */}
         <section>
           <h2 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Ações Rápidas</h2>
-          <div className="grid grid-cols-4 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
             {quickActions.map(item => (
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className="group flex flex-col items-center gap-2 py-3.5 rounded-2xl bg-card border border-border/30 hover:border-primary/20 hover:shadow-md active:scale-[0.96] transition-all duration-150"
+                className="group flex flex-col items-center gap-2 py-3 sm:py-3.5 rounded-2xl bg-card border border-border/30 hover:border-primary/20 hover:shadow-md active:scale-[0.96] transition-all duration-150"
               >
-                <div className={`size-11 rounded-xl ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-105 transition-transform duration-150`}>
-                  <item.icon className={`w-[18px] h-[18px] ${item.color}`} />
+                <div className={`size-10 sm:size-11 rounded-xl ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-105 transition-transform duration-150`}>
+                  <item.icon className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${item.color}`} />
                 </div>
-                <span className="text-[10px] font-semibold text-foreground/80">{item.label}</span>
+                <span className="text-[10px] sm:text-[11px] font-semibold text-foreground/80">{item.label}</span>
               </button>
             ))}
           </div>
@@ -286,7 +286,7 @@ const PatientDashboard = () => {
               </Button>
             </div>
 
-            <div className="space-y-2.5">
+            <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
               {/* Primary next appointment */}
               <Card
                 className={`overflow-hidden cursor-pointer active:scale-[0.98] transition-all duration-150 border-border/30 hover:shadow-md rounded-2xl ${
@@ -350,17 +350,17 @@ const PatientDashboard = () => {
               {/* Secondary appointments */}
               {upcoming.slice(1, 3).map((a: { id: string; scheduled_at: string; status: string; doctor_name: string; duration_minutes?: number | null }) => (
                 <Card key={a.id} className="border-border/30 overflow-hidden hover:shadow-sm transition-colors duration-150 cursor-pointer active:scale-[0.98] rounded-xl" onClick={() => navigate("/dashboard/appointments?role=patient")}>
-                  <CardContent className="p-3.5">
-                    <div className="flex items-center gap-3">
-                      <div className="size-10 rounded-lg bg-muted/30 flex flex-col items-center justify-center shrink-0 text-muted-foreground">
+                  <CardContent className="p-3 sm:p-3.5">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="size-9 sm:size-10 rounded-lg bg-muted/30 flex flex-col items-center justify-center shrink-0 text-muted-foreground">
                         <span className="text-[8px] font-bold uppercase leading-none">{format(new Date(a.scheduled_at), "MMM", { locale: ptBR })}</span>
-                        <span className="text-sm font-bold leading-none">{format(new Date(a.scheduled_at), "dd")}</span>
+                        <span className="text-xs sm:text-sm font-bold leading-none">{format(new Date(a.scheduled_at), "dd")}</span>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-[13px] font-semibold text-foreground truncate">{a.doctor_name}</h4>
-                        <p className="text-xs text-muted-foreground">{format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min</p>
+                        <h4 className="text-xs sm:text-[13px] font-semibold text-foreground truncate">{a.doctor_name}</h4>
+                        <p className="text-[11px] sm:text-xs text-muted-foreground">{format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min</p>
                       </div>
-                      <span className="text-[10px] text-muted-foreground/50 bg-muted/30 px-2 py-0.5 rounded-md font-medium shrink-0">
+                      <span className="text-[9px] sm:text-[10px] text-muted-foreground/50 bg-muted/30 px-1.5 sm:px-2 py-0.5 rounded-md font-medium shrink-0">
                         {statusLabel[a.status] ?? a.status}
                       </span>
                     </div>
@@ -385,8 +385,8 @@ const PatientDashboard = () => {
                   <p className="text-sm text-muted-foreground mb-6 max-w-[240px] mx-auto leading-relaxed">
                     Encontre o médico ideal e agende sua consulta
                   </p>
-                  <Button
-                    className="w-full bg-primary text-primary-foreground rounded-xl h-12 text-sm font-bold shadow-lg shadow-primary/15"
+                    <Button
+                    className="w-full sm:w-auto bg-primary text-primary-foreground rounded-xl h-12 text-sm font-bold shadow-lg shadow-primary/15 px-8"
                     onClick={() => navigate("/dashboard/schedule?role=patient")}>
                     <Calendar className="w-4 h-4 mr-2" /> Agendar consulta
                   </Button>
@@ -418,7 +418,7 @@ const PatientDashboard = () => {
                 Ver tudo <ArrowRight className="w-3 h-3" />
               </Button>
             </div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-2.5">
               {healthMetrics.map((m: { type: string; value: number; unit: string; measured_at: string }) => {
                 const typeConfig: Record<string, { icon: string; color: string; label: string }> = {
                   "pressao_arterial": { icon: "🫀", color: "text-destructive", label: "Pressão" },
@@ -510,17 +510,17 @@ const PatientDashboard = () => {
         {/* ═══ Shortcuts grid ═══ */}
         <section>
           <h2 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Acesso Rápido</h2>
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
             {shortcuts.map(item => (
               <button
                 key={item.label}
                 onClick={() => navigate(item.path)}
-                className="group flex flex-col items-center gap-2 py-4 rounded-xl bg-card border border-border/30 hover:border-primary/15 hover:shadow-sm active:scale-[0.97] transition-all duration-150"
+                className="group flex flex-col items-center gap-2 py-3 sm:py-4 rounded-xl bg-card border border-border/30 hover:border-primary/15 hover:shadow-sm active:scale-[0.97] transition-all duration-150"
               >
-                <div className="size-10 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 transition-colors duration-150">
-                  <item.icon className={`w-[18px] h-[18px] ${item.color}`} />
+                <div className="size-9 sm:size-10 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 transition-colors duration-150">
+                  <item.icon className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${item.color}`} />
                 </div>
-                <span className="text-[11px] font-semibold text-muted-foreground">{item.label}</span>
+                <span className="text-[10px] sm:text-[11px] font-semibold text-muted-foreground">{item.label}</span>
               </button>
             ))}
           </div>
