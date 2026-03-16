@@ -1,6 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, Routes, Route, useSearchParams, useNavigate } from "react-router-dom";
 import { usePresence } from "@/hooks/use-presence";
+import { prefetchOnIdle } from "@/hooks/use-prefetch-route";
 import { lazy, Suspense, ReactNode, useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -124,19 +125,6 @@ const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: str
   if (isAdmin) return <>{children}</>;
   if (allowed.some(r => roles.includes(r))) return <>{children}</>;
   return <Navigate to="/dashboard" replace />;
-};
-
-// ── Prefetch strategy: preload likely routes on idle ──
-const prefetchOnIdle = (imports: Array<() => Promise<unknown>>) => {
-  if (typeof requestIdleCallback !== "undefined") {
-    requestIdleCallback(() => {
-      imports.forEach(fn => fn().catch(() => {}));
-    }, { timeout: 3000 });
-  } else {
-    setTimeout(() => {
-      imports.forEach(fn => fn().catch(() => {}));
-    }, 2000);
-  }
 };
 
 const Dashboard = () => {
