@@ -68,6 +68,6 @@ const PWAUpdateBanner = forwardRef<HTMLDivElement>(function PWAUpdateBanner(_pro
       )}
     </AnimatePresence>
   );
-};
+});
 
 export default PWAUpdateBanner;
