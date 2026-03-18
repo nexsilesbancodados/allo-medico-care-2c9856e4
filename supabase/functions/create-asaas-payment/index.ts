@@ -432,7 +432,7 @@ serve(async (req) => {
           pixData = await safeJson(pixRes);
         }
       } catch (error) {
-        console.warn("PIX QR code fetch failed, payment still created:", e);
+        console.warn("PIX QR code fetch failed, payment still created:", error);
       }
     }
 

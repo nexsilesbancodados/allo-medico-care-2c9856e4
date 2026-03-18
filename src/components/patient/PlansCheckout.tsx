@@ -480,6 +480,15 @@ const PlansCheckout = () => {
 
       setAsaasPaymentId(data.paymentId || data.subscriptionId);
 
+      // Handle PIX→BOLETO fallback from Asaas
+      if (data.fallbackUsed && data.billingType === "BOLETO") {
+        setBoletoUrl(data.bankSlipUrl || data.invoiceUrl || null);
+        setPaymentMethod("boleto");
+        setProcessing(false);
+        toast.warning("PIX indisponível no momento", { description: "Boleto gerado automaticamente como alternativa." });
+        return;
+      }
+
       if (paymentMethod === "pix") {
         setPixQrCode(data.pixQrCode || null);
         setPixCopyPasteCode(data.pixCopyPaste || null);
@@ -492,8 +501,8 @@ const PlansCheckout = () => {
       if (paymentMethod === "boleto") {
         setBoletoUrl(data.bankSlipUrl || data.invoiceUrl || null);
         setProcessing(false);
-        setStep("success");
-        clearCheckoutDraft();
+        // Don't go to success — user needs to pay the boleto first
+        toast.success("Boleto gerado! 📄", { description: "Pague o boleto para confirmar sua consulta." });
         return;
       }
 
