@@ -18,7 +18,7 @@ import mascotImg from "@/assets/mascot.png";
 import DashboardBreadcrumbs from "@/components/dashboards/DashboardBreadcrumbs";
 import useNotificationTitle from "@/hooks/use-notification-title";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import gsap from "gsap";
+// gsap loaded dynamically for entrance animations
 
 interface NavItem {
   label: string; href: string; icon: ReactNode;
