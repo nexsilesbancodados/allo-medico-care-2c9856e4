@@ -18,7 +18,7 @@ import mascotImg from "@/assets/mascot.png";
 import DashboardBreadcrumbs from "@/components/dashboards/DashboardBreadcrumbs";
 import useNotificationTitle from "@/hooks/use-notification-title";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import gsap from "gsap";
+// gsap loaded dynamically for entrance animations
 
 interface NavItem {
   label: string; href: string; icon: ReactNode;
@@ -188,13 +188,18 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
     if (sidebarAnimated.current || !sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     sidebarAnimated.current = true;
     const items = sidebarRef.current.querySelectorAll(".nav-item");
-    gsap.fromTo(items, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.035, ease: "power2.out", clearProps: "transform,opacity" });
+    import("gsap").then(({ default: gsap }) => {
+      gsap.fromTo(items, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.035, ease: "power2.out", clearProps: "transform,opacity" });
+    }).catch(() => {});
   }, [nav]);
 
   // GSAP header entrance
   useEffect(() => {
     if (!headerRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    gsap.fromTo(headerRef.current, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", clearProps: "transform,opacity" });
+    const el = headerRef.current;
+    import("gsap").then(({ default: gsap }) => {
+      gsap.fromTo(el, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", clearProps: "transform,opacity" });
+    }).catch(() => {});
   }, []);
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => (

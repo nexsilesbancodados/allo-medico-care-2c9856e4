@@ -9,8 +9,8 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
-import Index from "./pages/Index";
-import Dashboard from "./pages/Dashboard";
+const Index = lazy(() => import("./pages/Index"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
 import { logError } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
@@ -109,8 +109,8 @@ const App = () => {
   const [showDeferredFeatures, setShowDeferredFeatures] = useState(false);
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => setShowDeferredFeatures(true));
-    return () => window.cancelAnimationFrame(frameId);
+    const timerId = window.setTimeout(() => setShowDeferredFeatures(true), 1200);
+    return () => window.clearTimeout(timerId);
   }, []);
 
   useEffect(() => {

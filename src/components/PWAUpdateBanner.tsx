@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { RefreshCw, X, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,7 +8,7 @@ import { useRegisterSW } from "virtual:pwa-register/react";
  * Shows a toast-style banner when a new PWA version is available.
  * Uses vite-plugin-pwa's useRegisterSW hook.
  */
-const PWAUpdateBanner = () => {
+const PWAUpdateBanner = forwardRef<HTMLDivElement>(function PWAUpdateBanner(_props, _ref) {
   const [show, setShow] = useState(false);
 
   const { needRefresh: [needRefresh], updateServiceWorker } = useRegisterSW({
@@ -68,6 +68,6 @@ const PWAUpdateBanner = () => {
       )}
     </AnimatePresence>
   );
-};
+});
 
 export default PWAUpdateBanner;

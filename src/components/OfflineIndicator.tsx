@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WifiOff, Wifi, RefreshCw } from "lucide-react";
 import { useTranslation } from "@/i18n";
@@ -40,7 +40,7 @@ const checkRealConnectivity = async (): Promise<boolean> => {
   }
 };
 
-const OfflineIndicator = () => {
+const OfflineIndicator = forwardRef<HTMLDivElement>(function OfflineIndicator(_props, _ref) {
   const [isOffline, setIsOffline] = useState(!getInitialOnlineState());
   const [showReconnected, setShowReconnected] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
@@ -132,6 +132,6 @@ const OfflineIndicator = () => {
       )}
     </AnimatePresence>
   );
-};
+});
 
 export default OfflineIndicator;

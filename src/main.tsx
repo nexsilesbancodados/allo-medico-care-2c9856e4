@@ -126,17 +126,7 @@ if (!root) {
   throw new Error("Root element not found");
 }
 
-root.innerHTML = `<div id="${BOOT_PLACEHOLDER_ID}" style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:system-ui,-apple-system,sans-serif;color:#475569">Carregando aplicativo...</div>`;
-
-window.setTimeout(() => {
-  const firstChild = root.firstElementChild as HTMLElement | null;
-  const onlyBootPlaceholder = root.childElementCount === 1 && firstChild?.id === BOOT_PLACEHOLDER_ID;
-  const hasRenderedContent = (root.textContent?.trim().length ?? 0) > 0;
-
-  if (!hasRenderedContent || onlyBootPlaceholder) {
-    renderFatalFallback(root);
-  }
-}, 7000);
+// The index.html already has a 10s watchdog — no duplicate timer here.
 
 const notifyBootReady = () => {
   clearReloadFlag();
