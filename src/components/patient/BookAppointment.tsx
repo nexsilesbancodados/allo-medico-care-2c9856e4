@@ -10,8 +10,15 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { ArrowLeft, Clock, Star, Check, UserPlus, UserCheck, AlertTriangle, CalendarDays, CheckCircle2, ChevronRight, Stethoscope } from "lucide-react";
+import {
+  ArrowLeft, Clock, Star, Check, UserPlus, UserCheck, AlertTriangle,
+  CalendarDays, CheckCircle2, ChevronRight, Stethoscope, QrCode, CreditCard,
+  FileBarChart, Lock, Shield, Copy
+} from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -21,6 +28,8 @@ import { getFeriadosNacionais } from "@/lib/feriados";
 
 import { getPatientNav } from "./patientNav";
 const patientNav = getPatientNav("schedule");
+
+type PaymentMethod = "pix" | "card" | "boleto";
 
 interface DoctorInfo {
   id: string;
@@ -41,6 +50,7 @@ const STEPS = [
   { key: "date", label: "Data", icon: CalendarDays },
   { key: "time", label: "Horário", icon: Clock },
   { key: "confirm", label: "Confirmar", icon: CheckCircle2 },
+  { key: "payment", label: "Pagamento", icon: CreditCard },
 ];
 
 const RECURRENCE_OPTIONS = [
@@ -56,7 +66,7 @@ const BookAppointment = () => {
   const { doctorId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
-  
+
   const [doctor, setDoctor] = useState<DoctorInfo | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -70,14 +80,31 @@ const BookAppointment = () => {
   const [recurrence, setRecurrence] = useState("none");
   const [recurrenceCount, setRecurrenceCount] = useState(4);
 
-  const currentStep = !selectedDate ? 0 : !selectedTime ? 1 : 2;
+  // Payment state
+  const [paymentStep, setPaymentStep] = useState(false);
+  const [appointmentId, setAppointmentId] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
+  const [processing, setProcessing] = useState(false);
+  const [pixQrCode, setPixQrCode] = useState<string | null>(null);
+  const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
+  const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
+  const [pixCopied, setPixCopied] = useState(false);
+  const [cardName, setCardName] = useState("");
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvv, setCardCvv] = useState("");
+  const [cardDiscount, setCardDiscount] = useState(0);
+
+  const currentStep = paymentStep ? 3 : !selectedDate ? 0 : !selectedTime ? 1 : 2;
 
   useEffect(() => {
     if (user) {
       supabase.from("dependents").select("id, name, relationship").eq("user_id", user.id)
         .then(({ data }) => setDependents(data ?? []));
+      // Check discount card
+      supabase.from("discount_cards").select("discount_percent").eq("user_id", user.id).eq("status", "active").maybeSingle()
+        .then(({ data }) => { if (data) setCardDiscount(Number(data.discount_percent)); });
     }
-    // Load feriados for current and next year
     const currentYear = new Date().getFullYear();
     Promise.all([getFeriadosNacionais(currentYear), getFeriadosNacionais(currentYear + 1)])
       .then(([f1, f2]) => setFeriados([...f1, ...f2]));
@@ -90,6 +117,27 @@ const BookAppointment = () => {
   useEffect(() => {
     if (selectedDate && doctorId) fetchBookedSlots();
   }, [selectedDate]);
+
+  // Poll for payment confirmation
+  useEffect(() => {
+    if (!paymentStep || !appointmentId) return;
+    const hasPending = pixQrCode || boletoUrl;
+    if (!hasPending) return;
+    const poll = setInterval(async () => {
+      const { data } = await supabase
+        .from("appointments")
+        .select("payment_status")
+        .eq("id", appointmentId)
+        .in("payment_status", ["approved", "confirmed", "received"])
+        .limit(1);
+      if (data && data.length > 0) {
+        clearInterval(poll);
+        toast.success("✅ Pagamento confirmado! Consulta garantida.");
+        navigate("/dashboard/appointments");
+      }
+    }, 8000);
+    return () => clearInterval(poll);
+  }, [paymentStep, appointmentId, pixQrCode, boletoUrl]);
 
   const fetchDoctor = async () => {
     const { data: doc } = await supabase
@@ -150,7 +198,7 @@ const BookAppointment = () => {
       while (h < endH || (h === endH && m < endM)) {
         const timeStr = `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
         const slotDateTime = setMinutes(setHours(new Date(date), h), m);
-        
+
         if (!bookedSlots.includes(timeStr) && !isBefore(slotDateTime, new Date())) {
           times.push(timeStr);
         }
@@ -165,13 +213,17 @@ const BookAppointment = () => {
   const isDayAvailable = (date: Date): boolean => {
     if (!doctor) return false;
     if (isBefore(date, new Date()) && date.toDateString() !== new Date().toDateString()) return false;
-    // Check feriados
     const isFeriado = feriados.some(f => f.getFullYear() === date.getFullYear() && f.getMonth() === date.getMonth() && f.getDate() === date.getDate());
     if (isFeriado) return false;
     const dayOfWeek = date.getDay();
     return doctor.slots.some(s => s.day_of_week === dayOfWeek);
   };
 
+  const basePrice = doctor?.consultation_price ?? 89;
+  const discountAmount = basePrice * (cardDiscount / 100);
+  const totalPrice = Math.max(basePrice - discountAmount, 0);
+
+  // Step 1: Create appointment, then move to payment
   const handleBook = async () => {
     if (!selectedDate || !selectedTime || !doctor || !user) return;
     setBooking(true);
@@ -213,7 +265,6 @@ const BookAppointment = () => {
       }
 
       if (!firstApptId) firstApptId = insertedAppt.id;
-      triggerAppointmentConfirmed(insertedAppt.id).catch(err => logError("triggerAppointmentConfirmed failed", err));
     }
 
     setBooking(false);
@@ -221,18 +272,145 @@ const BookAppointment = () => {
     if (errorOccurred || !firstApptId) {
       toast.error("Erro", { description: "Não foi possível agendar. Tente novamente." });
     } else {
-      const patientProfile = user.user_metadata;
-      const pName = `${patientProfile?.first_name || ""} ${patientProfile?.last_name || ""}`.trim() || "Paciente";
-      const dateStr = format(scheduledAt, "dd/MM/yyyy", { locale: ptBR });
-      const timeStr = format(scheduledAt, "HH:mm");
-      notifyNewAppointment(firstApptId, doctor.id, pName, dateStr, timeStr).catch(err => logError("notifyNewAppointment failed", err));
-
-      const msg = recurrence !== "none"
-        ? `${datesToBook.length} consultas agendadas com Dr(a). ${doctor.first_name}`
-        : `${format(scheduledAt, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} com Dr(a). ${doctor.first_name}`;
-      toast.success("Consulta agendada! ✅", { description: msg });
-      navigate("/dashboard/appointments");
+      setAppointmentId(firstApptId);
+      setPaymentStep(true);
+      toast.success("Consulta reservada! Agora finalize o pagamento.");
     }
+  };
+
+  // Step 2: Process payment via Asaas
+  const handlePayment = async () => {
+    if (!user || !doctor || !appointmentId) return;
+    if (paymentMethod === "card" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
+      toast.error("Preencha todos os campos do cartão");
+      return;
+    }
+    setProcessing(true);
+
+    try {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("first_name, last_name, cpf, phone")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!profile?.cpf) {
+        toast.error("CPF obrigatório", { description: "Complete seu perfil com o CPF antes de pagar." });
+        setProcessing(false);
+        return;
+      }
+
+      const customerName = `${profile.first_name} ${profile.last_name}`.trim();
+      const billingTypeMap: Record<PaymentMethod, string> = { pix: "PIX", card: "CREDIT_CARD", boleto: "BOLETO" };
+
+      const payload: Record<string, any> = {
+        customerName,
+        customerCpf: profile.cpf,
+        customerEmail: user.email || "",
+        customerMobilePhone: profile.phone || "",
+        billingType: billingTypeMap[paymentMethod],
+        value: totalPrice,
+        description: `Consulta Médica - AloClinica`,
+        appointmentId,
+        doctorProfileId: doctor.id,
+      };
+
+      // Card tokenization
+      if (paymentMethod === "card") {
+        const [expiryMonth, expiryYear] = cardExpiry.split("/");
+        const { data: tokenData, error: tokenError } = await supabase.functions.invoke("tokenize-card", {
+          body: {
+            customerName,
+            customerCpf: profile.cpf,
+            customerEmail: user.email || "",
+            customerPhone: profile.phone || "",
+            cardHolderName: cardName,
+            cardNumber: cardNumber.replace(/\s/g, ""),
+            cardExpiryMonth: expiryMonth,
+            cardExpiryYear: `20${expiryYear}`,
+            cardCcv: cardCvv,
+            cardHolderCpf: profile.cpf,
+            cardHolderPhone: profile.phone || "",
+            remoteIp: "0.0.0.0",
+          },
+        });
+        if (tokenError || !tokenData?.success) {
+          toast.error("Erro no cartão", { description: tokenData?.error || "Não foi possível processar." });
+          setProcessing(false);
+          return;
+        }
+        payload.creditCardToken = tokenData.creditCardToken;
+      }
+
+      const { data, error } = await supabase.functions.invoke("create-asaas-payment", { body: payload });
+
+      if (error || !data?.success) {
+        toast.error("Erro no pagamento", { description: data?.error || "Tente novamente." });
+        setProcessing(false);
+        return;
+      }
+
+      // Handle PIX→BOLETO fallback
+      if (data.fallbackUsed && data.billingType === "BOLETO") {
+        setBoletoUrl(data.bankSlipUrl || data.invoiceUrl || null);
+        setPaymentMethod("boleto");
+        setProcessing(false);
+        toast.warning("PIX indisponível", { description: "Boleto gerado automaticamente." });
+        return;
+      }
+
+      if (paymentMethod === "pix") {
+        setPixQrCode(data.pixQrCode || null);
+        setPixCopyPaste(data.pixCopyPaste || null);
+        setProcessing(false);
+        toast.success("PIX gerado! 🎉", { description: "Escaneie o QR Code para pagar." });
+        return;
+      }
+
+      if (paymentMethod === "boleto") {
+        setBoletoUrl(data.bankSlipUrl || data.invoiceUrl || null);
+        setProcessing(false);
+        toast.success("Boleto gerado! 📄");
+        return;
+      }
+
+      // Card — usually instant
+      if (data.status === "CONFIRMED" || data.status === "RECEIVED") {
+        await supabase.from("appointments").update({
+          payment_status: "approved",
+          payment_confirmed_at: new Date().toISOString(),
+        }).eq("id", appointmentId);
+
+        // Trigger notifications
+        triggerAppointmentConfirmed(appointmentId).catch(err => logError("triggerAppointmentConfirmed", err));
+        const pName = `${profile.first_name} ${profile.last_name}`.trim();
+        if (selectedDate && selectedTime) {
+          notifyNewAppointment(appointmentId, doctor.id, pName, format(selectedDate, "dd/MM/yyyy", { locale: ptBR }), selectedTime)
+            .catch(err => logError("notifyNewAppointment", err));
+        }
+
+        toast.success("Pagamento confirmado! ✅");
+        navigate("/dashboard/appointments");
+      } else {
+        toast.success("Pagamento criado!", { description: "Aguardando confirmação." });
+      }
+    } catch (err: unknown) {
+      logError("BookAppointment payment error", err);
+      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro inesperado." });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const formatCardNumber = (value: string) => {
+    const cleaned = value.replace(/\D/g, "").slice(0, 16);
+    return cleaned.replace(/(\d{4})/g, "$1 ").trim();
+  };
+
+  const formatExpiry = (value: string) => {
+    const cleaned = value.replace(/\D/g, "").slice(0, 4);
+    if (cleaned.length >= 3) return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    return cleaned;
   };
 
   const availableTimes = selectedDate ? getAvailableTimesForDate(selectedDate) : [];
@@ -258,11 +436,14 @@ const BookAppointment = () => {
     <DashboardLayout title="Paciente" nav={patientNav}>
       <div className="max-w-lg mx-auto pb-8">
         {/* Back */}
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-5 active:scale-95 transition-transform">
+        <button onClick={() => {
+          if (paymentStep) { setPaymentStep(false); return; }
+          navigate(-1);
+        }} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-5 active:scale-95 transition-transform">
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>
 
-        {/* Doctor card - compact with gradient */}
+        {/* Doctor card */}
         <div className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border/50 mb-5 hover:shadow-lg transition-shadow">
           <Avatar className="w-14 h-14 rounded-xl shrink-0">
             <AvatarFallback className="rounded-xl bg-gradient-to-br from-primary to-secondary text-white font-bold text-lg">
@@ -288,13 +469,16 @@ const BookAppointment = () => {
             )}
           </div>
           <div className="text-right shrink-0">
-            <p className="text-xl font-black text-foreground">R${doctor.consultation_price}</p>
+            <p className="text-xl font-black text-foreground">R${totalPrice.toFixed(0)}</p>
+            {cardDiscount > 0 && (
+              <p className="text-[10px] text-secondary line-through">R${basePrice.toFixed(0)}</p>
+            )}
             <p className="text-[10px] text-muted-foreground">por consulta</p>
           </div>
         </div>
 
-        {/* Step indicator - animated */}
-        <div className="flex items-center justify-between px-4 mb-6">
+        {/* Step indicator */}
+        <div className="flex items-center justify-between px-2 mb-6">
           {STEPS.map((step, i) => {
             const Icon = step.icon;
             const isActive = i === currentStep;
@@ -304,7 +488,7 @@ const BookAppointment = () => {
                 <div className="flex flex-col items-center flex-1">
                   <motion.div
                     className={cn(
-                      "w-10 h-10 rounded-full flex items-center justify-center transition-colors",
+                      "w-9 h-9 rounded-full flex items-center justify-center transition-colors",
                       isDone ? "bg-primary text-primary-foreground" :
                       isActive ? "bg-primary/15 text-primary ring-2 ring-primary/30" :
                       "bg-muted text-muted-foreground"
@@ -314,12 +498,12 @@ const BookAppointment = () => {
                   >
                     {isDone ? (
                       <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300 }}>
-                        <Check className="w-5 h-5" />
+                        <Check className="w-4 h-4" />
                       </motion.div>
-                    ) : <Icon className="w-5 h-5" />}
+                    ) : <Icon className="w-4 h-4" />}
                   </motion.div>
                   <span className={cn(
-                    "text-[11px] mt-1.5 font-medium",
+                    "text-[10px] mt-1 font-medium",
                     isActive ? "text-primary" : isDone ? "text-foreground" : "text-muted-foreground"
                   )}>
                     {step.label}
@@ -340,47 +524,31 @@ const BookAppointment = () => {
           })}
         </div>
 
-        {/* Content area */}
+        {/* Content */}
         <AnimatePresence mode="wait">
           {/* Step 1: Date */}
           {currentStep === 0 && (
-            <motion.div
-              key="date"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="bg-card rounded-2xl border border-border p-4"
-            >
+            <motion.div key="date" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+              className="bg-card rounded-2xl border border-border p-4">
               <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                 <CalendarDays className="w-4 h-4 text-primary" /> Escolha a data
               </h3>
               <Calendar
-                mode="single"
-                selected={selectedDate}
+                mode="single" selected={selectedDate}
                 onSelect={(d) => { setSelectedDate(d); setSelectedTime(null); }}
                 disabled={(date) => !isDayAvailable(date)}
-                fromDate={new Date()}
-                toDate={addDays(new Date(), 60)}
-                locale={ptBR}
-                className="pointer-events-auto mx-auto"
+                fromDate={new Date()} toDate={addDays(new Date(), 60)}
+                locale={ptBR} className="pointer-events-auto mx-auto"
               />
             </motion.div>
           )}
 
           {/* Step 2: Time */}
           {currentStep === 1 && selectedDate && (
-            <motion.div
-              key="time"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-4"
-            >
-              {/* Selected date pill */}
-              <button
-                onClick={() => { setSelectedDate(undefined); setSelectedTime(null); }}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium active:scale-95 transition-transform"
-              >
+            <motion.div key="time" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+              className="space-y-4">
+              <button onClick={() => { setSelectedDate(undefined); setSelectedTime(null); }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium active:scale-95 transition-transform">
                 <CalendarDays className="w-4 h-4" />
                 {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                 <span className="text-primary/50 ml-1">✕</span>
@@ -390,39 +558,29 @@ const BookAppointment = () => {
                 <h3 className="font-semibold text-foreground mb-3 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-primary" /> Horários disponíveis
                 </h3>
-
                 {availableTimes.length === 0 ? (
                   <div className="text-center py-10">
                     <Clock className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
                     <p className="text-sm text-muted-foreground">Sem horários nesta data</p>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="mt-3 rounded-xl"
+                    <Button variant="outline" size="sm" className="mt-3 rounded-xl"
                       onClick={async () => {
                         const { error } = await supabase.from("appointment_waitlist").insert({
-                          patient_id: user!.id,
-                          doctor_id: doctor.id,
+                          patient_id: user!.id, doctor_id: doctor.id,
                           desired_date: format(selectedDate, "yyyy-MM-dd"),
                         });
                         if (!error) toast.success("✅ Avisaremos você!", { description: "Se uma vaga abrir, você será notificado." });
-                      }}
-                    >
+                      }}>
                       🔔 Me avise se vagar
                     </Button>
                   </div>
                 ) : (
                   <div className="grid grid-cols-3 gap-2">
                     {availableTimes.map(time => (
-                      <Button
-                        key={time}
-                        variant={selectedTime === time ? "default" : "outline"}
+                      <Button key={time} variant={selectedTime === time ? "default" : "outline"}
                         onClick={() => setSelectedTime(time)}
-                        className={cn(
-                          "h-12 text-sm rounded-xl font-medium active:scale-95 transition-all",
-                          selectedTime === time && "bg-gradient-hero text-primary-foreground shadow-md scale-[1.02]"
-                        )}
-                      >
+                        className={cn("h-12 text-sm rounded-xl font-medium active:scale-95 transition-all",
+                          selectedTime === time && "bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-md scale-[1.02]"
+                        )}>
                         {time}
                       </Button>
                     ))}
@@ -434,40 +592,26 @@ const BookAppointment = () => {
 
           {/* Step 3: Confirm */}
           {currentStep === 2 && selectedDate && selectedTime && (
-            <motion.div
-              key="confirm"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-4"
-            >
-              {/* Edit pills */}
+            <motion.div key="confirm" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+              className="space-y-4">
               <div className="flex gap-2 flex-wrap">
-                <button
-                  onClick={() => { setSelectedDate(undefined); setSelectedTime(null); }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium active:scale-95 transition-transform"
-                >
+                <button onClick={() => { setSelectedDate(undefined); setSelectedTime(null); }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium active:scale-95 transition-transform">
                   <CalendarDays className="w-3.5 h-3.5" />
                   {format(selectedDate, "dd/MM", { locale: ptBR })}
                   <span className="opacity-50">✕</span>
                 </button>
-                <button
-                  onClick={() => setSelectedTime(null)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium active:scale-95 transition-transform"
-                >
-                  <Clock className="w-3.5 h-3.5" />
-                  {selectedTime}h
-                  <span className="opacity-50">✕</span>
+                <button onClick={() => setSelectedTime(null)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-medium active:scale-95 transition-transform">
+                  <Clock className="w-3.5 h-3.5" /> {selectedTime}h <span className="opacity-50">✕</span>
                 </button>
               </div>
 
               <div className="bg-card rounded-2xl border-2 border-primary/20 p-5">
                 <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
-                  <CheckCircle2 className="w-5 h-5 text-primary" />
-                  Confirmar Agendamento
+                  <CheckCircle2 className="w-5 h-5 text-primary" /> Confirmar Agendamento
                 </h3>
 
-                {/* Dependent selection */}
                 {dependents.length > 0 && (
                   <div className="mb-4">
                     <p className="text-xs text-muted-foreground mb-1.5">Para quem é a consulta?</p>
@@ -485,7 +629,6 @@ const BookAppointment = () => {
                   </div>
                 )}
 
-                {/* Type */}
                 <div className="mb-4">
                   <p className="text-xs text-muted-foreground mb-1.5">Tipo de consulta</p>
                   <Select value={appointmentType} onValueChange={setAppointmentType}>
@@ -498,27 +641,23 @@ const BookAppointment = () => {
                   </Select>
                 </div>
 
-                {/* Summary */}
                 <div className="bg-muted/50 rounded-xl p-4 space-y-2.5 mb-5">
                   <div className="flex items-center gap-2 text-sm text-foreground">
-                    <Check className="w-4 h-4 text-primary shrink-0" />
-                    Dr(a). {doctor.first_name} {doctor.last_name}
+                    <Check className="w-4 h-4 text-primary shrink-0" /> Dr(a). {doctor.first_name} {doctor.last_name}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-foreground">
-                    <Check className="w-4 h-4 text-primary shrink-0" />
-                    {format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                    <Check className="w-4 h-4 text-primary shrink-0" /> {format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                   </div>
                   <div className="flex items-center gap-2 text-sm text-foreground">
-                    <Check className="w-4 h-4 text-primary shrink-0" />
-                    {selectedTime}h
+                    <Check className="w-4 h-4 text-primary shrink-0" /> {selectedTime}h
                   </div>
                   <div className="flex items-center gap-2 text-sm text-foreground font-semibold">
-                    <Check className="w-4 h-4 text-primary shrink-0" />
-                    R${doctor.consultation_price}
+                    <Check className="w-4 h-4 text-primary shrink-0" /> R$ {totalPrice.toFixed(2)}
+                    {cardDiscount > 0 && <Badge variant="secondary" className="text-[10px] ml-1">-{cardDiscount}%</Badge>}
                   </div>
                 </div>
 
-                {/* Recurrence selector */}
+                {/* Recurrence */}
                 <div className="mb-4">
                   <p className="text-xs text-muted-foreground mb-1.5">Agendamento recorrente</p>
                   <Select value={recurrence} onValueChange={setRecurrence}>
@@ -540,14 +679,10 @@ const BookAppointment = () => {
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-[10px] text-primary mt-1">
-                        Serão agendadas {recurrenceCount} consultas no mesmo horário ({selectedTime}h), {recurrence === "weekly" ? "toda semana" : recurrence === "biweekly" ? "a cada 2 semanas" : "a cada 4 semanas"}.
-                      </p>
                     </div>
                   )}
                 </div>
 
-                {/* Return policy notice */}
                 {appointmentType === "return" && (
                   <div className="flex items-start gap-2 p-3 rounded-xl bg-warning/10 border border-warning/20 mb-4">
                     <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
@@ -559,18 +694,15 @@ const BookAppointment = () => {
 
                 <Button
                   className="w-full h-14 rounded-xl bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground text-base font-bold shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow active:scale-[0.98]"
-                  onClick={handleBook}
-                  disabled={booking}
-                >
+                  onClick={handleBook} disabled={booking}>
                   {booking ? (
                     <span className="flex items-center gap-2">
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Agendando...
+                      Reservando...
                     </span>
                   ) : (
                     <span className="flex items-center gap-2">
-                      ✅ Confirmar Agendamento
-                      <ChevronRight className="w-5 h-5" />
+                      Ir para Pagamento <ChevronRight className="w-5 h-5" />
                     </span>
                   )}
                 </Button>
@@ -578,6 +710,163 @@ const BookAppointment = () => {
                 <p className="text-[10px] text-center text-muted-foreground mt-3">
                   Ao confirmar, você concorda com os termos de uso e política de cancelamento.
                 </p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Step 4: Payment */}
+          {currentStep === 3 && paymentStep && (
+            <motion.div key="payment" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+              <div className="text-center mb-5">
+                <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-1" />
+                <h3 className="text-lg font-bold text-foreground">Pagamento Seguro</h3>
+                <p className="text-xs text-muted-foreground">R$ {totalPrice.toFixed(2)} · via Asaas</p>
+              </div>
+
+              {/* Method selector */}
+              <div className="grid grid-cols-3 gap-2 mb-5">
+                {([
+                  { id: "pix" as PaymentMethod, label: "PIX", icon: QrCode, badge: "Instantâneo" },
+                  { id: "card" as PaymentMethod, label: "Cartão", icon: CreditCard, badge: null },
+                  { id: "boleto" as PaymentMethod, label: "Boleto", icon: FileBarChart, badge: null },
+                ] as const).map(method => (
+                  <button key={method.id} onClick={() => setPaymentMethod(method.id)}
+                    className={cn(
+                      "relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all",
+                      paymentMethod === method.id
+                        ? "border-primary bg-primary/5 shadow-sm"
+                        : "border-border bg-card hover:border-primary/30"
+                    )}>
+                    <method.icon className={cn("w-5 h-5", paymentMethod === method.id ? "text-primary" : "text-muted-foreground")} />
+                    <span className={cn("text-xs font-semibold", paymentMethod === method.id ? "text-primary" : "text-foreground")}>{method.label}</span>
+                    {method.badge && (
+                      <Badge className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0 bg-secondary text-secondary-foreground border-0">
+                        {method.badge}
+                      </Badge>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              <AnimatePresence mode="wait">
+                {/* PIX */}
+                {paymentMethod === "pix" && (
+                  <motion.div key="pix" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                    <Card className="border-border">
+                      <CardContent className="p-6 text-center">
+                        {pixQrCode ? (
+                          <>
+                            <div className="w-48 h-48 mx-auto rounded-2xl bg-card border-2 border-border p-2 mb-4">
+                              <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-full h-full object-contain rounded-xl" />
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-3">Escaneie o QR Code ou copie o código</p>
+                            <Button variant="outline" className="w-full mb-4 font-mono text-xs"
+                              onClick={() => { navigator.clipboard.writeText(pixCopyPaste || ""); setPixCopied(true); toast.success("Copiado!"); setTimeout(() => setPixCopied(false), 3000); }}>
+                              {pixCopied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-secondary" /> Copiado!</> : <><Copy className="w-4 h-4 mr-2" /> Copiar código PIX</>}
+                            </Button>
+                            <p className="text-xs text-muted-foreground">Confirmação automática via webhook.</p>
+                          </>
+                        ) : (
+                          <>
+                            <QrCode className="w-12 h-12 mx-auto text-primary/60 mb-4" />
+                            <p className="text-sm text-muted-foreground mb-4">Clique para gerar o QR Code PIX</p>
+                            <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12 text-base"
+                              onClick={handlePayment} disabled={processing}>
+                              {processing ? (
+                                <span className="flex items-center gap-2">
+                                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                                  Gerando PIX...
+                                </span>
+                              ) : `Gerar PIX • R$ ${totalPrice.toFixed(2)}`}
+                            </Button>
+                          </>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {/* Card */}
+                {paymentMethod === "card" && (
+                  <motion.div key="card" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                    <Card className="border-border">
+                      <CardContent className="p-6 space-y-4">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Nome no cartão</Label>
+                          <Input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Nome como no cartão" className="mt-1" />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Número</Label>
+                          <Input value={cardNumber} onChange={e => setCardNumber(formatCardNumber(e.target.value))} placeholder="0000 0000 0000 0000" className="mt-1 font-mono" maxLength={19} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <Label className="text-xs text-muted-foreground">Validade</Label>
+                            <Input value={cardExpiry} onChange={e => setCardExpiry(formatExpiry(e.target.value))} placeholder="MM/AA" className="mt-1 font-mono" maxLength={5} />
+                          </div>
+                          <div>
+                            <Label className="text-xs text-muted-foreground">CVV</Label>
+                            <Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="•••" className="mt-1 font-mono" maxLength={4} type="password" />
+                          </div>
+                        </div>
+                        <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12 text-base mt-2"
+                          onClick={handlePayment} disabled={processing}>
+                          {processing ? (
+                            <span className="flex items-center gap-2">
+                              <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                              Processando...
+                            </span>
+                          ) : <><Lock className="w-4 h-4 mr-2" /> Pagar R$ {totalPrice.toFixed(2)}</>}
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+
+                {/* Boleto */}
+                {paymentMethod === "boleto" && (
+                  <motion.div key="boleto" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
+                    <Card className="border-border">
+                      <CardContent className="p-6 text-center">
+                        {boletoUrl ? (
+                          <>
+                            <CheckCircle2 className="w-12 h-12 mx-auto text-secondary mb-4" />
+                            <h3 className="font-bold text-foreground mb-2">Boleto Gerado!</h3>
+                            <p className="text-sm text-muted-foreground mb-4">Pague o boleto para confirmar sua consulta.</p>
+                            <a href={boletoUrl} target="_blank" rel="noopener noreferrer">
+                              <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12 text-base mb-3">
+                                📄 Abrir Boleto
+                              </Button>
+                            </a>
+                            <p className="text-xs text-muted-foreground">Confirmação automática via webhook.</p>
+                          </>
+                        ) : (
+                          <>
+                            <FileBarChart className="w-12 h-12 mx-auto text-primary/60 mb-4" />
+                            <h3 className="font-bold text-foreground mb-2">Boleto Bancário</h3>
+                            <p className="text-sm text-muted-foreground mb-4">Compensação em até 2 dias úteis.</p>
+                            <Button className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12 text-base"
+                              onClick={handlePayment} disabled={processing}>
+                              {processing ? (
+                                <span className="flex items-center gap-2">
+                                  <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                                  Gerando boleto...
+                                </span>
+                              ) : `Gerar Boleto • R$ ${totalPrice.toFixed(2)}`}
+                            </Button>
+                          </>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Security badges */}
+              <div className="flex items-center justify-center gap-4 mt-4 text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs"><Lock className="w-3 h-3" /> SSL 256-bit</div>
+                <div className="flex items-center gap-1 text-xs"><Shield className="w-3 h-3" /> PCI DSS</div>
+                <div className="flex items-center gap-1 text-xs"><Check className="w-3 h-3" /> LGPD</div>
               </div>
             </motion.div>
           )}
