@@ -40,7 +40,7 @@ const checkRealConnectivity = async (): Promise<boolean> => {
   }
 };
 
-const OfflineIndicator = () => {
+const OfflineIndicator = forwardRef<HTMLDivElement>(function OfflineIndicator(_props, _ref) {
   const [isOffline, setIsOffline] = useState(!getInitialOnlineState());
   const [showReconnected, setShowReconnected] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
