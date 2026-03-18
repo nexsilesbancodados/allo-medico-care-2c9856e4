@@ -132,6 +132,6 @@ const OfflineIndicator = forwardRef<HTMLDivElement>(function OfflineIndicator(_p
       )}
     </AnimatePresence>
   );
-};
+});
 
 export default OfflineIndicator;
