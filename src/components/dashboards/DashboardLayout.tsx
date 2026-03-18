@@ -188,7 +188,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
     if (sidebarAnimated.current || !sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     sidebarAnimated.current = true;
     const items = sidebarRef.current.querySelectorAll(".nav-item");
-    gsap.fromTo(items, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.035, ease: "power2.out", clearProps: "transform,opacity" });
+    import("gsap").then(({ default: gsap }) => {
+      gsap.fromTo(items, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.035, ease: "power2.out", clearProps: "transform,opacity" });
+    }).catch(() => {});
   }, [nav]);
 
   // GSAP header entrance
