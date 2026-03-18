@@ -14,26 +14,26 @@ const PageLoader = () => (
   </div>
 );
 
-// ── EAGER imports: dashboard shells (loaded once, cached) ──
-import PatientDashboard from "@/components/dashboards/PatientDashboard";
-import DoctorDashboard from "@/components/dashboards/DoctorDashboard";
-import ClinicDashboard from "@/components/dashboards/ClinicDashboard";
-import AdminDashboard from "@/components/dashboards/AdminDashboard";
-import ReceptionDashboard from "@/components/dashboards/ReceptionDashboard";
-import SupportDashboard from "@/components/dashboards/SupportDashboard";
-import PartnerDashboard from "@/components/dashboards/PartnerDashboard";
-import LaudistaDashboard from "@/components/dashboards/LaudistaDashboard";
+// ── LAZY imports: dashboard shells ──
+const PatientDashboard = lazy(() => import("@/components/dashboards/PatientDashboard"));
+const DoctorDashboard = lazy(() => import("@/components/dashboards/DoctorDashboard"));
+const ClinicDashboard = lazy(() => import("@/components/dashboards/ClinicDashboard"));
+const AdminDashboard = lazy(() => import("@/components/dashboards/AdminDashboard"));
+const ReceptionDashboard = lazy(() => import("@/components/dashboards/ReceptionDashboard"));
+const SupportDashboard = lazy(() => import("@/components/dashboards/SupportDashboard"));
+const PartnerDashboard = lazy(() => import("@/components/dashboards/PartnerDashboard"));
+const LaudistaDashboard = lazy(() => import("@/components/dashboards/LaudistaDashboard"));
 
-// ── EAGER imports: most-used sub-pages (instant nav) ──
-import UserProfile from "@/components/profile/UserProfile";
-import PanelSettings from "@/components/settings/PanelSettings";
-import DoctorSearch from "@/components/patient/DoctorSearch";
-import AppointmentsList from "@/components/patient/AppointmentsList";
-import DoctorAvailability from "@/components/doctor/DoctorAvailability";
-import DoctorPatients from "@/components/doctor/DoctorPatients";
-import DoctorConsultations from "@/components/doctor/DoctorConsultations";
-import DoctorCalendar from "@/components/doctor/DoctorCalendar";
-import PanelCenter from "@/components/admin/PanelCenter";
+// ── LAZY imports: sub-pages ──
+const UserProfile = lazy(() => import("@/components/profile/UserProfile"));
+const PanelSettings = lazy(() => import("@/components/settings/PanelSettings"));
+const DoctorSearch = lazy(() => import("@/components/patient/DoctorSearch"));
+const AppointmentsList = lazy(() => import("@/components/patient/AppointmentsList"));
+const DoctorAvailability = lazy(() => import("@/components/doctor/DoctorAvailability"));
+const DoctorPatients = lazy(() => import("@/components/doctor/DoctorPatients"));
+const DoctorConsultations = lazy(() => import("@/components/doctor/DoctorConsultations"));
+const DoctorCalendar = lazy(() => import("@/components/doctor/DoctorCalendar"));
+const PanelCenter = lazy(() => import("@/components/admin/PanelCenter"));
 
 // ── LAZY imports: less-used pages (prefetched on idle) ──
 const BookAppointment = lazy(() => import("@/components/patient/BookAppointment"));

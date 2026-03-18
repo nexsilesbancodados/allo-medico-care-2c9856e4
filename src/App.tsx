@@ -109,8 +109,8 @@ const App = () => {
   const [showDeferredFeatures, setShowDeferredFeatures] = useState(false);
 
   useEffect(() => {
-    const frameId = window.requestAnimationFrame(() => setShowDeferredFeatures(true));
-    return () => window.cancelAnimationFrame(frameId);
+    const timerId = window.setTimeout(() => setShowDeferredFeatures(true), 1200);
+    return () => window.clearTimeout(timerId);
   }, []);
 
   useEffect(() => {

@@ -197,7 +197,8 @@ const AdminDashboard = () => {
     fetchLiveStats();
   };
 
-  const exportAdminPDF = () => {
+  const exportAdminPDF = async () => {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF();
     doc.setFontSize(16);
     doc.text("Relatório Administrativo — AloClínica", 14, 20);

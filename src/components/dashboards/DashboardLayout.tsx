@@ -196,7 +196,10 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   // GSAP header entrance
   useEffect(() => {
     if (!headerRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    gsap.fromTo(headerRef.current, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", clearProps: "transform,opacity" });
+    const el = headerRef.current;
+    import("gsap").then(({ default: gsap }) => {
+      gsap.fromTo(el, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", clearProps: "transform,opacity" });
+    }).catch(() => {});
   }, []);
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => (
