@@ -148,12 +148,20 @@ const DiscountCard = () => {
       if (paymentError) throw paymentError;
       if (!paymentData?.success) throw new Error(paymentData?.error || "Erro no gateway de pagamento");
 
-      const validUntil = new Date(); validUntil.setMonth(validUntil.getMonth() + 1);
-      const { error: cardError } = await supabase.from("discount_cards").insert({ user_id: user.id, plan_type: planId, price_monthly: price, discount_percent: 30, status: "active", valid_until: validUntil.toISOString(), payment_id: paymentData?.paymentId || null });
-      if (cardError) throw cardError;
-      toast.success("Cartão de Benefícios ativado! 🎉", { description: "Aproveite todos os benefícios agora mesmo." });
-      if (paymentData?.invoiceUrl) window.open(paymentData.invoiceUrl, "_blank");
-      navigate("/dashboard");
+      // Don't create discount_card here — the Asaas webhook activates it after payment confirmation
+      if (paymentData?.pixQrCode) {
+        // Redirect to dashboard plans tab where PIX QR is properly handled
+        sessionStorage.setItem("pending_card_plan", planId);
+        toast.success("Assinatura criada! 🎉", { description: "Pague o PIX para ativar seu cartão. Acompanhe no dashboard." });
+        navigate("/dashboard/plans?role=patient");
+      } else if (paymentData?.invoiceUrl) {
+        window.open(paymentData.invoiceUrl, "_blank");
+        toast.success("Assinatura criada!", { description: "Pague a fatura para ativar seu Cartão de Benefícios." });
+        navigate("/dashboard/plans?role=patient");
+      } else {
+        toast.success("Assinatura criada!", { description: "Seu cartão será ativado após a confirmação do pagamento." });
+        navigate("/dashboard/plans?role=patient");
+      }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Tente novamente.";
       toast.error("Erro ao processar", { description: message });
