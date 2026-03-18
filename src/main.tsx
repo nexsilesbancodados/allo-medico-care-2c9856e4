@@ -11,45 +11,18 @@ const isChunkError = (v: unknown) => {
 };
 
 const getReloadFlag = () => {
-  try {
-    return sessionStorage.getItem(CHUNK_RELOAD_KEY) === "1";
-  } catch {
-    return false;
-  }
+  try { return sessionStorage.getItem(CHUNK_RELOAD_KEY) === "1"; } catch { return false; }
 };
-
 const setReloadFlag = () => {
-  try {
-    sessionStorage.setItem(CHUNK_RELOAD_KEY, "1");
-  } catch {
-    // no-op (private mode / blocked storage)
-  }
+  try { sessionStorage.setItem(CHUNK_RELOAD_KEY, "1"); } catch {}
 };
-
 const clearReloadFlag = () => {
-  try {
-    sessionStorage.removeItem(CHUNK_RELOAD_KEY);
-  } catch {
-    // no-op
-  }
-};
-
-const reportFatal = async (message: string, error?: unknown) => {
-  try {
-    const { logError } = await import("@/lib/logger");
-    logError(message, error);
-  } catch {
-    console.error(`[boot] ${message}`, error);
-  }
+  try { sessionStorage.removeItem(CHUNK_RELOAD_KEY); } catch {}
 };
 
 const recover = () => {
-  if (getReloadFlag()) {
-    clearReloadFlag();
-    return; // already tried once
-  }
+  if (getReloadFlag()) { clearReloadFlag(); return; }
   setReloadFlag();
-
   const reset = async () => {
     try {
       if ("serviceWorker" in navigator) {
@@ -60,32 +33,19 @@ const recover = () => {
         const keys = await caches.keys();
         await Promise.all(keys.map((k) => caches.delete(k)));
       }
-    } catch {
-      // silent failure
-    }
+    } catch {}
     window.location.reload();
   };
-
   void reset();
 };
 
-window.addEventListener("vite:preloadError", (e) => {
-  e.preventDefault();
-  recover();
-});
+window.addEventListener("vite:preloadError", (e) => { e.preventDefault(); recover(); });
 window.addEventListener("unhandledrejection", (e) => {
-  if (isChunkError(e.reason)) {
-    e.preventDefault();
-    recover();
-  }
+  if (isChunkError(e.reason)) { e.preventDefault(); recover(); }
 });
-window.addEventListener(
-  "error",
-  (e) => {
-    if (isChunkError((e as ErrorEvent).error ?? (e as ErrorEvent).message)) recover();
-  },
-  true,
-);
+window.addEventListener("error", (e) => {
+  if (isChunkError((e as ErrorEvent).error ?? (e as ErrorEvent).message)) recover();
+}, true);
 
 /* ── Lazy side-effects (non-blocking) ─────────────────── */
 import("./lib/sentry").then(({ initSentry }) => initSentry()).catch(() => {});
@@ -95,50 +55,19 @@ const isPreviewEnvironment = window.location.hostname.startsWith("id-preview--")
 
 if ("serviceWorker" in navigator) {
   if (isPreviewEnvironment) {
-    void navigator.serviceWorker
-      .getRegistrations()
-      .then((regs) => Promise.all(regs.map((r) => r.unregister())))
-      .catch(() => {});
-
+    void navigator.serviceWorker.getRegistrations()
+      .then((regs) => Promise.all(regs.map((r) => r.unregister()))).catch(() => {});
     if ("caches" in window) {
-      void caches
-        .keys()
-        .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
-        .catch(() => {});
+      void caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).catch(() => {});
     }
   } else {
     navigator.serviceWorker.register("/push-sw.js").catch(() => {});
   }
 }
 
-/* ── Safe mount with deferred imports ─────────────────── */
-const BOOT_PLACEHOLDER_ID = "app-boot-placeholder";
-
-const renderFatalFallback = (root: HTMLElement) => {
-  root.innerHTML =
-    '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><div style="text-align:center"><h2>Erro ao carregar</h2><p>Detectamos uma falha de inicialização. Recarregue para recuperar.</p><button onclick="location.reload()" style="padding:8px 16px;margin-top:12px;cursor:pointer;border-radius:6px;border:1px solid #ccc">Recarregar</button></div></div>';
-};
-
+/* ── Mount ─────────────────────────────────────────────── */
 const root = document.getElementById("root");
-if (!root) {
-  document.body.innerHTML =
-    '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif">Erro crítico: elemento #root não encontrado.</div>';
-  throw new Error("Root element not found");
-}
-
-// The index.html already has a 10s watchdog — no duplicate timer here.
-
-const notifyBootReady = () => {
-  clearReloadFlag();
-  window.dispatchEvent(new Event("app:booted"));
-};
-
-const notifyBootFailure = () => {
-  const failHandler = (window as Window & { __APP_BOOT_FAIL__?: () => void }).__APP_BOOT_FAIL__;
-  if (typeof failHandler === "function") {
-    failHandler();
-  }
-};
+if (!root) throw new Error("Root element not found");
 
 const mountApp = async () => {
   try {
@@ -146,22 +75,17 @@ const mountApp = async () => {
       import("./App"),
       import("./components/ErrorBoundary"),
     ]);
-
     createRoot(root).render(
       <ErrorBoundary>
         <App />
       </ErrorBoundary>,
     );
-
-    notifyBootReady();
+    clearReloadFlag();
   } catch (err) {
-    void reportFatal("Fatal React mount/import error", err);
-    notifyBootFailure();
-    if (isChunkError(err)) {
-      recover();
-    } else {
-      renderFatalFallback(root);
-    }
+    if (isChunkError(err)) { recover(); return; }
+    console.error("[boot] Fatal mount error", err);
+    root.innerHTML =
+      '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><div style="text-align:center"><h2>Erro ao carregar</h2><p>Recarregue a página.</p><button onclick="location.reload()" style="padding:8px 16px;margin-top:12px;cursor:pointer;border-radius:6px;border:1px solid #ccc">Recarregar</button></div></div>';
   }
 };
 
