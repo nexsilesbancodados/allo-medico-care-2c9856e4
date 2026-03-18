@@ -328,12 +328,15 @@ const PlansCheckout = () => {
   // Track appointment ID created during checkout for PIX polling
   const [currentAppointmentId, setCurrentAppointmentId] = useState<string | null>(null);
 
-  // PIX polling for payment confirmation
+  // Payment polling for confirmation (PIX and Boleto)
   useEffect(() => {
-    if (step !== "checkout" || paymentMethod !== "pix" || (!pixQrCode && !asaasPaymentId)) return;
+    if (step !== "checkout" || !currentAppointmentId) return;
+    // Only poll when we have a generated payment (PIX QR or Boleto URL or asaas ID)
+    const hasPendingPayment = pixQrCode || boletoUrl || asaasPaymentId;
+    if (!hasPendingPayment) return;
+    
     const pollTimer = setInterval(async () => {
       if (user && currentAppointmentId) {
-        // Poll specific appointment instead of latest by doctor
         const { data } = await supabase
           .from("appointments")
           .select("payment_status")
@@ -349,7 +352,7 @@ const PlansCheckout = () => {
       }
     }, 10000);
     return () => clearInterval(pollTimer);
-  }, [step, paymentMethod, pixQrCode, asaasPaymentId, currentAppointmentId]);
+  }, [step, pixQrCode, boletoUrl, asaasPaymentId, currentAppointmentId]);
 
   const handleCheckout = async () => {
     if (paymentMethod === "card" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
@@ -480,6 +483,15 @@ const PlansCheckout = () => {
 
       setAsaasPaymentId(data.paymentId || data.subscriptionId);
 
+      // Handle PIX→BOLETO fallback from Asaas
+      if (data.fallbackUsed && data.billingType === "BOLETO") {
+        setBoletoUrl(data.bankSlipUrl || data.invoiceUrl || null);
+        setPaymentMethod("boleto");
+        setProcessing(false);
+        toast.warning("PIX indisponível no momento", { description: "Boleto gerado automaticamente como alternativa." });
+        return;
+      }
+
       if (paymentMethod === "pix") {
         setPixQrCode(data.pixQrCode || null);
         setPixCopyPasteCode(data.pixCopyPaste || null);
@@ -492,8 +504,8 @@ const PlansCheckout = () => {
       if (paymentMethod === "boleto") {
         setBoletoUrl(data.bankSlipUrl || data.invoiceUrl || null);
         setProcessing(false);
-        setStep("success");
-        clearCheckoutDraft();
+        // Don't go to success — user needs to pay the boleto first
+        toast.success("Boleto gerado! 📄", { description: "Pague o boleto para confirmar sua consulta." });
         return;
       }
 
@@ -1134,23 +1146,43 @@ const PlansCheckout = () => {
                     <motion.div key="boleto" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }}>
                       <Card className="border-border">
                         <CardContent className="p-6 text-center">
-                          <FileBarChart className="w-12 h-12 mx-auto text-primary/60 mb-4" />
-                          <h3 className="font-bold text-foreground mb-2">Boleto Bancário</h3>
-                          <p className="text-sm text-muted-foreground mb-4">
-                            O boleto será gerado e pode levar até 2 dias úteis para compensação.
-                          </p>
-                          <Button
-                            className="w-full bg-gradient-hero text-primary-foreground h-12 text-base"
-                            onClick={handleCheckout}
-                            disabled={processing}
-                          >
-                            {processing ? (
-                              <motion.div className="flex items-center gap-2" animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
-                                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                                Gerando boleto...
-                              </motion.div>
-                            ) : `Gerar Boleto • R$ ${totalPrice.toFixed(2)}`}
-                          </Button>
+                          {boletoUrl ? (
+                            <>
+                              <CheckCircle2 className="w-12 h-12 mx-auto text-secondary mb-4" />
+                              <h3 className="font-bold text-foreground mb-2">Boleto Gerado!</h3>
+                              <p className="text-sm text-muted-foreground mb-4">
+                                Pague o boleto para confirmar sua consulta. A compensação pode levar até 2 dias úteis.
+                              </p>
+                              <a href={boletoUrl} target="_blank" rel="noopener noreferrer">
+                                <Button className="w-full bg-gradient-hero text-primary-foreground h-12 text-base mb-3">
+                                  📄 Abrir Boleto
+                                </Button>
+                              </a>
+                              <p className="text-xs text-muted-foreground">
+                                Após o pagamento, a confirmação será automática via webhook.
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <FileBarChart className="w-12 h-12 mx-auto text-primary/60 mb-4" />
+                              <h3 className="font-bold text-foreground mb-2">Boleto Bancário</h3>
+                              <p className="text-sm text-muted-foreground mb-4">
+                                O boleto será gerado e pode levar até 2 dias úteis para compensação.
+                              </p>
+                              <Button
+                                className="w-full bg-gradient-hero text-primary-foreground h-12 text-base"
+                                onClick={handleCheckout}
+                                disabled={processing}
+                              >
+                                {processing ? (
+                                  <motion.div className="flex items-center gap-2" animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+                                    <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                                    Gerando boleto...
+                                  </motion.div>
+                                ) : `Gerar Boleto • R$ ${totalPrice.toFixed(2)}`}
+                              </Button>
+                            </>
+                          )}
                         </CardContent>
                       </Card>
                     </motion.div>

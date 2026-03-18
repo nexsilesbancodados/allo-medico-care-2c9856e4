@@ -200,6 +200,7 @@ const BookAppointment = () => {
         doctor_id: doctor.id,
         scheduled_at: dt.toISOString(),
         status: "scheduled",
+        payment_status: "pending",
         appointment_type: firstApptId ? "return" : appointmentType,
         notes: notesText ? notesText + (firstApptId ? ` | Recorrente` : "") : (firstApptId ? "Agendamento recorrente" : null),
         original_appointment_id: firstApptId || null,
