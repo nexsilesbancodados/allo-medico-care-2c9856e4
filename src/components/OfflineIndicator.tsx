@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { WifiOff, Wifi, RefreshCw } from "lucide-react";
 import { useTranslation } from "@/i18n";
