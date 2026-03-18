@@ -13,7 +13,7 @@ import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Act
 import AdminAnalyticsCharts from "./AdminAnalyticsCharts";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import jsPDF from "jspdf";
+// jsPDF loaded dynamically on export
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
