@@ -255,12 +255,38 @@ serve(async (req) => {
         );
       }
 
+      // For PIX subscriptions, fetch the first payment's QR code
+      let pixData = null;
+      if (billingType === "PIX" && subData.id) {
+        try {
+          // Wait for Asaas to generate the first payment
+          await new Promise(r => setTimeout(r, 2000));
+          const paymentsRes = await asaasFetch(
+            `${baseUrl}/subscriptions/${subData.id}/payments?limit=1&sort=dueDate&order=asc`,
+            { headers }
+          );
+          const paymentsData = await safeJson(paymentsRes);
+          if (paymentsData.data && paymentsData.data.length > 0) {
+            const firstPaymentId = paymentsData.data[0].id;
+            await new Promise(r => setTimeout(r, 1000));
+            const pixRes = await asaasFetch(`${baseUrl}/payments/${firstPaymentId}/pixQrCode`, { headers });
+            if (pixRes.ok) {
+              pixData = await safeJson(pixRes);
+            }
+          }
+        } catch (pixErr) {
+          console.warn("PIX QR code fetch for subscription failed:", pixErr);
+        }
+      }
+
       return new Response(
         JSON.stringify({
           success: true,
           type: "subscription",
           subscriptionId: subData.id,
           status: subData.status,
+          pixQrCode: pixData?.encodedImage || null,
+          pixCopyPaste: pixData?.payload || null,
           ...subData,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
