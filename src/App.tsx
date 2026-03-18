@@ -73,9 +73,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = () => (
-  <div className="min-h-screen bg-background" aria-hidden="true" />
-);
+const PageLoader = () => null;
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();
