@@ -3,15 +3,12 @@ import { Navigate, Routes, Route, useSearchParams, useNavigate } from "react-rou
 import { usePresence } from "@/hooks/use-presence";
 import { prefetchOnIdle } from "@/hooks/use-prefetch-route";
 import { lazy, Suspense, ReactNode, useEffect, useState, useCallback } from "react";
-import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { warn } from "@/lib/logger";
 
-// ── Lightweight inline loader (no spinner delay) ──
+// ── Invisible loader (no spinner, no flash) ──
 const PageLoader = () => (
-  <div className="min-h-[40vh] flex items-center justify-center" role="status">
-    <Loader2 className="w-6 h-6 animate-spin text-primary/40" />
-  </div>
+  <div className="min-h-screen bg-background" aria-hidden="true" />
 );
 
 // ── LAZY imports: dashboard shells ──

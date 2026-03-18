@@ -9,7 +9,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
-const Index = lazy(() => import("./pages/Index"));
+import Index from "./pages/Index";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 import { logError } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
@@ -73,26 +73,9 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = () => {
-  const [showRecovery, setShowRecovery] = useState(false);
-
-  useEffect(() => {
-    const timer = window.setTimeout(() => setShowRecovery(true), 8000);
-    return () => window.clearTimeout(timer);
-  }, []);
-
-  return (
-    <div className="min-h-[40vh] flex flex-col items-center justify-center gap-4 px-4" role="status" aria-live="polite" aria-label="Carregando página">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
-      <p className="text-sm text-muted-foreground">Carregando com segurança...</p>
-      {showRecovery && (
-        <Button size="sm" variant="outline" onClick={() => window.location.reload()}>
-          Recarregar aplicativo
-        </Button>
-      )}
-    </div>
-  );
-};
+const PageLoader = () => (
+  <div className="min-h-screen bg-background" aria-hidden="true" />
+);
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();
