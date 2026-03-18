@@ -328,12 +328,15 @@ const PlansCheckout = () => {
   // Track appointment ID created during checkout for PIX polling
   const [currentAppointmentId, setCurrentAppointmentId] = useState<string | null>(null);
 
-  // PIX polling for payment confirmation
+  // Payment polling for confirmation (PIX and Boleto)
   useEffect(() => {
-    if (step !== "checkout" || paymentMethod !== "pix" || (!pixQrCode && !asaasPaymentId)) return;
+    if (step !== "checkout" || !currentAppointmentId) return;
+    // Only poll when we have a generated payment (PIX QR or Boleto URL or asaas ID)
+    const hasPendingPayment = pixQrCode || boletoUrl || asaasPaymentId;
+    if (!hasPendingPayment) return;
+    
     const pollTimer = setInterval(async () => {
       if (user && currentAppointmentId) {
-        // Poll specific appointment instead of latest by doctor
         const { data } = await supabase
           .from("appointments")
           .select("payment_status")
@@ -349,7 +352,7 @@ const PlansCheckout = () => {
       }
     }, 10000);
     return () => clearInterval(pollTimer);
-  }, [step, paymentMethod, pixQrCode, asaasPaymentId, currentAppointmentId]);
+  }, [step, pixQrCode, boletoUrl, asaasPaymentId, currentAppointmentId]);
 
   const handleCheckout = async () => {
     if (paymentMethod === "card" && (!cardName || !cardNumber || !cardExpiry || !cardCvv)) {
