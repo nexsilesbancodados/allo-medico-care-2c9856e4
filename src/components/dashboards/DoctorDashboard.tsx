@@ -205,34 +205,37 @@ const DoctorDashboard = () => {
         </div>
 
         {/* ═══ KPI Cards — colored left border like reference ═══ */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4" role="list" aria-label="Estatísticas do médico">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4" role="list" aria-label="Estatísticas do médico">
           {loading ? (
-            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)
+            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-2xl shimmer-v2" />)
           ) : (
             kpis.map((kpi, i) => (
               <motion.div
                 key={kpi.label}
-                initial={{ opacity: 0, y: 12 }}
+                initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08, type: "spring", stiffness: 180, damping: 18 }}
+                transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 18 }}
                 role="listitem"
                 aria-label={`${kpi.label}: ${kpi.value}`}
-                className={`bg-card rounded-xl border border-border/50 border-l-4 ${kpi.borderColor} p-4 hover:shadow-lg hover:-translate-y-1 transition-all duration-200 cursor-pointer hover:border-primary/30`}
+                className={`kpi-card relative overflow-hidden bg-card rounded-2xl border border-border/40 border-l-[3px] ${kpi.borderColor} p-4 cursor-pointer group`}
                 onClick={() => {
                   const paths = [null, "/dashboard/doctor/waiting-room", "/dashboard/prescriptions", "/dashboard/earnings"];
                   if (paths[i]) navigate(paths[i]!);
                 }}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className={`size-10 rounded-xl ${kpi.iconBg} flex items-center justify-center`}>
+                {/* Ambient glow */}
+                <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full blur-2xl opacity-10 pointer-events-none ${kpi.iconBg}`} aria-hidden="true" />
+                
+                <div className="flex items-center justify-between mb-3 relative">
+                  <div className={`size-11 rounded-xl ${kpi.iconBg} flex items-center justify-center shadow-sm ring-1 ring-border/10 group-hover:scale-110 transition-transform duration-200`}>
                     <kpi.icon className={`w-5 h-5 ${kpi.iconColor}`} />
                   </div>
-                  <Badge className={`text-[10px] font-bold px-2 py-0.5 rounded-full border-0 ${kpi.badgeColor}`}>
+                  <Badge className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border-0 ${kpi.badgeColor}`}>
                     {kpi.badge}
                   </Badge>
                 </div>
-                <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mb-1">{kpi.label}</p>
-                <p className={`font-bold text-foreground leading-none tabular-nums ${kpi.isLarge ? "text-xl" : "text-2xl"}`}>{kpi.value}</p>
+                <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider mb-1.5">{kpi.label}</p>
+                <p className={`font-black text-foreground leading-none tabular-nums ${kpi.isLarge ? "text-xl" : "text-2xl"}`}>{kpi.value}</p>
               </motion.div>
             ))
           )}
