@@ -142,35 +142,25 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
 
   const fetchAllData = async () => {
     setLoading(true);
-    const promises: Promise<any>[] = [
-      // Patient profile
+    const [profileRes, recordsRes, docsRes, pastRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", patientId).maybeSingle(),
-      // Medical records (allergies, conditions, meds)
       supabase.from("medical_records").select("id, record_type, title, description, cid_code, severity, is_active, created_at")
         .eq("patient_id", patientId).order("created_at", { ascending: false }),
-      // Patient documents
       supabase.from("patient_documents").select("*").eq("patient_id", patientId).order("created_at", { ascending: false }),
-      // Past anamneses
       supabase.from("clinical_anamnesis" as any).select("*").eq("patient_id", patientId)
-        .order("created_at", { ascending: false }),
-    ];
+        .order("created_at", { ascending: false }) as any,
+    ]);
 
-    // Current appointment anamnesis
+    let currentAnamnesisRes: any = null;
     if (appointmentId) {
-      promises.push(
-        supabase.from("clinical_anamnesis" as any).select("*")
-          .eq("appointment_id", appointmentId).maybeSingle()
-      );
+      currentAnamnesisRes = await (supabase.from("clinical_anamnesis" as any).select("*")
+        .eq("appointment_id", appointmentId).maybeSingle() as any);
     }
 
-    // Get doctor profile id
+    let docProfileRes: any = null;
     if (user && isDoctorRole) {
-      promises.push(
-        supabase.from("doctor_profiles").select("id").eq("user_id", user.id).maybeSingle()
-      );
+      docProfileRes = await supabase.from("doctor_profiles").select("id").eq("user_id", user.id).maybeSingle();
     }
-
-    const results = await Promise.all(promises);
 
     if (results[0].data) setPatient(results[0].data);
     if (results[1].data) setRecords(results[1].data as MedicalRecord[]);
