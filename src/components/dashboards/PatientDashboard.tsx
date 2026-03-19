@@ -179,28 +179,36 @@ const PatientDashboard = () => {
           {/* KPI stats bar */}
           {!loading && (
             <div className="relative z-10 px-4 sm:px-5 lg:px-6 pb-4 sm:pb-5">
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3" role="list" aria-label="Estatísticas do paciente">
                 {[
-                  { label: "Consultas", value: stats?.total ?? 0, icon: Calendar, color: "text-primary", bgIcon: "bg-primary/8" },
-                  { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText, color: "text-secondary", bgIcon: "bg-secondary/8" },
-                  { label: "Documentos", value: stats?.documents ?? 0, icon: Upload, color: "text-warning", bgIcon: "bg-warning/8" },
-                ].map(kpi => (
-                  <div key={kpi.label} className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-muted/30 border border-border/20">
-                    <div className={`size-7 sm:size-8 rounded-lg ${kpi.bgIcon} flex items-center justify-center shrink-0`}>
-                      <kpi.icon className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${kpi.color}`} />
+                  { label: "Consultas", value: stats?.total ?? 0, icon: Calendar, color: "text-primary", bgIcon: "bg-primary/10", gradient: "from-primary/5 to-primary/[0.02]" },
+                  { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText, color: "text-secondary", bgIcon: "bg-secondary/10", gradient: "from-secondary/5 to-secondary/[0.02]" },
+                  { label: "Documentos", value: stats?.documents ?? 0, icon: Upload, color: "text-warning", bgIcon: "bg-warning/10", gradient: "from-warning/5 to-warning/[0.02]" },
+                ].map((kpi, i) => (
+                  <motion.div
+                    key={kpi.label}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06, type: "spring", stiffness: 200, damping: 20 }}
+                    role="listitem"
+                    className={`kpi-card relative overflow-hidden flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2.5 sm:py-3 rounded-xl bg-gradient-to-br ${kpi.gradient} border border-border/25 backdrop-blur-sm`}
+                  >
+                    <div className={`absolute -top-3 -right-3 w-12 h-12 rounded-full blur-xl opacity-20 ${kpi.bgIcon}`} aria-hidden="true" />
+                    <div className={`size-8 sm:size-9 rounded-xl ${kpi.bgIcon} flex items-center justify-center shrink-0 shadow-sm`}>
+                      <kpi.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${kpi.color}`} />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-base sm:text-lg font-black text-foreground leading-none tabular-nums">{kpi.value}</p>
-                      <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium mt-0.5">{kpi.label}</p>
+                    <div className="min-w-0 relative">
+                      <p className="text-lg sm:text-xl font-black text-foreground leading-none tabular-nums">{kpi.value}</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-semibold mt-0.5 uppercase tracking-wider">{kpi.label}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
           )}
           {loading && (
             <div className="px-4 sm:px-5 pb-4 sm:pb-5 grid grid-cols-3 gap-2 sm:gap-3">
-              {[1,2,3].map(i => <div key={i} className="h-14 rounded-xl shimmer-v2" />)}
+              {[1,2,3].map(i => <div key={i} className="h-16 rounded-xl shimmer-v2" />)}
             </div>
           )}
         </section>
