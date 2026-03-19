@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, Routes, Route, useSearchParams, useNavigate } from "react-router-dom";
+import { Navigate, Routes, Route, useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { usePresence } from "@/hooks/use-presence";
 import { prefetchOnIdle } from "@/hooks/use-prefetch-route";
 import { lazy, Suspense, ReactNode, useEffect, useState, useCallback } from "react";
@@ -30,6 +30,7 @@ const DoctorAvailability = lazy(() => import("@/components/doctor/DoctorAvailabi
 const DoctorPatients = lazy(() => import("@/components/doctor/DoctorPatients"));
 const DoctorConsultations = lazy(() => import("@/components/doctor/DoctorConsultations"));
 const DoctorCalendar = lazy(() => import("@/components/doctor/DoctorCalendar"));
+const PatientEMR = lazy(() => import("@/components/medical/PatientEMR"));
 const PanelCenter = lazy(() => import("@/components/admin/PanelCenter"));
 
 // ── LAZY imports: less-used pages (prefetched on idle) ──
@@ -100,6 +101,13 @@ const AdminFinancial = lazy(() => import("@/components/admin/AdminFinancial"));
 const AdminCoupons = lazy(() => import("@/components/admin/AdminCoupons"));
 const AdminDoctorApplications = lazy(() => import("@/components/admin/AdminDoctorApplications"));
 const SupportInbox = lazy(() => import("@/components/support/SupportInbox"));
+
+// EMR wrapper with route params
+const PatientEMRPage = () => {
+  const { patientUserId } = useParams();
+  if (!patientUserId) return <Navigate to="/dashboard/patients" replace />;
+  return <PatientEMR patientId={patientUserId} isDoctor readOnly={false} />;
+};
 
 const PLAN_CHECK_TIMEOUT_MS = 6000;
 
@@ -280,6 +288,7 @@ const Dashboard = () => {
       {/* Doctor routes (mix eager+lazy) */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />
       <Route path="patients" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorPatients /></RoleGuard>} />
+      <Route path="patients/:patientUserId/emr" element={<RoleGuard allowed={["doctor"]} roles={roles}><PatientEMRPage /></RoleGuard>} />
       <Route path="prescriptions" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorPrescriptions /></RoleGuard>} />
       <Route path="earnings" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorEarnings /></RoleGuard>} />
       <Route path="certificates" element={<RoleGuard allowed={["doctor"]} roles={roles}><MedicalCertificate /></RoleGuard>} />
