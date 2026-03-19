@@ -72,23 +72,20 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
   useEffect(() => {
     (async () => {
       try {
-        const [patientsRes, specialtiesRes, appointmentsRes, npsRes] = await Promise.all([
+        const [patientsRes, specialtiesRes, appointmentsRes] = await Promise.all([
           supabase.from("profiles").select("id", { count: "exact", head: true }),
           supabase.from("specialties").select("id", { count: "exact", head: true }),
           supabase.from("appointments").select("id", { count: "exact", head: true }).eq("status", "completed"),
-          supabase.from("satisfaction_surveys").select("nps_score"),
         ]);
         const patients = patientsRes.count ?? 0;
         const specialties = specialtiesRes.count ?? 0;
         const appointments = appointmentsRes.count ?? 0;
-        const scores = npsRes.data ?? [];
-        const avgNps = scores.length > 0 ? scores.reduce((s, x) => s + x.nps_score, 0) / scores.length : 4.9;
 
         if (patients > 10 || appointments > 5) {
           setStats([
             { icon: Users,       target: patients,    suffix: "+",   label: "Pacientes atendidos",  gradient: "from-blue-500 to-cyan-500",    delay: 0 },
             { icon: Stethoscope, target: specialties, suffix: "+",   label: "Especialidades",        gradient: "from-emerald-500 to-teal-500", delay: 0.08 },
-            { icon: Star,        target: Math.round(avgNps * 10) / 10, suffix: "", label: "Nota média", decimals: 1, gradient: "from-amber-500 to-orange-500", delay: 0.16 },
+            { icon: Star,        target: 4.9, suffix: "", label: "Nota média", decimals: 1, gradient: "from-amber-500 to-orange-500", delay: 0.16 },
             { icon: Clock,       target: appointments,suffix: "+",   label: "Consultas realizadas",  gradient: "from-green-500 to-emerald-500",delay: 0.24 },
           ]);
         }
