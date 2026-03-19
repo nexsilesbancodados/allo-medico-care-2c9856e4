@@ -9,7 +9,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
-import Index from "./pages/Index";
+const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 import { logError } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
@@ -97,6 +97,7 @@ const App = () => {
   useEffect(() => {
     const cancelCriticalPrefetch = prefetchOnIdle(
       [
+        () => import("./pages/Index"),
         () => import("./pages/Auth"),
         () => import("./pages/AuthPaciente"),
         () => import("./pages/AuthMedico"),
@@ -109,7 +110,7 @@ const App = () => {
         () => import("./pages/GuestCheckout"),
         () => import("./pages/GuestConsultation"),
       ],
-      1200,
+      800,
     );
 
     const cancelSecondaryPrefetch = prefetchOnIdle(
