@@ -59,6 +59,8 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
   const [symptomsSubmitted, setSymptomsSubmitted] = useState(false);
   const [showSymptomForm, setShowSymptomForm] = useState(false);
   const [showTips, setShowTips] = useState(false);
+  const [networkQuality, setNetworkQuality] = useState<"good" | "fair" | "poor" | null>(null);
+  const [networkLatency, setNetworkLatency] = useState<number | null>(null);
 
   // Check if symptoms already submitted
   useEffect(() => {
