@@ -162,13 +162,13 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
       docProfileRes = await supabase.from("doctor_profiles").select("id").eq("user_id", user.id).maybeSingle();
     }
 
-    if (results[0].data) setPatient(results[0].data);
-    if (results[1].data) setRecords(results[1].data as MedicalRecord[]);
-    if (results[2].data) setDocuments(results[2].data);
-    if (results[3].data) setPastAnamneses(results[3].data as any[]);
+    if (profileRes.data) setPatient(profileRes.data);
+    if (recordsRes.data) setRecords(recordsRes.data as MedicalRecord[]);
+    if (docsRes.data) setDocuments(docsRes.data);
+    if (pastRes.data) setPastAnamneses(pastRes.data as any[]);
 
-    if (appointmentId && results[4]?.data) {
-      const existing = results[4].data;
+    if (currentAnamnesisRes?.data) {
+      const existing = currentAnamnesisRes.data;
       setExistingAnamnesisId(existing.id);
       setAnamnesis({
         social_name: existing.social_name || "",
@@ -193,13 +193,13 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
         treatment_plan: existing.treatment_plan || "",
       });
       // Fetch audit log
-      const { data: audit } = await supabase.from("clinical_evolution_audit" as any)
-        .select("*").eq("record_id", existing.id).order("changed_at", { ascending: false });
-      if (audit) setAuditLog(audit as AuditEntry[]);
+      const auditRes = await (supabase.from("clinical_evolution_audit" as any)
+        .select("*").eq("record_id", existing.id).order("changed_at", { ascending: false }) as any);
+      if (auditRes.data) setAuditLog(auditRes.data as unknown as AuditEntry[]);
     }
 
-    if (isDoctorRole && results.length > 5 && results[5]?.data) {
-      setDoctorProfileId(results[5].data.id);
+    if (docProfileRes?.data) {
+      setDoctorProfileId(docProfileRes.data.id);
     }
 
     setLoading(false);
