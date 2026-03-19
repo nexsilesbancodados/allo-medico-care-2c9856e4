@@ -292,6 +292,33 @@
   50%, 100% { left: 100%; }
 }
 
+/* ── Smooth entrance for dashboard cards ── */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-scale-in {
+  animation: scale-in 0.3s ease-out both;
+}
+
+/* ── Glow border effect for premium elements ── */
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: var(--gradient-hero);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+.glow-border:hover::before {
+  opacity: 0.15;
+}
+
 @keyframes rain-drop {
   0% { transform: translateY(-20px); opacity: 0; }
   20% { opacity: 1; }
