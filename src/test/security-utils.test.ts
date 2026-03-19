@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { validateCPF } from "@/lib/cpf";
-import { validateCNPJ } from "@/lib/cnpj";
+import { validarCPF } from "@/lib/cpf";
+import { validarCNPJ } from "@/lib/cnpj";
+
+const validateCPF = validarCPF;
+const validateCNPJ = validarCNPJ;
 
 describe("Security & Validation", () => {
   describe("CPF validation prevents injection", () => {
