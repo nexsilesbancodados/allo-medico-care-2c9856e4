@@ -238,9 +238,9 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
         diagnostic_hypothesis, cid_codes, treatment_plan,
       }).eq("id", existingAnamnesisId));
     } else {
-      const res = await supabase.from("clinical_anamnesis" as any).insert(payload).select("id").single();
+      const res = await (supabase.from("clinical_anamnesis" as any).insert(payload).select("id").single() as any);
       error = res.error;
-      if (res.data) setExistingAnamnesisId(res.data.id);
+      if (res.data) setExistingAnamnesisId((res.data as any).id);
     }
 
     setSaving(false);
