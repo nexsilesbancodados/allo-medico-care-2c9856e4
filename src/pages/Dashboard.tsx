@@ -30,6 +30,7 @@ const DoctorAvailability = lazy(() => import("@/components/doctor/DoctorAvailabi
 const DoctorPatients = lazy(() => import("@/components/doctor/DoctorPatients"));
 const DoctorConsultations = lazy(() => import("@/components/doctor/DoctorConsultations"));
 const DoctorCalendar = lazy(() => import("@/components/doctor/DoctorCalendar"));
+const PatientEMR = lazy(() => import("@/components/medical/PatientEMR"));
 const PanelCenter = lazy(() => import("@/components/admin/PanelCenter"));
 
 // ── LAZY imports: less-used pages (prefetched on idle) ──
