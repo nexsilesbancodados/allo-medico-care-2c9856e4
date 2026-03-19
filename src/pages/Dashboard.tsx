@@ -102,6 +102,18 @@ const AdminCoupons = lazy(() => import("@/components/admin/AdminCoupons"));
 const AdminDoctorApplications = lazy(() => import("@/components/admin/AdminDoctorApplications"));
 const SupportInbox = lazy(() => import("@/components/support/SupportInbox"));
 
+// EMR wrapper with route params
+const PatientEMRPage = () => {
+  const { patientUserId } = useParams();
+  const DashboardLayoutLazy = lazy(() => import("@/components/dashboards/DashboardLayout"));
+  const { getDoctorNav } = require("@/components/doctor/doctorNav");
+  return (
+    <Suspense fallback={<div className="shimmer-v2 h-20 rounded-2xl m-6" />}>
+      <PatientEMR patientId={patientUserId!} isDoctor readOnly={false} />
+    </Suspense>
+  );
+};
+
 const PLAN_CHECK_TIMEOUT_MS = 6000;
 
 const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number) =>
