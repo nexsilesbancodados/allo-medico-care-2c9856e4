@@ -281,6 +281,7 @@ const Dashboard = () => {
       {/* Doctor routes (mix eager+lazy) */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorAvailability /></RoleGuard>} />
       <Route path="patients" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorPatients /></RoleGuard>} />
+      <Route path="patients/:patientUserId/emr" element={<RoleGuard allowed={["doctor"]} roles={roles}><PatientEMRPage /></RoleGuard>} />
       <Route path="prescriptions" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorPrescriptions /></RoleGuard>} />
       <Route path="earnings" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorEarnings /></RoleGuard>} />
       <Route path="certificates" element={<RoleGuard allowed={["doctor"]} roles={roles}><MedicalCertificate /></RoleGuard>} />
