@@ -15,7 +15,6 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import jsPDF from "jspdf";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
