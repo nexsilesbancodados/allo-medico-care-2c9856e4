@@ -727,10 +727,10 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
       </Tabs>
 
       {/* ─── LGPD / Compliance Footer ─── */}
-      <div className="flex items-center gap-2.5 p-3 rounded-lg bg-muted/30 border border-border">
-        <Shield className="w-4 h-4 text-emerald-500 shrink-0" />
+      <div className="flex items-center gap-2.5 p-3 rounded-lg bg-accent/30 border border-border">
+        <Shield className="w-4 h-4 text-primary shrink-0" />
         <div>
-          <p className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">Prontuário protegido pela LGPD</p>
+          <p className="text-[11px] font-medium text-primary">Prontuário protegido pela LGPD</p>
           <p className="text-[10px] text-muted-foreground">CFM 2.314/22 · Guarda mínima 20 anos · Trilha de auditoria ativa</p>
         </div>
       </div>
