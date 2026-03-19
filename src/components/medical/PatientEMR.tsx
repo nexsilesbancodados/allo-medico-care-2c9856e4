@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,7 +16,7 @@ import {
   AlertTriangle, User, Heart, Activity, FileText, Stethoscope,
   Thermometer, Weight, HeartPulse, Wind, Droplets, Save, Clock,
   Shield, Search, Upload, Download, History, Eye, Plus, Loader2,
-  ClipboardList, Brain
+  ClipboardList, Brain, Check, AlertCircle, RefreshCw
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -76,6 +76,8 @@ interface MedicalRecord {
   created_at: string;
 }
 
+type SaveStatus = "idle" | "saving" | "saved" | "error" | "dirty";
+
 const EMPTY_ANAMNESIS: AnamnesisData = {
   social_name: "", gender: "", chief_complaint: "", history_present_illness: "",
   past_medical_history: "", family_history: "", lifestyle_habits: "", review_of_systems: "",
@@ -106,6 +108,9 @@ const FIELD_LABELS: Record<string, string> = {
   gender: "Gênero",
 };
 
+const AUTOSAVE_DEBOUNCE_MS = 5000;
+const AUTOSAVE_INTERVAL_MS = 30000;
+
 const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = false }: PatientEMRProps) => {
   const { user, roles } = useAuth();
   const isDoctorRole = isDoctor || roles.includes("doctor");
@@ -118,18 +123,30 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
   const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [patient, setPatient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState("anamnesis");
   const [showAudit, setShowAudit] = useState(false);
   const [cidSearch, setCidSearch] = useState("");
   const [doctorProfileId, setDoctorProfileId] = useState<string | null>(null);
   const [existingAnamnesisId, setExistingAnamnesisId] = useState<string | null>(null);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
 
-  // Fetch all data in parallel
+  // Refs to avoid stale closures
+  const anamnesisRef = useRef(anamnesis);
+  const existingIdRef = useRef(existingAnamnesisId);
+  const doctorIdRef = useRef(doctorProfileId);
+  const savingRef = useRef(false);
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dirtyRef = useRef(false);
+
+  useEffect(() => { anamnesisRef.current = anamnesis; }, [anamnesis]);
+  useEffect(() => { existingIdRef.current = existingAnamnesisId; }, [existingAnamnesisId]);
+  useEffect(() => { doctorIdRef.current = doctorProfileId; }, [doctorProfileId]);
+
+  // ─── Fetch all data in parallel ─────────────────────────────────
   useEffect(() => {
     if (!patientId) return;
     fetchAllData();
-    // Log access for LGPD compliance
     if (user && isDoctorRole && patientId !== user.id) {
       supabase.from("medical_record_access_logs" as any).insert({
         patient_id: patientId,
@@ -167,10 +184,16 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
     if (docsRes.data) setDocuments(docsRes.data);
     if (pastRes.data) setPastAnamneses(pastRes.data as any[]);
 
+    if (docProfileRes?.data) {
+      setDoctorProfileId(docProfileRes.data.id);
+      doctorIdRef.current = docProfileRes.data.id;
+    }
+
     if (currentAnamnesisRes?.data) {
       const existing = currentAnamnesisRes.data;
       setExistingAnamnesisId(existing.id);
-      setAnamnesis({
+      existingIdRef.current = existing.id;
+      const loaded: AnamnesisData = {
         social_name: existing.social_name || "",
         gender: existing.gender || "",
         chief_complaint: existing.chief_complaint || "",
@@ -191,74 +214,143 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
         diagnostic_hypothesis: existing.diagnostic_hypothesis || "",
         cid_codes: existing.cid_codes || [],
         treatment_plan: existing.treatment_plan || "",
-      });
+      };
+      setAnamnesis(loaded);
+      anamnesisRef.current = loaded;
+      setSaveStatus("saved");
+      setLastSavedAt(new Date(existing.updated_at || existing.created_at));
+
       // Fetch audit log
       const auditRes = await (supabase.from("clinical_evolution_audit" as any)
         .select("*").eq("record_id", existing.id).order("changed_at", { ascending: false }) as any);
       if (auditRes.data) setAuditLog(auditRes.data as unknown as AuditEntry[]);
     }
 
-    if (docProfileRes?.data) {
-      setDoctorProfileId(docProfileRes.data.id);
-    }
-
     setLoading(false);
   };
 
+  // ─── Field update with dirty tracking ───────────────────────────
   const updateField = useCallback((field: keyof AnamnesisData, value: any) => {
     setAnamnesis(prev => ({ ...prev, [field]: value }));
+    dirtyRef.current = true;
+    setSaveStatus("dirty");
+
+    // Debounced auto-save
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => {
+      persistAnamnesis();
+    }, AUTOSAVE_DEBOUNCE_MS);
   }, []);
 
-  const saveAnamnesis = async () => {
-    if (!appointmentId || !doctorProfileId) {
-      toast.error("Dados insuficientes para salvar");
-      return;
-    }
-    setSaving(true);
+  // ─── Core save function (uses refs to avoid stale closures) ─────
+  const persistAnamnesis = useCallback(async () => {
+    if (savingRef.current) return;
+    if (!appointmentId || !doctorIdRef.current) return;
+    if (!dirtyRef.current && existingIdRef.current) return; // nothing to save
 
-    const payload = {
-      appointment_id: appointmentId,
-      patient_id: patientId,
-      doctor_id: doctorProfileId,
-      ...anamnesis,
+    savingRef.current = true;
+    setSaveStatus("saving");
+    const currentData = anamnesisRef.current;
+
+    const anamnesisFields = {
+      social_name: currentData.social_name,
+      gender: currentData.gender,
+      chief_complaint: currentData.chief_complaint,
+      history_present_illness: currentData.history_present_illness,
+      past_medical_history: currentData.past_medical_history,
+      family_history: currentData.family_history,
+      lifestyle_habits: currentData.lifestyle_habits,
+      review_of_systems: currentData.review_of_systems,
+      blood_pressure_sys: currentData.blood_pressure_sys,
+      blood_pressure_dia: currentData.blood_pressure_dia,
+      heart_rate: currentData.heart_rate,
+      respiratory_rate: currentData.respiratory_rate,
+      spo2: currentData.spo2,
+      temperature: currentData.temperature,
+      weight: currentData.weight,
+      height: currentData.height,
+      physical_exam_notes: currentData.physical_exam_notes,
+      diagnostic_hypothesis: currentData.diagnostic_hypothesis,
+      cid_codes: currentData.cid_codes,
+      treatment_plan: currentData.treatment_plan,
     };
 
-    let error;
-    if (existingAnamnesisId) {
-      const { social_name, gender, chief_complaint, history_present_illness,
-        past_medical_history, family_history, lifestyle_habits, review_of_systems,
-        blood_pressure_sys, blood_pressure_dia, heart_rate, respiratory_rate,
-        spo2, temperature, weight, height, physical_exam_notes,
-        diagnostic_hypothesis, cid_codes, treatment_plan } = anamnesis;
-      ({ error } = await supabase.from("clinical_anamnesis" as any).update({
-        social_name, gender, chief_complaint, history_present_illness,
-        past_medical_history, family_history, lifestyle_habits, review_of_systems,
-        blood_pressure_sys, blood_pressure_dia, heart_rate, respiratory_rate,
-        spo2, temperature, weight, height, physical_exam_notes,
-        diagnostic_hypothesis, cid_codes, treatment_plan,
-      }).eq("id", existingAnamnesisId));
+    let error: any;
+
+    if (existingIdRef.current) {
+      // UPDATE existing
+      ({ error } = await supabase.from("clinical_anamnesis" as any)
+        .update(anamnesisFields)
+        .eq("id", existingIdRef.current));
     } else {
-      const res = await (supabase.from("clinical_anamnesis" as any).insert(payload).select("id").single() as any);
+      // INSERT new — auto-creates on first edit
+      const res = await (supabase.from("clinical_anamnesis" as any).insert({
+        appointment_id: appointmentId,
+        patient_id: patientId,
+        doctor_id: doctorIdRef.current,
+        ...anamnesisFields,
+      }).select("id").single() as any);
       error = res.error;
-      if (res.data) setExistingAnamnesisId((res.data as any).id);
+      if (res.data) {
+        const newId = (res.data as any).id;
+        setExistingAnamnesisId(newId);
+        existingIdRef.current = newId;
+      }
     }
 
-    setSaving(false);
+    savingRef.current = false;
+
     if (error) {
-      toast.error("Erro ao salvar prontuário");
+      setSaveStatus("error");
+      console.error("EMR save error:", error);
     } else {
-      toast.success("Prontuário salvo com sucesso!");
+      dirtyRef.current = false;
+      setSaveStatus("saved");
+      setLastSavedAt(new Date());
     }
-  };
+  }, [appointmentId, patientId]);
 
-  // Auto-save every 30s
+  // ─── Manual save button ─────────────────────────────────────────
+  const handleManualSave = useCallback(async () => {
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    dirtyRef.current = true; // force save
+    await persistAnamnesis();
+    if (!savingRef.current) {
+      toast.success("Prontuário salvo com sucesso! ✅");
+    }
+  }, [persistAnamnesis]);
+
+  // ─── Periodic auto-save (interval) ──────────────────────────────
   useEffect(() => {
-    if (!canEdit || !existingAnamnesisId) return;
+    if (!canEdit) return;
     const interval = setInterval(() => {
-      saveAnamnesis();
-    }, 30000);
+      if (dirtyRef.current) persistAnamnesis();
+    }, AUTOSAVE_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [canEdit, existingAnamnesisId, anamnesis]);
+  }, [canEdit, persistAnamnesis]);
+
+  // ─── Warn on unsaved changes (beforeunload) ─────────────────────
+  useEffect(() => {
+    if (!canEdit) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      if (dirtyRef.current) {
+        e.preventDefault();
+        e.returnValue = "Existem alterações não salvas no prontuário. Deseja sair?";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [canEdit]);
+
+  // ─── Save on unmount ────────────────────────────────────────────
+  useEffect(() => {
+    return () => {
+      if (dirtyRef.current && canEdit) {
+        persistAnamnesis();
+      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    };
+  }, [canEdit, persistAnamnesis]);
 
   const activeAllergies = records.filter(r => r.record_type === "allergy" && r.is_active);
   const activeConditions = records.filter(r => r.record_type === "condition" && r.is_active);
@@ -294,6 +386,36 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
     a.click();
     URL.revokeObjectURL(url);
     toast.success("Exportado em formato HL7!");
+  };
+
+  // ─── Save status indicator ─────────────────────────────────────
+  const SaveStatusIndicator = () => {
+    const config: Record<SaveStatus, { icon: any; text: string; color: string }> = {
+      idle: { icon: null, text: "", color: "" },
+      dirty: { icon: AlertCircle, text: "Alterações não salvas", color: "text-amber-500" },
+      saving: { icon: Loader2, text: "Salvando...", color: "text-primary" },
+      saved: { icon: Check, text: lastSavedAt ? `Salvo ${format(lastSavedAt, "HH:mm")}` : "Salvo", color: "text-emerald-500" },
+      error: { icon: AlertTriangle, text: "Erro ao salvar", color: "text-destructive" },
+    };
+    const s = config[saveStatus];
+    if (!s.icon || !canEdit) return null;
+    const Icon = s.icon;
+    return (
+      <motion.div
+        key={saveStatus}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className={`flex items-center gap-1.5 text-xs font-medium ${s.color}`}
+      >
+        <Icon className={`w-3.5 h-3.5 ${saveStatus === "saving" ? "animate-spin" : ""}`} />
+        <span>{s.text}</span>
+        {saveStatus === "error" && (
+          <Button size="sm" variant="ghost" className="h-5 px-1.5 text-[10px]" onClick={handleManualSave}>
+            <RefreshCw className="w-3 h-3 mr-0.5" /> Tentar novamente
+          </Button>
+        )}
+      </motion.div>
+    );
   };
 
   if (loading) {
@@ -337,19 +459,22 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
                 )}
               </div>
             </div>
-            <div className="flex gap-2">
-              {canEdit && (
-                <Button onClick={saveAnamnesis} disabled={saving} size="sm" className="gap-1.5">
-                  {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
-                  Salvar
+            <div className="flex flex-col items-end gap-2">
+              <div className="flex gap-2">
+                {canEdit && (
+                  <Button onClick={handleManualSave} disabled={saveStatus === "saving"} size="sm" className="gap-1.5">
+                    {saveStatus === "saving" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                    Salvar
+                  </Button>
+                )}
+                <Button onClick={exportHL7} variant="outline" size="sm" className="gap-1.5">
+                  <Download className="w-3.5 h-3.5" /> HL7
                 </Button>
-              )}
-              <Button onClick={exportHL7} variant="outline" size="sm" className="gap-1.5">
-                <Download className="w-3.5 h-3.5" /> HL7
-              </Button>
-              <Button onClick={() => setShowAudit(true)} variant="ghost" size="sm" className="gap-1.5">
-                <History className="w-3.5 h-3.5" /> Auditoria
-              </Button>
+                <Button onClick={() => setShowAudit(true)} variant="ghost" size="sm" className="gap-1.5">
+                  <History className="w-3.5 h-3.5" /> Auditoria
+                </Button>
+              </div>
+              <SaveStatusIndicator />
             </div>
           </div>
 
@@ -585,14 +710,12 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
 
         {/* ─── Records Tab (allergies, conditions, meds) ─── */}
         <TabsContent value="records" className="mt-4 space-y-4">
-          {/* Active Conditions */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <SummaryCard title="Alergias" items={activeAllergies} icon={AlertTriangle} color="text-destructive" bgColor="bg-destructive/5" />
             <SummaryCard title="Condições Crônicas" items={activeConditions} icon={Activity} color="text-orange-400" bgColor="bg-orange-500/5" />
             <SummaryCard title="Medicamentos Contínuos" items={activeMeds} icon={Heart} color="text-primary" bgColor="bg-primary/5" />
           </div>
 
-          {/* Timeline of all records */}
           <Card className="border-border">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm">Registros Cronológicos</CardTitle>
@@ -731,7 +854,7 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
         <Shield className="w-4 h-4 text-primary shrink-0" />
         <div>
           <p className="text-[11px] font-medium text-primary">Prontuário protegido pela LGPD</p>
-          <p className="text-[10px] text-muted-foreground">CFM 2.314/22 · Guarda mínima 20 anos · Trilha de auditoria ativa</p>
+          <p className="text-[10px] text-muted-foreground">CFM 2.314/22 · Guarda mínima 20 anos · Trilha de auditoria ativa · Auto-save ativo</p>
         </div>
       </div>
 
