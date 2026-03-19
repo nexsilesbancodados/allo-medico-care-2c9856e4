@@ -424,6 +424,154 @@ export type Database = {
         }
         Relationships: []
       }
+      clinical_anamnesis: {
+        Row: {
+          appointment_id: string
+          blood_pressure_dia: number | null
+          blood_pressure_sys: number | null
+          chief_complaint: string
+          cid_codes: string[] | null
+          created_at: string
+          diagnostic_hypothesis: string | null
+          doctor_id: string
+          family_history: string | null
+          gender: string | null
+          heart_rate: number | null
+          height: number | null
+          history_present_illness: string | null
+          id: string
+          lifestyle_habits: string | null
+          past_medical_history: string | null
+          patient_id: string
+          physical_exam_notes: string | null
+          respiratory_rate: number | null
+          review_of_systems: string | null
+          social_name: string | null
+          spo2: number | null
+          temperature: number | null
+          treatment_plan: string | null
+          updated_at: string
+          weight: number | null
+        }
+        Insert: {
+          appointment_id: string
+          blood_pressure_dia?: number | null
+          blood_pressure_sys?: number | null
+          chief_complaint?: string
+          cid_codes?: string[] | null
+          created_at?: string
+          diagnostic_hypothesis?: string | null
+          doctor_id: string
+          family_history?: string | null
+          gender?: string | null
+          heart_rate?: number | null
+          height?: number | null
+          history_present_illness?: string | null
+          id?: string
+          lifestyle_habits?: string | null
+          past_medical_history?: string | null
+          patient_id: string
+          physical_exam_notes?: string | null
+          respiratory_rate?: number | null
+          review_of_systems?: string | null
+          social_name?: string | null
+          spo2?: number | null
+          temperature?: number | null
+          treatment_plan?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Update: {
+          appointment_id?: string
+          blood_pressure_dia?: number | null
+          blood_pressure_sys?: number | null
+          chief_complaint?: string
+          cid_codes?: string[] | null
+          created_at?: string
+          diagnostic_hypothesis?: string | null
+          doctor_id?: string
+          family_history?: string | null
+          gender?: string | null
+          heart_rate?: number | null
+          height?: number | null
+          history_present_illness?: string | null
+          id?: string
+          lifestyle_habits?: string | null
+          past_medical_history?: string | null
+          patient_id?: string
+          physical_exam_notes?: string | null
+          respiratory_rate?: number | null
+          review_of_systems?: string | null
+          social_name?: string | null
+          spo2?: number | null
+          temperature?: number | null
+          treatment_plan?: string | null
+          updated_at?: string
+          weight?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinical_anamnesis_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinical_anamnesis_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinical_anamnesis_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinical_evolution_audit: {
+        Row: {
+          changed_at: string
+          changed_by: string
+          field_name: string
+          id: string
+          ip_address: string | null
+          new_value: string | null
+          old_value: string | null
+          record_id: string
+          record_table: string
+          user_agent: string | null
+        }
+        Insert: {
+          changed_at?: string
+          changed_by: string
+          field_name: string
+          id?: string
+          ip_address?: string | null
+          new_value?: string | null
+          old_value?: string | null
+          record_id: string
+          record_table?: string
+          user_agent?: string | null
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string
+          field_name?: string
+          id?: string
+          ip_address?: string | null
+          new_value?: string | null
+          old_value?: string | null
+          record_id?: string
+          record_table?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       consultation_notes: {
         Row: {
           appointment_id: string
