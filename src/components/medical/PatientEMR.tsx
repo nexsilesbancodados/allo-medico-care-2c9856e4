@@ -761,8 +761,8 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
                         <p className="text-[10px] text-destructive font-medium mb-0.5">Anterior</p>
                         <p className="text-xs text-foreground">{entry.old_value || "—"}</p>
                       </div>
-                      <div className="p-2 rounded bg-emerald-500/5 border border-emerald-500/10">
-                        <p className="text-[10px] text-emerald-500 font-medium mb-0.5">Novo</p>
+                      <div className="p-2 rounded bg-accent/50 border border-accent">
+                        <p className="text-[10px] text-primary font-medium mb-0.5">Novo</p>
                         <p className="text-xs text-foreground">{entry.new_value || "—"}</p>
                       </div>
                     </div>
