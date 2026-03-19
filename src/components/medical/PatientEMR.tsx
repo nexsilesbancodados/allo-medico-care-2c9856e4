@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +20,8 @@ import {
   Shield, Search, Upload, Download, History, Eye, Plus, Loader2,
   ClipboardList, Brain, Check, AlertCircle, RefreshCw, Pill,
   CalendarDays, ChevronRight, Sparkles, TrendingUp, Ruler,
-  FileCheck2, UserCircle, Syringe, Clipboard, ShieldCheck
+  FileCheck2, UserCircle, Syringe, Clipboard, ShieldCheck, X,
+  Filter, SortAsc, SortDesc, Printer, Copy, Hash
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -101,6 +102,13 @@ const FIELD_LABELS: Record<string, string> = {
   treatment_plan: "Plano Terapêutico", social_name: "Nome Social", gender: "Gênero",
 };
 
+const RECORD_TYPE_MAP: Record<string, { label: string; icon: any; color: string }> = {
+  allergy: { label: "Alergia", icon: AlertTriangle, color: "text-orange-500" },
+  medication: { label: "Medicamento", icon: Pill, color: "text-primary" },
+  condition: { label: "Condição", icon: Activity, color: "text-destructive" },
+  evolution: { label: "Evolução", icon: FileText, color: "text-secondary" },
+};
+
 const AUTOSAVE_DEBOUNCE_MS = 5000;
 const AUTOSAVE_INTERVAL_MS = 30000;
 
@@ -136,6 +144,20 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
   const [existingAnamnesisId, setExistingAnamnesisId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+
+  // New: inline record creation
+  const [showAddRecord, setShowAddRecord] = useState(false);
+  const [newRecord, setNewRecord] = useState({ record_type: "allergy", title: "", description: "", cid_code: "", severity: "" });
+  const [addingRecord, setAddingRecord] = useState(false);
+
+  // New: document filters
+  const [docSearch, setDocSearch] = useState("");
+  const [docCategory, setDocCategory] = useState("all");
+  const [docSortDesc, setDocSortDesc] = useState(true);
+
+  // New: records filter
+  const [recordSearch, setRecordSearch] = useState("");
+  const [recordTypeFilter, setRecordTypeFilter] = useState("all");
 
   const anamnesisRef = useRef(anamnesis);
   const existingIdRef = useRef(existingAnamnesisId);
@@ -267,6 +289,36 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
     if (!savingRef.current) toast.success("Prontuário salvo com sucesso! ✅");
   }, [persistAnamnesis]);
 
+  // Add medical record inline
+  const handleAddRecord = useCallback(async () => {
+    if (!newRecord.title.trim() || !patientId) return;
+    setAddingRecord(true);
+    const { error } = await supabase.from("medical_records").insert({
+      patient_id: patientId,
+      record_type: newRecord.record_type,
+      title: newRecord.title.trim(),
+      description: newRecord.description.trim() || null,
+      cid_code: newRecord.cid_code.trim() || null,
+      severity: newRecord.severity || null,
+      doctor_id: doctorProfileId,
+      appointment_id: appointmentId || null,
+    });
+    setAddingRecord(false);
+    if (error) {
+      toast.error("Erro ao salvar registro médico");
+      console.error(error);
+    } else {
+      toast.success("Registro médico adicionado! ✅");
+      setNewRecord({ record_type: "allergy", title: "", description: "", cid_code: "", severity: "" });
+      setShowAddRecord(false);
+      // Refresh records
+      const { data } = await supabase.from("medical_records")
+        .select("id, record_type, title, description, cid_code, severity, is_active, created_at")
+        .eq("patient_id", patientId).order("created_at", { ascending: false });
+      if (data) setRecords(data as MedicalRecord[]);
+    }
+  }, [newRecord, patientId, doctorProfileId, appointmentId]);
+
   useEffect(() => {
     if (!canEdit) return;
     const interval = setInterval(() => { if (dirtyRef.current) persistAnamnesis(); }, AUTOSAVE_INTERVAL_MS);
@@ -302,6 +354,38 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
     ? (anamnesis.weight / Math.pow(anamnesis.height / 100, 2)).toFixed(1)
     : null;
 
+  // Filtered records
+  const filteredRecords = useMemo(() => {
+    let r = records;
+    if (recordTypeFilter !== "all") r = r.filter(rec => rec.record_type === recordTypeFilter);
+    if (recordSearch) {
+      const q = recordSearch.toLowerCase();
+      r = r.filter(rec => rec.title.toLowerCase().includes(q) || rec.description?.toLowerCase().includes(q) || rec.cid_code?.toLowerCase().includes(q));
+    }
+    return r;
+  }, [records, recordTypeFilter, recordSearch]);
+
+  // Filtered documents
+  const filteredDocs = useMemo(() => {
+    let d = [...documents];
+    if (docCategory !== "all") d = d.filter(doc => (doc.category || "Geral") === docCategory);
+    if (docSearch) {
+      const q = docSearch.toLowerCase();
+      d = d.filter(doc => doc.file_name?.toLowerCase().includes(q) || doc.description?.toLowerCase().includes(q));
+    }
+    d.sort((a, b) => {
+      const da = new Date(a.created_at).getTime();
+      const db = new Date(b.created_at).getTime();
+      return docSortDesc ? db - da : da - db;
+    });
+    return d;
+  }, [documents, docCategory, docSearch, docSortDesc]);
+
+  const docCategories = useMemo(() => {
+    const cats = new Set(documents.map((d: any) => d.category || "Geral"));
+    return ["all", ...Array.from(cats)];
+  }, [documents]);
+
   const exportHL7 = () => {
     const lines = [
       `MSH|^~\\&|ALLO_MEDICO|EMR|||${new Date().toISOString()}||ADT^A01|${Date.now()}|P|2.5`,
@@ -321,6 +405,38 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
     a.href = url; a.download = `prontuario-${patientId.slice(0, 8)}-${format(new Date(), "yyyyMMdd")}.hl7`;
     a.click(); URL.revokeObjectURL(url);
     toast.success("Exportado em formato HL7!");
+  };
+
+  const handlePrint = () => {
+    window.print();
+    toast.success("Impressão iniciada");
+  };
+
+  const copyToClipboard = () => {
+    const d = anamnesis;
+    const text = [
+      `PRONTUÁRIO ELETRÔNICO — ${patient?.first_name || ""} ${patient?.last_name || ""}`,
+      `Data: ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: ptBR })}`,
+      "",
+      `QUEIXA PRINCIPAL: ${d.chief_complaint || "—"}`,
+      `HDA: ${d.history_present_illness || "—"}`,
+      `ANTECEDENTES: ${d.past_medical_history || "—"}`,
+      `HIST. FAMILIAR: ${d.family_history || "—"}`,
+      `HÁBITOS: ${d.lifestyle_habits || "—"}`,
+      "",
+      `SINAIS VITAIS:`,
+      `  PA: ${d.blood_pressure_sys || "—"}/${d.blood_pressure_dia || "—"} mmHg`,
+      `  FC: ${d.heart_rate || "—"} bpm | FR: ${d.respiratory_rate || "—"} irpm`,
+      `  SpO₂: ${d.spo2 || "—"}% | Temp: ${d.temperature || "—"}°C`,
+      `  Peso: ${d.weight || "—"} kg | Altura: ${d.height || "—"} cm ${bmi ? `| IMC: ${bmi}` : ""}`,
+      "",
+      `EXAME FÍSICO: ${d.physical_exam_notes || "—"}`,
+      `HIPÓTESE: ${d.diagnostic_hypothesis || "—"}`,
+      `CID: ${d.cid_codes?.join(", ") || "—"}`,
+      `CONDUTA: ${d.treatment_plan || "—"}`,
+    ].join("\n");
+    navigator.clipboard.writeText(text);
+    toast.success("Prontuário copiado para a área de transferência!");
   };
 
   if (loading) {
@@ -345,7 +461,6 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
            ══════════════════════════════════════════════════════════ */}
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
           <Card className="glass border-border/50 overflow-hidden relative">
-            {/* Gradient accent bar */}
             <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-primary via-secondary to-primary rounded-t-xl" />
             <CardContent className="p-5 pt-6">
               <div className="flex items-start gap-4">
@@ -411,7 +526,7 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
 
                 {/* Actions + Completeness */}
                 <div className="flex flex-col items-end gap-3 shrink-0">
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 flex-wrap justify-end">
                     {canEdit && (
                       <Button onClick={handleManualSave} disabled={saveStatus === "saving"} size="sm"
                         className="gap-1.5 rounded-xl shadow-sm">
@@ -419,18 +534,37 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
                         Salvar
                       </Button>
                     )}
-                    <Button onClick={exportHL7} variant="outline" size="sm" className="gap-1.5 rounded-xl">
-                      <Download className="w-3.5 h-3.5" /> HL7
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button onClick={copyToClipboard} variant="outline" size="sm" className="gap-1.5 rounded-xl">
+                          <Copy className="w-3.5 h-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Copiar prontuário</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button onClick={exportHL7} variant="outline" size="sm" className="gap-1.5 rounded-xl">
+                          <Download className="w-3.5 h-3.5" /> HL7
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Exportar HL7</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button onClick={handlePrint} variant="outline" size="sm" className="gap-1.5 rounded-xl">
+                          <Printer className="w-3.5 h-3.5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Imprimir</TooltipContent>
+                    </Tooltip>
                     <Button onClick={() => setShowAudit(true)} variant="ghost" size="sm" className="gap-1.5 rounded-xl">
                       <History className="w-3.5 h-3.5" />
                     </Button>
                   </div>
 
-                  {/* Save status */}
                   <SaveStatusIndicator saveStatus={saveStatus} lastSavedAt={lastSavedAt} canEdit={canEdit} onRetry={handleManualSave} />
 
-                  {/* Completeness ring */}
                   {canEdit && (
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -481,6 +615,24 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
                   </motion.div>
                 )}
               </AnimatePresence>
+
+              {/* ─── Active Medications & Conditions Summary ─── */}
+              {(activeMeds.length > 0 || activeConditions.length > 0) && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {activeMeds.length > 0 && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 text-[11px] text-primary font-medium">
+                      <Pill className="w-3 h-3" />
+                      {activeMeds.length} medicamento{activeMeds.length > 1 ? "s" : ""} ativo{activeMeds.length > 1 ? "s" : ""}
+                    </div>
+                  )}
+                  {activeConditions.length > 0 && (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-500/10 text-[11px] text-orange-600 font-medium">
+                      <Activity className="w-3 h-3" />
+                      {activeConditions.length} condição(ões) crônica(s)
+                    </div>
+                  )}
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -670,33 +822,37 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
                 <SectionCard icon={Brain} title="Hipótese Diagnóstica">
                   <Textarea value={anamnesis.diagnostic_hypothesis}
                     onChange={e => updateField("diagnostic_hypothesis", e.target.value)}
-                    placeholder="Hipóteses diagnósticas baseadas na avaliação clínica..." rows={3} className="rounded-xl border-border/50" disabled={!canEdit} />
+                    placeholder="Principais hipóteses diagnósticas..." rows={3} className="rounded-xl border-border/50" disabled={!canEdit} />
                 </SectionCard>
 
                 <Card className="border-border/50 bg-card/80 backdrop-blur-sm rounded-2xl overflow-hidden">
                   <CardContent className="p-5">
-                    <p className="text-xs font-semibold text-foreground mb-3 flex items-center gap-1.5">
-                      <FileCheck2 className="w-3.5 h-3.5 text-primary" /> Códigos CID-10/11
-                    </p>
-                    <div className="flex gap-2">
-                      <Input value={cidSearch} onChange={e => setCidSearch(e.target.value)}
-                        placeholder="Adicionar código CID (ex: J45, E11, I10)..."
-                        className="rounded-xl" disabled={!canEdit}
-                        onKeyDown={e => {
-                          if (e.key === "Enter" && cidSearch.trim()) {
-                            updateField("cid_codes", [...anamnesis.cid_codes, cidSearch.trim().toUpperCase()]);
-                            setCidSearch("");
-                          }
-                        }} />
-                      <Button size="sm" variant="outline" className="rounded-xl shrink-0" disabled={!canEdit || !cidSearch.trim()}
-                        onClick={() => { updateField("cid_codes", [...anamnesis.cid_codes, cidSearch.trim().toUpperCase()]); setCidSearch(""); }}>
-                        <Plus className="w-4 h-4" />
-                      </Button>
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <Hash className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <p className="text-xs font-bold text-foreground">Códigos CID-10</p>
                     </div>
-                    <div className="flex flex-wrap gap-2 mt-3">
+                    {canEdit && (
+                      <div className="flex gap-2 mb-3">
+                        <Input value={cidSearch} onChange={e => setCidSearch(e.target.value.toUpperCase())}
+                          placeholder="Ex: J06, I10, E11..." className="rounded-xl flex-1" maxLength={10} />
+                        <Button size="sm" className="rounded-xl gap-1 shrink-0"
+                          onClick={() => {
+                            if (cidSearch && !anamnesis.cid_codes.includes(cidSearch)) {
+                              updateField("cid_codes", [...anamnesis.cid_codes, cidSearch]);
+                              setCidSearch("");
+                            }
+                          }} disabled={!cidSearch}>
+                          <Plus className="w-3.5 h-3.5" /> Adicionar
+                        </Button>
+                      </div>
+                    )}
+                    <div className="flex flex-wrap gap-2">
                       <AnimatePresence>
                         {anamnesis.cid_codes.map((code, i) => (
-                          <motion.div key={code + i} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }}>
+                          <motion.div key={code} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.8, opacity: 0 }}>
                             <Badge variant="secondary" className="text-xs gap-1.5 rounded-lg py-1 px-2.5">
                               <FileCheck2 className="w-3 h-3" />{code}
                               {canEdit && (
@@ -721,7 +877,7 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
               </motion.div>
             </TabsContent>
 
-            {/* ─── Records Tab ─── */}
+            {/* ─── Records Tab (IMPROVED with inline add + filters) ─── */}
             <TabsContent value="records">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5 space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -733,39 +889,143 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
                     gradient="from-primary/15 to-primary/5" iconColor="text-primary" />
                 </div>
 
+                {/* Inline add record */}
+                {canEdit && (
+                  <AnimatePresence>
+                    {!showAddRecord ? (
+                      <Button onClick={() => setShowAddRecord(true)} variant="outline" className="w-full gap-2 rounded-xl border-dashed border-primary/30 text-primary hover:bg-primary/5">
+                        <Plus className="w-4 h-4" /> Adicionar Registro Médico
+                      </Button>
+                    ) : (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+                        <Card className="border-primary/30 bg-primary/5 rounded-2xl">
+                          <CardContent className="p-4 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-bold text-foreground flex items-center gap-2">
+                                <Plus className="w-4 h-4 text-primary" /> Novo Registro
+                              </p>
+                              <Button size="sm" variant="ghost" className="h-7 w-7 p-0 rounded-lg" onClick={() => setShowAddRecord(false)}>
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Tipo</Label>
+                                <Select value={newRecord.record_type} onValueChange={v => setNewRecord(p => ({ ...p, record_type: v }))}>
+                                  <SelectTrigger className="mt-1 rounded-xl"><SelectValue /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="allergy">🟠 Alergia</SelectItem>
+                                    <SelectItem value="medication">💊 Medicamento</SelectItem>
+                                    <SelectItem value="condition">🔴 Condição / Diagnóstico</SelectItem>
+                                    <SelectItem value="evolution">📄 Evolução / Nota</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Gravidade</Label>
+                                <Select value={newRecord.severity} onValueChange={v => setNewRecord(p => ({ ...p, severity: v }))}>
+                                  <SelectTrigger className="mt-1 rounded-xl"><SelectValue placeholder="Opcional" /></SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="mild">Leve</SelectItem>
+                                    <SelectItem value="moderate">Moderada</SelectItem>
+                                    <SelectItem value="severe">Grave</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Título *</Label>
+                                <Input value={newRecord.title} onChange={e => setNewRecord(p => ({ ...p, title: e.target.value }))}
+                                  placeholder="Ex: Penicilina, HAS, Losartana..." className="mt-1 rounded-xl" />
+                              </div>
+                              <div>
+                                <Label className="text-xs text-muted-foreground">CID-10</Label>
+                                <Input value={newRecord.cid_code} onChange={e => setNewRecord(p => ({ ...p, cid_code: e.target.value.toUpperCase() }))}
+                                  placeholder="Ex: I10" className="mt-1 rounded-xl" maxLength={10} />
+                              </div>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Descrição</Label>
+                              <Textarea value={newRecord.description} onChange={e => setNewRecord(p => ({ ...p, description: e.target.value }))}
+                                placeholder="Detalhes adicionais..." rows={2} className="mt-1 rounded-xl" />
+                            </div>
+                            <div className="flex justify-end gap-2">
+                              <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setShowAddRecord(false)}>Cancelar</Button>
+                              <Button size="sm" className="rounded-xl gap-1.5" onClick={handleAddRecord}
+                                disabled={!newRecord.title.trim() || addingRecord}>
+                                {addingRecord ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+                                Salvar Registro
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
+
                 <Card className="border-border/50 rounded-2xl overflow-hidden">
                   <CardHeader className="pb-2 px-5 pt-5">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Clock className="w-4 h-4 text-muted-foreground" /> Registros Cronológicos
+                      <Badge variant="outline" className="text-[10px] ml-auto">{filteredRecords.length}/{records.length}</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="px-5 pb-5">
+                    {/* Filters bar */}
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="relative flex-1 min-w-[150px]">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <Input value={recordSearch} onChange={e => setRecordSearch(e.target.value)}
+                          placeholder="Buscar registros..." className="pl-8 h-8 text-xs rounded-lg" />
+                      </div>
+                      <Select value={recordTypeFilter} onValueChange={setRecordTypeFilter}>
+                        <SelectTrigger className="w-[140px] h-8 text-xs rounded-lg">
+                          <Filter className="w-3 h-3 mr-1" /><SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Todos os tipos</SelectItem>
+                          <SelectItem value="allergy">Alergias</SelectItem>
+                          <SelectItem value="medication">Medicamentos</SelectItem>
+                          <SelectItem value="condition">Condições</SelectItem>
+                          <SelectItem value="evolution">Evoluções</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     <ScrollArea className="max-h-96">
-                      {records.length === 0 ? (
-                        <EmptyState icon={Clipboard} text="Nenhum registro encontrado" />
+                      {filteredRecords.length === 0 ? (
+                        <EmptyState icon={Clipboard} text={recordSearch || recordTypeFilter !== "all" ? "Nenhum resultado encontrado" : "Nenhum registro encontrado"} />
                       ) : (
                         <div className="space-y-2">
-                          {records.map((r, idx) => (
-                            <motion.div key={r.id} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: idx * 0.03 }}
-                              className={`p-3.5 rounded-xl border border-border/50 hover:border-primary/30 transition-all ${!r.is_active ? "opacity-40" : ""}`}>
-                              <div className="flex items-center gap-2">
-                                <Badge variant="outline" className="text-[10px] rounded-md">{r.record_type}</Badge>
-                                <span className="text-sm font-semibold text-foreground">{r.title}</span>
-                                {r.cid_code && <Badge variant="secondary" className="text-[10px]">CID: {r.cid_code}</Badge>}
-                                {r.severity && (
-                                  <span className={`w-2 h-2 rounded-full ${
-                                    r.severity === "severe" ? "bg-destructive" : r.severity === "moderate" ? "bg-orange-500" : "bg-yellow-500"
-                                  }`} />
-                                )}
-                              </div>
-                              {r.description && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{r.description}</p>}
-                              <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
-                                <CalendarDays className="w-3 h-3" />
-                                {format(new Date(r.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                              </p>
-                            </motion.div>
-                          ))}
+                          {filteredRecords.map((r, idx) => {
+                            const typeInfo = RECORD_TYPE_MAP[r.record_type] || { label: r.record_type, icon: FileText, color: "text-muted-foreground" };
+                            const TypeIcon = typeInfo.icon;
+                            return (
+                              <motion.div key={r.id} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.03 }}
+                                className={`p-3.5 rounded-xl border border-border/50 hover:border-primary/30 transition-all ${!r.is_active ? "opacity-40" : ""}`}>
+                                <div className="flex items-center gap-2">
+                                  <TypeIcon className={`w-4 h-4 ${typeInfo.color} shrink-0`} />
+                                  <Badge variant="outline" className="text-[10px] rounded-md">{typeInfo.label}</Badge>
+                                  <span className="text-sm font-semibold text-foreground">{r.title}</span>
+                                  {r.cid_code && <Badge variant="secondary" className="text-[10px]">CID: {r.cid_code}</Badge>}
+                                  {r.severity && (
+                                    <span className={`w-2 h-2 rounded-full ${
+                                      r.severity === "severe" ? "bg-destructive" : r.severity === "moderate" ? "bg-orange-500" : "bg-yellow-500"
+                                    }`} />
+                                  )}
+                                  {!r.is_active && <Badge variant="outline" className="text-[9px] text-muted-foreground">Inativo</Badge>}
+                                </div>
+                                {r.description && <p className="text-xs text-muted-foreground mt-1.5 line-clamp-2">{r.description}</p>}
+                                <p className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
+                                  <CalendarDays className="w-3 h-3" />
+                                  {format(new Date(r.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                                </p>
+                              </motion.div>
+                            );
+                          })}
                         </div>
                       )}
                     </ScrollArea>
@@ -774,22 +1034,44 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
               </motion.div>
             </TabsContent>
 
-            {/* ─── Documents Tab ─── */}
+            {/* ─── Documents Tab (IMPROVED with search, filter, sort) ─── */}
             <TabsContent value="documents">
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-5">
                 <Card className="border-border/50 rounded-2xl overflow-hidden">
                   <CardHeader className="px-5 pt-5 pb-2">
                     <CardTitle className="text-sm flex items-center gap-2">
                       <Upload className="w-4 h-4 text-primary" /> Arquivos do Paciente
-                      <Badge variant="outline" className="text-[10px] ml-auto">{documents.length}</Badge>
+                      <Badge variant="outline" className="text-[10px] ml-auto">{filteredDocs.length}/{documents.length}</Badge>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="px-5 pb-5">
-                    {documents.length === 0 ? (
-                      <EmptyState icon={FileText} text="Nenhum arquivo enviado pelo paciente" />
+                    {/* Search + filter bar */}
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <div className="relative flex-1 min-w-[150px]">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <Input value={docSearch} onChange={e => setDocSearch(e.target.value)}
+                          placeholder="Buscar arquivos..." className="pl-8 h-8 text-xs rounded-lg" />
+                      </div>
+                      <Select value={docCategory} onValueChange={setDocCategory}>
+                        <SelectTrigger className="w-[130px] h-8 text-xs rounded-lg">
+                          <Filter className="w-3 h-3 mr-1" /><SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {docCategories.map(c => (
+                            <SelectItem key={c} value={c}>{c === "all" ? "Todas categorias" : c}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Button variant="ghost" size="sm" className="h-8 px-2 rounded-lg" onClick={() => setDocSortDesc(v => !v)}>
+                        {docSortDesc ? <SortDesc className="w-3.5 h-3.5" /> : <SortAsc className="w-3.5 h-3.5" />}
+                      </Button>
+                    </div>
+
+                    {filteredDocs.length === 0 ? (
+                      <EmptyState icon={FileText} text={docSearch || docCategory !== "all" ? "Nenhum resultado encontrado" : "Nenhum arquivo enviado pelo paciente"} />
                     ) : (
                       <div className="space-y-2">
-                        {documents.map((d: any, idx: number) => (
+                        {filteredDocs.map((d: any, idx: number) => (
                           <motion.div key={d.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: idx * 0.04 }}
                             className="flex items-center justify-between p-3.5 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/30 transition-all group">
@@ -844,14 +1126,12 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
                         <EmptyState icon={TrendingUp} text="Nenhuma evolução registrada" />
                       ) : (
                         <div className="relative">
-                          {/* Timeline line */}
                           <div className="absolute left-[15px] top-4 bottom-4 w-px bg-border" />
                           <div className="space-y-4">
                             {pastAnamneses.map((a, idx) => (
                               <motion.div key={a.id} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: idx * 0.05 }}
                                 className="relative pl-10">
-                                {/* Timeline dot */}
                                 <div className={`absolute left-2.5 top-4 w-[11px] h-[11px] rounded-full border-2 border-background ${
                                   idx === 0 ? "bg-primary" : "bg-muted-foreground/40"
                                 }`} />
