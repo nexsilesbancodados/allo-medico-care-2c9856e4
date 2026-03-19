@@ -261,7 +261,8 @@ const ReceptionDashboard = () => {
               variant="outline"
               className="h-9 rounded-xl gap-1.5"
               disabled={loading || todayAppts.length === 0}
-              onClick={() => {
+              onClick={async () => {
+                const { default: jsPDF } = await import("jspdf");
                 const doc = new jsPDF();
                 doc.setFontSize(16);
                 doc.text(`Agenda — ${format(selectedDate, "dd/MM/yyyy")}`, 14, 20);

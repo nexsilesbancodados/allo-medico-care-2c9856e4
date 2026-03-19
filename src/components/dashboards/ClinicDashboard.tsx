@@ -115,7 +115,8 @@ const ClinicDashboard = () => {
 
   const pendingDoctors = doctors.filter(d => d.status !== "active").length;
 
-  const exportClinicPDF = () => {
+  const exportClinicPDF = async () => {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF();
     const today = format(now, "dd/MM/yyyy HH:mm");
     doc.setFillColor(0, 105, 146);

@@ -83,23 +83,27 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       <HeroSection />
       <SocialProofBar />
 
-      {/* Plantão 24h Banner */}
+      {/* Plantão 24h Banner — premium urgency */}
       <section className="py-6 px-4 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary opacity-[0.06]" />
         <div className="container mx-auto max-w-4xl relative">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl shadow-primary/20">
-            <div className="text-center sm:text-left">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl shadow-primary/20 relative overflow-hidden">
+            {/* Animated shimmer overlay */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
+            <div className="text-center sm:text-left relative z-10">
               <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2 justify-center sm:justify-start">
-                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center relative">
                   <Stethoscope className="w-4 h-4" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-white/90 animate-ping" />
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-white/90" />
                 </div>
                 Plantão Clínico 24h
               </h2>
-              <p className="text-sm opacity-80 mt-1">Atendimento médico imediato, sem agendamento.</p>
+              <p className="text-sm opacity-90 mt-1">Atendimento médico imediato, sem agendamento. Médicos disponíveis agora.</p>
             </div>
             <Button
               size="lg"
-              className="bg-white text-primary hover:bg-white/90 rounded-full px-7 gap-2 shadow-lg font-semibold shrink-0"
+              className="bg-white text-primary hover:bg-white/90 rounded-full px-7 gap-2 shadow-lg font-bold shrink-0 hover:scale-[1.03] active:scale-[0.97] transition-all relative z-10"
               onClick={() => navigate(user ? "/dashboard/urgent-care" : "/consulta-avulsa")}
             >
               <Stethoscope className="w-4 h-4" />
