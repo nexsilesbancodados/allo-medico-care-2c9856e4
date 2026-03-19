@@ -109,41 +109,45 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         </div>
       </section>
 
-      <StatsSection />
-      <HowItWorksSection />
-      <SpecialtiesSection />
-      <PlansSection />
-      <TestimonialsSection />
-      <CTABanner />
-      <FAQSection />
+      <Suspense fallback={null}>
+        <StatsSection />
+        <HowItWorksSection />
+        <SpecialtiesSection />
+        <PlansSection />
+        <TestimonialsSection />
+        <CTABanner />
+        <FAQSection />
 
-      <section aria-labelledby="triage-heading" className="py-16 px-4">
-        <div className="container mx-auto max-w-2xl text-center space-y-5">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
-            <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
+        <section aria-labelledby="triage-heading" className="py-16 px-4">
+          <div className="container mx-auto max-w-2xl text-center space-y-5">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
+              <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
+            </div>
+            <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
+              Não sabe qual especialidade procurar?
+            </h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
+            </p>
+            <Button
+              size="lg"
+              className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
+              onClick={() => setShowQuiz(true)}
+            >
+              <Stethoscope className="w-5 h-5" aria-hidden="true" />
+              Fazer Triagem Gratuita
+            </Button>
           </div>
-          <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
-            Não sabe qual especialidade procurar?
-          </h2>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
-          </p>
-          <Button
-            size="lg"
-            className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
-            onClick={() => setShowQuiz(true)}
-          >
-            <Stethoscope className="w-5 h-5" aria-hidden="true" />
-            Fazer Triagem Gratuita
-          </Button>
-        </div>
-      </section>
+        </section>
 
-      <Footer />
+        <Footer />
+      </Suspense>
 
       <FloatingMobileCTA />
       {showQuiz && (
-        <SpecialtyQuiz onClose={() => setShowQuiz(false)} />
+        <Suspense fallback={null}>
+          <SpecialtyQuiz onClose={() => setShowQuiz(false)} />
+        </Suspense>
       )}
     </div>
   );
