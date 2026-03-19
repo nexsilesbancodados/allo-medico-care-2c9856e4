@@ -70,7 +70,7 @@ const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
   }, []);
 
   return (
-    <section aria-label="Início" className="relative min-h-[85vh] sm:min-h-[90vh] lg:min-h-screen flex items-center pt-20 sm:pt-24 overflow-hidden">
+    <section aria-label="Início" className="relative min-h-[70vh] sm:min-h-[80vh] lg:min-h-[85vh] flex items-center pt-20 sm:pt-24 pb-8 overflow-hidden">
       {/* Refined corporate background */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-secondary/[0.04]" />
@@ -104,7 +104,7 @@ const HeroSection = memo(forwardRef<HTMLElement>((_, ref) => {
                 exit={{ opacity: 0, y: -12 }}
                 transition={{ duration: 0.4 }}
               >
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold leading-[1.08] text-foreground mb-5 sm:mb-6 tracking-tight">
+                <h1 className="text-[1.75rem] sm:text-4xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold leading-[1.08] text-foreground mb-5 sm:mb-6 tracking-tight">
                   {poseContent[poseIndex].title}{" "}
                   <span className="text-gradient bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                     {poseContent[poseIndex].highlight}

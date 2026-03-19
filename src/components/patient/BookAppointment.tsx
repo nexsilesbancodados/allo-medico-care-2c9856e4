@@ -417,8 +417,20 @@ const BookAppointment = () => {
 
   if (loading) return (
     <DashboardLayout title="Paciente" nav={patientNav}>
-      <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="max-w-lg mx-auto pb-8 space-y-4">
+        <div className="h-6 w-20 rounded-lg shimmer-v2" />
+        <div className="flex items-center gap-3 p-4 rounded-2xl border border-border/30">
+          <div className="w-14 h-14 rounded-xl shimmer-v2" />
+          <div className="flex-1 space-y-2">
+            <div className="h-4 w-40 rounded shimmer-v2" />
+            <div className="h-3 w-28 rounded shimmer-v2" />
+          </div>
+          <div className="h-6 w-16 rounded shimmer-v2" />
+        </div>
+        <div className="flex items-center justify-between px-2">
+          {[1,2,3,4].map(i => <div key={i} className="flex flex-col items-center gap-1"><div className="w-9 h-9 rounded-full shimmer-v2" /><div className="h-2 w-8 rounded shimmer-v2" /></div>)}
+        </div>
+        <div className="h-64 rounded-2xl shimmer-v2" />
       </div>
     </DashboardLayout>
   );
