@@ -15,7 +15,6 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import jsPDF from "jspdf";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
@@ -136,7 +135,7 @@ const ReceptionDashboard = () => {
       ["Horário", "Paciente", "Telefone", "Médico", "Duração", "Status"],
       ...filteredAppts.map(a => [
         format(new Date(a.scheduled_at), "HH:mm"),
-        a.patient_name, a.patient_phone, a.doctor_name,
+        a.patient_name, a.patient_phone ?? "", a.doctor_name,
         `${a.duration_minutes || 30}min`,
         statusLabel[a.status] ?? a.status,
       ]),
@@ -144,18 +143,12 @@ const ReceptionDashboard = () => {
     const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
     const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `agenda-${format(new Date(), "yyyy-MM-dd")}.csv`;
-    document.body.appendChild(a);
-
-    a.click();
-
-    document.body.removeChild(a);
-
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-
-    document.body.removeChild(a);
+    const el = document.createElement("a");
+    el.href = url;
+    el.download = `agenda-${format(new Date(), "yyyy-MM-dd")}.csv`;
+    document.body.appendChild(el);
+    el.click();
+    document.body.removeChild(el);
     setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("Agenda exportada em CSV!");
   };
@@ -268,7 +261,8 @@ const ReceptionDashboard = () => {
               variant="outline"
               className="h-9 rounded-xl gap-1.5"
               disabled={loading || todayAppts.length === 0}
-              onClick={() => {
+              onClick={async () => {
+                const { default: jsPDF } = await import("jspdf");
                 const doc = new jsPDF();
                 doc.setFontSize(16);
                 doc.text(`Agenda — ${format(selectedDate, "dd/MM/yyyy")}`, 14, 20);

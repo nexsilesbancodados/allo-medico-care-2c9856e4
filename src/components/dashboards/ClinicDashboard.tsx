@@ -9,11 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, Calendar, BarChart3, Settings, Stethoscope, Clock, DollarSign, TrendingUp, FileText, Sparkles, SlidersHorizontal, Download } from "lucide-react";
-import jsPDF from "jspdf";
+// jsPDF loaded dynamically on export
 import { toast } from "sonner";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
@@ -51,6 +51,21 @@ const ClinicDashboard = () => {
   const defaultTab = pathSegment === "finance" ? "finance" : pathSegment === "reports" ? "performance" : "overview";
 
   useEffect(() => { if (user) fetchData(); }, [user]);
+
+  // Real-time appointment updates
+  useEffect(() => {
+    if (!clinicProfile) return;
+    const doctorIds = doctors.filter(d => d.status === "active").map(d => d.doctor_id);
+    if (doctorIds.length === 0) return;
+    const channel = supabase
+      .channel("clinic-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "appointments" }, (payload) => {
+        const row = payload.new as any;
+        if (row && doctorIds.includes(row.doctor_id)) fetchData();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [clinicProfile, doctors]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -100,7 +115,8 @@ const ClinicDashboard = () => {
 
   const pendingDoctors = doctors.filter(d => d.status !== "active").length;
 
-  const exportClinicPDF = () => {
+  const exportClinicPDF = async () => {
+    const { default: jsPDF } = await import("jspdf");
     const doc = new jsPDF();
     const today = format(now, "dd/MM/yyyy HH:mm");
     doc.setFillColor(0, 105, 146);

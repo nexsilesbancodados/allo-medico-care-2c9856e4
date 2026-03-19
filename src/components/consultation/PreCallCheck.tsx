@@ -59,6 +59,8 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
   const [symptomsSubmitted, setSymptomsSubmitted] = useState(false);
   const [showSymptomForm, setShowSymptomForm] = useState(false);
   const [showTips, setShowTips] = useState(false);
+  const [networkQuality, setNetworkQuality] = useState<"good" | "fair" | "poor" | null>(null);
+  const [networkLatency, setNetworkLatency] = useState<number | null>(null);
 
   // Check if symptoms already submitted
   useEffect(() => {
@@ -85,14 +87,28 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
     return () => clearInterval(interval);
   }, [scheduledAt]);
 
-  // Device testing
+  // Device testing + network quality
   useEffect(() => {
     testDevices();
+    testNetwork();
     return () => {
       streamRef.current?.getTracks().forEach(t => t.stop());
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, []);
+
+  const testNetwork = async () => {
+    try {
+      const start = performance.now();
+      await fetch(`${window.location.origin}/favicon.ico?_t=${Date.now()}`, { cache: "no-store" });
+      const latency = Math.round(performance.now() - start);
+      setNetworkLatency(latency);
+      setNetworkQuality(latency < 150 ? "good" : latency < 400 ? "fair" : "poor");
+    } catch {
+      setNetworkQuality("poor");
+      setNetworkLatency(null);
+    }
+  };
 
   // Poll appointment status for doctor presence — realtime + polling fallback
   useEffect(() => {
@@ -294,9 +310,28 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
             </h1>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(150,60%,40%,0.15)] border border-[hsl(150,60%,40%,0.25)]">
-              <Wifi className="w-2.5 h-2.5 text-[hsl(150,60%,45%)]" />
-              <span className="text-[10px] text-[hsl(150,60%,55%)] font-medium">Boa</span>
+            {/* Network quality badge */}
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${
+              networkQuality === "good" ? "bg-[hsl(150,60%,40%,0.15)] border-[hsl(150,60%,40%,0.25)]"
+              : networkQuality === "fair" ? "bg-warning/15 border-warning/25"
+              : networkQuality === "poor" ? "bg-destructive/15 border-destructive/25"
+              : "bg-[hsl(220,20%,15%)] border-[hsl(220,15%,25%)]"
+            }`}>
+              <Wifi className={`w-2.5 h-2.5 ${
+                networkQuality === "good" ? "text-[hsl(150,60%,45%)]"
+                : networkQuality === "fair" ? "text-warning"
+                : networkQuality === "poor" ? "text-destructive"
+                : "text-[hsl(220,15%,55%)]"
+              }`} />
+              <span className={`text-[10px] font-medium ${
+                networkQuality === "good" ? "text-[hsl(150,60%,55%)]"
+                : networkQuality === "fair" ? "text-warning"
+                : networkQuality === "poor" ? "text-destructive"
+                : "text-[hsl(220,15%,55%)]"
+              }`}>
+                {networkQuality === "good" ? "Boa" : networkQuality === "fair" ? "Média" : networkQuality === "poor" ? "Fraca" : "..."}
+                {networkLatency && <span className="ml-0.5 opacity-70">{networkLatency}ms</span>}
+              </span>
             </div>
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(220,20%,15%)] border border-[hsl(220,15%,25%)]">
               <Shield className="w-2.5 h-2.5 text-[hsl(220,15%,55%)]" />
