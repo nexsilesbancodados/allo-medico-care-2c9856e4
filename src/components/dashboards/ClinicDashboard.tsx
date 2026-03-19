@@ -52,6 +52,21 @@ const ClinicDashboard = () => {
 
   useEffect(() => { if (user) fetchData(); }, [user]);
 
+  // Real-time appointment updates
+  useEffect(() => {
+    if (!clinicProfile) return;
+    const doctorIds = doctors.filter(d => d.status === "active").map(d => d.doctor_id);
+    if (doctorIds.length === 0) return;
+    const channel = supabase
+      .channel("clinic-live")
+      .on("postgres_changes", { event: "*", schema: "public", table: "appointments" }, (payload) => {
+        const row = payload.new as any;
+        if (row && doctorIds.includes(row.doctor_id)) fetchData();
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [clinicProfile, doctors]);
+
   const fetchData = async () => {
     setLoading(true);
     const { data: clinic } = await supabase.from("clinic_profiles").select("*").eq("user_id", user!.id).single();
