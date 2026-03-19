@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { Navigate, Routes, Route, useSearchParams, useNavigate } from "react-router-dom";
+import { Navigate, Routes, Route, useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { usePresence } from "@/hooks/use-presence";
 import { prefetchOnIdle } from "@/hooks/use-prefetch-route";
 import { lazy, Suspense, ReactNode, useEffect, useState, useCallback } from "react";
