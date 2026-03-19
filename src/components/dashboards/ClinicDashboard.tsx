@@ -13,7 +13,7 @@ import jsPDF from "jspdf";
 import { toast } from "sonner";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from "recharts";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 
