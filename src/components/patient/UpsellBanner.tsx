@@ -77,40 +77,45 @@ const UpsellBanner = () => {
 
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
+      initial={{ opacity: 0, y: 10, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -10, scale: 0.97 }}
+      transition={{ type: "spring", stiffness: 200, damping: 20 }}
     >
-      <Card className="border-primary/30 bg-gradient-to-r from-primary/8 via-secondary/5 to-primary/8 overflow-hidden relative">
+      <Card className="border-primary/20 bg-gradient-to-br from-primary/[0.06] via-card to-secondary/[0.06] overflow-hidden relative shadow-sm hover:shadow-md transition-shadow duration-200">
+        {/* Ambient glow */}
+        <div className="absolute -top-8 -left-8 w-28 h-28 rounded-full blur-2xl opacity-15 bg-primary pointer-events-none" aria-hidden="true" />
+        <div className="absolute -bottom-6 -right-6 w-20 h-20 rounded-full blur-xl opacity-10 bg-secondary pointer-events-none" aria-hidden="true" />
         <button
           onClick={dismiss}
-          className="absolute top-2.5 right-2.5 p-1 rounded-lg hover:bg-muted/50 transition-colors"
+          className="absolute top-3 right-3 p-1.5 rounded-xl hover:bg-muted/50 transition-colors z-10"
+          aria-label="Dispensar"
         >
           <X className="w-3.5 h-3.5 text-muted-foreground" />
         </button>
-        <CardContent className="p-3.5">
-          <div className="flex items-start gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg">
-              <Crown className="w-5 h-5 text-primary-foreground" />
+        <CardContent className="p-4 relative">
+          <div className="flex items-start gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shrink-0 shadow-lg shadow-primary/20 ring-1 ring-white/10">
+              <Crown className="w-6 h-6 text-primary-foreground" />
             </div>
-            <div className="flex-1 min-w-0 pr-4">
-              <p className="text-xs font-bold text-foreground mb-0.5">
+            <div className="flex-1 min-w-0 pr-6">
+              <p className="text-sm font-extrabold text-foreground mb-1 tracking-tight">
                 Economize com o Plano Mensal
               </p>
-              <p className="text-[11px] text-muted-foreground mb-2">
-                Você já gastou ~R${totalSpent} em {consultCount} consultas avulsas.
+              <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+                Você já gastou ~<span className="font-semibold text-foreground">R${totalSpent}</span> em {consultCount} consultas avulsas.
                 Com o plano de R${monthlyPrice}/mês, economizaria{" "}
-                <span className="font-semibold text-success">R${Math.max(0, savings)}</span>.
+                <span className="font-bold text-success">R${Math.max(0, savings)}</span>.
               </p>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2.5">
                 <Button
                   size="sm"
-                  className="bg-gradient-to-r from-primary to-secondary text-primary-foreground text-[11px] h-7 px-3 rounded-lg"
+                  className="bg-gradient-to-r from-primary to-secondary text-primary-foreground text-xs h-8 px-4 rounded-xl font-bold shadow-md shadow-primary/15 active:scale-[0.96] transition-all"
                   onClick={() => navigate("/dashboard/plans")}
                 >
-                  <TrendingUp className="w-3 h-3 mr-1" /> Ver planos
+                  <TrendingUp className="w-3.5 h-3.5 mr-1.5" /> Ver planos
                 </Button>
-                <Badge variant="outline" className="text-[9px] text-success border-success/30">
+                <Badge variant="outline" className="text-[10px] text-success border-success/25 font-semibold px-2.5">
                   Consultas ilimitadas
                 </Badge>
               </div>
