@@ -5,8 +5,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { getDoctorNav } from "./doctorNav";
-import { Users } from "lucide-react";
+import { Users, FileText } from "lucide-react";
 
 interface Patient {
   user_id: string;
