@@ -105,13 +105,8 @@ const SupportInbox = lazy(() => import("@/components/support/SupportInbox"));
 // EMR wrapper with route params
 const PatientEMRPage = () => {
   const { patientUserId } = useParams();
-  const DashboardLayoutLazy = lazy(() => import("@/components/dashboards/DashboardLayout"));
-  const { getDoctorNav } = require("@/components/doctor/doctorNav");
-  return (
-    <Suspense fallback={<div className="shimmer-v2 h-20 rounded-2xl m-6" />}>
-      <PatientEMR patientId={patientUserId!} isDoctor readOnly={false} />
-    </Suspense>
-  );
+  if (!patientUserId) return <Navigate to="/dashboard/patients" replace />;
+  return <PatientEMR patientId={patientUserId} isDoctor readOnly={false} />;
 };
 
 const PLAN_CHECK_TIMEOUT_MS = 6000;
