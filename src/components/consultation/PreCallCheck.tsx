@@ -87,14 +87,28 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
     return () => clearInterval(interval);
   }, [scheduledAt]);
 
-  // Device testing
+  // Device testing + network quality
   useEffect(() => {
     testDevices();
+    testNetwork();
     return () => {
       streamRef.current?.getTracks().forEach(t => t.stop());
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
   }, []);
+
+  const testNetwork = async () => {
+    try {
+      const start = performance.now();
+      await fetch(`${window.location.origin}/favicon.ico?_t=${Date.now()}`, { cache: "no-store" });
+      const latency = Math.round(performance.now() - start);
+      setNetworkLatency(latency);
+      setNetworkQuality(latency < 150 ? "good" : latency < 400 ? "fair" : "poor");
+    } catch {
+      setNetworkQuality("poor");
+      setNetworkLatency(null);
+    }
+  };
 
   // Poll appointment status for doctor presence — realtime + polling fallback
   useEffect(() => {
