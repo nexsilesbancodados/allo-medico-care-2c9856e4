@@ -97,6 +97,7 @@ const App = () => {
   useEffect(() => {
     const cancelCriticalPrefetch = prefetchOnIdle(
       [
+        () => import("./pages/Index"),
         () => import("./pages/Auth"),
         () => import("./pages/AuthPaciente"),
         () => import("./pages/AuthMedico"),
@@ -109,7 +110,7 @@ const App = () => {
         () => import("./pages/GuestCheckout"),
         () => import("./pages/GuestConsultation"),
       ],
-      1200,
+      800,
     );
 
     const cancelSecondaryPrefetch = prefetchOnIdle(
