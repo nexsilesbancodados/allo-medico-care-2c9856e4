@@ -213,39 +213,51 @@ const PatientDashboard = () => {
           )}
         </section>
 
-        {/* ═══ Digital Card — slim banner ═══ */}
-        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-primary/90 to-secondary p-4 shadow-lg shadow-primary/12">
-          <div className="absolute -right-6 -top-6 size-28 bg-white/[0.06] rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute left-1/2 bottom-0 w-40 h-1 bg-white/10 rounded-full blur-sm" />
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="size-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-primary-foreground/80" />
+        {/* ═══ Digital Card — premium glassmorphism banner ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, type: "spring", stiffness: 180, damping: 18 }}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary p-[1px] shadow-xl shadow-primary/15"
+        >
+          <div className="relative rounded-[calc(1rem-1px)] bg-gradient-to-br from-primary via-primary/95 to-secondary overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute -right-8 -top-8 size-32 bg-white/[0.07] rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -left-6 -bottom-6 size-24 bg-white/[0.05] rounded-full blur-xl pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            
+            <div className="relative z-10 p-4 sm:p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="size-11 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shrink-0 ring-1 ring-white/10 shadow-lg">
+                    <Sparkles className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-primary-foreground/45 text-[9px] font-bold uppercase tracking-[0.25em]">Cartão de Benefícios</p>
+                    <p className="text-primary-foreground text-base font-extrabold truncate tracking-tight">{profile?.first_name} {profile?.last_name}</p>
+                  </div>
+                </div>
+                <Button size="sm"
+                  className="bg-white/20 backdrop-blur-md text-primary-foreground hover:bg-white/30 rounded-xl h-9 px-4 text-xs font-bold border border-white/15 shrink-0 shadow-lg shadow-black/10 active:scale-[0.96] transition-all"
+                  onClick={() => navigate("/dashboard/discount-card?role=patient")}>
+                  Ver Cartão <ChevronRight className="w-3 h-3 ml-1" />
+                </Button>
               </div>
-              <div className="min-w-0">
-                <p className="text-primary-foreground/50 text-[9px] font-bold uppercase tracking-[0.2em]">Cartão Digital</p>
-                <p className="text-primary-foreground text-sm font-bold truncate">{profile?.first_name} {profile?.last_name}</p>
-              </div>
+              {activeSub && (
+                <div className="relative z-10 mt-3.5 pt-3 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[10px] text-primary-foreground/50 flex items-center gap-1.5 font-medium">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Plano ativo
+                  </span>
+                  <span className="text-primary-foreground/80 font-mono text-[11px] font-semibold bg-white/10 px-2.5 py-0.5 rounded-lg">
+                    {(activeSub as Record<string, unknown>).expires_at
+                      ? `Até ${format(new Date((activeSub as Record<string, unknown>).expires_at as string), "MM/yyyy")}`
+                      : "Ativo"}
+                  </span>
+                </div>
+              )}
             </div>
-            <Button size="sm"
-              className="bg-white/20 backdrop-blur-sm text-primary-foreground hover:bg-white/30 rounded-xl h-8 px-3.5 text-xs font-bold border border-white/10 shrink-0"
-              onClick={() => navigate("/dashboard/discount-card?role=patient")}>
-              Ver Cartão
-            </Button>
           </div>
-          {activeSub && (
-            <div className="relative z-10 mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between">
-              <span className="text-[10px] text-primary-foreground/40 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Plano ativo
-              </span>
-              <span className="text-primary-foreground/70 font-mono text-[11px] font-medium">
-                {(activeSub as Record<string, unknown>).expires_at
-                  ? `Válido até ${format(new Date((activeSub as Record<string, unknown>).expires_at as string), "MM/yyyy")}`
-                  : "—"}
-              </span>
-            </div>
-          )}
-        </section>
+        </motion.section>
 
         {/* Live consultation */}
         {waitingAppt && (
