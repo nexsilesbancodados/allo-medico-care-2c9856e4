@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import DashboardLayout from "../dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -179,65 +180,85 @@ const PatientDashboard = () => {
           {/* KPI stats bar */}
           {!loading && (
             <div className="relative z-10 px-4 sm:px-5 lg:px-6 pb-4 sm:pb-5">
-              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3" role="list" aria-label="Estatísticas do paciente">
                 {[
-                  { label: "Consultas", value: stats?.total ?? 0, icon: Calendar, color: "text-primary", bgIcon: "bg-primary/8" },
-                  { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText, color: "text-secondary", bgIcon: "bg-secondary/8" },
-                  { label: "Documentos", value: stats?.documents ?? 0, icon: Upload, color: "text-warning", bgIcon: "bg-warning/8" },
-                ].map(kpi => (
-                  <div key={kpi.label} className="flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2 sm:py-2.5 rounded-xl bg-muted/30 border border-border/20">
-                    <div className={`size-7 sm:size-8 rounded-lg ${kpi.bgIcon} flex items-center justify-center shrink-0`}>
-                      <kpi.icon className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${kpi.color}`} />
+                  { label: "Consultas", value: stats?.total ?? 0, icon: Calendar, color: "text-primary", bgIcon: "bg-primary/10", gradient: "from-primary/5 to-primary/[0.02]" },
+                  { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText, color: "text-secondary", bgIcon: "bg-secondary/10", gradient: "from-secondary/5 to-secondary/[0.02]" },
+                  { label: "Documentos", value: stats?.documents ?? 0, icon: Upload, color: "text-warning", bgIcon: "bg-warning/10", gradient: "from-warning/5 to-warning/[0.02]" },
+                ].map((kpi, i) => (
+                  <motion.div
+                    key={kpi.label}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06, type: "spring", stiffness: 200, damping: 20 }}
+                    role="listitem"
+                    className={`kpi-card relative overflow-hidden flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2.5 sm:py-3 rounded-xl bg-gradient-to-br ${kpi.gradient} border border-border/25 backdrop-blur-sm`}
+                  >
+                    <div className={`absolute -top-3 -right-3 w-12 h-12 rounded-full blur-xl opacity-20 ${kpi.bgIcon}`} aria-hidden="true" />
+                    <div className={`size-8 sm:size-9 rounded-xl ${kpi.bgIcon} flex items-center justify-center shrink-0 shadow-sm`}>
+                      <kpi.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${kpi.color}`} />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-base sm:text-lg font-black text-foreground leading-none tabular-nums">{kpi.value}</p>
-                      <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-medium mt-0.5">{kpi.label}</p>
+                    <div className="min-w-0 relative">
+                      <p className="text-lg sm:text-xl font-black text-foreground leading-none tabular-nums">{kpi.value}</p>
+                      <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-semibold mt-0.5 uppercase tracking-wider">{kpi.label}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
           )}
           {loading && (
             <div className="px-4 sm:px-5 pb-4 sm:pb-5 grid grid-cols-3 gap-2 sm:gap-3">
-              {[1,2,3].map(i => <div key={i} className="h-14 rounded-xl shimmer-v2" />)}
+              {[1,2,3].map(i => <div key={i} className="h-16 rounded-xl shimmer-v2" />)}
             </div>
           )}
         </section>
 
-        {/* ═══ Digital Card — slim banner ═══ */}
-        <section className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary via-primary/90 to-secondary p-4 shadow-lg shadow-primary/12">
-          <div className="absolute -right-6 -top-6 size-28 bg-white/[0.06] rounded-full blur-2xl pointer-events-none" />
-          <div className="absolute left-1/2 bottom-0 w-40 h-1 bg-white/10 rounded-full blur-sm" />
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className="size-9 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0">
-                <Sparkles className="w-4 h-4 text-primary-foreground/80" />
+        {/* ═══ Digital Card — premium glassmorphism banner ═══ */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, type: "spring", stiffness: 180, damping: 18 }}
+          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary p-[1px] shadow-xl shadow-primary/15"
+        >
+          <div className="relative rounded-[calc(1rem-1px)] bg-gradient-to-br from-primary via-primary/95 to-secondary overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute -right-8 -top-8 size-32 bg-white/[0.07] rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -left-6 -bottom-6 size-24 bg-white/[0.05] rounded-full blur-xl pointer-events-none" />
+            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            
+            <div className="relative z-10 p-4 sm:p-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="size-11 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center shrink-0 ring-1 ring-white/10 shadow-lg">
+                    <Sparkles className="w-5 h-5 text-primary-foreground" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-primary-foreground/45 text-[9px] font-bold uppercase tracking-[0.25em]">Cartão de Benefícios</p>
+                    <p className="text-primary-foreground text-base font-extrabold truncate tracking-tight">{profile?.first_name} {profile?.last_name}</p>
+                  </div>
+                </div>
+                <Button size="sm"
+                  className="bg-white/20 backdrop-blur-md text-primary-foreground hover:bg-white/30 rounded-xl h-9 px-4 text-xs font-bold border border-white/15 shrink-0 shadow-lg shadow-black/10 active:scale-[0.96] transition-all"
+                  onClick={() => navigate("/dashboard/discount-card?role=patient")}>
+                  Ver Cartão <ChevronRight className="w-3 h-3 ml-1" />
+                </Button>
               </div>
-              <div className="min-w-0">
-                <p className="text-primary-foreground/50 text-[9px] font-bold uppercase tracking-[0.2em]">Cartão Digital</p>
-                <p className="text-primary-foreground text-sm font-bold truncate">{profile?.first_name} {profile?.last_name}</p>
-              </div>
+              {activeSub && (
+                <div className="relative z-10 mt-3.5 pt-3 border-t border-white/10 flex items-center justify-between">
+                  <span className="text-[10px] text-primary-foreground/50 flex items-center gap-1.5 font-medium">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Plano ativo
+                  </span>
+                  <span className="text-primary-foreground/80 font-mono text-[11px] font-semibold bg-white/10 px-2.5 py-0.5 rounded-lg">
+                    {(activeSub as Record<string, unknown>).expires_at
+                      ? `Até ${format(new Date((activeSub as Record<string, unknown>).expires_at as string), "MM/yyyy")}`
+                      : "Ativo"}
+                  </span>
+                </div>
+              )}
             </div>
-            <Button size="sm"
-              className="bg-white/20 backdrop-blur-sm text-primary-foreground hover:bg-white/30 rounded-xl h-8 px-3.5 text-xs font-bold border border-white/10 shrink-0"
-              onClick={() => navigate("/dashboard/discount-card?role=patient")}>
-              Ver Cartão
-            </Button>
           </div>
-          {activeSub && (
-            <div className="relative z-10 mt-3 pt-2.5 border-t border-white/10 flex items-center justify-between">
-              <span className="text-[10px] text-primary-foreground/40 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> Plano ativo
-              </span>
-              <span className="text-primary-foreground/70 font-mono text-[11px] font-medium">
-                {(activeSub as Record<string, unknown>).expires_at
-                  ? `Válido até ${format(new Date((activeSub as Record<string, unknown>).expires_at as string), "MM/yyyy")}`
-                  : "—"}
-              </span>
-            </div>
-          )}
-        </section>
+        </motion.section>
 
         {/* Live consultation */}
         {waitingAppt && (
@@ -258,17 +279,20 @@ const PatientDashboard = () => {
         <section>
           <h2 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Ações Rápidas</h2>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
-            {quickActions.map(item => (
-              <button
+            {quickActions.map((item, i) => (
+              <motion.button
                 key={item.label}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 20 }}
                 onClick={() => navigate(item.path)}
-                className="group flex flex-col items-center gap-2 py-3 sm:py-3.5 rounded-2xl bg-card border border-border/30 hover:border-primary/20 hover:shadow-md active:scale-[0.96] transition-all duration-150"
+                className="card-interactive group flex flex-col items-center gap-2.5 py-4 sm:py-4.5 rounded-2xl bg-card border border-border/30 hover:border-primary/20 hover:shadow-lg active:scale-[0.96] transition-all duration-200"
               >
-                <div className={`size-10 sm:size-11 rounded-xl ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-105 transition-transform duration-150`}>
-                  <item.icon className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${item.color}`} />
+                <div className={`size-11 sm:size-12 rounded-2xl ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-sm`}>
+                  <item.icon className={`w-[18px] h-[18px] sm:w-5 sm:h-5 ${item.color}`} />
                 </div>
-                <span className="text-[10px] sm:text-[11px] font-semibold text-foreground/80">{item.label}</span>
-              </button>
+                <span className="text-[11px] sm:text-xs font-bold text-foreground/80">{item.label}</span>
+              </motion.button>
             ))}
           </div>
         </section>
@@ -511,17 +535,20 @@ const PatientDashboard = () => {
         <section>
           <h2 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Acesso Rápido</h2>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
-            {shortcuts.map(item => (
-              <button
+            {shortcuts.map((item, i) => (
+              <motion.button
                 key={item.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.03, type: "spring", stiffness: 200, damping: 20 }}
                 onClick={() => navigate(item.path)}
-                className="group flex flex-col items-center gap-2 py-3 sm:py-4 rounded-xl bg-card border border-border/30 hover:border-primary/15 hover:shadow-sm active:scale-[0.97] transition-all duration-150"
+                className="card-interactive group flex flex-col items-center gap-2.5 py-3.5 sm:py-4 rounded-xl bg-card border border-border/30 hover:border-primary/15 hover:shadow-md active:scale-[0.96] transition-all duration-200"
               >
-                <div className="size-9 sm:size-10 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 transition-colors duration-150">
-                  <item.icon className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${item.color}`} />
+                <div className="size-10 sm:size-11 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 group-hover:scale-110 transition-all duration-200 shadow-sm">
+                  <item.icon className={`w-[18px] h-[18px] sm:w-5 sm:h-5 ${item.color}`} />
                 </div>
-                <span className="text-[10px] sm:text-[11px] font-semibold text-muted-foreground">{item.label}</span>
-              </button>
+                <span className="text-[10px] sm:text-[11px] font-bold text-muted-foreground">{item.label}</span>
+              </motion.button>
             ))}
           </div>
         </section>
