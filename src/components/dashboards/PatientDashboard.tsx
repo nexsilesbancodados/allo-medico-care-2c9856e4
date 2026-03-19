@@ -534,17 +534,20 @@ const PatientDashboard = () => {
         <section>
           <h2 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Acesso Rápido</h2>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
-            {shortcuts.map(item => (
-              <button
+            {shortcuts.map((item, i) => (
+              <motion.button
                 key={item.label}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.03, type: "spring", stiffness: 200, damping: 20 }}
                 onClick={() => navigate(item.path)}
-                className="group flex flex-col items-center gap-2 py-3 sm:py-4 rounded-xl bg-card border border-border/30 hover:border-primary/15 hover:shadow-sm active:scale-[0.97] transition-all duration-150"
+                className="card-interactive group flex flex-col items-center gap-2.5 py-3.5 sm:py-4 rounded-xl bg-card border border-border/30 hover:border-primary/15 hover:shadow-md active:scale-[0.96] transition-all duration-200"
               >
-                <div className="size-9 sm:size-10 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 transition-colors duration-150">
-                  <item.icon className={`w-4 h-4 sm:w-[18px] sm:h-[18px] ${item.color}`} />
+                <div className="size-10 sm:size-11 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 group-hover:scale-110 transition-all duration-200 shadow-sm">
+                  <item.icon className={`w-[18px] h-[18px] sm:w-5 sm:h-5 ${item.color}`} />
                 </div>
-                <span className="text-[10px] sm:text-[11px] font-semibold text-muted-foreground">{item.label}</span>
-              </button>
+                <span className="text-[10px] sm:text-[11px] font-bold text-muted-foreground">{item.label}</span>
+              </motion.button>
             ))}
           </div>
         </section>
