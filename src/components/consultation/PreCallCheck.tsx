@@ -310,9 +310,28 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
             </h1>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(150,60%,40%,0.15)] border border-[hsl(150,60%,40%,0.25)]">
-              <Wifi className="w-2.5 h-2.5 text-[hsl(150,60%,45%)]" />
-              <span className="text-[10px] text-[hsl(150,60%,55%)] font-medium">Boa</span>
+            {/* Network quality badge */}
+            <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full border ${
+              networkQuality === "good" ? "bg-[hsl(150,60%,40%,0.15)] border-[hsl(150,60%,40%,0.25)]"
+              : networkQuality === "fair" ? "bg-warning/15 border-warning/25"
+              : networkQuality === "poor" ? "bg-destructive/15 border-destructive/25"
+              : "bg-[hsl(220,20%,15%)] border-[hsl(220,15%,25%)]"
+            }`}>
+              <Wifi className={`w-2.5 h-2.5 ${
+                networkQuality === "good" ? "text-[hsl(150,60%,45%)]"
+                : networkQuality === "fair" ? "text-warning"
+                : networkQuality === "poor" ? "text-destructive"
+                : "text-[hsl(220,15%,55%)]"
+              }`} />
+              <span className={`text-[10px] font-medium ${
+                networkQuality === "good" ? "text-[hsl(150,60%,55%)]"
+                : networkQuality === "fair" ? "text-warning"
+                : networkQuality === "poor" ? "text-destructive"
+                : "text-[hsl(220,15%,55%)]"
+              }`}>
+                {networkQuality === "good" ? "Boa" : networkQuality === "fair" ? "Média" : networkQuality === "poor" ? "Fraca" : "..."}
+                {networkLatency && <span className="ml-0.5 opacity-70">{networkLatency}ms</span>}
+              </span>
             </div>
             <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[hsl(220,20%,15%)] border border-[hsl(220,15%,25%)]">
               <Shield className="w-2.5 h-2.5 text-[hsl(220,15%,55%)]" />
