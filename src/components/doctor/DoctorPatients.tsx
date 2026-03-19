@@ -99,7 +99,8 @@ const DoctorPatients = () => {
         ) : (
           <div className="space-y-3">
             {patients.map(p => (
-              <Card key={p.user_id} className="border-border">
+              <Card key={p.user_id} className="border-border cursor-pointer hover:border-primary/30 transition-colors"
+                onClick={() => navigate(`/dashboard/patients/${p.user_id}/emr?role=doctor`)}>
                 <CardContent className="p-4 flex items-center gap-4">
                   <Avatar>
                     <AvatarFallback className="bg-primary/10 text-primary">
@@ -112,6 +113,9 @@ const DoctorPatients = () => {
                       {p.total_appointments} consulta(s)
                     </p>
                   </div>
+                  <Button size="sm" variant="outline" className="text-xs gap-1.5">
+                    <FileText className="w-3.5 h-3.5" /> Prontuário
+                  </Button>
                 </CardContent>
               </Card>
             ))}
