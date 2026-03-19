@@ -1,5 +1,5 @@
 import { logError } from "@/lib/logger";
-import { useEffect, useState, forwardRef } from "react";
+import { useEffect, useState, forwardRef, lazy, Suspense } from "react";
 import { useTheme } from "next-themes";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -10,15 +10,17 @@ import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import { Button } from "@/components/ui/button";
 import { Stethoscope } from "lucide-react";
-import StatsSection from "@/components/landing/StatsSection";
-import HowItWorksSection from "@/components/landing/HowItWorksSection";
-import SpecialtiesSection from "@/components/landing/SpecialtiesSection";
-import PlansSection from "@/components/landing/PlansSection";
-import TestimonialsSection from "@/components/landing/TestimonialsSection";
-import CTABanner from "@/components/landing/CTABanner";
-import FAQSection from "@/components/landing/FAQSection";
-import Footer from "@/components/landing/Footer";
-import SpecialtyQuiz from "@/components/landing/SpecialtyQuiz";
+
+// Lazy-load below-the-fold sections for faster initial paint
+const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
+const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection"));
+const SpecialtiesSection = lazy(() => import("@/components/landing/SpecialtiesSection"));
+const PlansSection = lazy(() => import("@/components/landing/PlansSection"));
+const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
+const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
+const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
+const Footer = lazy(() => import("@/components/landing/Footer"));
+const SpecialtyQuiz = lazy(() => import("@/components/landing/SpecialtyQuiz"));
 
 const Index = forwardRef<HTMLDivElement>((_, ref) => {
   const { setTheme, theme } = useTheme();
