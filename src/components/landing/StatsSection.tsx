@@ -43,11 +43,11 @@ const GsapCounter = ({ target, suffix, decimals = 0 }: { target: number; suffix:
   );
 };
 
-const iconColors = [
-  "bg-primary/90",
-  "bg-secondary/90",
-  "bg-warning",
-  "bg-success",
+const iconStyles = [
+  { bg: "bg-primary/90", glow: "shadow-primary/30" },
+  { bg: "bg-secondary/90", glow: "shadow-secondary/30" },
+  { bg: "bg-warning", glow: "shadow-warning/30" },
+  { bg: "bg-success", glow: "shadow-success/30" },
 ];
 
 const fallbackStats = [
@@ -116,12 +116,12 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
                 src={stat.mascot}
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-2 -right-2 w-20 h-20 sm:w-24 sm:h-24 object-contain opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500 pointer-events-none select-none"
+                className="absolute -bottom-2 -right-2 w-20 h-20 sm:w-24 sm:h-24 object-contain opacity-[0.07] group-hover:opacity-[0.12] group-hover:rotate-6 transition-all duration-500 pointer-events-none select-none"
               />
 
               <div className="relative flex flex-col gap-3">
-                {/* Icon */}
-                <div className={`w-10 h-10 rounded-xl ${iconColors[i]} flex items-center justify-center shadow-sm`}>
+                {/* Icon with glow */}
+                <div className={`w-10 h-10 rounded-xl ${iconStyles[i].bg} flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:${iconStyles[i].glow} group-hover:scale-110 transition-all duration-300`}>
                   <stat.icon className="w-[18px] h-[18px] text-white" aria-hidden="true" />
                 </div>
 
