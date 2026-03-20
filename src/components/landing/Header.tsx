@@ -194,10 +194,10 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                 <NavigationMenuContent>
                   <div className="p-2.5 w-[320px]">
                     <ul className="grid gap-0.5">
-                      <ListItem href="/para-empresas/cartao" title="Cartão Corporativo" icon={CreditCard} badge="B2B">
+                      <ListItem href="/para-empresas/cartao" title="Cartão Corporativo" imgSrc={pingoVirtualAssistant} badge="B2B">
                         Telemedicina 24h e descontos para colaboradores.
                       </ListItem>
-                      <ListItem href="/para-empresas/telelaudo" title="Telelaudo para Clínicas" icon={FileText}>
+                      <ListItem href="/para-empresas/telelaudo" title="Telelaudo para Clínicas" imgSrc={devicesMascot}>
                         Laudos a distância com IA, SLA e assinatura digital.
                       </ListItem>
                     </ul>
