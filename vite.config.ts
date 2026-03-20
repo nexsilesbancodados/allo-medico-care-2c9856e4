@@ -144,30 +144,5 @@ export default defineConfig(({ mode }) => ({
     minify: "esbuild",
     sourcemap: false,
     cssCodeSplit: true,
-      rollupOptions: {
-        output: {
-          // Keep manual chunking restricted to third-party libraries.
-          // Source-code chunking here was making the entry bundle depend on lazy feature chunks
-          // in production, which can break first paint and cause a persistent white screen.
-          onlyExplicitManualChunks: true,
-          manualChunks(id) {
-            if (!id.includes("node_modules")) return;
-            if (id.includes("react-dom")) return "vendor-react-dom";
-            if (id.includes("react-router-dom")) return "vendor-router";
-            if (id.includes("node_modules/react/") || id.includes("react/jsx-runtime")) return "vendor-react-core";
-            if (id.includes("lucide-react")) return "vendor-icons";
-            if (id.includes("framer-motion")) return "vendor-motion";
-            if (id.includes("gsap")) return "vendor-gsap";
-            if (id.includes("recharts") || id.includes("d3-")) return "vendor-charts";
-            if (id.includes("@supabase")) return "vendor-supabase";
-            if (id.includes("@tanstack")) return "vendor-query";
-            if (id.includes("@radix-ui")) return "vendor-radix";
-            if (id.includes("zod") || id.includes("react-hook-form") || id.includes("@hookform")) return "vendor-forms";
-            if (id.includes("date-fns")) return "vendor-dates";
-            if (id.includes("jspdf")) return "vendor-pdf";
-            if (id.includes("dwv")) return "vendor-dwv";
-          },
-        },
-      },
   },
 }));

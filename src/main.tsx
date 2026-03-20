@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import { unregisterLegacyRootPushServiceWorkers } from "@/lib/push-service-worker";
 
 /* ── Chunk-error recovery ─────────────────────────────── */
 const CHUNK_RELOAD_KEY = "__chunk_reloaded";
@@ -61,7 +62,7 @@ if ("serviceWorker" in navigator) {
       void caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).catch(() => {});
     }
   } else {
-    navigator.serviceWorker.register("/push-sw.js").catch(() => {});
+    void unregisterLegacyRootPushServiceWorkers().catch(() => {});
   }
 }
 

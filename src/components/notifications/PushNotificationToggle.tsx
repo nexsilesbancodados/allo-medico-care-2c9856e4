@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Bell, BellOff } from "lucide-react";
 import { toast } from "sonner";
+import { ensurePushServiceWorkerRegistration } from "@/lib/push-service-worker";
 
 const PushNotificationToggle = () => {
   const { user } = useAuth();
@@ -17,11 +18,14 @@ const PushNotificationToggle = () => {
       if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
       setSupported(true);
 
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await ensurePushServiceWorkerRegistration();
+      if (!reg) return;
+
       const sub = await (reg as ServiceWorkerRegistration & { pushManager: PushManager }).pushManager.getSubscription();
       if (sub) setSubscribed(true);
     };
-    check();
+
+    void check();
   }, []);
 
   const subscribe = async () => {
@@ -36,7 +40,9 @@ const PushNotificationToggle = () => {
         return;
       }
 
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await ensurePushServiceWorkerRegistration();
+      if (!reg) throw new Error("Push service worker indisponível");
+
       const sub = await (reg as ServiceWorkerRegistration & { pushManager: PushManager }).pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: "BAcxZjzip4n-k1ifUoCKTHN8s2fo9woakP0bT1_2bim88q4vvDDFhrm5Ydg2Q_dg8-paX0lg39E6fq0KysNKkmg",
@@ -64,7 +70,7 @@ const PushNotificationToggle = () => {
     setLoading(true);
 
     try {
-      const reg = await navigator.serviceWorker.ready;
+      const reg = await ensurePushServiceWorkerRegistration();
       const sub = await (reg as ServiceWorkerRegistration & { pushManager: PushManager }).pushManager.getSubscription();
       if (sub) {
         await sub.unsubscribe();
