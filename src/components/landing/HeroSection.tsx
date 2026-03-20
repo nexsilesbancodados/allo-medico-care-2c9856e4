@@ -86,10 +86,10 @@ const HeroSection = memo(
           <div className="absolute bottom-[-10%] left-[10%] w-[500px] h-[500px] rounded-full bg-secondary/[0.03] blur-[140px]" />
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6" ref={heroRef}>
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28" ref={heroRef}>
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-24 items-center">
             {/* ── Text column ── */}
-            <div className="max-w-xl">
+            <div className="max-w-2xl">
               {/* Live badge */}
               <div className="gsap-hero-item inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-primary/20 bg-primary/[0.06] text-primary text-sm font-semibold mb-8 select-none">
                 <span className="relative flex h-2 w-2">
