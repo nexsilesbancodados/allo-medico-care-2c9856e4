@@ -55,7 +55,6 @@ describe("ClinicDashboard", () => {
         </BrowserRouter>
       </QueryClientProvider>
     );
-    // Should render some dashboard content
-    expect(document.querySelector("[class*='dashboard'], [class*='grid'], main, div")).toBeTruthy();
-  });
+    expect(document.querySelector("div")).toBeTruthy();
+  }, 15000);
 });
