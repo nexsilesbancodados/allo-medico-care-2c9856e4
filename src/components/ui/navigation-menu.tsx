@@ -80,7 +80,8 @@ const NavigationMenuViewport = React.forwardRef<
   <div className={cn("absolute left-0 top-full flex justify-center")}>
     <NavigationMenuPrimitive.Viewport
       className={cn(
-        "origin-top-center relative mt-2.5 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-2xl border border-border/50 bg-popover/98 text-popover-foreground shadow-[0_20px_60px_-15px_hsl(var(--foreground)/0.12),0_0_0_1px_hsl(var(--border)/0.08)] backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-[0.96] data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 md:w-[var(--radix-navigation-menu-viewport-width)]",
+        "origin-top-center relative mt-3 h-[var(--radix-navigation-menu-viewport-height)] w-full overflow-hidden rounded-2xl border border-border/30 bg-popover text-popover-foreground shadow-[0_25px_50px_-12px_hsl(var(--foreground)/0.15),0_12px_24px_-8px_hsl(var(--foreground)/0.08)] backdrop-blur-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-[0.97] data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 md:w-[var(--radix-navigation-menu-viewport-width)]",
+        "before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary/20 before:to-transparent",
         className,
       )}
       ref={ref}
