@@ -9,9 +9,10 @@ import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
-import InfoBannerStrip from "@/components/landing/InfoBannerStrip";
 import { Button } from "@/components/ui/button";
 import { Stethoscope, ShieldCheck, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
+
+// Keep images as static imports but they'll be in separate chunks via asset pipeline
 import bannerBenefits from "@/assets/banner-benefits-card.png";
 import bannerAi from "@/assets/banner-ai-triage.png";
 import bannerConsulta from "@/assets/banner-consulta.png";
@@ -19,6 +20,7 @@ import bannerPlantao from "@/assets/banner-plantao.png";
 import bannerTelelaudo from "@/assets/banner-telelaudo.png";
 
 // Lazy-load below-the-fold sections for faster initial paint
+const InfoBannerStrip = lazy(() => import("@/components/landing/InfoBannerStrip"));
 const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
 const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection"));
 const SpecialtiesSection = lazy(() => import("@/components/landing/SpecialtiesSection"));

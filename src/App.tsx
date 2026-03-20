@@ -101,10 +101,15 @@ const App = () => {
   useEffect(() => {
     const cancelCriticalPrefetch = prefetchOnIdle(
       [
-        () => import("./pages/Index"),
         () => import("./pages/Auth"),
         () => import("./pages/AuthPaciente"),
         () => import("./pages/AuthMedico"),
+      ],
+      3000,
+    );
+
+    const cancelSecondaryPrefetch = prefetchOnIdle(
+      [
         () => import("./pages/AuthAdmin"),
         () => import("./pages/AuthClinica"),
         () => import("./pages/AuthRecepcionista"),
@@ -112,41 +117,9 @@ const App = () => {
         () => import("./pages/AuthParceiro"),
         () => import("./pages/AuthLaudista"),
         () => import("./pages/GuestCheckout"),
-        () => import("./pages/GuestConsultation"),
-      ],
-      800,
-    );
-
-    const cancelSecondaryPrefetch = prefetchOnIdle(
-      [
         () => import("./pages/ForgotPassword"),
-        () => import("./pages/ResetPassword"),
-        () => import("./pages/Terms"),
-        () => import("./pages/Privacy"),
-        () => import("./pages/LGPD"),
-        () => import("./pages/Cookies"),
-        () => import("./pages/RefundPolicy"),
-        () => import("./pages/DoctorTerms"),
-        () => import("./pages/Accessibility"),
-        () => import("./pages/PaymentSuccess"),
-        () => import("./pages/DoctorPublicProfilePage"),
-        () => import("./pages/DiscountCard"),
-        () => import("./pages/B2BLanding"),
-        () => import("./pages/B2BCartao"),
-        () => import("./pages/B2BTelelaudo"),
-        () => import("./pages/Teleconsulta"),
-        () => import("./pages/Telelaudo"),
-        () => import("./pages/TelelaudoWorkspace"),
-        () => import("./pages/ValidateDocument"),
-        () => import("./pages/LinkRedirect"),
-        () => import("./components/analytics/AnalyticsScripts"),
-        () => import("./components/PingoChatbot"),
-        () => import("./components/OfflineIndicator"),
-        () => import("./components/CookieConsent"),
-        () => import("./components/auth/TermsReconsentDialog"),
-        () => import("./components/PWAUpdateBanner"),
       ],
-      4000,
+      8000,
     );
 
     return () => {
