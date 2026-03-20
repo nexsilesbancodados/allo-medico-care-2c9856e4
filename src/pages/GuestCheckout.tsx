@@ -25,6 +25,7 @@ import { validarCPF } from "@/lib/cpf";
 import mascotWave from "@/assets/mascot-wave.png";
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
 import mascotReading from "@/assets/mascot-reading.png";
+import teleconsultaHero from "@/assets/teleconsulta-hero.png";
 
 type Step = "specialty" | "doctor" | "datetime" | "patient_info" | "checkout" | "success";
 
@@ -439,22 +440,24 @@ const GuestCheckout = () => {
       <main className="flex-1 pt-24 md:pt-28 pb-12 px-4">
         <div className="max-w-3xl mx-auto">
 
-          {/* Hero Title with Mascot */}
+          {/* Hero with teleconsultation image */}
           <motion.div {...fadeUp} className="text-center mb-10 relative">
-            <motion.img
-              src={mascotWave}
-              alt="Mascote Alô Médico"
-              className="w-20 h-20 mx-auto mb-4 drop-shadow-lg"
-              initial={{ scale: 0.8, rotate: -5 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: "spring", stiffness: 200, damping: 15 }}
-            />
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent mb-2">
-              Consulta Avulsa
-            </h1>
-            <p className="text-muted-foreground text-base max-w-md mx-auto">
-              Agende sua consulta sem cadastro · Rápido, seguro e transparente
-            </p>
+            <div className="relative w-full max-w-lg mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl shadow-primary/10">
+              <img
+                src={teleconsultaHero}
+                alt="Paciente em teleconsulta médica"
+                className="w-full h-48 sm:h-56 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
+              <div className="absolute bottom-4 left-4 right-4">
+                <h1 className="text-2xl md:text-3xl font-extrabold text-white drop-shadow-lg">
+                  Consulta Avulsa
+                </h1>
+                <p className="text-white/80 text-sm mt-1 drop-shadow">
+                  Agende sua consulta sem cadastro · Rápido, seguro e transparente
+                </p>
+              </div>
+            </div>
           </motion.div>
 
           {/* Step Progress Bar */}
