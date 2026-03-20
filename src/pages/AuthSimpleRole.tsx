@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowLeft, Sparkles, LucideIcon } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Sparkles, LucideIcon, CheckCircle2 } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 
 interface AuthSimpleRoleProps {
@@ -23,12 +23,13 @@ interface AuthSimpleRoleProps {
   bottomLabel: string;
   bottomIcon: LucideIcon;
   bottomIconColor: string;
+  mascotSrc?: string;
 }
 
 const AuthSimpleRole = ({
   title, subtitle, description, seoDescription, icon: Icon,
   gradientFrom, gradientTo, features, placeholder,
-  bottomLabel, bottomIcon: BottomIcon, bottomIconColor,
+  bottomLabel, bottomIcon: BottomIcon, bottomIconColor, mascotSrc,
 }: AuthSimpleRoleProps) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -52,31 +53,76 @@ const AuthSimpleRole = ({
   return (
     <div className="min-h-screen bg-background flex">
       <SEOHead title={title} description={seoDescription} />
-      <div className={`hidden lg:flex lg:w-1/2 bg-gradient-to-br ${gradient} items-center justify-center p-12`}>
-        <div className="text-primary-foreground max-w-md">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8 opacity-80 hover:opacity-100 transition">
-            <ArrowLeft className="w-4 h-4" /> Voltar ao início
-          </Link>
-          <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
-            <Icon className="w-8 h-8" />
+
+      {/* ── Left panel — desktop only ── */}
+      <div className={`hidden lg:flex lg:w-1/2 bg-gradient-to-br ${gradient} relative overflow-hidden`}>
+        {/* Ambient orbs */}
+        <div className="absolute top-[-15%] left-[-10%] w-[400px] h-[400px] rounded-full bg-white/[0.06] blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[350px] h-[350px] rounded-full bg-white/[0.04] blur-[80px]" />
+
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          <div>
+            <Link to="/" className="inline-flex items-center gap-2 text-primary-foreground/70 hover:text-primary-foreground transition text-sm mb-10">
+              <ArrowLeft className="w-4 h-4" /> Voltar ao início
+            </Link>
+
+            <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-6 border border-white/10">
+              <Icon className="w-7 h-7 text-primary-foreground" />
+            </div>
+            <h1 className="text-4xl font-extrabold text-primary-foreground mb-3 tracking-tight">{title}</h1>
+            <p className="text-base text-primary-foreground/80 max-w-sm leading-relaxed">{description}</p>
+
+            <div className="mt-8 space-y-3">
+              {features.map((f, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center gap-2.5 text-sm text-primary-foreground/80"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-primary-foreground/60 shrink-0" />
+                  {f}
+                </motion.div>
+              ))}
+            </div>
           </div>
-          <h1 className="text-4xl font-extrabold mb-4">{title}</h1>
-          <p className="text-lg opacity-90">{description}</p>
-          <div className="mt-8 space-y-3 opacity-80 text-sm">
-            {features.map((f, i) => <p key={i}>✓ {f}</p>)}
-          </div>
+
+          {/* Mascot illustration */}
+          {mascotSrc && (
+            <motion.div
+              className="flex justify-center mt-8"
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <img
+                src={mascotSrc}
+                alt={`Pingo - ${title}`}
+                className="w-56 h-56 object-contain drop-shadow-2xl"
+                loading="eager"
+              />
+            </motion.div>
+          )}
         </div>
       </div>
 
+      {/* ── Right panel — form ── */}
       <div className="flex-1 flex flex-col min-h-screen">
-        <div className={`lg:hidden bg-gradient-to-br ${gradient} px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8`}>
-          <Link to="/" className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
+        {/* Mobile gradient header */}
+        <div className={`lg:hidden bg-gradient-to-br ${gradient} px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8 relative overflow-hidden`}>
+          <div className="absolute top-[-30%] right-[-20%] w-[200px] h-[200px] rounded-full bg-white/[0.06] blur-[60px]" />
+          <Link to="/" className="relative z-10 inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Icon className="w-6 h-6 text-primary-foreground" />
-            </div>
+          <div className="relative z-10 flex items-center gap-3">
+            {mascotSrc ? (
+              <img src={mascotSrc} alt="Pingo" className="w-14 h-14 object-contain drop-shadow-lg" />
+            ) : (
+              <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                <Icon className="w-6 h-6 text-primary-foreground" />
+              </div>
+            )}
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">{title}</h1>
               <p className="text-xs text-primary-foreground/70">{subtitle}</p>
@@ -85,12 +131,17 @@ const AuthSimpleRole = ({
         </div>
 
         <div className="flex-1 flex flex-col justify-center px-6 py-6 lg:items-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
+          <motion.div
+            initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="w-full max-w-md"
+          >
             <Link to="/" className="hidden lg:inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition">
               <ArrowLeft className="w-4 h-4" /> Voltar
             </Link>
             <div className="hidden lg:flex items-center gap-3 mb-6">
-              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center`}>
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shadow-lg`}>
                 <Icon className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
@@ -98,28 +149,30 @@ const AuthSimpleRole = ({
                 <p className="text-sm text-muted-foreground">Acesso restrito</p>
               </div>
             </div>
-            <div className="p-3 rounded-lg bg-muted/50 border border-border mb-4">
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                <Icon className="w-3 h-3" />
+
+            <div className="p-3 rounded-xl bg-muted/50 border border-border/60 mb-5">
+              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                <Icon className="w-3.5 h-3.5 shrink-0" />
                 Conta criada pelo administrador. Entre com suas credenciais.
               </p>
             </div>
+
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <Label>Email</Label>
-                <div className="relative mt-1">
+                <Label className="text-sm font-medium">Email</Label>
+                <div className="relative mt-1.5">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={placeholder} className="pl-10" required />
+                  <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder={placeholder} className="pl-10 h-11" required />
                 </div>
               </div>
               <div>
-                <Label>Senha</Label>
-                <div className="relative mt-1">
+                <Label className="text-sm font-medium">Senha</Label>
+                <div className="relative mt-1.5">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-10" required />
+                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="pl-10 h-11" required />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground h-12" size="lg" disabled={loading}>
+              <Button type="submit" className={`w-full bg-gradient-to-r ${gradient} text-primary-foreground h-12 rounded-xl font-bold shadow-lg hover:shadow-xl hover:brightness-105 active:scale-[0.97] transition-all`} size="lg" disabled={loading}>
                 {loading ? (
                   <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
