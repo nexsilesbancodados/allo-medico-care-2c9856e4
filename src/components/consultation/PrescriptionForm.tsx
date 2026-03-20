@@ -358,6 +358,14 @@ const PrescriptionForm = () => {
       toast.error("Adicione pelo menos um medicamento");
       return;
     }
+    if (!doctorInfo) {
+      toast.error("Dados do médico não carregados. Aguarde.");
+      return;
+    }
+    if (!patientId) {
+      toast.error("Dados do paciente não carregados. Aguarde.");
+      return;
+    }
 
     setSaving(true);
 
