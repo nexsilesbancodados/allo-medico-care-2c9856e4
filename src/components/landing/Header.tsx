@@ -34,23 +34,21 @@ const ListItem = ({
       <Link
         to={href || "#"}
         className={cn(
-          "block select-none rounded-xl p-3 leading-none no-underline outline-none transition-all hover:bg-muted/80 focus:bg-muted/80 group",
+          "flex items-center gap-3.5 select-none rounded-xl p-3.5 no-underline outline-none transition-all duration-200 hover:bg-primary/[0.05] focus:bg-primary/[0.05] group",
           className
         )}
         {...props}
       >
-        <div className="flex items-center gap-3">
-          {imgSrc ? (
-            <img src={imgSrc} alt={title} className="w-9 h-9 rounded-xl object-contain shrink-0" />
-          ) : Icon ? (
-            <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center shrink-0 group-hover:bg-primary/12 transition-colors">
-              <Icon className="w-4.5 h-4.5 text-primary" />
-            </div>
-          ) : null}
-          <div>
-            <div className="text-sm font-semibold leading-none text-foreground mb-1">{title}</div>
-            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">{children}</p>
+        {imgSrc ? (
+          <img src={imgSrc} alt={title} className="w-10 h-10 rounded-xl object-contain shrink-0 ring-1 ring-border/30 group-hover:ring-primary/20 transition-all" />
+        ) : Icon ? (
+          <div className="w-10 h-10 rounded-xl bg-primary/[0.07] flex items-center justify-center shrink-0 group-hover:bg-primary/[0.12] group-hover:scale-105 transition-all duration-200">
+            <Icon className="w-[18px] h-[18px] text-primary" />
           </div>
+        ) : null}
+        <div className="min-w-0">
+          <div className="text-[13px] font-bold leading-none text-foreground group-hover:text-primary transition-colors">{title}</div>
+          <p className="line-clamp-2 text-[11px] leading-snug text-muted-foreground mt-1.5">{children}</p>
         </div>
       </Link>
     </NavigationMenuLink>
@@ -117,28 +115,30 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                   Serviços
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid gap-1 p-2.5 w-[460px] lg:grid-cols-[.7fr_1fr]">
-                    <li className="row-span-3">
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/teleconsulta"
-                          className="flex h-full w-full select-none flex-col items-center justify-end rounded-xl bg-gradient-to-b from-muted/50 to-muted/20 p-4 no-underline outline-none hover:from-primary/8 hover:to-primary/4 transition-colors overflow-hidden"
-                        >
-                          <img src={teleconsultaDropdown} alt="Teleconsulta" className="w-full flex-1 object-cover object-center rounded-lg mb-3" />
-                          <div className="mb-1 text-sm font-bold text-foreground">Teleconsulta</div>
-                          <p className="text-[11px] leading-relaxed text-muted-foreground text-center">
-                            Consultas por vídeo 24h com 30+ especialidades.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={telelaudoPingo}>
-                      Descontos em consultas e exames para toda a família.
-                    </ListItem>
-                    <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope} imgSrc={mascotWave}>
-                      Atendimento sem cadastro, rápido e seguro.
-                    </ListItem>
-                  </ul>
+                  <div className="p-3 w-[480px]">
+                    <ul className="grid gap-1.5 lg:grid-cols-[.65fr_1fr]">
+                      <li className="row-span-3">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/teleconsulta"
+                            className="flex h-full w-full select-none flex-col justify-end rounded-xl bg-gradient-to-b from-muted/40 to-muted/10 p-4 no-underline outline-none hover:from-primary/[0.06] hover:to-primary/[0.02] transition-all duration-200 overflow-hidden group"
+                          >
+                            <img src={teleconsultaDropdown} alt="Teleconsulta" className="w-full flex-1 object-cover object-center rounded-lg mb-3 group-hover:scale-[1.02] transition-transform duration-300" />
+                            <div className="mb-1 text-sm font-bold text-foreground group-hover:text-primary transition-colors">Teleconsulta</div>
+                            <p className="text-[11px] leading-relaxed text-muted-foreground">
+                              Consultas por vídeo 24h com 30+ especialidades.
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={telelaudoPingo}>
+                        Descontos em consultas e exames para toda a família.
+                      </ListItem>
+                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope} imgSrc={mascotWave}>
+                        Atendimento sem cadastro, rápido e seguro.
+                      </ListItem>
+                    </ul>
+                  </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
@@ -148,13 +148,15 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                   Profissionais
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[320px] gap-1 p-2.5">
+                  <ul className="grid w-[340px] gap-1 p-3">
                     <ListItem href="/medico" title="Sou Médico" icon={Stethoscope}>
                       Atenda pacientes online e aumente sua renda.
                     </ListItem>
+                    <li><div className="mx-3 border-t border-border/30" /></li>
                     <ListItem href="/laudista" title="Sou Laudista" icon={Brain}>
                       Emita laudos à distância com IA e assinatura digital.
                     </ListItem>
+                    <li><div className="mx-3 border-t border-border/30" /></li>
                     <ListItem href="/clinica" title="Sou Clínica" icon={Building2}>
                       Gerencie agendamento, prontuário e equipe.
                     </ListItem>
@@ -168,10 +170,11 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                   Para Empresas
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[320px] gap-1 p-2.5">
+                  <ul className="grid w-[340px] gap-1 p-3">
                     <ListItem href="/para-empresas/cartao" title="Cartão Corporativo" icon={CreditCard}>
                       Telemedicina 24h e descontos para colaboradores.
                     </ListItem>
+                    <li><div className="mx-3 border-t border-border/30" /></li>
                     <ListItem href="/para-empresas/telelaudo" title="Telelaudo para Clínicas" icon={FileText}>
                       Laudos a distância com IA, SLA e assinatura digital.
                     </ListItem>
