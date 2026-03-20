@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowLeft, Handshake, Building2, LogIn, Sparkles } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Handshake, Building2, LogIn, Sparkles, CheckCircle2 } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import pingoPartner from "@/assets/pingo-partner.png";
 import { translateAuthError } from "@/lib/authErrors";
 
 type Step = "welcome" | "register" | "login";
@@ -66,37 +67,58 @@ const AuthParceiro = () => {
   return (
     <div className="min-h-screen bg-background flex">
       <SEOHead title="Portal do Parceiro" description="Torne-se parceiro da AloClinica e ofereça telemedicina aos seus clientes." />
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/80 to-secondary/80 items-center justify-center p-12">
-        <div className="text-primary-foreground max-w-md">
-          <Link to="/" className="inline-flex items-center gap-2 mb-8 opacity-80 hover:opacity-100 transition">
-            <ArrowLeft className="w-4 h-4" /> Voltar ao início
-          </Link>
-          <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center mb-6">
-            <Handshake className="w-8 h-8" />
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/80 to-secondary/80 relative overflow-hidden">
+        <div className="absolute top-[-15%] left-[-10%] w-[400px] h-[400px] rounded-full bg-white/[0.06] blur-[100px]" />
+        <div className="absolute bottom-[-10%] right-[-5%] w-[350px] h-[350px] rounded-full bg-white/[0.04] blur-[80px]" />
+
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          <div>
+            <Link to="/" className="inline-flex items-center gap-2 text-primary-foreground/70 hover:text-primary-foreground transition text-sm mb-10">
+              <ArrowLeft className="w-4 h-4" /> Voltar ao início
+            </Link>
+            <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-6 border border-white/10">
+              <Handshake className="w-7 h-7 text-primary-foreground" />
+            </div>
+            <h1 className="text-4xl font-extrabold text-primary-foreground mb-3 tracking-tight">Portal do Parceiro</h1>
+            <p className="text-base text-primary-foreground/80 max-w-sm leading-relaxed">
+              Farmácias e laboratórios podem validar receitas digitais e pedidos de exames da plataforma AloClinica.
+            </p>
+            <div className="mt-8 space-y-3">
+              {["Validação de receitas digitais", "Pedidos de exames integrados", "Histórico de dispensações", "Dashboard com métricas"].map((f, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 + i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  className="flex items-center gap-2.5 text-sm text-primary-foreground/80"
+                >
+                  <CheckCircle2 className="w-4 h-4 text-primary-foreground/60 shrink-0" />
+                  {f}
+                </motion.div>
+              ))}
+            </div>
           </div>
-          <h1 className="text-4xl font-extrabold mb-4">Portal do Parceiro</h1>
-          <p className="text-lg opacity-90">
-            Farmácias e laboratórios podem validar receitas digitais e pedidos de exames da plataforma AloClinica.
-          </p>
-          <div className="mt-8 space-y-3 opacity-80 text-sm">
-            <p>✓ Validação de receitas digitais</p>
-            <p>✓ Pedidos de exames integrados</p>
-            <p>✓ Histórico de dispensações</p>
-            <p>✓ Dashboard com métricas</p>
-          </div>
+
+          <motion.div
+            className="flex justify-center mt-8"
+            initial={{ opacity: 0, y: 20, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <img src={pingoPartner} alt="Pingo Parceiro" className="w-56 h-56 object-contain drop-shadow-2xl" loading="eager" />
+          </motion.div>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Mobile gradient header */}
-        <div className="lg:hidden bg-gradient-to-br from-primary/80 to-secondary/80 px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
+        <div className="lg:hidden bg-gradient-to-br from-primary/80 to-secondary/80 px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8 relative overflow-hidden">
+          <div className="absolute top-[-30%] right-[-20%] w-[200px] h-[200px] rounded-full bg-white/[0.06] blur-[60px]" />
+          <Link to="/" className="relative z-10 inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Handshake className="w-6 h-6 text-primary-foreground" />
-            </div>
+          <div className="relative z-10 flex items-center gap-3">
+            <img src={pingoPartner} alt="Pingo" className="w-14 h-14 object-contain drop-shadow-lg" />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">Portal do Parceiro</h1>
               <p className="text-xs text-primary-foreground/70">Farmácias & Laboratórios</p>

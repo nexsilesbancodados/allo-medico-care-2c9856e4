@@ -1,5 +1,6 @@
 import AuthSimpleRole from "./AuthSimpleRole";
 import { HeadphonesIcon } from "lucide-react";
+import pingoSupport from "@/assets/pingo-support.png";
 
 const AuthSuporte = () => (
   <AuthSimpleRole
@@ -16,6 +17,7 @@ const AuthSuporte = () => (
     bottomLabel="Suporte 24h"
     bottomIcon={HeadphonesIcon}
     bottomIconColor="text-secondary"
+    mascotSrc={pingoSupport}
   />
 );
 

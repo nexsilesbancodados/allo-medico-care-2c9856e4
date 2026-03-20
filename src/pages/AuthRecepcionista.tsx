@@ -1,5 +1,6 @@
 import AuthSimpleRole from "./AuthSimpleRole";
 import { ClipboardList } from "lucide-react";
+import pingoReception from "@/assets/pingo-reception.png";
 
 const AuthRecepcionista = () => (
   <AuthSimpleRole
@@ -16,6 +17,7 @@ const AuthRecepcionista = () => (
     bottomLabel="Recepção"
     bottomIcon={ClipboardList}
     bottomIconColor="text-primary"
+    mascotSrc={pingoReception}
   />
 );
 
