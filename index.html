@@ -83,7 +83,23 @@
     <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-semibold focus:shadow-lg">
       Pular para o conteúdo principal
     </a>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Inline loading skeleton — visible instantly while JS downloads & parses -->
+      <div id="initial-loader" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f8fafc;flex-direction:column;gap:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+        <div style="width:48px;height:48px;border:3px solid hsl(210 60% 85%);border-top-color:hsl(210 70% 45%);border-radius:50%;animation:ld-spin .7s linear infinite"></div>
+        <span style="font-size:14px;color:hsl(210 10% 55%);font-weight:500;letter-spacing:.02em">Carregando AloClínica…</span>
+        <style>@keyframes ld-spin{to{transform:rotate(360deg)}}</style>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      // Remove inline loader as soon as React mounts (or after 6s safety)
+      var __ldObs = new MutationObserver(function(m){
+        var ld = document.getElementById('initial-loader');
+        if(ld && document.getElementById('root').children.length > 1){ld.remove();__ldObs.disconnect()}
+      });
+      __ldObs.observe(document.getElementById('root'),{childList:true});
+      setTimeout(function(){var ld=document.getElementById('initial-loader');if(ld)ld.remove();__ldObs.disconnect()},6000);
+    </script>
   </body>
 </html>
