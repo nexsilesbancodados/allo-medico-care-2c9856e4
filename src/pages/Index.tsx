@@ -94,7 +94,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
 
       {/* Plantão 24h — animated urgency strip */}
       <section className="py-8 px-4 relative overflow-hidden">
-        <div className="container mx-auto max-w-4xl">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
           <motion.div
             initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
             whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
