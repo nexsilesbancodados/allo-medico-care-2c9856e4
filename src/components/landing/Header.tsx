@@ -34,23 +34,21 @@ const ListItem = ({
       <Link
         to={href || "#"}
         className={cn(
-          "block select-none rounded-xl p-3 leading-none no-underline outline-none transition-all hover:bg-muted/80 focus:bg-muted/80 group",
+          "flex items-center gap-3.5 select-none rounded-xl p-3.5 no-underline outline-none transition-all duration-200 hover:bg-primary/[0.05] focus:bg-primary/[0.05] group",
           className
         )}
         {...props}
       >
-        <div className="flex items-center gap-3">
-          {imgSrc ? (
-            <img src={imgSrc} alt={title} className="w-9 h-9 rounded-xl object-contain shrink-0" />
-          ) : Icon ? (
-            <div className="w-9 h-9 rounded-xl bg-primary/8 flex items-center justify-center shrink-0 group-hover:bg-primary/12 transition-colors">
-              <Icon className="w-4.5 h-4.5 text-primary" />
-            </div>
-          ) : null}
-          <div>
-            <div className="text-sm font-semibold leading-none text-foreground mb-1">{title}</div>
-            <p className="line-clamp-2 text-xs leading-snug text-muted-foreground">{children}</p>
+        {imgSrc ? (
+          <img src={imgSrc} alt={title} className="w-10 h-10 rounded-xl object-contain shrink-0 ring-1 ring-border/30 group-hover:ring-primary/20 transition-all" />
+        ) : Icon ? (
+          <div className="w-10 h-10 rounded-xl bg-primary/[0.07] flex items-center justify-center shrink-0 group-hover:bg-primary/[0.12] group-hover:scale-105 transition-all duration-200">
+            <Icon className="w-[18px] h-[18px] text-primary" />
           </div>
+        ) : null}
+        <div className="min-w-0">
+          <div className="text-[13px] font-bold leading-none text-foreground group-hover:text-primary transition-colors">{title}</div>
+          <p className="line-clamp-2 text-[11px] leading-snug text-muted-foreground mt-1.5">{children}</p>
         </div>
       </Link>
     </NavigationMenuLink>
