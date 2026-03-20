@@ -16,6 +16,7 @@ import PasswordStrength from "@/components/ui/password-strength";
 import { translateAuthError } from "@/lib/authErrors";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
 import pingoSolitario from "@/assets/pingo-solitario.png";
+import pingoCartao from "@/assets/pingo-cartao.png";
 import pingoMiniFamilia from "@/assets/pingo-mini-familia.png";
 import pingoKingFamilia from "@/assets/pingo-king-familia.png";
 import pingoPrimeFamilia from "@/assets/pingo-prime-familia.png";
@@ -531,7 +532,7 @@ const AuthPaciente = () => {
                     transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <img
-                      src={pingoSolitario}
+                      src={pingoCartao}
                       alt="Pingo mascote"
                       className="w-48 h-48 object-contain drop-shadow-2xl"
                       loading="eager"
