@@ -105,7 +105,8 @@ const benefitCards = [
 
 const PlansSection = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
-
+  const [showAll, setShowAll] = useState(false);
+  const visibleSpecialties = showAll ? specialties : specialties.slice(0, 8);
   return (
     <>
       {/* ── SEÇÃO 1: CONSULTA AVULSA ── */}
