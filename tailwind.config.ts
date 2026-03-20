@@ -160,6 +160,7 @@ export default {
         "shimmer-move":    "shimmer-move 1.8s ease-in-out infinite",
         "glow-pulse":      "glow-pulse 2.5s ease-in-out infinite",
         "spin-slow":       "spin-slow 8s linear infinite",
+        "gradient-slide":  "gradient-slide 6s ease-in-out infinite",
       },
     },
   },
