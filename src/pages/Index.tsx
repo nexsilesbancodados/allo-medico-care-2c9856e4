@@ -94,7 +94,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
 
       {/* Plantão 24h — animated urgency strip */}
       <section className="py-8 px-4 relative overflow-hidden">
-        <div className="container mx-auto max-w-4xl">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
           <motion.div
             initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
             whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -247,7 +247,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         <FAQSection />
 
         <section aria-labelledby="triage-heading" className="py-16 px-4">
-          <div className="container mx-auto max-w-2xl text-center space-y-5">
+          <div className="max-w-[1800px] mx-auto max-w-2xl text-center space-y-5">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
               <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
             </div>
