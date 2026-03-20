@@ -115,15 +115,17 @@ const B2BLanding = () => {
               </motion.div>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
                 {[
-                  { icon: <Stethoscope className="w-7 h-7 text-white" />, title: "Telemedicina 24h", desc: "Consultas médicas por vídeo a qualquer hora, 30+ especialidades", gradient: "from-primary to-primary/70" },
-                  { icon: <CreditCard className="w-7 h-7 text-white" />, title: "30% de Desconto", desc: "Economia em todas as consultas e serviços para o titular e dependentes", gradient: "from-secondary to-secondary/70" },
-                  { icon: <Star className="w-7 h-7 text-white" />, title: "Clube de Vantagens", desc: "Descontos em farmácias, academias e serviços parceiros", gradient: "from-warning to-warning/70" },
-                  { icon: <Heart className="w-7 h-7 text-white" />, title: "Assistência Funeral", desc: "Cobertura nacional incluída nos planos Pro e Diamante", gradient: "from-destructive to-destructive/70" },
+                  { mascot: benefitTelemedicine, title: "Telemedicina 24h", desc: "Consultas médicas por vídeo a qualquer hora, 30+ especialidades" },
+                  { mascot: benefitDiscount, title: "30% de Desconto", desc: "Economia em todas as consultas e serviços para o titular e dependentes" },
+                  { mascot: benefitClub, title: "Clube de Vantagens", desc: "Descontos em farmácias, academias e serviços parceiros" },
+                  { mascot: benefitFuneral, title: "Assistência Funeral", desc: "Cobertura nacional incluída nos planos Pro e Diamante" },
                 ].map((s, i) => (
                   <motion.div key={i} variants={fadeUp}>
-                    <Card className="h-full border-border/50 hover:shadow-xl hover:border-border hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
-                      <CardContent className="p-6">
-                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${s.gradient} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 transition-transform duration-300`}>{s.icon}</div>
+                    <Card className="h-full border-border/50 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
+                      <CardContent className="p-6 flex flex-col items-start">
+                        <div className="w-20 h-20 mb-4 group-hover:scale-110 transition-transform duration-300">
+                          <img src={s.mascot} alt={s.title} className="w-full h-full object-contain" loading="lazy" />
+                        </div>
                         <h3 className="font-bold text-foreground text-lg mb-2">{s.title}</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
                       </CardContent>
