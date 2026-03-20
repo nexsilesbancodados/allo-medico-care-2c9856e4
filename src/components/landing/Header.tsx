@@ -108,7 +108,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
         WebkitBackdropFilter: "blur(20px)",
       }}
     >
-      <div className="container mx-auto flex items-center justify-between h-14 lg:h-[60px] px-4 sm:px-6">
+      <div className="max-w-[1800px] mx-auto flex items-center justify-between h-14 lg:h-[60px] px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
         {/* ── Logo ── */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
           <motion.img
