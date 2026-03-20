@@ -17,84 +17,66 @@ const InfoBannerStrip = ({ icon: Icon, label, title, highlight, href, gradient =
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14, filter: "blur(4px)" }}
+      initial={{ opacity: 0, y: 18, filter: "blur(6px)" }}
       whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      viewport={{ once: true, amount: 0.5 }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      className="py-4 px-4"
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+      className="py-5 px-4"
     >
       <div className="container mx-auto max-w-5xl">
         <button
           onClick={() => navigate(href)}
-          className={`w-full group relative overflow-hidden rounded-2xl bg-gradient-to-r ${gradient} px-6 sm:px-8 py-5 sm:py-6 flex items-center justify-between gap-4 shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer`}
+          className={`w-full group relative overflow-hidden rounded-3xl bg-gradient-to-br ${gradient} px-5 sm:px-10 py-6 sm:py-7 flex items-center justify-between gap-3 shadow-2xl shadow-black/15 hover:shadow-[0_20px_60px_-12px_rgba(0,0,0,0.3)] transition-all duration-500 ease-out hover:scale-[1.008] active:scale-[0.985] cursor-pointer`}
         >
-          {/* Animated floating particles */}
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <motion.div
-              className="absolute w-3 h-3 rounded-full bg-white/10"
-              style={{ top: "20%", left: "15%" }}
-              animate={{ y: [-8, 8, -8], opacity: [0.3, 0.7, 0.3] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute w-2 h-2 rounded-full bg-white/10"
-              style={{ top: "60%", left: "35%" }}
-              animate={{ y: [6, -6, 6], opacity: [0.2, 0.6, 0.2] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            />
-            <motion.div
-              className="absolute w-2.5 h-2.5 rounded-full bg-white/[0.08]"
-              style={{ top: "30%", left: "55%" }}
-              animate={{ y: [-5, 10, -5], opacity: [0.15, 0.5, 0.15] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            />
-          </div>
+          {/* Noise texture overlay */}
+          <div className="absolute inset-0 opacity-[0.035] mix-blend-overlay pointer-events-none" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")", backgroundSize: "128px 128px" }} />
 
-          {/* Shimmer effect */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1200ms] ease-out" />
+          {/* Soft radial glow behind content */}
+          <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[300px] h-[200px] rounded-full bg-white/[0.08] blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-12 right-1/4 w-[200px] h-[160px] rounded-full bg-black/[0.06] blur-3xl pointer-events-none" />
 
-          {/* Decorative shape */}
-          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/[0.05]" />
-          <div className="absolute -bottom-6 left-1/3 w-24 h-24 rounded-full bg-white/[0.04]" />
+          {/* Shimmer sweep */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.09] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1400ms] ease-out pointer-events-none" />
 
-          {/* Content */}
-          <div className="flex items-center gap-4 sm:gap-5 relative z-10 min-w-0">
+          {/* Content left */}
+          <div className="flex items-center gap-4 sm:gap-6 relative z-10 min-w-0 flex-1">
             <motion.div
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center shrink-0 shadow-lg shadow-black/10"
-              whileHover={{ rotate: 8, scale: 1.1 }}
-              transition={{ type: "spring", stiffness: 300, damping: 15 }}
+              className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/[0.13] backdrop-blur-md flex items-center justify-center shrink-0 shadow-lg shadow-black/[0.08] border border-white/[0.12]"
+              whileHover={{ rotate: 6, scale: 1.08 }}
+              transition={{ type: "spring", stiffness: 280, damping: 14 }}
             >
-              <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+              <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </motion.div>
             <div className="text-left min-w-0">
-              <span className="text-[10px] uppercase tracking-widest text-primary-foreground/50 font-bold block mb-0.5">{label}</span>
-              <p className="text-sm sm:text-base font-extrabold text-primary-foreground leading-snug">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/40 font-bold block mb-1 leading-none">{label}</span>
+              <p className="text-sm sm:text-[15px] font-extrabold text-white leading-snug" style={{ textWrap: "balance" } as React.CSSProperties}>
                 {title}
               </p>
               {highlight && (
-                <p className="text-[11px] sm:text-xs text-white/60 font-medium mt-0.5">{highlight}</p>
+                <p className="text-[10px] sm:text-xs text-white/55 font-semibold mt-1 tracking-wide">{highlight}</p>
               )}
             </div>
           </div>
 
-          {/* Mascot + CTA */}
-          <div className="flex items-center gap-3 shrink-0 relative z-10">
+          {/* Mascot + CTA right */}
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0 relative z-10">
             {mascotSrc && (
               <motion.img
                 src={mascotSrc}
                 alt=""
                 aria-hidden="true"
-                className="w-16 h-16 sm:w-20 sm:h-20 object-contain drop-shadow-xl hidden sm:block"
-                initial={{ opacity: 0, x: 10 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                className="w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] object-contain drop-shadow-2xl hidden sm:block select-none"
+                draggable={false}
+                initial={{ opacity: 0, x: 12, scale: 0.9 }}
+                whileInView={{ opacity: 1, x: 0, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                whileHover={{ scale: 1.1, rotate: -5 }}
+                transition={{ delay: 0.25, duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ scale: 1.12, rotate: -4, y: -3 }}
               />
             )}
-            <div className="flex items-center gap-1.5 text-primary-foreground/80 text-xs font-bold shrink-0 group-hover:text-primary-foreground transition-colors bg-white/10 rounded-full px-4 py-2 backdrop-blur-sm">
-              <span className="hidden sm:inline">Saiba mais</span>
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <div className="flex items-center gap-1.5 text-white/90 text-xs font-bold shrink-0 group-hover:text-white transition-colors duration-300 bg-white/[0.12] hover:bg-white/[0.18] rounded-full px-4 sm:px-5 py-2.5 backdrop-blur-md border border-white/[0.1] shadow-sm">
+              <span className="hidden sm:inline tracking-wide">Saiba mais</span>
+              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
             </div>
           </div>
         </button>
