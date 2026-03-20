@@ -14,24 +14,24 @@ vi.mock("@/contexts/AuthContext", () => ({
   }),
 }));
 
+const mockChain = (): any => {
+  const chain: any = {};
+  chain.select = () => chain;
+  chain.eq = () => chain;
+  chain.in = () => chain;
+  chain.gte = () => chain;
+  chain.lte = () => chain;
+  chain.order = () => chain;
+  chain.limit = () => Promise.resolve({ data: [] });
+  chain.single = () => Promise.resolve({ data: { id: "c1", name: "Test Clinic", user_id: "clinic-user" } });
+  chain.maybeSingle = () => Promise.resolve({ data: null });
+  chain.then = (fn: any) => Promise.resolve({ data: [] }).then(fn);
+  return chain;
+};
+
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          single: () => Promise.resolve({ data: { id: "c1", name: "Test Clinic", user_id: "clinic-user" } }),
-          order: () => ({
-            limit: () => Promise.resolve({ data: [] }),
-          }),
-          then: (fn: any) => fn({ data: [] }),
-        }),
-        in: () => ({
-          gte: () => ({
-            lte: () => Promise.resolve({ data: [] }),
-          }),
-        }),
-      }),
-    }),
+    from: () => mockChain(),
     channel: () => ({
       on: () => ({ subscribe: () => ({ unsubscribe: vi.fn() }) }),
     }),

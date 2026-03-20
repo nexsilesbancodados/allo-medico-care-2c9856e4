@@ -7,16 +7,22 @@ vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => ({ user: { id: "test-user" }, profile: { first_name: "Test" } }),
 }));
 
+const mockChain = () => {
+  const chain: any = {};
+  chain.select = () => chain;
+  chain.eq = () => chain;
+  chain.in = () => chain;
+  chain.lt = () => chain;
+  chain.limit = () => Promise.resolve({ data: [] });
+  chain.single = () => Promise.resolve({ data: null });
+  chain.order = () => Promise.resolve({ data: [] });
+  chain.then = (fn: any) => Promise.resolve({ data: [] }).then(fn);
+  return chain;
+};
+
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
-    from: () => ({
-      select: () => ({
-        eq: () => ({
-          single: () => Promise.resolve({ data: null }),
-          limit: () => Promise.resolve({ data: [] }),
-        }),
-      }),
-    }),
+    from: () => mockChain(),
     channel: () => ({
       on: () => ({ subscribe: () => ({ unsubscribe: vi.fn() }) }),
     }),
