@@ -131,41 +131,42 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
           </motion.div>
 
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 max-w-4xl mx-auto mb-10">
-            {specialties.map((spec, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 18, filter: "blur(4px)" }}
-                whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ delay: i * 0.06, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                whileHover={{ y: -6, transition: { duration: 0.25 } }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => navigate(`/consulta-avulsa?specialty=${encodeURIComponent(spec.name)}`)}
-                className="relative rounded-2xl p-5 border border-border/50 bg-card hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.08] transition-all duration-300 cursor-pointer group overflow-hidden"
-              >
-                {/* Mascot watermark */}
-                <img
-                  src={spec.mascot}
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute -bottom-3 -right-3 w-24 h-24 object-contain opacity-[0.06] group-hover:opacity-[0.14] group-hover:scale-110 transition-all duration-500 pointer-events-none select-none"
-                />
-
-                <div className="relative z-10">
-                  <div className="w-12 h-12 rounded-xl bg-primary/[0.07] flex items-center justify-center mb-3 group-hover:bg-primary/[0.12] group-hover:scale-105 transition-all duration-200">
-                    <spec.icon className="w-5 h-5 text-primary" />
+            <AnimatePresence mode="popLayout">
+              {visibleSpecialties.map((spec, i) => (
+                <motion.div
+                  key={spec.name}
+                  layout
+                  initial={{ opacity: 0, y: 18, filter: "blur(4px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: i < 8 ? i * 0.06 : (i - 8) * 0.04, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ y: -6, transition: { duration: 0.25 } }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => navigate(`/consulta-avulsa?specialty=${encodeURIComponent(spec.name)}`)}
+                  className="relative rounded-2xl p-5 border border-border/50 bg-card hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.08] transition-all duration-300 cursor-pointer group overflow-hidden"
+                >
+                  <img
+                    src={spec.mascot}
+                    alt=""
+                    aria-hidden="true"
+                    className="absolute -bottom-3 -right-3 w-24 h-24 object-contain opacity-[0.06] group-hover:opacity-[0.14] group-hover:scale-110 transition-all duration-500 pointer-events-none select-none"
+                  />
+                  <div className="relative z-10">
+                    <div className="w-12 h-12 rounded-xl bg-primary/[0.07] flex items-center justify-center mb-3 group-hover:bg-primary/[0.12] group-hover:scale-105 transition-all duration-200">
+                      <spec.icon className="w-5 h-5 text-primary" />
+                    </div>
+                    <h3 className="text-sm font-bold text-foreground mb-1.5 group-hover:text-primary transition-colors">{spec.name}</h3>
+                    <div>
+                      <span className="text-xl font-extrabold text-foreground tabular-nums">R${spec.price}</span>
+                      <span className="text-[10px] text-muted-foreground ml-1 opacity-70">por consulta</span>
+                    </div>
                   </div>
-                  <h3 className="text-sm font-bold text-foreground mb-1.5 group-hover:text-primary transition-colors">{spec.name}</h3>
-                  <div>
-                    <span className="text-xl font-extrabold text-foreground tabular-nums">R${spec.price}</span>
-                    <span className="text-[10px] text-muted-foreground ml-1 opacity-70">por consulta</span>
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0">
+                    <ArrowRight className="w-4 h-4 text-primary" />
                   </div>
-                </div>
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 translate-x-1 group-hover:translate-x-0">
-                  <ArrowRight className="w-4 h-4 text-primary" />
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
 
           <motion.div
@@ -178,9 +179,10 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
             <Button
               size="lg"
               className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:scale-105 transition-all cta-shimmer group"
-              onClick={() => navigate("/paciente")}
+              onClick={() => setShowAll(!showAll)}
             >
-              Ver Todas as Especialidades <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+              {showAll ? "Ver menos" : "Ver Todas as Especialidades"}
+              {showAll ? <ChevronUp className="w-4 h-4 ml-2" /> : <ChevronDown className="w-4 h-4 ml-2 transition-transform group-hover:translate-y-0.5" />}
             </Button>
             <div className="flex flex-wrap items-center justify-center gap-5 mt-7 text-xs text-muted-foreground">
               <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-success" /> Receita digital inclusa</span>
