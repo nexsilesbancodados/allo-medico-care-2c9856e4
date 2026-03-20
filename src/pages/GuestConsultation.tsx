@@ -172,7 +172,43 @@ const GuestConsultation = () => {
     }
   };
 
-  const formatTime = (seconds: number) => {
+  // Poll for incoming messages from doctor
+  useEffect(() => {
+    if (!appointment) return;
+    let pollActive = true;
+    let lastPollTime = new Date().toISOString();
+    const guestSenderId = appointment.guest_patient_id || "guest";
+
+    const pollMessages = async () => {
+      const { data } = await supabase
+        .from("messages")
+        .select("id, content, sender_id, created_at")
+        .eq("appointment_id", appointment.id)
+        .gt("created_at", lastPollTime)
+        .neq("sender_id", guestSenderId)
+        .order("created_at", { ascending: true });
+
+      if (data && data.length > 0) {
+        lastPollTime = data[data.length - 1].created_at;
+        setMessages(prev => {
+          const existingIds = new Set(prev.map(m => m.id));
+          const newMsgs = data
+            .filter(m => !existingIds.has(m.id))
+            .map(m => ({
+              id: m.id,
+              sender: "doctor" as const,
+              text: m.content,
+              time: format(new Date(m.created_at), "HH:mm"),
+            }));
+          return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev;
+        });
+      }
+      if (pollActive) setTimeout(pollMessages, 5000);
+    };
+    setTimeout(pollMessages, 3000);
+    return () => { pollActive = false; };
+  }, [appointment]);
+
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = seconds % 60;
