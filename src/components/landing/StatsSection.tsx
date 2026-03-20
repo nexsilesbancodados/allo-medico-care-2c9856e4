@@ -5,14 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
+import mascotThumbsup from "@/assets/mascot-thumbsup.png";
+import mascotWave from "@/assets/mascot-wave.png";
+import mascotWelcome from "@/assets/mascot-welcome.png";
+import mascotReading from "@/assets/mascot-reading.png";
+
 gsap.registerPlugin(ScrollTrigger);
 
-// ─── GSAP counter (much smoother than setInterval) ─────────────────────────
 const GsapCounter = ({ target, suffix, decimals = 0 }: { target: number; suffix: string; decimals?: number }) => {
   const ref = useRef<HTMLSpanElement>(null);
   const wrapRef = useRef<HTMLSpanElement>(null);
   const isInView = useInView(wrapRef, { once: true });
-  const animRef = useRef<gsap.core.Tween | null>(null);
 
   useEffect(() => {
     if (!isInView || !ref.current) return;
@@ -21,7 +24,7 @@ const GsapCounter = ({ target, suffix, decimals = 0 }: { target: number; suffix:
       return;
     }
     const obj = { val: 0 };
-    animRef.current = gsap.to(obj, {
+    const tween = gsap.to(obj, {
       val: target, duration: 1.8, ease: "power2.out",
       onUpdate: () => {
         if (ref.current)
@@ -30,7 +33,7 @@ const GsapCounter = ({ target, suffix, decimals = 0 }: { target: number; suffix:
             : Math.round(obj.val).toLocaleString("pt-BR");
       },
     });
-    return () => { animRef.current?.kill(); };
+    return () => { tween.kill(); };
   }, [isInView, target, decimals]);
 
   return (
@@ -40,12 +43,18 @@ const GsapCounter = ({ target, suffix, decimals = 0 }: { target: number; suffix:
   );
 };
 
-// ─── Data ───────────────────────────────────────────────────────────────────
+const iconColors = [
+  "bg-primary/90",
+  "bg-secondary/90",
+  "bg-warning",
+  "bg-success",
+];
+
 const fallbackStats = [
-  { icon: Users,        target: 12500, suffix: "+",   label: "Pacientes atendidos", gradient: "from-blue-500 to-cyan-500",    delay: 0 },
-  { icon: Stethoscope,  target: 200,   suffix: "+",   label: "Médicos especialistas", gradient: "from-emerald-500 to-teal-500", delay: 0.08 },
-  { icon: Star,         target: 4.9,   suffix: "",    label: "Nota média", decimals: 1, gradient: "from-amber-500 to-orange-500", delay: 0.16 },
-  { icon: Clock,        target: 15,    suffix: "min", label: "Espera média", gradient: "from-green-500 to-emerald-500", delay: 0.24 },
+  { icon: Users, target: 12500, suffix: "+", label: "Pacientes atendidos", decimals: 0, mascot: mascotWave },
+  { icon: Stethoscope, target: 200, suffix: "+", label: "Médicos especialistas", decimals: 0, mascot: mascotReading },
+  { icon: Star, target: 4.9, suffix: "", label: "Nota média", decimals: 1, mascot: mascotThumbsup },
+  { icon: Clock, target: 15, suffix: "min", label: "Espera média", decimals: 0, mascot: mascotWelcome },
 ];
 
 const StatsSection = forwardRef<HTMLElement>((_, ref) => {
@@ -61,8 +70,8 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
         trigger: el, start: "top 82%", once: true,
         onEnter: () =>
           gsap.fromTo(cards,
-            { opacity: 0, y: 24, scale: 0.96 },
-            { opacity: 1, y: 0, scale: 1, stagger: 0.08, duration: 0.55, ease: "power3.out", clearProps: "transform,opacity" }
+            { opacity: 0, y: 20, filter: "blur(4px)" },
+            { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.09, duration: 0.6, ease: "power3.out", clearProps: "all" }
           ),
       });
     }, el);
@@ -83,10 +92,10 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
 
         if (patients > 10 || appointments > 5) {
           setStats([
-            { icon: Users,       target: patients,    suffix: "+",   label: "Pacientes atendidos",  gradient: "from-blue-500 to-cyan-500",    delay: 0 },
-            { icon: Stethoscope, target: specialties, suffix: "+",   label: "Especialidades",        gradient: "from-emerald-500 to-teal-500", delay: 0.08 },
-            { icon: Star,        target: 4.9, suffix: "", label: "Nota média", decimals: 1, gradient: "from-amber-500 to-orange-500", delay: 0.16 },
-            { icon: Clock,       target: appointments,suffix: "+",   label: "Consultas realizadas",  gradient: "from-green-500 to-emerald-500",delay: 0.24 },
+            { icon: Users, target: patients, suffix: "+", label: "Pacientes atendidos", decimals: 0, mascot: mascotWave },
+            { icon: Stethoscope, target: specialties, suffix: "+", label: "Especialidades", decimals: 0, mascot: mascotReading },
+            { icon: Star, target: 4.9, suffix: "", label: "Nota média", decimals: 1, mascot: mascotThumbsup },
+            { icon: Clock, target: appointments, suffix: "+", label: "Consultas realizadas", decimals: 0, mascot: mascotWelcome },
           ]);
         }
       } catch { /* keep fallback */ }
@@ -94,24 +103,37 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
   }, []);
 
   return (
-    <section ref={ref} className="py-10 md:py-16 relative">
-      <div className="container mx-auto px-4">
-        <div ref={sectionRef} className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <section ref={ref} className="py-12 md:py-20 relative">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div ref={sectionRef} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
           {stats.map((stat, i) => (
-            <div key={i} className="card-interactive stat-card relative group rounded-2xl bg-card border border-border/40 p-5 sm:p-6 hover:-translate-y-1 hover:border-primary/20 hover:shadow-primary/5 cursor-default">
-              {/* Top-left gradient orb */}
-              <div className={`absolute top-0 right-0 w-24 h-24 rounded-full bg-gradient-to-br ${stat.gradient} opacity-[0.06] blur-2xl pointer-events-none group-hover:opacity-[0.10] transition-opacity`} />
+            <div
+              key={i}
+              className="stat-card group relative rounded-2xl bg-card border border-border/40 p-5 sm:p-6 overflow-hidden hover:border-primary/20 hover:shadow-lg hover:shadow-primary/[0.04] hover:-translate-y-0.5 transition-all duration-300 cursor-default"
+            >
+              {/* Mascot watermark */}
+              <img
+                src={stat.mascot}
+                alt=""
+                aria-hidden="true"
+                className="absolute -bottom-2 -right-2 w-20 h-20 sm:w-24 sm:h-24 object-contain opacity-[0.07] group-hover:opacity-[0.12] transition-opacity duration-500 pointer-events-none select-none"
+              />
 
-              <div className="flex flex-col gap-3 relative">
-                <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-md shadow-black/10`}>
-                  <stat.icon className="w-5 h-5 text-white" aria-hidden="true" />
+              <div className="relative flex flex-col gap-3">
+                {/* Icon */}
+                <div className={`w-10 h-10 rounded-xl ${iconColors[i]} flex items-center justify-center shadow-sm`}>
+                  <stat.icon className="w-[18px] h-[18px] text-white" aria-hidden="true" />
                 </div>
-                <div>
-                  <p className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground leading-none tabular-nums">
-                    <GsapCounter target={stat.target} suffix={stat.suffix} decimals={(stat as {decimals?: number}).decimals} />
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1.5 font-medium">{stat.label}</p>
-                </div>
+
+                {/* Number */}
+                <p className="text-2xl sm:text-3xl lg:text-[2rem] font-extrabold tracking-tight text-foreground leading-none tabular-nums">
+                  <GsapCounter target={stat.target} suffix={stat.suffix} decimals={stat.decimals} />
+                </p>
+
+                {/* Label */}
+                <p className="text-xs sm:text-[13px] text-muted-foreground font-medium leading-snug">
+                  {stat.label}
+                </p>
               </div>
             </div>
           ))}
