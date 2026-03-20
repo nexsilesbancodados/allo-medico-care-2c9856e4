@@ -89,33 +89,93 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       <HeroSection />
       <SocialProofBar />
 
-      {/* Plantão 24h Banner — premium urgency */}
-      <section className="py-6 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary opacity-[0.06]" />
-        <div className="container mx-auto max-w-4xl relative">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 sm:p-6 rounded-2xl bg-gradient-to-r from-primary to-secondary text-primary-foreground shadow-xl shadow-primary/20 relative overflow-hidden">
-            {/* Animated shimmer overlay */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.07] to-transparent -translate-x-full animate-[shimmer_3s_infinite]" />
-            <div className="text-center sm:text-left relative z-10">
-              <h2 className="text-lg sm:text-xl font-bold flex items-center gap-2 justify-center sm:justify-start">
-                <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center relative">
-                  <Stethoscope className="w-4 h-4" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-white/90 animate-ping" />
-                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-white/90" />
+      {/* Plantão 24h — animated urgency strip */}
+      <section className="py-8 px-4 relative overflow-hidden">
+        <div className="container mx-auto max-w-4xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+            className="relative rounded-3xl overflow-hidden"
+          >
+            {/* Animated gradient background */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_100%] animate-[gradient-slide_6s_ease-in-out_infinite]" />
+
+            {/* Floating orbs */}
+            <motion.div
+              className="absolute w-40 h-40 rounded-full bg-white/[0.06] blur-2xl"
+              style={{ top: "-20%", left: "10%" }}
+              animate={{ x: [0, 30, 0], y: [0, 15, 0] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <motion.div
+              className="absolute w-32 h-32 rounded-full bg-white/[0.05] blur-2xl"
+              style={{ bottom: "-15%", right: "15%" }}
+              animate={{ x: [0, -20, 0], y: [0, -12, 0] }}
+              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            />
+
+            <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-5 px-6 sm:px-10 py-7 sm:py-8">
+              {/* Pulse indicator + text */}
+              <div className="flex items-center gap-5 text-center sm:text-left">
+                {/* Animated pulse ring */}
+                <div className="relative shrink-0 hidden sm:flex">
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl bg-white/20"
+                    animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0, 0.4] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
+                  />
+                  <motion.div
+                    className="absolute inset-0 rounded-2xl bg-white/15"
+                    animate={{ scale: [1, 1.8, 1], opacity: [0.3, 0, 0.3] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
+                  />
+                  <div className="relative w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                    <Stethoscope className="w-6 h-6 text-white" />
+                  </div>
                 </div>
-                Plantão Clínico 24h
-              </h2>
-              <p className="text-sm opacity-90 mt-1">Atendimento médico imediato, sem agendamento. Médicos disponíveis agora.</p>
+
+                <div>
+                  <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
+                    <motion.span
+                      className="w-2.5 h-2.5 rounded-full bg-green-400 shadow-lg shadow-green-400/50"
+                      animate={{ opacity: [1, 0.4, 1] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-white/60">Ao vivo agora</span>
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-tight">
+                    Plantão Clínico 24h
+                  </h2>
+                  <p className="text-sm text-white/70 mt-1 font-medium">
+                    Médicos disponíveis agora · Sem agendamento
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              <motion.div
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button
+                  size="lg"
+                  className="bg-white text-primary hover:bg-white/95 rounded-2xl px-8 gap-2.5 shadow-2xl shadow-black/15 font-extrabold shrink-0 transition-all relative z-10 text-sm sm:text-base"
+                  onClick={() => navigate(user ? "/dashboard/urgent-care" : "/consulta-avulsa")}
+                >
+                  <motion.div
+                    animate={{ rotate: [0, -8, 8, 0] }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+                  >
+                    <Stethoscope className="w-5 h-5" />
+                  </motion.div>
+                  Acessar Plantão
+                </Button>
+              </motion.div>
             </div>
-            <Button
-              size="lg"
-              className="bg-white text-primary hover:bg-white/90 rounded-full px-7 gap-2 shadow-lg font-bold shrink-0 hover:scale-[1.03] active:scale-[0.97] transition-all relative z-10"
-              onClick={() => navigate(user ? "/dashboard/urgent-care" : "/consulta-avulsa")}
-            >
-              <Stethoscope className="w-4 h-4" />
-              Acessar Plantão
-            </Button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
