@@ -47,15 +47,17 @@ describe("PWA Offline Logic", () => {
 });
 
 describe("Service Worker Registration", () => {
-  it("registers push-sw.js when serviceWorker is available", () => {
+  it("registers push-sw.js under /push/ scope when serviceWorker is available", async () => {
     const registerMock = vi.fn().mockResolvedValue({});
     Object.defineProperty(navigator, "serviceWorker", {
-      value: { register: registerMock },
+      value: { register: registerMock, getRegistration: vi.fn().mockResolvedValue(null) },
       writable: true,
       configurable: true,
     });
-    // Simulate the registration call
-    navigator.serviceWorker.register("/push-sw.js");
-    expect(registerMock).toHaveBeenCalledWith("/push-sw.js");
+
+    const { ensurePushServiceWorkerRegistration } = await import("@/lib/push-service-worker");
+    await ensurePushServiceWorkerRegistration();
+
+    expect(registerMock).toHaveBeenCalledWith("/push-sw.js", { scope: "/push/" });
   });
 });
