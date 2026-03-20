@@ -19,6 +19,11 @@ import logo from "@/assets/logo.png";
 import teleconsultaDropdown from "@/assets/teleconsulta-dropdown.png";
 import telelaudoPingo from "@/assets/telelaudo-pingo.png";
 import mascotWave from "@/assets/mascot-wave.png";
+import mascotThumbsup from "@/assets/mascot-thumbsup.png";
+import mascotReading from "@/assets/mascot-reading.png";
+import mascotWelcome from "@/assets/mascot-welcome.png";
+import pingoVirtualAssistant from "@/assets/pingo-virtual-assistant.png";
+import devicesMascot from "@/assets/devices-mascot.png";
 
 const ListItem = ({
   className,
@@ -148,10 +153,10 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                           </Link>
                         </NavigationMenuLink>
                       </li>
-                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={telelaudoPingo} badge="Popular">
+                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" imgSrc={telelaudoPingo} badge="Popular">
                         Descontos em consultas e exames para toda a família.
                       </ListItem>
-                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope} imgSrc={mascotWave} badge="Rápido">
+                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" imgSrc={mascotWave} badge="Rápido">
                         Atendimento rápido, seguro e sem burocracia.
                       </ListItem>
                     </ul>
@@ -167,13 +172,13 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                 <NavigationMenuContent>
                   <div className="p-2.5 w-[320px]">
                     <ul className="grid gap-0.5">
-                      <ListItem href="/medico" title="Sou Médico" icon={Stethoscope}>
+                      <ListItem href="/medico" title="Sou Médico" imgSrc={mascotThumbsup}>
                         Atenda pacientes online e aumente sua renda.
                       </ListItem>
-                      <ListItem href="/laudista" title="Sou Laudista" icon={Brain} badge="IA">
+                      <ListItem href="/laudista" title="Sou Laudista" imgSrc={mascotReading} badge="IA">
                         Emita laudos à distância com IA e assinatura digital.
                       </ListItem>
-                      <ListItem href="/clinica" title="Sou Clínica" icon={Building2}>
+                      <ListItem href="/clinica" title="Sou Clínica" imgSrc={mascotWelcome}>
                         Gerencie agendamento, prontuário e equipe.
                       </ListItem>
                     </ul>
@@ -189,10 +194,10 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                 <NavigationMenuContent>
                   <div className="p-2.5 w-[320px]">
                     <ul className="grid gap-0.5">
-                      <ListItem href="/para-empresas/cartao" title="Cartão Corporativo" icon={CreditCard} badge="B2B">
+                      <ListItem href="/para-empresas/cartao" title="Cartão Corporativo" imgSrc={pingoVirtualAssistant} badge="B2B">
                         Telemedicina 24h e descontos para colaboradores.
                       </ListItem>
-                      <ListItem href="/para-empresas/telelaudo" title="Telelaudo para Clínicas" icon={FileText}>
+                      <ListItem href="/para-empresas/telelaudo" title="Telelaudo para Clínicas" imgSrc={devicesMascot}>
                         Laudos a distância com IA, SLA e assinatura digital.
                       </ListItem>
                     </ul>
