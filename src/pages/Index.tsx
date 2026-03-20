@@ -11,6 +11,11 @@ import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import InfoBannerStrip from "@/components/landing/InfoBannerStrip";
 import { Button } from "@/components/ui/button";
 import { Stethoscope, ShieldCheck, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
+import bannerBenefits from "@/assets/banner-benefits-card.png";
+import bannerAi from "@/assets/banner-ai-triage.png";
+import bannerConsulta from "@/assets/banner-consulta.png";
+import bannerPlantao from "@/assets/banner-plantao.png";
+import bannerTelelaudo from "@/assets/banner-telelaudo.png";
 
 // Lazy-load below-the-fold sections for faster initial paint
 const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
@@ -124,6 +129,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           highlight="A partir de R$37,90/mês"
           href="/cartao-beneficios"
           gradient="from-secondary to-emerald-600"
+          mascotSrc={bannerBenefits}
         />
 
         <HowItWorksSection />
@@ -135,6 +141,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           highlight="Descubra o especialista ideal em segundos"
           href="/teleconsulta"
           gradient="from-blue-600 to-primary"
+          mascotSrc={bannerAi}
         />
 
         <SpecialtiesSection />
@@ -146,6 +153,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           highlight="A partir de R$89 com receita digital"
           href="/consulta-avulsa"
           gradient="from-primary to-violet-600"
+          mascotSrc={bannerConsulta}
         />
 
         <PlansSection />
@@ -157,6 +165,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           highlight="Médicos disponíveis agora"
           href="/consulta-avulsa"
           gradient="from-rose-500 to-primary"
+          mascotSrc={bannerPlantao}
         />
 
         <TestimonialsSection />
@@ -168,6 +177,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           highlight="Para clínicas e hospitais"
           href="/telelaudo"
           gradient="from-amber-500 to-orange-600"
+          mascotSrc={bannerTelelaudo}
         />
 
         <CTABanner />
