@@ -168,19 +168,23 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                   Profissionais
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[340px] gap-1 p-3">
-                    <ListItem href="/medico" title="Sou Médico" icon={Stethoscope}>
-                      Atenda pacientes online e aumente sua renda.
-                    </ListItem>
-                    <li><div className="mx-3 border-t border-border/30" /></li>
-                    <ListItem href="/laudista" title="Sou Laudista" icon={Brain}>
-                      Emita laudos à distância com IA e assinatura digital.
-                    </ListItem>
-                    <li><div className="mx-3 border-t border-border/30" /></li>
-                    <ListItem href="/clinica" title="Sou Clínica" icon={Building2}>
-                      Gerencie agendamento, prontuário e equipe.
-                    </ListItem>
-                  </ul>
+                  <div className="p-4 w-[370px]">
+                    <div className="flex items-center gap-2 mb-3 px-1">
+                      <div className="w-1 h-4 rounded-full bg-secondary" />
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Para Profissionais</span>
+                    </div>
+                    <ul className="grid gap-1">
+                      <ListItem href="/medico" title="Sou Médico" icon={Stethoscope}>
+                        Atenda pacientes online e aumente sua renda.
+                      </ListItem>
+                      <ListItem href="/laudista" title="Sou Laudista" icon={Brain} badge="IA">
+                        Emita laudos à distância com IA e assinatura digital.
+                      </ListItem>
+                      <ListItem href="/clinica" title="Sou Clínica" icon={Building2}>
+                        Gerencie agendamento, prontuário e equipe.
+                      </ListItem>
+                    </ul>
+                  </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
