@@ -25,6 +25,7 @@ import { validarCPF } from "@/lib/cpf";
 import mascotWave from "@/assets/mascot-wave.png";
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
 import mascotReading from "@/assets/mascot-reading.png";
+import teleconsultaHero from "@/assets/teleconsulta-hero.png";
 
 type Step = "specialty" | "doctor" | "datetime" | "patient_info" | "checkout" | "success";
 
