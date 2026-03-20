@@ -49,18 +49,20 @@ describe("PreCallCheck", () => {
 
   it("renders the pre-call check component", async () => {
     const PreCallCheck = (await import("@/components/consultation/PreCallCheck")).default;
-    render(
-      <BrowserRouter>
-        <PreCallCheck
-          appointmentId="apt-1"
-          doctorName="Dr. Silva"
-          doctorSpecialty="Cardiologia"
-          onReady={onReady}
-        />
-      </BrowserRouter>
-    );
-    // Should show doctor name or preparation text
-    expect(screen.getByText(/preparação/i) || screen.getByText(/Dr\. Silva/i)).toBeTruthy();
+    await act(async () => {
+      render(
+        <BrowserRouter>
+          <PreCallCheck
+            appointmentId="apt-1"
+            doctorName="Dr. Silva"
+            doctorSpecialty="Cardiologia"
+            onReady={onReady}
+          />
+        </BrowserRouter>
+      );
+    });
+    // Should render heading or connection info
+    expect(screen.getByText(/Pronto para entrar/i)).toBeTruthy();
   });
 
   it("shows camera and mic status indicators", async () => {
