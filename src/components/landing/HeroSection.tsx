@@ -77,7 +77,7 @@ const HeroSection = memo(
       <section
         ref={ref}
         aria-label="Início"
-        className="relative flex items-center pt-24 sm:pt-28 lg:pt-32 pb-12 sm:pb-16 lg:pb-20 overflow-hidden"
+        className="relative flex items-center pt-20 sm:pt-24 lg:pt-28 pb-12 sm:pb-16 lg:pb-20 overflow-hidden"
       >
         {/* Ambient background */}
         <div className="absolute inset-0 -z-10">
