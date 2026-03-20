@@ -89,13 +89,29 @@ const GuestConsultation = () => {
         return;
       }
 
-      setAppointment(data.appointment);
+      const appt = data.appointment;
+
+      // Block entry if cancelled/no_show
+      if (["cancelled", "no_show"].includes(appt.status)) {
+        setError("Esta consulta foi cancelada ou não comparecimento.");
+        setLoading(false);
+        return;
+      }
+
+      // Block entry if payment pending
+      if (appt.payment_status === "pending" && appt.status === "scheduled") {
+        setError("Aguardando confirmação do pagamento. Tente novamente após pagar.");
+        setLoading(false);
+        return;
+      }
+
+      setAppointment(appt);
       setGuestPatient(data.guest_patient);
       setDoctorName(data.doctor_name);
       setLoading(false);
 
       // Initialize Metered video after appointment loads
-      initMeteredRoom(data.appointment.id, data.guest_patient?.full_name);
+      initMeteredRoom(appt.id, data.guest_patient?.full_name);
     } catch {
       setError("Erro ao carregar consulta.");
       setLoading(false);
