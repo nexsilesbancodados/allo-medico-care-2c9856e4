@@ -322,6 +322,7 @@ const GuestCheckout = () => {
         description: `Consulta Avulsa - AloClínica`,
         appointmentId: data.appointment_id,
       };
+      setAppointmentId(data.appointment_id);
 
       if (paymentMethod === "credit") {
         // PCI Compliance: Tokenize card via dedicated endpoint BEFORE sending to payment

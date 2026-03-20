@@ -179,16 +179,27 @@ const GuestConsultation = () => {
     return `${h > 0 ? `${h}:` : ""}${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
-  const sendMessage = () => {
-    if (!chatInput.trim()) return;
+  const sendMessage = async () => {
+    if (!chatInput.trim() || !appointment) return;
+    const content = chatInput.trim();
     const msg: ChatMessage = {
       id: Date.now().toString(),
       sender: "patient",
-      text: chatInput.trim(),
+      text: content,
       time: format(new Date(), "HH:mm"),
     };
     setMessages(prev => [...prev, msg]);
     setChatInput("");
+
+    // Persist to DB so doctor can see messages
+    const guestSenderId = appointment.guest_patient_id || "guest";
+    await supabase.from("messages").insert({
+      appointment_id: appointment.id,
+      sender_id: guestSenderId,
+      content,
+    }).then(({ error: msgErr }) => {
+      if (msgErr) logError("Guest chat persist failed", msgErr);
+    });
   };
 
   const endCall = () => {
