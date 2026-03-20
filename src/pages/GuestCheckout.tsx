@@ -89,6 +89,29 @@ const GuestCheckout = () => {
 
   // Success
   const [consultationUrl, setConsultationUrl] = useState("");
+  const [appointmentId, setAppointmentId] = useState<string | null>(null);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+
+  // Poll for payment confirmation on success page (PIX/Boleto)
+  useEffect(() => {
+    if (step !== "success" || !appointmentId || paymentConfirmed) return;
+    const hasPending = pixQrCode || boletoUrl;
+    if (!hasPending) { setPaymentConfirmed(true); return; }
+    const poll = setInterval(async () => {
+      const { data } = await supabase
+        .from("appointments")
+        .select("payment_status")
+        .eq("id", appointmentId)
+        .in("payment_status", ["approved", "confirmed", "received"])
+        .limit(1);
+      if (data && data.length > 0) {
+        clearInterval(poll);
+        setPaymentConfirmed(true);
+        toast.success("✅ Pagamento confirmado! Sua consulta está garantida.");
+      }
+    }, 8000);
+    return () => clearInterval(poll);
+  }, [step, appointmentId, pixQrCode, boletoUrl, paymentConfirmed]);
 
   useEffect(() => {
     supabase.from("specialties").select("id, name").order("name").then(({ data }) => {
