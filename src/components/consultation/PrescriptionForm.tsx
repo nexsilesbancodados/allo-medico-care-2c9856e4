@@ -386,7 +386,7 @@ const PrescriptionForm = () => {
 
     const { error } = await supabase.from("prescriptions").insert({
       appointment_id: appointmentId,
-      doctor_id: doctorInfo.id,
+      doctor_id: doctorInfo!.id,
       patient_id: patientId,
       medications: validMeds as unknown as Parameters<typeof supabase.from>[0],
       diagnosis: diagnosis || null,
