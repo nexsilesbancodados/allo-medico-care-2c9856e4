@@ -19,6 +19,11 @@ import logo from "@/assets/logo.png";
 import teleconsultaDropdown from "@/assets/teleconsulta-dropdown.png";
 import telelaudoPingo from "@/assets/telelaudo-pingo.png";
 import mascotWave from "@/assets/mascot-wave.png";
+import mascotThumbsup from "@/assets/mascot-thumbsup.png";
+import mascotReading from "@/assets/mascot-reading.png";
+import mascotWelcome from "@/assets/mascot-welcome.png";
+import pingoVirtualAssistant from "@/assets/pingo-virtual-assistant.png";
+import devicesMascot from "@/assets/devices-mascot.png";
 
 const ListItem = ({
   className,
