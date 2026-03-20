@@ -170,10 +170,11 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                   Para Empresas
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[320px] gap-1 p-2.5">
+                  <ul className="grid w-[340px] gap-1 p-3">
                     <ListItem href="/para-empresas/cartao" title="Cartão Corporativo" icon={CreditCard}>
                       Telemedicina 24h e descontos para colaboradores.
                     </ListItem>
+                    <li><div className="mx-3 border-t border-border/30" /></li>
                     <ListItem href="/para-empresas/telelaudo" title="Telelaudo para Clínicas" icon={FileText}>
                       Laudos a distância com IA, SLA e assinatura digital.
                     </ListItem>
