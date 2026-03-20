@@ -101,20 +101,11 @@ const App = () => {
   useEffect(() => {
     const cancelCriticalPrefetch = prefetchOnIdle(
       [
-        () => import("./pages/Index"),
         () => import("./pages/Auth"),
         () => import("./pages/AuthPaciente"),
         () => import("./pages/AuthMedico"),
-        () => import("./pages/AuthAdmin"),
-        () => import("./pages/AuthClinica"),
-        () => import("./pages/AuthRecepcionista"),
-        () => import("./pages/AuthSuporte"),
-        () => import("./pages/AuthParceiro"),
-        () => import("./pages/AuthLaudista"),
-        () => import("./pages/GuestCheckout"),
-        () => import("./pages/GuestConsultation"),
       ],
-      800,
+      3000,
     );
 
     const cancelSecondaryPrefetch = prefetchOnIdle(
