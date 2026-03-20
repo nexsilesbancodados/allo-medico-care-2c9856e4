@@ -532,7 +532,7 @@ const AuthPaciente = () => {
                     transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
                   >
                     <img
-                      src={pingoSolitario}
+                      src={pingoCartao}
                       alt="Pingo mascote"
                       className="w-48 h-48 object-contain drop-shadow-2xl"
                       loading="eager"
