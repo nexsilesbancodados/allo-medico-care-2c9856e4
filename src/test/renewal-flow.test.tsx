@@ -55,13 +55,13 @@ describe("PrescriptionRenewalForm", () => {
 
   it("renders the renewal form with all fields", async () => {
     const { default: PrescriptionRenewalForm } = await import("@/components/patient/PrescriptionRenewalForm");
-    await act(async () => {
-      render(<PrescriptionRenewalForm />);
-    });
+    render(<PrescriptionRenewalForm />);
 
-    // Just verify it rendered without crash
-    expect(document.querySelector("div")).toBeTruthy();
-  }, 10000);
+    // Component renders without crash - verify basic structure exists
+    await waitFor(() => {
+      expect(document.querySelector("div")).toBeTruthy();
+    }, { timeout: 3000 });
+  });
 
   it("disables submit button when no prescription uploaded", async () => {
     const { default: PrescriptionRenewalForm } = await import("@/components/patient/PrescriptionRenewalForm");
