@@ -80,7 +80,7 @@ const SpecialtiesSection = forwardRef<HTMLElement>((_, ref) => {
               transition={{ delay: i * 0.06, duration: 0.5, type: "spring", stiffness: 200 }}
               whileHover={{ y: -8, scale: 1.12 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => navigate("/paciente")}
+              onClick={() => navigate(`/consulta-avulsa?specialty=${encodeURIComponent(spec.name)}`)}
               className="card-interactive flex flex-col items-center gap-2 p-3 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-xl hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
             >
               <div className="card-interactive w-14 h-14 rounded-xl overflow-hidden transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
