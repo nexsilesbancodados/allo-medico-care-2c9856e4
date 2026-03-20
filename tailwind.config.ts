@@ -128,6 +128,11 @@ export default {
           "70%":  { transform: "translateY(-4px) scale(1.01)" },
           "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
         },
+        "gradient-slide": {
+          "0%": { backgroundPosition: "0% 50%" },
+          "50%": { backgroundPosition: "100% 50%" },
+          "100%": { backgroundPosition: "0% 50%" },
+        },
         "shimmer-move": {
           "0%":   { backgroundPosition: "-600px 0" },
           "100%": { backgroundPosition: "600px 0" },
@@ -155,6 +160,7 @@ export default {
         "shimmer-move":    "shimmer-move 1.8s ease-in-out infinite",
         "glow-pulse":      "glow-pulse 2.5s ease-in-out infinite",
         "spin-slow":       "spin-slow 8s linear infinite",
+        "gradient-slide":  "gradient-slide 6s ease-in-out infinite",
       },
     },
   },
