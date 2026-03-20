@@ -15,6 +15,10 @@ import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import { z } from "zod";
 import b2bHero2 from "@/assets/b2b-hero-2.png";
+import benefitTelemedicine from "@/assets/benefit-telemedicine.png";
+import benefitDiscount from "@/assets/benefit-discount.png";
+import benefitClub from "@/assets/benefit-club.png";
+import benefitFuneral from "@/assets/benefit-funeral.png";
 import { lazy, Suspense } from "react";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
