@@ -165,12 +165,8 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                   Profissionais
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="p-4 w-[370px]">
-                    <div className="flex items-center gap-2 mb-3 px-1">
-                      <div className="w-1 h-4 rounded-full bg-secondary" />
-                      <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">Para Profissionais</span>
-                    </div>
-                    <ul className="grid gap-1">
+                  <div className="p-2.5 w-[320px]">
+                    <ul className="grid gap-0.5">
                       <ListItem href="/medico" title="Sou Médico" icon={Stethoscope}>
                         Atenda pacientes online e aumente sua renda.
                       </ListItem>
