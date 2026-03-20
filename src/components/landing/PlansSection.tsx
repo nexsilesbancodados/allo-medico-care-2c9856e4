@@ -13,27 +13,26 @@ import specPediatrics from "@/assets/spec-pediatrics.png";
 import specEndocrinology from "@/assets/spec-endocrinology.png";
 
 const specialties = [
-  { name: "Clínico Geral", icon: Stethoscope, price: 89, mascot: specGeneral },
-  { name: "Cardiologia", icon: Activity, price: 129, mascot: specCardiology },
-  { name: "Dermatologia", icon: Sparkles, price: 119, mascot: specDermatology },
-  { name: "Neurologia", icon: Brain, price: 139, mascot: specNeurology },
-  { name: "Oftalmologia", icon: Eye, price: 119, mascot: specOphthalmology },
-  { name: "Ortopedia", icon: Bone, price: 129, mascot: specOrthopedics },
-  { name: "Pediatria", icon: Baby, price: 99, mascot: specPediatrics },
-  { name: "Endocrinologia", icon: Activity, price: 129, mascot: specEndocrinology },
-  // Especialidades extras (exibidas ao expandir)
-  { name: "Ginecologia", icon: Heart, price: 129, mascot: specGeneral },
-  { name: "Urologia", icon: Activity, price: 139, mascot: specGeneral },
-  { name: "Psiquiatria", icon: Brain, price: 149, mascot: specNeurology },
-  { name: "Nutrição", icon: Sparkles, price: 99, mascot: specGeneral },
-  { name: "Pneumologia", icon: Activity, price: 129, mascot: specEndocrinology },
-  { name: "Gastroenterologia", icon: Activity, price: 139, mascot: specGeneral },
-  { name: "Reumatologia", icon: Bone, price: 139, mascot: specOrthopedics },
-  { name: "Otorrinolaringologia", icon: Activity, price: 129, mascot: specGeneral },
-  { name: "Geriatria", icon: Heart, price: 119, mascot: specGeneral },
-  { name: "Psicologia", icon: Brain, price: 99, mascot: specNeurology },
-  { name: "Fonoaudiologia", icon: Activity, price: 99, mascot: specGeneral },
-  { name: "Fisioterapia", icon: Bone, price: 89, mascot: specOrthopedics },
+  { name: "Clínico Geral", icon: Stethoscope, price: 89, mascot: specGeneral, gradient: "from-primary/10 to-secondary/5" },
+  { name: "Cardiologia", icon: Activity, price: 129, mascot: specCardiology, gradient: "from-rose-500/10 to-red-400/5" },
+  { name: "Dermatologia", icon: Sparkles, price: 119, mascot: specDermatology, gradient: "from-pink-500/10 to-fuchsia-400/5" },
+  { name: "Neurologia", icon: Brain, price: 139, mascot: specNeurology, gradient: "from-blue-500/10 to-indigo-400/5" },
+  { name: "Oftalmologia", icon: Eye, price: 119, mascot: specOphthalmology, gradient: "from-cyan-500/10 to-teal-400/5" },
+  { name: "Ortopedia", icon: Bone, price: 129, mascot: specOrthopedics, gradient: "from-amber-500/10 to-orange-400/5" },
+  { name: "Pediatria", icon: Baby, price: 99, mascot: specPediatrics, gradient: "from-green-500/10 to-emerald-400/5" },
+  { name: "Endocrinologia", icon: Activity, price: 129, mascot: specEndocrinology, gradient: "from-violet-500/10 to-purple-400/5" },
+  { name: "Ginecologia", icon: Heart, price: 129, mascot: specGeneral, gradient: "from-pink-500/10 to-rose-400/5" },
+  { name: "Urologia", icon: Activity, price: 139, mascot: specGeneral, gradient: "from-sky-500/10 to-blue-400/5" },
+  { name: "Psiquiatria", icon: Brain, price: 149, mascot: specNeurology, gradient: "from-indigo-500/10 to-violet-400/5" },
+  { name: "Nutrição", icon: Sparkles, price: 99, mascot: specGeneral, gradient: "from-lime-500/10 to-green-400/5" },
+  { name: "Pneumologia", icon: Activity, price: 129, mascot: specEndocrinology, gradient: "from-teal-500/10 to-cyan-400/5" },
+  { name: "Gastroenterologia", icon: Activity, price: 139, mascot: specGeneral, gradient: "from-yellow-500/10 to-amber-400/5" },
+  { name: "Reumatologia", icon: Bone, price: 139, mascot: specOrthopedics, gradient: "from-orange-500/10 to-red-400/5" },
+  { name: "Otorrinolaringologia", icon: Activity, price: 129, mascot: specGeneral, gradient: "from-emerald-500/10 to-teal-400/5" },
+  { name: "Geriatria", icon: Heart, price: 119, mascot: specGeneral, gradient: "from-warmth/10 to-amber-400/5" },
+  { name: "Psicologia", icon: Brain, price: 99, mascot: specNeurology, gradient: "from-purple-500/10 to-pink-400/5" },
+  { name: "Fonoaudiologia", icon: Activity, price: 99, mascot: specGeneral, gradient: "from-sky-500/10 to-primary/5" },
+  { name: "Fisioterapia", icon: Bone, price: 89, mascot: specOrthopedics, gradient: "from-green-500/10 to-lime-400/5" },
 ];
 
 const benefitCards = [
@@ -42,64 +41,44 @@ const benefitCards = [
     price: 47.9,
     description: "Telemedicina 24h para toda a família.",
     icon: Heart,
-    features: [
-      "Telemedicina 24h ilimitada",
-      "Clube de Vantagens",
-      "30% de desconto em serviços avulsos",
-      "Receitas digitais ilimitadas",
-      "Dependentes inclusos",
-    ],
+    features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "30% de desconto em serviços avulsos", "Receitas digitais ilimitadas", "Dependentes inclusos"],
     highlighted: false,
     badge: null,
     accentColor: "from-emerald-400 to-teal-500",
+    bgPattern: "radial-gradient(circle at 80% 20%, hsl(var(--success) / 0.06), transparent 50%)",
   },
   {
     name: "Solitário",
     price: 37.9,
     description: "Plano completo para uso individual.",
     icon: Award,
-    features: [
-      "Telemedicina 24h ilimitada",
-      "Clube de Vantagens",
-      "Assistência Funeral Nacional",
-      "30% de desconto em serviços avulsos",
-      "Prontuário digital completo",
-    ],
+    features: ["Telemedicina 24h ilimitada", "Clube de Vantagens", "Assistência Funeral Nacional", "30% de desconto em serviços avulsos", "Prontuário digital completo"],
     highlighted: true,
     badge: "Mais popular",
     accentColor: "from-primary to-secondary",
+    bgPattern: "",
   },
   {
     name: "King Família",
     price: 77.9,
     description: "Cobertura completa para a família.",
     icon: Crown,
-    features: [
-      "Tudo do Solitário",
-      "Dependentes inclusos",
-      "Prioridade no agendamento",
-      "Chat ilimitado com médicos",
-      "30% de desconto em serviços",
-    ],
+    features: ["Tudo do Solitário", "Dependentes inclusos", "Prioridade no agendamento", "Chat ilimitado com médicos", "30% de desconto em serviços"],
     highlighted: false,
     badge: null,
     accentColor: "from-blue-400 to-indigo-500",
+    bgPattern: "radial-gradient(circle at 20% 80%, hsl(var(--primary) / 0.05), transparent 50%)",
   },
   {
     name: "Prime Família",
     price: 157.9,
     description: "O plano mais completo da plataforma.",
     icon: Diamond,
-    features: [
-      "Tudo do King Família",
-      "Assistência Funeral Nacional",
-      "Suporte prioritário 24h",
-      "Consultas de retorno ilimitadas",
-      "Prontuário familiar unificado",
-    ],
+    features: ["Tudo do King Família", "Assistência Funeral Nacional", "Suporte prioritário 24h", "Consultas de retorno ilimitadas", "Prontuário familiar unificado"],
     highlighted: false,
     badge: "Premium",
     accentColor: "from-amber-400 to-orange-500",
+    bgPattern: "radial-gradient(circle at 90% 90%, hsl(38 92% 50% / 0.06), transparent 50%)",
   },
 ];
 
@@ -143,17 +122,21 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
                   whileHover={{ y: -6, transition: { duration: 0.25 } }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => navigate(`/consulta-avulsa?specialty=${encodeURIComponent(spec.name)}`)}
-                  className="relative rounded-2xl p-5 border border-border/50 bg-card hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.08] transition-all duration-300 cursor-pointer group overflow-hidden"
+                  className={`relative rounded-2xl p-5 border border-border/50 bg-gradient-to-br ${spec.gradient} hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.08] transition-all duration-300 cursor-pointer group overflow-hidden`}
                 >
+                  {/* Mascot watermark with unique rotation per card */}
                   <img
                     src={spec.mascot}
                     alt=""
                     aria-hidden="true"
-                    className="absolute -bottom-3 -right-3 w-24 h-24 object-contain opacity-[0.06] group-hover:opacity-[0.14] group-hover:scale-110 transition-all duration-500 pointer-events-none select-none"
+                    className="absolute -bottom-3 -right-3 w-24 h-24 object-contain opacity-[0.08] group-hover:opacity-[0.18] group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 pointer-events-none select-none"
                   />
+                  {/* Glow effect on hover */}
+                  <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary)/0.08),transparent_70%)]" />
+                  
                   <div className="relative z-10">
-                    <div className="w-12 h-12 rounded-xl bg-primary/[0.07] flex items-center justify-center mb-3 group-hover:bg-primary/[0.12] group-hover:scale-105 transition-all duration-200">
-                      <spec.icon className="w-5 h-5 text-primary" />
+                    <div className="w-12 h-12 rounded-xl bg-card/80 backdrop-blur-sm flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-primary-foreground group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 shadow-sm group-hover:shadow-lg group-hover:shadow-primary/20">
+                      <spec.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors" />
                     </div>
                     <h3 className="text-sm font-bold text-foreground mb-1.5 group-hover:text-primary transition-colors">{spec.name}</h3>
                     <div>
@@ -241,16 +224,24 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
                 {/* Top accent bar */}
                 <div className={`h-1.5 w-full bg-gradient-to-r ${plan.accentColor}`} />
 
-                <div className={`p-6 ${
-                  plan.highlighted
-                    ? "bg-gradient-to-br from-secondary via-primary to-primary text-primary-foreground"
-                    : "bg-card border border-t-0 border-border/50"
-                }`}>
-                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${
-                    plan.highlighted ? "bg-white/15 backdrop-blur-sm" : "bg-primary/[0.07]"
-                  }`}>
+                <div
+                  className={`p-6 relative ${
+                    plan.highlighted
+                      ? "bg-gradient-to-br from-secondary via-primary to-primary text-primary-foreground"
+                      : "bg-card border border-t-0 border-border/50"
+                  }`}
+                  style={!plan.highlighted && plan.bgPattern ? { backgroundImage: plan.bgPattern } : undefined}
+                >
+                  {/* Floating icon with unique effect */}
+                  <motion.div
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${
+                      plan.highlighted ? "bg-white/15 backdrop-blur-sm" : "bg-primary/[0.07]"
+                    }`}
+                    whileHover={{ rotate: 12, scale: 1.1 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
                     <plan.icon className={`w-5 h-5 ${plan.highlighted ? "text-primary-foreground" : "text-primary"}`} />
-                  </div>
+                  </motion.div>
 
                   <h3 className={`text-lg font-bold mb-0.5 ${plan.highlighted ? "" : "text-foreground"}`}>{plan.name}</h3>
                   <p className={`text-xs mb-4 ${plan.highlighted ? "opacity-75" : "text-muted-foreground"}`}>{plan.description}</p>
