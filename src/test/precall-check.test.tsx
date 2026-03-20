@@ -10,7 +10,12 @@ vi.mock("@/contexts/AuthContext", () => ({
 vi.mock("@/integrations/supabase/client", () => ({
   supabase: {
     from: () => ({
-      select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: null }) }) }),
+      select: () => ({
+        eq: () => ({
+          single: () => Promise.resolve({ data: null }),
+          limit: () => Promise.resolve({ data: [] }),
+        }),
+      }),
     }),
     channel: () => ({
       on: () => ({ subscribe: () => ({ unsubscribe: vi.fn() }) }),

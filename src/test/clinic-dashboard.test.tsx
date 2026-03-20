@@ -6,7 +6,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 vi.mock("@/contexts/AuthContext", () => ({
   useAuth: () => ({
     user: { id: "clinic-user" },
-    profile: { first_name: "Clinic", last_name: "Test", role: "clinic" },
+    profile: { first_name: "Clinic", last_name: "Test" },
+    roles: ["clinic"],
+    loading: false,
+    signOut: vi.fn(),
+    refreshRoles: vi.fn(),
   }),
 }));
 
