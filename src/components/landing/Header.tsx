@@ -115,28 +115,30 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                   Serviços
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid gap-1 p-2.5 w-[460px] lg:grid-cols-[.7fr_1fr]">
-                    <li className="row-span-3">
-                      <NavigationMenuLink asChild>
-                        <Link
-                          to="/teleconsulta"
-                          className="flex h-full w-full select-none flex-col items-center justify-end rounded-xl bg-gradient-to-b from-muted/50 to-muted/20 p-4 no-underline outline-none hover:from-primary/8 hover:to-primary/4 transition-colors overflow-hidden"
-                        >
-                          <img src={teleconsultaDropdown} alt="Teleconsulta" className="w-full flex-1 object-cover object-center rounded-lg mb-3" />
-                          <div className="mb-1 text-sm font-bold text-foreground">Teleconsulta</div>
-                          <p className="text-[11px] leading-relaxed text-muted-foreground text-center">
-                            Consultas por vídeo 24h com 30+ especialidades.
-                          </p>
-                        </Link>
-                      </NavigationMenuLink>
-                    </li>
-                    <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={telelaudoPingo}>
-                      Descontos em consultas e exames para toda a família.
-                    </ListItem>
-                    <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope} imgSrc={mascotWave}>
-                      Atendimento sem cadastro, rápido e seguro.
-                    </ListItem>
-                  </ul>
+                  <div className="p-3 w-[480px]">
+                    <ul className="grid gap-1.5 lg:grid-cols-[.65fr_1fr]">
+                      <li className="row-span-3">
+                        <NavigationMenuLink asChild>
+                          <Link
+                            to="/teleconsulta"
+                            className="flex h-full w-full select-none flex-col justify-end rounded-xl bg-gradient-to-b from-muted/40 to-muted/10 p-4 no-underline outline-none hover:from-primary/[0.06] hover:to-primary/[0.02] transition-all duration-200 overflow-hidden group"
+                          >
+                            <img src={teleconsultaDropdown} alt="Teleconsulta" className="w-full flex-1 object-cover object-center rounded-lg mb-3 group-hover:scale-[1.02] transition-transform duration-300" />
+                            <div className="mb-1 text-sm font-bold text-foreground group-hover:text-primary transition-colors">Teleconsulta</div>
+                            <p className="text-[11px] leading-relaxed text-muted-foreground">
+                              Consultas por vídeo 24h com 30+ especialidades.
+                            </p>
+                          </Link>
+                        </NavigationMenuLink>
+                      </li>
+                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={telelaudoPingo}>
+                        Descontos em consultas e exames para toda a família.
+                      </ListItem>
+                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope} imgSrc={mascotWave}>
+                        Atendimento sem cadastro, rápido e seguro.
+                      </ListItem>
+                    </ul>
+                  </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
