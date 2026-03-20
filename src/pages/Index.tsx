@@ -140,7 +140,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
                 <div>
                   <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
                     <motion.span
-                      className="w-2.5 h-2.5 rounded-full bg-green-400 shadow-lg shadow-green-400/50"
+                      className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50"
                       animate={{ opacity: [1, 0.4, 1] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
                     />
