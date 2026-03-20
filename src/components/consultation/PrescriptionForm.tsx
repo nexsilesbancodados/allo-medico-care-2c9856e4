@@ -72,32 +72,40 @@ const PrescriptionForm = () => {
   const fetchData = async () => {
     const { data: appt } = await supabase
       .from("appointments")
-      .select("patient_id, doctor_id")
+      .select("patient_id, doctor_id, guest_patient_id")
       .eq("id", appointmentId)
       .single();
 
     if (!appt) return;
-    setPatientId(appt.patient_id);
 
-    const [patientRes, doctorRes] = await Promise.all([
-      supabase.from("profiles").select("first_name, last_name, cpf").eq("user_id", appt.patient_id).single(),
-      supabase.from("doctor_profiles").select("id, crm, crm_state, user_id").eq("id", appt.doctor_id).single(),
-    ]);
-
-    if (patientRes.data) {
-      setPatientName(`${patientRes.data.first_name} ${patientRes.data.last_name}`);
-      setPatientCpf(patientRes.data.cpf || "");
+    // Handle both registered patients and guest patients
+    if (appt.patient_id) {
+      setPatientId(appt.patient_id);
+      const { data: patientRes } = await supabase.from("profiles").select("first_name, last_name, cpf").eq("user_id", appt.patient_id).single();
+      if (patientRes) {
+        setPatientName(`${patientRes.first_name} ${patientRes.last_name}`);
+        setPatientCpf(patientRes.cpf || "");
+      }
+    } else if (appt.guest_patient_id) {
+      setPatientId(appt.guest_patient_id);
+      const { data: guestRes } = await supabase.from("guest_patients").select("full_name, cpf").eq("id", appt.guest_patient_id).single();
+      if (guestRes) {
+        setPatientName(guestRes.full_name);
+        setPatientCpf(guestRes.cpf || "");
+      }
     }
 
-    if (doctorRes.data) {
+    const { data: doctorRes } = await supabase.from("doctor_profiles").select("id, crm, crm_state, user_id").eq("id", appt.doctor_id).single();
+
+    if (doctorRes) {
       const { data: docProfile } = await supabase
         .from("profiles")
         .select("first_name, last_name")
-        .eq("user_id", doctorRes.data.user_id)
+        .eq("user_id", doctorRes.user_id)
         .single();
 
       setDoctorInfo({
-        ...doctorRes.data,
+        ...doctorRes,
         first_name: docProfile?.first_name ?? "",
         last_name: docProfile?.last_name ?? "",
       });

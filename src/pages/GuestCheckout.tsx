@@ -940,6 +940,22 @@ const GuestCheckout = () => {
                 <h2 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
                   Consulta Agendada!
                 </h2>
+
+                {/* Payment status badge */}
+                {(pixQrCode || boletoUrl) && (
+                  <div className="mb-4">
+                    {paymentConfirmed ? (
+                      <Badge className="bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30 px-3 py-1">
+                        <Check className="w-3.5 h-3.5 mr-1.5" /> Pagamento Confirmado
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 px-3 py-1 animate-pulse">
+                        <Clock className="w-3.5 h-3.5 mr-1.5" /> Aguardando Pagamento...
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
                 <p className="text-muted-foreground mb-1">
                   {selectedDoctor && selectedDate && selectedTime && (
                     <>Dr(a). {selectedDoctor.first_name} · {format(selectedDate, "dd/MM/yyyy")} às {selectedTime}h</>
