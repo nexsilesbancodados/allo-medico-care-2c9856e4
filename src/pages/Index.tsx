@@ -11,6 +11,11 @@ import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import InfoBannerStrip from "@/components/landing/InfoBannerStrip";
 import { Button } from "@/components/ui/button";
 import { Stethoscope, ShieldCheck, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
+import bannerBenefits from "@/assets/banner-benefits-card.png";
+import bannerAi from "@/assets/banner-ai-triage.png";
+import bannerConsulta from "@/assets/banner-consulta.png";
+import bannerPlantao from "@/assets/banner-plantao.png";
+import bannerTelelaudo from "@/assets/banner-telelaudo.png";
 
 // Lazy-load below-the-fold sections for faster initial paint
 const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
