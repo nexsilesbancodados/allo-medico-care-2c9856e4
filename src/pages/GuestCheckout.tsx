@@ -440,22 +440,54 @@ const GuestCheckout = () => {
       <main className="flex-1 pt-24 md:pt-28 pb-12 px-4">
         <div className="max-w-3xl mx-auto">
 
-          {/* Hero with teleconsultation image */}
-          <motion.div {...fadeUp} className="text-center mb-10 relative">
-            <div className="relative w-full max-w-lg mx-auto mb-6 rounded-3xl overflow-hidden shadow-2xl shadow-primary/10">
-              <img
-                src={teleconsultaHero}
-                alt="Paciente em teleconsulta médica"
-                className="w-full h-48 sm:h-56 object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
-              <div className="absolute bottom-4 left-4 right-4">
-                <h1 className="text-2xl md:text-3xl font-extrabold text-white drop-shadow-lg">
-                  Consulta Avulsa
-                </h1>
-                <p className="text-white/80 text-sm mt-1 drop-shadow">
-                  Agende sua consulta sem cadastro · Rápido, seguro e transparente
-                </p>
+          {/* Hero Banner */}
+          <motion.div {...fadeUp} className="mb-10">
+            <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary to-secondary shadow-2xl shadow-primary/15">
+              {/* Background decorations */}
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-white/[0.06] blur-2xl" />
+                <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-white/[0.04] blur-2xl" />
+              </div>
+
+              <div className="relative z-10 flex flex-col sm:flex-row items-center gap-0">
+                {/* Text content */}
+                <div className="flex-1 px-7 sm:px-10 py-8 sm:py-10 text-center sm:text-left">
+                  <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/15 backdrop-blur-sm text-white/80 text-[10px] font-bold tracking-widest uppercase mb-4">
+                    <span className="w-2 h-2 rounded-full bg-white/70 animate-pulse" />
+                    Sem cadastro necessário
+                  </div>
+                  <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight mb-3" style={{ lineHeight: "1.1" }}>
+                    Consulta Avulsa
+                  </h1>
+                  <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-sm">
+                    Agende sua consulta médica online de forma rápida, segura e transparente.
+                  </p>
+                  <div className="flex flex-wrap gap-4 mt-5 justify-center sm:justify-start text-[11px] text-white/60 font-semibold">
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      Receita digital
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      A partir de R$89
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <svg className="w-3.5 h-3.5 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                      30+ especialidades
+                    </span>
+                  </div>
+                </div>
+
+                {/* Image side */}
+                <div className="w-full sm:w-[45%] shrink-0 relative">
+                  <img
+                    src={teleconsultaHero}
+                    alt="Paciente em teleconsulta médica"
+                    className="w-full h-48 sm:h-full sm:min-h-[280px] object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-transparent to-transparent sm:block hidden" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent sm:hidden" />
+                </div>
               </div>
             </div>
           </motion.div>
