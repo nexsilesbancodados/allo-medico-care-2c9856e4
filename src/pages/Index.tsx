@@ -8,8 +8,9 @@ import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
+import InfoBannerStrip from "@/components/landing/InfoBannerStrip";
 import { Button } from "@/components/ui/button";
-import { Stethoscope } from "lucide-react";
+import { Stethoscope, ShieldCheck, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
 
 // Lazy-load below-the-fold sections for faster initial paint
 const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
@@ -115,10 +116,60 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
 
       <Suspense fallback={null}>
         <StatsSection />
+
+        <InfoBannerStrip
+          icon={ShieldCheck}
+          label="Cartão de Benefícios"
+          title="Economize até 30% em todas as consultas"
+          highlight="A partir de R$37,90/mês"
+          href="/cartao-beneficios"
+          gradient="from-secondary to-emerald-600"
+        />
+
         <HowItWorksSection />
+
+        <InfoBannerStrip
+          icon={Brain}
+          label="Inteligência Artificial"
+          title="Triagem inteligente com IA"
+          highlight="Descubra o especialista ideal em segundos"
+          href="/teleconsulta"
+          gradient="from-blue-600 to-primary"
+        />
+
         <SpecialtiesSection />
+
+        <InfoBannerStrip
+          icon={CreditCard}
+          label="Consulta Avulsa"
+          title="Consulte agora sem mensalidade"
+          highlight="A partir de R$89 com receita digital"
+          href="/consulta-avulsa"
+          gradient="from-primary to-violet-600"
+        />
+
         <PlansSection />
+
+        <InfoBannerStrip
+          icon={HeartPulse}
+          label="Plantão 24h"
+          title="Precisa de atendimento urgente?"
+          highlight="Médicos disponíveis agora"
+          href="/consulta-avulsa"
+          gradient="from-rose-500 to-primary"
+        />
+
         <TestimonialsSection />
+
+        <InfoBannerStrip
+          icon={FileText}
+          label="Telelaudo"
+          title="Laudos médicos à distância com IA"
+          highlight="Para clínicas e hospitais"
+          href="/telelaudo"
+          gradient="from-amber-500 to-orange-600"
+        />
+
         <CTABanner />
         <FAQSection />
 
