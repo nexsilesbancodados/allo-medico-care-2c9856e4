@@ -164,7 +164,7 @@ const HeroSection = memo(
               transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
               className="relative hidden md:flex justify-center"
             >
-              <div className="relative w-full max-w-sm lg:max-w-md xl:max-w-lg">
+              <div className="relative w-full max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl">
                 {/* Soft glow */}
                 <div className="absolute inset-0 bg-primary/[0.06] blur-[100px] rounded-full scale-75 -z-10" />
 
