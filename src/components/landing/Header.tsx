@@ -141,7 +141,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                             <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-primary/10 group-hover:ring-primary/25 transition-all duration-300" />
                             <img src={teleconsultaDropdown} alt="Teleconsulta" className="w-full flex-1 object-cover object-center rounded-xl mb-3 group-hover:scale-[1.04] group-hover:rotate-[0.5deg] transition-transform duration-500 ease-out" />
                             <span className="inline-flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-widest text-primary/70 mb-1.5">
-                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
                               24h Online
                             </span>
                             <div className="text-sm font-bold text-foreground group-hover:text-primary transition-colors duration-200">Teleconsulta</div>
