@@ -358,6 +358,14 @@ const PrescriptionForm = () => {
       toast.error("Adicione pelo menos um medicamento");
       return;
     }
+    if (!doctorInfo) {
+      toast.error("Dados do médico não carregados. Aguarde.");
+      return;
+    }
+    if (!patientId) {
+      toast.error("Dados do paciente não carregados. Aguarde.");
+      return;
+    }
 
     setSaving(true);
 
@@ -378,7 +386,7 @@ const PrescriptionForm = () => {
 
     const { error } = await supabase.from("prescriptions").insert({
       appointment_id: appointmentId,
-      doctor_id: doctorInfo.id,
+      doctor_id: doctorInfo!.id,
       patient_id: patientId,
       medications: validMeds as unknown as Parameters<typeof supabase.from>[0],
       diagnosis: diagnosis || null,
