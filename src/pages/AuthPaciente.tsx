@@ -491,69 +491,121 @@ const AuthPaciente = () => {
               animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
               exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="max-w-md mx-auto"
+              className="max-w-4xl mx-auto"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20">
-                  <CreditCard className="w-5 h-5 text-primary-foreground" />
+              <div className="flex flex-col lg:flex-row rounded-3xl overflow-hidden border border-border/60 bg-card shadow-2xl shadow-primary/5">
+                {/* Left panel — desktop only */}
+                <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden flex-col justify-between p-10">
+                  <div className="absolute top-[-15%] left-[-10%] w-[350px] h-[350px] rounded-full bg-white/[0.06] blur-[90px]" />
+                  <div className="absolute bottom-[-10%] right-[-5%] w-[300px] h-[300px] rounded-full bg-white/[0.04] blur-[70px]" />
+
+                  <div className="relative z-10">
+                    <div className="w-12 h-12 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-5 border border-white/10">
+                      <CreditCard className="w-6 h-6 text-primary-foreground" />
+                    </div>
+                    <h2 className="text-3xl font-extrabold text-primary-foreground tracking-tight mb-2">Meu Cartão</h2>
+                    <p className="text-sm text-primary-foreground/75 leading-relaxed max-w-xs">
+                      Acesse sua conta e aproveite consultas médicas com desconto exclusivo.
+                    </p>
+
+                    <div className="mt-8 space-y-3">
+                      {["Consultas com até 70% de desconto", "Rede credenciada em todo o Brasil", "Agendamento online 24h", "Teleconsulta sem fila"].map((f, i) => (
+                        <motion.div
+                          key={i}
+                          initial={{ opacity: 0, x: -12 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: 0.3 + i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                          className="flex items-center gap-2.5 text-sm text-primary-foreground/80"
+                        >
+                          <Check className="w-4 h-4 text-primary-foreground/60 shrink-0" />
+                          {f}
+                        </motion.div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <motion.div
+                    className="relative z-10 flex justify-center mt-6"
+                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <img
+                      src={pingoSolitario}
+                      alt="Pingo mascote"
+                      className="w-48 h-48 object-contain drop-shadow-2xl"
+                      loading="eager"
+                    />
+                  </motion.div>
                 </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground tracking-tight">Acessar meu cartão</h2>
-                  <p className="text-sm text-muted-foreground">Entre com seus dados do cartão de benefícios</p>
+
+                {/* Right panel — form */}
+                <div className="flex-1 p-6 sm:p-10 flex flex-col justify-center">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20 lg:hidden">
+                      <CreditCard className="w-5 h-5 text-primary-foreground" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-foreground tracking-tight">Acessar meu cartão</h2>
+                      <p className="text-sm text-muted-foreground">Entre com seus dados do cartão de benefícios</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-muted/50 border border-border/60 mb-5">
+                    <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5 shrink-0 text-primary" />
+                      Seus dados estão protegidos com criptografia de ponta a ponta.
+                    </p>
+                  </div>
+
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Email</Label>
+                      <div className="relative mt-1.5">
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-12 rounded-xl" required />
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Senha</Label>
+                      <div className="relative mt-1.5">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          placeholder="••••••••"
+                          className="pl-10 pr-10 h-12 rounded-xl"
+                          required
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <Button type="submit" className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground h-12 rounded-xl font-bold shadow-lg hover:shadow-xl hover:brightness-105 active:scale-[0.97] transition-all" size="lg" disabled={loading}>
+                      {loading ? (
+                        <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
+                          <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
+                        </motion.span>
+                      ) : "Entrar"}
+                    </Button>
+                    <p className="text-center text-sm text-muted-foreground">
+                      <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
+                    </p>
+                    <p className="text-center text-sm text-muted-foreground">
+                      Ainda não tem conta? <button type="button" onClick={() => setMode("buy")} className="text-primary font-semibold hover:underline">Assinar um plano</button>
+                    </p>
+                  </form>
+
+                  {/* Social proof */}
+                  <div className="mt-8 pt-5 border-t border-border/50 flex flex-wrap items-center justify-center gap-5 text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary shrink-0" /> Dados protegidos</span>
+                    <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-warning shrink-0" /> 4.9/5</span>
+                    <span className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 text-destructive shrink-0" /> 12k+ pacientes</span>
+                  </div>
                 </div>
               </div>
-
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <Label>Email</Label>
-                  <div className="relative mt-1">
-                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11" required />
-                  </div>
-                </div>
-                <div>
-                  <Label>Senha</Label>
-                  <div className="relative mt-1">
-                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      type={showPassword ? "text" : "password"}
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      placeholder="••••••••"
-                      className="pl-10 pr-10 h-11"
-                      required
-                    />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-                <Button type="submit" className="w-full bg-gradient-to-r from-primary to-secondary text-primary-foreground cta-shimmer h-12 shadow-lg shadow-primary/20" size="lg" disabled={loading}>
-                  {loading ? (
-                    <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 animate-spin" /> Entrando...
-                    </motion.span>
-                  ) : "Entrar"}
-                </Button>
-                <p className="text-center text-sm text-muted-foreground">
-                  <Link to="/forgot-password" className="text-primary hover:underline">Esqueci minha senha</Link>
-                </p>
-                <p className="text-center text-sm text-muted-foreground">
-                  Ainda não tem conta? <button type="button" onClick={() => setMode("buy")} className="text-primary font-semibold hover:underline">Assinar um plano</button>
-                </p>
-              </form>
-
-              {/* Social proof */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="mt-8 flex flex-wrap items-center justify-center gap-5 text-xs text-muted-foreground pb-[max(env(safe-area-inset-bottom,8px),8px)]"
-              >
-                <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary shrink-0" /> Dados protegidos</span>
-                <span className="flex items-center gap-1.5"><Star className="w-3.5 h-3.5 text-warning shrink-0" /> 4.9/5</span>
-                <span className="flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 text-destructive shrink-0" /> 12k+ pacientes</span>
-              </motion.div>
             </motion.div>
           )}
 
