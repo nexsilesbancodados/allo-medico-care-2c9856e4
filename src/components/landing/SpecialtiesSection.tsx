@@ -69,27 +69,6 @@ const SpecialtiesSection = forwardRef<HTMLElement>((_, ref) => {
           </p>
         </motion.div>
 
-        {/* Specialty icon grid */}
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-3 max-w-4xl mx-auto mb-12">
-          {specialtyGrid.map((spec, i) => (
-            <motion.div
-              key={spec.name}
-              initial={{ opacity: 0, scale: 0.7, y: 20 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.06, duration: 0.5, type: "spring", stiffness: 200 }}
-              whileHover={{ y: -8, scale: 1.12 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => navigate(`/consulta-avulsa?specialty=${encodeURIComponent(spec.name)}`)}
-              className="card-interactive flex flex-col items-center gap-2 p-3 rounded-xl bg-card border border-border/50 shadow-card hover:shadow-xl hover:-translate-y-1 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
-            >
-              <div className="card-interactive w-14 h-14 rounded-xl overflow-hidden transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg">
-                <img src={spec.image} alt={spec.name} className="w-full h-full object-cover" loading="lazy" />
-              </div>
-              <span className="text-[10px] md:text-xs font-semibold text-foreground text-center leading-tight">{spec.name}</span>
-            </motion.div>
-          ))}
-        </div>
 
         {/* Auto-scrolling highlight cards */}
         <div
