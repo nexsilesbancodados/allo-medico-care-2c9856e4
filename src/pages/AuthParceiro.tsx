@@ -112,14 +112,13 @@ const AuthParceiro = () => {
 
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Mobile gradient header */}
-        <div className="lg:hidden bg-gradient-to-br from-primary/80 to-secondary/80 px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8">
-          <Link to="/" className="inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
+        <div className="lg:hidden bg-gradient-to-br from-primary/80 to-secondary/80 px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8 relative overflow-hidden">
+          <div className="absolute top-[-30%] right-[-20%] w-[200px] h-[200px] rounded-full bg-white/[0.06] blur-[60px]" />
+          <Link to="/" className="relative z-10 inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Handshake className="w-6 h-6 text-primary-foreground" />
-            </div>
+          <div className="relative z-10 flex items-center gap-3">
+            <img src={pingoPartner} alt="Pingo" className="w-14 h-14 object-contain drop-shadow-lg" />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">Portal do Parceiro</h1>
               <p className="text-xs text-primary-foreground/70">Farmácias & Laboratórios</p>
