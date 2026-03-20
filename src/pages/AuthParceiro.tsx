@@ -7,8 +7,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowLeft, Handshake, Building2, LogIn, Sparkles } from "lucide-react";
+import { Mail, Lock, ArrowLeft, Handshake, Building2, LogIn, Sparkles, CheckCircle2 } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import pingoPartner from "@/assets/pingo-partner.png";
 import { translateAuthError } from "@/lib/authErrors";
 
 type Step = "welcome" | "register" | "login";
