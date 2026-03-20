@@ -1,7 +1,7 @@
-import { forwardRef } from "react";
-import { motion } from "framer-motion";
+import { forwardRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, ShieldCheck, Zap, Award, Heart, Diamond, ArrowRight, Sparkles, Stethoscope, Brain, Eye, Bone, Baby, Activity, Crown } from "lucide-react";
+import { Check, ShieldCheck, Zap, Award, Heart, Diamond, ArrowRight, Sparkles, Stethoscope, Brain, Eye, Bone, Baby, Activity, Crown, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import specGeneral from "@/assets/spec-general.png";
 import specCardiology from "@/assets/spec-cardiology.png";
@@ -21,6 +21,19 @@ const specialties = [
   { name: "Ortopedia", icon: Bone, price: 129, mascot: specOrthopedics },
   { name: "Pediatria", icon: Baby, price: 99, mascot: specPediatrics },
   { name: "Endocrinologia", icon: Activity, price: 129, mascot: specEndocrinology },
+  // Especialidades extras (exibidas ao expandir)
+  { name: "Ginecologia", icon: Heart, price: 129, mascot: specGeneral },
+  { name: "Urologia", icon: Activity, price: 139, mascot: specGeneral },
+  { name: "Psiquiatria", icon: Brain, price: 149, mascot: specNeurology },
+  { name: "Nutrição", icon: Sparkles, price: 99, mascot: specGeneral },
+  { name: "Pneumologia", icon: Activity, price: 129, mascot: specEndocrinology },
+  { name: "Gastroenterologia", icon: Activity, price: 139, mascot: specGeneral },
+  { name: "Reumatologia", icon: Bone, price: 139, mascot: specOrthopedics },
+  { name: "Otorrinolaringologia", icon: Activity, price: 129, mascot: specGeneral },
+  { name: "Geriatria", icon: Heart, price: 119, mascot: specGeneral },
+  { name: "Psicologia", icon: Brain, price: 99, mascot: specNeurology },
+  { name: "Fonoaudiologia", icon: Activity, price: 99, mascot: specGeneral },
+  { name: "Fisioterapia", icon: Bone, price: 89, mascot: specOrthopedics },
 ];
 
 const benefitCards = [
