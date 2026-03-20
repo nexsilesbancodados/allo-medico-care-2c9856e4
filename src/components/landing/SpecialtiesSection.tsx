@@ -124,7 +124,7 @@ const SpecialtiesSection = forwardRef<HTMLElement>((_, ref) => {
           <Button
             size="lg"
             className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 cta-shimmer group"
-            onClick={() => navigate("/paciente")}
+            onClick={() => navigate("/consulta-avulsa")}
           >
             Ver todas especialidades <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
           </Button>
