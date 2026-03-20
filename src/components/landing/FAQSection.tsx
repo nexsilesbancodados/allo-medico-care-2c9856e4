@@ -1,42 +1,42 @@
-import { useEffect, useState, useRef, forwardRef } from "react";
+import { useEffect, useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, MessageCircle, HelpCircle, ArrowRight, Sparkles, ThumbsUp, Eye } from "lucide-react";
+import { Search, MessageCircle, HelpCircle, ArrowRight, ChevronDown, Stethoscope, FileText, CreditCard, Shield, UserCog } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+
+const categoryConfig: Record<string, { icon: typeof HelpCircle; color: string }> = {
+  consulta: { icon: Stethoscope, color: "text-blue-500" },
+  receita: { icon: FileText, color: "text-emerald-500" },
+  plano: { icon: CreditCard, color: "text-violet-500" },
+  segurança: { icon: Shield, color: "text-amber-500" },
+  médico: { icon: UserCog, color: "text-rose-500" },
+};
 
 const faqs = [
-  { q: "A consulta por vídeo tem a mesma validade de uma presencial?", a: "Sim! A telemedicina é regulamentada pelo CFM e as consultas realizadas pela AloClinica têm a mesma validade legal de uma consulta presencial, incluindo receitas e atestados.", category: "consulta", views: 1240, helpful: 98 },
-  { q: "Como funciona a receita digital?", a: "Após a consulta, o médico emite uma receita digital assinada eletronicamente. Você recebe o PDF pelo aplicativo e pode apresentá-la em qualquer farmácia.", category: "receita", views: 980, helpful: 95 },
-  { q: "Posso cancelar meu plano a qualquer momento?", a: "Sim, você pode cancelar seu plano mensal a qualquer momento sem multa. O acesso continua até o fim do período pago.", category: "plano", views: 870, helpful: 97 },
-  { q: "Quais especialidades estão disponíveis?", a: "Contamos com mais de 20 especialidades, incluindo Cardiologia, Neurologia, Pediatria, Dermatologia, Ortopedia, Clínico Geral e muitas outras.", category: "consulta", views: 1100, helpful: 94 },
-  { q: "Os dados da minha consulta são sigilosos?", a: "Absolutamente. Todas as consultas são protegidas com criptografia end-to-end e seguimos rigorosamente a LGPD e as normas do CFM para sigilo médico.", category: "segurança", views: 760, helpful: 99 },
-  { q: "Sou médico, como faço para atender pela plataforma?", a: "Basta se cadastrar como médico, enviar seu CRM para verificação e configurar sua disponibilidade. Após aprovação, você já pode receber pacientes.", category: "médico", views: 650, helpful: 92 },
-  { q: "Quanto tempo leva para receber a receita?", a: "A receita digital é emitida instantaneamente ao final da consulta e fica disponível no seu perfil e por e-mail.", category: "receita", views: 890, helpful: 96 },
-  { q: "Posso agendar consulta para dependentes?", a: "Sim! Você pode cadastrar até 5 dependentes e agendar consultas para eles diretamente pelo seu perfil.", category: "consulta", views: 720, helpful: 93 },
+  { q: "A consulta por vídeo tem a mesma validade de uma presencial?", a: "Sim! A telemedicina é regulamentada pelo CFM e as consultas realizadas pela AloClinica têm a mesma validade legal de uma consulta presencial, incluindo receitas e atestados.", category: "consulta" },
+  { q: "Como funciona a receita digital?", a: "Após a consulta, o médico emite uma receita digital assinada eletronicamente. Você recebe o PDF pelo aplicativo e pode apresentá-la em qualquer farmácia.", category: "receita" },
+  { q: "Posso cancelar meu plano a qualquer momento?", a: "Sim, você pode cancelar seu plano mensal a qualquer momento sem multa. O acesso continua até o fim do período pago.", category: "plano" },
+  { q: "Quais especialidades estão disponíveis?", a: "Contamos com mais de 20 especialidades, incluindo Cardiologia, Neurologia, Pediatria, Dermatologia, Ortopedia, Clínico Geral e muitas outras.", category: "consulta" },
+  { q: "Os dados da minha consulta são sigilosos?", a: "Absolutamente. Todas as consultas são protegidas com criptografia end-to-end e seguimos rigorosamente a LGPD e as normas do CFM para sigilo médico.", category: "segurança" },
+  { q: "Sou médico, como faço para atender pela plataforma?", a: "Basta se cadastrar como médico, enviar seu CRM para verificação e configurar sua disponibilidade. Após aprovação, você já pode receber pacientes.", category: "médico" },
+  { q: "Quanto tempo leva para receber a receita?", a: "A receita digital é emitida instantaneamente ao final da consulta e fica disponível no seu perfil e por e-mail.", category: "receita" },
+  { q: "Posso agendar consulta para dependentes?", a: "Sim! Você pode cadastrar até 5 dependentes e agendar consultas para eles diretamente pelo seu perfil.", category: "consulta" },
 ];
 
 const categories = [
-  { key: "all", label: "Todas", count: faqs.length },
-  { key: "consulta", label: "Consultas", count: faqs.filter(f => f.category === "consulta").length },
-  { key: "receita", label: "Receitas", count: faqs.filter(f => f.category === "receita").length },
-  { key: "plano", label: "Planos", count: faqs.filter(f => f.category === "plano").length },
-  { key: "segurança", label: "Segurança", count: faqs.filter(f => f.category === "segurança").length },
-  { key: "médico", label: "Médicos", count: faqs.filter(f => f.category === "médico").length },
+  { key: "all", label: "Todas" },
+  { key: "consulta", label: "Consultas" },
+  { key: "receita", label: "Receitas" },
+  { key: "plano", label: "Planos" },
+  { key: "segurança", label: "Segurança" },
+  { key: "médico", label: "Médicos" },
 ];
-
-// Top 2 most viewed
-const featuredFaqs = [...faqs].sort((a, b) => b.views - a.views).slice(0, 2);
 
 const FAQSection = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("all");
+  const [openItem, setOpenItem] = useState<string | null>(null);
 
   const filtered = faqs.filter((faq) => {
     const matchSearch = search === "" || faq.q.toLowerCase().includes(search.toLowerCase()) || faq.a.toLowerCase().includes(search.toLowerCase());
@@ -44,7 +44,6 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
     return matchSearch && matchCategory;
   });
 
-  // Inject FAQ JSON-LD for SEO
   useEffect(() => {
     const jsonLd = {
       "@context": "https://schema.org",
@@ -64,214 +63,247 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
   }, []);
 
   return (
-    <section id="faq" className="py-12 md:py-24" aria-labelledby="faq-heading">
-      <div className="container mx-auto px-4">
+    <section id="faq" className="py-16 md:py-28 relative overflow-hidden" aria-labelledby="faq-heading">
+      {/* Background decoration */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] rounded-full bg-primary/[0.03] blur-3xl" />
+        <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-secondary/[0.03] blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10 md:mb-16"
+          initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
+          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          viewport={{ once: true, amount: 0.3 }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="text-center mb-12 md:mb-16"
         >
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 text-primary text-sm font-semibold mb-4"
-          >
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 border border-primary/15 text-primary text-xs font-bold tracking-wide uppercase mb-5">
             <HelpCircle className="w-3.5 h-3.5" />
             Central de ajuda
-          </motion.span>
-          <h2 id="faq-heading" className="text-2xl md:text-4xl font-extrabold text-foreground mb-3">
-            Perguntas <span className="text-gradient">frequentes</span>
+          </div>
+          <h2 id="faq-heading" className="text-3xl md:text-5xl font-extrabold text-foreground mb-4" style={{ lineHeight: "1.1" }}>
+            Perguntas frequentes
           </h2>
-          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Tire suas dúvidas sobre a plataforma. <span className="font-semibold text-foreground">{faqs.length} perguntas</span> respondidas.
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto" style={{ textWrap: "balance" } as React.CSSProperties}>
+            Encontre respostas rápidas sobre consultas, receitas, planos e segurança.
           </p>
         </motion.div>
 
         <div className="max-w-3xl mx-auto">
-          {/* Featured questions */}
+          {/* Search bar */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 14 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="grid sm:grid-cols-2 gap-3 mb-8"
+            transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="relative mb-8"
           >
-            {featuredFaqs.map((faq, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.08 }}
-                className="bg-primary/5 border border-primary/10 rounded-xl p-4 cursor-default hover:border-primary/30 transition-all"
-              >
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Sparkles className="w-3 h-3 text-primary" />
-                  <span className="text-[10px] font-bold text-primary">Mais buscada</span>
-                </div>
-                <p className="text-sm font-semibold text-foreground mb-2 leading-snug">{faq.q}</p>
-                <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Eye className="w-2.5 h-2.5" />
-                    {faq.views.toLocaleString("pt-BR")} views
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <ThumbsUp className="w-2.5 h-2.5" />
-                    {faq.helpful}% útil
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+            <div className="relative group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/60 transition-colors group-focus-within:text-primary" />
+              <input
+                type="text"
+                placeholder="Pesquisar dúvida..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-13 pr-12 py-4 rounded-2xl bg-card border-2 border-border/60 text-foreground text-sm placeholder:text-muted-foreground/50 focus:outline-none focus:ring-0 focus:border-primary/40 transition-all duration-300 shadow-sm focus:shadow-lg focus:shadow-primary/5"
+                style={{ paddingLeft: "3.25rem" }}
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs font-medium bg-muted/60 px-2.5 py-1 rounded-lg transition-colors"
+                >
+                  Limpar
+                </button>
+              )}
+            </div>
           </motion.div>
 
-          {/* Search */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="relative mb-6"
-          >
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Buscar pergunta..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 rounded-xl bg-card border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch("")}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground text-xs"
-              >
-                Limpar
-              </button>
-            )}
-          </motion.div>
-
-          {/* Category filters with counts */}
+          {/* Category pills */}
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.15 }}
-            className="flex flex-wrap gap-2 mb-6"
+            transition={{ delay: 0.15, duration: 0.5 }}
+            className="flex flex-wrap gap-2 mb-8"
           >
-            {categories.map((cat) => (
-              <button
-                key={cat.key}
-                onClick={() => setActiveCategory(cat.key)}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 ${
-                  activeCategory === cat.key
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
-                }`}
-              >
-                {cat.label}
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                  activeCategory === cat.key
-                    ? "bg-primary-foreground/20"
-                    : "bg-muted-foreground/10"
-                }`}>
-                  {cat.count}
-                </span>
-              </button>
-            ))}
+            {categories.map((cat, i) => {
+              const isActive = activeCategory === cat.key;
+              const count = cat.key === "all" ? faqs.length : faqs.filter(f => f.category === cat.key).length;
+              return (
+                <motion.button
+                  key={cat.key}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.15 + i * 0.04 }}
+                  onClick={() => setActiveCategory(cat.key)}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center gap-2 active:scale-95 ${
+                    isActive
+                      ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
+                      : "bg-card text-muted-foreground border border-border/60 hover:border-primary/30 hover:text-foreground hover:shadow-sm"
+                  }`}
+                >
+                  {cat.label}
+                  <span className={`text-[10px] tabular-nums px-1.5 py-0.5 rounded-md font-bold ${
+                    isActive ? "bg-white/20" : "bg-muted/80"
+                  }`}>
+                    {count}
+                  </span>
+                </motion.button>
+              );
+            })}
           </motion.div>
 
-          {/* Results count */}
-          {search && (
-            <p className="text-xs text-muted-foreground mb-4">
-              {filtered.length} resultado{filtered.length !== 1 ? "s" : ""} para "{search}"
-            </p>
-          )}
+          {/* Search results count */}
+          <AnimatePresence>
+            {search && (
+              <motion.p
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                exit={{ opacity: 0, height: 0 }}
+                className="text-xs text-muted-foreground mb-4"
+              >
+                {filtered.length} resultado{filtered.length !== 1 ? "s" : ""} para "<span className="font-semibold text-foreground">{search}</span>"
+              </motion.p>
+            )}
+          </AnimatePresence>
 
-          {/* FAQ Items */}
-          <Accordion type="single" collapsible className="space-y-3">
+          {/* FAQ Accordion */}
+          <div className="space-y-3">
             <AnimatePresence mode="popLayout">
-              {filtered.map((faq, i) => (
-                <motion.div
-                  key={faq.q}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ delay: i * 0.04, duration: 0.3 }}
-                  layout
-                >
-                  <AccordionItem
-                    value={faq.q}
-                    className="bg-card rounded-xl border border-border px-6 shadow-card transition-all duration-300 hover:border-primary/20 hover:shadow-xl hover:-translate-y-1 data-[state=open]:border-primary/30 data-[state=open]:shadow-elevated"
+              {filtered.map((faq, i) => {
+                const isOpen = openItem === faq.q;
+                const catConfig = categoryConfig[faq.category];
+                const CatIcon = catConfig?.icon || HelpCircle;
+
+                return (
+                  <motion.div
+                    key={faq.q}
+                    initial={{ opacity: 0, y: 16, filter: "blur(4px)" }}
+                    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    transition={{ delay: i * 0.04, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+                    layout
                   >
-                    <AccordionTrigger className="text-left font-semibold text-foreground hover:no-underline py-5 text-sm md:text-base">
-                      <div className="flex-1">
-                        {faq.q}
-                        <div className="flex items-center gap-3 mt-1.5">
-                          <span className="text-[10px] text-muted-foreground font-normal flex items-center gap-1">
-                            <Eye className="w-2.5 h-2.5" />
-                            {faq.views.toLocaleString("pt-BR")}
-                          </span>
-                          <span className="text-[10px] text-medical-green font-normal flex items-center gap-1">
-                            <ThumbsUp className="w-2.5 h-2.5" />
-                            {faq.helpful}% útil
-                          </span>
+                    <div
+                      className={`rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
+                        isOpen
+                          ? "bg-card border-primary/25 shadow-xl shadow-primary/[0.06]"
+                          : "bg-card/80 border-border/50 hover:border-primary/15 hover:shadow-md hover:-translate-y-0.5"
+                      }`}
+                    >
+                      <button
+                        onClick={() => setOpenItem(isOpen ? null : faq.q)}
+                        className="w-full flex items-center gap-4 px-5 sm:px-6 py-5 text-left cursor-pointer active:scale-[0.995] transition-transform"
+                      >
+                        {/* Category icon */}
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300 ${
+                          isOpen ? "bg-primary/10" : "bg-muted/60"
+                        }`}>
+                          <CatIcon className={`w-4.5 h-4.5 transition-colors duration-300 ${
+                            isOpen ? "text-primary" : (catConfig?.color || "text-muted-foreground")
+                          }`} style={{ width: "18px", height: "18px" }} />
                         </div>
-                      </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground leading-relaxed pb-5 text-sm">
-                      {faq.a}
-                    </AccordionContent>
-                  </AccordionItem>
-                </motion.div>
-              ))}
+
+                        {/* Question text */}
+                        <span className={`flex-1 text-sm sm:text-[15px] font-semibold leading-snug transition-colors duration-200 ${
+                          isOpen ? "text-foreground" : "text-foreground/85"
+                        }`}>
+                          {faq.q}
+                        </span>
+
+                        {/* Chevron */}
+                        <motion.div
+                          animate={{ rotate: isOpen ? 180 : 0 }}
+                          transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                          className="shrink-0"
+                        >
+                          <ChevronDown className={`w-5 h-5 transition-colors duration-300 ${
+                            isOpen ? "text-primary" : "text-muted-foreground/40"
+                          }`} />
+                        </motion.div>
+                      </button>
+
+                      {/* Answer */}
+                      <AnimatePresence>
+                        {isOpen && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                            className="overflow-hidden"
+                          >
+                            <div className="px-5 sm:px-6 pb-5 pl-[4.5rem]">
+                              <p className="text-sm text-muted-foreground leading-relaxed">
+                                {faq.a}
+                              </p>
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
 
             {filtered.length === 0 && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-center py-10 text-muted-foreground"
+                className="text-center py-14"
               >
-                <HelpCircle className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Nenhuma pergunta encontrada para "{search}"</p>
+                <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                  <Search className="w-7 h-7 text-muted-foreground/40" />
+                </div>
+                <p className="text-sm font-medium text-muted-foreground mb-1">Nenhuma pergunta encontrada</p>
+                <p className="text-xs text-muted-foreground/60 mb-3">Tente buscar com outros termos</p>
                 <button
                   onClick={() => { setSearch(""); setActiveCategory("all"); }}
-                  className="text-primary text-xs mt-2 underline underline-offset-2"
+                  className="text-primary text-xs font-semibold hover:underline underline-offset-2"
                 >
                   Limpar filtros
                 </button>
               </motion.div>
             )}
-          </Accordion>
+          </div>
 
           {/* Contact CTA */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, y: 18, filter: "blur(4px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
             viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
-            className="mt-10 text-center bg-card rounded-2xl border border-border p-8 shadow-card"
+            transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="mt-12 text-center relative overflow-hidden rounded-3xl border-2 border-border/50 bg-gradient-to-br from-card to-muted/30 p-8 sm:p-10 shadow-lg"
           >
-            <MessageCircle className="w-10 h-10 text-primary mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-foreground mb-2">Ainda tem dúvidas?</h3>
-            <p className="text-sm text-muted-foreground mb-4 max-w-md mx-auto">
-              Nossa equipe de suporte está disponível para ajudar você por chat ou WhatsApp.
-            </p>
-            <div className="flex justify-center gap-3">
-              <Button
-                className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-6 font-bold"
-                onClick={() => navigate("/suporte")}
-              >
-                Falar com suporte <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
-              <Button
-                variant="outline"
-                className="rounded-full px-6"
-                onClick={() => window.open("https://wa.me/5511999999999", "_blank")}
-              >
-                WhatsApp
-              </Button>
+            <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-primary/[0.04] blur-3xl pointer-events-none" />
+            <div className="relative z-10">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <MessageCircle className="w-7 h-7 text-primary" />
+              </div>
+              <h3 className="text-xl font-extrabold text-foreground mb-2">Ainda tem dúvidas?</h3>
+              <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
+                Nossa equipe de suporte está disponível para ajudar você por chat ou WhatsApp.
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <Button
+                  className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground rounded-xl px-7 font-bold shadow-lg shadow-primary/20"
+                  onClick={() => navigate("/suporte")}
+                >
+                  Falar com suporte <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+                <Button
+                  variant="outline"
+                  className="rounded-xl px-7 font-bold border-2"
+                  onClick={() => window.open("https://wa.me/5511999999999", "_blank")}
+                >
+                  WhatsApp
+                </Button>
+              </div>
             </div>
           </motion.div>
         </div>
