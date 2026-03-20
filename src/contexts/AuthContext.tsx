@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     // Safety: force loading=false after 3s (prevents stuck spinner in preview)
-    const safetyTimer = setTimeout(markLoaded, 3000);
+    const safetyTimer = setTimeout(markLoaded, 1500);
 
     // 1. Primary init: getSession
     supabase.auth.getSession().then(({ data: { session: s } }) => {
