@@ -148,13 +148,15 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                   Profissionais
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid w-[320px] gap-1 p-2.5">
+                  <ul className="grid w-[340px] gap-1 p-3">
                     <ListItem href="/medico" title="Sou Médico" icon={Stethoscope}>
                       Atenda pacientes online e aumente sua renda.
                     </ListItem>
+                    <li><div className="mx-3 border-t border-border/30" /></li>
                     <ListItem href="/laudista" title="Sou Laudista" icon={Brain}>
                       Emita laudos à distância com IA e assinatura digital.
                     </ListItem>
+                    <li><div className="mx-3 border-t border-border/30" /></li>
                     <ListItem href="/clinica" title="Sou Clínica" icon={Building2}>
                       Gerencie agendamento, prontuário e equipe.
                     </ListItem>
