@@ -89,13 +89,29 @@ const GuestConsultation = () => {
         return;
       }
 
-      setAppointment(data.appointment);
+      const appt = data.appointment;
+
+      // Block entry if cancelled/no_show
+      if (["cancelled", "no_show"].includes(appt.status)) {
+        setError("Esta consulta foi cancelada ou não comparecimento.");
+        setLoading(false);
+        return;
+      }
+
+      // Block entry if payment pending
+      if (appt.payment_status === "pending" && appt.status === "scheduled") {
+        setError("Aguardando confirmação do pagamento. Tente novamente após pagar.");
+        setLoading(false);
+        return;
+      }
+
+      setAppointment(appt);
       setGuestPatient(data.guest_patient);
       setDoctorName(data.doctor_name);
       setLoading(false);
 
       // Initialize Metered video after appointment loads
-      initMeteredRoom(data.appointment.id, data.guest_patient?.full_name);
+      initMeteredRoom(appt.id, data.guest_patient?.full_name);
     } catch {
       setError("Erro ao carregar consulta.");
       setLoading(false);
@@ -156,6 +172,43 @@ const GuestConsultation = () => {
     }
   };
 
+  // Poll for incoming messages from doctor
+  useEffect(() => {
+    if (!appointment) return;
+    let pollActive = true;
+    let lastPollTime = new Date().toISOString();
+    const guestSenderId = appointment.guest_patient_id || "guest";
+
+    const pollMessages = async () => {
+      const { data } = await supabase
+        .from("messages")
+        .select("id, content, sender_id, created_at")
+        .eq("appointment_id", appointment.id)
+        .gt("created_at", lastPollTime)
+        .neq("sender_id", guestSenderId)
+        .order("created_at", { ascending: true });
+
+      if (data && data.length > 0) {
+        lastPollTime = data[data.length - 1].created_at;
+        setMessages(prev => {
+          const existingIds = new Set(prev.map(m => m.id));
+          const newMsgs = data
+            .filter(m => !existingIds.has(m.id))
+            .map(m => ({
+              id: m.id,
+              sender: "doctor" as const,
+              text: m.content,
+              time: format(new Date(m.created_at), "HH:mm"),
+            }));
+          return newMsgs.length > 0 ? [...prev, ...newMsgs] : prev;
+        });
+      }
+      if (pollActive) setTimeout(pollMessages, 5000);
+    };
+    setTimeout(pollMessages, 3000);
+    return () => { pollActive = false; };
+  }, [appointment]);
+
   const formatTime = (seconds: number) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -163,16 +216,27 @@ const GuestConsultation = () => {
     return `${h > 0 ? `${h}:` : ""}${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   };
 
-  const sendMessage = () => {
-    if (!chatInput.trim()) return;
+  const sendMessage = async () => {
+    if (!chatInput.trim() || !appointment) return;
+    const content = chatInput.trim();
     const msg: ChatMessage = {
       id: Date.now().toString(),
       sender: "patient",
-      text: chatInput.trim(),
+      text: content,
       time: format(new Date(), "HH:mm"),
     };
     setMessages(prev => [...prev, msg]);
     setChatInput("");
+
+    // Persist to DB so doctor can see messages
+    const guestSenderId = appointment.guest_patient_id || "guest";
+    await supabase.from("messages").insert({
+      appointment_id: appointment.id,
+      sender_id: guestSenderId,
+      content,
+    }).then(({ error: msgErr }) => {
+      if (msgErr) logError("Guest chat persist failed", msgErr);
+    });
   };
 
   const endCall = () => {

@@ -89,6 +89,29 @@ const GuestCheckout = () => {
 
   // Success
   const [consultationUrl, setConsultationUrl] = useState("");
+  const [appointmentId, setAppointmentId] = useState<string | null>(null);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+
+  // Poll for payment confirmation on success page (PIX/Boleto)
+  useEffect(() => {
+    if (step !== "success" || !appointmentId || paymentConfirmed) return;
+    const hasPending = pixQrCode || boletoUrl;
+    if (!hasPending) { setPaymentConfirmed(true); return; }
+    const poll = setInterval(async () => {
+      const { data } = await supabase
+        .from("appointments")
+        .select("payment_status")
+        .eq("id", appointmentId)
+        .in("payment_status", ["approved", "confirmed", "received"])
+        .limit(1);
+      if (data && data.length > 0) {
+        clearInterval(poll);
+        setPaymentConfirmed(true);
+        toast.success("✅ Pagamento confirmado! Sua consulta está garantida.");
+      }
+    }, 8000);
+    return () => clearInterval(poll);
+  }, [step, appointmentId, pixQrCode, boletoUrl, paymentConfirmed]);
 
   useEffect(() => {
     supabase.from("specialties").select("id, name").order("name").then(({ data }) => {
@@ -299,6 +322,7 @@ const GuestCheckout = () => {
         description: `Consulta Avulsa - AloClínica`,
         appointmentId: data.appointment_id,
       };
+      setAppointmentId(data.appointment_id);
 
       if (paymentMethod === "credit") {
         // PCI Compliance: Tokenize card via dedicated endpoint BEFORE sending to payment
@@ -916,6 +940,22 @@ const GuestCheckout = () => {
                 <h2 className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">
                   Consulta Agendada!
                 </h2>
+
+                {/* Payment status badge */}
+                {(pixQrCode || boletoUrl) && (
+                  <div className="mb-4">
+                    {paymentConfirmed ? (
+                      <Badge className="bg-green-500/15 text-green-700 dark:text-green-400 border-green-500/30 px-3 py-1">
+                        <Check className="w-3.5 h-3.5 mr-1.5" /> Pagamento Confirmado
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="border-amber-500/30 text-amber-600 dark:text-amber-400 px-3 py-1 animate-pulse">
+                        <Clock className="w-3.5 h-3.5 mr-1.5" /> Aguardando Pagamento...
+                      </Badge>
+                    )}
+                  </div>
+                )}
+
                 <p className="text-muted-foreground mb-1">
                   {selectedDoctor && selectedDate && selectedTime && (
                     <>Dr(a). {selectedDoctor.first_name} · {format(selectedDate, "dd/MM/yyyy")} às {selectedTime}h</>
