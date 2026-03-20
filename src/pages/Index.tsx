@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import { logError } from "@/lib/logger";
 import { useEffect, useState, forwardRef, lazy, Suspense } from "react";
 import { useTheme } from "next-themes";
