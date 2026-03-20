@@ -153,10 +153,10 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                           </Link>
                         </NavigationMenuLink>
                       </li>
-                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} imgSrc={telelaudoPingo} badge="Popular">
+                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" imgSrc={telelaudoPingo} badge="Popular">
                         Descontos em consultas e exames para toda a família.
                       </ListItem>
-                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope} imgSrc={mascotWave} badge="Rápido">
+                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" imgSrc={mascotWave} badge="Rápido">
                         Atendimento rápido, seguro e sem burocracia.
                       </ListItem>
                     </ul>
