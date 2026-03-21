@@ -7,22 +7,45 @@ import { log } from "@/lib/logger";
 interface SpeechToTextProps {
   onTranscript: (text: string) => void;
   className?: string;
+  /** Auto-stop after this many ms of silence (default 4000) */
+  silenceTimeout?: number;
 }
 
-const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
+const SpeechToText = ({ onTranscript, className, silenceTimeout = 4000 }: SpeechToTextProps) => {
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(true);
-  const recognitionRef = useRef<ReturnType<typeof Object> | null>(null);
-  
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const intentionalStopRef = useRef(false);
+
+  const clearSilenceTimer = useCallback(() => {
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+  }, []);
+
+  const stopListening = useCallback(() => {
+    clearSilenceTimer();
+    intentionalStopRef.current = true;
+    try { recognitionRef.current?.stop(); } catch {}
+    setListening(false);
+  }, [clearSilenceTimer]);
+
+  const resetSilenceTimer = useCallback(() => {
+    clearSilenceTimer();
+    silenceTimerRef.current = setTimeout(() => {
+      log("SpeechToText: silence timeout, stopping");
+      stopListening();
+      toast.info("🎙️ Ditado encerrado", { description: "Microfone desligado por inatividade." });
+    }, silenceTimeout);
+  }, [clearSilenceTimer, silenceTimeout, stopListening]);
 
   useEffect(() => {
-    const SpeechRecognition = (window as unknown as { SpeechRecognition?: typeof globalThis.SpeechRecognition; webkitSpeechRecognition?: typeof globalThis.SpeechRecognition }).SpeechRecognition || (window as unknown as { webkitSpeechRecognition?: typeof globalThis.SpeechRecognition }).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setSupported(false);
-      return;
-    }
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { setSupported(false); return; }
 
-    const recognition = new SpeechRecognition();
+    const recognition: SpeechRecognition = new SR();
     recognition.lang = "pt-BR";
     recognition.continuous = true;
     recognition.interimResults = true;
@@ -37,6 +60,7 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
       if (finalTranscript.trim()) {
         onTranscript(finalTranscript.trim());
       }
+      resetSilenceTimer();
     };
 
     recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -44,13 +68,13 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
       if (event.error === "not-allowed") {
         toast.error("Microfone bloqueado", { description: "Permita o acesso ao microfone nas configurações do navegador." });
       }
+      clearSilenceTimer();
       setListening(false);
     };
 
     recognition.onend = () => {
-      // Auto-restart if still listening
-      if (recognitionRef.current?._shouldRestart) {
-        try { recognition.start(); } catch {}
+      if (!intentionalStopRef.current) {
+        try { recognition.start(); } catch { setListening(false); }
       } else {
         setListening(false);
       }
@@ -59,29 +83,29 @@ const SpeechToText = ({ onTranscript, className }: SpeechToTextProps) => {
     recognitionRef.current = recognition;
 
     return () => {
-      try { recognition.stop(); } catch {}
+      clearSilenceTimer();
+      try { recognition.stop(); } catch {};
     };
-  }, [onTranscript]);
+  }, [onTranscript, resetSilenceTimer, clearSilenceTimer]);
 
   const toggleListening = useCallback(() => {
     if (!recognitionRef.current) return;
 
     if (listening) {
-      recognitionRef.current._shouldRestart = false;
-      recognitionRef.current.stop();
-      setListening(false);
+      stopListening();
     } else {
       try {
-        recognitionRef.current._shouldRestart = true;
+        intentionalStopRef.current = false;
         recognitionRef.current.start();
         setListening(true);
-        toast.success("🎙️ Ditado ativado", { description: "Fale e o texto será transcrito automaticamente." });
+        resetSilenceTimer();
+        toast.success("🎙️ Ditado ativado", { description: "Fale e o texto será transcrito. Para automaticamente após silêncio." });
       } catch (e) {
         log("SpeechToText start error:", e);
         toast.error("Não foi possível ativar o ditado");
       }
     }
-  }, [listening]);
+  }, [listening, stopListening, resetSilenceTimer]);
 
   if (!supported) return null;
 
