@@ -4,8 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Video, Shield, Clock, MapPin, Heart, Stethoscope, FileText, Smartphone,
-  CheckCircle2, ArrowRight, Users, Scale, HelpCircle, ChevronRight, MonitorSmartphone
+  CheckCircle2, ArrowRight, Users, Scale, HelpCircle, ChevronRight, MonitorSmartphone, Phone
 } from "lucide-react";
+import bannerDoctor from "@/assets/banner-teleconsulta-doctor.jpg";
+import bannerPatient from "@/assets/banner-teleconsulta-patient.jpg";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
