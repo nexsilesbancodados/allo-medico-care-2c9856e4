@@ -2705,14 +2705,54 @@ export type Database = {
           },
         ]
       }
+      wallet_transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          created_at: string
+          description: string
+          id: string
+          reference_id: string | null
+          reference_type: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       withdrawal_requests: {
         Row: {
+          admin_notes: string | null
           amount: number
           created_at: string
           id: string
           min_amount_validated: boolean | null
           notes: string | null
           pix_key: string | null
+          pix_key_type: string | null
+          processed_at: string | null
+          processed_by: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -2720,12 +2760,16 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           amount: number
           created_at?: string
           id?: string
           min_amount_validated?: boolean | null
           notes?: string | null
           pix_key?: string | null
+          pix_key_type?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -2733,12 +2777,16 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           amount?: number
           created_at?: string
           id?: string
           min_amount_validated?: boolean | null
           notes?: string | null
           pix_key?: string | null
+          pix_key_type?: string | null
+          processed_at?: string | null
+          processed_by?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -2803,6 +2851,16 @@ export type Database = {
           total_reviews?: number | null
           updated_at?: string | null
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      wallet_balances: {
+        Row: {
+          available_balance: number | null
+          total_earned: number | null
+          total_transactions: number | null
+          total_withdrawn: number | null
+          user_id: string | null
         }
         Relationships: []
       }

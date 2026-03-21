@@ -55,7 +55,7 @@ const DoctorEarnings = () => {
       });
     }
 
-    const [confirmedRes, pendingRes, withdrawRes] = await Promise.all([
+    const [confirmedRes, pendingRes, withdrawRes, walletRes] = await Promise.all([
       // Only count appointments with confirmed payment (issue #5)
       supabase
         .from("appointments")
@@ -77,6 +77,12 @@ const DoctorEarnings = () => {
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(20),
+      supabase
+        .from("wallet_transactions")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
 
     const confirmedAppts = confirmedRes.data ?? [];
@@ -88,11 +94,15 @@ const DoctorEarnings = () => {
     // Use price_at_booking if available, otherwise fallback (issue #13)
     const getPrice = (appt: { price_at_booking?: number | null }) => Number(appt.price_at_booking) || defaultPrice;
 
-    const totalEarned = confirmedAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0);
+    // Use wallet_transactions as source of truth if available
+    const walletTxns = walletRes.data ?? [];
+    const walletCredits = walletTxns.filter((t: any) => t.type === 'credit' || t.type === 'refund').reduce((s: number, t: any) => s + Number(t.amount), 0);
+    const walletDebits = walletTxns.filter((t: any) => t.type === 'withdrawal' || t.type === 'debit').reduce((s: number, t: any) => s + Number(t.amount), 0);
+    const hasWalletData = walletTxns.length > 0;
+
+    const totalEarned = hasWalletData ? walletCredits : confirmedAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0);
     const totalPending = pendingAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0);
-    const totalWithdrawn = (withdrawRes.data ?? [])
-      .filter(w => w.status === "approved")
-      .reduce((sum: number, w: { amount: number }) => sum + Number(w.amount), 0);
+    const availableBalance = hasWalletData ? Math.max(0, walletCredits - walletDebits) : Math.max(0, totalEarned - (withdrawRes.data ?? []).filter(w => w.status === "approved").reduce((sum: number, w: { amount: number }) => sum + Number(w.amount), 0));
 
     const now = new Date();
     const monthStart = startOfMonth(now);
@@ -103,7 +113,7 @@ const DoctorEarnings = () => {
       pending: totalPending,
       thisMonth: thisMonthAppts.reduce((sum, a) => sum + getPrice(a) * (doctorPercent / 100), 0),
       totalAppts: confirmedAppts.length,
-      available: Math.max(0, totalEarned - totalWithdrawn),
+      available: availableBalance,
     });
 
     // Last 6 months chart
