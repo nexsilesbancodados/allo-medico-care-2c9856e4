@@ -61,6 +61,9 @@ const LaudistaReportQueue = lazy(() => import("@/components/laudista/LaudistaRep
 const LaudistaMyReports = lazy(() => import("@/components/laudista/LaudistaMyReports"));
 const LaudistaStats = lazy(() => import("@/components/laudista/LaudistaStats"));
 const LaudistaTemplates = lazy(() => import("@/components/doctor/ReportTemplateManager"));
+const LaudistaEarnings = lazy(() => import("@/components/laudista/LaudistaEarnings"));
+const LaudistaWallet = lazy(() => import("@/components/laudista/LaudistaWallet"));
+const DoctorWallet = lazy(() => import("@/components/doctor/DoctorWallet"));
 const LaudistaExamRequest = lazy(() => import("@/components/doctor/ExamRequestForm"));
 const LaudistaReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
 const RenewalQueue = lazy(() => import("@/components/doctor/RenewalQueue"));
@@ -301,6 +304,7 @@ const Dashboard = () => {
       <Route path="doctor/report-queue" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportQueue /></RoleGuard>} />
       <Route path="doctor/report-editor/:examId" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamReportEditor /></RoleGuard>} />
       <Route path="doctor/exam-request" element={<RoleGuard allowed={["doctor"]} roles={roles}><ExamRequestForm /></RoleGuard>} />
+      <Route path="doctor/wallet" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorWallet /></RoleGuard>} />
 
       {/* Consultation */}
       <Route path="consultation/:appointmentId" element={<RoleGuard allowed={["doctor", "patient"]} roles={roles}><VideoRoom /></RoleGuard>} />
@@ -373,6 +377,8 @@ const Dashboard = () => {
       <Route path="laudista/stats" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaStats /></RoleGuard>} />
       <Route path="laudista/exam-request" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
       <Route path="laudista/report-editor/:examId" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaReportEditor /></RoleGuard>} />
+      <Route path="laudista/earnings" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaEarnings /></RoleGuard>} />
+      <Route path="laudista/wallet" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaWallet /></RoleGuard>} />
 
       {/* Fallback */}
       <Route
