@@ -916,11 +916,14 @@ const PacsViewer = ({
           {/* Image container with pan */}
           <div className="absolute inset-0 flex items-center justify-center"
             style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }}>
-            <div className="relative">
+            <div className="relative" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <canvas
                 ref={canvasRef}
                 className={loading && !canvasRef.current?.width ? "hidden" : ""}
                 style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
                   transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
                   filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}`,
                   transition: "filter 0.15s ease",
@@ -932,6 +935,9 @@ const PacsViewer = ({
                 ref={overlayCanvasRef}
                 className="absolute inset-0 pointer-events-none"
                 style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
                   transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
                 }}
               />
