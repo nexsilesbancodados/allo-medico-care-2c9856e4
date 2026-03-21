@@ -1755,8 +1755,25 @@ const ExamReportEditor = () => {
                 )}
               </div>
 
+              {/* Quality indicators */}
+              {!isReported && wordCount > 20 && (
+                <div className="px-3 py-2 border-t text-[10px] space-y-1" style={{ borderColor: 'hsl(220 15% 20%)', background: 'hsl(220 18% 10%)' }}>
+                  <p className="font-semibold text-[9px] uppercase tracking-wider" style={{ color: 'hsl(220 8% 50%)' }}>Qualidade do Laudo</p>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                    <span>{plainText.match(/t[ée]cnica/i) ? "✅" : "❌"} Técnica descrita</span>
+                    <span>{plainText.match(/achados/i) ? "✅" : "❌"} Achados documentados</span>
+                    <span>{plainText.match(/impress[ãa]o|conclus[ãa]o/i) ? "✅" : "⚠️"} Impressão/Conclusão</span>
+                    <span>{plainText.match(/recomend/i) ? "✅" : "ℹ️"} Recomendações</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span>{wordCount}w</span>
+                    <span>Score: {[/t[ée]cnica/i, /achados/i, /impress[ãa]o|conclus[ãa]o/i, /recomend/i].filter(r => r.test(plainText)).length}/4</span>
+                  </div>
+                </div>
+              )}
+
               {/* Footer */}
-              <div className="px-3 py-2 border-t border-border">
+              <div className="px-3 py-2 border-t" style={{ borderColor: 'hsl(220 15% 20%)' }}>
                 {isReported ? (
                   <div className="space-y-1.5">
                     <Badge className="bg-primary/10 text-primary border-primary/30" variant="outline">
@@ -1776,12 +1793,13 @@ const ExamReportEditor = () => {
                   </div>
                 ) : (
                   <>
-                    <Button onClick={() => setShowSignDialog(true)} disabled={signing || !content.trim() || wordCount < 5} className="w-full h-9">
+                    <Button onClick={() => setShowSignDialog(true)} disabled={signing || !content.trim() || wordCount < 5}
+                      className="w-full h-9" style={{ background: wordCount >= 150 ? 'hsl(142 70% 48%)' : undefined }}>
                       {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
                       {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
                     </Button>
                     {wordCount > 0 && wordCount < 50 && (
-                      <p className="text-[10px] text-warning mt-1 text-center">
+                      <p className="text-[10px] mt-1 text-center" style={{ color: 'hsl(38 95% 55%)' }}>
                         ⚠ Laudo muito curto — recomendado mínimo 50 palavras
                       </p>
                     )}
