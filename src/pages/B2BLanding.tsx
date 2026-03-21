@@ -135,6 +135,35 @@ const B2BLanding = () => {
                   </motion.div>
                 ))}
               </div>
+          </motion.div>
+          </div>
+        </section>
+
+        {/* ==================== BANNER CORPORATIVO ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
+          <img src={bannerCorporate} alt="Reunião corporativa sobre benefícios" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "320px" }}>
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs">Resultados Reais</Badge>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+                Reduza custos e<br />aumente a produtividade
+              </h2>
+              <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-md">
+                Empresas que adotam telemedicina corporativa reduzem em até 40% o absenteísmo e melhoram a satisfação dos colaboradores.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {["-40% absenteísmo", "+85% satisfação", "ROI em 3 meses"].map((stat) => (
+                  <span key={stat} className="px-3 py-1 rounded-full bg-white/15 text-white text-xs font-bold backdrop-blur-sm border border-white/10">
+                    {stat}
+                  </span>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
