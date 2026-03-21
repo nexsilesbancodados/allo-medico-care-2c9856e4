@@ -45,7 +45,7 @@ const WL_PRESETS = [
 
 type Measurement = {
   id: string;
-  type: "length" | "angle" | "ellipse";
+  type: "length" | "angle" | "ellipse" | "rectangle" | "bidirectional";
   points: { x: number; y: number }[];
   value?: string;
 };
@@ -74,7 +74,8 @@ const PacsViewer = ({
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [loading, setLoading] = useState(false);
-  const [tool, setTool] = useState<"pan" | "zoom" | "wl" | "measure" | "angle" | "ellipse" | "annotate" | "magnify">("pan");
+  const [tool, setTool] = useState<"pan" | "zoom" | "wl" | "measure" | "angle" | "ellipse" | "rectangle" | "bidirectional" | "annotate" | "magnify" | "stackScroll" | "windowROI" | "proof">("pan");
+  const [showMeasurementsPanel, setShowMeasurementsPanel] = useState(false);
   const [dicomInfo, setDicomInfo] = useState<Record<string, string>>({});
   const [flipH, setFlipH] = useState(false);
   const [flipV, setFlipV] = useState(false);
@@ -312,20 +313,20 @@ const PacsViewer = ({
     const x = (e.clientX - rect.left) / zoom;
     const y = (e.clientY - rect.top) / zoom;
 
-    if (tool === "pan") {
+    if (tool === "pan" || tool === "stackScroll") {
       isPanningRef.current = true;
       lastMouseRef.current = { x: e.clientX, y: e.clientY };
-    } else if (tool === "measure" || tool === "angle") {
+    } else if (tool === "measure" || tool === "angle" || tool === "bidirectional") {
       const newM: Measurement = {
         id: crypto.randomUUID(),
-        type: tool === "measure" ? "length" : "angle",
+        type: tool === "measure" ? "length" : tool === "angle" ? "angle" : "bidirectional",
         points: [{ x, y }],
       };
       setActiveMeasurement(newM);
-    } else if (tool === "ellipse") {
+    } else if (tool === "ellipse" || tool === "rectangle") {
       const newM: Measurement = {
         id: crypto.randomUUID(),
-        type: "ellipse",
+        type: tool === "ellipse" ? "ellipse" : "rectangle",
         points: [{ x, y }],
       };
       setActiveMeasurement(newM);
@@ -334,6 +335,14 @@ const PacsViewer = ({
       if (text) {
         setAnnotations(prev => [...prev, { id: crypto.randomUUID(), x, y, text }]);
       }
+    } else if (tool === "windowROI") {
+      // Window ROI - measure mean HU in a region
+      const newM: Measurement = {
+        id: crypto.randomUUID(),
+        type: "rectangle",
+        points: [{ x, y }],
+      };
+      setActiveMeasurement(newM);
     }
   };
 
@@ -355,12 +364,19 @@ const PacsViewer = ({
       setCursorPos({ x, y });
     }
 
-    // Pan
+    // Pan or Stack Scroll
     if (isPanningRef.current && tool === "pan") {
       const dx = e.clientX - lastMouseRef.current.x;
       const dy = e.clientY - lastMouseRef.current.y;
       setPanOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
       lastMouseRef.current = { x: e.clientX, y: e.clientY };
+    } else if (isPanningRef.current && tool === "stackScroll" && fileUrls.length > 1) {
+      const dy = e.clientY - lastMouseRef.current.y;
+      if (Math.abs(dy) > 15) {
+        if (dy > 0) setActiveIndex(i => Math.min(fileUrls.length - 1, i + 1));
+        else setActiveIndex(i => Math.max(0, i - 1));
+        lastMouseRef.current = { x: e.clientX, y: e.clientY };
+      }
     }
 
     // Active measurement
@@ -384,7 +400,6 @@ const PacsViewer = ({
         const dx = p[1].x - p[0].x;
         const dy = p[1].y - p[0].y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        // Use pixel spacing if available
         const spacing = dicomInfo["Pixel Spacing"];
         if (spacing) {
           const [sy, sx] = spacing.split("\\").map(Number);
@@ -398,7 +413,30 @@ const PacsViewer = ({
         const rx = Math.abs(p[1].x - p[0].x);
         const ry = Math.abs(p[1].y - p[0].y);
         const area = Math.PI * rx * ry;
-        value = `Area: ${area.toFixed(0)} px²`;
+        value = `Área: ${area.toFixed(0)} px²`;
+      } else if (activeMeasurement.type === "rectangle") {
+        const w = Math.abs(p[1].x - p[0].x);
+        const h = Math.abs(p[1].y - p[0].y);
+        const area = w * h;
+        const spacing = dicomInfo["Pixel Spacing"];
+        if (spacing) {
+          const [sy, sx] = spacing.split("\\").map(Number);
+          value = `${(w * sx).toFixed(1)}×${(h * sy).toFixed(1)} mm — Área: ${(area * sx * sy).toFixed(0)} mm²`;
+        } else {
+          value = `${w.toFixed(0)}×${h.toFixed(0)} px — Área: ${area.toFixed(0)} px²`;
+        }
+      } else if (activeMeasurement.type === "bidirectional") {
+        const dx = p[1].x - p[0].x;
+        const dy = p[1].y - p[0].y;
+        const major = Math.sqrt(dx * dx + dy * dy);
+        // Perpendicular bisector line (approximate)
+        const spacing = dicomInfo["Pixel Spacing"];
+        if (spacing) {
+          const [sy, sx] = spacing.split("\\").map(Number);
+          value = `Maior: ${(major * ((sx + sy) / 2)).toFixed(1)} mm`;
+        } else {
+          value = `Maior: ${major.toFixed(1)} px`;
+        }
       }
       setMeasurements(prev => [...prev, { ...activeMeasurement, value }]);
       setActiveMeasurement(null);
@@ -429,7 +467,6 @@ const PacsViewer = ({
         ctx.moveTo(m.points[0].x, m.points[0].y);
         ctx.lineTo(m.points[1].x, m.points[1].y);
         ctx.stroke();
-        // Endpoints
         [m.points[0], m.points[1]].forEach(p => {
           ctx.beginPath();
           ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
@@ -444,6 +481,45 @@ const PacsViewer = ({
         ctx.beginPath();
         ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
         ctx.stroke();
+      } else if (m.type === "rectangle") {
+        const x0 = Math.min(m.points[0].x, m.points[1].x);
+        const y0 = Math.min(m.points[0].y, m.points[1].y);
+        const w = Math.abs(m.points[1].x - m.points[0].x);
+        const h = Math.abs(m.points[1].y - m.points[0].y);
+        ctx.strokeRect(x0, y0, w, h);
+        // Corner markers
+        [m.points[0], m.points[1], { x: m.points[0].x, y: m.points[1].y }, { x: m.points[1].x, y: m.points[0].y }].forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = "#00ff00";
+          ctx.fill();
+        });
+      } else if (m.type === "bidirectional") {
+        // Main axis
+        ctx.beginPath();
+        ctx.moveTo(m.points[0].x, m.points[0].y);
+        ctx.lineTo(m.points[1].x, m.points[1].y);
+        ctx.stroke();
+        // Perpendicular bisector (short cross)
+        const cx = (m.points[0].x + m.points[1].x) / 2;
+        const cy = (m.points[0].y + m.points[1].y) / 2;
+        const dx = m.points[1].x - m.points[0].x;
+        const dy = m.points[1].y - m.points[0].y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const perpLen = len * 0.3;
+        const nx = -dy / len * perpLen;
+        const ny = dx / len * perpLen;
+        ctx.beginPath();
+        ctx.moveTo(cx + nx, cy + ny);
+        ctx.lineTo(cx - nx, cy - ny);
+        ctx.stroke();
+        // Endpoints
+        [m.points[0], m.points[1], { x: cx + nx, y: cy + ny }, { x: cx - nx, y: cy - ny }].forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = "#00ff00";
+          ctx.fill();
+        });
       } else if (m.type === "angle") {
         ctx.beginPath();
         ctx.moveTo(m.points[0].x, m.points[0].y);
@@ -473,13 +549,28 @@ const PacsViewer = ({
     });
   }, [measurements, activeMeasurement, annotations]);
 
+  // Download current image
+  const handleDownloadImage = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = `exam-${activeIndex + 1}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    toast.success("Imagem baixada!");
+  };
+
   const toolButtons: { id: typeof tool; icon: typeof Move; label: string }[] = [
+    { id: "stackScroll", icon: ChevronDown, label: "Stack Scroll" },
     { id: "pan", icon: Move, label: "Arrastar (Pan)" },
     { id: "zoom", icon: ZoomIn, label: "Zoom" },
     { id: "wl", icon: Sun, label: "Janela/Nível (W/L)" },
     { id: "measure", icon: Ruler, label: "Medição Linear" },
+    { id: "bidirectional", icon: Pencil, label: "Bidirecional" },
     { id: "angle", icon: Crosshair, label: "Ângulo" },
     { id: "ellipse", icon: Eye, label: "ROI Elíptica" },
+    { id: "rectangle", icon: Grid3X3, label: "Retângulo ROI" },
+    { id: "windowROI", icon: Monitor, label: "Janela ROI" },
     { id: "annotate", icon: Type, label: "Anotação" },
     { id: "magnify", icon: ZoomIn, label: "Lupa" },
   ];
@@ -635,6 +726,22 @@ const PacsViewer = ({
           )}
 
           <div className="flex-1" />
+
+          {/* Download */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+              onClick={handleDownloadImage}>
+              <Download className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Baixar imagem</TooltipContent></Tooltip>
+
+          {/* Measurements panel toggle */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${showMeasurementsPanel ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+              onClick={() => setShowMeasurementsPanel(p => !p)}>
+              <Ruler className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Medições</TooltipContent></Tooltip>
 
           {/* Info panel toggle */}
           <Tooltip><TooltipTrigger asChild>
@@ -828,12 +935,68 @@ const PacsViewer = ({
                 <div className="p-2 space-y-1">
                   {measurements.map((m, i) => (
                     <div key={m.id} className="text-[10px] text-green-400/70 flex justify-between">
-                      <span>{i + 1}. {m.type === "length" ? "Comprimento" : m.type === "angle" ? "Ângulo" : "ROI"}</span>
+                      <span>{i + 1}. {m.type === "length" ? "Comprimento" : m.type === "angle" ? "Ângulo" : m.type === "rectangle" ? "Retângulo" : m.type === "bidirectional" ? "Bidirecional" : "ROI"}</span>
                       <span className="font-mono">{m.value}</span>
                     </div>
                   ))}
                 </div>
               </>
+            )}
+          </div>
+        )}
+
+        {/* Measurements Panel (Zafaz-style) */}
+        {showMeasurementsPanel && (
+          <div className="w-56 border-l border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0">
+            <div className="p-1.5 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1.5 border-b border-white/5 font-semibold flex items-center justify-between">
+              Measurements
+              <Button size="icon" variant="ghost" className="h-5 w-5 text-white/30 hover:text-white" onClick={() => setShowMeasurementsPanel(false)}>
+                ×
+              </Button>
+            </div>
+            {measurements.length === 0 && annotations.length === 0 ? (
+              <div className="p-4 text-center text-[10px] text-white/20">
+                <Ruler className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                Nenhuma medição
+              </div>
+            ) : (
+              <div className="p-2 space-y-1.5">
+                {measurements.map((m, i) => (
+                  <div key={m.id} className="flex items-center justify-between gap-1 text-[10px] py-1 px-1.5 rounded bg-white/5 hover:bg-white/10 group">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-green-400/80">
+                        {m.type === "length" ? "📏" : m.type === "angle" ? "📐" : m.type === "ellipse" ? "⭕" : m.type === "rectangle" ? "⬜" : m.type === "bidirectional" ? "↔️" : "📍"}
+                      </span>
+                      <span className="text-white/50 shrink-0">{i + 1}.</span>
+                      <span className="text-white/70 truncate">{m.type === "length" ? "Comp." : m.type === "angle" ? "Ângulo" : m.type === "ellipse" ? "Elipse" : m.type === "rectangle" ? "Retângulo" : m.type === "bidirectional" ? "Bidirec." : m.type}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono text-green-400/90 text-[9px]">{m.value}</span>
+                      <Button size="icon" variant="ghost" className="h-4 w-4 opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-400"
+                        onClick={() => setMeasurements(prev => prev.filter(x => x.id !== m.id))}>
+                        ×
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {annotations.map((a, i) => (
+                  <div key={a.id} className="flex items-center justify-between gap-1 text-[10px] py-1 px-1.5 rounded bg-white/5 hover:bg-white/10 group">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-yellow-400/80">📝</span>
+                      <span className="text-white/70 truncate">{a.text}</span>
+                    </div>
+                    <Button size="icon" variant="ghost" className="h-4 w-4 opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-400"
+                      onClick={() => setAnnotations(prev => prev.filter(x => x.id !== a.id))}>
+                      ×
+                    </Button>
+                  </div>
+                ))}
+                <Separator className="bg-white/10 my-1" />
+                <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 text-red-400/60 hover:text-red-400 hover:bg-red-500/10"
+                  onClick={() => { setMeasurements([]); setAnnotations([]); }}>
+                  Limpar tudo
+                </Button>
+              </div>
             )}
           </div>
         )}
