@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { ArrowLeft, Download, ExternalLink, Loader2, Glasses, Eye, FileText } from "lucide-react";
 import { jsPDF } from "jspdf";
-import useProfile from "@/hooks/useProfile";
+import { useProfile } from "@/hooks/useProfile";
 
 interface OphExam {
   id: string;
