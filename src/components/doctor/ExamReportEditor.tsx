@@ -1438,6 +1438,35 @@ const ExamReportEditor = () => {
           {/* Report Editor */}
           <ResizablePanel defaultSize={45} minSize={25}>
             <div className="flex flex-col h-full bg-card">
+              {/* Clinical info bar */}
+              {examRequest?.clinical_info && (
+                <div className="px-3 py-2 border-b border-border bg-warning/5">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold text-warning uppercase tracking-wider">Informações Clínicas</p>
+                      <p className="text-xs text-foreground/80 leading-relaxed">{examRequest.clinical_info}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Patient info bar */}
+              {examRequest?.patient_id && (
+                <div className="px-3 py-1.5 border-b border-border bg-muted/30 flex items-center gap-2">
+                  <Clipboard className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground">
+                    Exame: <strong>{examRequest.exam_type}</strong>
+                    {examRequest.priority === "urgent" && <span className="text-destructive ml-2 font-bold">● URGENTE</span>}
+                    {examRequest.sla_deadline && (
+                      <span className="ml-2">
+                        SLA: {new Date(examRequest.sla_deadline).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
+
               {/* Editor header */}
               <div className="px-3 py-2 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
