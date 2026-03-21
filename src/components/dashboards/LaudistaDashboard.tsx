@@ -337,7 +337,7 @@ const LaudistaDashboard = () => {
             {[
               { label: "Fila Completa", icon: ClipboardList, href: "/dashboard/laudista/queue?role=doctor", color: "from-primary to-secondary" },
               { label: "Meus Laudos", icon: FileText, href: "/dashboard/laudista/my-reports?role=doctor", color: "from-secondary to-primary" },
-              { label: "Templates", icon: FileText, href: "/dashboard/laudista/templates?role=doctor", color: "from-success to-success/70" },
+              { label: "Financeiro", icon: BarChart2, href: "/dashboard/laudista/financeiro?role=doctor", color: "from-success to-success/70" },
             ].map(action => (
               <button
                 key={action.label}
