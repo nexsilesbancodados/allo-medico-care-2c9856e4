@@ -1,4 +1,4 @@
-import { Calendar, FileText, Users, DollarSign, Settings, User, FileBadge, Clock, History, CalendarDays, Upload, MessageCircle, SlidersHorizontal, Zap, RefreshCw, ClipboardList, FileImage, CreditCard } from "lucide-react";
+import { Calendar, FileText, Users, DollarSign, Settings, User, FileBadge, Clock, History, CalendarDays, Upload, MessageCircle, SlidersHorizontal, Zap, RefreshCw, CreditCard } from "lucide-react";
 
 export const getDoctorNav = (active: string) => [
   { label: "Início", href: "/dashboard?role=doctor", icon: <Calendar className="w-4 h-4" />, active: active === "home", group: "Principal" },
@@ -12,7 +12,6 @@ export const getDoctorNav = (active: string) => [
   { label: "Exames", href: "/dashboard/doctor/documents?role=doctor", icon: <Upload className="w-4 h-4" />, active: active === "documents", group: "Documentos" },
   { label: "Receitas", href: "/dashboard/prescriptions?role=doctor", icon: <FileText className="w-4 h-4" />, active: active === "prescriptions", group: "Documentos" },
   { label: "Atestados", href: "/dashboard/certificates?role=doctor", icon: <FileBadge className="w-4 h-4" />, active: active === "certificates", group: "Documentos" },
-  { label: "Fila de Laudos", href: "/dashboard/doctor/report-queue?role=doctor", icon: <ClipboardList className="w-4 h-4" />, active: active === "report-queue", group: "Telelaudo" },
   
   { label: "Ganhos", href: "/dashboard/earnings?role=doctor", icon: <DollarSign className="w-4 h-4" />, active: active === "earnings", group: "Financeiro" },
   { label: "Carteira", href: "/dashboard/doctor/wallet?role=doctor", icon: <CreditCard className="w-4 h-4" />, active: active === "wallet", group: "Financeiro" },
