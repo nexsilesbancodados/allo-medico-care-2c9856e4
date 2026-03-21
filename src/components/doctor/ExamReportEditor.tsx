@@ -549,13 +549,28 @@ const PacsViewer = ({
     });
   }, [measurements, activeMeasurement, annotations]);
 
+  // Download current image
+  const handleDownloadImage = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const link = document.createElement("a");
+    link.download = `exam-${activeIndex + 1}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    toast.success("Imagem baixada!");
+  };
+
   const toolButtons: { id: typeof tool; icon: typeof Move; label: string }[] = [
+    { id: "stackScroll", icon: ChevronDown, label: "Stack Scroll" },
     { id: "pan", icon: Move, label: "Arrastar (Pan)" },
     { id: "zoom", icon: ZoomIn, label: "Zoom" },
     { id: "wl", icon: Sun, label: "Janela/Nível (W/L)" },
     { id: "measure", icon: Ruler, label: "Medição Linear" },
+    { id: "bidirectional", icon: Pencil, label: "Bidirecional" },
     { id: "angle", icon: Crosshair, label: "Ângulo" },
     { id: "ellipse", icon: Eye, label: "ROI Elíptica" },
+    { id: "rectangle", icon: Grid3X3, label: "Retângulo ROI" },
+    { id: "windowROI", icon: Monitor, label: "Janela ROI" },
     { id: "annotate", icon: Type, label: "Anotação" },
     { id: "magnify", icon: ZoomIn, label: "Lupa" },
   ];
