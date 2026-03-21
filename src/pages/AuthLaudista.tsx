@@ -516,6 +516,14 @@ const AuthLaudista = () => {
                   <Button className="w-full bg-gradient-to-r from-[hsl(200,80%,35%)] to-[hsl(220,90%,50%)] text-white h-12 shadow-lg" size="lg" disabled={!specialty || !examTypes} onClick={() => setStep("apply")}>
                     Continuar para Cadastro <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
+                  <div className="flex items-center gap-2 my-1">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs text-muted-foreground">ou</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                  <Button variant="outline" className="w-full h-11" onClick={() => setStep("login")}>
+                    <LogIn className="w-4 h-4 mr-2" /> Já tenho conta — Entrar
+                  </Button>
                   <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => hasLoginAccess ? setStep("welcome") : navigate("/")} className="text-[hsl(210,85%,45%)] font-semibold hover:underline">← Voltar</button></p>
                 </div>
               )}
