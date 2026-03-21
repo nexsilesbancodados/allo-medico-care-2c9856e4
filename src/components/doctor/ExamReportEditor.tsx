@@ -400,7 +400,6 @@ const PacsViewer = ({
         const dx = p[1].x - p[0].x;
         const dy = p[1].y - p[0].y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        // Use pixel spacing if available
         const spacing = dicomInfo["Pixel Spacing"];
         if (spacing) {
           const [sy, sx] = spacing.split("\\").map(Number);
@@ -414,7 +413,30 @@ const PacsViewer = ({
         const rx = Math.abs(p[1].x - p[0].x);
         const ry = Math.abs(p[1].y - p[0].y);
         const area = Math.PI * rx * ry;
-        value = `Area: ${area.toFixed(0)} px²`;
+        value = `Área: ${area.toFixed(0)} px²`;
+      } else if (activeMeasurement.type === "rectangle") {
+        const w = Math.abs(p[1].x - p[0].x);
+        const h = Math.abs(p[1].y - p[0].y);
+        const area = w * h;
+        const spacing = dicomInfo["Pixel Spacing"];
+        if (spacing) {
+          const [sy, sx] = spacing.split("\\").map(Number);
+          value = `${(w * sx).toFixed(1)}×${(h * sy).toFixed(1)} mm — Área: ${(area * sx * sy).toFixed(0)} mm²`;
+        } else {
+          value = `${w.toFixed(0)}×${h.toFixed(0)} px — Área: ${area.toFixed(0)} px²`;
+        }
+      } else if (activeMeasurement.type === "bidirectional") {
+        const dx = p[1].x - p[0].x;
+        const dy = p[1].y - p[0].y;
+        const major = Math.sqrt(dx * dx + dy * dy);
+        // Perpendicular bisector line (approximate)
+        const spacing = dicomInfo["Pixel Spacing"];
+        if (spacing) {
+          const [sy, sx] = spacing.split("\\").map(Number);
+          value = `Maior: ${(major * ((sx + sy) / 2)).toFixed(1)} mm`;
+        } else {
+          value = `Maior: ${major.toFixed(1)} px`;
+        }
       }
       setMeasurements(prev => [...prev, { ...activeMeasurement, value }]);
       setActiveMeasurement(null);
