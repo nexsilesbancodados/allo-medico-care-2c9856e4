@@ -1238,7 +1238,7 @@ const ExamReportEditor = () => {
     setAiProcessing(true); setAiMode(mode);
     try {
       const { data, error } = await supabase.functions.invoke("structure-report", {
-        body: { raw_text: content, exam_type: examRequest?.exam_type || "", clinical_info: examRequest?.clinical_info || "", mode },
+        body: { raw_text: plainText, exam_type: examRequest?.exam_type || "", clinical_info: examRequest?.clinical_info || "", mode },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
