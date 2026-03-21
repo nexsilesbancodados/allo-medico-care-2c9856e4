@@ -825,10 +825,41 @@ const PacsViewer = ({
           )}
 
           {!activeUrl && !loading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/20">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white/20">
               <Monitor className="w-20 h-20" />
               <p className="text-sm">Nenhum arquivo de exame</p>
-              <p className="text-[10px] text-white/10">Faça upload de imagens DICOM para visualizar</p>
+              <p className="text-[10px] text-white/10">Faça upload de imagens DICOM ou imagens comuns para visualizar</p>
+              <label className="cursor-pointer">
+                <input type="file" className="hidden" accept=".dcm,.dicom,.jpg,.jpeg,.png,.bmp,.tiff,image/*" multiple
+                  onChange={async (e) => {
+                    const files = e.target.files;
+                    if (!files?.length || !examRequest?.id) return;
+                    const paths: string[] = [];
+                    for (const file of Array.from(files)) {
+                      const ext = file.name.split(".").pop() || "dcm";
+                      const path = `${examRequest.id}/${crypto.randomUUID()}.${ext}`;
+                      const { error } = await supabase.storage.from("exam-files").upload(path, file);
+                      if (error) { toast.error(`Erro ao enviar ${file.name}`); continue; }
+                      paths.push(path);
+                    }
+                    if (paths.length > 0) {
+                      const existing = (examRequest.file_urls as string[]) || [];
+                      const updated = [...existing, ...paths];
+                      await supabase.from("exam_requests" as any).update({ file_urls: updated } as any).eq("id", examRequest.id);
+                      // Resolve URLs
+                      const resolved = await Promise.all(paths.map(async p => {
+                        const { data } = await supabase.storage.from("exam-files").createSignedUrl(p, 3600);
+                        return data?.signedUrl || "";
+                      }));
+                      setFileUrls(prev => [...prev, ...resolved.filter(Boolean)]);
+                      toast.success(`${paths.length} arquivo(s) enviado(s)!`);
+                    }
+                  }}
+                />
+                <Button variant="outline" size="sm" className="text-white/50 border-white/20 hover:bg-white/10 hover:text-white" asChild>
+                  <span><Upload className="w-4 h-4 mr-2" /> Upload de Arquivos</span>
+                </Button>
+              </label>
             </div>
           )}
 
