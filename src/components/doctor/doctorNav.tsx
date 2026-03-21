@@ -1,4 +1,4 @@
-import { Calendar, FileText, Users, DollarSign, Settings, User, FileBadge, Clock, History, CalendarDays, Upload, MessageCircle, SlidersHorizontal, Zap, RefreshCw, CreditCard } from "lucide-react";
+import { Calendar, FileText, Users, DollarSign, Settings, User, FileBadge, Clock, History, CalendarDays, Upload, MessageCircle, SlidersHorizontal, Zap, RefreshCw, CreditCard, Pill } from "lucide-react";
 
 export const getDoctorNav = (active: string) => [
   { label: "Início", href: "/dashboard?role=doctor", icon: <Calendar className="w-4 h-4" />, active: active === "home", group: "Principal" },
