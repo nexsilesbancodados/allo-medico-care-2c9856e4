@@ -204,19 +204,26 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => (
     <Link to={item.href} onClick={onClick}
-      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors duration-150 relative ${
-        item.active ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 relative ${
+        item.active
+          ? "bg-gradient-to-r from-primary/12 to-primary/5 text-primary font-semibold shadow-sm shadow-primary/5"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/60 hover:translate-x-0.5"
       }`}
     >
       {item.active && (
-        <span className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full bg-primary" />
+        <span className="absolute left-0 top-[15%] bottom-[15%] w-[3px] rounded-r-full bg-gradient-to-b from-primary to-primary/60" />
       )}
-      <span className={`shrink-0 transition-colors ${item.active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}>
+      <span className={`shrink-0 transition-all duration-200 ${
+        item.active
+          ? "text-primary scale-110"
+          : "text-muted-foreground group-hover:text-foreground group-hover:scale-105"
+      }`}>
         {item.icon}
       </span>
       <span className="flex-1 truncate">{item.label}</span>
       {(item.badge ?? 0) > 0 && (
-        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-destructive text-white leading-none min-w-[18px] text-center tabular-nums">
+        <span className="relative text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-destructive text-white leading-none min-w-[18px] text-center tabular-nums">
+          <span className="absolute inset-0 rounded-full bg-destructive animate-ping opacity-40" />
           {(item.badge ?? 0) > 99 ? "99+" : item.badge}
         </span>
       )}
