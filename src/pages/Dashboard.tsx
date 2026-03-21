@@ -376,6 +376,8 @@ const Dashboard = () => {
       <Route path="laudista/stats" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaStats /></RoleGuard>} />
       <Route path="laudista/exam-request" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
       <Route path="laudista/report-editor/:examId" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaReportEditor /></RoleGuard>} />
+      <Route path="laudista/earnings" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaEarnings /></RoleGuard>} />
+      <Route path="laudista/wallet" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaWallet /></RoleGuard>} />
 
       {/* Fallback */}
       <Route
