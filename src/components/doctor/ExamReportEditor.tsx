@@ -935,6 +935,9 @@ const PacsViewer = ({
                 ref={overlayCanvasRef}
                 className="absolute inset-0 pointer-events-none"
                 style={{
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
                   transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
                 }}
               />
