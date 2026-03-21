@@ -3,35 +3,444 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import DashboardLayout from "@/components/dashboards/DashboardLayout";
-import { getDoctorNav } from "@/components/doctor/doctorNav";
-import { getLaudistaNav } from "@/components/laudista/laudistaNav";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import {
-  Loader2, FileSignature, Download, Eye, Save, ImageIcon,
-  Mic, MicOff, Sparkles, Wand2, BookText, ChevronDown, Lightbulb
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
+import {
+  Loader2, FileSignature, Download, Save, ImageIcon,
+  Mic, MicOff, Sparkles, Wand2, BookText, ChevronDown, Lightbulb,
+  ZoomIn, ZoomOut, RotateCw, Contrast, Maximize2, Sun, Move, Ruler,
+  ArrowLeft, ChevronLeft, ChevronRight, Grid3X3, Monitor, Eye,
+  Crosshair, RotateCcw, FlipHorizontal, FlipVertical, Pencil,
+  Type, Play, MoreHorizontal, Keyboard, FileText, Clock, AlertTriangle
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
 import jsPDF from "jspdf";
-import DicomViewer from "@/components/consultation/DicomViewer";
 import type { ExamRequest, ExamReport, ReportTemplate } from "@/types/domain";
 
+// ==================== DICOM VIEWER PANEL (PACS-style) ====================
+const PacsViewer = ({
+  fileUrls,
+  examRequest,
+}: {
+  fileUrls: string[];
+  examRequest: ExamRequest | null;
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [loading, setLoading] = useState(false);
+  const [tool, setTool] = useState<"pan" | "zoom" | "measure" | "annotate">("pan");
+  const [dicomInfo, setDicomInfo] = useState<Record<string, string>>({});
+  const [flipH, setFlipH] = useState(false);
+  const [flipV, setFlipV] = useState(false);
+
+  const activeUrl = fileUrls[activeIndex] || null;
+
+  useEffect(() => {
+    if (!activeUrl) return;
+    loadImage(activeUrl);
+  }, [activeUrl]);
+
+  const loadImage = async (url: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch(url);
+      const arrayBuffer = await response.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+
+      const isDicom =
+        bytes.length > 132 &&
+        bytes[128] === 0x44 && bytes[129] === 0x49 &&
+        bytes[130] === 0x43 && bytes[131] === 0x4d;
+
+      if (isDicom) {
+        await parseDicom(bytes);
+      } else {
+        const blob = new Blob([arrayBuffer]);
+        const imgUrl = URL.createObjectURL(blob);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext("2d");
+          if (ctx) ctx.drawImage(img, 0, 0);
+          setDicomInfo({ Formato: "Imagem" });
+          setLoading(false);
+        };
+        img.onerror = () => { setLoading(false); };
+        img.src = imgUrl;
+      }
+    } catch {
+      setLoading(false);
+    }
+  };
+
+  const parseDicom = async (bytes: Uint8Array) => {
+    try {
+      const info: Record<string, string> = {};
+      let offset = 132;
+      let rows = 0, cols = 0, bitsAllocated = 16, bitsStored = 12;
+      let pixelDataOffset = -1, samplesPerPixel = 1;
+      let photometric = "MONOCHROME2", wc = 0, ww = 0;
+      let pixelRep = 0, intercept = 0, slope = 1;
+
+      const readUint16 = (o: number) => bytes[o] | (bytes[o + 1] << 8);
+      const readUint32 = (o: number) => bytes[o] | (bytes[o + 1] << 8) | (bytes[o + 2] << 16) | (bytes[o + 3] << 24);
+      const readString = (o: number, len: number) => {
+        let str = "";
+        for (let i = 0; i < len; i++) {
+          const ch = bytes[o + i];
+          if (ch === 0) break;
+          str += String.fromCharCode(ch);
+        }
+        return str.trim();
+      };
+
+      while (offset < bytes.length - 8) {
+        const group = readUint16(offset);
+        const element = readUint16(offset + 2);
+        const vr = readString(offset + 4, 2);
+        let dataOffset: number, dataLength: number;
+        const longVRs = ["OB", "OD", "OF", "OL", "OW", "SQ", "UC", "UN", "UR", "UT"];
+        if (longVRs.includes(vr)) { dataLength = readUint32(offset + 8); dataOffset = offset + 12; }
+        else if (vr.match(/^[A-Z]{2}$/)) { dataLength = readUint16(offset + 6); dataOffset = offset + 8; }
+        else { dataLength = readUint32(offset + 4); dataOffset = offset + 8; }
+
+        if (dataLength === 0xFFFFFFFF || dataLength < 0) {
+          if (group === 0x7FE0 && element === 0x0010) { pixelDataOffset = dataOffset; break; }
+          offset = dataOffset; continue;
+        }
+
+        const tag = `${group.toString(16).padStart(4, "0")}${element.toString(16).padStart(4, "0")}`;
+        switch (tag) {
+          case "00100010": info["Paciente"] = readString(dataOffset, dataLength); break;
+          case "00100020": info["ID"] = readString(dataOffset, dataLength); break;
+          case "00080060": info["Modalidade"] = readString(dataOffset, dataLength); break;
+          case "00081030": info["Estudo"] = readString(dataOffset, dataLength); break;
+          case "0008103e": info["Série"] = readString(dataOffset, dataLength); break;
+          case "00080020": info["Data"] = readString(dataOffset, dataLength); break;
+          case "00080080": info["Instituição"] = readString(dataOffset, dataLength); break;
+          case "00280010": rows = readUint16(dataOffset); break;
+          case "00280011": cols = readUint16(dataOffset); break;
+          case "00280100": bitsAllocated = readUint16(dataOffset); break;
+          case "00280101": bitsStored = readUint16(dataOffset); break;
+          case "00280002": samplesPerPixel = readUint16(dataOffset); break;
+          case "00280004": photometric = readString(dataOffset, dataLength); break;
+          case "00281050": wc = parseFloat(readString(dataOffset, dataLength)) || 0; break;
+          case "00281051": ww = parseFloat(readString(dataOffset, dataLength)) || 0; break;
+          case "00280103": pixelRep = readUint16(dataOffset); break;
+          case "00281052": intercept = parseFloat(readString(dataOffset, dataLength)) || 0; break;
+          case "00281053": slope = parseFloat(readString(dataOffset, dataLength)) || 1; break;
+        }
+        if (group === 0x7FE0 && element === 0x0010) { pixelDataOffset = dataOffset; break; }
+        offset = dataOffset + dataLength;
+        if (offset % 2 !== 0) offset++;
+      }
+
+      info["Formato"] = "DICOM";
+      info["Dimensões"] = `${cols}×${rows}`;
+      info["Bits"] = `${bitsStored}/${bitsAllocated}`;
+      setDicomInfo(info);
+
+      if (pixelDataOffset > 0 && rows > 0 && cols > 0) {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        canvas.width = cols;
+        canvas.height = rows;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
+        const imgData = ctx.createImageData(cols, rows);
+        const totalPixels = rows * cols;
+
+        if (samplesPerPixel === 3) {
+          for (let i = 0; i < totalPixels; i++) {
+            imgData.data[i * 4] = bytes[pixelDataOffset + i * 3];
+            imgData.data[i * 4 + 1] = bytes[pixelDataOffset + i * 3 + 1];
+            imgData.data[i * 4 + 2] = bytes[pixelDataOffset + i * 3 + 2];
+            imgData.data[i * 4 + 3] = 255;
+          }
+        } else {
+          const pixelValues = new Float32Array(totalPixels);
+          let min = Infinity, max = -Infinity;
+          for (let i = 0; i < totalPixels; i++) {
+            let rawValue: number;
+            if (bitsAllocated === 16) {
+              const idx = pixelDataOffset + i * 2;
+              rawValue = bytes[idx] | (bytes[idx + 1] << 8);
+              if (pixelRep === 1 && rawValue > (1 << (bitsStored - 1))) rawValue -= (1 << bitsStored);
+            } else { rawValue = bytes[pixelDataOffset + i]; }
+            const hu = rawValue * slope + intercept;
+            pixelValues[i] = hu;
+            if (hu < min) min = hu;
+            if (hu > max) max = hu;
+          }
+          const center = wc || (min + max) / 2;
+          const width = ww || (max - min) || 1;
+          const lower = center - width / 2;
+          const upper = center + width / 2;
+          const isMono1 = photometric.includes("MONOCHROME1");
+          for (let i = 0; i < totalPixels; i++) {
+            let val = ((pixelValues[i] - lower) / (upper - lower)) * 255;
+            val = Math.max(0, Math.min(255, val));
+            if (isMono1) val = 255 - val;
+            imgData.data[i * 4] = val;
+            imgData.data[i * 4 + 1] = val;
+            imgData.data[i * 4 + 2] = val;
+            imgData.data[i * 4 + 3] = 255;
+          }
+        }
+        ctx.putImageData(imgData, 0, 0);
+      }
+    } catch { /* parse error */ }
+    setLoading(false);
+  };
+
+  const resetView = () => { setZoom(1); setRotation(0); setBrightness(100); setContrast(100); setFlipH(false); setFlipV(false); };
+
+  const toolButtons = [
+    { id: "pan" as const, icon: Move, label: "Arrastar" },
+    { id: "zoom" as const, icon: ZoomIn, label: "Zoom" },
+    { id: "measure" as const, icon: Ruler, label: "Medição" },
+    { id: "annotate" as const, icon: Pencil, label: "Anotação" },
+  ];
+
+  return (
+    <div className="flex flex-col h-full bg-black text-white/80">
+      {/* PACS Toolbar */}
+      <div className="flex items-center gap-0.5 px-2 py-1 bg-[hsl(var(--card))]/90 border-b border-white/10 text-[11px] flex-wrap">
+        <TooltipProvider delayDuration={200}>
+          {/* Series navigation */}
+          <div className="flex items-center gap-0.5 mr-2">
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+                onClick={() => setActiveIndex(i => Math.max(0, i - 1))} disabled={activeIndex === 0}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent side="bottom">Série anterior</TooltipContent></Tooltip>
+            <span className="text-[10px] text-white/50 min-w-[40px] text-center">
+              {fileUrls.length > 0 ? `${activeIndex + 1}/${fileUrls.length}` : "0/0"}
+            </span>
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+                onClick={() => setActiveIndex(i => Math.min(fileUrls.length - 1, i + 1))} disabled={activeIndex >= fileUrls.length - 1}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent side="bottom">Próxima série</TooltipContent></Tooltip>
+          </div>
+
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-1" />
+
+          {/* Tools */}
+          {toolButtons.map(t => (
+            <Tooltip key={t.id}><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost"
+                className={`h-7 w-7 ${tool === t.id ? "bg-primary/30 text-primary" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+                onClick={() => setTool(t.id)}>
+                <t.icon className="w-4 h-4" />
+              </Button>
+            </TooltipTrigger><TooltipContent side="bottom">{t.label}</TooltipContent></Tooltip>
+          ))}
+
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-1" />
+
+          {/* Zoom controls */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+              onClick={() => setZoom(z => Math.min(z + 0.25, 6))}>
+              <ZoomIn className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Zoom +</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+              onClick={() => setZoom(z => Math.max(z - 0.25, 0.1))}>
+              <ZoomOut className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Zoom −</TooltipContent></Tooltip>
+          <span className="text-[10px] text-white/40 mx-1 min-w-[32px] text-center">{Math.round(zoom * 100)}%</span>
+
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-1" />
+
+          {/* Window/Level */}
+          <div className="flex items-center gap-1">
+            <Sun className="w-3 h-3 text-white/40" />
+            <input type="range" min="0" max="300" value={brightness}
+              onChange={e => setBrightness(+e.target.value)}
+              className="w-14 h-1 accent-primary cursor-pointer" />
+          </div>
+          <div className="flex items-center gap-1">
+            <Contrast className="w-3 h-3 text-white/40" />
+            <input type="range" min="0" max="300" value={contrast}
+              onChange={e => setContrast(+e.target.value)}
+              className="w-14 h-1 accent-primary cursor-pointer" />
+          </div>
+
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-1" />
+
+          {/* Transform */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+              onClick={() => setRotation(r => (r + 90) % 360)}>
+              <RotateCw className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Rotacionar</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${flipH ? "bg-primary/30 text-primary" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+              onClick={() => setFlipH(f => !f)}>
+              <FlipHorizontal className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Espelhar H</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${flipV ? "bg-primary/30 text-primary" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+              onClick={() => setFlipV(f => !f)}>
+              <FlipVertical className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Espelhar V</TooltipContent></Tooltip>
+
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+              onClick={resetView}>
+              <RotateCcw className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Restaurar</TooltipContent></Tooltip>
+
+          <div className="flex-1" />
+
+          {/* Layout / Fullscreen */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+              onClick={() => containerRef.current?.requestFullscreen?.()}>
+              <Maximize2 className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Tela cheia</TooltipContent></Tooltip>
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10">
+              <Grid3X3 className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Layout</TooltipContent></Tooltip>
+        </TooltipProvider>
+      </div>
+
+      {/* Main viewer area */}
+      <div className="flex flex-1 min-h-0">
+        {/* Series thumbnails sidebar */}
+        {fileUrls.length > 1 && (
+          <div className="w-36 border-r border-white/10 bg-black/80 overflow-y-auto flex-shrink-0">
+            <div className="p-1.5 space-y-1.5">
+              {fileUrls.map((url, i) => {
+                const originalPath = (examRequest?.file_urls as string[])?.[i] || "";
+                const isDicom = originalPath.toLowerCase().endsWith(".dcm") || originalPath.toLowerCase().endsWith(".dicom");
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setActiveIndex(i)}
+                    className={`w-full rounded overflow-hidden border-2 transition-all ${
+                      i === activeIndex
+                        ? "border-primary shadow-[0_0_8px_hsl(var(--primary)/0.4)]"
+                        : "border-white/10 hover:border-white/30"
+                    }`}
+                  >
+                    <div className="aspect-square bg-black/60 flex items-center justify-center relative">
+                      {isDicom ? (
+                        <ImageIcon className="w-6 h-6 text-white/30" />
+                      ) : (
+                        <img src={url} alt={`Série ${i + 1}`} className="w-full h-full object-cover" />
+                      )}
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-1 py-0.5 flex justify-between">
+                        <span className="text-[9px] text-white/60">s: {i + 1}</span>
+                        <span className="text-[9px] text-primary">📁 {i + 1}</span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Main canvas */}
+        <div ref={containerRef} className="flex-1 relative overflow-hidden flex items-center justify-center bg-black">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          )}
+
+          {!activeUrl && !loading && (
+            <div className="flex flex-col items-center gap-3 text-white/30">
+              <Monitor className="w-16 h-16" />
+              <p className="text-sm">Nenhum arquivo de exame disponível</p>
+            </div>
+          )}
+
+          <canvas
+            ref={canvasRef}
+            className={loading && !canvasRef.current?.width ? "hidden" : ""}
+            style={{
+              transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
+              filter: `brightness(${brightness}%) contrast(${contrast}%)`,
+              transition: "transform 0.15s ease, filter 0.1s ease",
+              maxWidth: "100%",
+              maxHeight: "100%",
+              imageRendering: "auto",
+            }}
+          />
+
+          {/* Patient info overlay (top-left) */}
+          {Object.keys(dicomInfo).length > 0 && (
+            <div className="absolute top-2 left-2 text-[11px] font-mono text-cyan-300/80 leading-relaxed pointer-events-none">
+              {dicomInfo["Paciente"] && <div>Nome: {dicomInfo["Paciente"]}</div>}
+              {dicomInfo["Data"] && <div>Data: {dicomInfo["Data"]}</div>}
+              {dicomInfo["Modalidade"] && <div>Mod: {dicomInfo["Modalidade"]}</div>}
+              {dicomInfo["Estudo"] && <div>{dicomInfo["Estudo"]}</div>}
+            </div>
+          )}
+
+          {/* Dimensions overlay (top-right) */}
+          {dicomInfo["Dimensões"] && (
+            <div className="absolute top-2 right-2 text-[10px] font-mono text-white/40 pointer-events-none">
+              {dicomInfo["Dimensões"]} · {dicomInfo["Bits"]}
+            </div>
+          )}
+
+          {/* Clinical info overlay (bottom) */}
+          {examRequest?.clinical_info && (
+            <div className="absolute bottom-2 left-2 right-2 text-[10px] font-mono text-yellow-300/60 pointer-events-none truncate">
+              Clínica: {examRequest.clinical_info}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ==================== MAIN EDITOR ====================
 const ExamReportEditor = () => {
   const { examId } = useParams<{ examId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const isLaudista = location.pathname.includes("/laudista/");
-  const nav = isLaudista ? getLaudistaNav("queue") : getDoctorNav("report-queue");
   const backRoute = isLaudista ? "/dashboard/laudista/queue?role=doctor" : "/dashboard/doctor/report-queue?role=doctor";
   const queryClient = useQueryClient();
 
@@ -39,50 +448,35 @@ const ExamReportEditor = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [signing, setSigning] = useState(false);
   const [fileUrls, setFileUrls] = useState<string[]>([]);
-  const [activeDicomUrl, setActiveDicomUrl] = useState<string | null>(null);
-  const [fullscreenImageUrl, setFullscreenImageUrl] = useState<string | null>(null);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Voice dictation state
+  // Voice
   const [listening, setListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(true);
   const recognitionRef = useRef<Record<string, unknown> | null>(null);
   const [interimText, setInterimText] = useState("");
 
-  // AI structuring state
+  // AI
   const [aiProcessing, setAiProcessing] = useState(false);
   const [aiMode, setAiMode] = useState<"structure" | "improve" | "suggest_conclusion">("structure");
 
-  // Macros state
+  // Macros
   const [showMacros, setShowMacros] = useState(false);
   const macroCategories = [...new Set(REPORT_MACROS.map((m) => m.category))];
 
-  // ---- Audio Noise Suppression + Speech Recognition Setup ----
+  // ---- Speech Recognition ----
   useEffect(() => {
     const SpeechRecognition = (window as unknown as Record<string, unknown>).SpeechRecognition || (window as unknown as Record<string, unknown>).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setVoiceSupported(false);
-      return;
-    }
+    if (!SpeechRecognition) { setVoiceSupported(false); return; }
 
-    // Apply Web Audio API noise suppression constraints when available
     let audioStream: MediaStream | null = null;
     const initNoiseFilter = async () => {
       try {
         audioStream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-            // @ts-ignore - advanced constraints for noise reduction
-            suppressLocalAudioPlayback: true,
-          },
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
         });
-        // STT noise suppression active
-      } catch {
-        // Noise filter unavailable, using raw mic
-      }
+      } catch { /* fallback */ }
     };
 
     const recognition = new (SpeechRecognition as unknown as { new(): { lang: string; continuous: boolean; interimResults: boolean; onresult: ((e: SpeechRecognitionEvent) => void) | null; onerror: ((e: SpeechRecognitionErrorEvent) => void) | null; onend: (() => void) | null; start: () => void; stop: () => void } })();
@@ -91,46 +485,27 @@ const ExamReportEditor = () => {
     recognition.interimResults = true;
 
     recognition.onresult = (event: SpeechRecognitionEvent) => {
-      let interim = "";
-      let finalText = "";
+      let interim = "", finalText = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
-        if (event.results[i].isFinal) {
-          finalText += transcript + " ";
-        } else {
-          interim += transcript;
-        }
+        if (event.results[i].isFinal) finalText += transcript + " ";
+        else interim += transcript;
       }
       setInterimText(interim);
       if (finalText.trim()) {
-        setContent((prev) => {
+        setContent(prev => {
           const newContent = prev ? prev + " " + finalText.trim() : finalText.trim();
           const macro = findMacro(newContent);
-          if (macro) {
-            toast("📝 Macro aplicada", { description: macro.label });
-            return applyMacro(newContent, macro);
-          }
+          if (macro) { toast("📝 Macro aplicada", { description: macro.label }); return applyMacro(newContent, macro); }
           return newContent;
         });
       }
     };
-
-    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-      if (event.error === "not-allowed") {
-        toast.error("Microfone bloqueado", { description: "Permita o acesso ao microfone." });
-      }
-      setListening(false);
-      setInterimText("");
-    };
-
+    recognition.onerror = () => { setListening(false); setInterimText(""); };
     recognition.onend = () => {
-      const ref = recognitionRef.current as Record<string, unknown> | null;
-      if (ref?._shouldRestart) {
-        try { recognition.start(); } catch {}
-      } else {
-        setListening(false);
-        setInterimText("");
-      }
+      const ref = recognitionRef.current;
+      if (ref?._shouldRestart) { try { recognition.start(); } catch {} }
+      else { setListening(false); setInterimText(""); }
     };
 
     recognitionRef.current = recognition as unknown as Record<string, unknown>;
@@ -138,18 +513,17 @@ const ExamReportEditor = () => {
 
     return () => {
       try { (recognition as { stop: () => void }).stop(); } catch {}
-      if (audioStream) audioStream.getTracks().forEach((t) => t.stop());
+      if (audioStream) audioStream.getTracks().forEach(t => t.stop());
     };
   }, []);
 
   const toggleListening = useCallback(async () => {
-    const ref = recognitionRef.current as Record<string, unknown> | null;
+    const ref = recognitionRef.current;
     if (!ref) return;
     if (listening) {
       ref._shouldRestart = false;
       (ref as unknown as { stop: () => void }).stop();
-      setListening(false);
-      setInterimText("");
+      setListening(false); setInterimText("");
     } else {
       try {
         if (typeof ref._initNoise === "function") {
@@ -159,14 +533,12 @@ const ExamReportEditor = () => {
         ref._shouldRestart = true;
         (ref as unknown as { start: () => void }).start();
         setListening(true);
-        toast("🎙️ Ditado ativado", { description: "Filtro de ruído ativo. Fale e o texto será transcrito. Use /comandos para macros." });
-      } catch {
-        // Speech recognition start failed
-      }
+        toast("🎙️ Ditado ativado", { description: "Filtro de ruído ativo." });
+      } catch { /* fail */ }
     }
   }, [listening]);
 
-  // ---- Data Queries ----
+  // ---- Queries ----
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-editor", user?.id],
     queryFn: async () => {
@@ -229,7 +601,6 @@ const ExamReportEditor = () => {
   }, [doctorProfile?.id, examId, existingReport?.id, queryClient]);
 
   const handleContentChange = (newContent: string) => {
-    // Check for macro triggers on manual typing
     const macro = findMacro(newContent);
     if (macro) {
       const applied = applyMacro(newContent, macro);
@@ -244,16 +615,12 @@ const ExamReportEditor = () => {
     autoSaveTimerRef.current = setTimeout(() => autoSaveDraft(newContent), 5000);
   };
 
-  useEffect(() => {
-    if (existingReport?.content_text) setContent(existingReport.content_text);
-  }, [existingReport]);
+  useEffect(() => { if (existingReport?.content_text) setContent(existingReport.content_text); }, [existingReport]);
 
-  // Access control: verify reporter owns this report (issue #13 rodada 3)
   useEffect(() => {
     if (!existingReport || !doctorProfile) return;
     if (existingReport.reporter_id && existingReport.reporter_id !== doctorProfile.id) {
-      toast.error("Acesso negado", { description: "Este laudo não está atribuído a você." });
-      navigate(backRoute);
+      toast.error("Acesso negado"); navigate(backRoute);
     }
   }, [existingReport, doctorProfile]);
 
@@ -269,7 +636,7 @@ const ExamReportEditor = () => {
         const { data } = await supabase.storage.from("exam-files").createSignedUrl(path, 3600);
         return data?.signedUrl || "";
       })
-    ).then((resolved) => setFileUrls(resolved.filter(Boolean)));
+    ).then(resolved => setFileUrls(resolved.filter(Boolean)));
   }, [examRequest]);
 
   const handleTemplateSelect = (templateId: string) => {
@@ -278,62 +645,43 @@ const ExamReportEditor = () => {
     if (tpl) setContent(tpl.body_text);
   };
 
-  // ---- AI Processing ----
+  // ---- AI ----
   const handleAiProcess = async (mode: "structure" | "improve" | "suggest_conclusion") => {
-    if (!content.trim()) {
-      toast.error("Texto vazio", { description: "Escreva ou dite o texto antes de usar a IA." });
-      return;
-    }
-    setAiProcessing(true);
-    setAiMode(mode);
+    if (!content.trim()) { toast.error("Texto vazio"); return; }
+    setAiProcessing(true); setAiMode(mode);
     try {
       const { data, error } = await supabase.functions.invoke("structure-report", {
-        body: {
-          raw_text: content,
-          exam_type: examRequest?.exam_type || "",
-          clinical_info: examRequest?.clinical_info || "",
-          mode,
-        },
+        body: { raw_text: content, exam_type: examRequest?.exam_type || "", clinical_info: examRequest?.clinical_info || "", mode },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (data?.structured_text) {
-        if (mode === "suggest_conclusion") {
-          setContent((prev) => prev + "\n\n" + data.structured_text);
-        } else {
-          setContent(data.structured_text);
-        }
-        toast.success("✨ IA aplicada", { description: mode === "structure" ? "Laudo estruturado com sucesso!" : mode === "improve" ? "Texto melhorado!" : "Conclusão sugerida!" });
+        if (mode === "suggest_conclusion") setContent(prev => prev + "\n\n" + data.structured_text);
+        else setContent(data.structured_text);
+        toast.success("✨ IA aplicada");
       }
     } catch (err: unknown) {
       toast.error("Erro na IA", { description: err instanceof Error ? err.message : "Tente novamente." });
-    } finally {
-      setAiProcessing(false);
-    }
+    } finally { setAiProcessing(false); }
   };
 
-  // ---- Insert macro ----
   const insertMacro = (macroId: string) => {
-    const macro = REPORT_MACROS.find((m) => m.id === macroId);
+    const macro = REPORT_MACROS.find(m => m.id === macroId);
     if (!macro) return;
-    setContent((prev) => prev ? `${prev}\n\n${macro.text}` : macro.text);
+    setContent(prev => prev ? `${prev}\n\n${macro.text}` : macro.text);
     setShowMacros(false);
     toast("📝 Macro inserida", { description: macro.label });
   };
 
-  // ---- Sign & Finalize ----
+  // ---- Sign ----
   const handleSignAndFinalize = async () => {
-    if (!doctorProfile?.id || !content.trim()) {
-      toast.error("Erro", { description: "Preencha o laudo antes de assinar." });
-      return;
-    }
+    if (!doctorProfile?.id || !content.trim()) { toast.error("Preencha o laudo antes de assinar."); return; }
     setSigning(true);
     try {
       const documentHash = await gerarHashDocumento(content);
       const verificationCode = gerarCodigoVerificacao();
       const doctorName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim();
 
-      // Generate PDF
       const pdf = new jsPDF();
       pdf.setFontSize(16);
       pdf.text("LAUDO MÉDICO", 105, 20, { align: "center" });
@@ -361,7 +709,6 @@ const ExamReportEditor = () => {
       pdf.setFontSize(7);
       pdf.text(`Código de Verificação: ${verificationCode}`, 20, 280);
       pdf.text(`Hash SHA-256: ${documentHash.substring(0, 32)}...`, 20, 284);
-      pdf.text("Verifique em: /validar", 20, 288);
 
       const pdfBlob = pdf.output("blob");
       const pdfPath = `reports/${examId}/${crypto.randomUUID()}.pdf`;
@@ -385,12 +732,10 @@ const ExamReportEditor = () => {
 
       await supabase.from("exam_requests" as any).update({ status: "reported" } as any).eq("id", examId);
 
-      // ICP-Brasil (optional)
       try {
-        const icpRes = await supabase.functions.invoke("vidaas-sign", {
+        await supabase.functions.invoke("vidaas-sign", {
           body: { action: "sign", document_hash: documentHash, document_type: "exam_report", doctor_name: doctorName, doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`, verification_code: verificationCode },
         });
-        if (icpRes.data?.success) { /* ICP signed */ }
       } catch {}
 
       await supabase.from("document_verifications").insert({
@@ -398,7 +743,6 @@ const ExamReportEditor = () => {
         patient_name: "Paciente", document_type: "exam_report", document_hash: documentHash, verification_code: verificationCode,
       });
 
-      // Notifications
       if (examRequest?.requesting_doctor_id) {
         const { data: reqDoctor } = await supabase.from("doctor_profiles").select("user_id").eq("id", examRequest.requesting_doctor_id).maybeSingle();
         if (reqDoctor?.user_id) {
@@ -420,227 +764,215 @@ const ExamReportEditor = () => {
       navigate(backRoute);
     } catch (err: unknown) {
       toast.error("Erro ao assinar", { description: err instanceof Error ? err.message : "Erro desconhecido" });
-    } finally {
-      setSigning(false);
-    }
+    } finally { setSigning(false); }
   };
+
+  // ---- Keyboard shortcuts ----
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        if (content.trim()) autoSaveDraft(content);
+        toast.success("Salvo!");
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        if (!isReported) handleSignAndFinalize();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [content, autoSaveDraft]);
 
   if (loadingExam) {
     return (
-      <DashboardLayout nav={nav} title="Editor de Laudo">
-        <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
-      </DashboardLayout>
+      <div className="h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+      </div>
     );
   }
 
   const isReported = examRequest?.status === "reported" && existingReport?.signed_at;
 
   return (
-    <DashboardLayout nav={nav} title="Editor de Laudo">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Left: File Viewer */}
-        <Card className="h-[calc(100vh-12rem)]">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <Eye className="w-4 h-4" />
-              Arquivos do Exame — {examRequest?.exam_type}
-              {examRequest?.priority === "urgent" && <Badge variant="destructive">Urgente</Badge>}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-full pb-4">
-            {examRequest?.clinical_info && (
-              <div className="mb-3 p-3 bg-muted rounded-md text-sm">
-                <strong>Anamnese:</strong> {examRequest.clinical_info}
-              </div>
-            )}
-            {activeDicomUrl && (
-              <div className="mb-3 h-80">
-                <DicomViewer fileUrl={activeDicomUrl} fileName="Exame DICOM" />
-              </div>
-            )}
-            <div className="space-y-2 overflow-y-auto" style={{ maxHeight: activeDicomUrl ? "calc(100% - 28rem)" : "calc(100% - 6rem)" }}>
-              {fileUrls.map((url, i) => {
-                const originalPath = (examRequest?.file_urls as string[])?.[i] || "";
-                const isPdf = originalPath.toLowerCase().endsWith(".pdf");
-                const isDicom = originalPath.toLowerCase().endsWith(".dcm") || originalPath.toLowerCase().endsWith(".dicom");
-                return (
-                  <div key={i} className="border rounded-md overflow-hidden">
-                    {isDicom ? (
-                      <Button variant="outline" className="w-full h-16" onClick={() => setActiveDicomUrl(url)}>
-                        <ImageIcon className="w-4 h-4 mr-2" /> Abrir DICOM #{i + 1}
-                      </Button>
-                    ) : isPdf ? (
-                      <iframe src={url} className="w-full h-96" title={`Exame ${i + 1}`} />
-                    ) : (
-                      <img src={url} alt={`Exame ${i + 1}`} className="w-full object-contain max-h-96 cursor-pointer hover:opacity-90 transition-opacity" onClick={() => setFullscreenImageUrl(url)} title="Clique para ver em tela cheia" />
-                    )}
-                  </div>
-                );
-              })}
-              {fileUrls.length === 0 && <p className="text-muted-foreground text-sm text-center py-8">Nenhum arquivo disponível.</p>}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Right: Report Editor */}
-        <Card className="h-[calc(100vh-12rem)] flex flex-col">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm flex items-center gap-2">
-              <FileSignature className="w-4 h-4" />
-              {isReported ? "Laudo Finalizado" : "Redigir Laudo"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex-1 flex flex-col gap-3 overflow-hidden">
-            {/* Toolbar: Template + Voice + AI + Macros */}
-            {!isReported && (
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Template selector */}
-                {templates && templates.length > 0 && (
-                  <Select value={selectedTemplateId} onValueChange={handleTemplateSelect}>
-                    <SelectTrigger className="h-8 text-xs w-auto min-w-[140px]">
-                      <SelectValue placeholder="Template..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {templates.map((t: { id: string; title: string; exam_type: string }) => (
-                        <SelectItem key={t.id} value={t.id}>{t.title} ({t.exam_type})</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-
-                {/* Voice dictation */}
-                {voiceSupported && (
-                  <Button
-                    type="button"
-                    variant={listening ? "destructive" : "outline"}
-                    size="sm"
-                    onClick={toggleListening}
-                    className="h-8 text-xs"
-                  >
-                    {listening ? (
-                      <><MicOff className="w-3.5 h-3.5 mr-1" /><span className="animate-pulse">Ditando...</span></>
-                    ) : (
-                      <><Mic className="w-3.5 h-3.5 mr-1" />Ditar</>
-                    )}
-                  </Button>
-                )}
-
-                {/* AI Tools */}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 text-xs" disabled={aiProcessing}>
-                      {aiProcessing ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Sparkles className="w-3.5 h-3.5 mr-1" />}
-                      IA <ChevronDown className="w-3 h-3 ml-1" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-64 p-2" align="start">
-                    <div className="space-y-1">
-                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-8" onClick={() => handleAiProcess("structure")} disabled={aiProcessing}>
-                        <Wand2 className="w-3.5 h-3.5 mr-2" /> Estruturar Laudo
-                      </Button>
-                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-8" onClick={() => handleAiProcess("improve")} disabled={aiProcessing}>
-                        <Sparkles className="w-3.5 h-3.5 mr-2" /> Melhorar Redação
-                      </Button>
-                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-8" onClick={() => handleAiProcess("suggest_conclusion")} disabled={aiProcessing}>
-                        <Lightbulb className="w-3.5 h-3.5 mr-2" /> Sugerir Conclusão
-                      </Button>
-                    </div>
-                    <p className="text-[10px] text-muted-foreground mt-2 px-1">A IA auxilia na redação. Sempre revise o resultado.</p>
-                  </PopoverContent>
-                </Popover>
-
-                {/* Macros */}
-                <Popover open={showMacros} onOpenChange={setShowMacros}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="h-8 text-xs">
-                      <BookText className="w-3.5 h-3.5 mr-1" /> Macros <ChevronDown className="w-3 h-3 ml-1" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-72 p-2 max-h-80 overflow-y-auto" align="start">
-                    {macroCategories.map((cat) => (
-                      <div key={cat} className="mb-2">
-                        <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-1">{cat}</p>
-                        {REPORT_MACROS.filter((m) => m.category === cat).map((m) => (
-                          <Button key={m.id} variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => insertMacro(m.id)}>
-                            {m.label} <span className="ml-auto text-muted-foreground font-mono">{m.trigger}</span>
-                          </Button>
-                        ))}
-                      </div>
-                    ))}
-                    <p className="text-[10px] text-muted-foreground mt-1 px-1">💡 Digite o comando (ex: /torax-normal) no editor ou dite por voz.</p>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            )}
-
-            {/* Interim voice text preview */}
-            {listening && interimText && (
-              <div className="bg-primary/5 border border-primary/20 rounded-md px-3 py-2 text-sm text-primary animate-pulse">
-                🎙️ {interimText}
-              </div>
-            )}
-
-            {/* Editor */}
-            <div className="relative flex-1 min-h-0">
-              <Textarea
-                value={content}
-                onChange={(e) => handleContentChange(e.target.value)}
-                placeholder={listening ? "Fale agora... o texto aparecerá aqui automaticamente." : "Digite o laudo ou use o botão Ditar para transcrição por voz...\n\nDica: digite /torax-normal para inserir um laudo modelo."}
-                className="h-full min-h-[200px] resize-none text-sm font-mono"
-                readOnly={!!isReported}
-              />
-              {autoSaveStatus !== "idle" && !isReported && (
-                <div className="absolute top-2 right-2 flex items-center gap-1 text-xs text-muted-foreground bg-background/80 rounded px-2 py-1">
-                  {autoSaveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin" /> Salvando...</>}
-                  {autoSaveStatus === "saved" && <><Save className="w-3 h-3 text-success" /> Salvo</>}
-                </div>
-              )}
-              {aiProcessing && (
-                <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-md">
-                  <div className="flex items-center gap-2 bg-background border rounded-lg px-4 py-2 shadow-lg">
-                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                    <span className="text-sm">
-                      {aiMode === "structure" ? "Estruturando laudo..." : aiMode === "improve" ? "Melhorando redação..." : "Gerando conclusão..."}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {isReported ? (
-              <div className="space-y-2">
-                <Badge className="bg-primary/10 text-primary border-primary/30" variant="outline">
-                  ✅ Assinado em {new Date(existingReport.signed_at).toLocaleString("pt-BR")}
-                </Badge>
-                <p className="text-xs text-muted-foreground">
-                  Código: {existingReport.verification_code} | Hash: {existingReport.document_hash?.substring(0, 16)}...
-                </p>
-                {existingReport.pdf_url && (
-                  <Button size="sm" variant="outline" onClick={async () => {
-                    const { data } = await supabase.storage.from("prescriptions").createSignedUrl(existingReport.pdf_url, 3600);
-                    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-                  }}>
-                    <Download className="w-3 h-3 mr-1" /> Baixar PDF
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <Button onClick={handleSignAndFinalize} disabled={signing || !content.trim()} className="w-full">
-                {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
-                {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
+      {/* Top bar */}
+      <div className="flex items-center gap-3 px-3 py-1.5 border-b border-border bg-card text-sm shrink-0">
+        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(backRoute)}>
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
+        <div className="flex items-center gap-2 min-w-0">
+          <FileSignature className="w-4 h-4 text-primary shrink-0" />
+          <span className="font-semibold truncate">Editor de Laudo</span>
+          {examRequest?.exam_type && (
+            <Badge variant="outline" className="text-[10px] shrink-0">{examRequest.exam_type}</Badge>
+          )}
+          {examRequest?.priority === "urgent" && (
+            <Badge variant="destructive" className="text-[10px] shrink-0">
+              <AlertTriangle className="w-3 h-3 mr-0.5" /> Urgente
+            </Badge>
+          )}
+        </div>
+        <div className="flex-1" />
+        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+          <Keyboard className="w-3 h-3" />
+          <span>Ctrl+S salvar · Ctrl+Enter assinar</span>
+        </div>
       </div>
 
-      {/* Fullscreen image dialog */}
-      <Dialog open={!!fullscreenImageUrl} onOpenChange={() => setFullscreenImageUrl(null)}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] p-2 flex items-center justify-center">
-          {fullscreenImageUrl && <img src={fullscreenImageUrl} alt="Exame em tela cheia" className="max-w-full max-h-[90vh] object-contain" />}
-        </DialogContent>
-      </Dialog>
-    </DashboardLayout>
+      {/* Main content: PACS viewer + Editor */}
+      <div className="flex-1 min-h-0">
+        <ResizablePanelGroup direction="horizontal">
+          {/* DICOM Viewer */}
+          <ResizablePanel defaultSize={55} minSize={30}>
+            <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} />
+          </ResizablePanel>
+
+          <ResizableHandle withHandle />
+
+          {/* Report Editor */}
+          <ResizablePanel defaultSize={45} minSize={25}>
+            <div className="flex flex-col h-full bg-card">
+              {/* Editor header */}
+              <div className="px-3 py-2 border-b border-border flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-primary" />
+                  <span className="font-medium text-sm">{isReported ? "Laudo Finalizado" : "Redigir Laudo"}</span>
+                </div>
+                {autoSaveStatus !== "idle" && !isReported && (
+                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                    {autoSaveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin" /> Salvando...</>}
+                    {autoSaveStatus === "saved" && <><Save className="w-3 h-3 text-green-500" /> Salvo</>}
+                  </div>
+                )}
+              </div>
+
+              {/* Editor toolbar */}
+              {!isReported && (
+                <div className="flex flex-wrap items-center gap-1.5 px-3 py-1.5 border-b border-border bg-muted/30">
+                  {templates && templates.length > 0 && (
+                    <Select value={selectedTemplateId} onValueChange={handleTemplateSelect}>
+                      <SelectTrigger className="h-7 text-[11px] w-auto min-w-[120px]">
+                        <SelectValue placeholder="Template..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {templates.map((t: { id: string; title: string; exam_type: string }) => (
+                          <SelectItem key={t.id} value={t.id}>{t.title} ({t.exam_type})</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+
+                  {voiceSupported && (
+                    <Button type="button" variant={listening ? "destructive" : "outline"} size="sm"
+                      onClick={toggleListening} className="h-7 text-[11px] px-2">
+                      {listening ? <><MicOff className="w-3 h-3 mr-1" /><span className="animate-pulse">Ditando</span></> :
+                        <><Mic className="w-3 h-3 mr-1" />Ditar</>}
+                    </Button>
+                  )}
+
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-7 text-[11px] px-2" disabled={aiProcessing}>
+                        {aiProcessing ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Sparkles className="w-3 h-3 mr-1" />}
+                        IA <ChevronDown className="w-2.5 h-2.5 ml-0.5" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-56 p-1.5" align="start">
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => handleAiProcess("structure")} disabled={aiProcessing}>
+                        <Wand2 className="w-3 h-3 mr-2" /> Estruturar Laudo
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => handleAiProcess("improve")} disabled={aiProcessing}>
+                        <Sparkles className="w-3 h-3 mr-2" /> Melhorar Redação
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => handleAiProcess("suggest_conclusion")} disabled={aiProcessing}>
+                        <Lightbulb className="w-3 h-3 mr-2" /> Sugerir Conclusão
+                      </Button>
+                      <p className="text-[9px] text-muted-foreground mt-1 px-1">A IA auxilia na redação. Revise sempre.</p>
+                    </PopoverContent>
+                  </Popover>
+
+                  <Popover open={showMacros} onOpenChange={setShowMacros}>
+                    <PopoverTrigger asChild>
+                      <Button variant="outline" size="sm" className="h-7 text-[11px] px-2">
+                        <BookText className="w-3 h-3 mr-1" /> Macros
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-64 p-1.5 max-h-72 overflow-y-auto" align="start">
+                      {macroCategories.map(cat => (
+                        <div key={cat} className="mb-1.5">
+                          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-0.5">{cat}</p>
+                          {REPORT_MACROS.filter(m => m.category === cat).map(m => (
+                            <Button key={m.id} variant="ghost" size="sm" className="w-full justify-start text-[11px] h-6" onClick={() => insertMacro(m.id)}>
+                              {m.label} <span className="ml-auto text-muted-foreground font-mono text-[9px]">{m.trigger}</span>
+                            </Button>
+                          ))}
+                        </div>
+                      ))}
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+
+              {/* Voice interim */}
+              {listening && interimText && (
+                <div className="mx-3 mt-1.5 bg-primary/5 border border-primary/20 rounded px-2 py-1 text-xs text-primary animate-pulse">
+                  🎙️ {interimText}
+                </div>
+              )}
+
+              {/* Editor area */}
+              <div className="flex-1 relative min-h-0 p-3">
+                <Textarea
+                  value={content}
+                  onChange={e => handleContentChange(e.target.value)}
+                  placeholder={listening ? "Fale agora..." : "Digite o laudo ou use /comandos para macros..."}
+                  className="h-full resize-none text-sm font-mono leading-relaxed border-0 bg-transparent focus-visible:ring-0 p-0"
+                  readOnly={!!isReported}
+                />
+                {aiProcessing && (
+                  <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-md">
+                    <div className="flex items-center gap-2 bg-card border rounded-lg px-4 py-2 shadow-lg">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      <span className="text-sm">
+                        {aiMode === "structure" ? "Estruturando..." : aiMode === "improve" ? "Melhorando..." : "Gerando conclusão..."}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-3 py-2 border-t border-border">
+                {isReported ? (
+                  <div className="space-y-1.5">
+                    <Badge className="bg-primary/10 text-primary border-primary/30" variant="outline">
+                      ✅ Assinado em {existingReport?.signed_at ? new Date(existingReport.signed_at).toLocaleString("pt-BR") : ""}
+                    </Badge>
+                    <p className="text-[10px] text-muted-foreground">
+                      Código: {existingReport?.verification_code} | Hash: {existingReport?.document_hash?.substring(0, 16)}...
+                    </p>
+                    {existingReport?.pdf_url && (
+                      <Button size="sm" variant="outline" onClick={async () => {
+                        const { data } = await supabase.storage.from("prescriptions").createSignedUrl(existingReport.pdf_url!, 3600);
+                        if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                      }}>
+                        <Download className="w-3 h-3 mr-1" /> Baixar PDF
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <Button onClick={handleSignAndFinalize} disabled={signing || !content.trim()} className="w-full h-9">
+                    {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
+                    {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+      </div>
+    </div>
   );
 };
 
