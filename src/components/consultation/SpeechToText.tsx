@@ -45,7 +45,7 @@ const SpeechToText = ({ onTranscript, className, silenceTimeout = 4000 }: Speech
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { setSupported(false); return; }
 
-    const recognition: SpeechRecognition = new SR();
+    const recognition = new SR();
     recognition.lang = "pt-BR";
     recognition.continuous = true;
     recognition.interimResults = true;
