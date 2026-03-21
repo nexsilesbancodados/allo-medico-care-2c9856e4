@@ -5,8 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   FileText, Shield, Clock, Upload, CheckCircle2, ArrowRight, Users,
-  Zap, Monitor, Lock, Stethoscope, ChevronRight, Brain, Fingerprint, Bell
+  Zap, Monitor, Lock, Stethoscope, ChevronRight, Brain, Fingerprint, Bell, TrendingUp
 } from "lucide-react";
+import bannerTelelaudoWorkflow from "@/assets/banner-telelaudo-workflow.jpg";
+import bannerLaudoDigital from "@/assets/banner-laudo-digital.png";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
