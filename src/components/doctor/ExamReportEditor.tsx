@@ -1359,7 +1359,7 @@ const ExamReportEditor = () => {
       pdf.setFontSize(9);
       y += 6;
 
-      const contentLines = pdf.splitTextToSize(content, 170);
+      const contentLines = pdf.splitTextToSize(contentForPdf, 170);
       for (const line of contentLines) {
         if (y > 260) {
           pdf.addPage();
