@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
@@ -18,13 +17,13 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import {
-  Loader2, FileSignature, Download, Save, ImageIcon, Upload,
+  Loader2, FileSignature, Download, Save, Upload,
   Mic, MicOff, Sparkles, Wand2, BookText, ChevronDown, Lightbulb,
   ZoomIn, ZoomOut, RotateCw, Contrast, Maximize2, Sun, Move, Ruler,
   ArrowLeft, ChevronLeft, ChevronRight, Grid3X3, Monitor, Eye,
   Crosshair, RotateCcw, FlipHorizontal, FlipVertical, Pencil,
-  Type, Play, MoreHorizontal, Keyboard, FileText, Clock, AlertTriangle,
-  Info, Clipboard
+  Type, Play, MoreHorizontal, FileText, Clock, AlertTriangle,
+  Info, Clipboard, Undo2, Redo2, ListChecks, GitBranch
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
@@ -32,7 +31,7 @@ import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
 import jsPDF from "jspdf";
 import type { ExamRequest, ExamReport, ReportTemplate } from "@/types/domain";
 
-// ==================== WL PRESETS (Weasis/OsiriX) ====================
+// ==================== WL PRESETS ====================
 const WL_PRESETS = [
   { label: "Default", ww: 0, wl: 0, icon: "🔄" },
   { label: "Osso", ww: 2500, wl: 480, icon: "🦴" },
@@ -58,7 +57,7 @@ type Annotation = {
   text: string;
 };
 
-// ==================== DICOM VIEWER PANEL (PACS-style Pro) ====================
+// ==================== PACS VIEWER ====================
 const PacsViewer = ({
   fileUrls,
   examRequest,
@@ -77,7 +76,7 @@ const PacsViewer = ({
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [loading, setLoading] = useState(false);
-  const [tool, setTool] = useState<"pan" | "zoom" | "wl" | "measure" | "angle" | "ellipse" | "rectangle" | "bidirectional" | "annotate" | "magnify" | "stackScroll" | "windowROI" | "proof">("pan");
+  const [tool, setTool] = useState<"pan" | "zoom" | "wl" | "measure" | "angle" | "ellipse" | "rectangle" | "bidirectional" | "annotate" | "magnify" | "stackScroll" | "windowROI">("pan");
   const [showMeasurementsPanel, setShowMeasurementsPanel] = useState(false);
   const [dicomInfo, setDicomInfo] = useState<Record<string, string>>({});
   const [flipH, setFlipH] = useState(false);
@@ -99,12 +98,11 @@ const PacsViewer = ({
   const lastMouseRef = useRef({ x: 0, y: 0 });
   const [dualView, setDualView] = useState(false);
   const [dualIndex, setDualIndex] = useState(1);
-  const [showSidebar, setShowSidebar] = useState(true);
   const [imageNaturalSize, setImageNaturalSize] = useState({ w: 0, h: 0 });
 
   const activeUrl = fileUrls[activeIndex] || null;
 
-  // CINE playback (OHIF-inspired)
+  // CINE playback
   useEffect(() => {
     if (cinePlay && fileUrls.length > 1) {
       cineRef.current = setInterval(() => {
@@ -120,6 +118,18 @@ const PacsViewer = ({
     if (!activeUrl) return;
     loadImage(activeUrl);
   }, [activeUrl]);
+
+  // Scroll wheel zoom
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    if (tool === "stackScroll" && fileUrls.length > 1) {
+      if (e.deltaY > 0) setActiveIndex(i => Math.min(fileUrls.length - 1, i + 1));
+      else setActiveIndex(i => Math.max(0, i - 1));
+    } else {
+      const delta = e.deltaY > 0 ? -0.1 : 0.1;
+      setZoom(z => Math.max(0.1, Math.min(10, z + delta)));
+    }
+  }, [tool, fileUrls.length]);
 
   const loadImage = async (url: string) => {
     setLoading(true);
@@ -270,7 +280,6 @@ const PacsViewer = ({
             if (hu < min) min = hu;
             if (hu > max) max = hu;
           }
-          // Store pixel data for HU readout (OsiriX feature)
           pixelDataRef.current = { values: pixelValues, rows, cols };
 
           const center = wc || (min + max) / 2;
@@ -294,13 +303,11 @@ const PacsViewer = ({
     setLoading(false);
   };
 
-  // Apply WL preset (Weasis-inspired)
   const applyPreset = (preset: typeof WL_PRESETS[0]) => {
     setActivePreset(preset.label);
     if (preset.label === "Default") {
       setBrightness(100); setContrast(100);
     } else {
-      // Map WW/WL to brightness/contrast CSS filters
       const normBrightness = Math.max(20, Math.min(300, 100 + (preset.wl / 10)));
       const normContrast = Math.max(20, Math.min(300, 50 + (preset.ww / 20)));
       setBrightness(normBrightness);
@@ -317,7 +324,6 @@ const PacsViewer = ({
     setMeasurements([]); setAnnotations([]);
   };
 
-  // Mouse handlers for measurements and pan (OHIF-inspired)
   const handleCanvasMouseDown = (e: React.MouseEvent) => {
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const x = (e.clientX - rect.left) / zoom;
@@ -333,7 +339,7 @@ const PacsViewer = ({
         points: [{ x, y }],
       };
       setActiveMeasurement(newM);
-    } else if (tool === "ellipse" || tool === "rectangle") {
+    } else if (tool === "ellipse" || tool === "rectangle" || tool === "windowROI") {
       const newM: Measurement = {
         id: crypto.randomUUID(),
         type: tool === "ellipse" ? "ellipse" : "rectangle",
@@ -345,14 +351,6 @@ const PacsViewer = ({
       if (text) {
         setAnnotations(prev => [...prev, { id: crypto.randomUUID(), x, y, text }]);
       }
-    } else if (tool === "windowROI") {
-      // Window ROI - measure mean HU in a region
-      const newM: Measurement = {
-        id: crypto.randomUUID(),
-        type: "rectangle",
-        points: [{ x, y }],
-      };
-      setActiveMeasurement(newM);
     }
   };
 
@@ -361,12 +359,10 @@ const PacsViewer = ({
     const x = Math.round((e.clientX - rect.left) / zoom);
     const y = Math.round((e.clientY - rect.top) / zoom);
 
-    // HU readout (OsiriX feature)
     if (pixelDataRef.current) {
       const { values, rows, cols } = pixelDataRef.current;
       if (x >= 0 && x < cols && y >= 0 && y < rows) {
-        const hu = values[y * cols + x];
-        setCursorPos({ x, y, hu: Math.round(hu) });
+        setCursorPos({ x, y, hu: Math.round(values[y * cols + x]) });
       } else {
         setCursorPos({ x, y });
       }
@@ -374,7 +370,6 @@ const PacsViewer = ({
       setCursorPos({ x, y });
     }
 
-    // Pan or Stack Scroll
     if (isPanningRef.current && tool === "pan") {
       const dx = e.clientX - lastMouseRef.current.x;
       const dy = e.clientY - lastMouseRef.current.y;
@@ -387,9 +382,15 @@ const PacsViewer = ({
         else setActiveIndex(i => Math.max(0, i - 1));
         lastMouseRef.current = { x: e.clientX, y: e.clientY };
       }
+    } else if (isPanningRef.current && tool === "wl") {
+      const dx = e.clientX - lastMouseRef.current.x;
+      const dy = e.clientY - lastMouseRef.current.y;
+      setBrightness(b => Math.max(0, Math.min(300, b - dy)));
+      setContrast(c => Math.max(0, Math.min(300, c + dx)));
+      setActivePreset("Custom");
+      lastMouseRef.current = { x: e.clientX, y: e.clientY };
     }
 
-    // Active measurement
     if (activeMeasurement) {
       const updatedPoints = [...activeMeasurement.points];
       if (updatedPoints.length === 1) {
@@ -406,47 +407,70 @@ const PacsViewer = ({
     if (activeMeasurement && activeMeasurement.points.length >= 2) {
       const p = activeMeasurement.points;
       let value = "";
+      const spacing = dicomInfo["Pixel Spacing"];
+      const getScale = () => {
+        if (!spacing) return null;
+        const [sy, sx] = spacing.split("\\").map(Number);
+        return { sx, sy, avg: (sx + sy) / 2 };
+      };
+      const scale = getScale();
+
       if (activeMeasurement.type === "length") {
         const dx = p[1].x - p[0].x;
         const dy = p[1].y - p[0].y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        const spacing = dicomInfo["Pixel Spacing"];
-        if (spacing) {
-          const [sy, sx] = spacing.split("\\").map(Number);
-          value = `${(dist * ((sx + sy) / 2)).toFixed(1)} mm`;
-        } else {
-          value = `${dist.toFixed(1)} px`;
-        }
+        value = scale ? `${(dist * scale.avg).toFixed(1)} mm` : `${dist.toFixed(1)} px`;
       } else if (activeMeasurement.type === "angle" && p.length >= 2) {
         value = `${Math.round(Math.atan2(p[1].y - p[0].y, p[1].x - p[0].x) * 180 / Math.PI)}°`;
       } else if (activeMeasurement.type === "ellipse") {
         const rx = Math.abs(p[1].x - p[0].x);
         const ry = Math.abs(p[1].y - p[0].y);
         const area = Math.PI * rx * ry;
-        value = `Área: ${area.toFixed(0)} px²`;
+        value = scale ? `Área: ${(area * scale.sx * scale.sy).toFixed(0)} mm²` : `Área: ${area.toFixed(0)} px²`;
+        // Mean HU for elliptical ROI
+        if (pixelDataRef.current) {
+          const { values, rows, cols } = pixelDataRef.current;
+          const cx = (p[0].x + p[1].x) / 2;
+          const cy = (p[0].y + p[1].y) / 2;
+          let sum = 0, count = 0;
+          const x0 = Math.max(0, Math.floor(cx - rx));
+          const x1 = Math.min(cols - 1, Math.ceil(cx + rx));
+          const y0 = Math.max(0, Math.floor(cy - ry));
+          const y1 = Math.min(rows - 1, Math.ceil(cy + ry));
+          for (let py = y0; py <= y1; py++) {
+            for (let px = x0; px <= x1; px++) {
+              const dx2 = ((px - cx) / rx) ** 2;
+              const dy2 = ((py - cy) / ry) ** 2;
+              if (dx2 + dy2 <= 1) { sum += values[py * cols + px]; count++; }
+            }
+          }
+          if (count > 0) value += ` | HU médio: ${Math.round(sum / count)}`;
+        }
       } else if (activeMeasurement.type === "rectangle") {
         const w = Math.abs(p[1].x - p[0].x);
         const h = Math.abs(p[1].y - p[0].y);
         const area = w * h;
-        const spacing = dicomInfo["Pixel Spacing"];
-        if (spacing) {
-          const [sy, sx] = spacing.split("\\").map(Number);
-          value = `${(w * sx).toFixed(1)}×${(h * sy).toFixed(1)} mm — Área: ${(area * sx * sy).toFixed(0)} mm²`;
-        } else {
-          value = `${w.toFixed(0)}×${h.toFixed(0)} px — Área: ${area.toFixed(0)} px²`;
+        value = scale
+          ? `${(w * scale.sx).toFixed(1)}×${(h * scale.sy).toFixed(1)} mm — Área: ${(area * scale.sx * scale.sy).toFixed(0)} mm²`
+          : `${w.toFixed(0)}×${h.toFixed(0)} px — Área: ${area.toFixed(0)} px²`;
+        // Mean HU for rectangular ROI
+        if (pixelDataRef.current) {
+          const { values, rows, cols } = pixelDataRef.current;
+          const x0 = Math.max(0, Math.floor(Math.min(p[0].x, p[1].x)));
+          const x1 = Math.min(cols - 1, Math.ceil(Math.max(p[0].x, p[1].x)));
+          const y0 = Math.max(0, Math.floor(Math.min(p[0].y, p[1].y)));
+          const y1 = Math.min(rows - 1, Math.ceil(Math.max(p[0].y, p[1].y)));
+          let sum = 0, count = 0;
+          for (let py = y0; py <= y1; py++) {
+            for (let px = x0; px <= x1; px++) { sum += values[py * cols + px]; count++; }
+          }
+          if (count > 0) value += ` | HU médio: ${Math.round(sum / count)}`;
         }
       } else if (activeMeasurement.type === "bidirectional") {
         const dx = p[1].x - p[0].x;
         const dy = p[1].y - p[0].y;
         const major = Math.sqrt(dx * dx + dy * dy);
-        // Perpendicular bisector line (approximate)
-        const spacing = dicomInfo["Pixel Spacing"];
-        if (spacing) {
-          const [sy, sx] = spacing.split("\\").map(Number);
-          value = `Maior: ${(major * ((sx + sy) / 2)).toFixed(1)} mm`;
-        } else {
-          value = `Maior: ${major.toFixed(1)} px`;
-        }
+        value = scale ? `Maior: ${(major * scale.avg).toFixed(1)} mm` : `Maior: ${major.toFixed(1)} px`;
       }
       setMeasurements(prev => [...prev, { ...activeMeasurement, value }]);
       setActiveMeasurement(null);
@@ -478,39 +502,25 @@ const PacsViewer = ({
         ctx.lineTo(m.points[1].x, m.points[1].y);
         ctx.stroke();
         [m.points[0], m.points[1]].forEach(p => {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-          ctx.fillStyle = "#00ff00";
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fillStyle = "#00ff00"; ctx.fill();
         });
       } else if (m.type === "ellipse") {
         const cx = (m.points[0].x + m.points[1].x) / 2;
         const cy = (m.points[0].y + m.points[1].y) / 2;
         const rx = Math.abs(m.points[1].x - m.points[0].x) / 2;
         const ry = Math.abs(m.points[1].y - m.points[0].y) / 2;
-        ctx.beginPath();
-        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
-        ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2); ctx.stroke();
       } else if (m.type === "rectangle") {
         const x0 = Math.min(m.points[0].x, m.points[1].x);
         const y0 = Math.min(m.points[0].y, m.points[1].y);
         const w = Math.abs(m.points[1].x - m.points[0].x);
         const h = Math.abs(m.points[1].y - m.points[0].y);
         ctx.strokeRect(x0, y0, w, h);
-        // Corner markers
-        [m.points[0], m.points[1], { x: m.points[0].x, y: m.points[1].y }, { x: m.points[1].x, y: m.points[0].y }].forEach(p => {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
-          ctx.fillStyle = "#00ff00";
-          ctx.fill();
-        });
       } else if (m.type === "bidirectional") {
-        // Main axis
         ctx.beginPath();
         ctx.moveTo(m.points[0].x, m.points[0].y);
         ctx.lineTo(m.points[1].x, m.points[1].y);
         ctx.stroke();
-        // Perpendicular bisector (short cross)
         const cx = (m.points[0].x + m.points[1].x) / 2;
         const cy = (m.points[0].y + m.points[1].y) / 2;
         const dx = m.points[1].x - m.points[0].x;
@@ -519,16 +529,9 @@ const PacsViewer = ({
         const perpLen = len * 0.3;
         const nx = -dy / len * perpLen;
         const ny = dx / len * perpLen;
-        ctx.beginPath();
-        ctx.moveTo(cx + nx, cy + ny);
-        ctx.lineTo(cx - nx, cy - ny);
-        ctx.stroke();
-        // Endpoints
+        ctx.beginPath(); ctx.moveTo(cx + nx, cy + ny); ctx.lineTo(cx - nx, cy - ny); ctx.stroke();
         [m.points[0], m.points[1], { x: cx + nx, y: cy + ny }, { x: cx - nx, y: cy - ny }].forEach(p => {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-          ctx.fillStyle = "#00ff00";
-          ctx.fill();
+          ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, Math.PI * 2); ctx.fillStyle = "#00ff00"; ctx.fill();
         });
       } else if (m.type === "angle") {
         ctx.beginPath();
@@ -537,7 +540,6 @@ const PacsViewer = ({
         ctx.stroke();
       }
 
-      // Label
       if (m.value) {
         const labelX = (m.points[0].x + m.points[1].x) / 2;
         const labelY = (m.points[0].y + m.points[1].y) / 2 - 8;
@@ -547,19 +549,15 @@ const PacsViewer = ({
       }
     });
 
-    // Draw annotations
     annotations.forEach(a => {
       ctx.font = "bold 11px monospace";
       ctx.fillStyle = "#ffff00";
       ctx.fillText(a.text, a.x, a.y);
-      ctx.beginPath();
-      ctx.arc(a.x - 4, a.y - 4, 2, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffff00";
-      ctx.fill();
+      ctx.beginPath(); ctx.arc(a.x - 4, a.y - 4, 2, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffff00"; ctx.fill();
     });
   }, [measurements, activeMeasurement, annotations]);
 
-  // Download current image
   const handleDownloadImage = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -582,15 +580,13 @@ const PacsViewer = ({
     { id: "rectangle", icon: Grid3X3, label: "Retângulo ROI" },
     { id: "windowROI", icon: Monitor, label: "Janela ROI" },
     { id: "annotate", icon: Type, label: "Anotação" },
-    { id: "magnify", icon: ZoomIn, label: "Lupa" },
   ];
 
   return (
     <div className="flex flex-col h-full bg-black text-white/80">
-      {/* PACS Toolbar - Weasis/OHIF style */}
+      {/* PACS Toolbar */}
       <div className="flex items-center gap-0.5 px-2 py-1 bg-[#1a2332] border-b border-white/10 text-[11px] flex-wrap">
         <TooltipProvider delayDuration={200}>
-          {/* Series navigation */}
           <div className="flex items-center gap-0.5 mr-1">
             <Tooltip><TooltipTrigger asChild>
               <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
@@ -611,7 +607,6 @@ const PacsViewer = ({
 
           <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
-          {/* Tools */}
           {toolButtons.map(t => (
             <Tooltip key={t.id}><TooltipTrigger asChild>
               <Button size="icon" variant="ghost"
@@ -624,7 +619,6 @@ const PacsViewer = ({
 
           <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
-          {/* Zoom controls */}
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => setZoom(z => Math.min(z + 0.25, 8))}>
@@ -641,12 +635,10 @@ const PacsViewer = ({
 
           <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
-          {/* WL Presets (Weasis) */}
           <Popover open={showPresets} onOpenChange={setShowPresets}>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="h-7 text-[10px] text-white/60 hover:text-white hover:bg-white/10 px-2">
-                <Contrast className="w-3.5 h-3.5 mr-1" />
-                {activePreset}
+                <Contrast className="w-3.5 h-3.5 mr-1" /> {activePreset}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-44 p-1 bg-[#1a2332] border-white/20" align="start">
@@ -661,25 +653,21 @@ const PacsViewer = ({
             </PopoverContent>
           </Popover>
 
-          {/* W/L sliders */}
           <div className="flex items-center gap-0.5">
             <Sun className="w-3 h-3 text-white/30" />
             <input type="range" min="0" max="300" value={brightness}
               onChange={e => { setBrightness(+e.target.value); setActivePreset("Custom"); }}
               className="w-12 h-1 accent-primary cursor-pointer" />
-            <span className="text-[8px] text-white/30 w-5">{brightness}</span>
           </div>
           <div className="flex items-center gap-0.5">
             <Contrast className="w-3 h-3 text-white/30" />
             <input type="range" min="0" max="300" value={contrast}
               onChange={e => { setContrast(+e.target.value); setActivePreset("Custom"); }}
               className="w-12 h-1 accent-primary cursor-pointer" />
-            <span className="text-[8px] text-white/30 w-5">{contrast}</span>
           </div>
 
           <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
-          {/* Transform tools */}
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => setRotation(r => (r + 90) % 360)}>
@@ -703,11 +691,10 @@ const PacsViewer = ({
               onClick={() => setInvert(i => !i)}>
               <Contrast className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent side="bottom">Inverter (Negativo)</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent side="bottom">Inverter</TooltipContent></Tooltip>
 
           <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
-          {/* CINE (OHIF) */}
           {fileUrls.length > 1 && (
             <>
               <Tooltip><TooltipTrigger asChild>
@@ -717,186 +704,92 @@ const PacsViewer = ({
                 </Button>
               </TooltipTrigger><TooltipContent side="bottom">{cinePlay ? "Parar CINE" : "CINE Play"}</TooltipContent></Tooltip>
               {cinePlay && (
-                <div className="flex items-center gap-1">
-                  <span className="text-[8px] text-white/30">Cine Loop</span>
-                  <input type="range" min="50" max="1000" value={cineSpeed}
-                    onChange={e => setCineSpeed(+e.target.value)}
-                    className="w-16 h-1 accent-green-400 cursor-pointer" />
-                </div>
+                <input type="range" min="50" max="1000" value={cineSpeed}
+                  onChange={e => setCineSpeed(+e.target.value)}
+                  className="w-16 h-1 accent-green-400 cursor-pointer" />
               )}
+              <Tooltip><TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" className={`h-7 w-7 ${dualView ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+                  onClick={() => setDualView(d => !d)}>
+                  <Grid3X3 className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger><TooltipContent side="bottom">Dual View</TooltipContent></Tooltip>
             </>
           )}
 
-          {/* Reset */}
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={resetView}>
               <RotateCcw className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent side="bottom">Restaurar tudo</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent side="bottom">Restaurar</TooltipContent></Tooltip>
 
-          {/* Clear measurements */}
           {measurements.length > 0 && (
-            <Tooltip><TooltipTrigger asChild>
-              <Button size="sm" variant="ghost" className="h-7 text-[10px] text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-2"
-                onClick={() => { setMeasurements([]); setAnnotations([]); }}>
-                Limpar ({measurements.length})
-              </Button>
-            </TooltipTrigger><TooltipContent side="bottom">Limpar medições e anotações</TooltipContent></Tooltip>
+            <Button size="sm" variant="ghost" className="h-7 text-[10px] text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-2"
+              onClick={() => { setMeasurements([]); setAnnotations([]); }}>
+              Limpar ({measurements.length})
+            </Button>
           )}
 
           <div className="flex-1" />
 
-          {/* Download */}
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
-              onClick={handleDownloadImage}>
-              <Download className="w-3.5 h-3.5" />
-            </Button>
-          </TooltipTrigger><TooltipContent side="bottom">Baixar imagem</TooltipContent></Tooltip>
-
-          {/* Measurements panel toggle */}
+              onClick={handleDownloadImage}><Download className="w-3.5 h-3.5" /></Button>
+          </TooltipTrigger><TooltipContent side="bottom">Baixar</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className={`h-7 w-7 ${showMeasurementsPanel ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
               onClick={() => setShowMeasurementsPanel(p => !p)}>
               <Ruler className="w-3.5 h-3.5" />
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Medições</TooltipContent></Tooltip>
-
-          {/* Info panel toggle */}
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className={`h-7 w-7 ${showInfoPanel ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
               onClick={() => setShowInfoPanel(p => !p)}>
               <FileText className="w-3.5 h-3.5" />
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Info DICOM</TooltipContent></Tooltip>
-
-          {/* Fullscreen / Layout */}
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => containerRef.current?.requestFullscreen?.()}>
               <Maximize2 className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent side="bottom">Tela cheia</TooltipContent></Tooltip>
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className={`h-7 w-7 ${dualView ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
-              onClick={() => { setDualView(d => !d); if (!dualView && fileUrls.length > 1) setDualIndex(activeIndex === 0 ? 1 : 0); }}>
-              <Grid3X3 className="w-3.5 h-3.5" />
-            </Button>
-          </TooltipTrigger><TooltipContent side="bottom">{dualView ? "Visão única" : "Comparação lado a lado"}</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent side="bottom">Tela Cheia</TooltipContent></Tooltip>
         </TooltipProvider>
       </div>
 
-      {/* Main viewer area */}
-      <div className="flex flex-1 min-h-0">
-        {/* Series thumbnails sidebar (OsiriX-style) */}
-        {showSidebar && (
-          <div className="w-[140px] border-r border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0 flex flex-col">
-            <div className="p-1 text-[9px] text-amber-400/80 uppercase tracking-wider px-2 py-1.5 border-b border-white/5 font-bold flex items-center justify-between">
-              <span className="truncate">{dicomInfo["Paciente"] || "Séries"}</span>
-              <Button size="icon" variant="ghost" className="h-4 w-4 text-white/30 hover:text-white shrink-0" onClick={() => setShowSidebar(false)}>×</Button>
-            </div>
-            {dicomInfo["ID"] && (
-              <div className="px-2 py-1 text-[8px] text-amber-400/50 border-b border-white/5 font-mono">
-                ID: {dicomInfo["ID"]}
-              </div>
-            )}
-            {dicomInfo["Estudo"] && (
-              <div className="px-2 py-0.5 text-[8px] text-white/30 border-b border-white/5">
-                [{dicomInfo["Estudo"] || "No study description"}]
-              </div>
-            )}
-            <div className="px-2 py-0.5 text-[8px] text-white/30 border-b border-white/5">
-              {dicomInfo["Data Estudo"] || ""} {fileUrls.length > 0 ? `${fileUrls.length} Series` : ""}
-            </div>
-            {/* Series group */}
-            <div className="px-1 py-1 text-[8px] text-amber-400/60 font-mono border-b border-white/5 cursor-pointer hover:bg-white/5">
-              {dicomInfo["Modalidade"] || "DX"} - [{dicomInfo["Série"] || "No study description"}]
-            </div>
-            <div className="p-1 space-y-1 flex-1 overflow-y-auto">
-              {fileUrls.length > 0 ? fileUrls.map((url, i) => {
-                const originalPath = (examRequest?.file_urls as string[])?.[i] || "";
-                const isDicom = originalPath.toLowerCase().endsWith(".dcm") || originalPath.toLowerCase().endsWith(".dicom");
-                const isActive = i === activeIndex;
-                const isDualActive = dualView && i === dualIndex;
-                return (
-                  <button
-                    key={i}
-                    onClick={() => { if (dualView && i !== activeIndex) setDualIndex(i); else { setActiveIndex(i); setCinePlay(false); } }}
-                    className={`w-full rounded overflow-hidden border-2 transition-all ${
-                      isActive ? "border-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]"
-                      : isDualActive ? "border-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.4)]"
-                      : "border-white/5 hover:border-white/20"
-                    }`}
-                  >
-                    <div className="aspect-square bg-black flex items-center justify-center relative">
-                      {isDicom ? (
-                        <ImageIcon className="w-5 h-5 text-white/20" />
-                      ) : (
-                        <img src={url} alt={`S${i + 1}`} className="w-full h-full object-cover opacity-80" />
-                      )}
-                      <div className="absolute top-0.5 right-0.5">
-                        <span className="text-[7px] text-red-400 font-bold">■</span>
-                      </div>
-                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 to-transparent px-1 py-0.5 flex justify-between items-end">
-                        <span className="text-[7px] text-amber-400/60 font-mono">{fileUrls.length} Imgs</span>
-                      </div>
-                    </div>
-                  </button>
-                );
-              }) : (
-                <div className="text-center text-[9px] text-white/20 py-4">Sem imagens</div>
-              )}
-            </div>
-          </div>
-        )}
-        {!showSidebar && (
-          <Button size="icon" variant="ghost" className="absolute top-12 left-0 z-30 h-8 w-5 bg-[#1a2332]/80 text-white/40 hover:text-white rounded-none rounded-r"
-            onClick={() => setShowSidebar(true)}>
-            <ChevronRight className="w-3 h-3" />
-          </Button>
-        )}
-
-        {/* Main canvas area */}
-        <div ref={containerRef} className="flex-1 relative overflow-hidden bg-black"
+      {/* Main viewport */}
+      <div className="flex flex-1 min-h-0" ref={containerRef}>
+        <div className="flex-1 relative overflow-hidden bg-black select-none"
           onMouseDown={handleCanvasMouseDown}
           onMouseMove={handleCanvasMouseMove}
           onMouseUp={handleCanvasMouseUp}
-          onMouseLeave={() => { setCursorPos(null); isPanningRef.current = false; }}
-          style={{ cursor: tool === "pan" ? "grab" : tool === "measure" || tool === "angle" || tool === "ellipse" ? "crosshair" : tool === "annotate" ? "text" : "default" }}
-        >
+          onMouseLeave={handleCanvasMouseUp}
+          onWheel={handleWheel}
+          style={{ cursor: tool === "pan" ? "grab" : tool === "wl" ? "ns-resize" : tool === "annotate" ? "crosshair" : "crosshair" }}>
+
           {loading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                <span className="text-[10px] text-white/40">Carregando DICOM...</span>
-              </div>
+            <div className="absolute inset-0 flex items-center justify-center z-30">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           )}
 
-          {!activeUrl && !loading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white/20">
-              <Monitor className="w-20 h-20" />
-              <p className="text-sm">Nenhum arquivo de exame</p>
-              <p className="text-[10px] text-white/10">Faça upload de imagens DICOM ou imagens comuns para visualizar</p>
+          {fileUrls.length === 0 && !loading && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-20">
+              <Upload className="w-12 h-12 text-white/20" />
+              <p className="text-white/30 text-sm">Nenhuma imagem disponível</p>
               <label className="cursor-pointer">
-                <input type="file" className="hidden" accept=".dcm,.dicom,.jpg,.jpeg,.png,.bmp,.tiff,image/*" multiple
+                <input type="file" className="hidden" multiple accept="image/*,.dcm,application/dicom"
                   onChange={async (e) => {
-                    const files = e.target.files;
-                    if (!files?.length || !examRequest?.id) return;
+                    const files = Array.from(e.target.files || []);
+                    if (!files.length || !examRequest?.id) return;
                     const paths: string[] = [];
-                    for (const file of Array.from(files)) {
-                      const ext = file.name.split(".").pop() || "dcm";
-                      const path = `${examRequest.id}/${crypto.randomUUID()}.${ext}`;
+                    for (const file of files) {
+                      const path = `exams/${examRequest.id}/${crypto.randomUUID()}-${file.name}`;
                       const { error } = await supabase.storage.from("exam-files").upload(path, file);
-                      if (error) { toast.error(`Erro ao enviar ${file.name}`); continue; }
-                      paths.push(path);
+                      if (!error) paths.push(path);
                     }
-                    if (paths.length > 0) {
-                      const existing = (examRequest.file_urls as string[]) || [];
-                      const updated = [...existing, ...paths];
-                      await supabase.from("exam_requests" as any).update({ file_urls: updated } as any).eq("id", examRequest.id);
-                      // Resolve URLs
+                    if (paths.length) {
                       const resolved = await Promise.all(paths.map(async p => {
                         const { data } = await supabase.storage.from("exam-files").createSignedUrl(p, 3600);
                         return data?.signedUrl || "";
@@ -921,45 +814,31 @@ const PacsViewer = ({
                 ref={canvasRef}
                 className={loading && !canvasRef.current?.width ? "hidden" : ""}
                 style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
+                  maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
                   transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
                   filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}`,
-                  transition: "filter 0.15s ease",
-                  imageRendering: "auto",
+                  transition: "filter 0.15s ease", imageRendering: "auto",
                 }}
               />
-              {/* Measurement overlay canvas */}
-              <canvas
-                ref={overlayCanvasRef}
-                className="absolute inset-0 pointer-events-none"
+              <canvas ref={overlayCanvasRef} className="absolute inset-0 pointer-events-none"
                 style={{
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
+                  maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
                   transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
                 }}
               />
             </div>
           </div>
 
-          {/* Patient info overlay — top-left (OsiriX orange style) */}
+          {/* Overlays */}
           {Object.keys(dicomInfo).length > 0 && (
             <div className="absolute top-2 left-2 text-[10px] font-mono leading-snug pointer-events-none z-20">
               {dicomInfo["Paciente"] && <div className="text-amber-400/90">Nome: <strong>{dicomInfo["Paciente"]}</strong></div>}
               {dicomInfo["ID"] && <div className="text-amber-400/60">ID: {dicomInfo["ID"]}</div>}
               {dicomInfo["Nascimento"] && <div className="text-amber-400/60">Nasc: {dicomInfo["Nascimento"]}</div>}
               {dicomInfo["Sexo"] && <div className="text-amber-400/60">Sexo: {dicomInfo["Sexo"]}</div>}
-              {dicomInfo["Instituição"] && (
-                <div className="text-amber-300/50 mt-1">
-                  Nome do departamento : {dicomInfo["Instituição"]}
-                </div>
-              )}
+              {dicomInfo["Instituição"] && <div className="text-amber-300/50 mt-1">{dicomInfo["Instituição"]}</div>}
             </div>
           )}
-
-          {/* Study info overlay — top-right */}
           {Object.keys(dicomInfo).length > 0 && (
             <div className="absolute top-2 right-2 text-[10px] font-mono text-right leading-snug pointer-events-none z-20">
               {dicomInfo["Data Estudo"] && <div className="text-white/50">{dicomInfo["Data Estudo"]}</div>}
@@ -967,85 +846,49 @@ const PacsViewer = ({
               {dicomInfo["Modalidade"] && <div className="text-white/50">{dicomInfo["Modalidade"]} {dicomInfo["Protocolo"] ? `· ${dicomInfo["Protocolo"]}` : ""}</div>}
             </div>
           )}
-
-          {/* Cursor position + HU readout — bottom-left (OsiriX) */}
           {cursorPos && (
             <div className="absolute bottom-6 left-2 text-[10px] font-mono text-green-400/80 pointer-events-none z-20 bg-black/50 px-1.5 py-0.5 rounded">
               x: {cursorPos.x} y: {cursorPos.y}
               {cursorPos.hu !== undefined && <span className="ml-2 text-yellow-300/80">HU: {cursorPos.hu}</span>}
             </div>
           )}
-
-          {/* Bottom status bar (OsiriX-style) */}
           <div className="absolute bottom-0 inset-x-0 h-5 bg-black/70 border-t border-white/5 flex items-center justify-between px-3 text-[9px] font-mono text-white/40 pointer-events-none z-20">
             <div className="flex items-center gap-4">
-              <span>Image size:{imageNaturalSize.w}x{imageNaturalSize.h}</span>
+              <span>{imageNaturalSize.w}x{imageNaturalSize.h}</span>
               <span>Zoom: {Math.round(zoom * 100)}%</span>
-              {dicomInfo["Formato"] === "DICOM" && <span>DERIVED\\PRIMARY</span>}
             </div>
             <div className="flex items-center gap-4">
-              {fileUrls.length > 0 && <span>Images:{activeIndex + 1}/ {fileUrls.length}</span>}
+              {fileUrls.length > 0 && <span>{activeIndex + 1}/{fileUrls.length}</span>}
               <span>WL: {brightness} / WW: {contrast}</span>
-              {dicomInfo["Modalidade"] && <span>({dicomInfo["Modalidade"]})</span>}
             </div>
           </div>
 
-          {/* Measurements list — bottom-center */}
-          {measurements.length > 0 && (
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[9px] font-mono text-green-400/70 pointer-events-none z-20 space-y-0.5">
-              {measurements.map(m => (
-                <div key={m.id} className="bg-black/60 px-2 py-0.5 rounded">
-                  {m.type === "length" ? "📏" : m.type === "angle" ? "📐" : "⭕"} {m.value}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Técnico Responsável overlay — bottom-right above status bar */}
           {dicomInfo["Médico Ref."] && (
             <div className="absolute bottom-6 right-2 text-[10px] font-mono text-red-400/80 pointer-events-none z-20">
-              Técnico Responsável : <strong>{dicomInfo["Médico Ref."]}</strong>
+              Técnico: <strong>{dicomInfo["Médico Ref."]}</strong>
             </div>
           )}
         </div>
 
-        {/* Dual viewport (comparison side-by-side) */}
+        {/* Dual viewport */}
         {dualView && fileUrls.length > 1 && (
           <div className="flex-1 relative overflow-hidden bg-black border-l-2 border-white/10">
-            <img
-              src={fileUrls[dualIndex] || fileUrls[1] || ""}
-              alt="Comparison"
+            <img src={fileUrls[dualIndex] || fileUrls[1] || ""} alt="Comparison"
               className="absolute inset-0 w-full h-full object-contain"
-              style={{
-                filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}`,
-              }}
-            />
-            {/* Dual view overlays */}
-            {Object.keys(dicomInfo).length > 0 && (
-              <div className="absolute top-2 left-2 text-[10px] font-mono leading-snug pointer-events-none z-20">
-                {dicomInfo["Paciente"] && <div className="text-amber-400/90">{dicomInfo["Paciente"]}</div>}
-                {dicomInfo["ID"] && <div className="text-amber-400/60">{dicomInfo["ID"]}</div>}
-              </div>
-            )}
-            <div className="absolute top-2 right-2 text-[10px] font-mono text-white/50 pointer-events-none z-20">
-              {dicomInfo["Data Estudo"]}
-            </div>
+              style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}` }} />
             <div className="absolute bottom-0 inset-x-0 h-5 bg-black/70 border-t border-white/5 flex items-center justify-between px-3 text-[9px] font-mono text-white/40 pointer-events-none z-20">
-              <span>Image size:{imageNaturalSize.w}x{imageNaturalSize.h}</span>
-              <span>Images:{dualIndex + 1}/ {fileUrls.length}</span>
-              <span>WL: {brightness} / WW: {contrast}</span>
+              <span>{imageNaturalSize.w}x{imageNaturalSize.h}</span>
+              <span>{dualIndex + 1}/{fileUrls.length}</span>
             </div>
           </div>
         )}
 
-        {/* DICOM Info Side Panel (Weasis-style) */}
+        {/* Info Panel */}
         {showInfoPanel && Object.keys(dicomInfo).length > 0 && (
           <div className="w-56 border-l border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0">
             <div className="p-1.5 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1.5 border-b border-white/5 font-semibold flex items-center justify-between">
               DICOM Tags
-              <Button size="icon" variant="ghost" className="h-5 w-5 text-white/30 hover:text-white" onClick={() => setShowInfoPanel(false)}>
-                ×
-              </Button>
+              <Button size="icon" variant="ghost" className="h-5 w-5 text-white/30 hover:text-white" onClick={() => setShowInfoPanel(false)}>×</Button>
             </div>
             <div className="p-2 space-y-1">
               {Object.entries(dicomInfo).map(([k, v]) => (
@@ -1055,35 +898,17 @@ const PacsViewer = ({
                 </div>
               ))}
             </div>
-            {/* Measurements summary */}
-            {measurements.length > 0 && (
-              <>
-                <div className="p-1.5 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1.5 border-t border-b border-white/5 font-semibold">
-                  Medições ({measurements.length})
-                </div>
-                <div className="p-2 space-y-1">
-                  {measurements.map((m, i) => (
-                    <div key={m.id} className="text-[10px] text-green-400/70 flex justify-between">
-                      <span>{i + 1}. {m.type === "length" ? "Comprimento" : m.type === "angle" ? "Ângulo" : m.type === "rectangle" ? "Retângulo" : m.type === "bidirectional" ? "Bidirecional" : "ROI"}</span>
-                      <span className="font-mono">{m.value}</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
           </div>
         )}
 
-        {/* Measurements Panel (Zafaz-style) */}
+        {/* Measurements Panel */}
         {showMeasurementsPanel && (
           <div className="w-56 border-l border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0">
             <div className="p-1.5 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1.5 border-b border-white/5 font-semibold flex items-center justify-between">
-              Measurements
-              <Button size="icon" variant="ghost" className="h-5 w-5 text-white/30 hover:text-white" onClick={() => setShowMeasurementsPanel(false)}>
-                ×
-              </Button>
+              Medições
+              <Button size="icon" variant="ghost" className="h-5 w-5 text-white/30 hover:text-white" onClick={() => setShowMeasurementsPanel(false)}>×</Button>
             </div>
-            {measurements.length === 0 && annotations.length === 0 ? (
+            {measurements.length === 0 ? (
               <div className="p-4 text-center text-[10px] text-white/20">
                 <Ruler className="w-8 h-8 mx-auto mb-2 opacity-30" />
                 Nenhuma medição
@@ -1092,36 +917,15 @@ const PacsViewer = ({
               <div className="p-2 space-y-1.5">
                 {measurements.map((m, i) => (
                   <div key={m.id} className="flex items-center justify-between gap-1 text-[10px] py-1 px-1.5 rounded bg-white/5 hover:bg-white/10 group">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-green-400/80">
-                        {m.type === "length" ? "📏" : m.type === "angle" ? "📐" : m.type === "ellipse" ? "⭕" : m.type === "rectangle" ? "⬜" : m.type === "bidirectional" ? "↔️" : "📍"}
-                      </span>
-                      <span className="text-white/50 shrink-0">{i + 1}.</span>
-                      <span className="text-white/70 truncate">{m.type === "length" ? "Comp." : m.type === "angle" ? "Ângulo" : m.type === "ellipse" ? "Elipse" : m.type === "rectangle" ? "Retângulo" : m.type === "bidirectional" ? "Bidirec." : m.type}</span>
-                    </div>
+                    <span className="text-white/50">{i + 1}. {m.type}</span>
                     <div className="flex items-center gap-1">
                       <span className="font-mono text-green-400/90 text-[9px]">{m.value}</span>
                       <Button size="icon" variant="ghost" className="h-4 w-4 opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-400"
-                        onClick={() => setMeasurements(prev => prev.filter(x => x.id !== m.id))}>
-                        ×
-                      </Button>
+                        onClick={() => setMeasurements(prev => prev.filter(x => x.id !== m.id))}>×</Button>
                     </div>
                   </div>
                 ))}
-                {annotations.map((a, i) => (
-                  <div key={a.id} className="flex items-center justify-between gap-1 text-[10px] py-1 px-1.5 rounded bg-white/5 hover:bg-white/10 group">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-yellow-400/80">📝</span>
-                      <span className="text-white/70 truncate">{a.text}</span>
-                    </div>
-                    <Button size="icon" variant="ghost" className="h-4 w-4 opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-400"
-                      onClick={() => setAnnotations(prev => prev.filter(x => x.id !== a.id))}>
-                      ×
-                    </Button>
-                  </div>
-                ))}
-                <Separator className="bg-white/10 my-1" />
-                <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 text-red-400/60 hover:text-red-400 hover:bg-red-500/10"
+                <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 text-red-400/60 hover:text-red-400"
                   onClick={() => { setMeasurements([]); setAnnotations([]); }}>
                   Limpar tudo
                 </Button>
@@ -1133,6 +937,45 @@ const PacsViewer = ({
     </div>
   );
 };
+
+// ==================== UNDO/REDO HOOK ====================
+function useUndoRedo(initialValue: string) {
+  const [history, setHistory] = useState<string[]>([initialValue]);
+  const [pointer, setPointer] = useState(0);
+
+  const current = history[pointer] ?? initialValue;
+
+  const push = useCallback((value: string) => {
+    setHistory(prev => {
+      const next = prev.slice(0, pointer + 1);
+      // Don't push if same as current
+      if (next[next.length - 1] === value) return next;
+      const updated = [...next, value];
+      // Keep max 50 entries
+      if (updated.length > 50) updated.shift();
+      return updated;
+    });
+    setPointer(prev => Math.min(prev + 1, 49));
+  }, [pointer]);
+
+  const undo = useCallback(() => {
+    setPointer(p => Math.max(0, p - 1));
+  }, []);
+
+  const redo = useCallback(() => {
+    setPointer(p => Math.min(history.length - 1, p + 1));
+  }, [history.length]);
+
+  const canUndo = pointer > 0;
+  const canRedo = pointer < history.length - 1;
+
+  const reset = useCallback((value: string) => {
+    setHistory([value]);
+    setPointer(0);
+  }, []);
+
+  return { current, push, undo, redo, canUndo, canRedo, reset };
+}
 
 // ==================== MAIN EDITOR ====================
 const ExamReportEditor = () => {
@@ -1150,6 +993,10 @@ const ExamReportEditor = () => {
   const [fileUrls, setFileUrls] = useState<string[]>([]);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Undo/Redo
+  const undoRedo = useUndoRedo("");
 
   // Voice
   const [listening, setListening] = useState(false);
@@ -1159,11 +1006,43 @@ const ExamReportEditor = () => {
 
   // AI
   const [aiProcessing, setAiProcessing] = useState(false);
-  const [aiMode, setAiMode] = useState<"structure" | "improve" | "suggest_conclusion">("structure");
+  const [aiMode, setAiMode] = useState<"structure" | "improve" | "suggest_conclusion" | "differential" | "checklist">("structure");
 
   // Macros
   const [showMacros, setShowMacros] = useState(false);
   const macroCategories = [...new Set(REPORT_MACROS.map((m) => m.category))];
+
+  // SLA timer
+  const [slaRemaining, setSlaRemaining] = useState<string | null>(null);
+
+  // Word count
+  const wordCount = useMemo(() => {
+    if (!content.trim()) return 0;
+    return content.trim().split(/\s+/).length;
+  }, [content]);
+
+  const charCount = content.length;
+
+  // ---- SLA countdown ----
+  useEffect(() => {
+    const examData = queryClient.getQueryData<ExamRequest>(["exam-request-detail", examId]);
+    const deadline = examData?.sla_deadline;
+    if (!deadline) return;
+
+    const update = () => {
+      const diff = new Date(deadline).getTime() - Date.now();
+      if (diff <= 0) {
+        setSlaRemaining("ESTOURADO");
+        return;
+      }
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      setSlaRemaining(`${h}h ${m}min`);
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [examId, queryClient]);
 
   // ---- Speech Recognition ----
   useEffect(() => {
@@ -1233,7 +1112,7 @@ const ExamReportEditor = () => {
         ref._shouldRestart = true;
         (ref as unknown as { start: () => void }).start();
         setListening(true);
-        toast("🎙️ Ditado ativado", { description: "Filtro de ruído ativo." });
+        toast("🎙️ Ditado ativado", { description: "Fale agora — filtro de ruído ativo." });
       } catch { /* fail */ }
     }
   }, [listening]);
@@ -1284,6 +1163,31 @@ const ExamReportEditor = () => {
     },
   });
 
+  // ---- Auto-claim exam on open ----
+  useEffect(() => {
+    if (!examRequest || !doctorProfile?.id) return;
+    if (examRequest.status === "pending" && !examRequest.assigned_to) {
+      // Claim this exam
+      supabase.from("exam_requests" as any)
+        .update({ status: "in_review", assigned_to: doctorProfile.id } as any)
+        .eq("id", examId!)
+        .then(({ error }) => {
+          if (!error) {
+            toast.info("Exame assumido por você", { description: "Status → Em revisão" });
+            queryClient.invalidateQueries({ queryKey: ["exam-request-detail", examId] });
+            queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
+          }
+        });
+    } else if (examRequest.status === "pending" && examRequest.assigned_to === doctorProfile.id) {
+      supabase.from("exam_requests" as any)
+        .update({ status: "in_review" } as any)
+        .eq("id", examId!)
+        .then(() => {
+          queryClient.invalidateQueries({ queryKey: ["exam-request-detail", examId] });
+        });
+    }
+  }, [examRequest?.id, doctorProfile?.id]);
+
   // ---- Auto-save ----
   const autoSaveDraft = useCallback(async (text: string) => {
     if (!doctorProfile?.id || !examId || !text.trim()) return;
@@ -1305,17 +1209,42 @@ const ExamReportEditor = () => {
     if (macro) {
       const applied = applyMacro(newContent, macro);
       setContent(applied);
+      undoRedo.push(applied);
       toast("📝 Macro aplicada", { description: macro.label });
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
       autoSaveTimerRef.current = setTimeout(() => autoSaveDraft(applied), 5000);
       return;
     }
     setContent(newContent);
+    // Debounced undo push
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
+    undoTimerRef.current = setTimeout(() => undoRedo.push(newContent), 800);
+    // Debounced auto-save
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(() => autoSaveDraft(newContent), 5000);
   };
 
-  useEffect(() => { if (existingReport?.content_text) setContent(existingReport.content_text); }, [existingReport]);
+  const handleUndo = useCallback(() => {
+    undoRedo.undo();
+    setContent(undoRedo.current);
+  }, [undoRedo]);
+
+  const handleRedo = useCallback(() => {
+    undoRedo.redo();
+    setContent(undoRedo.current);
+  }, [undoRedo]);
+
+  // Sync undo state with content
+  useEffect(() => {
+    setContent(undoRedo.current);
+  }, [undoRedo.current]);
+
+  useEffect(() => {
+    if (existingReport?.content_text) {
+      setContent(existingReport.content_text);
+      undoRedo.reset(existingReport.content_text);
+    }
+  }, [existingReport?.content_text]);
 
   useEffect(() => {
     if (!existingReport || !doctorProfile) return;
@@ -1342,11 +1271,14 @@ const ExamReportEditor = () => {
   const handleTemplateSelect = (templateId: string) => {
     setSelectedTemplateId(templateId);
     const tpl = templates?.find((t: { id: string; body_text: string }) => t.id === templateId);
-    if (tpl) setContent(tpl.body_text);
+    if (tpl) {
+      setContent(tpl.body_text);
+      undoRedo.push(tpl.body_text);
+    }
   };
 
   // ---- AI ----
-  const handleAiProcess = async (mode: "structure" | "improve" | "suggest_conclusion") => {
+  const handleAiProcess = async (mode: "structure" | "improve" | "suggest_conclusion" | "differential" | "checklist") => {
     if (!content.trim()) { toast.error("Texto vazio"); return; }
     setAiProcessing(true); setAiMode(mode);
     try {
@@ -1356,19 +1288,37 @@ const ExamReportEditor = () => {
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
       if (data?.structured_text) {
-        if (mode === "suggest_conclusion") setContent(prev => prev + "\n\n" + data.structured_text);
-        else setContent(data.structured_text);
-        toast.success("✨ IA aplicada");
+        const newContent = (mode === "suggest_conclusion" || mode === "differential" || mode === "checklist")
+          ? content + "\n\n" + data.structured_text
+          : data.structured_text;
+        setContent(newContent);
+        undoRedo.push(newContent);
+        toast.success("✨ IA aplicada", {
+          description: mode === "structure" ? "Laudo estruturado" :
+            mode === "improve" ? "Redação melhorada" :
+            mode === "suggest_conclusion" ? "Conclusão sugerida" :
+            mode === "differential" ? "Diferenciais gerados" :
+            "Checklist gerada"
+        });
       }
     } catch (err: unknown) {
-      toast.error("Erro na IA", { description: err instanceof Error ? err.message : "Tente novamente." });
+      const msg = err instanceof Error ? err.message : "Tente novamente.";
+      if (msg.includes("Rate limited") || msg.includes("429")) {
+        toast.error("IA sobrecarregada", { description: "Aguarde um momento e tente novamente." });
+      } else if (msg.includes("402") || msg.includes("Créditos")) {
+        toast.error("Créditos insuficientes", { description: "Adicione créditos na sua conta." });
+      } else {
+        toast.error("Erro na IA", { description: msg });
+      }
     } finally { setAiProcessing(false); }
   };
 
   const insertMacro = (macroId: string) => {
     const macro = REPORT_MACROS.find(m => m.id === macroId);
     if (!macro) return;
-    setContent(prev => prev ? `${prev}\n\n${macro.text}` : macro.text);
+    const newContent = content ? `${content}\n\n${macro.text}` : macro.text;
+    setContent(newContent);
+    undoRedo.push(newContent);
     setShowMacros(false);
     toast("📝 Macro inserida", { description: macro.label });
   };
@@ -1376,39 +1326,102 @@ const ExamReportEditor = () => {
   // ---- Sign ----
   const handleSignAndFinalize = async () => {
     if (!doctorProfile?.id || !content.trim()) { toast.error("Preencha o laudo antes de assinar."); return; }
+
+    // Confirmation dialog
+    if (!window.confirm("Deseja realmente assinar e finalizar este laudo? Esta ação é irreversível.")) return;
+
     setSigning(true);
     try {
       const documentHash = await gerarHashDocumento(content);
       const verificationCode = gerarCodigoVerificacao();
       const doctorName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim();
 
+      // Generate professional PDF
       const pdf = new jsPDF();
-      pdf.setFontSize(16);
-      pdf.text("LAUDO MÉDICO", 105, 20, { align: "center" });
-      pdf.setFontSize(10);
-      pdf.text(`Tipo de Exame: ${examRequest?.exam_type || ""}`, 20, 35);
-      pdf.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 20, 42);
-      pdf.text(`Médico Laudista: Dr(a). ${doctorName}`, 20, 49);
-      pdf.text(`CRM: ${doctorProfile.crm}/${doctorProfile.crm_state}`, 20, 56);
 
+      // Header
+      pdf.setFillColor(0, 102, 68);
+      pdf.rect(0, 0, 210, 28, "F");
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(18);
+      pdf.text("LAUDO MÉDICO", 105, 14, { align: "center" });
+      pdf.setFontSize(8);
+      pdf.text("Allo Médico — Plataforma de Telemedicina", 105, 22, { align: "center" });
+
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFontSize(10);
+      let y = 38;
+
+      // Exam info box
+      pdf.setDrawColor(200, 200, 200);
+      pdf.setFillColor(248, 248, 248);
+      pdf.roundedRect(15, y - 5, 180, 30, 2, 2, "FD");
+      pdf.setFontSize(9);
+      pdf.text(`Tipo de Exame: ${examRequest?.exam_type || "—"}`, 20, y + 2);
+      pdf.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 120, y + 2);
+      pdf.text(`Médico Laudista: Dr(a). ${doctorName}`, 20, y + 10);
+      pdf.text(`CRM: ${doctorProfile.crm}/${doctorProfile.crm_state}`, 120, y + 10);
+      if (examRequest?.priority === "urgent") {
+        pdf.setTextColor(200, 0, 0);
+        pdf.text("⚠ URGENTE", 20, y + 18);
+        pdf.setTextColor(0, 0, 0);
+      }
+      y += 35;
+
+      // Clinical info
       if (examRequest?.clinical_info) {
-        pdf.setFontSize(11);
-        pdf.text("Informações Clínicas:", 20, 68);
+        pdf.setFontSize(10);
+        pdf.setFont("helvetica", "bold");
+        pdf.text("Informações Clínicas:", 20, y);
+        pdf.setFont("helvetica", "normal");
         pdf.setFontSize(9);
         const clinicalLines = pdf.splitTextToSize(examRequest.clinical_info, 170);
-        pdf.text(clinicalLines, 20, 75);
+        pdf.text(clinicalLines, 20, y + 7);
+        y += 7 + clinicalLines.length * 4.5 + 5;
       }
 
-      pdf.setFontSize(11);
-      const yStart = examRequest?.clinical_info ? 75 + pdf.splitTextToSize(examRequest.clinical_info, 170).length * 5 + 10 : 68;
-      pdf.text("Laudo:", 20, yStart);
-      pdf.setFontSize(9);
-      const contentLines = pdf.splitTextToSize(content, 170);
-      pdf.text(contentLines, 20, yStart + 7);
+      // Separator
+      pdf.setDrawColor(0, 102, 68);
+      pdf.setLineWidth(0.5);
+      pdf.line(20, y, 190, y);
+      y += 8;
 
+      // Report content
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("Laudo:", 20, y);
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(9);
+      y += 6;
+
+      const contentLines = pdf.splitTextToSize(content, 170);
+      // Handle page breaks
+      for (const line of contentLines) {
+        if (y > 260) {
+          pdf.addPage();
+          y = 20;
+        }
+        pdf.text(line, 20, y);
+        y += 4.5;
+      }
+
+      // Signature area
+      y = Math.max(y + 15, 240);
+      if (y > 260) { pdf.addPage(); y = 40; }
+
+      pdf.setDrawColor(100, 100, 100);
+      pdf.line(55, y, 155, y);
+      pdf.setFontSize(9);
+      pdf.text(`Dr(a). ${doctorName}`, 105, y + 5, { align: "center" });
+      pdf.text(`CRM: ${doctorProfile.crm}/${doctorProfile.crm_state}`, 105, y + 10, { align: "center" });
+
+      // Footer
       pdf.setFontSize(7);
+      pdf.setTextColor(100, 100, 100);
       pdf.text(`Código de Verificação: ${verificationCode}`, 20, 280);
-      pdf.text(`Hash SHA-256: ${documentHash.substring(0, 32)}...`, 20, 284);
+      pdf.text(`Hash SHA-256: ${documentHash.substring(0, 48)}...`, 20, 284);
+      pdf.text(`Verificar autenticidade: allomedico.com/validar`, 20, 288);
+      pdf.text(`Gerado em: ${new Date().toLocaleString("pt-BR")}`, 130, 288);
 
       const pdfBlob = pdf.output("blob");
       const pdfPath = `reports/${examId}/${crypto.randomUUID()}.pdf`;
@@ -1432,17 +1445,20 @@ const ExamReportEditor = () => {
 
       await supabase.from("exam_requests" as any).update({ status: "reported" } as any).eq("id", examId);
 
+      // Try ICP-Brasil digital signature
       try {
         await supabase.functions.invoke("vidaas-sign", {
           body: { action: "sign", document_hash: documentHash, document_type: "exam_report", doctor_name: doctorName, doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`, verification_code: verificationCode },
         });
       } catch {}
 
+      // Document verification record
       await supabase.from("document_verifications").insert({
         doctor_name: doctorName, doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`,
         patient_name: "Paciente", document_type: "exam_report", document_hash: documentHash, verification_code: verificationCode,
       });
 
+      // Notifications
       if (examRequest?.requesting_doctor_id) {
         const { data: reqDoctor } = await supabase.from("doctor_profiles").select("user_id").eq("id", examRequest.requesting_doctor_id).maybeSingle();
         if (reqDoctor?.user_id) {
@@ -1454,7 +1470,7 @@ const ExamReportEditor = () => {
         if (patientProfile) {
           await supabase.from("notifications").insert({ user_id: patientProfile.user_id, title: "📋 Seu laudo está pronto!", message: `O laudo do exame ${examRequest.exam_type} foi concluído.`, type: "exam_report", link: "/dashboard/health" });
           if (patientProfile.phone) {
-            supabase.functions.invoke("send-whatsapp", { body: { phone: patientProfile.phone, message: `🩺 *Allo Médico* — Laudo Pronto!\n\nOlá, ${patientProfile.first_name}!\nSeu laudo de *${examRequest.exam_type}* foi finalizado pelo Dr(a). ${doctorName}.\n\nCódigo: ${verificationCode}` } }).catch(() => {});
+            supabase.functions.invoke("send-whatsapp", { body: { phone: patientProfile.phone, message: `🩺 *Allo Médico* — Laudo Pronto!\n\nOlá, ${patientProfile.first_name}!\nSeu laudo de *${examRequest.exam_type}* foi finalizado pelo Dr(a). ${doctorName}.\n\nCódigo: ${verificationCode}\nVerifique em: allomedico.com/validar` } }).catch(() => {});
           }
         }
       }
@@ -1479,10 +1495,18 @@ const ExamReportEditor = () => {
         e.preventDefault();
         if (!isReported) handleSignAndFinalize();
       }
+      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
+        e.preventDefault();
+        handleUndo();
+      }
+      if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
+        e.preventDefault();
+        handleRedo();
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [content, autoSaveDraft]);
+  }, [content, autoSaveDraft, handleUndo, handleRedo]);
 
   if (loadingExam) {
     return (
@@ -1512,28 +1536,31 @@ const ExamReportEditor = () => {
               <AlertTriangle className="w-3 h-3 mr-0.5" /> Urgente
             </Badge>
           )}
+          {slaRemaining && (
+            <Badge variant={slaRemaining === "ESTOURADO" ? "destructive" : "outline"} className="text-[10px] shrink-0">
+              <Clock className="w-3 h-3 mr-0.5" /> SLA: {slaRemaining}
+            </Badge>
+          )}
         </div>
         <div className="flex-1" />
-        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-          <Keyboard className="w-3 h-3" />
-          <span>Ctrl+S salvar · Ctrl+Enter assinar</span>
+        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+          <span>{wordCount} palavras · {charCount} chars</span>
+          <span className="hidden md:inline">Ctrl+S salvar · Ctrl+Enter assinar · Ctrl+Z desfazer</span>
         </div>
       </div>
 
-      {/* Main content: PACS viewer + Editor */}
+      {/* Main content */}
       <div className="flex-1 min-h-0">
         <ResizablePanelGroup direction="horizontal">
-          {/* DICOM Viewer */}
           <ResizablePanel defaultSize={55} minSize={30}>
             <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} onFilesUploaded={(newUrls) => setFileUrls(prev => [...prev, ...newUrls])} />
           </ResizablePanel>
 
           <ResizableHandle withHandle />
 
-          {/* Report Editor */}
           <ResizablePanel defaultSize={45} minSize={25}>
             <div className="flex flex-col h-full bg-card">
-              {/* Clinical info bar */}
+              {/* Clinical info */}
               {examRequest?.clinical_info && (
                 <div className="px-3 py-2 border-b border-border bg-warning/5">
                   <div className="flex items-start gap-2">
@@ -1546,18 +1573,12 @@ const ExamReportEditor = () => {
                 </div>
               )}
 
-              {/* Patient info bar */}
               {examRequest?.patient_id && (
                 <div className="px-3 py-1.5 border-b border-border bg-muted/30 flex items-center gap-2">
                   <Clipboard className="w-3.5 h-3.5 text-muted-foreground" />
                   <span className="text-[10px] text-muted-foreground">
                     Exame: <strong>{examRequest.exam_type}</strong>
                     {examRequest.priority === "urgent" && <span className="text-destructive ml-2 font-bold">● URGENTE</span>}
-                    {examRequest.sla_deadline && (
-                      <span className="ml-2">
-                        SLA: {new Date(examRequest.sla_deadline).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
-                      </span>
-                    )}
                   </span>
                 </div>
               )}
@@ -1568,12 +1589,28 @@ const ExamReportEditor = () => {
                   <FileText className="w-4 h-4 text-primary" />
                   <span className="font-medium text-sm">{isReported ? "Laudo Finalizado" : "Redigir Laudo"}</span>
                 </div>
-                {autoSaveStatus !== "idle" && !isReported && (
-                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                    {autoSaveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin" /> Salvando...</>}
-                    {autoSaveStatus === "saved" && <><Save className="w-3 h-3 text-green-500" /> Salvo</>}
-                  </div>
-                )}
+                <div className="flex items-center gap-1">
+                  {!isReported && (
+                    <>
+                      <Tooltip><TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleUndo} disabled={!undoRedo.canUndo}>
+                          <Undo2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </TooltipTrigger><TooltipContent>Desfazer (Ctrl+Z)</TooltipContent></Tooltip>
+                      <Tooltip><TooltipTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleRedo} disabled={!undoRedo.canRedo}>
+                          <Redo2 className="w-3.5 h-3.5" />
+                        </Button>
+                      </TooltipTrigger><TooltipContent>Refazer (Ctrl+Y)</TooltipContent></Tooltip>
+                    </>
+                  )}
+                  {autoSaveStatus !== "idle" && !isReported && (
+                    <div className="flex items-center gap-1 text-[10px] text-muted-foreground ml-2">
+                      {autoSaveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin" /> Salvando...</>}
+                      {autoSaveStatus === "saved" && <><Save className="w-3 h-3 text-green-500" /> Salvo</>}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Editor toolbar */}
@@ -1607,7 +1644,7 @@ const ExamReportEditor = () => {
                         IA <ChevronDown className="w-2.5 h-2.5 ml-0.5" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-56 p-1.5" align="start">
+                    <PopoverContent className="w-64 p-1.5" align="start">
                       <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => handleAiProcess("structure")} disabled={aiProcessing}>
                         <Wand2 className="w-3 h-3 mr-2" /> Estruturar Laudo
                       </Button>
@@ -1617,7 +1654,14 @@ const ExamReportEditor = () => {
                       <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => handleAiProcess("suggest_conclusion")} disabled={aiProcessing}>
                         <Lightbulb className="w-3 h-3 mr-2" /> Sugerir Conclusão
                       </Button>
-                      <p className="text-[9px] text-muted-foreground mt-1 px-1">A IA auxilia na redação. Revise sempre.</p>
+                      <Separator className="my-1" />
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => handleAiProcess("differential")} disabled={aiProcessing}>
+                        <GitBranch className="w-3 h-3 mr-2" /> Diagnósticos Diferenciais
+                      </Button>
+                      <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7" onClick={() => handleAiProcess("checklist")} disabled={aiProcessing}>
+                        <ListChecks className="w-3 h-3 mr-2" /> Checklist de Revisão
+                      </Button>
+                      <p className="text-[9px] text-muted-foreground mt-1 px-1">DeepSeek + Gemini fallback. Revise sempre.</p>
                     </PopoverContent>
                   </Popover>
 
@@ -1658,13 +1702,18 @@ const ExamReportEditor = () => {
                   placeholder={listening ? "Fale agora..." : "Digite o laudo ou use /comandos para macros..."}
                   className="h-full resize-none text-sm font-mono leading-relaxed border-0 bg-transparent focus-visible:ring-0 p-0"
                   readOnly={!!isReported}
+                  spellCheck
                 />
                 {aiProcessing && (
                   <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-md">
                     <div className="flex items-center gap-2 bg-card border rounded-lg px-4 py-2 shadow-lg">
                       <Loader2 className="w-4 h-4 animate-spin text-primary" />
                       <span className="text-sm">
-                        {aiMode === "structure" ? "Estruturando..." : aiMode === "improve" ? "Melhorando..." : "Gerando conclusão..."}
+                        {aiMode === "structure" ? "Estruturando..." :
+                         aiMode === "improve" ? "Melhorando..." :
+                         aiMode === "suggest_conclusion" ? "Gerando conclusão..." :
+                         aiMode === "differential" ? "Analisando diferenciais..." :
+                         "Gerando checklist..."}
                       </span>
                     </div>
                   </div>
