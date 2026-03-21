@@ -91,11 +91,16 @@ const PacsViewer = ({
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [activePreset, setActivePreset] = useState("Default");
   const [cinePlay, setCinePlay] = useState(false);
+  const [cineSpeed, setCineSpeed] = useState(200);
   const cineRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pixelDataRef = useRef<{ values: Float32Array; rows: number; cols: number } | null>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const isPanningRef = useRef(false);
   const lastMouseRef = useRef({ x: 0, y: 0 });
+  const [dualView, setDualView] = useState(false);
+  const [dualIndex, setDualIndex] = useState(1);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [imageNaturalSize, setImageNaturalSize] = useState({ w: 0, h: 0 });
 
   const activeUrl = fileUrls[activeIndex] || null;
 
@@ -104,12 +109,12 @@ const PacsViewer = ({
     if (cinePlay && fileUrls.length > 1) {
       cineRef.current = setInterval(() => {
         setActiveIndex(i => (i + 1) % fileUrls.length);
-      }, 200);
+      }, cineSpeed);
     } else {
       if (cineRef.current) clearInterval(cineRef.current);
     }
     return () => { if (cineRef.current) clearInterval(cineRef.current); };
-  }, [cinePlay, fileUrls.length]);
+  }, [cinePlay, fileUrls.length, cineSpeed]);
 
   useEffect(() => {
     if (!activeUrl) return;
@@ -142,6 +147,7 @@ const PacsViewer = ({
           const ctx = canvas.getContext("2d");
           if (ctx) ctx.drawImage(img, 0, 0);
           setDicomInfo({ Formato: "Imagem" });
+          setImageNaturalSize({ w: img.width, h: img.height });
           pixelDataRef.current = null;
           setLoading(false);
         };
@@ -225,6 +231,7 @@ const PacsViewer = ({
 
       info["Formato"] = "DICOM";
       info["Dimensões"] = `${cols}×${rows}`;
+      setImageNaturalSize({ w: cols, h: rows });
       info["Bits"] = `${bitsStored}/${bitsAllocated}`;
       if (wc) info["WC"] = String(Math.round(wc));
       if (ww) info["WW"] = String(Math.round(ww));
@@ -702,12 +709,22 @@ const PacsViewer = ({
 
           {/* CINE (OHIF) */}
           {fileUrls.length > 1 && (
-            <Tooltip><TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" className={`h-7 w-7 ${cinePlay ? "bg-green-500/30 text-green-400 animate-pulse" : "text-white/60 hover:text-white hover:bg-white/10"}`}
-                onClick={() => setCinePlay(p => !p)}>
-                <Play className="w-3.5 h-3.5" />
-              </Button>
-            </TooltipTrigger><TooltipContent side="bottom">{cinePlay ? "Parar CINE" : "CINE Play"}</TooltipContent></Tooltip>
+            <>
+              <Tooltip><TooltipTrigger asChild>
+                <Button size="icon" variant="ghost" className={`h-7 w-7 ${cinePlay ? "bg-green-500/30 text-green-400 animate-pulse" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+                  onClick={() => setCinePlay(p => !p)}>
+                  <Play className="w-3.5 h-3.5" />
+                </Button>
+              </TooltipTrigger><TooltipContent side="bottom">{cinePlay ? "Parar CINE" : "CINE Play"}</TooltipContent></Tooltip>
+              {cinePlay && (
+                <div className="flex items-center gap-1">
+                  <span className="text-[8px] text-white/30">Cine Loop</span>
+                  <input type="range" min="50" max="1000" value={cineSpeed}
+                    onChange={e => setCineSpeed(+e.target.value)}
+                    className="w-16 h-1 accent-green-400 cursor-pointer" />
+                </div>
+              )}
+            </>
           )}
 
           {/* Reset */}
@@ -762,33 +779,54 @@ const PacsViewer = ({
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Tela cheia</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10">
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${dualView ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+              onClick={() => { setDualView(d => !d); if (!dualView && fileUrls.length > 1) setDualIndex(activeIndex === 0 ? 1 : 0); }}>
               <Grid3X3 className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent side="bottom">Layout</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent side="bottom">{dualView ? "Visão única" : "Comparação lado a lado"}</TooltipContent></Tooltip>
         </TooltipProvider>
       </div>
 
       {/* Main viewer area */}
       <div className="flex flex-1 min-h-0">
-        {/* Series thumbnails sidebar (Weasis-style) */}
-        {fileUrls.length > 1 && (
-          <div className="w-32 border-r border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0">
-            <div className="p-1 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1 border-b border-white/5 font-semibold">
-              Séries
+        {/* Series thumbnails sidebar (OsiriX-style) */}
+        {showSidebar && (
+          <div className="w-[140px] border-r border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0 flex flex-col">
+            <div className="p-1 text-[9px] text-amber-400/80 uppercase tracking-wider px-2 py-1.5 border-b border-white/5 font-bold flex items-center justify-between">
+              <span className="truncate">{dicomInfo["Paciente"] || "Séries"}</span>
+              <Button size="icon" variant="ghost" className="h-4 w-4 text-white/30 hover:text-white shrink-0" onClick={() => setShowSidebar(false)}>×</Button>
             </div>
-            <div className="p-1 space-y-1">
-              {fileUrls.map((url, i) => {
+            {dicomInfo["ID"] && (
+              <div className="px-2 py-1 text-[8px] text-amber-400/50 border-b border-white/5 font-mono">
+                ID: {dicomInfo["ID"]}
+              </div>
+            )}
+            {dicomInfo["Estudo"] && (
+              <div className="px-2 py-0.5 text-[8px] text-white/30 border-b border-white/5">
+                [{dicomInfo["Estudo"] || "No study description"}]
+              </div>
+            )}
+            <div className="px-2 py-0.5 text-[8px] text-white/30 border-b border-white/5">
+              {dicomInfo["Data Estudo"] || ""} {fileUrls.length > 0 ? `${fileUrls.length} Series` : ""}
+            </div>
+            {/* Series group */}
+            <div className="px-1 py-1 text-[8px] text-amber-400/60 font-mono border-b border-white/5 cursor-pointer hover:bg-white/5">
+              {dicomInfo["Modalidade"] || "DX"} - [{dicomInfo["Série"] || "No study description"}]
+            </div>
+            <div className="p-1 space-y-1 flex-1 overflow-y-auto">
+              {fileUrls.length > 0 ? fileUrls.map((url, i) => {
                 const originalPath = (examRequest?.file_urls as string[])?.[i] || "";
                 const isDicom = originalPath.toLowerCase().endsWith(".dcm") || originalPath.toLowerCase().endsWith(".dicom");
+                const isActive = i === activeIndex;
+                const isDualActive = dualView && i === dualIndex;
                 return (
                   <button
                     key={i}
-                    onClick={() => { setActiveIndex(i); setCinePlay(false); }}
+                    onClick={() => { if (dualView && i !== activeIndex) setDualIndex(i); else { setActiveIndex(i); setCinePlay(false); } }}
                     className={`w-full rounded overflow-hidden border-2 transition-all ${
-                      i === activeIndex
-                        ? "border-primary shadow-[0_0_10px_hsl(var(--primary)/0.5)]"
-                        : "border-white/5 hover:border-white/20"
+                      isActive ? "border-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]"
+                      : isDualActive ? "border-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.4)]"
+                      : "border-white/5 hover:border-white/20"
                     }`}
                   >
                     <div className="aspect-square bg-black flex items-center justify-center relative">
@@ -797,16 +835,26 @@ const PacsViewer = ({
                       ) : (
                         <img src={url} alt={`S${i + 1}`} className="w-full h-full object-cover opacity-80" />
                       )}
+                      <div className="absolute top-0.5 right-0.5">
+                        <span className="text-[7px] text-red-400 font-bold">■</span>
+                      </div>
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 to-transparent px-1 py-0.5 flex justify-between items-end">
-                        <span className="text-[8px] text-white/50 font-mono">s: {i + 1}</span>
-                        <span className="text-[8px] text-primary/80">📁{i + 1}</span>
+                        <span className="text-[7px] text-amber-400/60 font-mono">{fileUrls.length} Imgs</span>
                       </div>
                     </div>
                   </button>
                 );
-              })}
+              }) : (
+                <div className="text-center text-[9px] text-white/20 py-4">Sem imagens</div>
+              )}
             </div>
           </div>
+        )}
+        {!showSidebar && (
+          <Button size="icon" variant="ghost" className="absolute top-12 left-0 z-30 h-8 w-5 bg-[#1a2332]/80 text-white/40 hover:text-white rounded-none rounded-r"
+            onClick={() => setShowSidebar(true)}>
+            <ChevronRight className="w-3 h-3" />
+          </Button>
         )}
 
         {/* Main canvas area */}
@@ -890,38 +938,50 @@ const PacsViewer = ({
             </div>
           </div>
 
-          {/* Patient info overlay — top-left (Weasis style) */}
+          {/* Patient info overlay — top-left (OsiriX orange style) */}
           {Object.keys(dicomInfo).length > 0 && (
             <div className="absolute top-2 left-2 text-[10px] font-mono leading-snug pointer-events-none z-20">
-              {dicomInfo["Paciente"] && <div className="text-cyan-300/90">Nome: <strong>{dicomInfo["Paciente"]}</strong></div>}
-              {dicomInfo["ID"] && <div className="text-cyan-300/60">ID: {dicomInfo["ID"]}</div>}
-              {dicomInfo["Nascimento"] && <div className="text-cyan-300/60">Nasc: {dicomInfo["Nascimento"]}</div>}
-              {dicomInfo["Sexo"] && <div className="text-cyan-300/60">Sexo: {dicomInfo["Sexo"]}</div>}
+              {dicomInfo["Paciente"] && <div className="text-amber-400/90">Nome: <strong>{dicomInfo["Paciente"]}</strong></div>}
+              {dicomInfo["ID"] && <div className="text-amber-400/60">ID: {dicomInfo["ID"]}</div>}
+              {dicomInfo["Nascimento"] && <div className="text-amber-400/60">Nasc: {dicomInfo["Nascimento"]}</div>}
+              {dicomInfo["Sexo"] && <div className="text-amber-400/60">Sexo: {dicomInfo["Sexo"]}</div>}
+              {dicomInfo["Instituição"] && (
+                <div className="text-amber-300/50 mt-1">
+                  Nome do departamento : {dicomInfo["Instituição"]}
+                </div>
+              )}
             </div>
           )}
 
           {/* Study info overlay — top-right */}
           {Object.keys(dicomInfo).length > 0 && (
             <div className="absolute top-2 right-2 text-[10px] font-mono text-right leading-snug pointer-events-none z-20">
-              {dicomInfo["Instituição"] && <div className="text-white/50">{dicomInfo["Instituição"]}</div>}
-              {dicomInfo["Data Estudo"] && <div className="text-white/40">Data: {dicomInfo["Data Estudo"]}</div>}
+              {dicomInfo["Data Estudo"] && <div className="text-white/50">{dicomInfo["Data Estudo"]}</div>}
+              {dicomInfo["Estudo"] && <div className="text-white/40">[{dicomInfo["Estudo"]}]</div>}
               {dicomInfo["Modalidade"] && <div className="text-white/50">{dicomInfo["Modalidade"]} {dicomInfo["Protocolo"] ? `· ${dicomInfo["Protocolo"]}` : ""}</div>}
-              {dicomInfo["Dimensões"] && <div className="text-white/30">{dicomInfo["Dimensões"]} · {dicomInfo["Bits"]}</div>}
-              {dicomInfo["Espessura"] && <div className="text-white/30">Esp: {dicomInfo["Espessura"]}</div>}
             </div>
           )}
 
           {/* Cursor position + HU readout — bottom-left (OsiriX) */}
           {cursorPos && (
-            <div className="absolute bottom-2 left-2 text-[10px] font-mono text-green-400/80 pointer-events-none z-20 bg-black/50 px-1.5 py-0.5 rounded">
+            <div className="absolute bottom-6 left-2 text-[10px] font-mono text-green-400/80 pointer-events-none z-20 bg-black/50 px-1.5 py-0.5 rounded">
               x: {cursorPos.x} y: {cursorPos.y}
               {cursorPos.hu !== undefined && <span className="ml-2 text-yellow-300/80">HU: {cursorPos.hu}</span>}
             </div>
           )}
 
-          {/* WW/WL display — bottom-right */}
-          <div className="absolute bottom-2 right-2 text-[10px] font-mono text-white/30 pointer-events-none z-20">
-            W: {brightness} L: {contrast} {activePreset !== "Default" && activePreset !== "Custom" && `[${activePreset}]`}
+          {/* Bottom status bar (OsiriX-style) */}
+          <div className="absolute bottom-0 inset-x-0 h-5 bg-black/70 border-t border-white/5 flex items-center justify-between px-3 text-[9px] font-mono text-white/40 pointer-events-none z-20">
+            <div className="flex items-center gap-4">
+              <span>Image size:{imageNaturalSize.w}x{imageNaturalSize.h}</span>
+              <span>Zoom: {Math.round(zoom * 100)}%</span>
+              {dicomInfo["Formato"] === "DICOM" && <span>DERIVED\\PRIMARY</span>}
+            </div>
+            <div className="flex items-center gap-4">
+              {fileUrls.length > 0 && <span>Images:{activeIndex + 1}/ {fileUrls.length}</span>}
+              <span>WL: {brightness} / WW: {contrast}</span>
+              {dicomInfo["Modalidade"] && <span>({dicomInfo["Modalidade"]})</span>}
+            </div>
           </div>
 
           {/* Measurements list — bottom-center */}
@@ -935,13 +995,42 @@ const PacsViewer = ({
             </div>
           )}
 
-          {/* Clinical info overlay */}
-          {examRequest?.clinical_info && (
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] font-mono text-yellow-400/40 pointer-events-none z-10 max-w-[60%] truncate">
-              📋 {examRequest.clinical_info}
+          {/* Técnico Responsável overlay — bottom-right above status bar */}
+          {dicomInfo["Médico Ref."] && (
+            <div className="absolute bottom-6 right-2 text-[10px] font-mono text-red-400/80 pointer-events-none z-20">
+              Técnico Responsável : <strong>{dicomInfo["Médico Ref."]}</strong>
             </div>
           )}
         </div>
+
+        {/* Dual viewport (comparison side-by-side) */}
+        {dualView && fileUrls.length > 1 && (
+          <div className="flex-1 relative overflow-hidden bg-black border-l-2 border-white/10">
+            <img
+              src={fileUrls[dualIndex] || fileUrls[1] || ""}
+              alt="Comparison"
+              className="absolute inset-0 w-full h-full object-contain"
+              style={{
+                filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}`,
+              }}
+            />
+            {/* Dual view overlays */}
+            {Object.keys(dicomInfo).length > 0 && (
+              <div className="absolute top-2 left-2 text-[10px] font-mono leading-snug pointer-events-none z-20">
+                {dicomInfo["Paciente"] && <div className="text-amber-400/90">{dicomInfo["Paciente"]}</div>}
+                {dicomInfo["ID"] && <div className="text-amber-400/60">{dicomInfo["ID"]}</div>}
+              </div>
+            )}
+            <div className="absolute top-2 right-2 text-[10px] font-mono text-white/50 pointer-events-none z-20">
+              {dicomInfo["Data Estudo"]}
+            </div>
+            <div className="absolute bottom-0 inset-x-0 h-5 bg-black/70 border-t border-white/5 flex items-center justify-between px-3 text-[9px] font-mono text-white/40 pointer-events-none z-20">
+              <span>Image size:{imageNaturalSize.w}x{imageNaturalSize.h}</span>
+              <span>Images:{dualIndex + 1}/ {fileUrls.length}</span>
+              <span>WL: {brightness} / WW: {contrast}</span>
+            </div>
+          </div>
+        )}
 
         {/* DICOM Info Side Panel (Weasis-style) */}
         {showInfoPanel && Object.keys(dicomInfo).length > 0 && (
