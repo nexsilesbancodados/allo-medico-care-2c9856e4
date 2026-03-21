@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,17 +17,25 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Loader2, FileSignature, Download, Save, Upload,
   Mic, MicOff, Sparkles, Wand2, BookText, ChevronDown, Lightbulb,
   ZoomIn, ZoomOut, RotateCw, Contrast, Maximize2, Sun, Move, Ruler,
   ArrowLeft, ChevronLeft, ChevronRight, Grid3X3, Monitor, Eye,
   Crosshair, RotateCcw, FlipHorizontal, FlipVertical, Pencil,
   Type, Play, MoreHorizontal, FileText, Clock, AlertTriangle,
-  Info, Clipboard, Undo2, Redo2, ListChecks, GitBranch
+  Info, Clipboard, ListChecks, GitBranch
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
+import TipTapEditor from "@/components/telelaudo/TipTapEditor";
 import jsPDF from "jspdf";
 import type { ExamRequest, ExamReport, ReportTemplate } from "@/types/domain";
 
@@ -99,6 +107,11 @@ const PacsViewer = ({
   const [dualView, setDualView] = useState(false);
   const [dualIndex, setDualIndex] = useState(1);
   const [imageNaturalSize, setImageNaturalSize] = useState({ w: 0, h: 0 });
+
+  // Annotation dialog states
+  const [annotationDialogOpen, setAnnotationDialogOpen] = useState(false);
+  const [annotationInput, setAnnotationInput] = useState("");
+  const [pendingAnnotationPos, setPendingAnnotationPos] = useState<{ x: number; y: number } | null>(null);
 
   const activeUrl = fileUrls[activeIndex] || null;
 
@@ -347,11 +360,24 @@ const PacsViewer = ({
       };
       setActiveMeasurement(newM);
     } else if (tool === "annotate") {
-      const text = prompt("Texto da anotação:");
-      if (text) {
-        setAnnotations(prev => [...prev, { id: crypto.randomUUID(), x, y, text }]);
-      }
+      setPendingAnnotationPos({ x, y });
+      setAnnotationInput("");
+      setAnnotationDialogOpen(true);
     }
+  };
+
+  const handleConfirmAnnotation = () => {
+    if (annotationInput.trim() && pendingAnnotationPos) {
+      setAnnotations(prev => [...prev, {
+        id: crypto.randomUUID(),
+        x: pendingAnnotationPos.x,
+        y: pendingAnnotationPos.y,
+        text: annotationInput.trim(),
+      }]);
+    }
+    setAnnotationDialogOpen(false);
+    setAnnotationInput("");
+    setPendingAnnotationPos(null);
   };
 
   const handleCanvasMouseMove = (e: React.MouseEvent) => {
@@ -427,7 +453,6 @@ const PacsViewer = ({
         const ry = Math.abs(p[1].y - p[0].y);
         const area = Math.PI * rx * ry;
         value = scale ? `Área: ${(area * scale.sx * scale.sy).toFixed(0)} mm²` : `Área: ${area.toFixed(0)} px²`;
-        // Mean HU for elliptical ROI
         if (pixelDataRef.current) {
           const { values, rows, cols } = pixelDataRef.current;
           const cx = (p[0].x + p[1].x) / 2;
@@ -453,7 +478,6 @@ const PacsViewer = ({
         value = scale
           ? `${(w * scale.sx).toFixed(1)}×${(h * scale.sy).toFixed(1)} mm — Área: ${(area * scale.sx * scale.sy).toFixed(0)} mm²`
           : `${w.toFixed(0)}×${h.toFixed(0)} px — Área: ${area.toFixed(0)} px²`;
-        // Mean HU for rectangular ROI
         if (pixelDataRef.current) {
           const { values, rows, cols } = pixelDataRef.current;
           const x0 = Math.max(0, Math.floor(Math.min(p[0].x, p[1].x)));
@@ -758,145 +782,91 @@ const PacsViewer = ({
         </TooltipProvider>
       </div>
 
-      {/* Main viewport */}
-      <div className="flex flex-1 min-h-0" ref={containerRef}>
-        <div className="flex-1 relative overflow-hidden bg-black select-none"
-          onMouseDown={handleCanvasMouseDown}
-          onMouseMove={handleCanvasMouseMove}
-          onMouseUp={handleCanvasMouseUp}
-          onMouseLeave={handleCanvasMouseUp}
-          onWheel={handleWheel}
-          style={{ cursor: tool === "pan" ? "grab" : tool === "wl" ? "ns-resize" : tool === "annotate" ? "crosshair" : "crosshair" }}>
-
-          {loading && (
-            <div className="absolute inset-0 flex items-center justify-center z-30">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      {/* Canvas area */}
+      <div className="flex flex-1 min-h-0">
+        <div className={`flex-1 flex ${dualView ? "flex-row" : ""}`}>
+          <div ref={containerRef} className={`relative overflow-hidden bg-black flex-1 select-none ${
+            tool === "pan" ? "cursor-grab active:cursor-grabbing" :
+            tool === "measure" || tool === "angle" || tool === "bidirectional" ? "cursor-crosshair" :
+            tool === "annotate" ? "cursor-text" :
+            tool === "wl" ? "cursor-ns-resize" :
+            tool === "zoom" ? "cursor-zoom-in" :
+            "cursor-default"
+          }`}
+            onMouseDown={handleCanvasMouseDown}
+            onMouseMove={handleCanvasMouseMove}
+            onMouseUp={handleCanvasMouseUp}
+            onMouseLeave={handleCanvasMouseUp}
+            onWheel={handleWheel}
+          >
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center z-20">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            )}
+            {!activeUrl && !loading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-white/20">
+                <Upload className="w-12 h-12 mb-2" />
+                <p className="text-sm">Nenhuma imagem</p>
+              </div>
+            )}
+            <div className="w-full h-full flex items-center justify-center" style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }}>
+              <div style={{
+                transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
+                filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}`,
+                transformOrigin: "center",
+              }}>
+                <canvas ref={canvasRef} className="max-w-none" />
+                <canvas ref={overlayCanvasRef} className="absolute top-0 left-0 pointer-events-none max-w-none"
+                  style={{ width: canvasRef.current?.width, height: canvasRef.current?.height }} />
+              </div>
             </div>
-          )}
 
-          {fileUrls.length === 0 && !loading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 z-20">
-              <Upload className="w-12 h-12 text-white/20" />
-              <p className="text-white/30 text-sm">Nenhuma imagem disponível</p>
-              <label className="cursor-pointer">
-                <input type="file" className="hidden" multiple accept="image/*,.dcm,application/dicom"
-                  onChange={async (e) => {
-                    const files = Array.from(e.target.files || []);
-                    if (!files.length || !examRequest?.id) return;
-                    const paths: string[] = [];
-                    for (const file of files) {
-                      const path = `exams/${examRequest.id}/${crypto.randomUUID()}-${file.name}`;
-                      const { error } = await supabase.storage.from("exam-files").upload(path, file);
-                      if (!error) paths.push(path);
-                    }
-                    if (paths.length) {
-                      const resolved = await Promise.all(paths.map(async p => {
-                        const { data } = await supabase.storage.from("exam-files").createSignedUrl(p, 3600);
-                        return data?.signedUrl || "";
-                      }));
-                      onFilesUploaded?.(resolved.filter(Boolean));
-                      toast.success(`${paths.length} arquivo(s) enviado(s)!`);
-                    }
-                  }}
-                />
-                <Button variant="outline" size="sm" className="text-white/50 border-white/20 hover:bg-white/10 hover:text-white" asChild>
-                  <span><Upload className="w-4 h-4 mr-2" /> Upload de Arquivos</span>
+            {/* Cursor position / HU overlay */}
+            {cursorPos && (
+              <div className="absolute bottom-1 left-1 text-[9px] text-white/50 font-mono bg-black/60 px-1 rounded">
+                ({cursorPos.x}, {cursorPos.y}){cursorPos.hu !== undefined && ` HU: ${cursorPos.hu}`}
+              </div>
+            )}
+          </div>
+
+          {/* Dual view */}
+          {dualView && fileUrls.length > 1 && (
+            <div className="flex-1 relative overflow-hidden bg-black border-l border-white/10">
+              <img src={fileUrls[dualIndex] || ""} className="w-full h-full object-contain"
+                style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}` }} />
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1">
+                <Button size="icon" variant="ghost" className="h-5 w-5 text-white/50"
+                  onClick={() => setDualIndex(i => Math.max(0, i - 1))} disabled={dualIndex === 0}>
+                  <ChevronLeft className="w-3 h-3" />
                 </Button>
-              </label>
-            </div>
-          )}
-
-          {/* Image container with pan */}
-          <div className="absolute inset-0 flex items-center justify-center"
-            style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }}>
-            <div className="relative" style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <canvas
-                ref={canvasRef}
-                className={loading && !canvasRef.current?.width ? "hidden" : ""}
-                style={{
-                  maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
-                  transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
-                  filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}`,
-                  transition: "filter 0.15s ease", imageRendering: "auto",
-                }}
-              />
-              <canvas ref={overlayCanvasRef} className="absolute inset-0 pointer-events-none"
-                style={{
-                  maxWidth: '100%', maxHeight: '100%', objectFit: 'contain',
-                  transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Overlays */}
-          {Object.keys(dicomInfo).length > 0 && (
-            <div className="absolute top-2 left-2 text-[10px] font-mono leading-snug pointer-events-none z-20">
-              {dicomInfo["Paciente"] && <div className="text-amber-400/90">Nome: <strong>{dicomInfo["Paciente"]}</strong></div>}
-              {dicomInfo["ID"] && <div className="text-amber-400/60">ID: {dicomInfo["ID"]}</div>}
-              {dicomInfo["Nascimento"] && <div className="text-amber-400/60">Nasc: {dicomInfo["Nascimento"]}</div>}
-              {dicomInfo["Sexo"] && <div className="text-amber-400/60">Sexo: {dicomInfo["Sexo"]}</div>}
-              {dicomInfo["Instituição"] && <div className="text-amber-300/50 mt-1">{dicomInfo["Instituição"]}</div>}
-            </div>
-          )}
-          {Object.keys(dicomInfo).length > 0 && (
-            <div className="absolute top-2 right-2 text-[10px] font-mono text-right leading-snug pointer-events-none z-20">
-              {dicomInfo["Data Estudo"] && <div className="text-white/50">{dicomInfo["Data Estudo"]}</div>}
-              {dicomInfo["Estudo"] && <div className="text-white/40">[{dicomInfo["Estudo"]}]</div>}
-              {dicomInfo["Modalidade"] && <div className="text-white/50">{dicomInfo["Modalidade"]} {dicomInfo["Protocolo"] ? `· ${dicomInfo["Protocolo"]}` : ""}</div>}
-            </div>
-          )}
-          {cursorPos && (
-            <div className="absolute bottom-6 left-2 text-[10px] font-mono text-green-400/80 pointer-events-none z-20 bg-black/50 px-1.5 py-0.5 rounded">
-              x: {cursorPos.x} y: {cursorPos.y}
-              {cursorPos.hu !== undefined && <span className="ml-2 text-yellow-300/80">HU: {cursorPos.hu}</span>}
-            </div>
-          )}
-          <div className="absolute bottom-0 inset-x-0 h-5 bg-black/70 border-t border-white/5 flex items-center justify-between px-3 text-[9px] font-mono text-white/40 pointer-events-none z-20">
-            <div className="flex items-center gap-4">
-              <span>{imageNaturalSize.w}x{imageNaturalSize.h}</span>
-              <span>Zoom: {Math.round(zoom * 100)}%</span>
-            </div>
-            <div className="flex items-center gap-4">
-              {fileUrls.length > 0 && <span>{activeIndex + 1}/{fileUrls.length}</span>}
-              <span>WL: {brightness} / WW: {contrast}</span>
-            </div>
-          </div>
-
-          {dicomInfo["Médico Ref."] && (
-            <div className="absolute bottom-6 right-2 text-[10px] font-mono text-red-400/80 pointer-events-none z-20">
-              Técnico: <strong>{dicomInfo["Médico Ref."]}</strong>
+                <span className="text-[9px] text-white/40 font-mono">{dualIndex + 1}/{fileUrls.length}</span>
+                <Button size="icon" variant="ghost" className="h-5 w-5 text-white/50"
+                  onClick={() => setDualIndex(i => Math.min(fileUrls.length - 1, i + 1))} disabled={dualIndex >= fileUrls.length - 1}>
+                  <ChevronRight className="w-3 h-3" />
+                </Button>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Dual viewport */}
-        {dualView && fileUrls.length > 1 && (
-          <div className="flex-1 relative overflow-hidden bg-black border-l-2 border-white/10">
-            <img src={fileUrls[dualIndex] || fileUrls[1] || ""} alt="Comparison"
-              className="absolute inset-0 w-full h-full object-contain"
-              style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}` }} />
-            <div className="absolute bottom-0 inset-x-0 h-5 bg-black/70 border-t border-white/5 flex items-center justify-between px-3 text-[9px] font-mono text-white/40 pointer-events-none z-20">
-              <span>{imageNaturalSize.w}x{imageNaturalSize.h}</span>
-              <span>{dualIndex + 1}/{fileUrls.length}</span>
-            </div>
-          </div>
-        )}
-
-        {/* Info Panel */}
-        {showInfoPanel && Object.keys(dicomInfo).length > 0 && (
+        {/* DICOM Info Panel */}
+        {showInfoPanel && (
           <div className="w-56 border-l border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0">
             <div className="p-1.5 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1.5 border-b border-white/5 font-semibold flex items-center justify-between">
               DICOM Tags
               <Button size="icon" variant="ghost" className="h-5 w-5 text-white/30 hover:text-white" onClick={() => setShowInfoPanel(false)}>×</Button>
             </div>
             <div className="p-2 space-y-1">
-              {Object.entries(dicomInfo).map(([k, v]) => (
-                <div key={k} className="flex justify-between gap-2 text-[10px] py-0.5 border-b border-white/5">
-                  <span className="text-white/40 shrink-0">{k}</span>
-                  <span className="text-white/70 text-right truncate">{v}</span>
+              {Object.entries(dicomInfo).map(([key, val]) => (
+                <div key={key} className="flex justify-between text-[10px]">
+                  <span className="text-white/40">{key}</span>
+                  <span className="text-white/70 font-mono text-right max-w-[120px] truncate">{val}</span>
                 </div>
               ))}
+              {Object.keys(dicomInfo).length === 0 && (
+                <p className="text-[10px] text-white/20 text-center py-4">Sem informações DICOM</p>
+              )}
             </div>
           </div>
         )}
@@ -934,48 +904,37 @@ const PacsViewer = ({
           </div>
         )}
       </div>
+
+      {/* Annotation Dialog */}
+      <Dialog open={annotationDialogOpen} onOpenChange={(open) => {
+        if (!open) { setAnnotationDialogOpen(false); setPendingAnnotationPos(null); }
+      }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Adicionar Anotação</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input
+              placeholder="Texto da anotação..."
+              value={annotationInput}
+              onChange={(e) => setAnnotationInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") handleConfirmAnnotation(); }}
+              autoFocus
+            />
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => { setAnnotationDialogOpen(false); setPendingAnnotationPos(null); }}>
+                Cancelar
+              </Button>
+              <Button size="sm" onClick={handleConfirmAnnotation} disabled={!annotationInput.trim()}>
+                Adicionar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
-
-// ==================== UNDO/REDO HOOK ====================
-function useUndoRedo(initialValue: string) {
-  const [history, setHistory] = useState<string[]>([initialValue]);
-  const [pointer, setPointer] = useState(0);
-
-  const current = history[pointer] ?? initialValue;
-
-  const push = useCallback((value: string) => {
-    setHistory(prev => {
-      const next = prev.slice(0, pointer + 1);
-      // Don't push if same as current
-      if (next[next.length - 1] === value) return next;
-      const updated = [...next, value];
-      // Keep max 50 entries
-      if (updated.length > 50) updated.shift();
-      return updated;
-    });
-    setPointer(prev => Math.min(prev + 1, 49));
-  }, [pointer]);
-
-  const undo = useCallback(() => {
-    setPointer(p => Math.max(0, p - 1));
-  }, []);
-
-  const redo = useCallback(() => {
-    setPointer(p => Math.min(history.length - 1, p + 1));
-  }, [history.length]);
-
-  const canUndo = pointer > 0;
-  const canRedo = pointer < history.length - 1;
-
-  const reset = useCallback((value: string) => {
-    setHistory([value]);
-    setPointer(0);
-  }, []);
-
-  return { current, push, undo, redo, canUndo, canRedo, reset };
-}
 
 // ==================== MAIN EDITOR ====================
 const ExamReportEditor = () => {
@@ -993,10 +952,9 @@ const ExamReportEditor = () => {
   const [fileUrls, setFileUrls] = useState<string[]>([]);
   const [autoSaveStatus, setAutoSaveStatus] = useState<"idle" | "saving" | "saved">("idle");
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const undoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Undo/Redo
-  const undoRedo = useUndoRedo("");
+  // Sign confirmation dialog
+  const [showSignDialog, setShowSignDialog] = useState(false);
 
   // Voice
   const [listening, setListening] = useState(false);
@@ -1163,11 +1121,24 @@ const ExamReportEditor = () => {
     },
   });
 
+  // Requesting clinic name
+  const { data: requestingClinic } = useQuery({
+    queryKey: ["requesting-clinic-name", (examRequest as any)?.requesting_clinic_id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("clinic_profiles")
+        .select("name")
+        .eq("id", (examRequest as any).requesting_clinic_id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!(examRequest as any)?.requesting_clinic_id,
+  });
+
   // ---- Auto-claim exam on open ----
   useEffect(() => {
     if (!examRequest || !doctorProfile?.id) return;
     if (examRequest.status === "pending" && !examRequest.assigned_to) {
-      // Claim this exam
       supabase.from("exam_requests" as any)
         .update({ status: "in_review", assigned_to: doctorProfile.id } as any)
         .eq("id", examId!)
@@ -1209,40 +1180,20 @@ const ExamReportEditor = () => {
     if (macro) {
       const applied = applyMacro(newContent, macro);
       setContent(applied);
-      undoRedo.push(applied);
       toast("📝 Macro aplicada", { description: macro.label });
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
       autoSaveTimerRef.current = setTimeout(() => autoSaveDraft(applied), 5000);
       return;
     }
     setContent(newContent);
-    // Debounced undo push
-    if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
-    undoTimerRef.current = setTimeout(() => undoRedo.push(newContent), 800);
     // Debounced auto-save
     if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(() => autoSaveDraft(newContent), 5000);
   };
 
-  const handleUndo = useCallback(() => {
-    undoRedo.undo();
-    setContent(undoRedo.current);
-  }, [undoRedo]);
-
-  const handleRedo = useCallback(() => {
-    undoRedo.redo();
-    setContent(undoRedo.current);
-  }, [undoRedo]);
-
-  // Sync undo state with content
-  useEffect(() => {
-    setContent(undoRedo.current);
-  }, [undoRedo.current]);
-
   useEffect(() => {
     if (existingReport?.content_text) {
       setContent(existingReport.content_text);
-      undoRedo.reset(existingReport.content_text);
     }
   }, [existingReport?.content_text]);
 
@@ -1273,7 +1224,6 @@ const ExamReportEditor = () => {
     const tpl = templates?.find((t: { id: string; body_text: string }) => t.id === templateId);
     if (tpl) {
       setContent(tpl.body_text);
-      undoRedo.push(tpl.body_text);
     }
   };
 
@@ -1292,7 +1242,6 @@ const ExamReportEditor = () => {
           ? content + "\n\n" + data.structured_text
           : data.structured_text;
         setContent(newContent);
-        undoRedo.push(newContent);
         toast.success("✨ IA aplicada", {
           description: mode === "structure" ? "Laudo estruturado" :
             mode === "improve" ? "Redação melhorada" :
@@ -1318,23 +1267,20 @@ const ExamReportEditor = () => {
     if (!macro) return;
     const newContent = content ? `${content}\n\n${macro.text}` : macro.text;
     setContent(newContent);
-    undoRedo.push(newContent);
     setShowMacros(false);
     toast("📝 Macro inserida", { description: macro.label });
   };
 
-  // ---- Sign ----
-  const handleSignAndFinalize = async () => {
+  // ---- Sign (actual logic, called from AlertDialog confirm) ----
+  const executeSignAndFinalize = async () => {
     if (!doctorProfile?.id || !content.trim()) { toast.error("Preencha o laudo antes de assinar."); return; }
-
-    // Confirmation dialog
-    if (!window.confirm("Deseja realmente assinar e finalizar este laudo? Esta ação é irreversível.")) return;
 
     setSigning(true);
     try {
       const documentHash = await gerarHashDocumento(content);
       const verificationCode = gerarCodigoVerificacao();
       const doctorName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim();
+      const patientDisplayName = (examRequest as any)?.patient_name || "Paciente";
 
       // Generate professional PDF
       const pdf = new jsPDF();
@@ -1359,11 +1305,12 @@ const ExamReportEditor = () => {
       pdf.setFontSize(9);
       pdf.text(`Tipo de Exame: ${examRequest?.exam_type || "—"}`, 20, y + 2);
       pdf.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 120, y + 2);
-      pdf.text(`Médico Laudista: Dr(a). ${doctorName}`, 20, y + 10);
-      pdf.text(`CRM: ${doctorProfile.crm}/${doctorProfile.crm_state}`, 120, y + 10);
+      pdf.text(`Paciente: ${patientDisplayName}`, 20, y + 10);
+      pdf.text(`Médico Laudista: Dr(a). ${doctorName}`, 20, y + 18);
+      pdf.text(`CRM: ${doctorProfile.crm}/${doctorProfile.crm_state}`, 120, y + 18);
       if (examRequest?.priority === "urgent") {
         pdf.setTextColor(200, 0, 0);
-        pdf.text("⚠ URGENTE", 20, y + 18);
+        pdf.text("⚠ URGENTE", 120, y + 10);
         pdf.setTextColor(0, 0, 0);
       }
       y += 35;
@@ -1395,7 +1342,6 @@ const ExamReportEditor = () => {
       y += 6;
 
       const contentLines = pdf.splitTextToSize(content, 170);
-      // Handle page breaks
       for (const line of contentLines) {
         if (y > 260) {
           pdf.addPage();
@@ -1455,7 +1401,7 @@ const ExamReportEditor = () => {
       // Document verification record
       await supabase.from("document_verifications").insert({
         doctor_name: doctorName, doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`,
-        patient_name: "Paciente", document_type: "exam_report", document_hash: documentHash, verification_code: verificationCode,
+        patient_name: patientDisplayName, document_type: "exam_report", document_hash: documentHash, verification_code: verificationCode,
       });
 
       // Notifications
@@ -1470,7 +1416,8 @@ const ExamReportEditor = () => {
         if (patientProfile) {
           await supabase.from("notifications").insert({ user_id: patientProfile.user_id, title: "📋 Seu laudo está pronto!", message: `O laudo do exame ${examRequest.exam_type} foi concluído.`, type: "exam_report", link: "/dashboard/health" });
           if (patientProfile.phone) {
-            supabase.functions.invoke("send-whatsapp", { body: { phone: patientProfile.phone, message: `🩺 *Allo Médico* — Laudo Pronto!\n\nOlá, ${patientProfile.first_name}!\nSeu laudo de *${examRequest.exam_type}* foi finalizado pelo Dr(a). ${doctorName}.\n\nCódigo: ${verificationCode}\nVerifique em: allomedico.com/validar` } }).catch(() => {});
+            const doctorNameForWA = doctorName;
+            supabase.functions.invoke("send-whatsapp", { body: { phone: patientProfile.phone, message: `🩺 *Allo Médico* — Laudo Pronto!\n\nOlá, ${patientProfile.first_name}!\nSeu laudo de *${examRequest.exam_type}* foi finalizado pelo Dr(a). ${doctorNameForWA}.\n\nCódigo: ${verificationCode}\nVerifique em: allomedico.com/validar` } }).catch(() => {});
           }
         }
       }
@@ -1493,20 +1440,12 @@ const ExamReportEditor = () => {
       }
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
-        if (!isReported) handleSignAndFinalize();
-      }
-      if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
-        e.preventDefault();
-        handleUndo();
-      }
-      if ((e.ctrlKey || e.metaKey) && (e.key === "y" || (e.key === "z" && e.shiftKey))) {
-        e.preventDefault();
-        handleRedo();
+        if (!isReported) setShowSignDialog(true);
       }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [content, autoSaveDraft, handleUndo, handleRedo]);
+  }, [content, autoSaveDraft]);
 
   if (loadingExam) {
     return (
@@ -1545,7 +1484,7 @@ const ExamReportEditor = () => {
         <div className="flex-1" />
         <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
           <span>{wordCount} palavras · {charCount} chars</span>
-          <span className="hidden md:inline">Ctrl+S salvar · Ctrl+Enter assinar · Ctrl+Z desfazer</span>
+          <span className="hidden md:inline">Ctrl+S salvar · Ctrl+Enter assinar</span>
         </div>
       </div>
 
@@ -1573,15 +1512,34 @@ const ExamReportEditor = () => {
                 </div>
               )}
 
-              {examRequest?.patient_id && (
-                <div className="px-3 py-1.5 border-b border-border bg-muted/30 flex items-center gap-2">
-                  <Clipboard className="w-3.5 h-3.5 text-muted-foreground" />
+              {/* Patient / Clinic info panel */}
+              <div className="px-3 py-2 border-b border-border bg-muted/30 space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <Clipboard className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  <span className="text-[11px] font-semibold text-foreground">
+                    {(examRequest as any)?.patient_name
+                      ? (examRequest as any).patient_name
+                      : examRequest?.patient_id
+                      ? "Paciente cadastrado"
+                      : "Paciente não informado"}
+                  </span>
+                  {examRequest?.priority === "urgent" && (
+                    <span className="text-destructive ml-1 font-bold text-[10px]">● URGENTE</span>
+                  )}
+                </div>
+                {requestingClinic?.name && (
+                  <div className="flex items-center gap-2 pl-5">
+                    <span className="text-[10px] text-muted-foreground">
+                      Clínica: <strong>{requestingClinic.name}</strong>
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 pl-5">
                   <span className="text-[10px] text-muted-foreground">
-                    Exame: <strong>{examRequest.exam_type}</strong>
-                    {examRequest.priority === "urgent" && <span className="text-destructive ml-2 font-bold">● URGENTE</span>}
+                    Exame: <strong>{examRequest?.exam_type}</strong>
                   </span>
                 </div>
-              )}
+              </div>
 
               {/* Editor header */}
               <div className="px-3 py-2 border-b border-border flex items-center justify-between">
@@ -1590,20 +1548,6 @@ const ExamReportEditor = () => {
                   <span className="font-medium text-sm">{isReported ? "Laudo Finalizado" : "Redigir Laudo"}</span>
                 </div>
                 <div className="flex items-center gap-1">
-                  {!isReported && (
-                    <>
-                      <Tooltip><TooltipTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleUndo} disabled={!undoRedo.canUndo}>
-                          <Undo2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </TooltipTrigger><TooltipContent>Desfazer (Ctrl+Z)</TooltipContent></Tooltip>
-                      <Tooltip><TooltipTrigger asChild>
-                        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={handleRedo} disabled={!undoRedo.canRedo}>
-                          <Redo2 className="w-3.5 h-3.5" />
-                        </Button>
-                      </TooltipTrigger><TooltipContent>Refazer (Ctrl+Y)</TooltipContent></Tooltip>
-                    </>
-                  )}
                   {autoSaveStatus !== "idle" && !isReported && (
                     <div className="flex items-center gap-1 text-[10px] text-muted-foreground ml-2">
                       {autoSaveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin" /> Salvando...</>}
@@ -1694,15 +1638,12 @@ const ExamReportEditor = () => {
                 </div>
               )}
 
-              {/* Editor area */}
-              <div className="flex-1 relative min-h-0 p-3">
-                <Textarea
-                  value={content}
-                  onChange={e => handleContentChange(e.target.value)}
-                  placeholder={listening ? "Fale agora..." : "Digite o laudo ou use /comandos para macros..."}
-                  className="h-full resize-none text-sm font-mono leading-relaxed border-0 bg-transparent focus-visible:ring-0 p-0"
-                  readOnly={!!isReported}
-                  spellCheck
+              {/* Editor area — TipTap rich text */}
+              <div className="flex-1 relative min-h-0">
+                <TipTapEditor
+                  content={content}
+                  onChange={handleContentChange}
+                  disabled={!!isReported}
                 />
                 {aiProcessing && (
                   <div className="absolute inset-0 bg-background/60 flex items-center justify-center rounded-md">
@@ -1740,7 +1681,7 @@ const ExamReportEditor = () => {
                     )}
                   </div>
                 ) : (
-                  <Button onClick={handleSignAndFinalize} disabled={signing || !content.trim()} className="w-full h-9">
+                  <Button onClick={() => setShowSignDialog(true)} disabled={signing || !content.trim()} className="w-full h-9">
                     {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
                     {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
                   </Button>
@@ -1750,6 +1691,31 @@ const ExamReportEditor = () => {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+
+      {/* Sign Confirmation AlertDialog */}
+      <AlertDialog open={showSignDialog} onOpenChange={setShowSignDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Assinar Laudo</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação é irreversível. O laudo será enviado para a clínica com sua assinatura digital.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={signing}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={signing}
+              onClick={() => {
+                setShowSignDialog(false);
+                executeSignAndFinalize();
+              }}
+            >
+              {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
+              Sim, Assinar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
