@@ -1500,8 +1500,23 @@ const ExamReportEditor = () => {
           )}
         </div>
         <div className="flex-1" />
-        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
           <span>{wordCount} palavras · {charCount} chars</span>
+          {!isReported && wordCount > 0 && (
+            <div className="flex items-center gap-1">
+              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    wordCount >= 150 ? "bg-green-500" : wordCount >= 50 ? "bg-warning" : "bg-destructive"
+                  }`}
+                  style={{ width: `${Math.min(100, (wordCount / 150) * 100)}%` }}
+                />
+              </div>
+              <span className={wordCount >= 150 ? "text-green-500" : wordCount >= 50 ? "text-warning" : "text-destructive"}>
+                {wordCount >= 150 ? "✓" : `${150 - wordCount} para mínimo`}
+              </span>
+            </div>
+          )}
           <span className="hidden md:inline">Ctrl+S salvar · Ctrl+Enter assinar</span>
         </div>
       </div>
