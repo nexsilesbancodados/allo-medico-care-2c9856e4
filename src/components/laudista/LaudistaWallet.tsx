@@ -4,16 +4,18 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getLaudistaNav } from "./laudistaNav";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Shield, Stethoscope, Phone, Mail, Award, QrCode, Copy, CheckCircle2, FileText, Star, Microscope } from "lucide-react";
+import { Loader2, Shield, Phone, Mail, Award, QrCode, Copy, CheckCircle2, Star, Microscope, FileCheck, Sparkles, Zap } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { useState } from "react";
+import { motion } from "framer-motion";
 
 const LaudistaWallet = () => {
   const { user, profile } = useAuth();
   const [copied, setCopied] = useState(false);
+  const [flipped, setFlipped] = useState(false);
 
   const { data, isLoading } = useQuery({
     queryKey: ["laudista-wallet", user?.id],
@@ -21,13 +23,11 @@ const LaudistaWallet = () => {
       const dpRes = await supabase.from("doctor_profiles").select("*").eq("user_id", user!.id).maybeSingle();
       if (!dpRes.data) return null;
       const dpId = dpRes.data.id;
-
       const [specsRes, totalRes, signedRes] = await Promise.all([
         supabase.from("doctor_specialties").select("specialty_id, specialties(name)").eq("doctor_id", dpId),
         supabase.from("exam_reports").select("id", { count: "exact", head: true }).eq("reporter_id", dpId),
         supabase.from("exam_reports").select("id", { count: "exact", head: true }).eq("reporter_id", dpId).not("signed_at", "is", null),
       ]);
-
       return {
         doctor: dpRes.data,
         specialties: (specsRes.data ?? []).map((s: any) => s.specialties?.name).filter(Boolean),
@@ -40,6 +40,7 @@ const LaudistaWallet = () => {
 
   const fullName = `Dr(a). ${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim();
   const crmFull = data?.doctor ? `CRM ${data.doctor.crm}/${data.doctor.crm_state}` : "";
+  const initial = (profile?.first_name?.[0] ?? "L").toUpperCase();
 
   const copyId = () => {
     navigator.clipboard.writeText(data?.doctor?.id ?? "");
@@ -50,110 +51,188 @@ const LaudistaWallet = () => {
 
   return (
     <DashboardLayout title="Laudista" nav={getLaudistaNav("wallet")} role="doctor">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
-          <Award className="w-5 h-5 text-primary" />
-          Carteira de Médico Laudista
-        </h2>
+      <div className="max-w-lg mx-auto space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Award className="w-5 h-5 text-secondary" />
+            Carteira de Laudista
+          </h2>
+          <Button size="sm" variant="outline" className="text-xs gap-1.5" onClick={() => setFlipped(!flipped)}>
+            <Sparkles className="w-3.5 h-3.5" /> {flipped ? "Frente" : "Verso"}
+          </Button>
+        </div>
 
         {isLoading ? (
           <div className="flex justify-center py-16"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
         ) : !data ? (
           <p className="text-muted-foreground text-center py-12">Perfil médico não encontrado.</p>
         ) : (
-          <div className="relative overflow-hidden rounded-2xl border-2 border-secondary/30 shadow-2xl">
-            {/* Header gradient - secondary/teal for laudista */}
-            <div className="bg-gradient-to-r from-secondary via-secondary/90 to-primary p-6 pb-14 relative">
-              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }} />
-              <div className="flex items-start justify-between relative z-10">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Microscope className="w-5 h-5 text-white/80" />
-                    <span className="text-white/70 text-xs font-medium tracking-wider uppercase">Allo Médico · Telelaudo</span>
-                  </div>
-                  <h3 className="text-xl font-bold text-white">{fullName}</h3>
-                  <p className="text-white/80 text-sm font-mono mt-0.5">{crmFull}</p>
-                </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl p-2">
-                  <QrCode className="w-10 h-10 text-white" />
-                </div>
-              </div>
-            </div>
+          <div className="perspective-[1200px]" onClick={() => setFlipped(!flipped)}>
+            <motion.div
+              className="relative w-full cursor-pointer"
+              style={{ transformStyle: "preserve-3d" }}
+              animate={{ rotateY: flipped ? 180 : 0 }}
+              transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+            >
+              {/* ═══ FRONT ═══ */}
+              <div className="relative w-full" style={{ backfaceVisibility: "hidden" }}>
+                <div className="relative overflow-hidden rounded-3xl shadow-2xl border border-secondary/20">
+                  {/* Ambient glows */}
+                  <div className="absolute -top-20 -left-20 w-60 h-60 bg-secondary/20 rounded-full blur-3xl" />
+                  <div className="absolute -bottom-20 -right-20 w-60 h-60 bg-primary/15 rounded-full blur-3xl" />
 
-            {/* Body */}
-            <div className="bg-card p-6 -mt-6 rounded-t-2xl relative z-10 space-y-5">
-              <div className="flex items-center gap-4 -mt-12">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-2xl font-bold border-4 border-card shadow-lg">
-                  {(profile?.first_name?.[0] ?? "L").toUpperCase()}
-                </div>
-                <div className="mt-6 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <Badge className="bg-secondary/10 text-secondary border-secondary/20 gap-1 text-xs">
-                      <Microscope className="w-3 h-3" /> Médico Laudista
-                    </Badge>
-                    {data.doctor.crm_verified && (
-                      <Badge className="bg-success/10 text-success border-success/20 gap-1 text-xs">
-                        <Shield className="w-3 h-3" /> CRM Verificado
+                  {/* Header */}
+                  <div className="relative bg-gradient-to-br from-secondary via-secondary/95 to-secondary/80 p-6 pb-16">
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-white/40 to-transparent" />
+                    <div className="absolute top-3 right-4 flex items-center gap-1.5 opacity-60">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white/60 animate-pulse" />
+                      <span className="text-white/50 text-[9px] font-mono tracking-widest">ATIVO</span>
+                    </div>
+
+                    <div className="flex items-start justify-between relative z-10">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-center">
+                            <Microscope className="w-4 h-4 text-white" />
+                          </div>
+                          <div>
+                            <p className="text-white/60 text-[9px] font-medium tracking-[0.2em] uppercase">Allo Médico</p>
+                            <p className="text-white/40 text-[8px] tracking-wider">TELELAUDO · CARTEIRA DIGITAL</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-white/10 rounded-xl blur-md" />
+                        <div className="relative bg-white/10 backdrop-blur-md rounded-xl p-2.5 border border-white/20">
+                          <QrCode className="w-12 h-12 text-white/90" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Body */}
+                  <div className="relative bg-card p-6 -mt-8 rounded-t-3xl space-y-5 z-10">
+                    {/* Avatar overlap */}
+                    <div className="flex items-end gap-4 -mt-14">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-br from-secondary to-primary rounded-2xl blur-md opacity-40 scale-105" />
+                        {profile?.avatar_url ? (
+                          <img src={profile.avatar_url} alt={fullName} className="relative w-24 h-24 rounded-2xl object-cover border-4 border-card shadow-xl" />
+                        ) : (
+                          <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-secondary to-primary flex items-center justify-center text-white text-3xl font-black border-4 border-card shadow-xl">
+                            {initial}
+                          </div>
+                        )}
+                        {data.doctor.crm_verified && (
+                          <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-success flex items-center justify-center border-2 border-card shadow-md">
+                            <Shield className="w-3.5 h-3.5 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex-1 pb-1">
+                        <h3 className="text-lg font-black text-foreground leading-tight">{fullName}</h3>
+                        <p className="text-sm font-mono text-secondary font-semibold">{crmFull}</p>
+                      </div>
+                    </div>
+
+                    {/* Badges */}
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge className="bg-secondary/10 text-secondary border-secondary/20 gap-1 text-[10px] font-semibold">
+                        <Microscope className="w-3 h-3" /> Médico Laudista
                       </Badge>
-                    )}
+                      {data.specialties.map((s: string) => (
+                        <Badge key={s} variant="outline" className="text-[10px] border-secondary/20 text-secondary/80">{s}</Badge>
+                      ))}
+                    </div>
+
+                    {/* Stats bar */}
+                    <div className="grid grid-cols-3 gap-2">
+                      {[
+                        { value: data.totalReports, label: "Laudos", icon: <FileCheck className="w-3.5 h-3.5 text-secondary" /> },
+                        { value: data.signedReports, label: "Assinados", icon: <CheckCircle2 className="w-3.5 h-3.5 text-success" /> },
+                        { value: "50%", label: "Repasse", icon: <Zap className="w-3.5 h-3.5 text-warning" /> },
+                      ].map(s => (
+                        <div key={s.label} className="relative overflow-hidden text-center p-3 rounded-2xl bg-gradient-to-br from-muted/60 to-muted/30 border border-border/50">
+                          <div className="flex items-center justify-center gap-1 mb-0.5">
+                            {s.icon}
+                            <span className="text-lg font-black text-foreground">{s.value}</span>
+                          </div>
+                          <p className="text-[9px] text-muted-foreground font-medium uppercase tracking-wider">{s.label}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="h-px bg-gradient-to-r from-transparent via-secondary/30 to-transparent" />
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium">Membro desde</p>
+                        <p className="text-xs font-semibold text-foreground">
+                          {data.doctor.created_at ? format(new Date(data.doctor.created_at), "MMMM yyyy", { locale: ptBR }) : "—"}
+                        </p>
+                      </div>
+                      <Button size="sm" variant="ghost" className="text-[10px] gap-1 h-7 px-2 hover:bg-secondary/5" onClick={(e) => { e.stopPropagation(); copyId(); }}>
+                        {copied ? <CheckCircle2 className="w-3 h-3 text-success" /> : <Copy className="w-3 h-3 text-muted-foreground" />}
+                        {copied ? "Copiado!" : "Copiar ID"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {data.specialties.length > 0 && (
-                <div>
-                  <p className="text-xs text-muted-foreground mb-2">Especialidades</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {data.specialties.map((s: string) => (
-                      <Badge key={s} variant="outline" className="text-xs">{s}</Badge>
-                    ))}
+              {/* ═══ BACK ═══ */}
+              <div
+                className="absolute inset-0 w-full"
+                style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+              >
+                <div className="relative overflow-hidden rounded-3xl shadow-2xl border border-secondary/20 bg-gradient-to-br from-card via-card to-muted/30 h-full">
+                  <div className="absolute -top-16 -right-16 w-48 h-48 bg-secondary/5 rounded-full blur-3xl" />
+
+                  {/* Magnetic stripe */}
+                  <div className="w-full h-12 bg-gradient-to-r from-foreground/80 via-foreground/90 to-foreground/80 mt-6" />
+
+                  <div className="p-6 space-y-5">
+                    <div>
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider mb-1.5">Assinatura Digital</p>
+                      <div className="h-14 rounded-xl bg-muted/50 border border-dashed border-border flex items-center justify-center">
+                        <p className="text-sm italic text-muted-foreground/50 font-serif">{fullName}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Contato</p>
+                      {profile?.phone && (
+                        <div className="flex items-center gap-2.5 text-sm text-foreground">
+                          <div className="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center"><Phone className="w-3.5 h-3.5 text-secondary" /></div>
+                          <span className="font-medium">{profile.phone}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2.5 text-sm text-foreground">
+                        <div className="w-7 h-7 rounded-lg bg-secondary/10 flex items-center justify-center"><Mail className="w-3.5 h-3.5 text-secondary" /></div>
+                        <span className="font-medium text-xs">{user?.email}</span>
+                      </div>
+                    </div>
+
+                    <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-[9px] text-muted-foreground uppercase tracking-wider">ID do Laudista</p>
+                        <p className="text-xs font-mono text-foreground font-semibold mt-0.5">{data?.doctor?.id?.slice(0, 16)}...</p>
+                      </div>
+                      <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+                        <Microscope className="w-5 h-5 text-secondary" />
+                      </div>
+                    </div>
+
+                    <p className="text-[8px] text-center text-muted-foreground/60 pt-2">
+                      Carteira válida enquanto o profissional mantiver registro ativo no CRM e vínculo com a plataforma.
+                    </p>
                   </div>
                 </div>
-              )}
-
-              <div className="grid grid-cols-3 gap-3">
-                <div className="text-center p-3 rounded-xl bg-muted/50 border border-border">
-                  <p className="text-xl font-black text-foreground">{data.totalReports}</p>
-                  <p className="text-[10px] text-muted-foreground">Laudos Totais</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-muted/50 border border-border">
-                  <p className="text-xl font-black text-foreground">{data.signedReports}</p>
-                  <p className="text-[10px] text-muted-foreground">Assinados</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-muted/50 border border-border">
-                  <p className="text-xl font-black text-foreground flex items-center justify-center gap-0.5">
-                    50% <Star className="w-3 h-3 text-warning" />
-                  </p>
-                  <p className="text-[10px] text-muted-foreground">Repasse</p>
-                </div>
               </div>
-
-              <div className="space-y-2">
-                {profile?.phone && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Phone className="w-3.5 h-3.5" /><span>{profile.phone}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="w-3.5 h-3.5" /><span>{user?.email}</span>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-border">
-                <div>
-                  <p className="text-[10px] text-muted-foreground">ID do Laudista</p>
-                  <p className="text-xs font-mono text-foreground">{data.doctor.id?.slice(0, 8)}...</p>
-                </div>
-                <Button size="sm" variant="ghost" className="text-xs gap-1" onClick={copyId}>
-                  {copied ? <CheckCircle2 className="w-3 h-3 text-success" /> : <Copy className="w-3 h-3" />}
-                  {copied ? "Copiado" : "Copiar ID"}
-                </Button>
-              </div>
-
-              <p className="text-[10px] text-center text-muted-foreground">
-                Membro desde {data.doctor.created_at ? format(new Date(data.doctor.created_at), "MMMM 'de' yyyy", { locale: ptBR }) : "—"}
-              </p>
-            </div>
+            </motion.div>
           </div>
         )}
       </div>
