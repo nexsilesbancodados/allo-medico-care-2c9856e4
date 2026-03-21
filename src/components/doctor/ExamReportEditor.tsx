@@ -109,12 +109,12 @@ const PacsViewer = ({
     if (cinePlay && fileUrls.length > 1) {
       cineRef.current = setInterval(() => {
         setActiveIndex(i => (i + 1) % fileUrls.length);
-      }, 200);
+      }, cineSpeed);
     } else {
       if (cineRef.current) clearInterval(cineRef.current);
     }
     return () => { if (cineRef.current) clearInterval(cineRef.current); };
-  }, [cinePlay, fileUrls.length]);
+  }, [cinePlay, fileUrls.length, cineSpeed]);
 
   useEffect(() => {
     if (!activeUrl) return;
