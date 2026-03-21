@@ -66,6 +66,7 @@ const DoctorWallet = lazy(() => import("@/components/doctor/DoctorWallet"));
 const LaudistaExamRequest = lazy(() => import("@/components/doctor/ExamRequestForm"));
 const LaudistaReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
 const RenewalQueue = lazy(() => import("@/components/doctor/RenewalQueue"));
+const OphthalmologyPage = lazy(() => import("@/components/ophthalmology/OphthalmologyDashboardPage"));
 const DiscountCardPage = lazy(() => import("@/pages/DiscountCard"));
 const VideoRoom = lazy(() => import("@/components/consultation/VideoRoom"));
 const PrescriptionForm = lazy(() => import("@/components/consultation/PrescriptionForm"));
