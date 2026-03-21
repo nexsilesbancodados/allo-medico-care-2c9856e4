@@ -225,9 +225,12 @@ const AuthLaudista = () => {
               <motion.p variants={fadeUp} className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-lg">
                 Laudos à distância com assinatura digital SHA-256, fila inteligente e suporte de IA.
               </motion.p>
-              <motion.div variants={fadeUp}>
+              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
                 <Button size="default" className="bg-gradient-to-r from-[hsl(200,80%,35%)] to-[hsl(220,90%,50%)] text-white rounded-full px-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all" onClick={scrollToForm}>
                   Solicitar Cadastro <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+                <Button size="default" variant="ghost" className="text-foreground border border-border hover:bg-muted rounded-full px-6 font-semibold" onClick={() => { setStep("login"); scrollToForm(); }}>
+                  <LogIn className="w-4 h-4 mr-2" /> Já sou cadastrado
                 </Button>
               </motion.div>
             </motion.div>
