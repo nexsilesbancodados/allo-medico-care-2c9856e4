@@ -1280,7 +1280,7 @@ const ExamReportEditor = () => {
       const documentHash = await gerarHashDocumento(content);
       const verificationCode = gerarCodigoVerificacao();
       const doctorName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim();
-      const patientDisplayName = (examRequest as any)?.patient_name || "Paciente";
+      const patientDisplayName = examRequest?.patient_name || "Paciente";
 
       // Generate professional PDF
       const pdf = new jsPDF();
