@@ -225,9 +225,12 @@ const AuthLaudista = () => {
               <motion.p variants={fadeUp} className="text-sm text-muted-foreground leading-relaxed mb-6 max-w-lg">
                 Laudos à distância com assinatura digital SHA-256, fila inteligente e suporte de IA.
               </motion.p>
-              <motion.div variants={fadeUp}>
+              <motion.div variants={fadeUp} className="flex flex-col sm:flex-row gap-3">
                 <Button size="default" className="bg-gradient-to-r from-[hsl(200,80%,35%)] to-[hsl(220,90%,50%)] text-white rounded-full px-8 shadow-lg hover:shadow-xl hover:scale-105 transition-all" onClick={scrollToForm}>
                   Solicitar Cadastro <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+                <Button size="default" variant="ghost" className="text-foreground border border-border hover:bg-muted rounded-full px-6 font-semibold" onClick={() => { setStep("login"); scrollToForm(); }}>
+                  <LogIn className="w-4 h-4 mr-2" /> Já sou cadastrado
                 </Button>
               </motion.div>
             </motion.div>
@@ -512,6 +515,14 @@ const AuthLaudista = () => {
                   </div>
                   <Button className="w-full bg-gradient-to-r from-[hsl(200,80%,35%)] to-[hsl(220,90%,50%)] text-white h-12 shadow-lg" size="lg" disabled={!specialty || !examTypes} onClick={() => setStep("apply")}>
                     Continuar para Cadastro <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                  <div className="flex items-center gap-2 my-1">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs text-muted-foreground">ou</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                  <Button variant="outline" className="w-full h-11" onClick={() => setStep("login")}>
+                    <LogIn className="w-4 h-4 mr-2" /> Já tenho conta — Entrar
                   </Button>
                   <p className="text-center text-sm text-muted-foreground"><button type="button" onClick={() => hasLoginAccess ? setStep("welcome") : navigate("/")} className="text-[hsl(210,85%,45%)] font-semibold hover:underline">← Voltar</button></p>
                 </div>

@@ -13,7 +13,7 @@ import {
   Building2, Mail, Lock, Phone, MapPin, FileText, Sparkles, Eye, EyeOff,
   Users, Calendar, DollarSign, BarChart3, Shield, ArrowRight, CheckCircle2,
   ChevronRight, Smartphone, HelpCircle, Zap, Video, ClipboardList, UserPlus,
-  Globe, Clock
+  Globe, Clock, LogIn
 } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
@@ -203,8 +203,8 @@ const AuthClinica = () => {
                 <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl" onClick={scrollToForm}>
                   Cadastrar Clínica <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
-                <Button size="default" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl px-6 font-semibold" asChild>
-                  <a href="#como-funciona">Ver recursos</a>
+                <Button size="default" variant="ghost" className="text-white border border-white/30 hover:bg-white/10 rounded-2xl px-6 font-semibold" onClick={() => { setMode("login"); scrollToForm(); }}>
+                  <LogIn className="w-4 h-4 mr-2" /> Já sou cadastrado
                 </Button>
               </div>
               <div className="flex flex-wrap items-center gap-4 mt-6">
