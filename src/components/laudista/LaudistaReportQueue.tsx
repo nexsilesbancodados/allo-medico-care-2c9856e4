@@ -258,7 +258,8 @@ const LaudistaReportQueue = () => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{exam.patient_name}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{exam.patient_display}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{exam.origin}</TableCell>
                         <TableCell>
                           <Badge variant={exam.priority === "urgent" ? "destructive" : "secondary"}>
                             {exam.priority === "urgent" ? "🚨 Urgente" : "Normal"}
