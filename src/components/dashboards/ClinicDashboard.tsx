@@ -48,7 +48,7 @@ const ClinicDashboard = () => {
 
   // Route-based active nav detection
   const pathSegment = location.pathname.split("/").pop() || "";
-  const activeNav = ["schedules", "patients", "waiting-room", "finance", "reports", "doctors"].includes(pathSegment) ? pathSegment : "overview";
+  const activeNav = ["schedules", "patients", "waiting-room", "finance", "reports", "doctors", "my-exams", "exam-request"].includes(pathSegment) ? pathSegment : "overview";
   const defaultTab = pathSegment === "finance" ? "finance" : pathSegment === "reports" ? "performance" : "overview";
 
   useEffect(() => { if (user) fetchData(); }, [user]);
