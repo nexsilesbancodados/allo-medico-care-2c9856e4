@@ -26,6 +26,7 @@ import heroClinica1 from "@/assets/hero-clinica-1.png";
 import heroClinica2 from "@/assets/hero-clinica-2.png";
 import heroClinica3 from "@/assets/hero-clinica-3.png";
 import mascotThumbsUp from "@/assets/mascot-thumbsup.png";
+import bannerClinicaCta from "@/assets/banner-clinica-cta.jpg";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 

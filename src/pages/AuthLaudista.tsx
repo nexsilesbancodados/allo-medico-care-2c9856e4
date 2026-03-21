@@ -19,6 +19,7 @@ import PasswordStrength from "@/components/ui/password-strength";
 import Header from "@/components/landing/Header";
 import telelaudoImg from "@/assets/telelaudo-section.png";
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
+import bannerLaudistaCta from "@/assets/banner-laudista-cta.jpg";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 

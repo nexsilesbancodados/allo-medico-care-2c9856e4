@@ -24,6 +24,7 @@ import heroMedicos1 from "@/assets/hero-medicos.png";
 import heroMedicos2 from "@/assets/hero-medicos-2.png";
 import heroMedicos3 from "@/assets/hero-medicos-3.png";
 import mascotWave from "@/assets/mascot-wave.png";
+import bannerMedicoCta from "@/assets/banner-medico-cta.jpg";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
