@@ -318,6 +318,37 @@ const AuthLaudista = () => {
         </div>
       </section>
 
+      {/* ==================== IMAGE BANNER CTA ==================== */}
+      <section className="relative overflow-hidden" style={{ minHeight: "280px" }}>
+        <img src={bannerLaudistaCta} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[hsl(210,60%,15%)]/95 via-[hsl(210,60%,15%)]/75 to-transparent" />
+        <div className="container mx-auto px-4 relative z-10 flex items-center" style={{ minHeight: "280px" }}>
+          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="max-w-lg">
+            <Badge className="mb-3 text-xs px-3 py-1 bg-white/10 text-white border-white/15 backdrop-blur-sm">
+              <Clock className="w-3 h-3 mr-1" /> Performance
+            </Badge>
+            <h2 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight leading-tight">
+              Laudos entregues em<br /><span className="text-[hsl(200,80%,65%)]">menos de 2 horas</span>
+            </h2>
+            <p className="text-sm text-white/60 mb-5 max-w-md">
+              Assinatura digital SHA-256, verificação por QR Code e rastreabilidade completa.
+            </p>
+            <div className="flex flex-wrap gap-6">
+              {[
+                { label: "< 2h", desc: "SLA médio" },
+                { label: "SHA-256", desc: "Assinatura" },
+                { label: "99.8%", desc: "Uptime" },
+              ].map((s, i) => (
+                <div key={i} className="text-center">
+                  <p className="text-xl font-black text-white">{s.label}</p>
+                  <p className="text-[10px] text-white/50 uppercase tracking-wider">{s.desc}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       {/* ==================== DIFFERENTIALS ==================== */}
       <section className="py-20">
         <div className="container mx-auto px-4 max-w-3xl">
