@@ -203,6 +203,37 @@ const B2BTelelaudo = () => {
           </div>
         </section>
 
+        {/* ==================== BANNER LAUDO DIGITAL ==================== */}
+        <section className="py-16 bg-[hsl(210,50%,8%)] relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(160,55%,45%,0.08),transparent_70%)]" />
+          <div className="container mx-auto px-4 relative">
+            <div className="grid md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto">
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="flex items-center justify-center">
+                <img src={bannerLaudoDigital} alt="Laudo digital com assinatura" className="w-full max-w-sm rounded-2xl shadow-2xl shadow-secondary/10" loading="lazy" />
+              </motion.div>
+              <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+                <Badge className="mb-4 bg-secondary/20 text-secondary border-secondary/30 text-xs">
+                  <Fingerprint className="w-3 h-3 mr-1" /> Verificação Digital
+                </Badge>
+                <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-4">
+                  Laudos com<br />validade jurídica
+                </h2>
+                <p className="text-white/60 text-sm leading-relaxed mb-6">
+                  Cada laudo possui hash SHA-256, QR Code de verificação pública e certificação ICP-Brasil. Farmácias e empresas validam a autenticidade em tempo real.
+                </p>
+                <ul className="space-y-3">
+                  {["Hash SHA-256 único por documento", "QR Code para verificação pública", "Certificação digital ICP-Brasil", "Rastreabilidade completa"].map((item, i) => (
+                    <li key={i} className="flex items-center gap-2.5 text-sm text-white/70">
+                      <CheckCircle2 className="w-4 h-4 text-secondary shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
         {/* Contact Form */}
         <section id="form" className="py-20 bg-muted/30">
           <div className="container mx-auto px-4 max-w-xl">

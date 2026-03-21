@@ -127,6 +127,27 @@ const B2BCartao = () => {
                   </motion.div>
                 ))}
               </div>
+          </motion.div>
+          </div>
+        </section>
+
+        {/* ==================== BANNER VISUAL ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "300px" }}>
+          <img src={bannerCorporate} alt="Equipe corporativa discutindo benefícios" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "300px" }}>
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+                Invista no bem-estar<br />dos seus colaboradores
+              </h2>
+              <p className="text-white/80 text-sm leading-relaxed max-w-md mb-4">
+                Empresas que cuidam da saúde dos funcionários têm até 40% menos absenteísmo e maior retenção de talentos.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {["-40% faltas", "+85% satisfação", "ROI 3 meses"].map((s) => (
+                  <span key={s} className="px-3 py-1 rounded-full bg-white/15 text-white text-xs font-bold backdrop-blur-sm border border-white/10">{s}</span>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
