@@ -789,24 +789,44 @@ const PacsViewer = ({
 
       {/* Main viewer area */}
       <div className="flex flex-1 min-h-0">
-        {/* Series thumbnails sidebar (Weasis-style) */}
-        {fileUrls.length > 1 && (
-          <div className="w-32 border-r border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0">
-            <div className="p-1 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1 border-b border-white/5 font-semibold">
-              Séries
+        {/* Series thumbnails sidebar (OsiriX-style) */}
+        {showSidebar && (
+          <div className="w-[140px] border-r border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0 flex flex-col">
+            <div className="p-1 text-[9px] text-amber-400/80 uppercase tracking-wider px-2 py-1.5 border-b border-white/5 font-bold flex items-center justify-between">
+              <span className="truncate">{dicomInfo["Paciente"] || "Séries"}</span>
+              <Button size="icon" variant="ghost" className="h-4 w-4 text-white/30 hover:text-white shrink-0" onClick={() => setShowSidebar(false)}>×</Button>
             </div>
-            <div className="p-1 space-y-1">
-              {fileUrls.map((url, i) => {
+            {dicomInfo["ID"] && (
+              <div className="px-2 py-1 text-[8px] text-amber-400/50 border-b border-white/5 font-mono">
+                ID: {dicomInfo["ID"]}
+              </div>
+            )}
+            {dicomInfo["Estudo"] && (
+              <div className="px-2 py-0.5 text-[8px] text-white/30 border-b border-white/5">
+                [{dicomInfo["Estudo"] || "No study description"}]
+              </div>
+            )}
+            <div className="px-2 py-0.5 text-[8px] text-white/30 border-b border-white/5">
+              {dicomInfo["Data Estudo"] || ""} {fileUrls.length > 0 ? `${fileUrls.length} Series` : ""}
+            </div>
+            {/* Series group */}
+            <div className="px-1 py-1 text-[8px] text-amber-400/60 font-mono border-b border-white/5 cursor-pointer hover:bg-white/5">
+              {dicomInfo["Modalidade"] || "DX"} - [{dicomInfo["Série"] || "No study description"}]
+            </div>
+            <div className="p-1 space-y-1 flex-1 overflow-y-auto">
+              {fileUrls.length > 0 ? fileUrls.map((url, i) => {
                 const originalPath = (examRequest?.file_urls as string[])?.[i] || "";
                 const isDicom = originalPath.toLowerCase().endsWith(".dcm") || originalPath.toLowerCase().endsWith(".dicom");
+                const isActive = i === activeIndex;
+                const isDualActive = dualView && i === dualIndex;
                 return (
                   <button
                     key={i}
-                    onClick={() => { setActiveIndex(i); setCinePlay(false); }}
+                    onClick={() => { if (dualView && i !== activeIndex) setDualIndex(i); else { setActiveIndex(i); setCinePlay(false); } }}
                     className={`w-full rounded overflow-hidden border-2 transition-all ${
-                      i === activeIndex
-                        ? "border-primary shadow-[0_0_10px_hsl(var(--primary)/0.5)]"
-                        : "border-white/5 hover:border-white/20"
+                      isActive ? "border-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.4)]"
+                      : isDualActive ? "border-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.4)]"
+                      : "border-white/5 hover:border-white/20"
                     }`}
                   >
                     <div className="aspect-square bg-black flex items-center justify-center relative">
@@ -815,16 +835,26 @@ const PacsViewer = ({
                       ) : (
                         <img src={url} alt={`S${i + 1}`} className="w-full h-full object-cover opacity-80" />
                       )}
+                      <div className="absolute top-0.5 right-0.5">
+                        <span className="text-[7px] text-red-400 font-bold">■</span>
+                      </div>
                       <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 to-transparent px-1 py-0.5 flex justify-between items-end">
-                        <span className="text-[8px] text-white/50 font-mono">s: {i + 1}</span>
-                        <span className="text-[8px] text-primary/80">📁{i + 1}</span>
+                        <span className="text-[7px] text-amber-400/60 font-mono">{fileUrls.length} Imgs</span>
                       </div>
                     </div>
                   </button>
                 );
-              })}
+              }) : (
+                <div className="text-center text-[9px] text-white/20 py-4">Sem imagens</div>
+              )}
             </div>
           </div>
+        )}
+        {!showSidebar && (
+          <Button size="icon" variant="ghost" className="absolute top-12 left-0 z-30 h-8 w-5 bg-[#1a2332]/80 text-white/40 hover:text-white rounded-none rounded-r"
+            onClick={() => setShowSidebar(true)}>
+            <ChevronRight className="w-3 h-3" />
+          </Button>
         )}
 
         {/* Main canvas area */}
