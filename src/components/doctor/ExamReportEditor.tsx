@@ -18,12 +18,13 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import {
-  Loader2, FileSignature, Download, Save, ImageIcon,
+  Loader2, FileSignature, Download, Save, ImageIcon, Upload,
   Mic, MicOff, Sparkles, Wand2, BookText, ChevronDown, Lightbulb,
   ZoomIn, ZoomOut, RotateCw, Contrast, Maximize2, Sun, Move, Ruler,
   ArrowLeft, ChevronLeft, ChevronRight, Grid3X3, Monitor, Eye,
   Crosshair, RotateCcw, FlipHorizontal, FlipVertical, Pencil,
-  Type, Play, MoreHorizontal, Keyboard, FileText, Clock, AlertTriangle
+  Type, Play, MoreHorizontal, Keyboard, FileText, Clock, AlertTriangle,
+  Info, Clipboard
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
@@ -61,9 +62,11 @@ type Annotation = {
 const PacsViewer = ({
   fileUrls,
   examRequest,
+  onFilesUploaded,
 }: {
   fileUrls: string[];
   examRequest: ExamRequest | null;
+  onFilesUploaded?: (newUrls: string[]) => void;
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -824,10 +827,41 @@ const PacsViewer = ({
           )}
 
           {!activeUrl && !loading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/20">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white/20">
               <Monitor className="w-20 h-20" />
               <p className="text-sm">Nenhum arquivo de exame</p>
-              <p className="text-[10px] text-white/10">Faça upload de imagens DICOM para visualizar</p>
+              <p className="text-[10px] text-white/10">Faça upload de imagens DICOM ou imagens comuns para visualizar</p>
+              <label className="cursor-pointer">
+                <input type="file" className="hidden" accept=".dcm,.dicom,.jpg,.jpeg,.png,.bmp,.tiff,image/*" multiple
+                  onChange={async (e) => {
+                    const files = e.target.files;
+                    if (!files?.length || !examRequest?.id) return;
+                    const paths: string[] = [];
+                    for (const file of Array.from(files)) {
+                      const ext = file.name.split(".").pop() || "dcm";
+                      const path = `${examRequest.id}/${crypto.randomUUID()}.${ext}`;
+                      const { error } = await supabase.storage.from("exam-files").upload(path, file);
+                      if (error) { toast.error(`Erro ao enviar ${file.name}`); continue; }
+                      paths.push(path);
+                    }
+                    if (paths.length > 0) {
+                      const existing = (examRequest.file_urls as string[]) || [];
+                      const updated = [...existing, ...paths];
+                      await supabase.from("exam_requests" as any).update({ file_urls: updated } as any).eq("id", examRequest.id);
+                      // Resolve URLs
+                      const resolved = await Promise.all(paths.map(async p => {
+                        const { data } = await supabase.storage.from("exam-files").createSignedUrl(p, 3600);
+                        return data?.signedUrl || "";
+                      }));
+                      onFilesUploaded?.(resolved.filter(Boolean));
+                      toast.success(`${paths.length} arquivo(s) enviado(s)!`);
+                    }
+                  }}
+                />
+                <Button variant="outline" size="sm" className="text-white/50 border-white/20 hover:bg-white/10 hover:text-white" asChild>
+                  <span><Upload className="w-4 h-4 mr-2" /> Upload de Arquivos</span>
+                </Button>
+              </label>
             </div>
           )}
 
@@ -1396,7 +1430,7 @@ const ExamReportEditor = () => {
         <ResizablePanelGroup direction="horizontal">
           {/* DICOM Viewer */}
           <ResizablePanel defaultSize={55} minSize={30}>
-            <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} />
+            <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} onFilesUploaded={(newUrls) => setFileUrls(prev => [...prev, ...newUrls])} />
           </ResizablePanel>
 
           <ResizableHandle withHandle />
@@ -1404,6 +1438,35 @@ const ExamReportEditor = () => {
           {/* Report Editor */}
           <ResizablePanel defaultSize={45} minSize={25}>
             <div className="flex flex-col h-full bg-card">
+              {/* Clinical info bar */}
+              {examRequest?.clinical_info && (
+                <div className="px-3 py-2 border-b border-border bg-warning/5">
+                  <div className="flex items-start gap-2">
+                    <Info className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+                    <div className="min-w-0">
+                      <p className="text-[10px] font-semibold text-warning uppercase tracking-wider">Informações Clínicas</p>
+                      <p className="text-xs text-foreground/80 leading-relaxed">{examRequest.clinical_info}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Patient info bar */}
+              {examRequest?.patient_id && (
+                <div className="px-3 py-1.5 border-b border-border bg-muted/30 flex items-center gap-2">
+                  <Clipboard className="w-3.5 h-3.5 text-muted-foreground" />
+                  <span className="text-[10px] text-muted-foreground">
+                    Exame: <strong>{examRequest.exam_type}</strong>
+                    {examRequest.priority === "urgent" && <span className="text-destructive ml-2 font-bold">● URGENTE</span>}
+                    {examRequest.sla_deadline && (
+                      <span className="ml-2">
+                        SLA: {new Date(examRequest.sla_deadline).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              )}
+
               {/* Editor header */}
               <div className="px-3 py-2 border-b border-border flex items-center justify-between">
                 <div className="flex items-center gap-2">
