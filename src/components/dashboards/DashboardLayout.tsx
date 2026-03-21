@@ -260,8 +260,10 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           {navGroups.map((group, gi) => (
             <div key={gi}>
               {group.label && (
-                <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest px-3 pt-4 pb-1.5">
+                <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] px-3 pt-5 pb-2 flex items-center gap-2">
+                  <span className="w-4 h-px bg-border/60" />
                   {group.label}
+                  <span className="flex-1 h-px bg-border/30" />
                 </p>
               )}
               <div className="space-y-0.5">
