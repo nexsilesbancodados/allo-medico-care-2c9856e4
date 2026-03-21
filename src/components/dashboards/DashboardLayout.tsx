@@ -249,7 +249,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {isAdminViewingOtherPanel && (
         <div className="px-4 pb-2 shrink-0">
           <button onClick={() => { navigate("/dashboard"); onItemClick?.(); }}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-destructive bg-destructive/8 hover:bg-destructive/15 transition-colors border border-destructive/20">
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-destructive bg-destructive/8 hover:bg-destructive/15 transition-all duration-200 border border-destructive/20 hover:shadow-sm hover:shadow-destructive/10">
             <ShieldCheck className="w-3.5 h-3.5" /> Voltar ao Painel Admin
           </button>
         </div>
