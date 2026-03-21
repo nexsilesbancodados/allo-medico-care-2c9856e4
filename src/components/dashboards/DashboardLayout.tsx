@@ -347,39 +347,76 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           </Button>
         )}
 
-        <div className="flex items-center gap-1.5">
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-success/25 bg-success/8 text-success text-[11px] font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" aria-hidden="true" />
-            Online
-          </div>
+        <div className="flex items-center gap-1">
           <ThemeToggle />
           <NotificationBell />
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-9 gap-2 px-2 rounded-xl hover:bg-muted/50">
-                <Avatar className="h-7 w-7">
-                  {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                  <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-[10px] font-bold`}>{initials}</AvatarFallback>
-                </Avatar>
-                <span className="hidden md:block text-xs font-medium text-foreground max-w-[100px] truncate">{profile?.first_name ?? "Usuário"}</span>
-                <ChevronDown className="w-3 h-3 text-muted-foreground hidden md:block" aria-hidden="true" />
-              </Button>
+              <button className="group flex items-center gap-2.5 h-10 pl-1 pr-3 rounded-2xl border border-border/40 bg-card/60 hover:bg-card/90 backdrop-blur-sm transition-all duration-200 hover:shadow-md hover:shadow-primary/5 hover:border-primary/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1">
+                <div className="relative">
+                  <Avatar className="h-8 w-8 ring-2 ring-background group-hover:ring-primary/20 transition-all duration-300">
+                    {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+                    <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-[11px] font-bold`}>{initials}</AvatarFallback>
+                  </Avatar>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-success border-[2px] border-background" aria-hidden="true">
+                    <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-40" />
+                  </span>
+                </div>
+                <div className="hidden md:flex flex-col items-start min-w-0">
+                  <span className="text-xs font-semibold text-foreground truncate max-w-[110px] leading-tight">
+                    {profile?.first_name ?? "Usuário"}
+                  </span>
+                  <span className="text-[10px] text-muted-foreground leading-tight">{ROLE_LABELS[role] ?? title}</span>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/60 group-hover:text-foreground transition-all duration-200 group-data-[state=open]:rotate-180 hidden md:block" aria-hidden="true" />
+              </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 rounded-2xl border-border/40 shadow-2xl p-1.5">
-              <DropdownMenuLabel className="pb-1.5">
-                <p className="text-sm font-semibold">{fullName}</p>
-                <p className="text-xs text-muted-foreground font-normal">{ROLE_LABELS[role] ?? title}</p>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-xl gap-2 cursor-pointer text-sm">
-                <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
+            <DropdownMenuContent align="end" sideOffset={8} className="w-64 rounded-2xl border-border/30 bg-card/98 backdrop-blur-2xl shadow-2xl shadow-black/10 p-2">
+              {/* User info header */}
+              <div className="flex items-center gap-3 p-2.5 mb-1.5">
+                <Avatar className="h-10 w-10 ring-2 ring-border/20">
+                  {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+                  <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-sm font-bold`}>{initials}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{fullName}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${ROLE_COLORS[role] ?? ROLE_COLORS.patient}`}>
+                      <span>{ROLE_ICON[role] ?? "👤"}</span>
+                      {ROLE_LABELS[role] ?? title}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <DropdownMenuSeparator className="bg-border/20" />
+              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-xl gap-2.5 cursor-pointer text-sm py-2.5 px-3 mt-1">
+                <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
+                  <User className="h-4 w-4 text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Meu Perfil</p>
+                  <p className="text-[11px] text-muted-foreground">Editar dados pessoais</p>
+                </div>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-xl gap-2 cursor-pointer text-sm">
-                <Settings className="h-4 w-4 text-muted-foreground" /> Configurações
+              <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-xl gap-2.5 cursor-pointer text-sm py-2.5 px-3">
+                <div className="w-8 h-8 rounded-lg bg-muted/60 flex items-center justify-center shrink-0">
+                  <Settings className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="font-medium text-foreground">Configurações</p>
+                  <p className="text-[11px] text-muted-foreground">Preferências e segurança</p>
+                </div>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut} className="rounded-xl gap-2 cursor-pointer text-sm text-destructive focus:text-destructive focus:bg-destructive/8">
-                <LogOut className="h-4 w-4" /> Sair
+              <DropdownMenuSeparator className="bg-border/20 my-1.5" />
+              <DropdownMenuItem onClick={handleSignOut} className="rounded-xl gap-2.5 cursor-pointer text-sm py-2.5 px-3 text-destructive focus:text-destructive focus:bg-destructive/8">
+                <div className="w-8 h-8 rounded-lg bg-destructive/8 flex items-center justify-center shrink-0">
+                  <LogOut className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="font-medium">Sair da conta</p>
+                  <p className="text-[11px] opacity-70">Encerrar sessão</p>
+                </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
