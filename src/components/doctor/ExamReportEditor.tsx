@@ -974,12 +974,17 @@ const ExamReportEditor = () => {
   const [slaRemaining, setSlaRemaining] = useState<string | null>(null);
 
   // Word count
-  const wordCount = useMemo(() => {
-    if (!content.trim()) return 0;
-    return content.trim().split(/\s+/).length;
+  const plainText = useMemo(() => {
+    if (!content) return "";
+    return content.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\s+/g, " ").trim();
   }, [content]);
 
-  const charCount = content.length;
+  const wordCount = useMemo(() => {
+    if (!plainText) return 0;
+    return plainText.split(/\s+/).filter(Boolean).length;
+  }, [plainText]);
+
+  const charCount = plainText.length;
 
   // ---- SLA countdown ----
   useEffect(() => {
@@ -1233,7 +1238,7 @@ const ExamReportEditor = () => {
     setAiProcessing(true); setAiMode(mode);
     try {
       const { data, error } = await supabase.functions.invoke("structure-report", {
-        body: { raw_text: content, exam_type: examRequest?.exam_type || "", clinical_info: examRequest?.clinical_info || "", mode },
+        body: { raw_text: plainText, exam_type: examRequest?.exam_type || "", clinical_info: examRequest?.clinical_info || "", mode },
       });
       if (error) throw error;
       if (data?.error) throw new Error(data.error);
@@ -1277,7 +1282,20 @@ const ExamReportEditor = () => {
 
     setSigning(true);
     try {
-      const documentHash = await gerarHashDocumento(content);
+      const contentForPdf = content
+        .replace(/<h[1-3][^>]*>/gi, "\n")
+        .replace(/<\/h[1-3]>/gi, "\n")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<li[^>]*>/gi, "• ")
+        .replace(/<\/li>/gi, "\n")
+        .replace(/<\/p>/gi, "\n")
+        .replace(/<strong>|<\/strong>|<em>|<\/em>|<u>|<\/u>/gi, "")
+        .replace(/<mark[^>]*>|<\/mark>/gi, "")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+        .replace(/\n{3,}/g, "\n\n").trim();
+      const documentHash = await gerarHashDocumento(contentForPdf);
       const verificationCode = gerarCodigoVerificacao();
       const doctorName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim();
       const patientDisplayName = examRequest?.patient_name || "Paciente";
@@ -1341,7 +1359,7 @@ const ExamReportEditor = () => {
       pdf.setFontSize(9);
       y += 6;
 
-      const contentLines = pdf.splitTextToSize(content, 170);
+      const contentLines = pdf.splitTextToSize(contentForPdf, 170);
       for (const line of contentLines) {
         if (y > 260) {
           pdf.addPage();
@@ -1642,25 +1660,6 @@ const ExamReportEditor = () => {
                     </PopoverContent>
                   </Popover>
 
-                  <Popover open={showMacros} onOpenChange={setShowMacros}>
-                    <PopoverTrigger asChild>
-                      <Button variant="outline" size="sm" className="h-7 text-[11px] px-2">
-                        <BookText className="w-3 h-3 mr-1" /> Macros
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-64 p-1.5 max-h-72 overflow-y-auto" align="start">
-                      {macroCategories.map(cat => (
-                        <div key={cat} className="mb-1.5">
-                          <p className="text-[9px] font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-0.5">{cat}</p>
-                          {REPORT_MACROS.filter(m => m.category === cat).map(m => (
-                            <Button key={m.id} variant="ghost" size="sm" className="w-full justify-start text-[11px] h-6" onClick={() => insertMacro(m.id)}>
-                              {m.label} <span className="ml-auto text-muted-foreground font-mono text-[9px]">{m.trigger}</span>
-                            </Button>
-                          ))}
-                        </div>
-                      ))}
-                    </PopoverContent>
-                  </Popover>
                 </div>
               )}
 

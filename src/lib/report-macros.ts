@@ -52,6 +52,40 @@ Silhueta cardíaca dentro dos limites da normalidade.
 **IMPRESSÃO DIAGNÓSTICA:**
 Consolidação parenquimatosa em [localização], compatível com processo pneumônico. Correlacionar com dados clínicos e laboratoriais.`,
   },
+  {
+    id: "torax-condensacao",
+    trigger: "/torax-condensacao",
+    label: "Condensação Pulmonar",
+    category: "Tórax",
+    text: `**TÉCNICA:**
+Radiografia de tórax em PA.
+
+**ACHADOS:**
+Opacidade heterogênea com broncograma aéreo em [lobo] [direito/esquerdo],
+medindo aproximadamente [X] cm, de contornos mal definidos.
+Seios costofrênicos [livres / com discreto velamento].
+Silhueta cardíaca com ICT dentro dos limites da normalidade.
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Condensação parenquimatosa em [localização]. DD: pneumonia, atelectasia,
+neoplasia. Correlacionar com dados clínicos. Controle radiográfico recomendado.`,
+  },
+  {
+    id: "torax-pneumotorax",
+    trigger: "/torax-pneumotorax",
+    label: "Pneumotórax",
+    category: "Tórax",
+    text: `**TÉCNICA:**
+Radiografia de tórax em PA.
+
+**ACHADOS:**
+Hipertransparência avascular em [hemitórax direito/esquerdo], com linha pleural
+visceral visível, compatível com pneumotórax de [pequeno/moderado/grande] volume.
+[Sem/Com] desvio de mediastino contralateral.
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Pneumotórax [direito/esquerdo] de [pequeno/moderado/grande] volume.`,
+  },
   // ─── Abdome ───
   {
     id: "abdome-normal",
@@ -79,6 +113,39 @@ Vias biliares de calibre normal.
 
 **IMPRESSÃO DIAGNÓSTICA:**
 Colelitíase. Vesícula biliar com cálculo de [X] mm.`,
+  },
+  {
+    id: "abdome-apendicite",
+    trigger: "/abdome-apendicite",
+    label: "Apendicite (US)",
+    category: "Abdome",
+    text: `**TÉCNICA:**
+Ultrassonografia de abdome inferior com transdutor linear de alta frequência.
+
+**ACHADOS:**
+Estrutura tubular apendicular em FID, diâmetro AP de [X] mm (normal < 6 mm),
+paredes espessadas, sem compressibilidade. [Presença/Ausência] de apendicolito.
+[Presença/Ausência] de líquido livre periapendicular.
+Hipervascularização ao Doppler colorido.
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Achados compatíveis com apendicite aguda.
+Correlação clínico-laboratorial e cirúrgica recomendada.`,
+  },
+  {
+    id: "figado-normal",
+    trigger: "/figado-normal",
+    label: "Fígado Normal (US)",
+    category: "Abdome",
+    text: `**ACHADOS:**
+Fígado de dimensões normais, lobo direito medindo [X] cm.
+Ecotextura homogênea, ecogenicidade preservada.
+Veia porta e supra-hepáticas de calibre normal.
+Ausência de lesões focais, nódulos ou dilatação de vias biliares.
+Vesícula biliar de paredes finas, sem cálculos ou pólipos.
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Fígado e vesícula biliar sem alterações ultrassonográficas.`,
   },
   // ─── Crânio ───
   {
@@ -112,6 +179,24 @@ Sem sinais de hemorragia aguda.
 
 **IMPRESSÃO DIAGNÓSTICA:**
 Infarto isquêmico em território da artéria [localização]. Correlacionar com quadro clínico e angiografia.`,
+  },
+  {
+    id: "cranio-hemorragia",
+    trigger: "/cranio-hemorragia",
+    label: "Hemorragia Intracraniana",
+    category: "Crânio",
+    text: `**TÉCNICA:**
+Tomografia computadorizada de crânio sem contraste.
+
+**ACHADOS:**
+Área hiperdensa em [região/lobo], medindo [X x Y] mm, densidade [X] UH,
+compatível com coleção hemorrágica [intraparenquimatosa/subdural/extradural].
+[Sem/Com] edema perilesional. [Sem/Com] desvio da linha média.
+Ventrículos [normais/alargados].
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Hematoma [intraparenquimatoso/subdural] em [localização], medindo [X] mm.
+Avaliação neurocirúrgica urgente recomendada.`,
   },
   // ─── Mama ───
   {
@@ -257,6 +342,33 @@ Fluxo ao Doppler [periférico/central/misto].
 Nódulo tireoidiano em [localização], classificação TI-RADS [2/3/4/5].
 [Acompanhamento / PAAF recomendada conforme classificação].`,
   },
+  {
+    id: "renal-normal",
+    trigger: "/renal-normal",
+    label: "Rins Normais (US)",
+    category: "Ultrassom",
+    text: `**ACHADOS:**
+Rim direito medindo [X x Y x Z] cm, córtico-medular preservada.
+Rim esquerdo de características semelhantes.
+Bexiga bem distendida, paredes regulares, conteúdo anecoico.
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Rins e bexiga sem alterações ultrassonográficas.`,
+  },
+  {
+    id: "renal-calculo",
+    trigger: "/renal-calculo",
+    label: "Litíase Renal (US)",
+    category: "Ultrassom",
+    text: `**ACHADOS:**
+Imagem hiperecogênica com sombra acústica em rim [direito/esquerdo],
+localizada em [pelve/cálice], medindo [X] mm.
+[Sem/Com] hidronefrose de grau [leve/moderado/grave].
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Litíase renal [direito/esquerdo], [X] mm.
+[Sem/Com] hidronefrose. Correlação clínica recomendada.`,
+  },
   // ─── Ressonância Magnética ───
   {
     id: "rm-joelho-normal",
@@ -292,6 +404,38 @@ Derrame articular [leve / moderado / acentuado].
 **IMPRESSÃO DIAGNÓSTICA:**
 Rotura [parcial / completa] do ligamento cruzado anterior.
 [Lesões associadas se houver].`,
+  },
+  // ─── Musculoesquelético ───
+  {
+    id: "ombro-normal",
+    trigger: "/ombro-normal",
+    label: "Ombro Normal (RM)",
+    category: "Musculoesquelético",
+    text: `**TÉCNICA:**
+Ressonância magnética do ombro [direito/esquerdo] sem contraste.
+
+**ACHADOS:**
+Manguito rotador íntegro: tendões do supraespinal, infraespinal,
+subescapular e redondo menor sem roturas ou tendinopatia.
+Bursa subacromial-subdeltoidea sem distensão.
+Lábio glenoidal sem alterações. Tendão do bíceps em trajeto normal.
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Ombro [direito/esquerdo] sem alterações à RM.`,
+  },
+  {
+    id: "ombro-rotura",
+    trigger: "/ombro-rotura",
+    label: "Rotura Manguito Rotador",
+    category: "Musculoesquelético",
+    text: `**ACHADOS:**
+Rotura [parcial/total] do tendão do [supraespinal/infraespinal/subescapular],
+com descontinuidade das fibras em sua porção [articular/bursal], extensão [X] mm.
+[Sem/Com] retração do coto. Bursa com [discreto/moderado] derrame.
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Rotura [parcial/total] do tendão do [músculo], medindo [X] mm.
+Avaliação ortopédica recomendada.`,
   },
   // ─── EEG ───
   {
@@ -332,6 +476,26 @@ Prova broncodilatadora: sem resposta significativa (variação < 12% e < 200 ml 
 
 **IMPRESSÃO DIAGNÓSTICA:**
 Espirometria dentro dos limites da normalidade. Sem distúrbio ventilatório obstrutivo ou restritivo.`,
+  },
+  // ─── Ecocardiograma ───
+  {
+    id: "eco-normal",
+    trigger: "/eco-normal",
+    label: "Ecocardiograma Normal",
+    category: "Ecocardiograma",
+    text: `**TÉCNICA:**
+Ecocardiograma transtorácico em repouso com Doppler.
+
+**ACHADOS:**
+VE de dimensões normais (DDVE: [X] mm | DSVE: [X] mm).
+Função sistólica preservada (FEVE: [X]% — Simpson).
+Função diastólica sem alterações significativas.
+Válvulas mitral e aórtica sem alterações hemodinâmicas relevantes.
+Átrios de dimensões normais. VD de dimensões e função normais.
+Pericárdio sem derrame. PSAP estimada: [X] mmHg.
+
+**IMPRESSÃO DIAGNÓSTICA:**
+Ecocardiograma dentro dos limites da normalidade. FEVE [X]%.`,
   },
 ];
 
