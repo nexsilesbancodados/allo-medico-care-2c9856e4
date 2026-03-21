@@ -1430,7 +1430,7 @@ const ExamReportEditor = () => {
         <ResizablePanelGroup direction="horizontal">
           {/* DICOM Viewer */}
           <ResizablePanel defaultSize={55} minSize={30}>
-            <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} />
+            <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} onFilesUploaded={(newUrls) => setFileUrls(prev => [...prev, ...newUrls])} />
           </ResizablePanel>
 
           <ResizableHandle withHandle />
