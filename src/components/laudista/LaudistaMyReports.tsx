@@ -1,3 +1,4 @@
+import { useState, useMemo } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -5,16 +6,25 @@ import { getLaudistaNav } from "@/components/laudista/laudistaNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, FileText, Eye, Download } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Loader2, FileText, Eye, Download, Search, Filter, ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { motion } from "framer-motion";
+
+const PAGE_SIZE = 20;
 
 const LaudistaMyReports = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "signed" | "draft">("all");
+  const [page, setPage] = useState(0);
 
   const { data: doctorProfile } = useQuery({
     queryKey: ["laudista-doctor-profile", user?.id],
@@ -34,80 +44,240 @@ const LaudistaMyReports = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("exam_reports")
-        .select("*, exam_requests!inner(exam_type, priority)")
+        .select("*, exam_requests!inner(exam_type, priority, patient_name)")
         .eq("reporter_id", doctorProfile!.id)
         .order("created_at", { ascending: false })
-        .limit(50);
+        .limit(500);
       if (error) throw error;
-      return (data ?? []) as Record<string, unknown>[];
+      return (data ?? []) as Array<{
+        id: string;
+        created_at: string;
+        signed_at: string | null;
+        verification_code: string | null;
+        pdf_url: string | null;
+        exam_request_id: string;
+        exam_requests: { exam_type: string; priority?: string; patient_name?: string | null } | null;
+      }>;
     },
     enabled: !!doctorProfile?.id,
   });
 
+  // Filtered and paginated
+  const filtered = useMemo(() => {
+    if (!reports) return [];
+    let result = reports;
+
+    if (statusFilter === "signed") result = result.filter(r => r.signed_at);
+    if (statusFilter === "draft") result = result.filter(r => !r.signed_at);
+
+    if (search.trim()) {
+      const q = search.toLowerCase().trim();
+      result = result.filter(r =>
+        (r.exam_requests?.exam_type?.toLowerCase().includes(q)) ||
+        (r.exam_requests?.patient_name?.toLowerCase().includes(q)) ||
+        (r.verification_code?.toLowerCase().includes(q))
+      );
+    }
+
+    return result;
+  }, [reports, statusFilter, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const pageItems = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  // Reset page when filters change
+  const handleSearchChange = (v: string) => { setSearch(v); setPage(0); };
+  const handleStatusChange = (v: string) => { setStatusFilter(v as "all" | "signed" | "draft"); setPage(0); };
+
+  const signedCount = reports?.filter(r => r.signed_at).length ?? 0;
+  const draftCount = reports?.filter(r => !r.signed_at).length ?? 0;
+
   return (
     <DashboardLayout nav={getLaudistaNav("my-reports")} title="Meus Laudos" role="doctor">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-primary" />
-            Meus Laudos Emitidos
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      <motion.div
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="max-w-5xl space-y-4"
+      >
+        {/* Summary badges */}
+        {!isLoading && reports && (
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className="text-xs gap-1.5 py-1 px-3">
+              <FileText className="w-3 h-3" /> {reports.length} laudos
+            </Badge>
+            <Badge className="bg-success/10 text-success border-success/20 text-xs gap-1.5 py-1 px-3">
+              {signedCount} assinados
+            </Badge>
+            {draftCount > 0 && (
+              <Badge className="bg-warning/10 text-warning border-warning/20 text-xs gap-1.5 py-1 px-3">
+                {draftCount} rascunhos
+              </Badge>
+            )}
+          </div>
+        )}
+
+        <Card className="border-border/50">
+          <CardHeader className="pb-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <CardTitle className="flex items-center gap-2 text-base">
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <FileText className="w-4 h-4 text-white" />
+                </div>
+                Meus Laudos Emitidos
+              </CardTitle>
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input
+                    placeholder="Buscar exame, paciente..."
+                    value={search}
+                    onChange={e => handleSearchChange(e.target.value)}
+                    className="pl-8 h-8 w-48 text-xs"
+                  />
+                </div>
+                <Select value={statusFilter} onValueChange={handleStatusChange}>
+                  <SelectTrigger className="w-32 h-8 text-xs">
+                    <Filter className="w-3 h-3 mr-1" />
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="signed">Assinados</SelectItem>
+                    <SelectItem value="draft">Rascunhos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          ) : !reports?.length ? (
-            <p className="text-center text-muted-foreground py-8">Nenhum laudo emitido ainda.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Exame</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Data</TableHead>
-                    <TableHead>Código</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {reports.map((report: { id: string; created_at: string; signed_at: string | null; verification_code: string | null; pdf_url: string | null; exam_request_id: string; exam_requests?: { exam_type: string } | null }) => (
-                    <TableRow key={report.id}>
-                      <TableCell className="font-medium">{report.exam_requests?.exam_type ?? "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className={report.signed_at ? "bg-success/10 text-success border-success/20" : "bg-warning/10 text-warning border-warning/20"}>
-                          {report.signed_at ? "Assinado" : "Rascunho"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {format(new Date(report.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}
-                      </TableCell>
-                      <TableCell className="text-xs font-mono text-muted-foreground">
-                        {report.verification_code || "—"}
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button size="sm" variant="outline" onClick={() => navigate(`/dashboard/laudista/report-editor/${report.exam_request_id}?role=doctor`)}>
-                          <Eye className="w-3 h-3 mr-1" /> Ver
-                        </Button>
-                        {report.pdf_url && (
-                          <Button size="sm" variant="ghost" onClick={async () => {
-                            const { data } = await supabase.storage.from("prescriptions").createSignedUrl(report.pdf_url, 3600);
-                            if (data?.signedUrl) window.open(data.signedUrl, "_blank");
-                          }}>
-                            <Download className="w-3 h-3 mr-1" /> PDF
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardHeader>
+          <CardContent className="pt-0">
+            {isLoading ? (
+              <div className="space-y-2">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} className="flex items-center gap-3 p-3">
+                    <Skeleton className="h-5 w-32" />
+                    <Skeleton className="h-5 w-20" />
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-5 w-16" />
+                    <Skeleton className="h-8 w-16 ml-auto" />
+                  </div>
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+                <p className="text-sm font-semibold text-foreground mb-1">
+                  {search || statusFilter !== "all" ? "Nenhum resultado" : "Nenhum laudo emitido ainda"}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {search ? "Tente alterar os filtros de busca" : "Seus laudos aparecerão aqui após emissão"}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Exame</TableHead>
+                        <TableHead>Paciente</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Data</TableHead>
+                        <TableHead>Código</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pageItems.map((report) => (
+                        <TableRow key={report.id} className="hover:bg-muted/30">
+                          <TableCell className="font-medium text-sm">
+                            {report.exam_requests?.exam_type ?? "—"}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {report.exam_requests?.patient_name || "—"}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant="outline"
+                              className={
+                                report.signed_at
+                                  ? "bg-success/10 text-success border-success/20 text-[10px]"
+                                  : "bg-warning/10 text-warning border-warning/20 text-[10px]"
+                              }
+                            >
+                              {report.signed_at ? "Assinado" : "Rascunho"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-xs text-muted-foreground tabular-nums">
+                            {format(new Date(report.created_at), "dd/MM/yy HH:mm", { locale: ptBR })}
+                          </TableCell>
+                          <TableCell className="text-[10px] font-mono text-muted-foreground">
+                            {report.verification_code || "—"}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 text-xs gap-1 rounded-lg"
+                                onClick={() => navigate(`/dashboard/laudista/report-editor/${report.exam_request_id}?role=doctor`)}
+                              >
+                                <Eye className="w-3 h-3" /> Ver
+                              </Button>
+                              {report.pdf_url && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 text-xs gap-1"
+                                  onClick={async () => {
+                                    const { data } = await supabase.storage.from("prescriptions").createSignedUrl(report.pdf_url!, 3600);
+                                    if (data?.signedUrl) window.open(data.signedUrl, "_blank");
+                                  }}
+                                >
+                                  <Download className="w-3 h-3" />
+                                </Button>
+                              )}
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                    <p className="text-xs text-muted-foreground">
+                      {filtered.length} resultado{filtered.length !== 1 ? "s" : ""} · Página {page + 1} de {totalPages}
+                    </p>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0"
+                        onClick={() => setPage(p => Math.max(0, p - 1))}
+                        disabled={page === 0}
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-7 w-7 p-0"
+                        onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                        disabled={page >= totalPages - 1}
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </motion.div>
     </DashboardLayout>
   );
 };
