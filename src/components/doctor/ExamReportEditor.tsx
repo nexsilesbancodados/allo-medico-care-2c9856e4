@@ -779,10 +779,11 @@ const PacsViewer = ({
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Tela cheia</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10">
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${dualView ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+              onClick={() => { setDualView(d => !d); if (!dualView && fileUrls.length > 1) setDualIndex(activeIndex === 0 ? 1 : 0); }}>
               <Grid3X3 className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent side="bottom">Layout</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent side="bottom">{dualView ? "Visão única" : "Comparação lado a lado"}</TooltipContent></Tooltip>
         </TooltipProvider>
       </div>
 
