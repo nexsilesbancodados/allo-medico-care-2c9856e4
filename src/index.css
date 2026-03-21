@@ -144,9 +144,29 @@
         hsl(220 22% 7%) 100%
       );
   }
+
+  /* Laudo Workstation — forced dark theme override */
+  .laudo-workspace {
+    --background: 220 20% 8%;
+    --foreground: 220 10% 88%;
+    --card: 220 18% 12%;
+    --card-foreground: 220 10% 88%;
+    --popover: 220 18% 12%;
+    --popover-foreground: 220 10% 88%;
+    --border: 220 15% 18%;
+    --input: 220 15% 18%;
+    --muted: 220 15% 16%;
+    --muted-foreground: 220 8% 55%;
+    --primary: 195 80% 55%;
+    --primary-foreground: 220 20% 8%;
+    --accent: 195 70% 20%;
+    --accent-foreground: 195 80% 75%;
+    --ring: 195 80% 55%;
+    --destructive: 0 90% 60%;
+    --destructive-foreground: 0 0% 100%;
+  }
 }
 
-@layer base {
   * {
     @apply border-border;
   }
