@@ -13,6 +13,7 @@ export const getDoctorNav = (active: string) => [
   { label: "Receitas", href: "/dashboard/prescriptions?role=doctor", icon: <FileText className="w-4 h-4" />, active: active === "prescriptions", group: "Documentos" },
   { label: "Receituário", href: "/dashboard/doctor/simple-prescription?role=doctor", icon: <Pill className="w-4 h-4" />, active: active === "simple-prescription", group: "Documentos" },
   { label: "Atestados", href: "/dashboard/certificates?role=doctor", icon: <FileBadge className="w-4 h-4" />, active: active === "certificates", group: "Documentos" },
+  { label: "Oftalmologia", href: "/dashboard/doctor/ophthalmology?role=doctor", icon: <Eye className="w-4 h-4" />, active: active === "ophthalmology", group: "Documentos" },
   
   { label: "Ganhos", href: "/dashboard/earnings?role=doctor", icon: <DollarSign className="w-4 h-4" />, active: active === "earnings", group: "Financeiro" },
   { label: "Carteira", href: "/dashboard/doctor/wallet?role=doctor", icon: <CreditCard className="w-4 h-4" />, active: active === "wallet", group: "Financeiro" },
