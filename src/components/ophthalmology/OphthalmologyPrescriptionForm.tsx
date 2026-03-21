@@ -39,7 +39,7 @@ interface Props {
 
 const OphthalmologyPrescriptionForm = ({ exam, onBack }: Props) => {
   const { user } = useAuth();
-  const { profile } = useProfile();
+  const { data: profile } = useProfile();
   const [loading, setSaving] = useState(false);
   const [form, setForm] = useState({
     od_spherical: exam.od_spherical?.toString() || "",

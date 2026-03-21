@@ -19,7 +19,7 @@ const Ophthalmology = () => {
   const isDoctor = roles.includes("doctor") || roles.includes("admin");
 
   return (
-    <DashboardLayout role="doctor" navItems={getDoctorNav("ophthalmology")}>
+    <DashboardLayout role="doctor" title="Oftalmologia" nav={getDoctorNav("ophthalmology")}>
       <div className="p-4 md:p-6">
         <Tabs defaultValue={isDoctor ? "queue" : "upload"} className="space-y-6">
           <TabsList className="bg-muted/50 rounded-xl p-1 h-auto">
