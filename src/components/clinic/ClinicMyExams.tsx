@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -8,125 +8,103 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ClipboardList, Plus, Eye, FileText, Download, ExternalLink } from "lucide-react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
+import { ClipboardList, Upload, Eye, FileText, Download, BarChart3, Stethoscope, Calendar, Users, Clock, DollarSign, Settings, SlidersHorizontal } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate, useLocation } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+const getClinicNav = (active: string) => [
+  { label: "Visão Geral", href: "/dashboard?role=clinic", icon: <BarChart3 className="w-4 h-4" />, active: active === "overview", group: "Principal" },
+  { label: "Médicos", href: "/dashboard/clinic/doctors?role=clinic", icon: <Stethoscope className="w-4 h-4" />, active: active === "doctors", group: "Principal" },
+  { label: "Agendamentos", href: "/dashboard/clinic/schedules?role=clinic", icon: <Calendar className="w-4 h-4" />, active: active === "schedules", group: "Principal" },
+  { label: "Pacientes", href: "/dashboard/clinic/patients?role=clinic", icon: <Users className="w-4 h-4" />, active: active === "patients", group: "Atendimento" },
+  { label: "Sala de Espera", href: "/dashboard/clinic/waiting-room?role=clinic", icon: <Clock className="w-4 h-4" />, active: active === "waiting-room", group: "Atendimento" },
+  { label: "Solicitar Laudo", href: "/dashboard/clinic/exam-request?role=clinic", icon: <FileText className="w-4 h-4" />, active: active === "exam-request", group: "Telelaudo" },
+  { label: "Meus Laudos", href: "/dashboard/clinic/my-exams?role=clinic", icon: <ClipboardList className="w-4 h-4" />, active: active === "my-exams", group: "Telelaudo" },
+  { label: "Financeiro", href: "/dashboard/clinic/finance?role=clinic", icon: <DollarSign className="w-4 h-4" />, active: active === "finance", group: "Gestão" },
+  { label: "Relatórios", href: "/dashboard/clinic/reports?role=clinic", icon: <FileText className="w-4 h-4" />, active: active === "reports", group: "Gestão" },
+  { label: "Perfil", href: "/dashboard/profile?role=clinic", icon: <Settings className="w-4 h-4" />, active: active === "profile", group: "Conta" },
+  { label: "Configurações", href: "/dashboard/settings?role=clinic", icon: <SlidersHorizontal className="w-4 h-4" />, active: active === "settings", group: "Conta" },
+];
+
 const statusLabels: Record<string, string> = {
   pending: "Pendente",
-  in_review: "Em Digitação",
+  in_review: "Em Laudação",
   reported: "Laudado",
-  delivered: "Entregue",
 };
 
 const statusVariant: Record<string, string> = {
   pending: "bg-warning/10 text-warning border-warning/20",
   in_review: "bg-primary/10 text-primary border-primary/20",
-  reported: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
-  delivered: "bg-muted text-muted-foreground border-border",
+  reported: "bg-success/10 text-success border-success/20",
 };
 
 const ClinicMyExams = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
-  const [selectedExam, setSelectedExam] = useState<any>(null);
-  const [report, setReport] = useState<any>(null);
-  const [loadingReport, setLoadingReport] = useState(false);
+  const [selectedExam, setSelectedExam] = useState<any | null>(null);
 
-  // Get clinic profile
-  const { data: clinicProfile } = useQuery({
-    queryKey: ["clinic-profile-myexams", user?.id],
+  const { data: examRequests, isLoading } = useQuery({
+    queryKey: ["clinic-my-exams", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data: clinic } = await supabase
         .from("clinic_profiles")
-        .select("id, name")
+        .select("id")
         .eq("user_id", user!.id)
         .maybeSingle();
-      return data;
-    },
-    enabled: !!user,
-  });
+      if (!clinic) return [];
 
-  // Fetch exam requests
-  const { data: exams, isLoading } = useQuery({
-    queryKey: ["clinic-exam-requests", clinicProfile?.id],
-    queryFn: async () => {
       const { data, error } = await supabase
         .from("exam_requests")
         .select("*")
-        .eq("requesting_clinic_id", clinicProfile!.id)
+        .eq("requesting_clinic_id", clinic.id)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data || [];
+
+      // For reported exams, fetch reports
+      const reportedIds = (data ?? []).filter((e: any) => e.status === "reported").map((e: any) => e.id);
+      let reportsMap: Record<string, any> = {};
+      if (reportedIds.length > 0) {
+        const { data: reports } = await supabase
+          .from("exam_reports")
+          .select("*, doctor_profiles:reporter_id(crm, crm_state, user_id)")
+          .in("exam_request_id", reportedIds);
+        if (reports) {
+          // Fetch reporter names
+          const userIds = [...new Set(reports.map((r: any) => (r as any).doctor_profiles?.user_id).filter(Boolean))];
+          let profileMap: Record<string, string> = {};
+          if (userIds.length > 0) {
+            const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds);
+            if (profiles) profiles.forEach((p: any) => { profileMap[p.user_id] = `Dr(a). ${p.first_name} ${p.last_name}`.trim(); });
+          }
+          reports.forEach((r: any) => {
+            reportsMap[r.exam_request_id] = {
+              ...r,
+              reporter_name: profileMap[(r as any).doctor_profiles?.user_id] || "Laudista",
+            };
+          });
+        }
+      }
+
+      return (data ?? []).map((e: any) => ({
+        ...e,
+        report: reportsMap[e.id] || null,
+      }));
     },
-    enabled: !!clinicProfile?.id,
+    enabled: !!user,
+    refetchInterval: 30000,
   });
 
-  // Real-time updates
-  useEffect(() => {
-    if (!clinicProfile?.id) return;
-    const channel = supabase
-      .channel("clinic-exams-rt")
-      .on("postgres_changes", {
-        event: "*",
-        schema: "public",
-        table: "exam_requests",
-      }, () => {
-        queryClient.invalidateQueries({ queryKey: ["clinic-exam-requests", clinicProfile.id] });
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
-  }, [clinicProfile?.id, queryClient]);
-
-  const openReport = async (exam: any) => {
-    setSelectedExam(exam);
-    setLoadingReport(true);
-    try {
-      const { data } = await supabase
-        .from("exam_reports")
-        .select("*, doctor_profiles:reporter_id(crm, crm_state, user_id)")
-        .eq("exam_request_id", exam.id)
-        .maybeSingle();
-
-      if (data) {
-        // Get reporter name
-        let reporterName = "Laudista";
-        if ((data as any).doctor_profiles?.user_id) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("first_name, last_name")
-            .eq("user_id", (data as any).doctor_profiles.user_id)
-            .maybeSingle();
-          if (profile) reporterName = `Dr(a). ${profile.first_name} ${profile.last_name}`.trim();
-        }
-        setReport({ ...data, reporter_name: reporterName });
-      }
-    } catch {
-      setReport(null);
-    } finally {
-      setLoadingReport(false);
-    }
-  };
-
-  const nav = [
-    { label: "Visão Geral", href: "/dashboard?role=clinic", icon: <ClipboardList className="w-4 h-4" />, active: false, group: "Principal" },
-    { label: "Meus Laudos", href: "/dashboard/clinic/my-exams?role=clinic", icon: <FileText className="w-4 h-4" />, active: true, group: "Telelaudo" },
-    { label: "Solicitar Laudo", href: "/dashboard/clinic/exam-request?role=clinic", icon: <Plus className="w-4 h-4" />, active: false, group: "Telelaudo" },
-  ];
+  const report = selectedExam?.report;
 
   return (
-    <DashboardLayout nav={nav} title="Meus Laudos" role="clinic">
+    <DashboardLayout nav={getClinicNav("my-exams")} title="Meus Laudos" role="clinic">
       <div className="max-w-5xl mx-auto space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">Exames Enviados</h1>
-          <Button
-            onClick={() => navigate("/dashboard/clinic/exam-request?role=clinic")}
-            className="gap-2"
-          >
-            <Plus className="w-4 h-4" />
+          <Button onClick={() => navigate("/dashboard/clinic/exam-request?role=clinic")} className="gap-2">
+            <Upload className="w-4 h-4" />
             Solicitar Exame
           </Button>
         </div>
@@ -135,17 +113,17 @@ const ClinicMyExams = () => {
           <CardContent className="p-0">
             {isLoading ? (
               <div className="p-6 space-y-3">
-                {[0, 1, 2, 3].map((i) => (
-                  <Skeleton key={i} className="h-12 w-full rounded-lg" />
+                {[0, 1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className="h-10 w-full" />
                 ))}
               </div>
-            ) : !exams?.length ? (
+            ) : !examRequests?.length ? (
               <div className="text-center py-16">
                 <ClipboardList className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="text-muted-foreground font-medium">Nenhum exame enviado ainda</p>
                 <p className="text-xs text-muted-foreground mt-1">Envie seu primeiro exame para receber o laudo</p>
                 <Button className="mt-4" onClick={() => navigate("/dashboard/clinic/exam-request?role=clinic")}>
-                  <Plus className="w-4 h-4 mr-2" /> Solicitar Exame
+                  <Upload className="w-4 h-4 mr-2" /> Solicitar Exame
                 </Button>
               </div>
             ) : (
@@ -154,19 +132,17 @@ const ClinicMyExams = () => {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Paciente</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Data Envio</TableHead>
+                      <TableHead>Tipo de Exame</TableHead>
+                      <TableHead>Data de Envio</TableHead>
                       <TableHead>Prioridade</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Laudo</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {exams.map((exam: any) => (
+                    {examRequests.map((exam: any) => (
                       <TableRow key={exam.id}>
-                        <TableCell className="font-medium">
-                          {exam.patient_name || "—"}
-                        </TableCell>
+                        <TableCell className="font-medium">{exam.patient_name || "—"}</TableCell>
                         <TableCell className="text-sm">{exam.exam_type}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {format(new Date(exam.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
@@ -182,12 +158,12 @@ const ClinicMyExams = () => {
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          {exam.status === "reported" || exam.status === "delivered" ? (
-                            <Button size="sm" variant="outline" onClick={() => openReport(exam)}>
+                          {exam.status === "reported" ? (
+                            <Button size="sm" variant="outline" onClick={() => setSelectedExam(exam)}>
                               <Eye className="w-3 h-3 mr-1" /> Ver Laudo
                             </Button>
                           ) : (
-                            <span className="text-xs text-muted-foreground">Aguardando</span>
+                            <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </TableCell>
                       </TableRow>
@@ -201,72 +177,28 @@ const ClinicMyExams = () => {
       </div>
 
       {/* Report Dialog */}
-      <Dialog open={!!selectedExam} onOpenChange={(open) => { if (!open) { setSelectedExam(null); setReport(null); } }}>
+      <Dialog open={!!selectedExam} onOpenChange={(open) => !open && setSelectedExam(null)}>
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-primary" />
-              Laudo — {selectedExam?.exam_type}
-            </DialogTitle>
+            <DialogTitle>Laudo — {selectedExam?.exam_type}</DialogTitle>
           </DialogHeader>
-
-          {loadingReport ? (
-            <div className="space-y-3 py-4">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-              <Skeleton className="h-32 w-full" />
-            </div>
-          ) : report ? (
+          {report ? (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-3 text-sm">
-                <div>
-                  <span className="text-muted-foreground">Paciente:</span>
-                  <p className="font-medium">{selectedExam?.patient_name || "—"}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Tipo de Exame:</span>
-                  <p className="font-medium">{selectedExam?.exam_type}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Laudista:</span>
-                  <p className="font-medium">{report.reporter_name}</p>
-                </div>
-                <div>
-                  <span className="text-muted-foreground">CRM:</span>
-                  <p className="font-medium">
-                    {(report as any).doctor_profiles?.crm}/{(report as any).doctor_profiles?.crm_state}
-                  </p>
-                </div>
-                {report.signed_at && (
-                  <div>
-                    <span className="text-muted-foreground">Data Assinatura:</span>
-                    <p className="font-medium">
-                      {format(new Date(report.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                    </p>
-                  </div>
-                )}
-                {report.verification_code && (
-                  <div>
-                    <span className="text-muted-foreground">Código Verificação:</span>
-                    <p className="font-mono text-xs">{report.verification_code}</p>
-                  </div>
-                )}
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="text-muted-foreground">Paciente:</span> {selectedExam?.patient_name ?? "—"}</div>
+                <div><span className="text-muted-foreground">Status:</span> Laudado</div>
+                <div><span className="text-muted-foreground">Médico:</span> {report.reporter_name}</div>
+                <div><span className="text-muted-foreground">CRM:</span> {(report as any).doctor_profiles?.crm}/{(report as any).doctor_profiles?.crm_state}</div>
+                <div><span className="text-muted-foreground">Assinado em:</span> {report.signed_at ? format(new Date(report.signed_at), "dd/MM/yyyy HH:mm", { locale: ptBR }) : "—"}</div>
+                <div><span className="text-muted-foreground">Código:</span> {report.verification_code ?? "—"}</div>
               </div>
-
               <div className="border rounded-lg p-4 bg-muted/30">
-                <h4 className="text-sm font-semibold mb-2">Laudo</h4>
-                <div className="prose prose-sm max-w-none text-foreground whitespace-pre-wrap">
-                  {report.content_text}
-                </div>
+                <p className="text-sm font-medium mb-2">Texto do Laudo</p>
+                <p className="text-sm whitespace-pre-wrap">{report.content_text ?? "—"}</p>
               </div>
-
               {report.pdf_url && (
-                <Button variant="outline" className="w-full gap-2" asChild>
-                  <a href={report.pdf_url} target="_blank" rel="noopener noreferrer">
-                    <Download className="w-4 h-4" />
-                    Baixar PDF do Laudo
-                    <ExternalLink className="w-3 h-3" />
-                  </a>
+                <Button variant="outline" className="w-full" onClick={() => window.open(report.pdf_url, "_blank")}>
+                  <Download className="w-4 h-4 mr-2" /> Baixar PDF do Laudo
                 </Button>
               )}
             </div>
