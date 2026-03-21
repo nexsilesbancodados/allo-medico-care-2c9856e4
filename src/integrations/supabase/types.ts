@@ -1681,6 +1681,218 @@ export type Database = {
           },
         ]
       }
+      ophthalmology_exams: {
+        Row: {
+          assigned_doctor_id: string | null
+          clinic_id: string | null
+          created_at: string | null
+          exam_type: string
+          file_urls: Json | null
+          id: string
+          intraocular_pressure_od: number | null
+          intraocular_pressure_oe: number | null
+          notes: string | null
+          od_acuity: string | null
+          od_axis: number | null
+          od_cylindrical: number | null
+          od_spherical: number | null
+          oe_acuity: string | null
+          oe_axis: number | null
+          oe_cylindrical: number | null
+          oe_spherical: number | null
+          patient_birth_date: string | null
+          patient_cpf: string | null
+          patient_name: string
+          status: string
+          technician_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_doctor_id?: string | null
+          clinic_id?: string | null
+          created_at?: string | null
+          exam_type?: string
+          file_urls?: Json | null
+          id?: string
+          intraocular_pressure_od?: number | null
+          intraocular_pressure_oe?: number | null
+          notes?: string | null
+          od_acuity?: string | null
+          od_axis?: number | null
+          od_cylindrical?: number | null
+          od_spherical?: number | null
+          oe_acuity?: string | null
+          oe_axis?: number | null
+          oe_cylindrical?: number | null
+          oe_spherical?: number | null
+          patient_birth_date?: string | null
+          patient_cpf?: string | null
+          patient_name: string
+          status?: string
+          technician_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_doctor_id?: string | null
+          clinic_id?: string | null
+          created_at?: string | null
+          exam_type?: string
+          file_urls?: Json | null
+          id?: string
+          intraocular_pressure_od?: number | null
+          intraocular_pressure_oe?: number | null
+          notes?: string | null
+          od_acuity?: string | null
+          od_axis?: number | null
+          od_cylindrical?: number | null
+          od_spherical?: number | null
+          oe_acuity?: string | null
+          oe_axis?: number | null
+          oe_cylindrical?: number | null
+          oe_spherical?: number | null
+          patient_birth_date?: string | null
+          patient_cpf?: string | null
+          patient_name?: string
+          status?: string
+          technician_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ophthalmology_exams_assigned_doctor_id_fkey"
+            columns: ["assigned_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ophthalmology_exams_assigned_doctor_id_fkey"
+            columns: ["assigned_doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ophthalmology_exams_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ophthalmology_prescriptions: {
+        Row: {
+          created_at: string | null
+          doctor_id: string
+          exam_id: string
+          id: string
+          interpupillary_distance: number | null
+          lens_material: string | null
+          lens_treatment: string | null
+          lens_type: string | null
+          observations: string | null
+          od_addition: number | null
+          od_axis: number | null
+          od_cylindrical: number | null
+          od_prism: number | null
+          od_prism_base: string | null
+          od_spherical: number | null
+          oe_addition: number | null
+          oe_axis: number | null
+          oe_cylindrical: number | null
+          oe_prism: number | null
+          oe_prism_base: string | null
+          oe_spherical: number | null
+          patient_cpf: string | null
+          patient_name: string
+          pdf_url: string | null
+          signed_at: string | null
+          updated_at: string | null
+          verification_code: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          doctor_id: string
+          exam_id: string
+          id?: string
+          interpupillary_distance?: number | null
+          lens_material?: string | null
+          lens_treatment?: string | null
+          lens_type?: string | null
+          observations?: string | null
+          od_addition?: number | null
+          od_axis?: number | null
+          od_cylindrical?: number | null
+          od_prism?: number | null
+          od_prism_base?: string | null
+          od_spherical?: number | null
+          oe_addition?: number | null
+          oe_axis?: number | null
+          oe_cylindrical?: number | null
+          oe_prism?: number | null
+          oe_prism_base?: string | null
+          oe_spherical?: number | null
+          patient_cpf?: string | null
+          patient_name: string
+          pdf_url?: string | null
+          signed_at?: string | null
+          updated_at?: string | null
+          verification_code?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          doctor_id?: string
+          exam_id?: string
+          id?: string
+          interpupillary_distance?: number | null
+          lens_material?: string | null
+          lens_treatment?: string | null
+          lens_type?: string | null
+          observations?: string | null
+          od_addition?: number | null
+          od_axis?: number | null
+          od_cylindrical?: number | null
+          od_prism?: number | null
+          od_prism_base?: string | null
+          od_spherical?: number | null
+          oe_addition?: number | null
+          oe_axis?: number | null
+          oe_cylindrical?: number | null
+          oe_prism?: number | null
+          oe_prism_base?: string | null
+          oe_spherical?: number | null
+          patient_cpf?: string | null
+          patient_name?: string
+          pdf_url?: string | null
+          signed_at?: string | null
+          updated_at?: string | null
+          verification_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ophthalmology_prescriptions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ophthalmology_prescriptions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ophthalmology_prescriptions_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "ophthalmology_exams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_profiles: {
         Row: {
           address: string | null
