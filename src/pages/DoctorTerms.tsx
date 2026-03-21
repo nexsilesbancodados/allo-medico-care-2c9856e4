@@ -1,16 +1,15 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import InstitutionalHero from "@/components/landing/InstitutionalHero";
 
 const DoctorTerms = () => (
   <div className="min-h-screen bg-background">
     <SEOHead title="Termos de Uso para Médicos" description="Termos e condições para médicos cadastrados na AloClinica." />
+    
+    <InstitutionalHero title="Termos de Uso para Médicos" subtitle="Diretrizes para profissionais" icon={Stethoscope} lastUpdate="Fevereiro de 2026" />
+
     <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <Link to="/" className="inline-flex items-center gap-2 mb-8 text-muted-foreground hover:text-foreground transition text-sm">
-        <ArrowLeft className="w-4 h-4" /> Voltar ao início
-      </Link>
-      <h1 className="text-3xl font-bold text-foreground mb-2">Termos de Uso para Médicos</h1>
-      <p className="text-sm text-muted-foreground mb-8">Última atualização: Fevereiro de 2026</p>
       <div className="prose prose-sm max-w-none text-muted-foreground space-y-6">
 
         <p>Estes Termos complementam os <Link to="/terms" className="text-primary hover:underline">Termos de Uso Gerais</Link> e aplicam-se especificamente aos profissionais médicos cadastrados na Plataforma AloClinica.</p>
