@@ -974,12 +974,17 @@ const ExamReportEditor = () => {
   const [slaRemaining, setSlaRemaining] = useState<string | null>(null);
 
   // Word count
-  const wordCount = useMemo(() => {
-    if (!content.trim()) return 0;
-    return content.trim().split(/\s+/).length;
+  const plainText = useMemo(() => {
+    if (!content) return "";
+    return content.replace(/<[^>]*>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/\s+/g, " ").trim();
   }, [content]);
 
-  const charCount = content.length;
+  const wordCount = useMemo(() => {
+    if (!plainText) return 0;
+    return plainText.split(/\s+/).filter(Boolean).length;
+  }, [plainText]);
+
+  const charCount = plainText.length;
 
   // ---- SLA countdown ----
   useEffect(() => {
