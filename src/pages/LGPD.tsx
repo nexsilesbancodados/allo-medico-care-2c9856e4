@@ -1,19 +1,16 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft, Shield, Lock, Eye, FileCheck, UserCheck, Database, AlertTriangle } from "lucide-react";
+import { Shield, Lock, Eye, FileCheck, UserCheck, Database } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import SEOHead from "@/components/SEOHead";
+import InstitutionalHero from "@/components/landing/InstitutionalHero";
 
 const LGPD = () => (
   <div className="min-h-screen bg-background">
     <SEOHead title="Conformidade LGPD" description="Como a AloClinica cumpre a Lei Geral de Proteção de Dados." canonical="https://allo-medico-care.lovable.app/lgpd" />
-    <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <Link to="/" className="inline-flex items-center gap-2 mb-8 text-muted-foreground hover:text-foreground transition text-sm">
-        <ArrowLeft className="w-4 h-4" /> Voltar ao início
-      </Link>
-      <h1 className="text-3xl font-bold text-foreground mb-2">Conformidade LGPD</h1>
-      <p className="text-sm text-muted-foreground mb-2">Lei Geral de Proteção de Dados – Lei nº 13.709/2018</p>
-      <p className="text-sm text-muted-foreground mb-8">Última atualização: Fevereiro de 2026</p>
+    
+    <InstitutionalHero title="Conformidade LGPD" subtitle="Lei nº 13.709/2018" icon={Shield} lastUpdate="Fevereiro de 2026" />
 
+    <div className="container mx-auto px-4 py-12 max-w-3xl">
       <div className="grid sm:grid-cols-2 gap-3 mb-8">
         {[
           { icon: Shield, title: "Segurança", desc: "Criptografia AES-256 em repouso e TLS 1.3 em trânsito" },

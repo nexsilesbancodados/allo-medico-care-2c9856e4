@@ -1,19 +1,16 @@
 import { Link } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ReceiptText, Clock, XCircle, RefreshCw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { Clock, XCircle, RefreshCw, CreditCard, AlertTriangle, CheckCircle2 } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
+import InstitutionalHero from "@/components/landing/InstitutionalHero";
 
 const RefundPolicy = () => (
   <div className="min-h-screen bg-background">
     <SEOHead title="Política de Reembolso" description="Conheça a política de cancelamento e reembolso da AloClinica." />
-    <div className="container mx-auto px-4 py-12 max-w-3xl">
-      <Link to="/" className="inline-flex items-center gap-2 mb-8 text-muted-foreground hover:text-foreground transition text-sm">
-        <ArrowLeft className="w-4 h-4" /> Voltar ao início
-      </Link>
-      <h1 className="text-3xl font-bold text-foreground mb-2">Política de Reembolso e Cancelamento</h1>
-      <p className="text-sm text-muted-foreground mb-8">Última atualização: Fevereiro de 2026</p>
+    
+    <InstitutionalHero title="Política de Reembolso e Cancelamento" icon={ReceiptText} lastUpdate="Fevereiro de 2026" />
 
+    <div className="container mx-auto px-4 py-12 max-w-3xl">
       <div className="grid sm:grid-cols-3 gap-3 mb-8">
         {[
           { icon: Clock, title: "Até 2h antes", desc: "Cancelamento gratuito", color: "text-primary bg-primary/10" },
