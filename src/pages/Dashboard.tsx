@@ -236,16 +236,26 @@ const Dashboard = () => {
   const isAdmin = roles.includes("admin");
   const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "admin", "laudista"];
 
-  const primaryRole = isAdmin && forceRole && validForceRoles.includes(forceRole)
-    ? forceRole
-    : isAdmin ? "admin"
-    : roles.includes("doctor") ? "doctor"
-    : roles.includes("laudista") ? "laudista"
-    : roles.includes("receptionist") ? "receptionist"
-    : roles.includes("support") ? "support"
-    : roles.includes("clinic") ? "clinic"
-    : roles.includes("partner") ? "partner"
-    : "patient";
+  // Allow any user to use ?role= IF they actually have that role (not just admins)
+  const primaryRole = (() => {
+    if (forceRole && validForceRoles.includes(forceRole)) {
+      // Admin can force any role
+      if (isAdmin) return forceRole;
+      // Non-admin can only use ?role= if they actually have that role
+      if (roles.includes(forceRole as any)) return forceRole;
+    }
+    // Default role resolution
+    if (isAdmin) return "admin";
+    // Laudista takes priority over doctor if user has laudista role
+    // (laudistas also have doctor role but their primary context is laudista)
+    if (roles.includes("laudista")) return "laudista";
+    if (roles.includes("doctor")) return "doctor";
+    if (roles.includes("receptionist")) return "receptionist";
+    if (roles.includes("support")) return "support";
+    if (roles.includes("clinic")) return "clinic";
+    if (roles.includes("partner")) return "partner";
+    return "patient";
+  })();
 
   const IndexDashboard = () => {
     if (isAdmin && !forceRole) return <Navigate to="/dashboard/admin/panel-center" replace />;
