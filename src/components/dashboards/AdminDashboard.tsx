@@ -264,27 +264,27 @@ const AdminDashboard = () => {
         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel de Controle</h1>
-            <p className="text-sm text-muted-foreground mt-1">Monitoramento em tempo real, finanças e operações</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Monitoramento em tempo real, finanças e operações</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Select value={periodFilter} onValueChange={setPeriodFilter}>
-              <SelectTrigger className="w-40 h-9 rounded-xl">
+              <SelectTrigger className="w-36 h-9 rounded-xl text-xs bg-background border-border/40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button size="icon" variant="outline" className="h-9 w-9 rounded-xl" aria-label="Ação" onClick={() =>  fetchAll(true)} disabled={refreshing}>
+            <Button size="icon" variant="outline" className="h-9 w-9 rounded-xl bg-background" aria-label="Ação" onClick={() =>  fetchAll(true)} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
-            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportAdminCSV} disabled={loading}>
-              <Download className="w-4 h-4" /> CSV
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5 bg-background text-xs" onClick={exportAdminCSV} disabled={loading}>
+              <Download className="w-3.5 h-3.5" /> CSV
             </Button>
-            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportAdminPDF} disabled={loading}>
-              <FileText className="w-4 h-4" /> PDF
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5 bg-background text-xs" onClick={exportAdminPDF} disabled={loading}>
+              <FileText className="w-3.5 h-3.5" /> PDF
             </Button>
-            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={async () => {
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5 bg-background text-xs" onClick={async () => {
               toast.loading("Criando usuários de teste...");
               try {
                 const { data, error } = await supabase.functions.invoke("seed-test-users");
@@ -295,12 +295,12 @@ const AdminDashboard = () => {
                 toast.success(`${created} criados, ${existing} já existiam`);
               } catch (e: unknown) { toast.dismiss(); toast.error(e instanceof Error ? e.message : "Erro"); }
             }}>
-              <UserPlus className="w-4 h-4" /> Seed
+              <UserPlus className="w-3.5 h-3.5" /> Seed
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 rounded-xl gap-1.5">
-                  <LayoutGrid className="w-4 h-4" /> Trocar Painel
+                <Button size="sm" className="h-9 rounded-xl gap-1.5 bg-gradient-to-r from-foreground to-foreground/80 text-background hover:opacity-90 text-xs font-semibold">
+                  <LayoutGrid className="w-3.5 h-3.5" /> Trocar Painel
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52 rounded-xl p-1.5">
@@ -324,13 +324,16 @@ const AdminDashboard = () => {
 
         {/* Real-time banner */}
         <motion.div variants={fadeUp}>
-          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+          <Card className="border-border/20 bg-background shadow-sm rounded-2xl overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-primary via-secondary to-warning" />
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-4">
-                <Activity className="w-5 h-5 text-primary animate-pulse" />
-                <h2 className="font-semibold text-foreground">Tempo Real</h2>
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                <h2 className="font-semibold text-foreground text-sm">Tempo Real</h2>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 {[
                   { icon: Video, color: "text-primary", value: stats.live_now, label: "Ao vivo" },
                   { icon: Clock, color: "text-secondary", value: stats.waiting_now, label: "Na fila" },
@@ -338,12 +341,12 @@ const AdminDashboard = () => {
                   { icon: null, color: "text-destructive", value: `${stats.no_show_rate.toFixed(1)}%`, label: "Absenteísmo" },
                   { icon: Star, color: "text-warning", value: stats.avg_rating.toFixed(1), label: "NPS Médicos" },
                 ].map((item, i) => (
-                  <div key={i} className="text-center p-3 rounded-xl bg-card/50">
+                  <div key={i} className="text-center p-3 rounded-xl bg-muted/40">
                     <div className="flex items-center justify-center gap-1.5 mb-1">
                       {item.icon && <item.icon className={`w-4 h-4 ${item.color}`} />}
-                      <span className={`text-2xl font-bold ${item.color || "text-foreground"}`}>{item.value}</span>
+                      <span className={`text-xl font-bold ${item.color || "text-foreground"}`}>{item.value}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="text-[10px] text-muted-foreground">{item.label}</p>
                   </div>
                 ))}
               </div>
@@ -386,7 +389,7 @@ const AdminDashboard = () => {
         )}
 
         {/* KPI Cards with trend indicators */}
-        <motion.div variants={fadeUp} ref={kpiRef} className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3" role="list" aria-label="Indicadores chave do sistema">
+        <motion.div variants={fadeUp} ref={kpiRef} className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5" role="list" aria-label="Indicadores chave do sistema">
           {loading ? (
             Array.from({ length: 6 }).map((_, i) => <div key={i} className="h-28 shimmer-v2 rounded-2xl" aria-hidden="true" />)
           ) : (
@@ -403,26 +406,25 @@ const AdminDashboard = () => {
               <button
                 key={kpi.label}
                 onClick={() => kpi.path && navigate(kpi.path)}
-                className="kpi-card p-4 rounded-2xl bg-card border border-border/50 hover:border-border hover:shadow-md hover:-translate-y-1 transition-all duration-200 text-left group"
+                className="kpi-card p-3.5 rounded-2xl bg-background border border-border/20 hover:border-border/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 text-left group"
                 role="listitem"
                 aria-label={`${kpi.label}: ${kpi.value}${kpi.path ? " — clique para ver detalhes" : ""}`}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
+                  <div className={`w-8 h-8 rounded-xl ${kpi.bg} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                    <kpi.icon className={`w-3.5 h-3.5 ${kpi.color}`} aria-hidden="true" />
                   </div>
                   {kpi.trend && (
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
                       kpi.trend === "⚠" ? "bg-destructive/10 text-destructive"
-                      : kpi.trend === "✓" ? "bg-success/10 text-success"
                       : "bg-success/10 text-success"
                     }`} aria-hidden="true">
                       {kpi.trend}
                     </span>
                   )}
                 </div>
-                <p className="text-2xl font-black text-foreground tabular-nums" aria-hidden="true">{kpi.value}</p>
-                <p className="text-[11px] font-semibold text-muted-foreground/80 mt-0.5">{kpi.label}</p>
+                <p className="text-xl font-black text-foreground tabular-nums" aria-hidden="true">{kpi.value}</p>
+                <p className="text-[10px] font-semibold text-muted-foreground/70 mt-0.5">{kpi.label}</p>
               </button>
             ))
           )}
