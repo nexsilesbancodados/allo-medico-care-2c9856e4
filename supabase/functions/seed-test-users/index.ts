@@ -132,7 +132,11 @@ serve(async (req) => {
       const userId = newUser.user.id;
 
       if (u.role !== "patient") {
-        await supabase.from("user_roles").insert({ user_id: userId, role: u.role === "laudista" ? "doctor" : u.role });
+        const mainRole = u.role === "affiliate" ? "partner" : u.role;
+        await supabase.from("user_roles").insert({ user_id: userId, role: mainRole });
+        if (u.role === "laudista") {
+          await supabase.from("user_roles").insert({ user_id: userId, role: "doctor" });
+        }
       }
 
       if (u.role === "doctor" || u.role === "laudista") {
