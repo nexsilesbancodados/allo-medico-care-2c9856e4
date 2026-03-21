@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { ChevronRight, Home } from "lucide-react";
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -38,32 +38,109 @@ const ROUTE_LABELS: Record<string, string> = {
   schedules: "Agendas",
   reception: "Recepção",
   clinic: "Clínica",
+  ophthalmology: "Oftalmologia",
+  "simple-prescription": "Receituário",
+  certificates: "Atestados",
+  "on-duty": "Plantão 24h",
+  "renewal-queue": "Renovações",
+  "report-queue": "Fila de Laudos",
+  "report-editor": "Editor de Laudo",
+  wallet: "Carteira",
+  chat: "Chat",
+  "ai-assistant": "IA Assistente",
+  "panel-center": "Centro de Painéis",
+  financial: "Financeiro",
+  coupons: "Cupons",
+  live: "Ao Vivo",
+  laudista: "Laudista",
+  queue: "Fila",
+  "my-reports": "Meus Laudos",
+  financeiro: "Financeiro",
+  "exam-request": "Solicitar Exame",
+  "my-exams": "Meus Exames",
+  "doctor-applications": "Candidaturas",
+  "switch-panel": "Trocar Painel",
+  inbox: "Caixa de Entrada",
+  online: "Online",
+  audit: "Auditoria",
+  validate: "Validar",
+  history: "Histórico",
+  conversion: "Conversão",
+  calls: "Chamadas",
+  records: "Prontuários",
+  messages: "Mensagens",
+  book: "Agendar",
+  "urgent-care": "Pronto Atendimento",
+  "prescription-renewal": "Renovação",
+  "exam-results": "Resultados",
+  "discount-card": "Cartão Desconto",
+  dependents: "Dependentes",
+  diary: "Diário",
+  timeline: "Linha do Tempo",
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  doctor: "Médico",
+  patient: "Paciente",
+  admin: "Admin",
+  clinic: "Clínica",
+  receptionist: "Recepção",
+  support: "Suporte",
+  partner: "Parceiro",
+  laudista: "Laudista",
 };
 
 const DashboardBreadcrumbs = () => {
   const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
+  const role = searchParams.get("role");
   const segments = pathname.split("/").filter(Boolean);
 
   if (segments.length <= 1) return null;
 
-  const crumbs = segments.map((seg, i) => ({
-    label: ROUTE_LABELS[seg] || seg.charAt(0).toUpperCase() + seg.slice(1),
-    path: "/" + segments.slice(0, i + 1).join("/"),
-    isLast: i === segments.length - 1,
-  }));
+  // Skip UUID segments from breadcrumbs
+  const isUUID = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}/.test(s);
+
+  const crumbs = segments
+    .filter(seg => !isUUID(seg))
+    .map((seg, i, arr) => ({
+      label: ROUTE_LABELS[seg] || seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " "),
+      path: "/" + segments.slice(0, segments.indexOf(seg) + 1).join("/"),
+      isLast: i === arr.length - 1,
+    }));
 
   return (
-    <nav aria-label="Navegação estrutural" className="flex items-center gap-1 text-xs text-muted-foreground mb-4 flex-wrap">
-      <Link to="/dashboard" className="hover:text-foreground transition-colors">
-        <Home className="w-3.5 h-3.5" />
+    <nav aria-label="Navegação estrutural" className="flex items-center gap-1.5 text-xs mb-5 flex-wrap">
+      <Link
+        to={`/dashboard${role ? `?role=${role}` : ""}`}
+        className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <div className="p-1 rounded-md bg-primary/10">
+          <Home className="w-3 h-3 text-primary" />
+        </div>
       </Link>
-      {crumbs.map((crumb) => (
-        <span key={crumb.path} className="flex items-center gap-1">
-          <ChevronRight className="w-3 h-3 opacity-40" />
+
+      {role && (
+        <span className="flex items-center gap-1.5">
+          <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
+          <span className="text-muted-foreground font-medium">
+            {ROLE_LABELS[role] || role}
+          </span>
+        </span>
+      )}
+
+      {crumbs.slice(1).map((crumb) => (
+        <span key={crumb.path} className="flex items-center gap-1.5">
+          <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
           {crumb.isLast ? (
-            <span className="font-medium text-foreground">{crumb.label}</span>
+            <span className="font-semibold text-foreground bg-foreground/5 px-2 py-0.5 rounded-md">
+              {crumb.label}
+            </span>
           ) : (
-            <Link to={crumb.path} className="hover:text-foreground transition-colors">
+            <Link
+              to={`${crumb.path}${role ? `?role=${role}` : ""}`}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
               {crumb.label}
             </Link>
           )}
