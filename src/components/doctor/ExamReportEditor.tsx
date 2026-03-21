@@ -467,7 +467,6 @@ const PacsViewer = ({
         ctx.moveTo(m.points[0].x, m.points[0].y);
         ctx.lineTo(m.points[1].x, m.points[1].y);
         ctx.stroke();
-        // Endpoints
         [m.points[0], m.points[1]].forEach(p => {
           ctx.beginPath();
           ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
@@ -482,6 +481,45 @@ const PacsViewer = ({
         ctx.beginPath();
         ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
         ctx.stroke();
+      } else if (m.type === "rectangle") {
+        const x0 = Math.min(m.points[0].x, m.points[1].x);
+        const y0 = Math.min(m.points[0].y, m.points[1].y);
+        const w = Math.abs(m.points[1].x - m.points[0].x);
+        const h = Math.abs(m.points[1].y - m.points[0].y);
+        ctx.strokeRect(x0, y0, w, h);
+        // Corner markers
+        [m.points[0], m.points[1], { x: m.points[0].x, y: m.points[1].y }, { x: m.points[1].x, y: m.points[0].y }].forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2, 0, Math.PI * 2);
+          ctx.fillStyle = "#00ff00";
+          ctx.fill();
+        });
+      } else if (m.type === "bidirectional") {
+        // Main axis
+        ctx.beginPath();
+        ctx.moveTo(m.points[0].x, m.points[0].y);
+        ctx.lineTo(m.points[1].x, m.points[1].y);
+        ctx.stroke();
+        // Perpendicular bisector (short cross)
+        const cx = (m.points[0].x + m.points[1].x) / 2;
+        const cy = (m.points[0].y + m.points[1].y) / 2;
+        const dx = m.points[1].x - m.points[0].x;
+        const dy = m.points[1].y - m.points[0].y;
+        const len = Math.sqrt(dx * dx + dy * dy);
+        const perpLen = len * 0.3;
+        const nx = -dy / len * perpLen;
+        const ny = dx / len * perpLen;
+        ctx.beginPath();
+        ctx.moveTo(cx + nx, cy + ny);
+        ctx.lineTo(cx - nx, cy - ny);
+        ctx.stroke();
+        // Endpoints
+        [m.points[0], m.points[1], { x: cx + nx, y: cy + ny }, { x: cx - nx, y: cy - ny }].forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = "#00ff00";
+          ctx.fill();
+        });
       } else if (m.type === "angle") {
         ctx.beginPath();
         ctx.moveTo(m.points[0].x, m.points[0].y);
