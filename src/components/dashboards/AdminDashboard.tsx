@@ -264,27 +264,27 @@ const AdminDashboard = () => {
         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel de Controle</h1>
-            <p className="text-sm text-muted-foreground mt-1">Monitoramento em tempo real, finanças e operações</p>
+            <p className="text-sm text-muted-foreground mt-0.5">Monitoramento em tempo real, finanças e operações</p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Select value={periodFilter} onValueChange={setPeriodFilter}>
-              <SelectTrigger className="w-40 h-9 rounded-xl">
+              <SelectTrigger className="w-36 h-9 rounded-xl text-xs bg-background border-border/40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
               </SelectContent>
             </Select>
-            <Button size="icon" variant="outline" className="h-9 w-9 rounded-xl" aria-label="Ação" onClick={() =>  fetchAll(true)} disabled={refreshing}>
+            <Button size="icon" variant="outline" className="h-9 w-9 rounded-xl bg-background" aria-label="Ação" onClick={() =>  fetchAll(true)} disabled={refreshing}>
               <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
             </Button>
-            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportAdminCSV} disabled={loading}>
-              <Download className="w-4 h-4" /> CSV
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5 bg-background text-xs" onClick={exportAdminCSV} disabled={loading}>
+              <Download className="w-3.5 h-3.5" /> CSV
             </Button>
-            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportAdminPDF} disabled={loading}>
-              <FileText className="w-4 h-4" /> PDF
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5 bg-background text-xs" onClick={exportAdminPDF} disabled={loading}>
+              <FileText className="w-3.5 h-3.5" /> PDF
             </Button>
-            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={async () => {
+            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5 bg-background text-xs" onClick={async () => {
               toast.loading("Criando usuários de teste...");
               try {
                 const { data, error } = await supabase.functions.invoke("seed-test-users");
@@ -295,12 +295,12 @@ const AdminDashboard = () => {
                 toast.success(`${created} criados, ${existing} já existiam`);
               } catch (e: unknown) { toast.dismiss(); toast.error(e instanceof Error ? e.message : "Erro"); }
             }}>
-              <UserPlus className="w-4 h-4" /> Seed
+              <UserPlus className="w-3.5 h-3.5" /> Seed
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-9 rounded-xl gap-1.5">
-                  <LayoutGrid className="w-4 h-4" /> Trocar Painel
+                <Button size="sm" className="h-9 rounded-xl gap-1.5 bg-gradient-to-r from-foreground to-foreground/80 text-background hover:opacity-90 text-xs font-semibold">
+                  <LayoutGrid className="w-3.5 h-3.5" /> Trocar Painel
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52 rounded-xl p-1.5">
