@@ -364,12 +364,19 @@ const PacsViewer = ({
       setCursorPos({ x, y });
     }
 
-    // Pan
+    // Pan or Stack Scroll
     if (isPanningRef.current && tool === "pan") {
       const dx = e.clientX - lastMouseRef.current.x;
       const dy = e.clientY - lastMouseRef.current.y;
       setPanOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
       lastMouseRef.current = { x: e.clientX, y: e.clientY };
+    } else if (isPanningRef.current && tool === "stackScroll" && fileUrls.length > 1) {
+      const dy = e.clientY - lastMouseRef.current.y;
+      if (Math.abs(dy) > 15) {
+        if (dy > 0) setActiveIndex(i => Math.min(fileUrls.length - 1, i + 1));
+        else setActiveIndex(i => Math.max(0, i - 1));
+        lastMouseRef.current = { x: e.clientX, y: e.clientY };
+      }
     }
 
     // Active measurement
