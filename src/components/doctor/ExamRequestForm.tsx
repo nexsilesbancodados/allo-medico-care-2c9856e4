@@ -75,7 +75,7 @@ const ExamRequestForm = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("clinic_profiles")
-        .select("id")
+        .select("id, name")
         .eq("user_id", user!.id)
         .maybeSingle();
       return data;
