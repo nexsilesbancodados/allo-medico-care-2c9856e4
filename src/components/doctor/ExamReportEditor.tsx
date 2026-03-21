@@ -709,12 +709,20 @@ const PacsViewer = ({
 
           {/* CINE (OHIF) */}
           {fileUrls.length > 1 && (
-            <Tooltip><TooltipTrigger asChild>
+             <Tooltip><TooltipTrigger asChild>
               <Button size="icon" variant="ghost" className={`h-7 w-7 ${cinePlay ? "bg-green-500/30 text-green-400 animate-pulse" : "text-white/60 hover:text-white hover:bg-white/10"}`}
                 onClick={() => setCinePlay(p => !p)}>
                 <Play className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger><TooltipContent side="bottom">{cinePlay ? "Parar CINE" : "CINE Play"}</TooltipContent></Tooltip>
+            {cinePlay && (
+              <div className="flex items-center gap-1">
+                <span className="text-[8px] text-white/30">Cine Loop</span>
+                <input type="range" min="50" max="1000" value={cineSpeed}
+                  onChange={e => setCineSpeed(+e.target.value)}
+                  className="w-16 h-1 accent-green-400 cursor-pointer" />
+              </div>
+            )}
           )}
 
           {/* Reset */}
