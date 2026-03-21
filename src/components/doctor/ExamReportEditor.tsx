@@ -1422,6 +1422,24 @@ const ExamReportEditor = () => {
         }
       }
 
+      // Notificar clínica se o exame veio de uma clínica
+      if ((examRequest as any)?.requesting_clinic_id) {
+        const { data: clinicData } = await supabase
+          .from("clinic_profiles")
+          .select("user_id")
+          .eq("id", (examRequest as any).requesting_clinic_id)
+          .maybeSingle();
+        if (clinicData?.user_id) {
+          await supabase.from("notifications").insert({
+            user_id: clinicData.user_id,
+            title: "📋 Laudo Concluído",
+            message: `O laudo do exame ${examRequest.exam_type}${(examRequest as any).patient_name ? ` — ${(examRequest as any).patient_name}` : ""} foi finalizado.`,
+            type: "exam_report",
+            link: `/dashboard/clinic/my-exams?role=clinic`,
+          });
+        }
+      }
+
       toast.success("Laudo assinado e finalizado!", { description: `Código: ${verificationCode}` });
       queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
       navigate(backRoute);
