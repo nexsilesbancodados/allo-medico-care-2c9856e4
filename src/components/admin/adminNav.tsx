@@ -1,4 +1,4 @@
-import { Users, Stethoscope, Building2, Calendar, Shield, BarChart3, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet, Tag, ClipboardList } from "lucide-react";
+import { Users, Stethoscope, Building2, Calendar, Shield, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet, Tag, ClipboardList } from "lucide-react";
 
 export const getAdminNav = (active: string) => [
   { label: "Centro de Painéis", href: "/dashboard/admin/panel-center?role=admin", icon: <LayoutGrid className="w-4 h-4" />, active: active === "overview" || active === "panel-center", group: "Principal" },

@@ -1,5 +1,5 @@
 import {
-  Home, Calendar, Search, Clock, MessageCircle, Headphones,
+  Home, Search, Clock, MessageCircle, Headphones,
   ClipboardList, Heart, Smile, Upload, CreditCard, Users,
   SlidersHorizontal, User, Zap, FileText, FolderLock, FileCheck,
   Stethoscope, Activity
