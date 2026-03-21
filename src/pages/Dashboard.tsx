@@ -76,6 +76,7 @@ const ChatPage = lazy(() => import("@/components/chat/ChatPage"));
 const MedicalRecords = lazy(() => import("@/components/medical/MedicalRecords"));
 const AIAssistantPanel = lazy(() => import("@/components/ai/AIAssistantPanel"));
 const ClinicDoctorsManagement = lazy(() => import("@/components/clinic/ClinicDoctorsManagement"));
+const ClinicMyExams = lazy(() => import("@/components/clinic/ClinicMyExams"));
 const ReceptionSchedules = lazy(() => import("@/components/reception/ReceptionSchedules"));
 const ReceptionCheckin = lazy(() => import("@/components/reception/ReceptionCheckin"));
 const ReceptionBilling = lazy(() => import("@/components/reception/ReceptionBilling"));
