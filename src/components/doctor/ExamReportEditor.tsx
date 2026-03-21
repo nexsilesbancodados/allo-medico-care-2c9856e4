@@ -18,12 +18,13 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import {
-  Loader2, FileSignature, Download, Save, ImageIcon,
+  Loader2, FileSignature, Download, Save, ImageIcon, Upload,
   Mic, MicOff, Sparkles, Wand2, BookText, ChevronDown, Lightbulb,
   ZoomIn, ZoomOut, RotateCw, Contrast, Maximize2, Sun, Move, Ruler,
   ArrowLeft, ChevronLeft, ChevronRight, Grid3X3, Monitor, Eye,
   Crosshair, RotateCcw, FlipHorizontal, FlipVertical, Pencil,
-  Type, Play, MoreHorizontal, Keyboard, FileText, Clock, AlertTriangle
+  Type, Play, MoreHorizontal, Keyboard, FileText, Clock, AlertTriangle,
+  Info, Clipboard
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
