@@ -1123,16 +1123,16 @@ const ExamReportEditor = () => {
 
   // Requesting clinic name
   const { data: requestingClinic } = useQuery({
-    queryKey: ["requesting-clinic-name", (examRequest as any)?.requesting_clinic_id],
+    queryKey: ["requesting-clinic-name", examRequest?.requesting_clinic_id],
     queryFn: async () => {
       const { data } = await supabase
         .from("clinic_profiles")
         .select("name")
-        .eq("id", (examRequest as any).requesting_clinic_id)
+        .eq("id", examRequest!.requesting_clinic_id)
         .maybeSingle();
       return data;
     },
-    enabled: !!(examRequest as any)?.requesting_clinic_id,
+    enabled: !!examRequest?.requesting_clinic_id,
   });
 
   // ---- Auto-claim exam on open ----
@@ -1280,7 +1280,7 @@ const ExamReportEditor = () => {
       const documentHash = await gerarHashDocumento(content);
       const verificationCode = gerarCodigoVerificacao();
       const doctorName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim();
-      const patientDisplayName = (examRequest as any)?.patient_name || "Paciente";
+      const patientDisplayName = examRequest?.patient_name || "Paciente";
 
       // Generate professional PDF
       const pdf = new jsPDF();
@@ -1422,6 +1422,24 @@ const ExamReportEditor = () => {
         }
       }
 
+      // Notificar clínica se o exame veio de uma clínica
+      if (examRequest?.requesting_clinic_id) {
+        const { data: clinicData } = await supabase
+          .from("clinic_profiles")
+          .select("user_id")
+          .eq("id", examRequest!.requesting_clinic_id)
+          .maybeSingle();
+        if (clinicData?.user_id) {
+          await supabase.from("notifications").insert({
+            user_id: clinicData.user_id,
+            title: "📋 Laudo Concluído",
+            message: `O laudo do exame ${examRequest.exam_type}${examRequest?.patient_name ? ` — ${examRequest?.patient_name}` : ""} foi finalizado.`,
+            type: "exam_report",
+            link: `/dashboard/clinic/my-exams?role=clinic`,
+          });
+        }
+      }
+
       toast.success("Laudo assinado e finalizado!", { description: `Código: ${verificationCode}` });
       queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
       navigate(backRoute);
@@ -1482,8 +1500,23 @@ const ExamReportEditor = () => {
           )}
         </div>
         <div className="flex-1" />
-        <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
           <span>{wordCount} palavras · {charCount} chars</span>
+          {!isReported && wordCount > 0 && (
+            <div className="flex items-center gap-1">
+              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${
+                    wordCount >= 150 ? "bg-green-500" : wordCount >= 50 ? "bg-warning" : "bg-destructive"
+                  }`}
+                  style={{ width: `${Math.min(100, (wordCount / 150) * 100)}%` }}
+                />
+              </div>
+              <span className={wordCount >= 150 ? "text-green-500" : wordCount >= 50 ? "text-warning" : "text-destructive"}>
+                {wordCount >= 150 ? "✓" : `${150 - wordCount} para mínimo`}
+              </span>
+            </div>
+          )}
           <span className="hidden md:inline">Ctrl+S salvar · Ctrl+Enter assinar</span>
         </div>
       </div>
@@ -1517,8 +1550,8 @@ const ExamReportEditor = () => {
                 <div className="flex items-center gap-2">
                   <Clipboard className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   <span className="text-[11px] font-semibold text-foreground">
-                    {(examRequest as any)?.patient_name
-                      ? (examRequest as any).patient_name
+                    {examRequest?.patient_name
+                      ? examRequest?.patient_name
                       : examRequest?.patient_id
                       ? "Paciente cadastrado"
                       : "Paciente não informado"}
@@ -1681,10 +1714,17 @@ const ExamReportEditor = () => {
                     )}
                   </div>
                 ) : (
-                  <Button onClick={() => setShowSignDialog(true)} disabled={signing || !content.trim()} className="w-full h-9">
-                    {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
-                    {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
-                  </Button>
+                  <>
+                    <Button onClick={() => setShowSignDialog(true)} disabled={signing || !content.trim() || wordCount < 5} className="w-full h-9">
+                      {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
+                      {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
+                    </Button>
+                    {wordCount > 0 && wordCount < 50 && (
+                      <p className="text-[10px] text-warning mt-1 text-center">
+                        ⚠ Laudo muito curto — recomendado mínimo 50 palavras
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </div>
