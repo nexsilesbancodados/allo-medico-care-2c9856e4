@@ -341,9 +341,9 @@ const Dashboard = () => {
 
       {/* Clinic */}
       <Route path="clinic/doctors" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDoctorsManagement /></RoleGuard>} />
-      <Route path="clinic/schedules" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
-      <Route path="clinic/patients" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
-      <Route path="clinic/waiting-room" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
+      <Route path="clinic/schedules" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicSchedules /></RoleGuard>} />
+      <Route path="clinic/patients" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicPatients /></RoleGuard>} />
+      <Route path="clinic/waiting-room" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicWaitingRoom /></RoleGuard>} />
       <Route path="clinic/finance" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
       <Route path="clinic/reports" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
       <Route path="clinic/exam-request" element={<RoleGuard allowed={["clinic"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
