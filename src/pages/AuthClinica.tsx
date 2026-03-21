@@ -13,7 +13,7 @@ import {
   Building2, Mail, Lock, Phone, MapPin, FileText, Sparkles, Eye, EyeOff,
   Users, Calendar, DollarSign, BarChart3, Shield, ArrowRight, CheckCircle2,
   ChevronRight, Smartphone, HelpCircle, Zap, Video, ClipboardList, UserPlus,
-  Globe, Clock
+  Globe, Clock, LogIn
 } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
