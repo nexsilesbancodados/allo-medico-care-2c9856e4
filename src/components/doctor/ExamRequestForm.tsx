@@ -75,7 +75,7 @@ const ExamRequestForm = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from("clinic_profiles")
-        .select("id")
+        .select("id, name")
         .eq("user_id", user!.id)
         .maybeSingle();
       return data;
@@ -188,7 +188,9 @@ const ExamRequestForm = () => {
       if (isClinic) {
         const { error } = await supabase.from("exam_requests" as any).insert({
           requesting_clinic_id: clinicProfile!.id,
-          patient_name: patientName.trim(),
+          requesting_doctor_id: null,
+          patient_id: null,
+          patient_name: patientName.trim() || null,
           patient_birth_date: patientBirthDate || null,
           patient_sex: patientSex || null,
           exam_date: examDate || null,
@@ -199,6 +201,9 @@ const ExamRequestForm = () => {
           status: "pending",
         } as any);
         if (error) throw error;
+        toast.success("Solicitação enviada!", { description: "O exame foi enviado para a fila de laudos." });
+        navigate("/dashboard/clinic/my-exams?role=clinic");
+        return;
       } else {
         const effectiveDoctorId = isReception ? receptionDoctorProfile?.id : doctorProfile?.id;
         const { error } = await supabase.from("exam_requests" as any).insert({

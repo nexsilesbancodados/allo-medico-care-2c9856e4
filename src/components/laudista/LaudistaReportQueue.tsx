@@ -230,7 +230,6 @@ const LaudistaReportQueue = () => {
                     <TableHead>SLA</TableHead>
                     <TableHead>Recebido</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
-                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
