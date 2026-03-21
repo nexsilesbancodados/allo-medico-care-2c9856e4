@@ -45,7 +45,7 @@ const WL_PRESETS = [
 
 type Measurement = {
   id: string;
-  type: "length" | "angle" | "ellipse";
+  type: "length" | "angle" | "ellipse" | "rectangle" | "bidirectional";
   points: { x: number; y: number }[];
   value?: string;
 };
