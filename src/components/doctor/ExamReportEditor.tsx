@@ -62,9 +62,11 @@ type Annotation = {
 const PacsViewer = ({
   fileUrls,
   examRequest,
+  onFilesUploaded,
 }: {
   fileUrls: string[];
   examRequest: ExamRequest | null;
+  onFilesUploaded?: (newUrls: string[]) => void;
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
