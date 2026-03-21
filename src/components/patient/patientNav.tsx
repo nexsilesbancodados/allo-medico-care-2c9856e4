@@ -8,10 +8,9 @@ import {
 export const getPatientNav = (active: string) => [
   // ── Bottom bar (first 5 = bottom nav) ──
   { label: "Início", href: "/dashboard?role=patient", icon: <Home className="w-4 h-4" />, active: active === "home", group: "Principal" },
-  { label: "Agendar", href: "/dashboard/schedule?role=patient", icon: <Calendar className="w-4 h-4" />, active: active === "schedule", group: "Principal" },
+  { label: "Agendar", href: "/dashboard/schedule?role=patient", icon: <Search className="w-4 h-4" />, active: active === "schedule" || active === "doctors", group: "Principal" },
   { label: "Urgência", href: "/dashboard/urgent-care?role=patient", icon: <Zap className="w-4 h-4" />, active: active === "urgent-care", group: "Principal" },
   { label: "Consultas", href: "/dashboard/appointments?role=patient", icon: <Clock className="w-4 h-4" />, active: active === "appointments", group: "Principal" },
-  { label: "Buscar", href: "/dashboard/doctors?role=patient", icon: <Search className="w-4 h-4" />, active: active === "doctors", group: "Principal" },
 
   // ── Saúde ──
   { label: "Minha Saúde", href: "/dashboard/patient/health?role=patient", icon: <Heart className="w-4 h-4" />, active: active === "health", group: "Saúde" },
