@@ -91,11 +91,16 @@ const PacsViewer = ({
   const [showInfoPanel, setShowInfoPanel] = useState(false);
   const [activePreset, setActivePreset] = useState("Default");
   const [cinePlay, setCinePlay] = useState(false);
+  const [cineSpeed, setCineSpeed] = useState(200);
   const cineRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pixelDataRef = useRef<{ values: Float32Array; rows: number; cols: number } | null>(null);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const isPanningRef = useRef(false);
   const lastMouseRef = useRef({ x: 0, y: 0 });
+  const [dualView, setDualView] = useState(false);
+  const [dualIndex, setDualIndex] = useState(1);
+  const [showSidebar, setShowSidebar] = useState(true);
+  const [imageNaturalSize, setImageNaturalSize] = useState({ w: 0, h: 0 });
 
   const activeUrl = fileUrls[activeIndex] || null;
 
