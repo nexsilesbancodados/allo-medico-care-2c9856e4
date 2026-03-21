@@ -938,38 +938,50 @@ const PacsViewer = ({
             </div>
           </div>
 
-          {/* Patient info overlay — top-left (Weasis style) */}
+          {/* Patient info overlay — top-left (OsiriX orange style) */}
           {Object.keys(dicomInfo).length > 0 && (
             <div className="absolute top-2 left-2 text-[10px] font-mono leading-snug pointer-events-none z-20">
-              {dicomInfo["Paciente"] && <div className="text-cyan-300/90">Nome: <strong>{dicomInfo["Paciente"]}</strong></div>}
-              {dicomInfo["ID"] && <div className="text-cyan-300/60">ID: {dicomInfo["ID"]}</div>}
-              {dicomInfo["Nascimento"] && <div className="text-cyan-300/60">Nasc: {dicomInfo["Nascimento"]}</div>}
-              {dicomInfo["Sexo"] && <div className="text-cyan-300/60">Sexo: {dicomInfo["Sexo"]}</div>}
+              {dicomInfo["Paciente"] && <div className="text-amber-400/90">Nome: <strong>{dicomInfo["Paciente"]}</strong></div>}
+              {dicomInfo["ID"] && <div className="text-amber-400/60">ID: {dicomInfo["ID"]}</div>}
+              {dicomInfo["Nascimento"] && <div className="text-amber-400/60">Nasc: {dicomInfo["Nascimento"]}</div>}
+              {dicomInfo["Sexo"] && <div className="text-amber-400/60">Sexo: {dicomInfo["Sexo"]}</div>}
+              {dicomInfo["Instituição"] && (
+                <div className="text-amber-300/50 mt-1">
+                  Nome do departamento : {dicomInfo["Instituição"]}
+                </div>
+              )}
             </div>
           )}
 
           {/* Study info overlay — top-right */}
           {Object.keys(dicomInfo).length > 0 && (
             <div className="absolute top-2 right-2 text-[10px] font-mono text-right leading-snug pointer-events-none z-20">
-              {dicomInfo["Instituição"] && <div className="text-white/50">{dicomInfo["Instituição"]}</div>}
-              {dicomInfo["Data Estudo"] && <div className="text-white/40">Data: {dicomInfo["Data Estudo"]}</div>}
+              {dicomInfo["Data Estudo"] && <div className="text-white/50">{dicomInfo["Data Estudo"]}</div>}
+              {dicomInfo["Estudo"] && <div className="text-white/40">[{dicomInfo["Estudo"]}]</div>}
               {dicomInfo["Modalidade"] && <div className="text-white/50">{dicomInfo["Modalidade"]} {dicomInfo["Protocolo"] ? `· ${dicomInfo["Protocolo"]}` : ""}</div>}
-              {dicomInfo["Dimensões"] && <div className="text-white/30">{dicomInfo["Dimensões"]} · {dicomInfo["Bits"]}</div>}
-              {dicomInfo["Espessura"] && <div className="text-white/30">Esp: {dicomInfo["Espessura"]}</div>}
             </div>
           )}
 
           {/* Cursor position + HU readout — bottom-left (OsiriX) */}
           {cursorPos && (
-            <div className="absolute bottom-2 left-2 text-[10px] font-mono text-green-400/80 pointer-events-none z-20 bg-black/50 px-1.5 py-0.5 rounded">
+            <div className="absolute bottom-6 left-2 text-[10px] font-mono text-green-400/80 pointer-events-none z-20 bg-black/50 px-1.5 py-0.5 rounded">
               x: {cursorPos.x} y: {cursorPos.y}
               {cursorPos.hu !== undefined && <span className="ml-2 text-yellow-300/80">HU: {cursorPos.hu}</span>}
             </div>
           )}
 
-          {/* WW/WL display — bottom-right */}
-          <div className="absolute bottom-2 right-2 text-[10px] font-mono text-white/30 pointer-events-none z-20">
-            W: {brightness} L: {contrast} {activePreset !== "Default" && activePreset !== "Custom" && `[${activePreset}]`}
+          {/* Bottom status bar (OsiriX-style) */}
+          <div className="absolute bottom-0 inset-x-0 h-5 bg-black/70 border-t border-white/5 flex items-center justify-between px-3 text-[9px] font-mono text-white/40 pointer-events-none z-20">
+            <div className="flex items-center gap-4">
+              <span>Image size:{imageNaturalSize.w}x{imageNaturalSize.h}</span>
+              <span>Zoom: {Math.round(zoom * 100)}%</span>
+              {dicomInfo["Formato"] === "DICOM" && <span>DERIVED\\PRIMARY</span>}
+            </div>
+            <div className="flex items-center gap-4">
+              {fileUrls.length > 0 && <span>Images:{activeIndex + 1}/ {fileUrls.length}</span>}
+              <span>WL: {brightness} / WW: {contrast}</span>
+              {dicomInfo["Modalidade"] && <span>({dicomInfo["Modalidade"]})</span>}
+            </div>
           </div>
 
           {/* Measurements list — bottom-center */}
