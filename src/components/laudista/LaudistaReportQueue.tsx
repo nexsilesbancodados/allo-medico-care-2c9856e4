@@ -224,10 +224,12 @@ const LaudistaReportQueue = () => {
                   <TableRow>
                     <TableHead>Tipo de Exame</TableHead>
                     <TableHead>Paciente</TableHead>
+                    <TableHead>Origem</TableHead>
                     <TableHead>Prioridade</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>SLA</TableHead>
                     <TableHead>Recebido</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
