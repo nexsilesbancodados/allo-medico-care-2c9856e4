@@ -4,8 +4,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Video, Shield, Clock, MapPin, Heart, Stethoscope, FileText, Smartphone,
-  CheckCircle2, ArrowRight, Users, Scale, HelpCircle, ChevronRight, MonitorSmartphone
+  CheckCircle2, ArrowRight, Users, Scale, HelpCircle, ChevronRight, MonitorSmartphone, Phone
 } from "lucide-react";
+import bannerDoctor from "@/assets/banner-teleconsulta-doctor.jpg";
+import bannerPatient from "@/assets/banner-teleconsulta-patient.jpg";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
@@ -167,6 +169,33 @@ const Teleconsulta = () => {
           </div>
         </section>
 
+        {/* ==================== BANNER MÉDICO ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
+          <img src={bannerDoctor} alt="Médica em teleconsulta" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "320px" }}>
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Stethoscope className="w-5 h-5 text-white" />
+                </div>
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs">Profissionais Qualificados</Badge>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+                Mais de 30 especialidades<br />disponíveis 24h
+              </h2>
+              <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-md">
+                Clínico geral, pediatria, dermatologia, psicologia, cardiologia e muito mais. Médicos com CRM verificado e avaliações reais.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {["Clínico Geral", "Pediatria", "Dermatologia", "Psicologia", "Cardiologia"].map((spec) => (
+                  <span key={spec} className="px-3 py-1 rounded-full bg-white/15 text-white text-xs font-medium backdrop-blur-sm border border-white/10">{spec}</span>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* CTA Banner */}
         <section className="py-6 px-4">
           <div className="container mx-auto max-w-3xl">
@@ -233,6 +262,31 @@ const Teleconsulta = () => {
                   </motion.div>
                 ))}
               </div>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ==================== BANNER PACIENTE ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
+          <img src={bannerPatient} alt="Paciente usando teleconsulta de casa" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-l from-secondary/90 via-secondary/70 to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center justify-end" style={{ minHeight: "320px" }}>
+            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10 text-right">
+              <div className="flex items-center gap-2 mb-4 justify-end">
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs">Conforto de Casa</Badge>
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <Heart className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+                Consulte sem sair<br />do sofá
+              </h2>
+              <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-md ml-auto">
+                Celular, tablet ou computador — é tudo que você precisa. Receitas digitais válidas em todo o Brasil, sem enfrentar trânsito ou filas.
+              </p>
+              <Button className="bg-white text-secondary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-lg" asChild>
+                <Link to="/paciente">Marcar Consulta <ArrowRight className="w-4 h-4 ml-2" /></Link>
+              </Button>
             </motion.div>
           </div>
         </section>

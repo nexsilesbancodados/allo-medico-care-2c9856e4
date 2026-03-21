@@ -7,8 +7,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, CheckCircle2, ArrowRight, Shield, Users, Heart, Stethoscope, Clock, Star, Building2, Phone, FileText, Brain, Fingerprint, Zap, Upload, ChevronRight } from "lucide-react";
+import { CreditCard, CheckCircle2, ArrowRight, Shield, Users, Heart, Stethoscope, Clock, Star, Building2, Phone, FileText, Brain, Fingerprint, Zap, Upload, ChevronRight, TrendingUp, Video } from "lucide-react";
 import { motion } from "framer-motion";
+import bannerCorporate from "@/assets/banner-b2b-corporate.jpg";
+import bannerTelelaudoWorkflow from "@/assets/banner-telelaudo-workflow.jpg";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import SEOHead from "@/components/SEOHead";
@@ -133,6 +135,35 @@ const B2BLanding = () => {
                   </motion.div>
                 ))}
               </div>
+          </motion.div>
+          </div>
+        </section>
+
+        {/* ==================== BANNER CORPORATIVO ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
+          <img src={bannerCorporate} alt="Reunião corporativa sobre benefícios" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "320px" }}>
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-white" />
+                </div>
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs">Resultados Reais</Badge>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+                Reduza custos e<br />aumente a produtividade
+              </h2>
+              <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-md">
+                Empresas que adotam telemedicina corporativa reduzem em até 40% o absenteísmo e melhoram a satisfação dos colaboradores.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                {["-40% absenteísmo", "+85% satisfação", "ROI em 3 meses"].map((stat) => (
+                  <span key={stat} className="px-3 py-1 rounded-full bg-white/15 text-white text-xs font-bold backdrop-blur-sm border border-white/10">
+                    {stat}
+                  </span>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>
@@ -188,6 +219,35 @@ const B2BLanding = () => {
                 </div>
               </motion.div>
 
+            </motion.div>
+          </div>
+        </section>
+
+        {/* ==================== BANNER TELELAUDO ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
+          <img src={bannerTelelaudoWorkflow} alt="Centro de laudos médicos digitais" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-l from-secondary/90 via-secondary/70 to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center justify-end" style={{ minHeight: "320px" }}>
+            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10 text-right">
+              <div className="flex items-center gap-2 mb-4 justify-end">
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs">Telelaudo Profissional</Badge>
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+                Laudos assinados<br />em menos de 2 horas
+              </h2>
+              <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-md ml-auto">
+                Terceirize laudos médicos sem equipe própria. IA de triagem, assinatura digital ICP-Brasil e verificação por QR Code.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-end">
+                {["ECG", "Raio-X", "Ressonância", "EEG", "Espirometria"].map((exam) => (
+                  <span key={exam} className="px-3 py-1 rounded-full bg-white/15 text-white text-xs font-medium backdrop-blur-sm border border-white/10">
+                    {exam}
+                  </span>
+                ))}
+              </div>
             </motion.div>
           </div>
         </section>

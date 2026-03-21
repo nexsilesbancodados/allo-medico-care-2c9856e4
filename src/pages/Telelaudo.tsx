@@ -5,8 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   FileText, Shield, Clock, Upload, CheckCircle2, ArrowRight, Users,
-  Zap, Monitor, Lock, Stethoscope, ChevronRight, Brain, Fingerprint, Bell
+  Zap, Monitor, Lock, Stethoscope, ChevronRight, Brain, Fingerprint, Bell, TrendingUp
 } from "lucide-react";
+import bannerTelelaudoWorkflow from "@/assets/banner-telelaudo-workflow.jpg";
+import bannerLaudoDigital from "@/assets/banner-laudo-digital.png";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
@@ -149,6 +151,37 @@ const Telelaudo = () => {
           </div>
         </section>
 
+        {/* ==================== BANNER WORKFLOW ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
+          <img src={bannerTelelaudoWorkflow} alt="Centro de diagnóstico por imagem" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(210,50%,8%)]/90 via-[hsl(210,50%,8%)]/60 to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "320px" }}>
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">
+              <Badge className="mb-4 bg-secondary/20 text-secondary border-secondary/30 text-xs">
+                <TrendingUp className="w-3 h-3 mr-1" /> Tecnologia
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+                Inteligência Artificial<br />a serviço do diagnóstico
+              </h2>
+              <p className="text-white/70 text-sm leading-relaxed mb-5 max-w-md">
+                Nossa IA classifica exames por urgência, sugere achados e estrutura laudos automaticamente — acelerando o trabalho do especialista.
+              </p>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { value: "< 2h", label: "SLA urgente" },
+                  { value: "50%", label: "Mais rápido" },
+                  { value: "24/7", label: "Disponível" },
+                ].map(({ value, label }) => (
+                  <div key={label} className="text-center">
+                    <span className="text-xl font-black text-white">{value}</span>
+                    <span className="block text-xs text-white/50 mt-0.5">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Exam types */}
         <section className="py-20 bg-muted/30">
           <div className="container mx-auto px-4 max-w-4xl">
@@ -210,25 +243,39 @@ const Telelaudo = () => {
           </div>
         </section>
 
-        {/* Verification */}
-        <section className="py-20">
-          <div className="container mx-auto px-4 max-w-2xl text-center">
-            <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-secondary to-primary mx-auto mb-5 shadow-xl">
-                <Fingerprint className="w-8 h-8 text-white" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-3 tracking-tight">
-                Verificação de Autenticidade
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto mb-8">
-                Todo laudo possui um código único e QR Code para verificação pública. Farmácias e empresas podem confirmar a autenticidade em tempo real.
-              </p>
-              <Button size="lg" variant="outline" className="rounded-2xl h-14 px-8 text-base font-bold border-border" asChild>
-                <Link to="/validar">
-                  <Shield className="w-5 h-5 mr-2" /> Validar Documento
-                </Link>
-              </Button>
-            </motion.div>
+        {/* ==================== BANNER LAUDO DIGITAL ==================== */}
+        <section className="py-16 bg-[hsl(210,50%,8%)] relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,hsl(160,55%,45%,0.08),transparent_70%)]" />
+          <div className="container mx-auto px-4 relative">
+            <div className="grid md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto">
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="flex items-center justify-center">
+                <img src={bannerLaudoDigital} alt="Documento digital com assinatura" className="w-full max-w-sm rounded-2xl shadow-2xl shadow-secondary/10" loading="lazy" />
+              </motion.div>
+              <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
+                <Badge className="mb-4 bg-secondary/20 text-secondary border-secondary/30 text-xs">
+                  <Fingerprint className="w-3 h-3 mr-1" /> Verificação
+                </Badge>
+                <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-4">
+                  Verificação de<br />Autenticidade
+                </h2>
+                <p className="text-white/60 text-sm leading-relaxed mb-6">
+                  Todo laudo possui um código único e QR Code para verificação pública. Farmácias e empresas podem confirmar a autenticidade em tempo real.
+                </p>
+                <ul className="space-y-3 mb-6">
+                  {["Hash SHA-256 único", "QR Code verificável", "Certificação ICP-Brasil", "Rastreabilidade total"].map((item, i) => (
+                    <li key={i} className="flex items-center gap-2.5 text-sm text-white/70">
+                      <CheckCircle2 className="w-4 h-4 text-secondary shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button size="lg" variant="outline" className="rounded-2xl h-14 px-8 text-base font-bold border-white/20 text-white hover:bg-white/10" asChild>
+                  <Link to="/validar">
+                    <Shield className="w-5 h-5 mr-2" /> Validar Documento
+                  </Link>
+                </Button>
+              </motion.div>
+            </div>
           </div>
         </section>
 
