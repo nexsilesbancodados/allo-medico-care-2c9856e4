@@ -313,20 +313,20 @@ const PacsViewer = ({
     const x = (e.clientX - rect.left) / zoom;
     const y = (e.clientY - rect.top) / zoom;
 
-    if (tool === "pan") {
+    if (tool === "pan" || tool === "stackScroll") {
       isPanningRef.current = true;
       lastMouseRef.current = { x: e.clientX, y: e.clientY };
-    } else if (tool === "measure" || tool === "angle") {
+    } else if (tool === "measure" || tool === "angle" || tool === "bidirectional") {
       const newM: Measurement = {
         id: crypto.randomUUID(),
-        type: tool === "measure" ? "length" : "angle",
+        type: tool === "measure" ? "length" : tool === "angle" ? "angle" : "bidirectional",
         points: [{ x, y }],
       };
       setActiveMeasurement(newM);
-    } else if (tool === "ellipse") {
+    } else if (tool === "ellipse" || tool === "rectangle") {
       const newM: Measurement = {
         id: crypto.randomUUID(),
-        type: "ellipse",
+        type: tool === "ellipse" ? "ellipse" : "rectangle",
         points: [{ x, y }],
       };
       setActiveMeasurement(newM);
@@ -335,6 +335,14 @@ const PacsViewer = ({
       if (text) {
         setAnnotations(prev => [...prev, { id: crypto.randomUUID(), x, y, text }]);
       }
+    } else if (tool === "windowROI") {
+      // Window ROI - measure mean HU in a region
+      const newM: Measurement = {
+        id: crypto.randomUUID(),
+        type: "rectangle",
+        points: [{ x, y }],
+      };
+      setActiveMeasurement(newM);
     }
   };
 
