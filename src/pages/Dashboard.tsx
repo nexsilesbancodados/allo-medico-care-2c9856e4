@@ -373,12 +373,9 @@ const Dashboard = () => {
       <Route path="laudista" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaDashboard /></RoleGuard>} />
       <Route path="laudista/queue" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaReportQueue /></RoleGuard>} />
       <Route path="laudista/my-reports" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaMyReports /></RoleGuard>} />
-      <Route path="laudista/templates" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaTemplates /></RoleGuard>} />
       <Route path="laudista/stats" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaStats /></RoleGuard>} />
-      <Route path="laudista/exam-request" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
       <Route path="laudista/report-editor/:examId" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaReportEditor /></RoleGuard>} />
-      <Route path="laudista/earnings" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaEarnings /></RoleGuard>} />
-      <Route path="laudista/wallet" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaWallet /></RoleGuard>} />
+      <Route path="laudista/financeiro" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><LaudistaFinanceiro /></RoleGuard>} />
 
       {/* Fallback */}
       <Route
