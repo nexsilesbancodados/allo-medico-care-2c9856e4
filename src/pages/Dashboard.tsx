@@ -60,9 +60,7 @@ const DoctorOnDutyPanel = lazy(() => import("@/components/doctor/DoctorOnDutyPan
 const LaudistaReportQueue = lazy(() => import("@/components/laudista/LaudistaReportQueue"));
 const LaudistaMyReports = lazy(() => import("@/components/laudista/LaudistaMyReports"));
 const LaudistaStats = lazy(() => import("@/components/laudista/LaudistaStats"));
-const LaudistaTemplates = lazy(() => import("@/components/doctor/ReportTemplateManager"));
-const LaudistaEarnings = lazy(() => import("@/components/laudista/LaudistaEarnings"));
-const LaudistaWallet = lazy(() => import("@/components/laudista/LaudistaWallet"));
+const LaudistaFinanceiro = lazy(() => import("@/components/laudista/LaudistaFinanceiro"));
 const DoctorWallet = lazy(() => import("@/components/doctor/DoctorWallet"));
 const LaudistaExamRequest = lazy(() => import("@/components/doctor/ExamRequestForm"));
 const LaudistaReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
