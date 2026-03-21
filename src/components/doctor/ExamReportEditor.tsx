@@ -147,6 +147,7 @@ const PacsViewer = ({
           const ctx = canvas.getContext("2d");
           if (ctx) ctx.drawImage(img, 0, 0);
           setDicomInfo({ Formato: "Imagem" });
+          setImageNaturalSize({ w: img.width, h: img.height });
           pixelDataRef.current = null;
           setLoading(false);
         };
