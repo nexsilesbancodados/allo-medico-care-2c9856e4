@@ -204,19 +204,26 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => (
     <Link to={item.href} onClick={onClick}
-      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors duration-150 relative ${
-        item.active ? "bg-primary/10 text-primary font-semibold" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+      className={`nav-item group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-200 relative ${
+        item.active
+          ? "bg-gradient-to-r from-primary/12 to-primary/5 text-primary font-semibold shadow-sm shadow-primary/5"
+          : "text-muted-foreground hover:text-foreground hover:bg-muted/60 hover:translate-x-0.5"
       }`}
     >
       {item.active && (
-        <span className="absolute left-0 top-[20%] bottom-[20%] w-[3px] rounded-r-full bg-primary" />
+        <span className="absolute left-0 top-[15%] bottom-[15%] w-[3px] rounded-r-full bg-gradient-to-b from-primary to-primary/60" />
       )}
-      <span className={`shrink-0 transition-colors ${item.active ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`}>
+      <span className={`shrink-0 transition-all duration-200 ${
+        item.active
+          ? "text-primary scale-110"
+          : "text-muted-foreground group-hover:text-foreground group-hover:scale-105"
+      }`}>
         {item.icon}
       </span>
       <span className="flex-1 truncate">{item.label}</span>
       {(item.badge ?? 0) > 0 && (
-        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-destructive text-white leading-none min-w-[18px] text-center tabular-nums">
+        <span className="relative text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-destructive text-white leading-none min-w-[18px] text-center tabular-nums">
+          <span className="absolute inset-0 rounded-full bg-destructive animate-ping opacity-40" />
           {(item.badge ?? 0) > 99 ? "99+" : item.badge}
         </span>
       )}
@@ -225,9 +232,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <div ref={sidebarRef} className="flex flex-col h-full">
-      <div className="flex items-center gap-3 px-5 h-16 border-b border-border/30 shrink-0">
-        <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${grad} flex items-center justify-center shadow-md`}>
-          <img src={logoImg} alt="AloClínica" className="w-4.5 h-4.5 object-contain brightness-0 invert" loading="lazy" />
+      <div className="flex items-center gap-3 px-5 h-16 border-b border-border/20 shrink-0">
+        <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${grad} flex items-center justify-center shadow-lg shadow-primary/20`}>
+          <img src={logoImg} alt="AloClínica" className="w-5 h-5 object-contain brightness-0 invert" loading="lazy" />
         </div>
         <span className="font-bold text-base tracking-tight text-foreground">AloClínica</span>
       </div>
@@ -242,7 +249,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {isAdminViewingOtherPanel && (
         <div className="px-4 pb-2 shrink-0">
           <button onClick={() => { navigate("/dashboard"); onItemClick?.(); }}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-destructive bg-destructive/8 hover:bg-destructive/15 transition-colors border border-destructive/20">
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold text-destructive bg-destructive/8 hover:bg-destructive/15 transition-all duration-200 border border-destructive/20 hover:shadow-sm hover:shadow-destructive/10">
             <ShieldCheck className="w-3.5 h-3.5" /> Voltar ao Painel Admin
           </button>
         </div>
@@ -253,8 +260,10 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           {navGroups.map((group, gi) => (
             <div key={gi}>
               {group.label && (
-                <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest px-3 pt-4 pb-1.5">
+                <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] px-3 pt-5 pb-2 flex items-center gap-2">
+                  <span className="w-4 h-px bg-border/60" />
                   {group.label}
+                  <span className="flex-1 h-px bg-border/30" />
                 </p>
               )}
               <div className="space-y-0.5">
@@ -265,15 +274,17 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         </nav>
       )}
 
-      <div className="p-3 border-t border-border/30 mt-auto shrink-0">
+      <div className="p-3 border-t border-border/20 mt-auto shrink-0">
         <button onClick={() => { navigate("/dashboard/profile"); onItemClick?.(); }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left group">
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/60 transition-all duration-200 text-left group">
           <div className="relative shrink-0">
-            <Avatar className="h-9 w-9 ring-2 ring-border/30 group-hover:ring-primary/20 transition-all">
+            <Avatar className="h-9 w-9 ring-2 ring-border/20 group-hover:ring-primary/30 transition-all duration-300">
               {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
               <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-xs font-bold`}>{initials}</AvatarFallback>
             </Avatar>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-success border-2 border-background" aria-hidden="true" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-success border-2 border-background" aria-hidden="true">
+              <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-50" />
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground truncate leading-tight">{fullName}</p>
@@ -378,7 +389,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {/* Body */}
       <div className="flex flex-1 min-h-0">
         {nav && nav.length > 0 && (
-          <aside className="hidden md:flex w-56 lg:w-60 shrink-0 flex-col border-r border-border/25 bg-card/40 sticky top-14 h-[calc(100vh-3.5rem)]">
+          <aside className="hidden md:flex w-56 lg:w-64 shrink-0 flex-col border-r border-border/20 bg-gradient-to-b from-card/60 via-card/40 to-card/60 backdrop-blur-sm sticky top-14 h-[calc(100vh-3.5rem)]">
             <SidebarContent />
           </aside>
         )}
