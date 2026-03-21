@@ -127,7 +127,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
         {/* ── Desktop nav ── */}
         <div className="hidden lg:flex items-center">
           <NavigationMenu>
-            <NavigationMenuList className="gap-0">
+            <NavigationMenuList className="gap-1">
               {/* Serviços */}
               <NavigationMenuItem>
                 <NavigationMenuTrigger className="text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground px-3.5 h-10">
