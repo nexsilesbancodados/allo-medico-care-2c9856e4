@@ -14,7 +14,7 @@ interface SpeechToTextProps {
 const SpeechToText = ({ onTranscript, className, silenceTimeout = 4000 }: SpeechToTextProps) => {
   const [listening, setListening] = useState(false);
   const [supported, setSupported] = useState(true);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const recognitionRef = useRef<ReturnType<typeof Object> | null>(null);
   const silenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const intentionalStopRef = useRef(false);
 
