@@ -1793,6 +1793,24 @@ const ExamReportEditor = () => {
         </ResizablePanelGroup>
       </div>
 
+      {/* ═══ STATUS BAR — VS Code style ═══ */}
+      <div className="flex items-center gap-4 px-3 h-6 shrink-0 font-mono text-[10px] select-none" style={{ background: 'hsl(220 20% 7%)', borderTop: '1px solid hsl(220 15% 16%)', color: 'hsl(220 8% 50%)' }}>
+        <span>{isReported ? "🔒 Leitura" : "✏️ Edição"}</span>
+        <span>PT-BR</span>
+        {dicomInfo?.Formato === "DICOM" && (
+          <>
+            <span>DICOM: {dicomInfo?.Modalidade || "—"} • {dicomInfo?.Dimensões || "—"} • {dicomInfo?.Bits || "—"}bit</span>
+            {dicomInfo?.Espessura && <span>Corte: {dicomInfo.Espessura}</span>}
+          </>
+        )}
+        {fileUrls.length > 0 && <span>Série: {activeIndex + 1}/{fileUrls.length}</span>}
+        <span>Zoom: {Math.round(zoom * 100)}%</span>
+        {examRequest?.exam_type && <span>Exame: {examRequest.exam_type}</span>}
+        <div className="flex-1" />
+        {profile && <span>Dr(a). {profile.first_name} {profile.last_name}</span>}
+        {doctorProfile?.crm && <span>CRM {doctorProfile.crm}/{doctorProfile.crm_state}</span>}
+      </div>
+
       {/* Sign Confirmation AlertDialog */}
       <AlertDialog open={showSignDialog} onOpenChange={setShowSignDialog}>
         <AlertDialogContent>
