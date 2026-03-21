@@ -37,7 +37,7 @@ const LaudistaEarnings = () => {
     const { data: docProfile } = await supabase.from("doctor_profiles").select("id").eq("user_id", user!.id).single();
     if (!docProfile) { setLoading(false); return; }
 
-    const [reportsRes, withdrawRes] = await Promise.all([
+    const [reportsRes, withdrawRes, walletRes] = await Promise.all([
       supabase.from("exam_reports")
         .select("id, created_at, signed_at")
         .eq("reporter_id", docProfile.id)
@@ -48,16 +48,26 @@ const LaudistaEarnings = () => {
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false })
         .limit(20),
+      supabase.from("wallet_transactions")
+        .select("*")
+        .eq("user_id", user!.id)
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
 
     const reports = reportsRes.data ?? [];
     setWithdrawals(withdrawRes.data ?? []);
 
-    const pricePerReport = EXAM_BASE_PRICE * (LAUDISTA_PERCENT / 100); // R$ 40 per report
-    const totalEarned = reports.length * pricePerReport;
-    const totalWithdrawn = (withdrawRes.data ?? [])
-      .filter((w: any) => w.status === "approved")
-      .reduce((sum: number, w: any) => sum + Number(w.amount), 0);
+    const pricePerReport = EXAM_BASE_PRICE * (LAUDISTA_PERCENT / 100);
+
+    // Use wallet_transactions as source of truth if available
+    const walletTxns = walletRes.data ?? [];
+    const walletCredits = walletTxns.filter((t: any) => t.type === 'credit' || t.type === 'refund').reduce((s: number, t: any) => s + Number(t.amount), 0);
+    const walletDebits = walletTxns.filter((t: any) => t.type === 'withdrawal' || t.type === 'debit').reduce((s: number, t: any) => s + Number(t.amount), 0);
+    const hasWalletData = walletTxns.length > 0;
+
+    const totalEarned = hasWalletData ? walletCredits : reports.length * pricePerReport;
+    const availableBalance = hasWalletData ? Math.max(0, walletCredits - walletDebits) : Math.max(0, totalEarned - (withdrawRes.data ?? []).filter((w: any) => w.status === "approved").reduce((sum: number, w: any) => sum + Number(w.amount), 0));
 
     const now = new Date();
     const monthStart = startOfMonth(now);
@@ -67,7 +77,7 @@ const LaudistaEarnings = () => {
       total: totalEarned,
       thisMonth: thisMonthReports.length * pricePerReport,
       totalReports: reports.length,
-      available: Math.max(0, totalEarned - totalWithdrawn),
+      available: availableBalance,
     });
 
     // Last 6 months chart
