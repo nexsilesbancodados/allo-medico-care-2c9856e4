@@ -1126,13 +1126,18 @@ export type Database = {
           clinical_info: string | null
           completed_at: string | null
           created_at: string
+          exam_date: string | null
           exam_type: string
           file_urls: Json
           id: string
           orthanc_study_uid: string | null
+          patient_birth_date: string | null
           patient_id: string | null
+          patient_name: string | null
+          patient_sex: string | null
           priority: string
-          requesting_doctor_id: string
+          requesting_clinic_id: string | null
+          requesting_doctor_id: string | null
           sla_deadline: string | null
           sla_hours: number | null
           source: string | null
@@ -1146,13 +1151,18 @@ export type Database = {
           clinical_info?: string | null
           completed_at?: string | null
           created_at?: string
+          exam_date?: string | null
           exam_type: string
           file_urls?: Json
           id?: string
           orthanc_study_uid?: string | null
+          patient_birth_date?: string | null
           patient_id?: string | null
+          patient_name?: string | null
+          patient_sex?: string | null
           priority?: string
-          requesting_doctor_id: string
+          requesting_clinic_id?: string | null
+          requesting_doctor_id?: string | null
           sla_deadline?: string | null
           sla_hours?: number | null
           source?: string | null
@@ -1166,13 +1176,18 @@ export type Database = {
           clinical_info?: string | null
           completed_at?: string | null
           created_at?: string
+          exam_date?: string | null
           exam_type?: string
           file_urls?: Json
           id?: string
           orthanc_study_uid?: string | null
+          patient_birth_date?: string | null
           patient_id?: string | null
+          patient_name?: string | null
+          patient_sex?: string | null
           priority?: string
-          requesting_doctor_id?: string
+          requesting_clinic_id?: string | null
+          requesting_doctor_id?: string | null
           sla_deadline?: string | null
           sla_hours?: number | null
           source?: string | null
@@ -1194,6 +1209,13 @@ export type Database = {
             columns: ["assigned_to"]
             isOneToOne: false
             referencedRelation: "doctor_profiles_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "exam_requests_requesting_clinic_id_fkey"
+            columns: ["requesting_clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinic_profiles"
             referencedColumns: ["id"]
           },
           {
@@ -2899,6 +2921,8 @@ export type Database = {
       fn_reset_available_now_midnight: { Args: never; Returns: undefined }
       get_clinic_profile_id: { Args: { _user_id: string }; Returns: string }
       get_doctor_profile_id: { Args: { _user_id: string }; Returns: string }
+      get_my_clinic_id: { Args: never; Returns: string }
+      get_my_doctor_id: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

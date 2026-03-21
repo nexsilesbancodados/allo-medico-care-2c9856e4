@@ -102,7 +102,7 @@ const LaudistaReportQueue = () => {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Fetch patient names
+      // Fetch patient names from profiles
       const patientIds = [...new Set((data || []).filter((e: any) => e.patient_id).map((e: any) => e.patient_id))];
       let patientMap: Record<string, string> = {};
       if (patientIds.length > 0) {
@@ -110,13 +110,22 @@ const LaudistaReportQueue = () => {
         if (profiles) profiles.forEach((p: any) => { patientMap[p.user_id] = `${p.first_name} ${p.last_name}`.trim(); });
       }
 
+      // Fetch clinic names
+      const clinicIds = [...new Set((data || []).filter((e: any) => e.requesting_clinic_id).map((e: any) => e.requesting_clinic_id))];
+      let clinicMap: Record<string, string> = {};
+      if (clinicIds.length > 0) {
+        const { data: clinics } = await supabase.from("clinic_profiles").select("id, name").in("id", clinicIds);
+        if (clinics) clinics.forEach((c: any) => { clinicMap[c.id] = c.name; });
+      }
+
       return (data || []).map((e: any) => ({
         ...e,
-        patient_name: e.patient_id ? patientMap[e.patient_id] || "Paciente" : "—",
+        patient_display: e.patient_name || (e.patient_id ? patientMap[e.patient_id] || "Paciente" : "—"),
+        origin: e.requesting_clinic_id ? clinicMap[e.requesting_clinic_id] || "Clínica" : "Médico",
       }));
     },
     enabled: !!user,
-    refetchInterval: 30000, // Auto-refresh every 30s
+    refetchInterval: 30000,
   });
 
   const handleClaim = async (examId: string) => {
@@ -215,10 +224,12 @@ const LaudistaReportQueue = () => {
                   <TableRow>
                     <TableHead>Tipo de Exame</TableHead>
                     <TableHead>Paciente</TableHead>
+                    <TableHead>Origem</TableHead>
                     <TableHead>Prioridade</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>SLA</TableHead>
                     <TableHead>Recebido</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -247,7 +258,8 @@ const LaudistaReportQueue = () => {
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">{exam.patient_name}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{exam.patient_display}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{exam.origin}</TableCell>
                         <TableCell>
                           <Badge variant={exam.priority === "urgent" ? "destructive" : "secondary"}>
                             {exam.priority === "urgent" ? "🚨 Urgente" : "Normal"}

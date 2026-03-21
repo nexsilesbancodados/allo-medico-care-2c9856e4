@@ -39,7 +39,6 @@ const ExamRequestForm = () => {
   const [searchParams] = useSearchParams();
   const roleParam = searchParams.get("role") || "";
 
-  // Determine context from URL
   const isLaudista = location.pathname.includes("/laudista/");
   const isClinic = location.pathname.includes("/clinic/") || roleParam === "clinic";
   const isReception = location.pathname.includes("/reception/") || roleParam === "receptionist";
@@ -49,11 +48,14 @@ const ExamRequestForm = () => {
   const [clinicalInfo, setClinicalInfo] = useState("");
   const [priority, setPriority] = useState("normal");
   const [patientName, setPatientName] = useState("");
+  const [patientBirthDate, setPatientBirthDate] = useState("");
+  const [patientSex, setPatientSex] = useState("");
+  const [examDate, setExamDate] = useState("");
   const [patientId, setPatientId] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
 
-  // Get or create a doctor_profile for the current user (needed for requesting_doctor_id FK)
+  // Doctor profile (for doctor/laudista roles)
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-for-exam", user?.id],
     queryFn: async () => {
@@ -64,22 +66,33 @@ const ExamRequestForm = () => {
         .maybeSingle();
       return data;
     },
-    enabled: !!user,
+    enabled: !!user && !isClinic,
   });
 
-  // For clinic/reception: find the clinic's associated doctor profile to use as requesting_doctor_id
-  const { data: clinicDoctorProfile } = useQuery({
-    queryKey: ["clinic-doctor-profile", user?.id],
+  // Clinic profile (for clinic role)
+  const { data: clinicProfile } = useQuery({
+    queryKey: ["clinic-profile-for-exam", user?.id],
     queryFn: async () => {
-      // First try to find a doctor profile for the user
+      const { data } = await supabase
+        .from("clinic_profiles")
+        .select("id")
+        .eq("user_id", user!.id)
+        .maybeSingle();
+      return data;
+    },
+    enabled: !!user && isClinic,
+  });
+
+  // For reception: find affiliated doctor
+  const { data: receptionDoctorProfile } = useQuery({
+    queryKey: ["reception-doctor-profile", user?.id],
+    queryFn: async () => {
       const { data: dp } = await supabase
         .from("doctor_profiles")
         .select("id")
         .eq("user_id", user!.id)
         .maybeSingle();
       if (dp) return dp;
-
-      // If clinic/reception user, find the first affiliated doctor
       const { data: clinic } = await supabase
         .from("clinic_profiles")
         .select("id")
@@ -97,18 +110,13 @@ const ExamRequestForm = () => {
       }
       return null;
     },
-    enabled: !!user && (isClinic || isReception),
+    enabled: !!user && isReception,
   });
-
-  const effectiveDoctorProfileId = isClinic || isReception
-    ? clinicDoctorProfile?.id || doctorProfile?.id
-    : doctorProfile?.id;
 
   const getNav = () => {
     if (isClinic) {
-      // Import inline to avoid circular deps
       return [
-        { label: "Voltar", href: "/dashboard?role=clinic", icon: <FileImage className="w-4 h-4" />, active: false, group: "Principal" },
+        { label: "Voltar", href: "/dashboard/clinic/my-exams?role=clinic", icon: <FileImage className="w-4 h-4" />, active: false, group: "Principal" },
       ];
     }
     if (isReception) return getReceptionNav("exam-request");
@@ -117,7 +125,7 @@ const ExamRequestForm = () => {
   };
 
   const getBackRoute = () => {
-    if (isClinic) return "/dashboard?role=clinic";
+    if (isClinic) return "/dashboard/clinic/my-exams?role=clinic";
     if (isReception) return "/dashboard?role=receptionist";
     if (isLaudista) return "/dashboard/laudista/queue?role=doctor";
     return "/dashboard/doctor/report-queue?role=doctor";
@@ -137,20 +145,35 @@ const ExamRequestForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!effectiveDoctorProfileId) {
-      toast.error("Erro", { description: "Perfil de médico não encontrado. Certifique-se de que há um médico vinculado à sua clínica." });
-      return;
-    }
-
     const finalExamType = examType === "Outro" ? customExamType : examType;
-    if (!finalExamType || files.length === 0) {
-      toast.error("Campos obrigatórios", { description: "Selecione o tipo de exame e envie pelo menos um arquivo." });
-      return;
+
+    if (isClinic) {
+      if (!clinicProfile?.id) {
+        toast.error("Erro", { description: "Perfil da clínica não encontrado." });
+        return;
+      }
+      if (!patientName.trim()) {
+        toast.error("Campo obrigatório", { description: "Informe o nome do paciente." });
+        return;
+      }
+      if (!finalExamType || files.length === 0) {
+        toast.error("Campos obrigatórios", { description: "Selecione o tipo de exame e envie pelo menos um arquivo." });
+        return;
+      }
+    } else {
+      const effectiveDoctorId = isReception ? receptionDoctorProfile?.id : doctorProfile?.id;
+      if (!effectiveDoctorId) {
+        toast.error("Erro", { description: "Perfil de médico não encontrado." });
+        return;
+      }
+      if (!finalExamType || files.length === 0) {
+        toast.error("Campos obrigatórios", { description: "Selecione o tipo de exame e envie pelo menos um arquivo." });
+        return;
+      }
     }
 
     setUploading(true);
     try {
-      // Upload files
       const fileUrls: string[] = [];
       for (const file of files) {
         const ext = file.name.split(".").pop();
@@ -162,18 +185,33 @@ const ExamRequestForm = () => {
         fileUrls.push(path);
       }
 
-      // Create exam request
-      const { error } = await supabase.from("exam_requests" as any).insert({
-        requesting_doctor_id: effectiveDoctorProfileId,
-        patient_id: patientId || null,
-        exam_type: finalExamType,
-        clinical_info: `${patientName ? `Paciente: ${patientName}\n` : ""}${clinicalInfo}`,
-        file_urls: fileUrls,
-        priority,
-        status: "pending",
-      } as any);
-
-      if (error) throw error;
+      if (isClinic) {
+        const { error } = await supabase.from("exam_requests" as any).insert({
+          requesting_clinic_id: clinicProfile!.id,
+          patient_name: patientName.trim(),
+          patient_birth_date: patientBirthDate || null,
+          patient_sex: patientSex || null,
+          exam_date: examDate || null,
+          exam_type: finalExamType,
+          clinical_info: clinicalInfo,
+          file_urls: fileUrls,
+          priority,
+          status: "pending",
+        } as any);
+        if (error) throw error;
+      } else {
+        const effectiveDoctorId = isReception ? receptionDoctorProfile?.id : doctorProfile?.id;
+        const { error } = await supabase.from("exam_requests" as any).insert({
+          requesting_doctor_id: effectiveDoctorId,
+          patient_id: patientId || null,
+          exam_type: finalExamType,
+          clinical_info: clinicalInfo,
+          file_urls: fileUrls,
+          priority,
+          status: "pending",
+        } as any);
+        if (error) throw error;
+      }
 
       toast.success("Solicitação enviada!", { description: "O exame foi enviado para a fila de laudos." });
       navigate(getBackRoute());
@@ -200,15 +238,44 @@ const ExamRequestForm = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Patient info - shown for clinic/reception */}
               {(isClinic || isReception) && (
-                <div className="space-y-2">
-                  <Label htmlFor="patientName">Nome do Paciente</Label>
-                  <Input
-                    id="patientName"
-                    value={patientName}
-                    onChange={(e) => setPatientName(e.target.value)}
-                    placeholder="Nome completo do paciente"
-                  />
-                </div>
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="patientName">Nome do Paciente *</Label>
+                    <Input
+                      id="patientName"
+                      value={patientName}
+                      onChange={(e) => setPatientName(e.target.value)}
+                      placeholder="Nome completo do paciente"
+                      required={isClinic}
+                    />
+                  </div>
+                  {isClinic && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="space-y-2">
+                        <Label htmlFor="patientBirthDate">Data de Nascimento</Label>
+                        <Input
+                          id="patientBirthDate"
+                          type="date"
+                          value={patientBirthDate}
+                          onChange={(e) => setPatientBirthDate(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="patientSex">Sexo</Label>
+                        <Select value={patientSex} onValueChange={setPatientSex}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="M">Masculino</SelectItem>
+                            <SelectItem value="F">Feminino</SelectItem>
+                            <SelectItem value="O">Outro</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               <div className="space-y-2">
@@ -232,6 +299,18 @@ const ExamRequestForm = () => {
                   />
                 )}
               </div>
+
+              {isClinic && (
+                <div className="space-y-2">
+                  <Label htmlFor="examDate">Data de Realização do Exame</Label>
+                  <Input
+                    id="examDate"
+                    type="date"
+                    value={examDate}
+                    onChange={(e) => setExamDate(e.target.value)}
+                  />
+                </div>
+              )}
 
               {!(isClinic || isReception) && (
                 <div className="space-y-2">

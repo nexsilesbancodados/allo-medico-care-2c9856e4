@@ -23,6 +23,7 @@ const getClinicNav = (active: string) => [
   { label: "Agendamentos", href: "/dashboard/clinic/schedules?role=clinic", icon: <Calendar className="w-4 h-4" />, active: active === "schedules", group: "Principal" },
   { label: "Pacientes", href: "/dashboard/clinic/patients?role=clinic", icon: <Users className="w-4 h-4" />, active: active === "patients", group: "Atendimento" },
   { label: "Sala de Espera", href: "/dashboard/clinic/waiting-room?role=clinic", icon: <Clock className="w-4 h-4" />, active: active === "waiting-room", group: "Atendimento" },
+  { label: "Meus Laudos", href: "/dashboard/clinic/my-exams?role=clinic", icon: <FileText className="w-4 h-4" />, active: active === "my-exams", group: "Telelaudo" },
   { label: "Solicitar Laudo", href: "/dashboard/clinic/exam-request?role=clinic", icon: <FileText className="w-4 h-4" />, active: active === "exam-request", group: "Telelaudo" },
   { label: "Financeiro", href: "/dashboard/clinic/finance?role=clinic", icon: <DollarSign className="w-4 h-4" />, active: active === "finance", group: "Gestão" },
   { label: "Relatórios", href: "/dashboard/clinic/reports?role=clinic", icon: <FileText className="w-4 h-4" />, active: active === "reports", group: "Gestão" },
@@ -47,7 +48,7 @@ const ClinicDashboard = () => {
 
   // Route-based active nav detection
   const pathSegment = location.pathname.split("/").pop() || "";
-  const activeNav = ["schedules", "patients", "waiting-room", "finance", "reports", "doctors"].includes(pathSegment) ? pathSegment : "overview";
+  const activeNav = ["schedules", "patients", "waiting-room", "finance", "reports", "doctors", "my-exams", "exam-request"].includes(pathSegment) ? pathSegment : "overview";
   const defaultTab = pathSegment === "finance" ? "finance" : pathSegment === "reports" ? "performance" : "overview";
 
   useEffect(() => { if (user) fetchData(); }, [user]);

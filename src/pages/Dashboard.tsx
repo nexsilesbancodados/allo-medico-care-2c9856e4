@@ -76,6 +76,7 @@ const ChatPage = lazy(() => import("@/components/chat/ChatPage"));
 const MedicalRecords = lazy(() => import("@/components/medical/MedicalRecords"));
 const AIAssistantPanel = lazy(() => import("@/components/ai/AIAssistantPanel"));
 const ClinicDoctorsManagement = lazy(() => import("@/components/clinic/ClinicDoctorsManagement"));
+const ClinicMyExams = lazy(() => import("@/components/clinic/ClinicMyExams"));
 const ReceptionSchedules = lazy(() => import("@/components/reception/ReceptionSchedules"));
 const ReceptionCheckin = lazy(() => import("@/components/reception/ReceptionCheckin"));
 const ReceptionBilling = lazy(() => import("@/components/reception/ReceptionBilling"));
@@ -321,6 +322,7 @@ const Dashboard = () => {
       <Route path="clinic/finance" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
       <Route path="clinic/reports" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
       <Route path="clinic/exam-request" element={<RoleGuard allowed={["clinic"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
+      <Route path="clinic/my-exams" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicMyExams /></RoleGuard>} />
 
       {/* Support */}
       <Route path="support/inbox" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
