@@ -389,7 +389,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {/* Body */}
       <div className="flex flex-1 min-h-0">
         {nav && nav.length > 0 && (
-          <aside className="hidden md:flex w-56 lg:w-60 shrink-0 flex-col border-r border-border/25 bg-card/40 sticky top-14 h-[calc(100vh-3.5rem)]">
+          <aside className="hidden md:flex w-56 lg:w-64 shrink-0 flex-col border-r border-border/20 bg-gradient-to-b from-card/60 via-card/40 to-card/60 backdrop-blur-sm sticky top-14 h-[calc(100vh-3.5rem)]">
             <SidebarContent />
           </aside>
         )}
