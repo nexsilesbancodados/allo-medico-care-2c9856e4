@@ -499,6 +499,45 @@ Ecocardiograma dentro dos limites da normalidade. FEVE [X]%.`,
   },
 ];
 
+// ─── TC Tórax ───
+REPORT_MACROS.push(
+  {
+    id: "tc-torax-normal",
+    trigger: "/tc-torax-normal",
+    label: "TC Tórax Normal",
+    category: "TC Tórax",
+    text: `**TÉCNICA:**\nTomografia computadorizada do tórax sem contraste, cortes axiais de 5mm, reformatações coronais e sagitais.\n\n**ACHADOS:**\nParênquima pulmonar: Sem opacidades, nódulos, consolidações ou derrame pleural.\nMediastino: Sem linfadenopatia mediastinal. Estruturas vasculares de calibre normal.\nCoração: Dimensões normais. Ausência de derrame pericárdico.\nEstrutura óssea: Sem alterações.\n\n**IMPRESSÃO DIAGNÓSTICA:**\nTomografia de tórax sem alterações significativas.`,
+  },
+  {
+    id: "rx-torax-normal-2",
+    trigger: "/rx-torax",
+    label: "RX Tórax Normal (Resumido)",
+    category: "RX Tórax",
+    text: `**TÉCNICA:**\nRadiografia do tórax em PA e perfil.\n\n**ACHADOS:**\nCampos pulmonares livres e expandidos. Seios costofrênicos livres. Área cardíaca de dimensões normais. Mediastino centrado. Estrutura óssea sem alterações.\n\n**IMPRESSÃO DIAGNÓSTICA:**\nRadiografia de tórax sem alterações.`,
+  },
+  {
+    id: "us-abdomen-total-normal",
+    trigger: "/us-abdome-total",
+    label: "US Abdome Total Normal",
+    category: "Ultrassonografia",
+    text: `**TÉCNICA:**\nUltrassonografia do abdome total em modo B e Doppler colorido.\n\n**ACHADOS:**\nFígado: Dimensões normais, ecotextura homogênea, sem lesões focais.\nVesícula: Dimensões normais, paredes finas, sem cálculos.\nPâncreas: Visualização parcial, sem alterações identificadas.\nRins: Dimensões e ecogenicidade normais bilateralmente, sem litíase.\nBaço: Dimensões normais, homogêneo.\nAorta abdominal: Calibre normal.\n\n**IMPRESSÃO DIAGNÓSTICA:**\nUltrassonografia do abdome total sem alterações significativas.`,
+  },
+  {
+    id: "rm-cranio-normal",
+    trigger: "/rm-cranio",
+    label: "RM Crânio Normal",
+    category: "Ressonância",
+    text: `**TÉCNICA:**\nRessonância magnética do crânio nas sequências: T1, T2, FLAIR, DWI e T1 pós-gadolínio.\n\n**ACHADOS:**\nEncéfalo: Sem focos de restrição à difusão. Sem lesões em T2/FLAIR. Sulcos e cisternas de amplitude normal para a faixa etária.\nSistema ventricular: Dimensões e morfologia normais.\nEstrutura óssea: Sem alterações.\nRealce pós-contraste: Sem realce patológico.\n\n**IMPRESSÃO DIAGNÓSTICA:**\nRessonância magnética do crânio sem alterações.`,
+  },
+  {
+    id: "rx-coluna-lombar-normal",
+    trigger: "/rx-coluna-lombar",
+    label: "RX Coluna Lombar Normal",
+    category: "Musculoesquelético",
+    text: `**TÉCNICA:**\nRadiografia da coluna lombar em AP e perfil.\n\n**ACHADOS:**\nAlinhamento vertebral preservado. Altura dos corpos vertebrais mantida. Espaços discais com altura preservada. Pedículos, lâminas e processos espinhosos sem alterações. Articulações facetárias sem alterações.\n\n**IMPRESSÃO DIAGNÓSTICA:**\nRadiografia da coluna lombar sem alterações significativas.`,
+  },
+);
+
 export function findMacro(text: string): ReportMacro | null {
   const lines = text.split("\n");
   const lastLine = lines[lines.length - 1]?.trim().toLowerCase();

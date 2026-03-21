@@ -16,8 +16,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import {
   Bold, Italic, Underline as UnderlineIcon, List, ListOrdered,
-  Heading2, Heading3, Undo, Redo, Slash, AlignLeft, AlignCenter,
-  AlignRight, Highlighter, FileText,
+  Heading1, Heading2, Heading3, Undo, Redo, Slash, AlignLeft, AlignCenter,
+  AlignRight, Highlighter, FileText, Minus, Strikethrough, Quote, Eraser,
+  ChevronDown,
 } from "lucide-react";
 
 interface TipTapEditorProps {
