@@ -223,6 +223,35 @@ const B2BLanding = () => {
           </div>
         </section>
 
+        {/* ==================== BANNER TELELAUDO ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
+          <img src={bannerTelelaudoWorkflow} alt="Centro de laudos médicos digitais" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-l from-secondary/90 via-secondary/70 to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center justify-end" style={{ minHeight: "320px" }}>
+            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10 text-right">
+              <div className="flex items-center gap-2 mb-4 justify-end">
+                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm text-xs">Telelaudo Profissional</Badge>
+                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+                Laudos assinados<br />em menos de 2 horas
+              </h2>
+              <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-md ml-auto">
+                Terceirize laudos médicos sem equipe própria. IA de triagem, assinatura digital ICP-Brasil e verificação por QR Code.
+              </p>
+              <div className="flex flex-wrap gap-3 justify-end">
+                {["ECG", "Raio-X", "Ressonância", "EEG", "Espirometria"].map((exam) => (
+                  <span key={exam} className="px-3 py-1 rounded-full bg-white/15 text-white text-xs font-medium backdrop-blur-sm border border-white/10">
+                    {exam}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Advantages for company */}
         <section className="py-20">
           <div className="container mx-auto px-4">
