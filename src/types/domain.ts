@@ -134,7 +134,9 @@ export interface AdminStats {
 export interface ExamRequest {
   id: string;
   requesting_doctor_id: string;
+  requesting_clinic_id?: string | null;
   patient_id?: string | null;
+  patient_name?: string | null;
   exam_type: string;
   status: string;
   assigned_to?: string | null;

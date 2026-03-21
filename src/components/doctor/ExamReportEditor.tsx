@@ -1714,10 +1714,17 @@ const ExamReportEditor = () => {
                     )}
                   </div>
                 ) : (
-                  <Button onClick={() => setShowSignDialog(true)} disabled={signing || !content.trim()} className="w-full h-9">
-                    {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
-                    {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
-                  </Button>
+                  <>
+                    <Button onClick={() => setShowSignDialog(true)} disabled={signing || !content.trim() || wordCount < 5} className="w-full h-9">
+                      {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
+                      {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
+                    </Button>
+                    {wordCount > 0 && wordCount < 50 && (
+                      <p className="text-[10px] text-warning mt-1 text-center">
+                        ⚠ Laudo muito curto — recomendado mínimo 50 palavras
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </div>
