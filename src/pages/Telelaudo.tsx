@@ -151,6 +151,37 @@ const Telelaudo = () => {
           </div>
         </section>
 
+        {/* ==================== BANNER WORKFLOW ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
+          <img src={bannerTelelaudoWorkflow} alt="Centro de diagnóstico por imagem" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[hsl(210,50%,8%)]/90 via-[hsl(210,50%,8%)]/60 to-transparent" />
+          <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "320px" }}>
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">
+              <Badge className="mb-4 bg-secondary/20 text-secondary border-secondary/30 text-xs">
+                <TrendingUp className="w-3 h-3 mr-1" /> Tecnologia
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-black text-white leading-tight mb-3">
+                Inteligência Artificial<br />a serviço do diagnóstico
+              </h2>
+              <p className="text-white/70 text-sm leading-relaxed mb-5 max-w-md">
+                Nossa IA classifica exames por urgência, sugere achados e estrutura laudos automaticamente — acelerando o trabalho do especialista.
+              </p>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { value: "< 2h", label: "SLA urgente" },
+                  { value: "50%", label: "Mais rápido" },
+                  { value: "24/7", label: "Disponível" },
+                ].map(({ value, label }) => (
+                  <div key={label} className="text-center">
+                    <span className="text-xl font-black text-white">{value}</span>
+                    <span className="block text-xs text-white/50 mt-0.5">{label}</span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Exam types */}
         <section className="py-20 bg-muted/30">
           <div className="container mx-auto px-4 max-w-4xl">
