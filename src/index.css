@@ -165,7 +165,6 @@
     --destructive: 0 90% 60%;
     --destructive-foreground: 0 0% 100%;
   }
-  }
 
   * {
     @apply border-border;
