@@ -31,7 +31,33 @@ import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
 import jsPDF from "jspdf";
 import type { ExamRequest, ExamReport, ReportTemplate } from "@/types/domain";
 
-// ==================== DICOM VIEWER PANEL (PACS-style) ====================
+// ==================== WL PRESETS (Weasis/OsiriX) ====================
+const WL_PRESETS = [
+  { label: "Default", ww: 0, wl: 0, icon: "🔄" },
+  { label: "Osso", ww: 2500, wl: 480, icon: "🦴" },
+  { label: "Pulmão", ww: 1500, wl: -600, icon: "🫁" },
+  { label: "Abdômen", ww: 400, wl: 50, icon: "🫃" },
+  { label: "Cérebro", ww: 80, wl: 40, icon: "🧠" },
+  { label: "Mediastino", ww: 350, wl: 50, icon: "❤️" },
+  { label: "Fígado", ww: 150, wl: 30, icon: "🫀" },
+  { label: "Tecido Mole", ww: 400, wl: 40, icon: "💪" },
+];
+
+type Measurement = {
+  id: string;
+  type: "length" | "angle" | "ellipse";
+  points: { x: number; y: number }[];
+  value?: string;
+};
+
+type Annotation = {
+  id: string;
+  x: number;
+  y: number;
+  text: string;
+};
+
+// ==================== DICOM VIEWER PANEL (PACS-style Pro) ====================
 const PacsViewer = ({
   fileUrls,
   examRequest,
@@ -40,6 +66,7 @@ const PacsViewer = ({
   examRequest: ExamRequest | null;
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const overlayCanvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoom, setZoom] = useState(1);
@@ -47,12 +74,38 @@ const PacsViewer = ({
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [loading, setLoading] = useState(false);
-  const [tool, setTool] = useState<"pan" | "zoom" | "measure" | "annotate">("pan");
+  const [tool, setTool] = useState<"pan" | "zoom" | "wl" | "measure" | "angle" | "ellipse" | "annotate" | "magnify">("pan");
   const [dicomInfo, setDicomInfo] = useState<Record<string, string>>({});
   const [flipH, setFlipH] = useState(false);
   const [flipV, setFlipV] = useState(false);
+  const [invert, setInvert] = useState(false);
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number; hu?: number } | null>(null);
+  const [measurements, setMeasurements] = useState<Measurement[]>([]);
+  const [annotations, setAnnotations] = useState<Annotation[]>([]);
+  const [activeMeasurement, setActiveMeasurement] = useState<Measurement | null>(null);
+  const [showPresets, setShowPresets] = useState(false);
+  const [showInfoPanel, setShowInfoPanel] = useState(false);
+  const [activePreset, setActivePreset] = useState("Default");
+  const [cinePlay, setCinePlay] = useState(false);
+  const cineRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pixelDataRef = useRef<{ values: Float32Array; rows: number; cols: number } | null>(null);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const isPanningRef = useRef(false);
+  const lastMouseRef = useRef({ x: 0, y: 0 });
 
   const activeUrl = fileUrls[activeIndex] || null;
+
+  // CINE playback (OHIF-inspired)
+  useEffect(() => {
+    if (cinePlay && fileUrls.length > 1) {
+      cineRef.current = setInterval(() => {
+        setActiveIndex(i => (i + 1) % fileUrls.length);
+      }, 200);
+    } else {
+      if (cineRef.current) clearInterval(cineRef.current);
+    }
+    return () => { if (cineRef.current) clearInterval(cineRef.current); };
+  }, [cinePlay, fileUrls.length]);
 
   useEffect(() => {
     if (!activeUrl) return;
@@ -85,6 +138,7 @@ const PacsViewer = ({
           const ctx = canvas.getContext("2d");
           if (ctx) ctx.drawImage(img, 0, 0);
           setDicomInfo({ Formato: "Imagem" });
+          pixelDataRef.current = null;
           setLoading(false);
         };
         img.onerror = () => { setLoading(false); };
@@ -135,11 +189,17 @@ const PacsViewer = ({
         switch (tag) {
           case "00100010": info["Paciente"] = readString(dataOffset, dataLength); break;
           case "00100020": info["ID"] = readString(dataOffset, dataLength); break;
+          case "00100030": info["Nascimento"] = readString(dataOffset, dataLength); break;
+          case "00100040": info["Sexo"] = readString(dataOffset, dataLength); break;
           case "00080060": info["Modalidade"] = readString(dataOffset, dataLength); break;
           case "00081030": info["Estudo"] = readString(dataOffset, dataLength); break;
           case "0008103e": info["Série"] = readString(dataOffset, dataLength); break;
-          case "00080020": info["Data"] = readString(dataOffset, dataLength); break;
+          case "00080020": info["Data Estudo"] = readString(dataOffset, dataLength); break;
+          case "00080030": info["Hora Estudo"] = readString(dataOffset, dataLength); break;
           case "00080080": info["Instituição"] = readString(dataOffset, dataLength); break;
+          case "00080090": info["Médico Ref."] = readString(dataOffset, dataLength); break;
+          case "00181030": info["Protocolo"] = readString(dataOffset, dataLength); break;
+          case "00200013": info["Instância"] = readString(dataOffset, dataLength); break;
           case "00280010": rows = readUint16(dataOffset); break;
           case "00280011": cols = readUint16(dataOffset); break;
           case "00280100": bitsAllocated = readUint16(dataOffset); break;
@@ -151,6 +211,8 @@ const PacsViewer = ({
           case "00280103": pixelRep = readUint16(dataOffset); break;
           case "00281052": intercept = parseFloat(readString(dataOffset, dataLength)) || 0; break;
           case "00281053": slope = parseFloat(readString(dataOffset, dataLength)) || 1; break;
+          case "00280030": info["Pixel Spacing"] = readString(dataOffset, dataLength); break;
+          case "00180050": info["Espessura"] = readString(dataOffset, dataLength) + " mm"; break;
         }
         if (group === 0x7FE0 && element === 0x0010) { pixelDataOffset = dataOffset; break; }
         offset = dataOffset + dataLength;
@@ -160,6 +222,8 @@ const PacsViewer = ({
       info["Formato"] = "DICOM";
       info["Dimensões"] = `${cols}×${rows}`;
       info["Bits"] = `${bitsStored}/${bitsAllocated}`;
+      if (wc) info["WC"] = String(Math.round(wc));
+      if (ww) info["WW"] = String(Math.round(ww));
       setDicomInfo(info);
 
       if (pixelDataOffset > 0 && rows > 0 && cols > 0) {
@@ -179,6 +243,7 @@ const PacsViewer = ({
             imgData.data[i * 4 + 2] = bytes[pixelDataOffset + i * 3 + 2];
             imgData.data[i * 4 + 3] = 255;
           }
+          pixelDataRef.current = null;
         } else {
           const pixelValues = new Float32Array(totalPixels);
           let min = Infinity, max = -Infinity;
@@ -194,6 +259,9 @@ const PacsViewer = ({
             if (hu < min) min = hu;
             if (hu > max) max = hu;
           }
+          // Store pixel data for HU readout (OsiriX feature)
+          pixelDataRef.current = { values: pixelValues, rows, cols };
+
           const center = wc || (min + max) / 2;
           const width = ww || (max - min) || 1;
           const lower = center - width / 2;
@@ -215,30 +283,222 @@ const PacsViewer = ({
     setLoading(false);
   };
 
-  const resetView = () => { setZoom(1); setRotation(0); setBrightness(100); setContrast(100); setFlipH(false); setFlipV(false); };
+  // Apply WL preset (Weasis-inspired)
+  const applyPreset = (preset: typeof WL_PRESETS[0]) => {
+    setActivePreset(preset.label);
+    if (preset.label === "Default") {
+      setBrightness(100); setContrast(100);
+    } else {
+      // Map WW/WL to brightness/contrast CSS filters
+      const normBrightness = Math.max(20, Math.min(300, 100 + (preset.wl / 10)));
+      const normContrast = Math.max(20, Math.min(300, 50 + (preset.ww / 20)));
+      setBrightness(normBrightness);
+      setContrast(normContrast);
+    }
+    setShowPresets(false);
+    toast.success(`Preset: ${preset.icon} ${preset.label}`);
+  };
 
-  const toolButtons = [
-    { id: "pan" as const, icon: Move, label: "Arrastar" },
-    { id: "zoom" as const, icon: ZoomIn, label: "Zoom" },
-    { id: "measure" as const, icon: Ruler, label: "Medição" },
-    { id: "annotate" as const, icon: Pencil, label: "Anotação" },
+  const resetView = () => {
+    setZoom(1); setRotation(0); setBrightness(100); setContrast(100);
+    setFlipH(false); setFlipV(false); setInvert(false);
+    setActivePreset("Default"); setPanOffset({ x: 0, y: 0 });
+    setMeasurements([]); setAnnotations([]);
+  };
+
+  // Mouse handlers for measurements and pan (OHIF-inspired)
+  const handleCanvasMouseDown = (e: React.MouseEvent) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = (e.clientX - rect.left) / zoom;
+    const y = (e.clientY - rect.top) / zoom;
+
+    if (tool === "pan") {
+      isPanningRef.current = true;
+      lastMouseRef.current = { x: e.clientX, y: e.clientY };
+    } else if (tool === "measure" || tool === "angle") {
+      const newM: Measurement = {
+        id: crypto.randomUUID(),
+        type: tool === "measure" ? "length" : "angle",
+        points: [{ x, y }],
+      };
+      setActiveMeasurement(newM);
+    } else if (tool === "ellipse") {
+      const newM: Measurement = {
+        id: crypto.randomUUID(),
+        type: "ellipse",
+        points: [{ x, y }],
+      };
+      setActiveMeasurement(newM);
+    } else if (tool === "annotate") {
+      const text = prompt("Texto da anotação:");
+      if (text) {
+        setAnnotations(prev => [...prev, { id: crypto.randomUUID(), x, y, text }]);
+      }
+    }
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent) => {
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = Math.round((e.clientX - rect.left) / zoom);
+    const y = Math.round((e.clientY - rect.top) / zoom);
+
+    // HU readout (OsiriX feature)
+    if (pixelDataRef.current) {
+      const { values, rows, cols } = pixelDataRef.current;
+      if (x >= 0 && x < cols && y >= 0 && y < rows) {
+        const hu = values[y * cols + x];
+        setCursorPos({ x, y, hu: Math.round(hu) });
+      } else {
+        setCursorPos({ x, y });
+      }
+    } else {
+      setCursorPos({ x, y });
+    }
+
+    // Pan
+    if (isPanningRef.current && tool === "pan") {
+      const dx = e.clientX - lastMouseRef.current.x;
+      const dy = e.clientY - lastMouseRef.current.y;
+      setPanOffset(prev => ({ x: prev.x + dx, y: prev.y + dy }));
+      lastMouseRef.current = { x: e.clientX, y: e.clientY };
+    }
+
+    // Active measurement
+    if (activeMeasurement) {
+      const updatedPoints = [...activeMeasurement.points];
+      if (updatedPoints.length === 1) {
+        updatedPoints.push({ x: (e.clientX - rect.left) / zoom, y: (e.clientY - rect.top) / zoom });
+      } else {
+        updatedPoints[updatedPoints.length - 1] = { x: (e.clientX - rect.left) / zoom, y: (e.clientY - rect.top) / zoom };
+      }
+      setActiveMeasurement({ ...activeMeasurement, points: updatedPoints });
+    }
+  };
+
+  const handleCanvasMouseUp = () => {
+    isPanningRef.current = false;
+    if (activeMeasurement && activeMeasurement.points.length >= 2) {
+      const p = activeMeasurement.points;
+      let value = "";
+      if (activeMeasurement.type === "length") {
+        const dx = p[1].x - p[0].x;
+        const dy = p[1].y - p[0].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        // Use pixel spacing if available
+        const spacing = dicomInfo["Pixel Spacing"];
+        if (spacing) {
+          const [sy, sx] = spacing.split("\\").map(Number);
+          value = `${(dist * ((sx + sy) / 2)).toFixed(1)} mm`;
+        } else {
+          value = `${dist.toFixed(1)} px`;
+        }
+      } else if (activeMeasurement.type === "angle" && p.length >= 2) {
+        value = `${Math.round(Math.atan2(p[1].y - p[0].y, p[1].x - p[0].x) * 180 / Math.PI)}°`;
+      } else if (activeMeasurement.type === "ellipse") {
+        const rx = Math.abs(p[1].x - p[0].x);
+        const ry = Math.abs(p[1].y - p[0].y);
+        const area = Math.PI * rx * ry;
+        value = `Area: ${area.toFixed(0)} px²`;
+      }
+      setMeasurements(prev => [...prev, { ...activeMeasurement, value }]);
+      setActiveMeasurement(null);
+    }
+  };
+
+  // Draw measurement overlays
+  useEffect(() => {
+    const overlay = overlayCanvasRef.current;
+    const main = canvasRef.current;
+    if (!overlay || !main) return;
+    overlay.width = main.width || 512;
+    overlay.height = main.height || 512;
+    const ctx = overlay.getContext("2d");
+    if (!ctx) return;
+    ctx.clearRect(0, 0, overlay.width, overlay.height);
+
+    const allMeasurements = [...measurements, ...(activeMeasurement ? [activeMeasurement] : [])];
+
+    allMeasurements.forEach(m => {
+      if (m.points.length < 2) return;
+      ctx.strokeStyle = "#00ff00";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([]);
+
+      if (m.type === "length") {
+        ctx.beginPath();
+        ctx.moveTo(m.points[0].x, m.points[0].y);
+        ctx.lineTo(m.points[1].x, m.points[1].y);
+        ctx.stroke();
+        // Endpoints
+        [m.points[0], m.points[1]].forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+          ctx.fillStyle = "#00ff00";
+          ctx.fill();
+        });
+      } else if (m.type === "ellipse") {
+        const cx = (m.points[0].x + m.points[1].x) / 2;
+        const cy = (m.points[0].y + m.points[1].y) / 2;
+        const rx = Math.abs(m.points[1].x - m.points[0].x) / 2;
+        const ry = Math.abs(m.points[1].y - m.points[0].y) / 2;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (m.type === "angle") {
+        ctx.beginPath();
+        ctx.moveTo(m.points[0].x, m.points[0].y);
+        ctx.lineTo(m.points[1].x, m.points[1].y);
+        ctx.stroke();
+      }
+
+      // Label
+      if (m.value) {
+        const labelX = (m.points[0].x + m.points[1].x) / 2;
+        const labelY = (m.points[0].y + m.points[1].y) / 2 - 8;
+        ctx.font = "bold 12px monospace";
+        ctx.fillStyle = "#00ff00";
+        ctx.fillText(m.value, labelX, labelY);
+      }
+    });
+
+    // Draw annotations
+    annotations.forEach(a => {
+      ctx.font = "bold 11px monospace";
+      ctx.fillStyle = "#ffff00";
+      ctx.fillText(a.text, a.x, a.y);
+      ctx.beginPath();
+      ctx.arc(a.x - 4, a.y - 4, 2, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffff00";
+      ctx.fill();
+    });
+  }, [measurements, activeMeasurement, annotations]);
+
+  const toolButtons: { id: typeof tool; icon: typeof Move; label: string }[] = [
+    { id: "pan", icon: Move, label: "Arrastar (Pan)" },
+    { id: "zoom", icon: ZoomIn, label: "Zoom" },
+    { id: "wl", icon: Sun, label: "Janela/Nível (W/L)" },
+    { id: "measure", icon: Ruler, label: "Medição Linear" },
+    { id: "angle", icon: Crosshair, label: "Ângulo" },
+    { id: "ellipse", icon: Eye, label: "ROI Elíptica" },
+    { id: "annotate", icon: Type, label: "Anotação" },
+    { id: "magnify", icon: ZoomIn, label: "Lupa" },
   ];
 
   return (
     <div className="flex flex-col h-full bg-black text-white/80">
-      {/* PACS Toolbar */}
-      <div className="flex items-center gap-0.5 px-2 py-1 bg-[hsl(var(--card))]/90 border-b border-white/10 text-[11px] flex-wrap">
+      {/* PACS Toolbar - Weasis/OHIF style */}
+      <div className="flex items-center gap-0.5 px-2 py-1 bg-[#1a2332] border-b border-white/10 text-[11px] flex-wrap">
         <TooltipProvider delayDuration={200}>
           {/* Series navigation */}
-          <div className="flex items-center gap-0.5 mr-2">
+          <div className="flex items-center gap-0.5 mr-1">
             <Tooltip><TooltipTrigger asChild>
               <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
                 onClick={() => setActiveIndex(i => Math.max(0, i - 1))} disabled={activeIndex === 0}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
             </TooltipTrigger><TooltipContent side="bottom">Série anterior</TooltipContent></Tooltip>
-            <span className="text-[10px] text-white/50 min-w-[40px] text-center">
-              {fileUrls.length > 0 ? `${activeIndex + 1}/${fileUrls.length}` : "0/0"}
+            <span className="text-[10px] text-white/50 min-w-[36px] text-center font-mono">
+              {fileUrls.length > 0 ? `${activeIndex + 1}/${fileUrls.length}` : "—"}
             </span>
             <Tooltip><TooltipTrigger asChild>
               <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
@@ -248,93 +508,152 @@ const PacsViewer = ({
             </TooltipTrigger><TooltipContent side="bottom">Próxima série</TooltipContent></Tooltip>
           </div>
 
-          <Separator orientation="vertical" className="h-5 bg-white/10 mx-1" />
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
           {/* Tools */}
           {toolButtons.map(t => (
             <Tooltip key={t.id}><TooltipTrigger asChild>
               <Button size="icon" variant="ghost"
-                className={`h-7 w-7 ${tool === t.id ? "bg-primary/30 text-primary" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+                className={`h-7 w-7 ${tool === t.id ? "bg-primary/30 text-primary ring-1 ring-primary/50" : "text-white/60 hover:text-white hover:bg-white/10"}`}
                 onClick={() => setTool(t.id)}>
-                <t.icon className="w-4 h-4" />
+                <t.icon className="w-3.5 h-3.5" />
               </Button>
             </TooltipTrigger><TooltipContent side="bottom">{t.label}</TooltipContent></Tooltip>
           ))}
 
-          <Separator orientation="vertical" className="h-5 bg-white/10 mx-1" />
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
           {/* Zoom controls */}
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
-              onClick={() => setZoom(z => Math.min(z + 0.25, 6))}>
-              <ZoomIn className="w-4 h-4" />
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+              onClick={() => setZoom(z => Math.min(z + 0.25, 8))}>
+              <ZoomIn className="w-3.5 h-3.5" />
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Zoom +</TooltipContent></Tooltip>
+          <span className="text-[9px] text-white/40 min-w-[28px] text-center font-mono">{Math.round(zoom * 100)}%</span>
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => setZoom(z => Math.max(z - 0.25, 0.1))}>
-              <ZoomOut className="w-4 h-4" />
+              <ZoomOut className="w-3.5 h-3.5" />
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Zoom −</TooltipContent></Tooltip>
-          <span className="text-[10px] text-white/40 mx-1 min-w-[32px] text-center">{Math.round(zoom * 100)}%</span>
 
-          <Separator orientation="vertical" className="h-5 bg-white/10 mx-1" />
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
-          {/* Window/Level */}
-          <div className="flex items-center gap-1">
-            <Sun className="w-3 h-3 text-white/40" />
+          {/* WL Presets (Weasis) */}
+          <Popover open={showPresets} onOpenChange={setShowPresets}>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-7 text-[10px] text-white/60 hover:text-white hover:bg-white/10 px-2">
+                <Contrast className="w-3.5 h-3.5 mr-1" />
+                {activePreset}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-44 p-1 bg-[#1a2332] border-white/20" align="start">
+              {WL_PRESETS.map(p => (
+                <Button key={p.label} variant="ghost" size="sm"
+                  className={`w-full justify-start text-[11px] h-7 ${activePreset === p.label ? "bg-primary/20 text-primary" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+                  onClick={() => applyPreset(p)}>
+                  <span className="mr-2">{p.icon}</span> {p.label}
+                  {p.ww > 0 && <span className="ml-auto text-[9px] text-white/30">{p.ww}/{p.wl}</span>}
+                </Button>
+              ))}
+            </PopoverContent>
+          </Popover>
+
+          {/* W/L sliders */}
+          <div className="flex items-center gap-0.5">
+            <Sun className="w-3 h-3 text-white/30" />
             <input type="range" min="0" max="300" value={brightness}
-              onChange={e => setBrightness(+e.target.value)}
-              className="w-14 h-1 accent-primary cursor-pointer" />
+              onChange={e => { setBrightness(+e.target.value); setActivePreset("Custom"); }}
+              className="w-12 h-1 accent-primary cursor-pointer" />
+            <span className="text-[8px] text-white/30 w-5">{brightness}</span>
           </div>
-          <div className="flex items-center gap-1">
-            <Contrast className="w-3 h-3 text-white/40" />
+          <div className="flex items-center gap-0.5">
+            <Contrast className="w-3 h-3 text-white/30" />
             <input type="range" min="0" max="300" value={contrast}
-              onChange={e => setContrast(+e.target.value)}
-              className="w-14 h-1 accent-primary cursor-pointer" />
+              onChange={e => { setContrast(+e.target.value); setActivePreset("Custom"); }}
+              className="w-12 h-1 accent-primary cursor-pointer" />
+            <span className="text-[8px] text-white/30 w-5">{contrast}</span>
           </div>
 
-          <Separator orientation="vertical" className="h-5 bg-white/10 mx-1" />
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
-          {/* Transform */}
+          {/* Transform tools */}
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => setRotation(r => (r + 90) % 360)}>
-              <RotateCw className="w-4 h-4" />
+              <RotateCw className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent side="bottom">Rotacionar</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent side="bottom">Rotacionar 90°</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className={`h-7 w-7 ${flipH ? "bg-primary/30 text-primary" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${flipH ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
               onClick={() => setFlipH(f => !f)}>
-              <FlipHorizontal className="w-4 h-4" />
+              <FlipHorizontal className="w-3.5 h-3.5" />
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Espelhar H</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className={`h-7 w-7 ${flipV ? "bg-primary/30 text-primary" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${flipV ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
               onClick={() => setFlipV(f => !f)}>
-              <FlipVertical className="w-4 h-4" />
+              <FlipVertical className="w-3.5 h-3.5" />
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Espelhar V</TooltipContent></Tooltip>
-
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
-              onClick={resetView}>
-              <RotateCcw className="w-4 h-4" />
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${invert ? "bg-yellow-500/30 text-yellow-400" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+              onClick={() => setInvert(i => !i)}>
+              <Contrast className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent side="bottom">Restaurar</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent side="bottom">Inverter (Negativo)</TooltipContent></Tooltip>
+
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
+
+          {/* CINE (OHIF) */}
+          {fileUrls.length > 1 && (
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className={`h-7 w-7 ${cinePlay ? "bg-green-500/30 text-green-400 animate-pulse" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+                onClick={() => setCinePlay(p => !p)}>
+                <Play className="w-3.5 h-3.5" />
+              </Button>
+            </TooltipTrigger><TooltipContent side="bottom">{cinePlay ? "Parar CINE" : "CINE Play"}</TooltipContent></Tooltip>
+          )}
+
+          {/* Reset */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+              onClick={resetView}>
+              <RotateCcw className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Restaurar tudo</TooltipContent></Tooltip>
+
+          {/* Clear measurements */}
+          {measurements.length > 0 && (
+            <Tooltip><TooltipTrigger asChild>
+              <Button size="sm" variant="ghost" className="h-7 text-[10px] text-red-400/70 hover:text-red-400 hover:bg-red-500/10 px-2"
+                onClick={() => { setMeasurements([]); setAnnotations([]); }}>
+                Limpar ({measurements.length})
+              </Button>
+            </TooltipTrigger><TooltipContent side="bottom">Limpar medições e anotações</TooltipContent></Tooltip>
+          )}
 
           <div className="flex-1" />
 
-          {/* Layout / Fullscreen */}
+          {/* Info panel toggle */}
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${showInfoPanel ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+              onClick={() => setShowInfoPanel(p => !p)}>
+              <FileText className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Info DICOM</TooltipContent></Tooltip>
+
+          {/* Fullscreen / Layout */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => containerRef.current?.requestFullscreen?.()}>
-              <Maximize2 className="w-4 h-4" />
+              <Maximize2 className="w-3.5 h-3.5" />
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Tela cheia</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10">
-              <Grid3X3 className="w-4 h-4" />
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10">
+              <Grid3X3 className="w-3.5 h-3.5" />
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Layout</TooltipContent></Tooltip>
         </TooltipProvider>
@@ -342,32 +661,35 @@ const PacsViewer = ({
 
       {/* Main viewer area */}
       <div className="flex flex-1 min-h-0">
-        {/* Series thumbnails sidebar */}
+        {/* Series thumbnails sidebar (Weasis-style) */}
         {fileUrls.length > 1 && (
-          <div className="w-36 border-r border-white/10 bg-black/80 overflow-y-auto flex-shrink-0">
-            <div className="p-1.5 space-y-1.5">
+          <div className="w-32 border-r border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0">
+            <div className="p-1 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1 border-b border-white/5 font-semibold">
+              Séries
+            </div>
+            <div className="p-1 space-y-1">
               {fileUrls.map((url, i) => {
                 const originalPath = (examRequest?.file_urls as string[])?.[i] || "";
                 const isDicom = originalPath.toLowerCase().endsWith(".dcm") || originalPath.toLowerCase().endsWith(".dicom");
                 return (
                   <button
                     key={i}
-                    onClick={() => setActiveIndex(i)}
+                    onClick={() => { setActiveIndex(i); setCinePlay(false); }}
                     className={`w-full rounded overflow-hidden border-2 transition-all ${
                       i === activeIndex
-                        ? "border-primary shadow-[0_0_8px_hsl(var(--primary)/0.4)]"
-                        : "border-white/10 hover:border-white/30"
+                        ? "border-primary shadow-[0_0_10px_hsl(var(--primary)/0.5)]"
+                        : "border-white/5 hover:border-white/20"
                     }`}
                   >
-                    <div className="aspect-square bg-black/60 flex items-center justify-center relative">
+                    <div className="aspect-square bg-black flex items-center justify-center relative">
                       {isDicom ? (
-                        <ImageIcon className="w-6 h-6 text-white/30" />
+                        <ImageIcon className="w-5 h-5 text-white/20" />
                       ) : (
-                        <img src={url} alt={`Série ${i + 1}`} className="w-full h-full object-cover" />
+                        <img src={url} alt={`S${i + 1}`} className="w-full h-full object-cover opacity-80" />
                       )}
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 px-1 py-0.5 flex justify-between">
-                        <span className="text-[9px] text-white/60">s: {i + 1}</span>
-                        <span className="text-[9px] text-primary">📁 {i + 1}</span>
+                      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 to-transparent px-1 py-0.5 flex justify-between items-end">
+                        <span className="text-[8px] text-white/50 font-mono">s: {i + 1}</span>
+                        <span className="text-[8px] text-primary/80">📁{i + 1}</span>
                       </div>
                     </div>
                   </button>
@@ -377,58 +699,144 @@ const PacsViewer = ({
           </div>
         )}
 
-        {/* Main canvas */}
-        <div ref={containerRef} className="flex-1 relative overflow-hidden flex items-center justify-center bg-black">
+        {/* Main canvas area */}
+        <div ref={containerRef} className="flex-1 relative overflow-hidden bg-black"
+          onMouseDown={handleCanvasMouseDown}
+          onMouseMove={handleCanvasMouseMove}
+          onMouseUp={handleCanvasMouseUp}
+          onMouseLeave={() => { setCursorPos(null); isPanningRef.current = false; }}
+          style={{ cursor: tool === "pan" ? "grab" : tool === "measure" || tool === "angle" || tool === "ellipse" ? "crosshair" : tool === "annotate" ? "text" : "default" }}
+        >
           {loading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center">
-              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/50">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <span className="text-[10px] text-white/40">Carregando DICOM...</span>
+              </div>
             </div>
           )}
 
           {!activeUrl && !loading && (
-            <div className="flex flex-col items-center gap-3 text-white/30">
-              <Monitor className="w-16 h-16" />
-              <p className="text-sm">Nenhum arquivo de exame disponível</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-white/20">
+              <Monitor className="w-20 h-20" />
+              <p className="text-sm">Nenhum arquivo de exame</p>
+              <p className="text-[10px] text-white/10">Faça upload de imagens DICOM para visualizar</p>
             </div>
           )}
 
-          <canvas
-            ref={canvasRef}
-            className={loading && !canvasRef.current?.width ? "hidden" : ""}
-            style={{
-              transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
-              filter: `brightness(${brightness}%) contrast(${contrast}%)`,
-              transition: "transform 0.15s ease, filter 0.1s ease",
-              maxWidth: "100%",
-              maxHeight: "100%",
-              imageRendering: "auto",
-            }}
-          />
+          {/* Image container with pan */}
+          <div className="absolute inset-0 flex items-center justify-center"
+            style={{ transform: `translate(${panOffset.x}px, ${panOffset.y}px)` }}>
+            <div className="relative">
+              <canvas
+                ref={canvasRef}
+                className={loading && !canvasRef.current?.width ? "hidden" : ""}
+                style={{
+                  transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
+                  filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}`,
+                  transition: "filter 0.15s ease",
+                  imageRendering: "auto",
+                }}
+              />
+              {/* Measurement overlay canvas */}
+              <canvas
+                ref={overlayCanvasRef}
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  transform: `scale(${zoom}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1}) scaleY(${flipV ? -1 : 1})`,
+                }}
+              />
+            </div>
+          </div>
 
-          {/* Patient info overlay (top-left) */}
+          {/* Patient info overlay — top-left (Weasis style) */}
           {Object.keys(dicomInfo).length > 0 && (
-            <div className="absolute top-2 left-2 text-[11px] font-mono text-cyan-300/80 leading-relaxed pointer-events-none">
-              {dicomInfo["Paciente"] && <div>Nome: {dicomInfo["Paciente"]}</div>}
-              {dicomInfo["Data"] && <div>Data: {dicomInfo["Data"]}</div>}
-              {dicomInfo["Modalidade"] && <div>Mod: {dicomInfo["Modalidade"]}</div>}
-              {dicomInfo["Estudo"] && <div>{dicomInfo["Estudo"]}</div>}
+            <div className="absolute top-2 left-2 text-[10px] font-mono leading-snug pointer-events-none z-20">
+              {dicomInfo["Paciente"] && <div className="text-cyan-300/90">Nome: <strong>{dicomInfo["Paciente"]}</strong></div>}
+              {dicomInfo["ID"] && <div className="text-cyan-300/60">ID: {dicomInfo["ID"]}</div>}
+              {dicomInfo["Nascimento"] && <div className="text-cyan-300/60">Nasc: {dicomInfo["Nascimento"]}</div>}
+              {dicomInfo["Sexo"] && <div className="text-cyan-300/60">Sexo: {dicomInfo["Sexo"]}</div>}
             </div>
           )}
 
-          {/* Dimensions overlay (top-right) */}
-          {dicomInfo["Dimensões"] && (
-            <div className="absolute top-2 right-2 text-[10px] font-mono text-white/40 pointer-events-none">
-              {dicomInfo["Dimensões"]} · {dicomInfo["Bits"]}
+          {/* Study info overlay — top-right */}
+          {Object.keys(dicomInfo).length > 0 && (
+            <div className="absolute top-2 right-2 text-[10px] font-mono text-right leading-snug pointer-events-none z-20">
+              {dicomInfo["Instituição"] && <div className="text-white/50">{dicomInfo["Instituição"]}</div>}
+              {dicomInfo["Data Estudo"] && <div className="text-white/40">Data: {dicomInfo["Data Estudo"]}</div>}
+              {dicomInfo["Modalidade"] && <div className="text-white/50">{dicomInfo["Modalidade"]} {dicomInfo["Protocolo"] ? `· ${dicomInfo["Protocolo"]}` : ""}</div>}
+              {dicomInfo["Dimensões"] && <div className="text-white/30">{dicomInfo["Dimensões"]} · {dicomInfo["Bits"]}</div>}
+              {dicomInfo["Espessura"] && <div className="text-white/30">Esp: {dicomInfo["Espessura"]}</div>}
             </div>
           )}
 
-          {/* Clinical info overlay (bottom) */}
+          {/* Cursor position + HU readout — bottom-left (OsiriX) */}
+          {cursorPos && (
+            <div className="absolute bottom-2 left-2 text-[10px] font-mono text-green-400/80 pointer-events-none z-20 bg-black/50 px-1.5 py-0.5 rounded">
+              x: {cursorPos.x} y: {cursorPos.y}
+              {cursorPos.hu !== undefined && <span className="ml-2 text-yellow-300/80">HU: {cursorPos.hu}</span>}
+            </div>
+          )}
+
+          {/* WW/WL display — bottom-right */}
+          <div className="absolute bottom-2 right-2 text-[10px] font-mono text-white/30 pointer-events-none z-20">
+            W: {brightness} L: {contrast} {activePreset !== "Default" && activePreset !== "Custom" && `[${activePreset}]`}
+          </div>
+
+          {/* Measurements list — bottom-center */}
+          {measurements.length > 0 && (
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[9px] font-mono text-green-400/70 pointer-events-none z-20 space-y-0.5">
+              {measurements.map(m => (
+                <div key={m.id} className="bg-black/60 px-2 py-0.5 rounded">
+                  {m.type === "length" ? "📏" : m.type === "angle" ? "📐" : "⭕"} {m.value}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Clinical info overlay */}
           {examRequest?.clinical_info && (
-            <div className="absolute bottom-2 left-2 right-2 text-[10px] font-mono text-yellow-300/60 pointer-events-none truncate">
-              Clínica: {examRequest.clinical_info}
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] font-mono text-yellow-400/40 pointer-events-none z-10 max-w-[60%] truncate">
+              📋 {examRequest.clinical_info}
             </div>
           )}
         </div>
+
+        {/* DICOM Info Side Panel (Weasis-style) */}
+        {showInfoPanel && Object.keys(dicomInfo).length > 0 && (
+          <div className="w-56 border-l border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0">
+            <div className="p-1.5 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1.5 border-b border-white/5 font-semibold flex items-center justify-between">
+              DICOM Tags
+              <Button size="icon" variant="ghost" className="h-5 w-5 text-white/30 hover:text-white" onClick={() => setShowInfoPanel(false)}>
+                ×
+              </Button>
+            </div>
+            <div className="p-2 space-y-1">
+              {Object.entries(dicomInfo).map(([k, v]) => (
+                <div key={k} className="flex justify-between gap-2 text-[10px] py-0.5 border-b border-white/5">
+                  <span className="text-white/40 shrink-0">{k}</span>
+                  <span className="text-white/70 text-right truncate">{v}</span>
+                </div>
+              ))}
+            </div>
+            {/* Measurements summary */}
+            {measurements.length > 0 && (
+              <>
+                <div className="p-1.5 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1.5 border-t border-b border-white/5 font-semibold">
+                  Medições ({measurements.length})
+                </div>
+                <div className="p-2 space-y-1">
+                  {measurements.map((m, i) => (
+                    <div key={m.id} className="text-[10px] text-green-400/70 flex justify-between">
+                      <span>{i + 1}. {m.type === "length" ? "Comprimento" : m.type === "angle" ? "Ângulo" : "ROI"}</span>
+                      <span className="font-mono">{m.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
