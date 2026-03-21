@@ -134,6 +134,20 @@ const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: str
   return <Navigate to="/dashboard" replace />;
 };
 
+/**
+ * ContextGuard: ensures the active ?role= context matches the panel being accessed.
+ * Prevents e.g. a doctor+laudista user on ?role=laudista from accessing doctor-only routes.
+ */
+const ContextGuard = ({ panel, forceRole, roles, children }: { panel: string; forceRole: string | null; roles: string[]; children: ReactNode }) => {
+  const isAdmin = roles.includes("admin");
+  if (isAdmin) return <>{children}</>;
+  // If ?role= is set and doesn't match this panel's expected context, redirect
+  if (forceRole && forceRole !== panel) {
+    return <Navigate to={`/dashboard?role=${forceRole}`} replace />;
+  }
+  return <>{children}</>;
+};
+
 const Dashboard = () => {
   const { user, roles, loading } = useAuth();
   const [searchParams] = useSearchParams();
