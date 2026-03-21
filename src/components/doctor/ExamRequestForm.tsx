@@ -115,11 +115,7 @@ const ExamRequestForm = () => {
   });
 
   const getNav = () => {
-    if (isClinic) {
-      return [
-        { label: "Voltar", href: "/dashboard/clinic/my-exams?role=clinic", icon: <FileImage className="w-4 h-4" />, active: false, group: "Principal" },
-      ];
-    }
+    if (isClinic) return getClinicNav("exam-request");
     if (isReception) return getReceptionNav("exam-request");
     if (isLaudista) return getLaudistaNav("queue");
     return getDoctorNav("exam-request");
