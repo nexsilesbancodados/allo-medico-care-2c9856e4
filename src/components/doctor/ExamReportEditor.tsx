@@ -995,13 +995,42 @@ const PacsViewer = ({
             </div>
           )}
 
-          {/* Clinical info overlay */}
-          {examRequest?.clinical_info && (
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-[9px] font-mono text-yellow-400/40 pointer-events-none z-10 max-w-[60%] truncate">
-              📋 {examRequest.clinical_info}
+          {/* Técnico Responsável overlay — bottom-right above status bar */}
+          {dicomInfo["Médico Ref."] && (
+            <div className="absolute bottom-6 right-2 text-[10px] font-mono text-red-400/80 pointer-events-none z-20">
+              Técnico Responsável : <strong>{dicomInfo["Médico Ref."]}</strong>
             </div>
           )}
         </div>
+
+        {/* Dual viewport (comparison side-by-side) */}
+        {dualView && fileUrls.length > 1 && (
+          <div className="flex-1 relative overflow-hidden bg-black border-l-2 border-white/10">
+            <img
+              src={fileUrls[dualIndex] || fileUrls[1] || ""}
+              alt="Comparison"
+              className="absolute inset-0 w-full h-full object-contain"
+              style={{
+                filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}`,
+              }}
+            />
+            {/* Dual view overlays */}
+            {Object.keys(dicomInfo).length > 0 && (
+              <div className="absolute top-2 left-2 text-[10px] font-mono leading-snug pointer-events-none z-20">
+                {dicomInfo["Paciente"] && <div className="text-amber-400/90">{dicomInfo["Paciente"]}</div>}
+                {dicomInfo["ID"] && <div className="text-amber-400/60">{dicomInfo["ID"]}</div>}
+              </div>
+            )}
+            <div className="absolute top-2 right-2 text-[10px] font-mono text-white/50 pointer-events-none z-20">
+              {dicomInfo["Data Estudo"]}
+            </div>
+            <div className="absolute bottom-0 inset-x-0 h-5 bg-black/70 border-t border-white/5 flex items-center justify-between px-3 text-[9px] font-mono text-white/40 pointer-events-none z-20">
+              <span>Image size:{imageNaturalSize.w}x{imageNaturalSize.h}</span>
+              <span>Images:{dualIndex + 1}/ {fileUrls.length}</span>
+              <span>WL: {brightness} / WW: {contrast}</span>
+            </div>
+          </div>
+        )}
 
         {/* DICOM Info Side Panel (Weasis-style) */}
         {showInfoPanel && Object.keys(dicomInfo).length > 0 && (
