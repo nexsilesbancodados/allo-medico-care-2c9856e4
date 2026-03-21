@@ -6,6 +6,7 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getLaudistaNav } from "@/components/laudista/laudistaNav";
 import { getReceptionNav } from "@/components/reception/receptionNav";
+import { getClinicNav } from "@/components/clinic/clinicNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
