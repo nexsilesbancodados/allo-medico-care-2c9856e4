@@ -158,8 +158,9 @@ const TipTapEditor = ({ content, onChange, disabled, placeholder, className }: T
   return (
     <TooltipProvider delayDuration={300}>
       <div className={`flex flex-col h-full relative ${className || ""}`}>
-        {/* Toolbar Line 1 — Text formatting */}
-        <div className="flex items-center gap-0.5 px-1.5 py-1 border-b border-border bg-card/30 flex-wrap">
+        {/* Toolbar — Text formatting + Structure */}
+        <div className="flex items-center gap-0.5 px-1.5 py-1 border-b flex-wrap" style={{ borderColor: 'hsl(220 15% 20%)', background: 'hsl(220 18% 11%)' }}>
+          {/* Text formatting */}
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant={editor.isActive("bold") ? "default" : "ghost"} className="h-7 w-7"
               onClick={() => editor.chain().focus().toggleBold().run()} disabled={disabled}>
@@ -181,46 +182,12 @@ const TipTapEditor = ({ content, onChange, disabled, placeholder, className }: T
             </Button>
           </TooltipTrigger><TooltipContent>Sublinhado (Ctrl+U)</TooltipContent></Tooltip>
 
-          <div className="w-px h-5 bg-border mx-0.5" />
-
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant={editor.isActive("heading", { level: 2 }) ? "default" : "ghost"} className="h-7 w-7"
-              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} disabled={disabled}>
-              <Heading2 className="w-3.5 h-3.5" />
+            <Button size="icon" variant={editor.isActive("strike") ? "default" : "ghost"} className="h-7 w-7"
+              onClick={() => editor.chain().focus().toggleStrike().run()} disabled={disabled}>
+              <Strikethrough className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent>Título H2</TooltipContent></Tooltip>
-
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant={editor.isActive("heading", { level: 3 }) ? "default" : "ghost"} className="h-7 w-7"
-              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} disabled={disabled}>
-              <Heading3 className="w-3.5 h-3.5" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Título H3</TooltipContent></Tooltip>
-
-          <div className="w-px h-5 bg-border mx-0.5" />
-
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant={editor.isActive({ textAlign: "left" }) ? "default" : "ghost"} className="h-7 w-7"
-              onClick={() => editor.chain().focus().setTextAlign("left").run()} disabled={disabled}>
-              <AlignLeft className="w-3.5 h-3.5" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Alinhar Esquerda</TooltipContent></Tooltip>
-
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant={editor.isActive({ textAlign: "center" }) ? "default" : "ghost"} className="h-7 w-7"
-              onClick={() => editor.chain().focus().setTextAlign("center").run()} disabled={disabled}>
-              <AlignCenter className="w-3.5 h-3.5" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Centralizar</TooltipContent></Tooltip>
-
-          <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant={editor.isActive({ textAlign: "right" }) ? "default" : "ghost"} className="h-7 w-7"
-              onClick={() => editor.chain().focus().setTextAlign("right").run()} disabled={disabled}>
-              <AlignRight className="w-3.5 h-3.5" />
-            </Button>
-          </TooltipTrigger><TooltipContent>Alinhar Direita</TooltipContent></Tooltip>
-
-          <div className="w-px h-5 bg-border mx-0.5" />
+          </TooltipTrigger><TooltipContent>Tachado</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant={editor.isActive("highlight") ? "default" : "ghost"} className="h-7 w-7"
@@ -229,31 +196,39 @@ const TipTapEditor = ({ content, onChange, disabled, placeholder, className }: T
             </Button>
           </TooltipTrigger><TooltipContent>Destacar</TooltipContent></Tooltip>
 
-          <div className="w-px h-5 bg-border mx-0.5" />
+          <div className="w-px h-5 mx-0.5" style={{ background: 'hsl(220 15% 20%)' }} />
+
+          {/* Headings */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant={editor.isActive("heading", { level: 1 }) ? "default" : "ghost"} className="h-7 w-7"
+              onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} disabled={disabled}>
+              <Heading1 className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent>H1</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7"
-              onClick={() => editor.chain().focus().undo().run()} disabled={disabled || !editor.can().undo()}>
-              <Undo className="w-3.5 h-3.5" />
+            <Button size="icon" variant={editor.isActive("heading", { level: 2 }) ? "default" : "ghost"} className="h-7 w-7"
+              onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} disabled={disabled}>
+              <Heading2 className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent>Desfazer (Ctrl+Z)</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent>H2</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7"
-              onClick={() => editor.chain().focus().redo().run()} disabled={disabled || !editor.can().redo()}>
-              <Redo className="w-3.5 h-3.5" />
+            <Button size="icon" variant={editor.isActive("heading", { level: 3 }) ? "default" : "ghost"} className="h-7 w-7"
+              onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} disabled={disabled}>
+              <Heading3 className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent>Refazer (Ctrl+Y)</TooltipContent></Tooltip>
-        </div>
+          </TooltipTrigger><TooltipContent>H3</TooltipContent></Tooltip>
 
-        {/* Toolbar Line 2 — Structure & Macros */}
-        <div className="flex items-center gap-0.5 px-1.5 py-1 border-b border-border bg-card/20 flex-wrap">
+          <div className="w-px h-5 mx-0.5" style={{ background: 'hsl(220 15% 20%)' }} />
+
+          {/* Lists */}
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant={editor.isActive("bulletList") ? "default" : "ghost"} className="h-7 w-7"
               onClick={() => editor.chain().focus().toggleBulletList().run()} disabled={disabled}>
               <List className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent>Lista com marcadores</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent>Lista</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant={editor.isActive("orderedList") ? "default" : "ghost"} className="h-7 w-7"
@@ -262,29 +237,85 @@ const TipTapEditor = ({ content, onChange, disabled, placeholder, className }: T
             </Button>
           </TooltipTrigger><TooltipContent>Lista numerada</TooltipContent></Tooltip>
 
-          <div className="w-px h-5 bg-border mx-0.5" />
-
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-semibold"
-            onClick={() => insertSectionHeader("TÉCNICA:")} disabled={disabled}>
-            TÉCNICA
-          </Button>
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-semibold"
-            onClick={() => insertSectionHeader("ACHADOS:")} disabled={disabled}>
-            ACHADOS
-          </Button>
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] font-semibold"
-            onClick={() => insertSectionHeader("IMPRESSÃO DIAGNÓSTICA:")} disabled={disabled}>
-            IMPRESSÃO
-          </Button>
-
-          <div className="w-px h-5 bg-border mx-0.5" />
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant={editor.isActive("blockquote") ? "default" : "ghost"} className="h-7 w-7"
+              onClick={() => editor.chain().focus().toggleBlockquote().run()} disabled={disabled}>
+              <Quote className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Citação</TooltipContent></Tooltip>
 
           <Tooltip><TooltipTrigger asChild>
-            <Button variant="outline" size="sm" className="h-7 px-2 text-[10px] gap-1"
-              onClick={insertStructureTemplate} disabled={disabled}>
-              <FileText className="w-3 h-3" /> Estrutura Completa
+            <Button size="icon" variant="ghost" className="h-7 w-7"
+              onClick={() => editor.chain().focus().setHorizontalRule().run()} disabled={disabled}>
+              <Minus className="w-3.5 h-3.5" />
             </Button>
-          </TooltipTrigger><TooltipContent>Inserir template TÉCNICA / ACHADOS / IMPRESSÃO</TooltipContent></Tooltip>
+          </TooltipTrigger><TooltipContent>Separador</TooltipContent></Tooltip>
+
+          <div className="w-px h-5 mx-0.5" style={{ background: 'hsl(220 15% 20%)' }} />
+
+          {/* Alignment */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant={editor.isActive({ textAlign: "left" }) ? "default" : "ghost"} className="h-7 w-7"
+              onClick={() => editor.chain().focus().setTextAlign("left").run()} disabled={disabled}>
+              <AlignLeft className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Esquerda</TooltipContent></Tooltip>
+
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant={editor.isActive({ textAlign: "center" }) ? "default" : "ghost"} className="h-7 w-7"
+              onClick={() => editor.chain().focus().setTextAlign("center").run()} disabled={disabled}>
+              <AlignCenter className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Centro</TooltipContent></Tooltip>
+
+          <div className="w-px h-5 mx-0.5" style={{ background: 'hsl(220 15% 20%)' }} />
+
+          {/* Undo/Redo + Clear */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7"
+              onClick={() => editor.chain().focus().undo().run()} disabled={disabled || !editor.can().undo()}>
+              <Undo className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Desfazer</TooltipContent></Tooltip>
+
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7"
+              onClick={() => editor.chain().focus().redo().run()} disabled={disabled || !editor.can().redo()}>
+              <Redo className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Refazer</TooltipContent></Tooltip>
+
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7"
+              onClick={() => editor.chain().focus().clearNodes().unsetAllMarks().run()} disabled={disabled}>
+              <Eraser className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent>Limpar formatação</TooltipContent></Tooltip>
+        </div>
+
+        {/* Toolbar Line 2 — Sections & Macros */}
+        <div className="flex items-center gap-0.5 px-1.5 py-1 border-b flex-wrap" style={{ borderColor: 'hsl(220 15% 20%)', background: 'hsl(220 18% 10%)' }}>
+          {/* Section insert dropdown */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-7 px-2 text-[10px] gap-1 font-semibold" disabled={disabled}>
+                <FileText className="w-3 h-3" /> Inserir Seção <ChevronDown className="w-2.5 h-2.5" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-56 p-1" align="start">
+              {["TÉCNICA", "ACHADOS", "IMPRESSÃO DIAGNÓSTICA", "CONCLUSÃO", "COMPARAÇÃO COM EXAME ANTERIOR", "RECOMENDAÇÕES"].map(s => (
+                <Button key={s} variant="ghost" size="sm" className="w-full justify-start text-xs h-7"
+                  onClick={() => { insertSectionHeader(`${s}:`); }}>
+                  {s}
+                </Button>
+              ))}
+              <div className="border-t my-1" style={{ borderColor: 'hsl(220 15% 20%)' }} />
+              <Button variant="ghost" size="sm" className="w-full justify-start text-xs h-7 font-semibold"
+                onClick={insertStructureTemplate}>
+                📋 Estrutura Completa
+              </Button>
+            </PopoverContent>
+          </Popover>
 
           <div className="flex-1" />
 
