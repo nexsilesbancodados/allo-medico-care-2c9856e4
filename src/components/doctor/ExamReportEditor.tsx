@@ -1493,49 +1493,111 @@ const ExamReportEditor = () => {
 
   const isReported = examRequest?.status === "reported" && existingReport?.signed_at;
 
+  // Force dark theme for workstation
+  useEffect(() => {
+    document.documentElement.classList.add('laudo-workspace');
+    return () => document.documentElement.classList.remove('laudo-workspace');
+  }, []);
+
+  const slaPercent = useMemo(() => {
+    if (!examRequest?.sla_deadline || !examRequest?.created_at) return null;
+    const total = new Date(examRequest.sla_deadline).getTime() - new Date(examRequest.created_at).getTime();
+    const elapsed = Date.now() - new Date(examRequest.created_at).getTime();
+    return Math.min(100, Math.max(0, (elapsed / total) * 100));
+  }, [examRequest?.sla_deadline, examRequest?.created_at]);
+
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
-      {/* Top bar */}
-      <div className="flex items-center gap-3 px-3 py-1.5 border-b border-border bg-card text-sm shrink-0">
-        <Button size="icon" variant="ghost" className="h-7 w-7" onClick={() => navigate(backRoute)}>
-          <ArrowLeft className="w-4 h-4" />
+    <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'hsl(220 20% 8%)' }}>
+      {/* ═══ TOPBAR — Compact workstation header ═══ */}
+      <div className="flex items-center gap-2 px-3 h-11 shrink-0" style={{ background: 'hsl(220 18% 13%)', borderBottom: '1px solid hsl(220 15% 20%)' }}>
+        {/* Back + Breadcrumb */}
+        <Button size="icon" variant="ghost" className="h-7 w-7 hover:bg-white/5" onClick={() => navigate(backRoute)}>
+          <ArrowLeft className="w-3.5 h-3.5" />
         </Button>
-        <div className="flex items-center gap-2 min-w-0">
-          <FileSignature className="w-4 h-4 text-primary shrink-0" />
-          <span className="font-semibold truncate">Editor de Laudo</span>
-          {examRequest?.exam_type && (
-            <Badge variant="outline" className="text-[10px] shrink-0">{examRequest.exam_type}</Badge>
-          )}
-          {examRequest?.priority === "urgent" && (
-            <Badge variant="destructive" className="text-[10px] shrink-0">
-              <AlertTriangle className="w-3 h-3 mr-0.5" /> Urgente
-            </Badge>
-          )}
-          {slaRemaining && (
-            <Badge variant={slaRemaining === "ESTOURADO" ? "destructive" : "outline"} className="text-[10px] shrink-0">
-              <Clock className="w-3 h-3 mr-0.5" /> SLA: {slaRemaining}
-            </Badge>
-          )}
+        <div className="flex items-center gap-1.5 text-xs font-mono" style={{ color: 'hsl(220 8% 50%)' }}>
+          <span>AloMédico</span>
+          <ChevronRight className="w-3 h-3" />
+          <span>Laudos</span>
+          <ChevronRight className="w-3 h-3" />
+          <span style={{ color: 'hsl(220 10% 85%)' }}>{examRequest?.exam_type || "Editor"}</span>
         </div>
+
+        {/* Right-side indicators */}
         <div className="flex-1" />
-        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-          <span>{wordCount} palavras · {charCount} chars</span>
-          {!isReported && wordCount > 0 && (
-            <div className="flex items-center gap-1">
-              <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className="flex items-center gap-2">
+          {/* Urgent badge */}
+          {examRequest?.priority === "urgent" && (
+            <Badge className="bg-red-600/20 text-red-400 border-red-600/30 animate-pulse text-[10px] px-2 py-0.5">
+              <AlertTriangle className="w-3 h-3 mr-1" /> URGENTE
+            </Badge>
+          )}
+
+          {/* SLA countdown */}
+          {slaRemaining && (
+            <div className="flex items-center gap-1.5">
+              <div className="w-20 h-1.5 rounded-full overflow-hidden" style={{ background: 'hsl(220 15% 20%)' }}>
                 <div
-                  className={`h-full rounded-full transition-all ${
-                    wordCount >= 150 ? "bg-green-500" : wordCount >= 50 ? "bg-warning" : "bg-destructive"
-                  }`}
-                  style={{ width: `${Math.min(100, (wordCount / 150) * 100)}%` }}
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${slaPercent ?? 0}%`,
+                    background: (slaPercent ?? 0) > 80 ? 'hsl(0 90% 60%)' : (slaPercent ?? 0) > 50 ? 'hsl(38 95% 55%)' : 'hsl(142 70% 48%)',
+                  }}
                 />
               </div>
-              <span className={wordCount >= 150 ? "text-green-500" : wordCount >= 50 ? "text-warning" : "text-destructive"}>
-                {wordCount >= 150 ? "✓" : `${150 - wordCount} para mínimo`}
+              <span className="text-[10px] font-mono" style={{
+                color: slaRemaining === "ESTOURADO" ? 'hsl(0 90% 60%)' : (slaPercent ?? 0) > 50 ? 'hsl(38 95% 55%)' : 'hsl(142 70% 48%)',
+              }}>
+                <Clock className="w-3 h-3 inline mr-0.5" />{slaRemaining}
               </span>
             </div>
           )}
-          <span className="hidden md:inline">Ctrl+S salvar · Ctrl+Enter assinar</span>
+
+          {/* Word count */}
+          {wordCount > 0 && !isReported && (
+            <div className="flex items-center gap-1.5 text-[10px] font-mono" style={{ color: 'hsl(220 8% 50%)' }}>
+              <span>{wordCount}w · {charCount}c</span>
+              <div className="w-12 h-1.5 rounded-full overflow-hidden" style={{ background: 'hsl(220 15% 20%)' }}>
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${Math.min(100, (wordCount / 150) * 100)}%`,
+                    background: wordCount >= 150 ? 'hsl(142 70% 48%)' : wordCount >= 50 ? 'hsl(38 95% 55%)' : 'hsl(0 90% 60%)',
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Auto-save status */}
+          <div className="flex items-center gap-1 text-[10px] font-mono" style={{ color: 'hsl(220 8% 50%)' }}>
+            {autoSaveStatus === "saving" && <><Loader2 className="w-3 h-3 animate-spin" style={{ color: 'hsl(195 80% 55%)' }} /> Salvando</>}
+            {autoSaveStatus === "saved" && <><Save className="w-3 h-3" style={{ color: 'hsl(142 70% 48%)' }} /> Salvo</>}
+            {autoSaveStatus === "idle" && !isReported && <><Save className="w-3 h-3 opacity-40" /></>}
+          </div>
+
+          {/* Quick actions */}
+          {!isReported && (
+            <div className="flex items-center gap-0.5 ml-1" style={{ borderLeft: '1px solid hsl(220 15% 20%)', paddingLeft: '8px' }}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 hover:bg-white/5 text-[10px]" onClick={() => { if (content.trim()) autoSaveDraft(content); toast.success("Salvo!"); }}>
+                    <Save className="w-3.5 h-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-[10px]">Salvar (Ctrl+S)</TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button size="icon" variant="ghost" className="h-7 w-7 hover:bg-white/5" onClick={() => setShowSignDialog(true)} disabled={!content.trim() || wordCount < 5}>
+                    <FileSignature className="w-3.5 h-3.5" style={{ color: wordCount >= 150 ? 'hsl(142 70% 48%)' : undefined }} />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="text-[10px]">Assinar (Ctrl+Enter)</TooltipContent>
+              </Tooltip>
+            </div>
+          )}
+
+          <span className="hidden lg:inline text-[9px] font-mono" style={{ color: 'hsl(220 8% 40%)' }}>Ctrl+S · Ctrl+⏎</span>
         </div>
       </div>
 
@@ -1693,8 +1755,25 @@ const ExamReportEditor = () => {
                 )}
               </div>
 
+              {/* Quality indicators */}
+              {!isReported && wordCount > 20 && (
+                <div className="px-3 py-2 border-t text-[10px] space-y-1" style={{ borderColor: 'hsl(220 15% 20%)', background: 'hsl(220 18% 10%)' }}>
+                  <p className="font-semibold text-[9px] uppercase tracking-wider" style={{ color: 'hsl(220 8% 50%)' }}>Qualidade do Laudo</p>
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-0.5">
+                    <span>{plainText.match(/t[ée]cnica/i) ? "✅" : "❌"} Técnica descrita</span>
+                    <span>{plainText.match(/achados/i) ? "✅" : "❌"} Achados documentados</span>
+                    <span>{plainText.match(/impress[ãa]o|conclus[ãa]o/i) ? "✅" : "⚠️"} Impressão/Conclusão</span>
+                    <span>{plainText.match(/recomend/i) ? "✅" : "ℹ️"} Recomendações</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span>{wordCount}w</span>
+                    <span>Score: {[/t[ée]cnica/i, /achados/i, /impress[ãa]o|conclus[ãa]o/i, /recomend/i].filter(r => r.test(plainText)).length}/4</span>
+                  </div>
+                </div>
+              )}
+
               {/* Footer */}
-              <div className="px-3 py-2 border-t border-border">
+              <div className="px-3 py-2 border-t" style={{ borderColor: 'hsl(220 15% 20%)' }}>
                 {isReported ? (
                   <div className="space-y-1.5">
                     <Badge className="bg-primary/10 text-primary border-primary/30" variant="outline">
@@ -1714,12 +1793,13 @@ const ExamReportEditor = () => {
                   </div>
                 ) : (
                   <>
-                    <Button onClick={() => setShowSignDialog(true)} disabled={signing || !content.trim() || wordCount < 5} className="w-full h-9">
+                    <Button onClick={() => setShowSignDialog(true)} disabled={signing || !content.trim() || wordCount < 5}
+                      className="w-full h-9" style={{ background: wordCount >= 150 ? 'hsl(142 70% 48%)' : undefined }}>
                       {signing ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <FileSignature className="w-4 h-4 mr-2" />}
                       {signing ? "Assinando..." : "Assinar e Finalizar Laudo"}
                     </Button>
                     {wordCount > 0 && wordCount < 50 && (
-                      <p className="text-[10px] text-warning mt-1 text-center">
+                      <p className="text-[10px] mt-1 text-center" style={{ color: 'hsl(38 95% 55%)' }}>
                         ⚠ Laudo muito curto — recomendado mínimo 50 palavras
                       </p>
                     )}
@@ -1729,6 +1809,18 @@ const ExamReportEditor = () => {
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
+      </div>
+
+      {/* ═══ STATUS BAR — VS Code style ═══ */}
+      <div className="flex items-center gap-4 px-3 h-6 shrink-0 font-mono text-[10px] select-none" style={{ background: 'hsl(220 20% 7%)', borderTop: '1px solid hsl(220 15% 16%)', color: 'hsl(220 8% 50%)' }}>
+        <span>{isReported ? "🔒 Leitura" : "✏️ Edição"}</span>
+        <span>PT-BR</span>
+        {fileUrls.length > 0 && <span>Imagens: {fileUrls.length}</span>}
+        {examRequest?.exam_type && <span>Exame: {examRequest.exam_type}</span>}
+        {wordCount > 0 && <span>{wordCount} palavras</span>}
+        <div className="flex-1" />
+        {profile && <span>Dr(a). {profile.first_name} {profile.last_name}</span>}
+        {doctorProfile?.crm && <span>CRM {doctorProfile.crm}/{doctorProfile.crm_state}</span>}
       </div>
 
       {/* Sign Confirmation AlertDialog */}
