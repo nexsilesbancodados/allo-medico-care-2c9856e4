@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, User, ArrowLeft, Stethoscope, Building2, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Mail, Lock, User, ArrowLeft, Stethoscope, Building2, Eye, EyeOff, CheckCircle2, AlertCircle, Loader2, Shield, Video, Clock } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
 import { Link } from "react-router-dom";
@@ -21,9 +21,9 @@ type UserType = "patient" | "doctor" | "clinic";
 type AuthMode = "login" | "register" | "select-type";
 
 const pageVariants = {
-  initial: { opacity: 0, x: 20 },
-  animate: { opacity: 1, x: 0 },
-  exit: { opacity: 0, x: -20 },
+  initial: { opacity: 0, y: 12, filter: "blur(4px)" },
+  animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+  exit: { opacity: 0, y: -8, filter: "blur(2px)" },
 };
 
 const Auth = () => {
@@ -92,7 +92,6 @@ const Auth = () => {
         toast.error("Erro ao entrar", { description: translated });
       }
     } else if (data.user) {
-      // Use centralized redirect logic — no signOut on missing subscription
       await redirectAfterLogin(data.user.id);
     }
   };
@@ -126,7 +125,6 @@ const Auth = () => {
     }
 
     if (data.user) {
-      // Register consent
       await registerConsent(data.user.id, `terms_and_privacy_${userType}`);
 
       if (userType === "doctor") {
@@ -137,7 +135,6 @@ const Auth = () => {
         await supabase.from("clinic_profiles").insert({ user_id: data.user.id, name: clinicName, cnpj });
         await supabase.from("user_roles").insert({ user_id: data.user.id, role: "clinic" });
       } else {
-        // Patient welcome
         notifyWelcomePatient(`${firstName} ${lastName}`, email).catch(err => logError("notifyWelcomePatient failed", err));
       }
     }
@@ -155,299 +152,406 @@ const Auth = () => {
 
   const strength = passwordStrength(password);
 
+  const trustBadges = [
+    { icon: Shield, label: "Dados criptografados" },
+    { icon: Video, label: "Vídeo HD seguro" },
+    { icon: Clock, label: "Atendimento 24h" },
+  ];
+
   return (
     <div className="min-h-screen bg-background flex">
       <SEOHead title="Login e Cadastro" description="Acesse sua conta ou cadastre-se na AloClinica para consultas médicas online por vídeo." />
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[45%] bg-gradient-hero items-center justify-center p-12 relative overflow-hidden mesh-gradient">
-        {/* Background pattern */}
-        <div className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "32px 32px" }}
+
+      {/* ── Left panel — desktop only ── */}
+      <div className="hidden lg:flex lg:w-[48%] relative overflow-hidden">
+        {/* Rich gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary/90 to-secondary" />
+        
+        {/* Ambient orbs */}
+        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] rounded-full bg-white/[0.06] blur-[120px]" />
+        <div className="absolute bottom-[-15%] right-[-8%] w-[400px] h-[400px] rounded-full bg-secondary/20 blur-[100px]" />
+        <div className="absolute top-[40%] right-[20%] w-[200px] h-[200px] rounded-full bg-white/[0.04] blur-[60px]" />
+
+        {/* Dot pattern */}
+        <div className="absolute inset-0 opacity-[0.07]"
+          style={{ backgroundImage: "radial-gradient(circle at 1.5px 1.5px, white 1px, transparent 0)", backgroundSize: "28px 28px" }}
         />
-        <div className="text-primary-foreground max-w-md relative z-10">
-          <Link to="/" className="inline-flex items-center gap-2 mb-10 opacity-70 hover:opacity-100 transition text-sm font-medium">
-            <ArrowLeft className="w-4 h-4" />
-            Voltar ao início
-          </Link>
-          <img src={logo} alt="AloClinica" className="w-14 h-14 rounded-2xl mb-6 opacity-90" />
-          <h1 className="text-4xl font-extrabold mb-4 leading-tight">
-            Saúde na<br />palma da mão
-          </h1>
-          <p className="text-base opacity-80 leading-relaxed">
-            Consultas por vídeo com médicos qualificados, receitas digitais e atendimento 24h — tudo em um só lugar.
-          </p>
-          <div className="mt-10 flex flex-col gap-3">
-            {["✓ Médicos certificados pelo CFM", "✓ Receitas e atestados digitais válidos", "✓ Dados protegidos por criptografia"].map(item => (
-              <p key={item} className="text-sm opacity-80 font-medium">{item}</p>
-            ))}
+
+        <div className="relative z-10 flex flex-col justify-between p-12 w-full">
+          <div>
+            <Link to="/" className="inline-flex items-center gap-2 text-primary-foreground/60 hover:text-primary-foreground transition-colors text-sm font-medium group">
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+              Voltar ao início
+            </Link>
           </div>
+
+          <div className="flex-1 flex flex-col justify-center max-w-lg">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <img src={logo} alt="AloClinica" className="w-16 h-16 rounded-2xl mb-8 shadow-lg ring-2 ring-white/10" />
+              
+              <h1 className="text-5xl font-extrabold text-primary-foreground mb-5 leading-[1.1] tracking-tight">
+                Saúde na<br />palma da mão
+              </h1>
+              <p className="text-lg text-primary-foreground/75 leading-relaxed max-w-md">
+                Consultas por vídeo com médicos qualificados, receitas digitais e atendimento 24h — tudo em um só lugar.
+              </p>
+
+              <div className="mt-10 space-y-4">
+                {[
+                  "Médicos certificados pelo CFM",
+                  "Receitas e atestados digitais válidos",
+                  "Dados protegidos por criptografia",
+                ].map((item, i) => (
+                  <motion.div
+                    key={item}
+                    initial={{ opacity: 0, x: -16 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.4 + i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    className="flex items-center gap-3"
+                  >
+                    <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground/90" />
+                    </div>
+                    <span className="text-sm text-primary-foreground/80 font-medium">{item}</span>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* Social proof footer */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            className="flex items-center gap-6 pt-6 border-t border-white/10"
+          >
+            <div className="flex -space-x-2">
+              {[0, 1, 2, 3].map(i => (
+                <div key={i} className="w-8 h-8 rounded-full bg-white/20 border-2 border-primary/50 backdrop-blur-sm" />
+              ))}
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-primary-foreground/90">+5.000 pacientes</p>
+              <p className="text-xs text-primary-foreground/50">confiam na AloClinica</p>
+            </div>
+          </motion.div>
         </div>
       </div>
 
-      {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center p-6 bg-background overflow-y-auto">
-        <div className="w-full max-w-md py-8">
-          <Link to="/" className="lg:hidden inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition text-sm">
+      {/* ── Right panel — form ── */}
+      <div className="flex-1 flex flex-col min-h-screen bg-background">
+        {/* Mobile gradient header */}
+        <div className="lg:hidden bg-gradient-to-br from-primary to-secondary px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8 relative overflow-hidden">
+          <div className="absolute top-[-30%] right-[-20%] w-[200px] h-[200px] rounded-full bg-white/[0.06] blur-[60px]" />
+          <Link to="/" className="relative z-10 inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
+          <div className="relative z-10 flex items-center gap-3">
+            <img src={logo} alt="AloClinica" className="w-12 h-12 rounded-xl shadow-lg" />
+            <div>
+              <h1 className="text-xl font-bold text-primary-foreground">AloClinica</h1>
+              <p className="text-xs text-primary-foreground/70">Saúde digital</p>
+            </div>
+          </div>
+        </div>
 
-          <AnimatePresence mode="wait">
-            {success ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="text-center py-12"
-              >
-                <div className="w-20 h-20 mx-auto rounded-full bg-success/10 flex items-center justify-center mb-4">
-                  <CheckCircle2 className="w-10 h-10 text-success" />
-                </div>
-                <h2 className="text-2xl font-bold text-foreground mb-2">Conta criada! 🎉</h2>
-                <p className="text-muted-foreground">Redirecionando para o painel...</p>
-              </motion.div>
-            ) : mode === "login" ? (
-              <motion.div key="login" {...pageVariants} transition={{ duration: 0.3 }}>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-1">Bem-vindo de volta</h2>
-                  <p className="text-muted-foreground text-sm">Entre na sua conta para continuar</p>
-                </div>
+        <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
+          <div className="w-full max-w-[420px] py-8">
+            <Link to="/" className="lg:hidden inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition text-sm">
+              <ArrowLeft className="w-4 h-4" /> Voltar
+            </Link>
 
-                <form onSubmit={handleLogin} className="space-y-4" noValidate>
-                  <div>
-                    <Label htmlFor="email" className="text-sm font-medium">Email</Label>
-                    <div className="relative mt-1.5">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="seu@email.com"
-                        value={email}
-                        onChange={e => { setEmail(e.target.value); setEmailError(""); }}
-                        onBlur={() => setEmailError(validateEmail(email))}
-                        className={`pl-10 ${emailError ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                      />
-                      {emailError && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <AlertCircle className="w-3 h-3 text-destructive" />
-                          <p className="text-xs text-destructive">{emailError}</p>
-                        </div>
-                      )}
-                    </div>
+            <AnimatePresence mode="wait">
+              {success ? (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="text-center py-12"
+                >
+                  <div className="w-20 h-20 mx-auto rounded-full bg-success/10 flex items-center justify-center mb-4">
+                    <CheckCircle2 className="w-10 h-10 text-success" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-foreground mb-2">Conta criada! 🎉</h2>
+                  <p className="text-muted-foreground">Redirecionando para o painel...</p>
+                </motion.div>
+              ) : mode === "login" ? (
+                <motion.div key="login" {...pageVariants} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+                  <div className="mb-8">
+                    <h2 className="text-3xl font-extrabold text-foreground mb-2 tracking-tight">Bem-vindo de volta</h2>
+                    <p className="text-muted-foreground">Entre na sua conta para continuar</p>
                   </div>
 
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password" className="text-sm font-medium">Senha</Label>
-                      <Link to="/forgot-password" className="text-xs text-primary hover:underline">Esqueci minha senha</Link>
+                  <form onSubmit={handleLogin} className="space-y-5" noValidate>
+                    <div>
+                      <Label htmlFor="email" className="text-sm font-semibold text-foreground">Email</Label>
+                      <div className="relative mt-2">
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="email"
+                          type="email"
+                          placeholder="seu@email.com"
+                          value={email}
+                          onChange={e => { setEmail(e.target.value); setEmailError(""); }}
+                          onBlur={() => setEmailError(validateEmail(email))}
+                          className={`pl-11 h-12 rounded-xl text-base transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] ${emailError ? "border-destructive focus-visible:ring-destructive" : "border-input"}`}
+                        />
+                        {emailError && (
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0" />
+                            <p className="text-xs text-destructive">{emailError}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="relative mt-1.5">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
-                        className={`pl-10 pr-10 ${passwordError ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <Label htmlFor="password" className="text-sm font-semibold text-foreground">Senha</Label>
+                        <Link to="/forgot-password" className="text-xs text-primary hover:text-primary/80 font-medium transition-colors">Esqueci minha senha</Link>
+                      </div>
+                      <div className="relative">
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="password"
+                          type={showPassword ? "text" : "password"}
+                          placeholder="••••••••"
+                          value={password}
+                          onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
+                          className={`pl-11 pr-11 h-12 rounded-xl text-base transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] ${passwordError ? "border-destructive focus-visible:ring-destructive" : "border-input"}`}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
                       {passwordError && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <AlertCircle className="w-3 h-3 text-destructive" />
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0" />
                           <p className="text-xs text-destructive">{passwordError}</p>
                         </div>
                       )}
                     </div>
+
+                    <Button
+                      type="submit"
+                      className="w-full h-12 rounded-xl bg-gradient-hero text-primary-foreground font-bold text-base shadow-lg hover:shadow-xl hover:brightness-105 active:scale-[0.98] transition-all"
+                      size="lg"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" /> Entrando...
+                        </span>
+                      ) : "Entrar"}
+                    </Button>
+                  </form>
+
+                  {/* Trust badges */}
+                  <div className="flex items-center justify-center gap-4 mt-6 pt-5 border-t border-border">
+                    {trustBadges.map(badge => (
+                      <div key={badge.label} className="flex items-center gap-1.5 text-muted-foreground">
+                        <badge.icon className="w-3.5 h-3.5 text-primary/60" />
+                        <span className="text-[11px] font-medium">{badge.label}</span>
+                      </div>
+                    ))}
                   </div>
 
-                  <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading}>
-                    {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Entrando...</> : "Entrar"}
-                  </Button>
+                  <p className="text-center text-sm text-muted-foreground mt-6">
+                    Não tem conta?{" "}
+                    <button onClick={() => setMode("select-type")} className="text-primary font-bold hover:underline">
+                      Cadastre-se grátis
+                    </button>
+                  </p>
+                </motion.div>
+              ) : mode === "select-type" ? (
+                <motion.div key="select" {...pageVariants} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+                  <div className="mb-8">
+                    <h2 className="text-3xl font-extrabold text-foreground mb-2 tracking-tight">Criar conta</h2>
+                    <p className="text-muted-foreground">Selecione o tipo de cadastro</p>
+                  </div>
 
-                </form>
+                  <div className="space-y-3">
+                    {userTypes.map((ut, i) => (
+                      <motion.button
+                        key={ut.type}
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.08 }}
+                        onClick={() => {
+                          if (ut.type === "patient") {
+                            navigate("/paciente");
+                            return;
+                          }
+                          setUserType(ut.type);
+                          setMode("register");
+                        }}
+                        className="w-full flex items-center gap-4 p-4 rounded-2xl border border-border hover:border-primary/40 hover:bg-primary/[0.03] text-left group transition-all duration-200"
+                      >
+                        <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${ut.color} transition-transform group-hover:scale-105`}>
+                          <ut.icon className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-foreground group-hover:text-primary transition-colors">{ut.label}</p>
+                          <p className="text-sm text-muted-foreground">{ut.desc}</p>
+                        </div>
+                        <ArrowLeft className="w-4 h-4 text-muted-foreground/30 rotate-180 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                      </motion.button>
+                    ))}
+                  </div>
 
-                <p className="text-center text-sm text-muted-foreground mt-6">
-                  Não tem conta?{" "}
-                  <button onClick={() => setMode("select-type")} className="text-primary font-semibold hover:underline">
-                    Cadastre-se grátis
+                  <p className="text-center text-sm text-muted-foreground mt-6">
+                    Já tem conta?{" "}
+                    <button onClick={() => setMode("login")} className="text-primary font-bold hover:underline">Entrar</button>
+                  </p>
+                </motion.div>
+              ) : (
+                <motion.div key="register" {...pageVariants} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>
+                  <button onClick={() => setMode("select-type")} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors group">
+                    <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" /> Voltar
                   </button>
-                </p>
-              </motion.div>
-            ) : mode === "select-type" ? (
-              <motion.div key="select" {...pageVariants} transition={{ duration: 0.3 }}>
-                <div className="mb-8">
-                  <h2 className="text-2xl font-bold text-foreground mb-1">Criar conta</h2>
-                  <p className="text-muted-foreground text-sm">Selecione o tipo de cadastro</p>
-                </div>
 
-                <div className="space-y-3">
-                  {userTypes.map((ut, i) => (
-                    <motion.button
-                      key={ut.type}
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: i * 0.07 }}
-                    onClick={() => {
-                      if (ut.type === "patient") {
-                        navigate("/paciente");
-                        return;
-                      }
-                      setUserType(ut.type);
-                      setMode("register");
-                    }}
-                      className="card-interactive w-full flex items-center gap-4 p-4 rounded-2xl border border-border hover:border-primary/50 text-left group"
-                    >
-                      <div className={`w-12 h-12 rounded-xl border flex items-center justify-center shrink-0 ${ut.color}`}>
-                        <ut.icon className="w-6 h-6" />
+                  <div className="mb-6">
+                    <div className={`w-11 h-11 rounded-xl border mb-3 flex items-center justify-center ${userTypes.find(u => u.type === userType)?.color}`}>
+                      {(() => { const ut = userTypes.find(u => u.type === userType); return ut ? <ut.icon className="w-5 h-5" /> : null; })()}
+                    </div>
+                    <h2 className="text-2xl font-extrabold text-foreground mb-1 tracking-tight">
+                      Cadastro de {userTypes.find(u => u.type === userType)?.label}
+                    </h2>
+                    <p className="text-muted-foreground text-sm">Preencha seus dados para criar a conta</p>
+                  </div>
+
+                  <form onSubmit={handleRegister} className="space-y-4" noValidate>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-sm font-semibold">Nome</Label>
+                        <Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1.5 h-11 rounded-xl" />
                       </div>
                       <div>
-                        <p className="font-semibold text-foreground group-hover:text-primary transition-colors">{ut.label}</p>
-                        <p className="text-sm text-muted-foreground">{ut.desc}</p>
+                        <Label className="text-sm font-semibold">Sobrenome</Label>
+                        <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1.5 h-11 rounded-xl" />
                       </div>
-                      <ArrowLeft className="w-4 h-4 text-muted-foreground/40 rotate-180 ml-auto group-hover:text-primary transition-colors" />
-                    </motion.button>
-                  ))}
-                </div>
-
-                <p className="text-center text-sm text-muted-foreground mt-6">
-                  Já tem conta?{" "}
-                  <button onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
-                </p>
-              </motion.div>
-            ) : (
-              <motion.div key="register" {...pageVariants} transition={{ duration: 0.3 }}>
-                <button onClick={() => setMode("select-type")} className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-5 transition-colors">
-                  <ArrowLeft className="w-3 h-3" /> Voltar
-                </button>
-
-                <div className="mb-6">
-                  <div className={`w-10 h-10 rounded-xl border mb-3 flex items-center justify-center ${userTypes.find(u => u.type === userType)?.color}`}>
-                    {(() => { const ut = userTypes.find(u => u.type === userType); return ut ? <ut.icon className="w-5 h-5" /> : null; })()}
-                  </div>
-                  <h2 className="text-2xl font-bold text-foreground mb-1">
-                    Cadastro de {userTypes.find(u => u.type === userType)?.label}
-                  </h2>
-                  <p className="text-muted-foreground text-sm">Preencha seus dados para criar a conta</p>
-                </div>
-
-                <form onSubmit={handleRegister} className="space-y-4" noValidate>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-sm font-medium">Nome</Label>
-                      <Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1.5" />
                     </div>
-                    <div>
-                      <Label className="text-sm font-medium">Sobrenome</Label>
-                      <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1.5" />
-                    </div>
-                  </div>
 
-                  <div>
-                    <Label className="text-sm font-medium">Email</Label>
-                    <div className="relative mt-1.5">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        type="email"
-                        value={email}
-                        onChange={e => { setEmail(e.target.value); setEmailError(""); }}
-                        onBlur={() => setEmailError(validateEmail(email))}
-                        placeholder="seu@email.com"
-                        className={`pl-10 ${emailError ? "border-destructive" : ""}`}
-                      />
-                      {emailError && (
-                        <div className="flex items-center gap-1 mt-1">
-                          <AlertCircle className="w-3 h-3 text-destructive" />
-                          <p className="text-xs text-destructive">{emailError}</p>
+                    <div>
+                      <Label className="text-sm font-semibold">Email</Label>
+                      <div className="relative mt-1.5">
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type="email"
+                          value={email}
+                          onChange={e => { setEmail(e.target.value); setEmailError(""); }}
+                          onBlur={() => setEmailError(validateEmail(email))}
+                          placeholder="seu@email.com"
+                          className={`pl-11 h-11 rounded-xl ${emailError ? "border-destructive" : ""}`}
+                        />
+                        {emailError && (
+                          <div className="flex items-center gap-1.5 mt-1.5">
+                            <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0" />
+                            <p className="text-xs text-destructive">{emailError}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label className="text-sm font-semibold">Senha</Label>
+                      <div className="relative mt-1.5">
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
+                          placeholder="Mínimo 6 caracteres"
+                          className={`pl-11 pr-11 h-11 rounded-xl ${passwordError ? "border-destructive" : ""}`}
+                          minLength={6}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          tabIndex={-1}
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {password.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          <div className="flex gap-1">
+                            {[1, 2, 3, 4, 5].map(i => (
+                              <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor[strength] : "bg-muted"}`} />
+                            ))}
+                          </div>
+                          <p className="text-xs text-muted-foreground">Força: <span className="font-semibold text-foreground">{strengthLabel[strength]}</span></p>
+                        </div>
+                      )}
+                      {passwordError && (
+                        <div className="flex items-center gap-1.5 mt-1.5">
+                          <AlertCircle className="w-3.5 h-3.5 text-destructive shrink-0" />
+                          <p className="text-xs text-destructive">{passwordError}</p>
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  <div>
-                    <Label className="text-sm font-medium">Senha</Label>
-                    <div className="relative mt-1.5">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
-                        placeholder="Mínimo 6 caracteres"
-                        className={`pl-10 pr-10 ${passwordError ? "border-destructive" : ""}`}
-                        minLength={6}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                      </button>
-                    </div>
-                    {/* Password strength bar */}
-                    {password.length > 0 && (
-                      <div className="mt-2 space-y-1">
-                        <div className="flex gap-1">
-                          {[1, 2, 3, 4, 5].map(i => (
-                            <div key={i} className={`h-1 flex-1 rounded-full transition-all duration-300 ${i <= strength ? strengthColor[strength] : "bg-muted"}`} />
-                          ))}
+                    {userType === "doctor" && (
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="col-span-2">
+                          <Label className="text-sm font-semibold">CRM</Label>
+                          <Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1.5 h-11 rounded-xl" />
                         </div>
-                        <p className="text-xs text-muted-foreground">Força da senha: <span className="font-medium text-foreground">{strengthLabel[strength]}</span></p>
+                        <div>
+                          <Label className="text-sm font-semibold">UF</Label>
+                          <Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1.5 h-11 rounded-xl" maxLength={2} />
+                        </div>
                       </div>
                     )}
-                    {passwordError && (
-                      <div className="flex items-center gap-1 mt-1">
-                        <AlertCircle className="w-3 h-3 text-destructive" />
-                        <p className="text-xs text-destructive">{passwordError}</p>
-                      </div>
+
+                    {userType === "clinic" && (
+                      <>
+                        <div>
+                          <Label className="text-sm font-semibold">Nome da Clínica</Label>
+                          <Input value={clinicName} onChange={e => setClinicName(e.target.value)} placeholder="Clínica Saúde" required className="mt-1.5 h-11 rounded-xl" />
+                        </div>
+                        <div>
+                          <Label className="text-sm font-semibold">CNPJ <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                          <Input value={cnpj} onChange={e => setCnpj(e.target.value)} placeholder="00.000.000/0000-00" className="mt-1.5 h-11 rounded-xl" />
+                        </div>
+                      </>
                     )}
-                  </div>
 
-                  {userType === "doctor" && (
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="col-span-2">
-                        <Label className="text-sm font-medium">CRM</Label>
-                        <Input value={crm} onChange={e => setCrm(e.target.value)} placeholder="123456" required className="mt-1.5" />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">UF</Label>
-                        <Input value={crmState} onChange={e => setCrmState(e.target.value.toUpperCase())} placeholder="SP" required className="mt-1.5" maxLength={2} />
-                      </div>
-                    </div>
-                  )}
+                    <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} className="mt-2" />
 
-                  {userType === "clinic" && (
-                    <>
-                      <div>
-                        <Label className="text-sm font-medium">Nome da Clínica</Label>
-                        <Input value={clinicName} onChange={e => setClinicName(e.target.value)} placeholder="Clínica Saúde" required className="mt-1.5" />
-                      </div>
-                      <div>
-                        <Label className="text-sm font-medium">CNPJ <span className="text-muted-foreground font-normal">(opcional)</span></Label>
-                        <Input value={cnpj} onChange={e => setCnpj(e.target.value)} placeholder="00.000.000/0000-00" className="mt-1.5" />
-                      </div>
-                    </>
-                  )}
+                    <Button
+                      type="submit"
+                      className="w-full h-12 rounded-xl bg-gradient-hero text-primary-foreground font-bold text-base shadow-lg hover:shadow-xl hover:brightness-105 active:scale-[0.98] transition-all"
+                      size="lg"
+                      disabled={loading || !termsAccepted}
+                    >
+                      {loading ? (
+                        <span className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" /> Criando conta...
+                        </span>
+                      ) : "Criar conta grátis"}
+                    </Button>
+                  </form>
 
-                  <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} className="mt-2" />
-
-                  <Button type="submit" className="w-full bg-gradient-hero text-primary-foreground" size="lg" disabled={loading || !termsAccepted}>
-                    {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Criando conta...</> : "Criar conta grátis"}
-                  </Button>
-                </form>
-
-                <p className="text-center text-sm text-muted-foreground mt-4">
-                  Já tem conta?{" "}
-                  <button onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">Entrar</button>
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <p className="text-center text-sm text-muted-foreground mt-5">
+                    Já tem conta?{" "}
+                    <button onClick={() => setMode("login")} className="text-primary font-bold hover:underline">Entrar</button>
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>
