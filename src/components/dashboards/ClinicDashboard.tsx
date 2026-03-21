@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, Calendar, BarChart3, Settings, Stethoscope, Clock, DollarSign, TrendingUp, FileText, Sparkles, SlidersHorizontal, Download } from "lucide-react";
+import { Users, Calendar, BarChart3, Settings, Stethoscope, Clock, DollarSign, TrendingUp, FileText, Sparkles, SlidersHorizontal, Download, ClipboardList } from "lucide-react";
 // jsPDF loaded dynamically on export
 import { toast } from "sonner";
 import { format, startOfMonth, subMonths } from "date-fns";
