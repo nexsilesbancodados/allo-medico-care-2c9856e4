@@ -274,15 +274,17 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         </nav>
       )}
 
-      <div className="p-3 border-t border-border/30 mt-auto shrink-0">
+      <div className="p-3 border-t border-border/20 mt-auto shrink-0">
         <button onClick={() => { navigate("/dashboard/profile"); onItemClick?.(); }}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/60 transition-colors text-left group">
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-muted/60 transition-all duration-200 text-left group">
           <div className="relative shrink-0">
-            <Avatar className="h-9 w-9 ring-2 ring-border/30 group-hover:ring-primary/20 transition-all">
+            <Avatar className="h-9 w-9 ring-2 ring-border/20 group-hover:ring-primary/30 transition-all duration-300">
               {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
               <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-xs font-bold`}>{initials}</AvatarFallback>
             </Avatar>
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-success border-2 border-background" aria-hidden="true" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-success border-2 border-background" aria-hidden="true">
+              <span className="absolute inset-0 rounded-full bg-success animate-ping opacity-50" />
+            </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-foreground truncate leading-tight">{fullName}</p>
