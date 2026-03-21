@@ -1123,16 +1123,16 @@ const ExamReportEditor = () => {
 
   // Requesting clinic name
   const { data: requestingClinic } = useQuery({
-    queryKey: ["requesting-clinic-name", (examRequest as any)?.requesting_clinic_id],
+    queryKey: ["requesting-clinic-name", examRequest?.requesting_clinic_id],
     queryFn: async () => {
       const { data } = await supabase
         .from("clinic_profiles")
         .select("name")
-        .eq("id", (examRequest as any).requesting_clinic_id)
+        .eq("id", examRequest!.requesting_clinic_id)
         .maybeSingle();
       return data;
     },
-    enabled: !!(examRequest as any)?.requesting_clinic_id,
+    enabled: !!examRequest?.requesting_clinic_id,
   });
 
   // ---- Auto-claim exam on open ----
@@ -1423,17 +1423,17 @@ const ExamReportEditor = () => {
       }
 
       // Notificar clínica se o exame veio de uma clínica
-      if ((examRequest as any)?.requesting_clinic_id) {
+      if (examRequest?.requesting_clinic_id) {
         const { data: clinicData } = await supabase
           .from("clinic_profiles")
           .select("user_id")
-          .eq("id", (examRequest as any).requesting_clinic_id)
+          .eq("id", examRequest!.requesting_clinic_id)
           .maybeSingle();
         if (clinicData?.user_id) {
           await supabase.from("notifications").insert({
             user_id: clinicData.user_id,
             title: "📋 Laudo Concluído",
-            message: `O laudo do exame ${examRequest.exam_type}${(examRequest as any).patient_name ? ` — ${(examRequest as any).patient_name}` : ""} foi finalizado.`,
+            message: `O laudo do exame ${examRequest.exam_type}${examRequest?.patient_name ? ` — ${examRequest?.patient_name}` : ""} foi finalizado.`,
             type: "exam_report",
             link: `/dashboard/clinic/my-exams?role=clinic`,
           });
@@ -1550,8 +1550,8 @@ const ExamReportEditor = () => {
                 <div className="flex items-center gap-2">
                   <Clipboard className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   <span className="text-[11px] font-semibold text-foreground">
-                    {(examRequest as any)?.patient_name
-                      ? (examRequest as any).patient_name
+                    {examRequest?.patient_name
+                      ? examRequest?.patient_name
                       : examRequest?.patient_id
                       ? "Paciente cadastrado"
                       : "Paciente não informado"}
