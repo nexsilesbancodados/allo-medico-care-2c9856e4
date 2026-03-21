@@ -287,7 +287,7 @@ const PanelCenter = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <Card
-                  className={`relative overflow-hidden cursor-pointer group border-border/40 bg-card/90 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 ring-1 ring-transparent hover:ring-1 hover:${panel.accentRing}`}
+                  className="relative overflow-hidden cursor-pointer group border-border/40 bg-card/90 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 ring-1 ring-transparent hover:ring-primary/20"
                   onClick={() => navigate(panel.route)}
                 >
                   {/* Top gradient accent line */}
