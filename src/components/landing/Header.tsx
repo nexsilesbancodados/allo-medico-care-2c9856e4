@@ -127,10 +127,11 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
         {/* ── Desktop nav ── */}
         <div className="hidden lg:flex items-center">
           <NavigationMenu>
-            <NavigationMenuList className="gap-0">
+            <NavigationMenuList className="gap-1">
               {/* Serviços */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground px-3.5 h-10">
+                <NavigationMenuTrigger className="group/trigger text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-primary/[0.06] px-4 h-10 rounded-xl transition-all duration-200 gap-1.5">
+                  <Video className="w-3.5 h-3.5 text-primary/50 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150" />
                   Serviços
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -167,7 +168,8 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
 
               {/* Profissionais */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground px-3.5 h-10">
+                <NavigationMenuTrigger className="group/trigger text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-primary/[0.06] px-4 h-10 rounded-xl transition-all duration-200 gap-1.5">
+                  <Stethoscope className="w-3.5 h-3.5 text-primary/50 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150" />
                   Profissionais
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -189,7 +191,8 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
 
               {/* Para Empresas */}
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground px-3.5 h-10">
+                <NavigationMenuTrigger className="group/trigger text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-primary/[0.06] px-4 h-10 rounded-xl transition-all duration-200 gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-primary/50 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150" />
                   Para Empresas
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
