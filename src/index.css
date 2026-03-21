@@ -61,6 +61,19 @@
     --shadow-card: 0 4px 24px -4px hsl(210 90% 45% / 0.08);
     --shadow-elevated: 0 12px 40px -8px hsl(210 90% 45% / 0.15);
 
+    /* Laudos Workstation tokens */
+    --laudo-bg: 220 20% 10%;
+    --laudo-surface: 220 18% 13%;
+    --laudo-border: 220 15% 20%;
+    --laudo-text: 220 10% 85%;
+    --laudo-text-muted: 220 8% 50%;
+    --laudo-accent: 195 80% 55%;
+    --laudo-accent-dim: 195 70% 20%;
+    --laudo-urgent: 0 90% 60%;
+    --laudo-warning: 38 95% 55%;
+    --laudo-success: 142 70% 48%;
+    --laudo-dicom-bg: 0 0% 3%;
+
     /* Continuous background — soft blue-teal with organic curves */
     --landing-bg:
       radial-gradient(ellipse 120% 60% at 0% 80%, hsl(180 40% 85% / 0.5) 0%, transparent 60%),
