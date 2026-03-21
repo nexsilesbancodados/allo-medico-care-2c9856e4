@@ -25,7 +25,7 @@ import mascotWelcome from "@/assets/mascot-welcome.png";
 import pingoVirtualAssistant from "@/assets/pingo-virtual-assistant.png";
 import devicesMascot from "@/assets/devices-mascot.png";
 
-const ListItem = ({
+const ListItem = forwardRef<HTMLLIElement, React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType; imgSrc?: string; badge?: string }>(({
   className,
   title,
   children,
@@ -34,8 +34,8 @@ const ListItem = ({
   imgSrc,
   badge,
   ...props
-}: React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType; imgSrc?: string; badge?: string }) => (
-  <li>
+}, ref) => (
+  <li ref={ref}>
     <NavigationMenuLink asChild>
       <Link
         to={href || "#"}
@@ -71,7 +71,8 @@ const ListItem = ({
       </Link>
     </NavigationMenuLink>
   </li>
-);
+));
+ListItem.displayName = "ListItem";
 
 const Header = memo(forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
