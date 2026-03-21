@@ -231,6 +231,7 @@ const PacsViewer = ({
 
       info["Formato"] = "DICOM";
       info["Dimensões"] = `${cols}×${rows}`;
+      setImageNaturalSize({ w: cols, h: rows });
       info["Bits"] = `${bitsStored}/${bitsAllocated}`;
       if (wc) info["WC"] = String(Math.round(wc));
       if (ww) info["WW"] = String(Math.round(ww));
