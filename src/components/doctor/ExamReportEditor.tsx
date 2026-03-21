@@ -1282,7 +1282,20 @@ const ExamReportEditor = () => {
 
     setSigning(true);
     try {
-      const documentHash = await gerarHashDocumento(content);
+      const contentForPdf = content
+        .replace(/<h[1-3][^>]*>/gi, "\n")
+        .replace(/<\/h[1-3]>/gi, "\n")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<li[^>]*>/gi, "• ")
+        .replace(/<\/li>/gi, "\n")
+        .replace(/<\/p>/gi, "\n")
+        .replace(/<strong>|<\/strong>|<em>|<\/em>|<u>|<\/u>/gi, "")
+        .replace(/<mark[^>]*>|<\/mark>/gi, "")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+        .replace(/\n{3,}/g, "\n\n").trim();
+      const documentHash = await gerarHashDocumento(contentForPdf);
       const verificationCode = gerarCodigoVerificacao();
       const doctorName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim();
       const patientDisplayName = examRequest?.patient_name || "Paciente";
