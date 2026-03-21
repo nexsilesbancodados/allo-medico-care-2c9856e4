@@ -11,6 +11,7 @@ export const getDoctorNav = (active: string) => [
   { label: "Renovações", href: "/dashboard/doctor/renewal-queue?role=doctor", icon: <RefreshCw className="w-4 h-4" />, active: active === "renewal-queue", group: "Documentos" },
   { label: "Exames", href: "/dashboard/doctor/documents?role=doctor", icon: <Upload className="w-4 h-4" />, active: active === "documents", group: "Documentos" },
   { label: "Receitas", href: "/dashboard/prescriptions?role=doctor", icon: <FileText className="w-4 h-4" />, active: active === "prescriptions", group: "Documentos" },
+  { label: "Receituário", href: "/dashboard/doctor/simple-prescription?role=doctor", icon: <Pill className="w-4 h-4" />, active: active === "simple-prescription", group: "Documentos" },
   { label: "Atestados", href: "/dashboard/certificates?role=doctor", icon: <FileBadge className="w-4 h-4" />, active: active === "certificates", group: "Documentos" },
   
   { label: "Ganhos", href: "/dashboard/earnings?role=doctor", icon: <DollarSign className="w-4 h-4" />, active: active === "earnings", group: "Financeiro" },
