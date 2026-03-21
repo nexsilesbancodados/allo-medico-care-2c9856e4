@@ -324,13 +324,16 @@ const AdminDashboard = () => {
 
         {/* Real-time banner */}
         <motion.div variants={fadeUp}>
-          <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-secondary/5">
+          <Card className="border-border/20 bg-background shadow-sm rounded-2xl overflow-hidden">
+            <div className="h-1 bg-gradient-to-r from-primary via-secondary to-warning" />
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-4">
-                <Activity className="w-5 h-5 text-primary animate-pulse" />
-                <h2 className="font-semibold text-foreground">Tempo Real</h2>
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <Activity className="w-4 h-4 text-white" />
+                </div>
+                <h2 className="font-semibold text-foreground text-sm">Tempo Real</h2>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 {[
                   { icon: Video, color: "text-primary", value: stats.live_now, label: "Ao vivo" },
                   { icon: Clock, color: "text-secondary", value: stats.waiting_now, label: "Na fila" },
@@ -338,12 +341,12 @@ const AdminDashboard = () => {
                   { icon: null, color: "text-destructive", value: `${stats.no_show_rate.toFixed(1)}%`, label: "Absenteísmo" },
                   { icon: Star, color: "text-warning", value: stats.avg_rating.toFixed(1), label: "NPS Médicos" },
                 ].map((item, i) => (
-                  <div key={i} className="text-center p-3 rounded-xl bg-card/50">
+                  <div key={i} className="text-center p-3 rounded-xl bg-muted/40">
                     <div className="flex items-center justify-center gap-1.5 mb-1">
                       {item.icon && <item.icon className={`w-4 h-4 ${item.color}`} />}
-                      <span className={`text-2xl font-bold ${item.color || "text-foreground"}`}>{item.value}</span>
+                      <span className={`text-xl font-bold ${item.color || "text-foreground"}`}>{item.value}</span>
                     </div>
-                    <p className="text-xs text-muted-foreground">{item.label}</p>
+                    <p className="text-[10px] text-muted-foreground">{item.label}</p>
                   </div>
                 ))}
               </div>
