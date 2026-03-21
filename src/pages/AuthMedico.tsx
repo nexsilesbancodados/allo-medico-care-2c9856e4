@@ -523,6 +523,37 @@ const AuthMedico = () => {
           </div>
         </section>
 
+        {/* ==================== IMAGE BANNER CTA ==================== */}
+        <section className="relative overflow-hidden" style={{ minHeight: "280px" }}>
+          <img src={bannerMedicoCta} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
+          <div className="container mx-auto px-4 relative z-10 flex items-center" style={{ minHeight: "280px" }}>
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="max-w-lg">
+              <Badge className="mb-3 text-xs px-3 py-1 bg-white/15 text-white border-white/20 backdrop-blur-sm">
+                <BarChart3 className="w-3 h-3 mr-1" /> Dados reais
+              </Badge>
+              <h2 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight leading-tight">
+                Médicos que usam a AloClinica<br />aumentam sua base em até <span className="text-white/90">40%</span>
+              </h2>
+              <p className="text-sm text-white/70 mb-5 max-w-md">
+                Alcance pacientes de todo o Brasil sem sair de casa. Defina seus horários e preços.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                {[
+                  { label: "500+", desc: "Médicos ativos" },
+                  { label: "30+", desc: "Especialidades" },
+                  { label: "4.9★", desc: "Avaliação média" },
+                ].map((s, i) => (
+                  <div key={i} className="text-center">
+                    <p className="text-xl font-black text-white">{s.label}</p>
+                    <p className="text-[10px] text-white/60 uppercase tracking-wider">{s.desc}</p>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </section>
+
         {/* Features checklist */}
         <section className="py-20 bg-muted/30">
           <div className="container mx-auto px-4 max-w-3xl">
