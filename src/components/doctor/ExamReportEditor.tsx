@@ -935,12 +935,68 @@ const PacsViewer = ({
                 <div className="p-2 space-y-1">
                   {measurements.map((m, i) => (
                     <div key={m.id} className="text-[10px] text-green-400/70 flex justify-between">
-                      <span>{i + 1}. {m.type === "length" ? "Comprimento" : m.type === "angle" ? "Ângulo" : "ROI"}</span>
+                      <span>{i + 1}. {m.type === "length" ? "Comprimento" : m.type === "angle" ? "Ângulo" : m.type === "rectangle" ? "Retângulo" : m.type === "bidirectional" ? "Bidirecional" : "ROI"}</span>
                       <span className="font-mono">{m.value}</span>
                     </div>
                   ))}
                 </div>
               </>
+            )}
+          </div>
+        )}
+
+        {/* Measurements Panel (Zafaz-style) */}
+        {showMeasurementsPanel && (
+          <div className="w-56 border-l border-white/10 bg-[#0d1117] overflow-y-auto flex-shrink-0">
+            <div className="p-1.5 text-[9px] text-white/40 uppercase tracking-wider px-2 py-1.5 border-b border-white/5 font-semibold flex items-center justify-between">
+              Measurements
+              <Button size="icon" variant="ghost" className="h-5 w-5 text-white/30 hover:text-white" onClick={() => setShowMeasurementsPanel(false)}>
+                ×
+              </Button>
+            </div>
+            {measurements.length === 0 && annotations.length === 0 ? (
+              <div className="p-4 text-center text-[10px] text-white/20">
+                <Ruler className="w-8 h-8 mx-auto mb-2 opacity-30" />
+                Nenhuma medição
+              </div>
+            ) : (
+              <div className="p-2 space-y-1.5">
+                {measurements.map((m, i) => (
+                  <div key={m.id} className="flex items-center justify-between gap-1 text-[10px] py-1 px-1.5 rounded bg-white/5 hover:bg-white/10 group">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-green-400/80">
+                        {m.type === "length" ? "📏" : m.type === "angle" ? "📐" : m.type === "ellipse" ? "⭕" : m.type === "rectangle" ? "⬜" : m.type === "bidirectional" ? "↔️" : "📍"}
+                      </span>
+                      <span className="text-white/50 shrink-0">{i + 1}.</span>
+                      <span className="text-white/70 truncate">{m.type === "length" ? "Comp." : m.type === "angle" ? "Ângulo" : m.type === "ellipse" ? "Elipse" : m.type === "rectangle" ? "Retângulo" : m.type === "bidirectional" ? "Bidirec." : m.type}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="font-mono text-green-400/90 text-[9px]">{m.value}</span>
+                      <Button size="icon" variant="ghost" className="h-4 w-4 opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-400"
+                        onClick={() => setMeasurements(prev => prev.filter(x => x.id !== m.id))}>
+                        ×
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {annotations.map((a, i) => (
+                  <div key={a.id} className="flex items-center justify-between gap-1 text-[10px] py-1 px-1.5 rounded bg-white/5 hover:bg-white/10 group">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-yellow-400/80">📝</span>
+                      <span className="text-white/70 truncate">{a.text}</span>
+                    </div>
+                    <Button size="icon" variant="ghost" className="h-4 w-4 opacity-0 group-hover:opacity-100 text-red-400/60 hover:text-red-400"
+                      onClick={() => setAnnotations(prev => prev.filter(x => x.id !== a.id))}>
+                      ×
+                    </Button>
+                  </div>
+                ))}
+                <Separator className="bg-white/10 my-1" />
+                <Button variant="ghost" size="sm" className="w-full text-[10px] h-6 text-red-400/60 hover:text-red-400 hover:bg-red-500/10"
+                  onClick={() => { setMeasurements([]); setAnnotations([]); }}>
+                  Limpar tudo
+                </Button>
+              </div>
             )}
           </div>
         )}
