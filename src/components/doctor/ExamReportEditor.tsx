@@ -727,6 +727,22 @@ const PacsViewer = ({
 
           <div className="flex-1" />
 
+          {/* Download */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+              onClick={handleDownloadImage}>
+              <Download className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Baixar imagem</TooltipContent></Tooltip>
+
+          {/* Measurements panel toggle */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${showMeasurementsPanel ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+              onClick={() => setShowMeasurementsPanel(p => !p)}>
+              <Ruler className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Medições</TooltipContent></Tooltip>
+
           {/* Info panel toggle */}
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className={`h-7 w-7 ${showInfoPanel ? "bg-primary/30 text-primary" : "text-white/60 hover:text-white hover:bg-white/10"}`}
