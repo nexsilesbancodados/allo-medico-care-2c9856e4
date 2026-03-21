@@ -853,7 +853,7 @@ const PacsViewer = ({
                         const { data } = await supabase.storage.from("exam-files").createSignedUrl(p, 3600);
                         return data?.signedUrl || "";
                       }));
-                      setFileUrls(prev => [...prev, ...resolved.filter(Boolean)]);
+                      onFilesUploaded?.(resolved.filter(Boolean));
                       toast.success(`${paths.length} arquivo(s) enviado(s)!`);
                     }
                   }}
