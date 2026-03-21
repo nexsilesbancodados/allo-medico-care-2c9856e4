@@ -6,6 +6,7 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getLaudistaNav } from "@/components/laudista/laudistaNav";
 import { getReceptionNav } from "@/components/reception/receptionNav";
+import { getClinicNav } from "@/components/clinic/clinicNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -114,11 +115,7 @@ const ExamRequestForm = () => {
   });
 
   const getNav = () => {
-    if (isClinic) {
-      return [
-        { label: "Voltar", href: "/dashboard/clinic/my-exams?role=clinic", icon: <FileImage className="w-4 h-4" />, active: false, group: "Principal" },
-      ];
-    }
+    if (isClinic) return getClinicNav("exam-request");
     if (isReception) return getReceptionNav("exam-request");
     if (isLaudista) return getLaudistaNav("queue");
     return getDoctorNav("exam-request");
