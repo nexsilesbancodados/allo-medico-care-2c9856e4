@@ -240,7 +240,7 @@ const UserProfile = () => {
         </Card>
 
         {/* Health info */}
-        <Card className="border-border mb-6">
+        <Card variant="elevated" className="mb-6">
           <CardHeader><CardTitle className="text-lg">Dados de Saúde</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
