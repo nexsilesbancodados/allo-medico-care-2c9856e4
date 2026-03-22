@@ -37,6 +37,7 @@ import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
 import TipTapEditor from "@/components/telelaudo/TipTapEditor";
 import jsPDF from "jspdf";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
 import type { ExamRequest, ExamReport, ReportTemplate } from "@/types/domain";
 
@@ -1097,8 +1098,16 @@ const ExamReportEditor = () => {
 
   // Sign confirmation dialog
   const [showSignDialog, setShowSignDialog] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [panelDirection, setPanelDirection] = useState<"horizontal" | "vertical">(() => {
+    try { return (localStorage.getItem("laudo-panel-dir") as "horizontal" | "vertical") || "horizontal"; } catch { return "horizontal"; }
+  });
 
-  // Voice
+  const togglePanelDirection = () => {
+    const next = panelDirection === "horizontal" ? "vertical" : "horizontal";
+    setPanelDirection(next);
+    try { localStorage.setItem("laudo-panel-dir", next); } catch {}
+  };
   const [listening, setListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(true);
   const recognitionRef = useRef<Record<string, unknown> | null>(null);
@@ -1940,6 +1949,26 @@ const ExamReportEditor = () => {
           )}
 
           <span className="hidden lg:inline text-[9px] font-mono" style={{ color: 'hsl(220 8% 40%)' }}>Ctrl+S · Ctrl+⏎</span>
+
+          {/* Orientation toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7 hover:bg-white/5" onClick={togglePanelDirection}>
+                {panelDirection === "horizontal" ? <Grid3X3 className="w-3.5 h-3.5" /> : <Monitor className="w-3.5 h-3.5" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-[10px]">{panelDirection === "horizontal" ? "Layout Vertical" : "Layout Horizontal"}</TooltipContent>
+          </Tooltip>
+
+          {/* Shortcuts help */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7 hover:bg-white/5 font-bold text-sm" onClick={() => setShowShortcuts(true)}>
+                ?
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-[10px]">Atalhos de Teclado</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
@@ -1950,7 +1979,7 @@ const ExamReportEditor = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <ResizablePanelGroup direction="horizontal">
+        <ResizablePanelGroup direction={panelDirection} key={panelDirection}>
           <ResizablePanel defaultSize={55} minSize={30}>
             <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} onFilesUploaded={(newUrls) => setFileUrls(prev => [...prev, ...newUrls])} />
           </ResizablePanel>
@@ -2169,6 +2198,49 @@ const ExamReportEditor = () => {
         {profile && <span>Dr(a). {profile.first_name} {profile.last_name}</span>}
         {doctorProfile?.crm && <span>CRM {doctorProfile.crm}/{doctorProfile.crm_state}</span>}
       </div>
+
+      {/* ═══ SHORTCUTS DIALOG ═══ */}
+      <Dialog open={showShortcuts} onOpenChange={setShowShortcuts}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">⌨️ Atalhos de Teclado</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[60vh]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-semibold">Atalho</TableHead>
+                  <TableHead className="font-semibold">Ação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[
+                  ["Ctrl+S", "Salvar rascunho"],
+                  ["Ctrl+Enter", "Abrir diálogo de assinatura"],
+                  ["Ctrl+D", "Toggle ditado por voz"],
+                  ["Ctrl+M", "Abrir painel de macros"],
+                  ["Ctrl+Z / Ctrl+Y", "Desfazer / Refazer"],
+                  ["Ctrl+B / I / U", "Negrito / Itálico / Sublinhado"],
+                  ["[ / ]", "Imagem anterior / próxima"],
+                  ["+ / -", "Zoom in / out no viewer"],
+                  ["R", "Rotacionar imagem 90°"],
+                  ["I", "Inverter imagem"],
+                  ["Esc", "Cancelar ferramenta ativa"],
+                  ["F", "Tela cheia no viewer"],
+                  ["Space", "Play/Pause CINE"],
+                ].map(([key, action]) => (
+                  <TableRow key={key}>
+                    <TableCell>
+                      <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border">{key}</kbd>
+                    </TableCell>
+                    <TableCell className="text-sm">{action}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Sign Confirmation AlertDialog */}
       <AlertDialog open={showSignDialog} onOpenChange={setShowSignDialog}>
