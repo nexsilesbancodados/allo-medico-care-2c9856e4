@@ -329,7 +329,7 @@ const AdminFinancial = () => {
 
         {/* Charts */}
         <div className="grid md:grid-cols-2 gap-4">
-          <Card>
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Receita Diária (7 dias)</CardTitle>
             </CardHeader>
