@@ -1,4 +1,4 @@
-import { ReactNode, useState, useMemo, useEffect, useRef } from "react";
+import { ReactNode, useState, useMemo, useEffect, useRef, isValidElement, cloneElement } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
@@ -201,29 +201,32 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
     }).catch(() => {});
   }, []);
 
-  const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => (
-    <Link to={item.href} onClick={onClick}
-      className={`nav-item group flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-[13px] transition-all duration-200 relative ${
-        item.active
-          ? "bg-foreground text-background font-semibold shadow-md"
-          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-      }`}
-    >
-      <span className={`shrink-0 transition-all duration-200 ${
-        item.active ? "text-background" : "text-muted-foreground group-hover:text-foreground"
-      }`}>
-        {item.icon}
-      </span>
-      <span className="flex-1 truncate">{item.label}</span>
-      {(item.badge ?? 0) > 0 && (
-        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center tabular-nums ${
-          item.active ? "bg-background/20 text-background" : "bg-destructive text-white"
-        }`}>
-          {(item.badge ?? 0) > 99 ? "99+" : item.badge}
-        </span>
-      )}
-    </Link>
-  );
+  const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => {
+    // Clone NavIcon to inject active state
+    const icon = isValidElement(item.icon) && (item.icon.props as any)?.color
+      ? cloneElement(item.icon as React.ReactElement<any>, { active: item.active })
+      : item.icon;
+
+    return (
+      <Link to={item.href} onClick={onClick}
+        className={`nav-item group flex items-center gap-2.5 px-2 py-1.5 rounded-xl text-[13px] transition-all duration-200 relative ${
+          item.active
+            ? "bg-foreground text-background font-semibold shadow-md"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+        }`}
+      >
+        {icon}
+        <span className="flex-1 truncate">{item.label}</span>
+        {(item.badge ?? 0) > 0 && (
+          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center tabular-nums ${
+            item.active ? "bg-background/20 text-background" : "bg-destructive text-white"
+          }`}>
+            {(item.badge ?? 0) > 99 ? "99+" : item.badge}
+          </span>
+        )}
+      </Link>
+    );
+  };
 
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <div ref={sidebarRef} className="flex flex-col h-full">
