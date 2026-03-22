@@ -1944,7 +1944,12 @@ const ExamReportEditor = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 min-h-0">
+      <motion.div
+        className="flex-1 min-h-0"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={55} minSize={30}>
             <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} onFilesUploaded={(newUrls) => setFileUrls(prev => [...prev, ...newUrls])} />
