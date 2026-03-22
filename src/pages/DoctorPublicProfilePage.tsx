@@ -90,7 +90,8 @@ const DoctorPublicProfilePage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="min-h-screen flex items-center justify-center relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(200,55%,97%)] via-[hsl(210,45%,93%)] to-[hsl(220,40%,88%)] dark:from-[hsl(200,25%,7%)] dark:via-[hsl(210,20%,9%)] dark:to-[hsl(220,18%,11%)]" />
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>
     );
