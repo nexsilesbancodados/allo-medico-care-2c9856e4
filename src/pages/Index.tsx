@@ -53,7 +53,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
   return (
     <div className="min-h-screen relative">
       {/* Fixed subtle gradient background */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(210,40%,98%)] via-[hsl(200,30%,96%)] to-[hsl(170,25%,95%)] dark:from-[hsl(210,30%,8%)] dark:via-[hsl(200,25%,10%)] dark:to-[hsl(170,20%,9%)]" />
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(195,100%,95%)] via-[hsl(200,85%,88%)] to-[hsl(210,90%,72%)] dark:from-[hsl(210,40%,10%)] dark:via-[hsl(200,35%,14%)] dark:to-[hsl(195,30%,12%)]" />
       <SEOHead
         title="Consultas Médicas Online por Vídeo 24h | AloClínica"
         description="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades, plantão clínico 24h. Sua saúde na palma da mão."
