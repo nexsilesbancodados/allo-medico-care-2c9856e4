@@ -503,7 +503,7 @@ const PrescriptionForm = () => {
         )}
 
         {/* Patient info */}
-        <Card className="border-border mb-6">
+        <Card variant="flat" className="mb-6">
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Paciente</p>
             <p className="font-semibold text-foreground">{patientName || "Carregando..."}</p>
@@ -511,7 +511,7 @@ const PrescriptionForm = () => {
         </Card>
 
         {/* Diagnosis */}
-        <Card className="border-border mb-6">
+        <Card variant="elevated" className="mb-6">
           <CardHeader><CardTitle className="text-base">Diagnóstico</CardTitle></CardHeader>
           <CardContent>
             <Input
@@ -523,7 +523,7 @@ const PrescriptionForm = () => {
         </Card>
 
         {/* Medications */}
-        <Card className="border-border mb-6">
+        <Card variant="elevated" className="mb-6">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Medicamentos</CardTitle>
@@ -576,7 +576,7 @@ const PrescriptionForm = () => {
         </Card>
 
         {/* Observations */}
-        <Card className="border-border mb-6">
+        <Card variant="elevated" className="mb-6">
           <CardHeader><CardTitle className="text-base">Observações</CardTitle></CardHeader>
           <CardContent>
             <Textarea

@@ -256,7 +256,7 @@ const DoctorWaitingRoom = () => {
                   const alert = getTriageAlert(p.id);
                   const isCritical = alert?.level === "critical";
                   return (
-                    <Card key={p.id} className={`border-border border-l-4 ${isCritical ? "border-l-destructive bg-destructive/5" : "border-l-orange-400"}`}>
+                    <Card key={p.id} variant="interactive" className={`border-l-4 ${isCritical ? "border-l-destructive bg-destructive/5" : "border-l-orange-400"}`}>
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -297,7 +297,7 @@ const DoctorWaitingRoom = () => {
               {waitingPatients.filter(p => p.status === "scheduled").map(p => {
                 const t = typeLabel[p.appointment_type] ?? typeLabel.first_visit;
                 return (
-                  <Card key={p.id} className="border-border opacity-70">
+                  <Card key={p.id} variant="flat" className="opacity-70">
                     <CardContent className="p-3">
                       <div className="flex items-center justify-between">
                         <div>
@@ -325,7 +325,7 @@ const DoctorWaitingRoom = () => {
             </h2>
             <div className="space-y-2">
               {waitingPatients.filter(p => p.status === "in_progress").map(p => (
-                <Card key={p.id} className="border-border border-l-4 border-l-green-500">
+                <Card key={p.id} variant="interactive" className="border-l-4 border-l-green-500">
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -344,7 +344,7 @@ const DoctorWaitingRoom = () => {
         )}
 
         {waitingPatients.length === 0 && !loading && (
-          <Card className="border-border">
+          <Card variant="flat">
             <CardContent className="py-12 text-center">
               <Clock className="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
               <p className="text-muted-foreground">Nenhum paciente na sala de espera.</p>

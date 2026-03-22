@@ -193,25 +193,25 @@ const LaudistaEarnings = () => {
           </div>
         ) : earningsData && (
           <div className="grid sm:grid-cols-4 gap-4">
-            <Card className="border-border/50 bg-gradient-to-br from-secondary/5 to-transparent">
+            <Card variant="kpi" className="bg-gradient-to-br from-secondary/5 to-transparent">
               <CardContent className="pt-6">
                 <p className="text-xs text-muted-foreground">Ganho Total</p>
                 <p className="text-2xl font-bold text-foreground tabular-nums">R$ {earningsData.total.toFixed(2)}</p>
               </CardContent>
             </Card>
-            <Card className="border-border/50">
+            <Card variant="kpi">
               <CardContent className="pt-6">
                 <p className="text-xs text-muted-foreground">Este Mês</p>
                 <p className="text-2xl font-bold text-foreground tabular-nums">R$ {earningsData.thisMonth.toFixed(2)}</p>
               </CardContent>
             </Card>
-            <Card className="border-border/50">
+            <Card variant="kpi">
               <CardContent className="pt-6">
                 <p className="text-xs text-muted-foreground">Laudos Assinados</p>
                 <p className="text-2xl font-bold text-foreground">{earningsData.totalReports}</p>
               </CardContent>
             </Card>
-            <Card className="border-border/50 border-secondary/20 bg-secondary/5">
+            <Card variant="kpi" className="border-secondary/20 bg-secondary/5">
               <CardContent className="pt-6">
                 <p className="text-xs text-muted-foreground">Saldo Disponível</p>
                 <p className="text-2xl font-bold text-secondary tabular-nums">R$ {earningsData.available.toFixed(2)}</p>

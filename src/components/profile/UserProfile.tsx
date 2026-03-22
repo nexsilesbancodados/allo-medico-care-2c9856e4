@@ -200,7 +200,7 @@ const UserProfile = () => {
         <h1 className="text-2xl font-bold text-foreground mb-6">Meu Perfil</h1>
 
         {/* Avatar */}
-        <Card className="border-border mb-6">
+        <Card variant="elevated" className="mb-6">
           <CardContent className="pt-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <div className="relative shrink-0">
               <Avatar className="w-20 h-20">
@@ -221,7 +221,7 @@ const UserProfile = () => {
         </Card>
 
         {/* Personal info */}
-        <Card className="border-border mb-6">
+        <Card variant="elevated" className="mb-6">
           <CardHeader><CardTitle className="text-lg">Dados Pessoais</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -240,7 +240,7 @@ const UserProfile = () => {
         </Card>
 
         {/* Health info */}
-        <Card className="border-border mb-6">
+        <Card variant="elevated" className="mb-6">
           <CardHeader><CardTitle className="text-lg">Dados de Saúde</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -267,7 +267,7 @@ const UserProfile = () => {
 
         {/* Doctor-specific */}
         {isDoctor && (
-          <Card className="border-border mb-6">
+          <Card variant="elevated" className="mb-6">
             <CardHeader><CardTitle className="text-lg">Perfil Profissional</CardTitle></CardHeader>
             <CardContent className="space-y-4">
               <div><Label>Bio / Descrição</Label><textarea value={bio} onChange={e => setBio(e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" rows={3} placeholder="Conte sobre sua experiência..." /></div>

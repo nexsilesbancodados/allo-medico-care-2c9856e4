@@ -123,7 +123,7 @@ const ReportTemplateManager = () => {
 
   return (
     <DashboardLayout nav={nav} title="Modelos de Laudo">
-      <Card>
+      <Card variant="elevated">
         <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-primary" />

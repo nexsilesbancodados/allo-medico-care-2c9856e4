@@ -216,7 +216,7 @@ const DoctorConsultations = () => {
         </div>
 
         {/* Filters */}
-        <Card className="border-border">
+        <Card variant="elevated">
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
               <div className="relative flex-1 min-w-[160px]">

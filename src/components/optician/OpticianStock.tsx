@@ -41,7 +41,7 @@ const OpticianStock = () => {
         </Card>
       )}
 
-      <Card>
+      <Card variant="elevated">
         <CardHeader><CardTitle className="flex items-center gap-2"><Package className="w-5 h-5" /> Estoque Atual</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <p className="text-muted-foreground text-sm">Carregando...</p> : (
@@ -75,7 +75,7 @@ const OpticianStock = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant="elevated">
         <CardHeader><CardTitle>Últimas Movimentações</CardTitle></CardHeader>
         <CardContent>
           <Table>

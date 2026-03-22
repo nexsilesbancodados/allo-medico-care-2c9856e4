@@ -324,7 +324,7 @@ const AdminDashboard = () => {
 
         {/* Real-time banner */}
         <motion.div variants={fadeUp}>
-          <Card className="border-border/20 bg-background shadow-sm rounded-2xl overflow-hidden">
+          <Card variant="elevated" className="bg-background overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-primary via-secondary to-warning" />
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-4">
@@ -357,7 +357,7 @@ const AdminDashboard = () => {
         {/* Live consultations */}
         {liveAppts.length > 0 && (
           <motion.div variants={fadeUp}>
-            <Card className="border-border/50">
+            <Card variant="elevated">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
@@ -437,7 +437,7 @@ const AdminDashboard = () => {
 
         <motion.div variants={fadeUp} className="grid lg:grid-cols-2 gap-4">
           {/* Overdue */}
-          <Card className="border-border/50">
+          <Card variant="elevated">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-destructive" /> Inadimplentes
@@ -473,7 +473,7 @@ const AdminDashboard = () => {
           </Card>
 
           {/* Pending doctors */}
-          <Card className="border-border/50">
+          <Card variant="elevated">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 Médicos Pendentes
@@ -511,7 +511,7 @@ const AdminDashboard = () => {
 
         {/* Recent subscriptions */}
         <motion.div variants={fadeUp}>
-          <Card className="border-border/50">
+          <Card variant="elevated">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold">Assinaturas Recentes</CardTitle>

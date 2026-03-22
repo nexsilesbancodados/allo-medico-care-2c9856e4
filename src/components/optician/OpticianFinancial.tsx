@@ -23,27 +23,27 @@ const OpticianFinancial = () => {
   return (
     <div className="space-y-6">
       <div className="grid sm:grid-cols-3 gap-4">
-        <Card>
+        <Card variant="kpi">
           <CardContent className="pt-6 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center"><TrendingUp className="w-6 h-6 text-primary" /></div>
-            <div><p className="text-sm text-muted-foreground">Vendas</p><p className="text-2xl font-extrabold text-foreground">R$ {totalSales.toFixed(2)}</p></div>
+            <div><p className="text-sm text-muted-foreground">Vendas</p><p className="text-2xl font-extrabold text-foreground tabular-nums">R$ {totalSales.toFixed(2)}</p></div>
           </CardContent>
         </Card>
-        <Card>
+        <Card variant="kpi">
           <CardContent className="pt-6 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-destructive/10 flex items-center justify-center"><TrendingDown className="w-6 h-6 text-destructive" /></div>
-            <div><p className="text-sm text-muted-foreground">Estornos</p><p className="text-2xl font-extrabold text-foreground">R$ {totalRefunds.toFixed(2)}</p></div>
+            <div><p className="text-sm text-muted-foreground">Estornos</p><p className="text-2xl font-extrabold text-foreground tabular-nums">R$ {totalRefunds.toFixed(2)}</p></div>
           </CardContent>
         </Card>
-        <Card>
+        <Card variant="kpi">
           <CardContent className="pt-6 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center"><DollarSign className="w-6 h-6 text-accent-foreground" /></div>
-            <div><p className="text-sm text-muted-foreground">Líquido</p><p className="text-2xl font-extrabold text-foreground">R$ {net.toFixed(2)}</p></div>
+            <div><p className="text-sm text-muted-foreground">Líquido</p><p className="text-2xl font-extrabold text-foreground tabular-nums">R$ {net.toFixed(2)}</p></div>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card variant="elevated">
         <CardHeader><CardTitle>Transações</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <p className="text-muted-foreground text-sm">Carregando...</p> : (

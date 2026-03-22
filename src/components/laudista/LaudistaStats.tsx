@@ -188,7 +188,7 @@ const LaudistaStats = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
                 >
-                  <Card className="border-border/50 overflow-hidden hover:shadow-md transition-shadow">
+                  <Card variant="kpi" className="overflow-hidden">
                     <CardContent className="p-5">
                       <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${kpi.color} flex items-center justify-center mb-3 shadow-md`}>
                         <kpi.icon className="w-5 h-5 text-white" />
@@ -206,7 +206,7 @@ const LaudistaStats = () => {
         {/* Tempo Médio */}
         {avgTurnaround && (
           <motion.div variants={fadeUp}>
-            <Card className="border-border/50">
+            <Card variant="kpi">
               <CardContent className="p-5 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center">
                   <Zap className="w-6 h-6 text-primary" />
@@ -223,7 +223,7 @@ const LaudistaStats = () => {
 
         {/* Daily Chart - 30 days */}
         <motion.div variants={fadeUp}>
-          <Card className="border-border/50">
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
@@ -280,7 +280,7 @@ const LaudistaStats = () => {
         <motion.div variants={fadeUp}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Pie Chart */}
-            <Card className="border-border/50">
+            <Card variant="elevated">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-success to-success/70 flex items-center justify-center">

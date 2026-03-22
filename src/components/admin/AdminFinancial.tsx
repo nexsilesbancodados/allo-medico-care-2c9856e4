@@ -276,7 +276,7 @@ const AdminFinancial = () => {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
+          <Card variant="kpi">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <DollarSign className="w-4 h-4 text-emerald-500" />
@@ -291,7 +291,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="kpi">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Clock className="w-4 h-4 text-amber-500" />
@@ -302,7 +302,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="kpi">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <AlertTriangle className="w-4 h-4 text-red-500" />
@@ -315,7 +315,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="kpi">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Receipt className="w-4 h-4 text-primary" />
@@ -329,7 +329,7 @@ const AdminFinancial = () => {
 
         {/* Charts */}
         <div className="grid md:grid-cols-2 gap-4">
-          <Card>
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Receita Diária (7 dias)</CardTitle>
             </CardHeader>
@@ -351,7 +351,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Status dos Pagamentos</CardTitle>
             </CardHeader>
@@ -389,7 +389,7 @@ const AdminFinancial = () => {
 
         {/* Monthly Trend + Commission Breakdown */}
         <div className="grid md:grid-cols-2 gap-4">
-          <Card>
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" /> Tendência Mensal (6 meses)
@@ -420,7 +420,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-primary" /> Comissões por Médico (Top 10)
@@ -453,7 +453,7 @@ const AdminFinancial = () => {
         </div>
 
         {/* Transactions Table */}
-        <Card>
+        <Card variant="elevated">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <CardTitle className="text-base">Transações</CardTitle>

@@ -199,19 +199,19 @@ const DoctorEarnings = () => {
         </div>
 
         <div className="grid sm:grid-cols-4 gap-4 mb-8">
-          <Card className="border-border bg-gradient-to-br from-primary/5 to-transparent">
+          <Card variant="kpi" className="bg-gradient-to-br from-primary/5 to-transparent">
             <CardContent className="pt-6">
               <p className="text-xs text-muted-foreground">Ganho Confirmado</p>
               <p className="text-2xl font-bold text-foreground tabular-nums">R$ {stats.total.toFixed(2)}</p>
             </CardContent>
           </Card>
-          <Card className="border-border">
+          <Card variant="kpi">
             <CardContent className="pt-6">
               <p className="text-xs text-muted-foreground">Este Mês</p>
               <p className="text-2xl font-bold text-foreground tabular-nums">R$ {stats.thisMonth.toFixed(2)}</p>
             </CardContent>
           </Card>
-          <Card className="border-border">
+          <Card variant="kpi">
             <CardContent className="pt-6">
               <p className="text-xs text-muted-foreground flex items-center gap-1">
                 Pendente <AlertCircle className="w-3 h-3 text-warning" />
@@ -220,7 +220,7 @@ const DoctorEarnings = () => {
               <p className="text-[10px] text-muted-foreground">Aguardando confirmação de pagamento</p>
             </CardContent>
           </Card>
-          <Card className="border-border border-secondary/20 bg-secondary/5">
+          <Card variant="kpi" className="border-secondary/20 bg-secondary/5">
             <CardContent className="pt-6">
               <p className="text-xs text-muted-foreground">Saldo Disponível</p>
               <p className="text-2xl font-bold text-secondary">R$ {stats.available.toFixed(2)}</p>

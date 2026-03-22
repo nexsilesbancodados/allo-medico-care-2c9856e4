@@ -113,7 +113,7 @@ const OpticianCatalog = () => {
         </Dialog>
       </div>
 
-      <Card>
+      <Card variant="elevated">
         <CardHeader><CardTitle className="flex items-center gap-2"><Package className="w-5 h-5" /> Catálogo de Armações ({filtered.length})</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <p className="text-muted-foreground text-sm">Carregando...</p> : (
