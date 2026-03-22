@@ -44,6 +44,7 @@ export const APP_ROLES = [
   "partner",
   
   "laudista",
+  "optician",
 ] as const;
 export type AppRole = (typeof APP_ROLES)[number];
 
