@@ -176,6 +176,34 @@ serve(async (req) => {
       }
     }
 
+    // ─── Handle urgent care queue payments ───
+    const isQueuePayment = externalRef.startsWith("queue_");
+    if (isQueuePayment && newPaymentStatus === "approved") {
+      const queueId = externalRef.replace("queue_", "");
+      await supabase.from("on_demand_queue")
+        .update({ status: "waiting", payment_id: payment.id })
+        .eq("id", queueId)
+        .eq("status", "pending_payment");
+      console.info(`[Asaas Webhook] Queue entry ${queueId} activated after payment`);
+
+      // Notify patient
+      const { data: queueEntry } = await supabase
+        .from("on_demand_queue")
+        .select("patient_id")
+        .eq("id", queueId)
+        .single();
+
+      if (queueEntry?.patient_id) {
+        await supabase.from("notifications").insert({
+          user_id: queueEntry.patient_id,
+          title: "✅ Pagamento confirmado!",
+          message: "Você entrou na fila do Plantão 24h. Aguarde ser atendido.",
+          type: "payment",
+          link: "/dashboard/urgent-care",
+        });
+      }
+    }
+
     // ─── Handle renewal payment events ───
     const isRenewal = externalRef.startsWith("renewal_");
     if (isRenewal && newPaymentStatus === "approved") {
@@ -184,10 +212,27 @@ serve(async (req) => {
         .update({ paid_at: new Date().toISOString(), status: "pending_review", payment_id: payment.id })
         .eq("id", renewalId);
       console.info(`[Asaas Webhook] Renewal ${renewalId} payment confirmed`);
+
+      // Notify patient about renewal payment
+      const { data: renewal } = await supabase
+        .from("prescription_renewals")
+        .select("patient_id")
+        .eq("id", renewalId)
+        .single();
+
+      if (renewal?.patient_id) {
+        await supabase.from("notifications").insert({
+          user_id: renewal.patient_id,
+          title: "✅ Pagamento da renovação confirmado",
+          message: "Sua solicitação de renovação de receita será analisada por um médico em breve.",
+          type: "prescription",
+          link: "/dashboard/renewals",
+        });
+      }
     }
 
     // ─── Handle appointment payment events (existing logic) ───
-    const appointmentId = !isCardSubscription && !isRenewal ? externalRef : null;
+    const appointmentId = !isCardSubscription && !isRenewal && !isQueuePayment ? externalRef : null;
 
     if (!newPaymentStatus) {
       console.info(`[Asaas Webhook] Unhandled event: ${event}`);

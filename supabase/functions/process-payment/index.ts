@@ -7,13 +7,18 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+/**
+ * process-payment: Creates a subscription record AFTER payment is confirmed via Asaas webhook.
+ * This function is called internally or from the frontend after Asaas payment confirmation.
+ * It validates the plan, applies coupons atomically, creates the subscription, and sends notifications.
+ */
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { plan_id, user_id, payment_method, amount, coupon_code } = await req.json();
+    const { plan_id, user_id, payment_method, coupon_code, asaas_payment_id } = await req.json();
 
     if (!plan_id || !user_id || !payment_method) {
       return new Response(
@@ -44,36 +49,29 @@ serve(async (req) => {
 
     let finalAmount = plan.price;
 
-    // Apply coupon if provided
+    // Apply coupon atomically using the database function
     if (coupon_code) {
-      const { data: coupon } = await supabase
-        .from("coupons")
-        .select("*")
-        .eq("code", coupon_code.toUpperCase())
-        .eq("is_active", true)
-        .single();
+      const { data: couponValid } = await supabase.rpc("fn_increment_coupon_usage_atomic", {
+        p_code: coupon_code.toUpperCase(),
+      });
 
-      if (coupon) {
-        const isExpired = coupon.expires_at && new Date(coupon.expires_at) < new Date();
-        const isMaxUsed = coupon.max_uses && coupon.times_used >= coupon.max_uses;
+      if (couponValid) {
+        const { data: coupon } = await supabase
+          .from("coupons")
+          .select("discount_percentage")
+          .eq("code", coupon_code.toUpperCase())
+          .single();
 
-        if (!isExpired && !isMaxUsed) {
+        if (coupon) {
           finalAmount = plan.price * (1 - coupon.discount_percentage / 100);
-          // Increment coupon usage
-          await supabase
-            .from("coupons")
-            .update({ times_used: coupon.times_used + 1 })
-            .eq("id", coupon.id);
         }
       }
     }
 
-    // Create subscription
+    // Calculate expiration
     const startsAt = new Date();
     const expiresAt = new Date();
-    if (plan.interval === "monthly") {
-      expiresAt.setMonth(expiresAt.getMonth() + 1);
-    } else if (plan.interval === "yearly") {
+    if (plan.interval === "yearly") {
       expiresAt.setFullYear(expiresAt.getFullYear() + 1);
     } else {
       expiresAt.setMonth(expiresAt.getMonth() + 1);
@@ -86,6 +84,7 @@ serve(async (req) => {
       .eq("user_id", user_id)
       .eq("status", "active");
 
+    // Create new subscription
     const { data: subscription, error: subError } = await supabase
       .from("subscriptions")
       .insert({
@@ -96,7 +95,7 @@ serve(async (req) => {
         expires_at: expiresAt.toISOString(),
         current_period_end: expiresAt.toISOString(),
         payment_method,
-        notes: `Pagamento: R$${finalAmount.toFixed(2)} via ${payment_method}`,
+        notes: `Pagamento: R$${finalAmount.toFixed(2)} via ${payment_method}${asaas_payment_id ? ` | Asaas: ${asaas_payment_id}` : ""}`,
       })
       .select("id")
       .single();
@@ -120,26 +119,46 @@ serve(async (req) => {
         amount: finalAmount,
         payment_method,
         coupon_code: coupon_code || null,
+        asaas_payment_id: asaas_payment_id || null,
       },
     });
 
-    // Send confirmation email
+    // Send confirmation email + notification
     try {
       const { data: profile } = await supabase
         .from("profiles")
-        .select("first_name")
+        .select("first_name, last_name")
         .eq("user_id", user_id)
         .single();
 
       const { data: userAuth } = await supabase.auth.admin.getUserById(user_id);
+      const patientName = profile ? `${profile.first_name} ${profile.last_name}` : "Paciente";
 
+      // In-app notification
+      await supabase.from("notifications").insert({
+        user_id,
+        title: "🎉 Plano Ativado!",
+        message: `Seu plano ${plan.name} foi ativado com sucesso.`,
+        type: "billing",
+        link: "/dashboard",
+      });
+
+      // Email
       if (userAuth?.user?.email) {
-        await supabase.functions.invoke("send-email", {
-          body: {
-            type: "welcome",
+        const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+        const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+          body: JSON.stringify({
+            type: "subscription_activated",
             to: userAuth.user.email,
-            data: { name: profile?.first_name || "Paciente" },
-          },
+            data: {
+              patient_name: patientName,
+              plan_name: plan.name,
+              expires_at: expiresAt.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+            },
+          }),
         });
       }
     } catch (emailErr) {
@@ -155,10 +174,10 @@ serve(async (req) => {
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Payment error:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Erro desconhecido" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
