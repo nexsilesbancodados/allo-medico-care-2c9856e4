@@ -90,6 +90,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
   const mobileLinks = [
     { label: "Teleconsulta", href: "/teleconsulta" },
     { label: "Cartão de Benefícios", href: "/cartao-beneficios" },
+    { label: "Oftalmologia", href: "/oftalmologia" },
     { label: "Sou Médico", href: "/medico" },
     { label: "Sou Laudista", href: "/laudista" },
     { label: "Sou Clínica", href: "/clinica" },
