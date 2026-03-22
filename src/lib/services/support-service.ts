@@ -107,7 +107,7 @@ export const getPatientTickets = async (patientId: string): Promise<TicketSummar
       .eq("patient_id", patientId)
       .order("created_at", { ascending: false });
 
-    return (data ?? []).map(t => ({
+    return (data ?? []).map((t: any) => ({
       id: t.id,
       subject: t.subject,
       status: t.status,
