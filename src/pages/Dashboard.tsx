@@ -408,6 +408,14 @@ const Dashboard = () => {
       <Route path="admin/financial" element={<RoleGuard allowed={[]} roles={roles}><AdminFinancial /></RoleGuard>} />
       <Route path="admin/coupons" element={<RoleGuard allowed={[]} roles={roles}><AdminCoupons /></RoleGuard>} />
 
+      {/* Optician */}
+      <Route path="optician" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianDashboard /></RoleGuard>} />
+      <Route path="optician/orders" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianOrders /></RoleGuard>} />
+      <Route path="optician/catalog" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianCatalog /></RoleGuard>} />
+      <Route path="optician/stock" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianStock /></RoleGuard>} />
+      <Route path="optician/production" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianProduction /></RoleGuard>} />
+      <Route path="optician/financial" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianFinancial /></RoleGuard>} />
+
       {/* Laudista — blocked when ?role=doctor */}
       <Route path="laudista" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><ContextGuard panel="laudista" forceRole={forceRole} roles={roles}><LaudistaDashboard /></ContextGuard></RoleGuard>} />
       <Route path="laudista/queue" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><ContextGuard panel="laudista" forceRole={forceRole} roles={roles}><LaudistaReportQueue /></ContextGuard></RoleGuard>} />
