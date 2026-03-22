@@ -1,6 +1,6 @@
 import { useState, memo, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Globe } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Globe, Eye } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "@/i18n";
@@ -24,6 +24,7 @@ import mascotReading from "@/assets/mascot-reading.png";
 import mascotWelcome from "@/assets/mascot-welcome.png";
 import pingoVirtualAssistant from "@/assets/pingo-virtual-assistant.png";
 import devicesMascot from "@/assets/devices-mascot.png";
+import pingoOftalmo from "@/assets/pingo-oftalmo.png";
 
 const ListItem = forwardRef<HTMLLIElement, React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType; imgSrc?: string; badge?: string }>(({
   className,
@@ -89,6 +90,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
   const mobileLinks = [
     { label: "Teleconsulta", href: "/teleconsulta" },
     { label: "Cartão de Benefícios", href: "/cartao-beneficios" },
+    { label: "Oftalmologia", href: "/oftalmologia" },
     { label: "Sou Médico", href: "/medico" },
     { label: "Sou Laudista", href: "/laudista" },
     { label: "Sou Clínica", href: "/clinica" },
@@ -160,6 +162,9 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                       </ListItem>
                       <ListItem href="/consulta-avulsa" title="Consulta Avulsa" imgSrc={mascotWave} badge="Rápido">
                         Atendimento rápido, seguro e sem burocracia.
+                      </ListItem>
+                      <ListItem href="/oftalmologia" title="Oftalmologia" imgSrc={pingoOftalmo} badge="Novo">
+                        Exames, receitas de óculos e laudos oftalmológicos.
                       </ListItem>
                     </ul>
                   </div>
