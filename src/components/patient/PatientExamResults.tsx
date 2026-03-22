@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, FileText, Download, Eye, ShieldCheck } from "lucide-react";
+import { Loader2, FileText, Download, Eye, ShieldCheck, Share2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { generateShareableLink } from "@/lib/services/report-service";
+import { toastShareLinkCopied, toastShareLinkFailed } from "@/lib/toast-helpers";
 
 const statusLabels: Record<string, string> = {
   pending: "Pendente",
