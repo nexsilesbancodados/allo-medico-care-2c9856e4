@@ -344,7 +344,7 @@ const DoctorWaitingRoom = () => {
         )}
 
         {waitingPatients.length === 0 && !loading && (
-          <Card className="border-border">
+          <Card variant="flat">
             <CardContent className="py-12 text-center">
               <Clock className="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
               <p className="text-muted-foreground">Nenhum paciente na sala de espera.</p>

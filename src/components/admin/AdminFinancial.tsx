@@ -351,7 +351,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Status dos Pagamentos</CardTitle>
             </CardHeader>

@@ -64,7 +64,7 @@ const OpticianOverview = () => {
       </div>
 
       {lowStock > 0 && (
-        <Card className="border-destructive/20 bg-destructive/5">
+        <Card variant="elevated" className="border-destructive/20 bg-destructive/5">
           <CardContent className="pt-6 flex items-center gap-3">
             <AlertTriangle className="w-5 h-5 text-destructive shrink-0" />
             <p className="text-sm text-destructive font-medium">

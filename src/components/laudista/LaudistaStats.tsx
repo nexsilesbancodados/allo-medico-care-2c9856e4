@@ -280,7 +280,7 @@ const LaudistaStats = () => {
         <motion.div variants={fadeUp}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             {/* Pie Chart */}
-            <Card className="border-border/50">
+            <Card variant="elevated">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-bold flex items-center gap-2">
                   <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-success to-success/70 flex items-center justify-center">

@@ -43,7 +43,7 @@ const OpticianFinancial = () => {
         </Card>
       </div>
 
-      <Card>
+      <Card variant="elevated">
         <CardHeader><CardTitle>Transações</CardTitle></CardHeader>
         <CardContent>
           {isLoading ? <p className="text-muted-foreground text-sm">Carregando...</p> : (
