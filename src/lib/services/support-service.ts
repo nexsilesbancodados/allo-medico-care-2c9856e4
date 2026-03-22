@@ -251,10 +251,9 @@ export const resolveTicket = async (ticketId: string, resolution?: string): Prom
   try {
     const { error } = await supabase.from("support_tickets").update({
       status: "resolved",
-      resolution_notes: resolution ?? null,
-      resolved_at: new Date().toISOString(),
+      closed_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-    }).eq("id", ticketId);
+    } as any).eq("id", ticketId);
 
     if (error) return false;
 
