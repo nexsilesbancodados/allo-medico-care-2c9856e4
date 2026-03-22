@@ -159,7 +159,8 @@ const Auth = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen relative flex">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(195,55%,97%)] via-[hsl(205,45%,93%)] to-[hsl(215,40%,88%)] dark:from-[hsl(195,25%,7%)] dark:via-[hsl(205,20%,9%)] dark:to-[hsl(215,18%,11%)]" />
       <SEOHead title="Login e Cadastro" description="Acesse sua conta ou cadastre-se na AloClinica para consultas médicas online por vídeo." />
 
       {/* ── Left panel — desktop only ── */}

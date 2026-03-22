@@ -5,7 +5,8 @@ import { Eye, Ear, Hand, Monitor, Globe, MessageCircle } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 
 const Accessibility = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen relative">
+    <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(280,45%,97%)] via-[hsl(290,35%,93%)] to-[hsl(300,30%,89%)] dark:from-[hsl(280,25%,7%)] dark:via-[hsl(290,20%,9%)] dark:to-[hsl(300,18%,11%)]" />
     <SEOHead title="Acessibilidade" description="Conheça os recursos de acessibilidade da plataforma AloClinica." />
     <div className="container mx-auto px-4 py-12 max-w-3xl">
       <Link to="/" className="inline-flex items-center gap-2 mb-8 text-muted-foreground hover:text-foreground transition text-sm">

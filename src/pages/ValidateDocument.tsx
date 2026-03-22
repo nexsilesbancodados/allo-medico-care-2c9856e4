@@ -101,7 +101,8 @@ const ValidateDocument = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen relative flex flex-col items-center justify-center p-4">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(165,50%,97%)] via-[hsl(175,42%,93%)] to-[hsl(185,38%,88%)] dark:from-[hsl(165,25%,7%)] dark:via-[hsl(175,20%,9%)] dark:to-[hsl(185,18%,11%)]" />
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <div className="w-16 h-16 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center">

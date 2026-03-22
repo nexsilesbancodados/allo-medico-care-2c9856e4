@@ -180,7 +180,8 @@ const AuthClinica = () => {
   return (
     <>
       <SEOHead title="Sou Clínica — Gestão Online | AloClinica" description="Cadastre sua clínica na AloClinica. Gerencie médicos, agendamentos e faturamento em um só painel." />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(185,50%,97%)] via-[hsl(195,42%,93%)] to-[hsl(205,38%,88%)] dark:from-[hsl(185,25%,7%)] dark:via-[hsl(195,20%,9%)] dark:to-[hsl(205,18%,11%)]" />
         <Header />
 
         {/* Hero */}

@@ -65,7 +65,8 @@ const AuthParceiro = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen relative flex">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(150,50%,97%)] via-[hsl(160,40%,93%)] to-[hsl(170,35%,88%)] dark:from-[hsl(150,25%,7%)] dark:via-[hsl(160,20%,9%)] dark:to-[hsl(170,18%,11%)]" />
       <SEOHead title="Portal do Parceiro" description="Torne-se parceiro da AloClinica e ofereça telemedicina aos seus clientes." />
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/80 to-secondary/80 relative overflow-hidden">
         <div className="absolute top-[-15%] left-[-10%] w-[400px] h-[400px] rounded-full bg-white/[0.06] blur-[100px]" />

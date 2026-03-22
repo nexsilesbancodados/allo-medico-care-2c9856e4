@@ -50,7 +50,8 @@ const GuestRating = () => {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen relative flex items-center justify-center p-4">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(130,50%,97%)] via-[hsl(140,42%,93%)] to-[hsl(150,38%,88%)] dark:from-[hsl(130,25%,7%)] dark:via-[hsl(140,20%,9%)] dark:to-[hsl(150,18%,11%)]" />
         <SEOHead title="Obrigado! | AloClinica" description="Agradecemos sua avaliação." />
         <motion.div
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -103,7 +104,8 @@ const GuestRating = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+    <div className="min-h-screen relative flex items-center justify-center p-4">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(130,50%,97%)] via-[hsl(140,42%,93%)] to-[hsl(150,38%,88%)] dark:from-[hsl(130,25%,7%)] dark:via-[hsl(140,20%,9%)] dark:to-[hsl(150,18%,11%)]" />
       <SEOHead title="Avalie sua consulta | AloClinica" description="Conte como foi sua experiência." />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
