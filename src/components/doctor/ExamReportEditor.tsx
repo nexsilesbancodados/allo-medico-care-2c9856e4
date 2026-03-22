@@ -37,6 +37,7 @@ import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
 import TipTapEditor from "@/components/telelaudo/TipTapEditor";
 import jsPDF from "jspdf";
+import { motion } from "framer-motion";
 import type { ExamRequest, ExamReport, ReportTemplate } from "@/types/domain";
 
 // ==================== WL PRESETS ====================
