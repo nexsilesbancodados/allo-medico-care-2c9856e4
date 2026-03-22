@@ -820,8 +820,40 @@ const PacsViewer = ({
         </TooltipProvider>
       </div>
 
-      {/* Canvas area */}
+      {/* Canvas area with thumbnails */}
       <div className="flex flex-1 min-h-0">
+        {/* Thumbnail sidebar */}
+        {showThumbnails && fileUrls.length > 0 && (
+          <div className="w-20 border-r border-white/10 bg-[#0a0f18] overflow-y-auto flex-shrink-0">
+            <div className="p-1 text-[8px] text-white/30 uppercase tracking-wider text-center border-b border-white/5 font-semibold">
+              Séries ({fileUrls.length})
+            </div>
+            <div className="p-1 space-y-1">
+              {fileUrls.map((url, i) => (
+                <button
+                  key={i}
+                  onClick={() => setActiveIndex(i)}
+                  className={`w-full aspect-square rounded overflow-hidden border-2 transition-all relative group ${
+                    activeIndex === i
+                      ? "border-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
+                      : "border-white/10 hover:border-white/30"
+                  }`}
+                >
+                  <img src={url} className="w-full h-full object-cover" style={{ filter: "brightness(0.7)" }} />
+                  <div className={`absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold ${
+                    activeIndex === i ? "text-amber-400" : "text-white/50"
+                  }`}>
+                    {i + 1}
+                  </div>
+                  {activeIndex === i && (
+                    <div className="absolute top-0 left-0 w-1 h-full bg-amber-400" />
+                  )}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <div className={`flex-1 flex ${dualView ? "flex-row" : ""}`}>
           <div ref={containerRef} className={`relative overflow-hidden bg-black flex-1 select-none ${
             tool === "pan" ? "cursor-grab active:cursor-grabbing" :
@@ -829,12 +861,13 @@ const PacsViewer = ({
             tool === "annotate" ? "cursor-text" :
             tool === "wl" ? "cursor-ns-resize" :
             tool === "zoom" ? "cursor-zoom-in" :
+            tool === "magnify" ? "cursor-none" :
             "cursor-default"
           }`}
             onMouseDown={handleCanvasMouseDown}
-            onMouseMove={handleCanvasMouseMove}
+            onMouseMove={(e) => { handleCanvasMouseMove(e); handleMagnify(e); }}
             onMouseUp={handleCanvasMouseUp}
-            onMouseLeave={handleCanvasMouseUp}
+            onMouseLeave={() => { handleCanvasMouseUp(); setMagnifyPos(null); }}
             onWheel={handleWheel}
           >
             {loading && (
@@ -860,10 +893,63 @@ const PacsViewer = ({
               </div>
             </div>
 
+            {/* ═══ OsiriX-style DICOM Overlays (Amber) ═══ */}
+            {showOverlays && activeUrl && (
+              <>
+                {/* Top-Left: Patient Info */}
+                <div className="absolute top-2 left-2 pointer-events-none font-mono text-[10px] leading-tight" style={{ color: '#f59e0b', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                  {dicomInfo["Paciente"] && <div className="font-bold text-[11px]">{dicomInfo["Paciente"]}</div>}
+                  {dicomInfo["ID"] && <div>ID: {dicomInfo["ID"]}</div>}
+                  {dicomInfo["Nascimento"] && <div>DOB: {dicomInfo["Nascimento"]}</div>}
+                  {dicomInfo["Sexo"] && <div>Sex: {dicomInfo["Sexo"]}</div>}
+                </div>
+
+                {/* Top-Right: Study Info */}
+                <div className="absolute top-2 right-2 pointer-events-none font-mono text-[10px] leading-tight text-right" style={{ color: '#f59e0b', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                  {dicomInfo["Instituição"] && <div>{dicomInfo["Instituição"]}</div>}
+                  {dicomInfo["Modalidade"] && <div className="font-bold">{dicomInfo["Modalidade"]}</div>}
+                  {dicomInfo["Data Estudo"] && <div>{dicomInfo["Data Estudo"]}</div>}
+                  {dicomInfo["Hora Estudo"] && <div>{dicomInfo["Hora Estudo"]}</div>}
+                  {dicomInfo["Estudo"] && <div className="max-w-[200px] truncate">{dicomInfo["Estudo"]}</div>}
+                </div>
+
+                {/* Bottom-Left: Image/Technical Info */}
+                <div className="absolute bottom-6 left-2 pointer-events-none font-mono text-[10px] leading-tight" style={{ color: '#f59e0b', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                  {dicomInfo["Série"] && <div>Se: {dicomInfo["Série"]}</div>}
+                  {dicomInfo["Instância"] && <div>Im: {dicomInfo["Instância"]}</div>}
+                  {dicomInfo["Espessura"] && <div>Th: {dicomInfo["Espessura"]}</div>}
+                  {dicomInfo["Protocolo"] && <div>{dicomInfo["Protocolo"]}</div>}
+                  {fileUrls.length > 1 && <div>Frame: {activeIndex + 1}/{fileUrls.length}</div>}
+                </div>
+
+                {/* Bottom-Right: Window/Level + Zoom */}
+                <div className="absolute bottom-6 right-2 pointer-events-none font-mono text-[10px] leading-tight text-right" style={{ color: '#f59e0b', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                  <div>W: {Math.round(contrast * 10)} L: {Math.round(brightness * 5 - 250)}</div>
+                  <div>Zoom: {Math.round(zoom * 100)}%</div>
+                  {dicomInfo["Dimensões"] && <div>{dicomInfo["Dimensões"]}</div>}
+                  {dicomInfo["Pixel Spacing"] && <div>PS: {dicomInfo["Pixel Spacing"]}</div>}
+                  {rotation !== 0 && <div>Rot: {rotation}°</div>}
+                  {(flipH || flipV) && <div>{flipH ? "H↔" : ""}{flipV ? "V↕" : ""}</div>}
+                </div>
+              </>
+            )}
+
             {/* Cursor position / HU overlay */}
             {cursorPos && (
-              <div className="absolute bottom-1 left-1 text-[9px] text-white/50 font-mono bg-black/60 px-1 rounded">
+              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-[9px] font-mono px-2 py-0.5 rounded" style={{ color: '#f59e0b', background: 'rgba(0,0,0,0.7)' }}>
                 ({cursorPos.x}, {cursorPos.y}){cursorPos.hu !== undefined && ` HU: ${cursorPos.hu}`}
+              </div>
+            )}
+
+            {/* Magnifying Glass Lens */}
+            {tool === "magnify" && magnifyPos && (
+              <div className="absolute pointer-events-none z-30" style={{
+                left: magnifyPos.x - 80,
+                top: magnifyPos.y - 80,
+              }}>
+                <canvas ref={magnifyCanvasRef} width={160} height={160} className="rounded-full" style={{
+                  boxShadow: '0 0 12px rgba(245,158,11,0.4), inset 0 0 20px rgba(0,0,0,0.3)',
+                }} />
               </div>
             )}
           </div>
