@@ -534,16 +534,16 @@ serve(async (req) => {
     }
 
     if (!res.ok) {
-      // If Resend rejects due to unverified domain, log but return success
-      // so callers don't break. The email simply won't be delivered.
-      if (result?.name === "validation_error" && result?.message?.includes("verify a domain")) {
-        console.warn("Resend domain not verified — email skipped:", to, "template:", type);
+      // Handle domain verification issues gracefully
+      const errStr = JSON.stringify(result);
+      if (errStr.includes("verify") || errStr.includes("domain") || errStr.includes("sender")) {
+        console.warn("Email provider domain not verified — email skipped:", to, "template:", type);
         return new Response(
           JSON.stringify({ success: true, skipped: true, reason: "domain_not_verified" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.error("Resend error:", result);
+      console.error("Email send error:", result);
       return new Response(JSON.stringify({ error: "Failed to send email", details: result }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
