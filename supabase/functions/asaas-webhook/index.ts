@@ -327,6 +327,24 @@ serve(async (req) => {
               message: `Seu pagamento foi aprovado. Consulta agendada para ${scheduledDate}.`,
               type: "payment", link: "/dashboard/appointments",
             });
+
+            // Push notification for patient
+            try {
+              const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+              const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+              await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+                body: JSON.stringify({
+                  user_id: appointment.patient_id,
+                  title: "✅ Pagamento Confirmado!",
+                  message: `Consulta confirmada para ${scheduledDate}.`,
+                  link: "/dashboard/appointments",
+                }),
+              });
+            } catch (pushErr) {
+              console.warn("Payment push failed:", pushErr);
+            }
           }
 
           const { data: doctorProfile } = await supabase
@@ -339,6 +357,24 @@ serve(async (req) => {
               message: `Pagamento confirmado para consulta em ${scheduledDate}.`,
               type: "payment", link: "/dashboard/appointments",
             });
+
+            // Push for doctor
+            try {
+              const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+              const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+              await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+                body: JSON.stringify({
+                  user_id: doctorProfile.user_id,
+                  title: "💰 Pagamento Confirmado",
+                  message: `Novo pagamento para consulta em ${scheduledDate}.`,
+                  link: "/dashboard/appointments",
+                }),
+              });
+            } catch (pushErr) {
+              console.warn("Doctor payment push failed:", pushErr);
+            }
           }
 
           // WhatsApp notification
