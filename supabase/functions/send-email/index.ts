@@ -458,6 +458,56 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
       </div>
     `,
   }),
+  renewal_approved: (d) => ({
+    subject: "✅ Receita Renovada — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#22c55e;">Receita Renovada! ✅</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>Sua solicitação de renovação de receita foi <strong style="color:#22c55e;">aprovada</strong> pelo <strong>${d.doctor_name || "médico"}</strong>.</p>
+        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #22c55e;">
+          <p>📋 A nova receita já está disponível no seu painel.</p>
+          ${d.notes ? `<p><strong>Observações:</strong> ${d.notes}</p>` : ""}
+        </div>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="https://app.aloclinica.com.br/dashboard/prescriptions" style="background:#22c55e;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">Ver Minha Receita</a>
+        </div>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  renewal_rejected: (d) => ({
+    subject: "❌ Renovação de Receita Negada — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#ef4444;">Renovação Não Aprovada</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>Sua solicitação de renovação de receita <strong style="color:#ef4444;">não foi aprovada</strong>.</p>
+        ${d.reason ? `<div style="background:#fef2f2;padding:12px;border-radius:8px;margin:12px 0;"><strong>Motivo:</strong> ${d.reason}</div>` : ""}
+        <p>Recomendamos agendar uma nova consulta para reavaliação.</p>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="https://app.aloclinica.com.br/dashboard/schedule" style="background:#1a6fc4;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">Agendar Consulta</a>
+        </div>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  no_show_fee: (d) => ({
+    subject: "⚠️ Taxa de Não Comparecimento — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#f59e0b;">Taxa de Não Comparecimento</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>Você não compareceu à sua consulta com <strong>${d.doctor_name || "o médico"}</strong> agendada para <strong>${d.date || "—"} às ${d.time || "—"}</strong>.</p>
+        <div style="background:#fff8f0;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #f59e0b;">
+          <p>Conforme nossa política, será cobrada uma <strong>taxa de 50%</strong> do valor da consulta.</p>
+          ${d.amount ? `<p><strong>Valor retido:</strong> R$ ${d.amount}</p>` : ""}
+        </div>
+        <p>Para evitar cobranças futuras, cancele com pelo menos 2h de antecedência.</p>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
 
 };
 
@@ -467,12 +517,15 @@ serve(async (req) => {
   }
 
   try {
+    // Support both Brevo (primary) and Resend (fallback)
+    const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!RESEND_API_KEY) {
+    
+    if (!BREVO_API_KEY && !RESEND_API_KEY) {
       const body: EmailRequest = await req.json();
       console.info("[DEV] Email would be sent:", JSON.stringify(body));
       return new Response(
-        JSON.stringify({ success: true, dev: true, message: "Email logged (no RESEND_API_KEY configured)" }),
+        JSON.stringify({ success: true, dev: true, message: "Email logged (no email provider configured)" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -490,35 +543,57 @@ serve(async (req) => {
 
     const { subject, html } = template(data);
 
-    const fromAddress = Deno.env.get("EMAIL_FROM") || "AloClinica <onboarding@resend.dev>";
-    
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: fromAddress,
-        to: [to],
-        subject,
-        html,
-      }),
-    });
+    const fromEmail = Deno.env.get("EMAIL_FROM_ADDRESS") || "noreply@aloclinica.com.br";
+    const fromName = Deno.env.get("EMAIL_FROM_NAME") || "AloClínica";
 
-    const result = await res.json();
+    let res: Response;
+    let result: Record<string, unknown>;
+
+    if (BREVO_API_KEY) {
+      // Brevo (Sendinblue) API v3
+      res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+          sender: { name: fromName, email: fromEmail },
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+        }),
+      });
+      result = res.ok ? { success: true, messageId: (await res.json()).messageId } : await res.json();
+    } else {
+      // Resend fallback
+      res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: `${fromName} <${fromEmail}>`,
+          to: [to],
+          subject,
+          html,
+        }),
+      });
+      result = await res.json();
+    }
 
     if (!res.ok) {
-      // If Resend rejects due to unverified domain, log but return success
-      // so callers don't break. The email simply won't be delivered.
-      if (result?.name === "validation_error" && result?.message?.includes("verify a domain")) {
-        console.warn("Resend domain not verified — email skipped:", to, "template:", type);
+      // Handle domain verification issues gracefully
+      const errStr = JSON.stringify(result);
+      if (errStr.includes("verify") || errStr.includes("domain") || errStr.includes("sender")) {
+        console.warn("Email provider domain not verified — email skipped:", to, "template:", type);
         return new Response(
           JSON.stringify({ success: true, skipped: true, reason: "domain_not_verified" }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.error("Resend error:", result);
+      console.error("Email send error:", result);
       return new Response(JSON.stringify({ error: "Failed to send email", details: result }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

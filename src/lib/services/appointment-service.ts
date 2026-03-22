@@ -175,6 +175,16 @@ export const cancelAppointment = async (params: CancelAppointmentParams): Promis
 
     if (error) return false;
 
+    // Process refund based on cancellation type
+    const refundType = params.isLateCancel ? "no_refund" : "full";
+    supabase.functions.invoke("process-refund", {
+      body: {
+        appointmentId: params.appointmentId,
+        reason: params.reason,
+        refundType,
+      },
+    }).catch(err => logError("process-refund invocation", err));
+
     notifyAppointmentCancelled(params.appointmentId, params.cancelledByName, params.reason)
       .catch(err => logError("notifyAppointmentCancelled", err));
 
