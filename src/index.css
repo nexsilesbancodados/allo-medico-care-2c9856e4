@@ -267,6 +267,19 @@
     background: hsl(var(--card) / 0.75);
     border: 1px solid hsl(var(--border) / 0.5);
   }
+
+  /* ── Modern nav icon wrappers ── */
+  .nav-icon-wrapper {
+    border-radius: 0.5rem;
+    backdrop-filter: blur(4px);
+  }
+  .nav-item:hover .nav-icon-wrapper {
+    transform: scale(1.08);
+    filter: brightness(1.1);
+  }
+  .nav-item:active .nav-icon-wrapper {
+    transform: scale(0.95);
+  }
 }
 
 @keyframes gradient-shimmer {
