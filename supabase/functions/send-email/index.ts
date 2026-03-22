@@ -467,12 +467,15 @@ serve(async (req) => {
   }
 
   try {
+    // Support both Brevo (primary) and Resend (fallback)
+    const BREVO_API_KEY = Deno.env.get("BREVO_API_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!RESEND_API_KEY) {
+    
+    if (!BREVO_API_KEY && !RESEND_API_KEY) {
       const body: EmailRequest = await req.json();
       console.info("[DEV] Email would be sent:", JSON.stringify(body));
       return new Response(
-        JSON.stringify({ success: true, dev: true, message: "Email logged (no RESEND_API_KEY configured)" }),
+        JSON.stringify({ success: true, dev: true, message: "Email logged (no email provider configured)" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -490,23 +493,45 @@ serve(async (req) => {
 
     const { subject, html } = template(data);
 
-    const fromAddress = Deno.env.get("EMAIL_FROM") || "AloClinica <onboarding@resend.dev>";
-    
-    const res = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: fromAddress,
-        to: [to],
-        subject,
-        html,
-      }),
-    });
+    const fromEmail = Deno.env.get("EMAIL_FROM_ADDRESS") || "noreply@aloclinica.com.br";
+    const fromName = Deno.env.get("EMAIL_FROM_NAME") || "AloClínica";
 
-    const result = await res.json();
+    let res: Response;
+    let result: Record<string, unknown>;
+
+    if (BREVO_API_KEY) {
+      // Brevo (Sendinblue) API v3
+      res = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "api-key": BREVO_API_KEY,
+        },
+        body: JSON.stringify({
+          sender: { name: fromName, email: fromEmail },
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+        }),
+      });
+      result = res.ok ? { success: true, messageId: (await res.json()).messageId } : await res.json();
+    } else {
+      // Resend fallback
+      res = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${RESEND_API_KEY}`,
+        },
+        body: JSON.stringify({
+          from: `${fromName} <${fromEmail}>`,
+          to: [to],
+          subject,
+          html,
+        }),
+      });
+      result = await res.json();
+    }
 
     if (!res.ok) {
       // If Resend rejects due to unverified domain, log but return success
