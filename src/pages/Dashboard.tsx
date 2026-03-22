@@ -67,6 +67,12 @@ const LaudistaExamRequest = lazy(() => import("@/components/doctor/ExamRequestFo
 const LaudistaReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
 const RenewalQueue = lazy(() => import("@/components/doctor/RenewalQueue"));
 const OphthalmologyPage = lazy(() => import("@/components/ophthalmology/OphthalmologyDashboardPage"));
+const OpticianDashboard = lazy(() => import("@/components/dashboards/OpticianDashboard"));
+const OpticianOrders = lazy(() => import("@/components/optician/OpticianOrders"));
+const OpticianCatalog = lazy(() => import("@/components/optician/OpticianCatalog"));
+const OpticianStock = lazy(() => import("@/components/optician/OpticianStock"));
+const OpticianProduction = lazy(() => import("@/components/optician/OpticianProduction"));
+const OpticianFinancial = lazy(() => import("@/components/optician/OpticianFinancial"));
 const DiscountCardPage = lazy(() => import("@/pages/DiscountCard"));
 const VideoRoom = lazy(() => import("@/components/consultation/VideoRoom"));
 const PrescriptionForm = lazy(() => import("@/components/consultation/PrescriptionForm"));
