@@ -473,7 +473,7 @@ const AdminDashboard = () => {
           </Card>
 
           {/* Pending doctors */}
-          <Card className="border-border/50">
+          <Card variant="elevated">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 Médicos Pendentes
