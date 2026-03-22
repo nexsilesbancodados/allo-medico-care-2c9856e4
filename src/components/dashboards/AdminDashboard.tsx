@@ -437,7 +437,7 @@ const AdminDashboard = () => {
 
         <motion.div variants={fadeUp} className="grid lg:grid-cols-2 gap-4">
           {/* Overdue */}
-          <Card className="border-border/50">
+          <Card variant="elevated">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center gap-2">
                 <AlertTriangle className="w-4 h-4 text-destructive" /> Inadimplentes
