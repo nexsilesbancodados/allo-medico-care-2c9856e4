@@ -357,7 +357,7 @@ const AdminDashboard = () => {
         {/* Live consultations */}
         {liveAppts.length > 0 && (
           <motion.div variants={fadeUp}>
-            <Card className="border-border/50">
+            <Card variant="elevated">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-semibold flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
