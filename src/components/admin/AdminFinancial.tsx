@@ -420,7 +420,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-primary" /> Comissões por Médico (Top 10)
