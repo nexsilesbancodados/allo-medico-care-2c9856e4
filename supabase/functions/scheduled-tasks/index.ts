@@ -27,9 +27,68 @@ serve(async (req) => {
     const { error: expireErr } = await supabase.rpc("expire_subscriptions_and_cards");
     results.expire_subscriptions = expireErr?.message ?? "ok";
 
-    // 2. Mark no-shows (issue #10)
+    // 2. Mark no-shows and send fee notifications
     const { error: noShowErr } = await supabase.rpc("mark_no_shows");
     results.mark_no_shows = noShowErr?.message ?? "ok";
+
+    // 2b. Send no-show fee email to recently marked no-shows (last 20 min)
+    const noShowCutoff = new Date(Date.now() - 20 * 60 * 1000).toISOString();
+    const { data: recentNoShows } = await supabase
+      .from("appointments")
+      .select("id, patient_id, doctor_id, scheduled_at, price_at_booking")
+      .eq("status", "no_show")
+      .gte("updated_at", noShowCutoff)
+      .not("patient_id", "is", null);
+
+    for (const ns of recentNoShows ?? []) {
+      try {
+        const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", ns.patient_id).single();
+        const { data: authUser } = await supabase.auth.admin.getUserById(ns.patient_id);
+        const { data: docProfile } = await supabase.from("doctor_profiles").select("user_id").eq("id", ns.doctor_id).single();
+        let drName = "Médico";
+        if (docProfile) {
+          const { data: dp } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", docProfile.user_id).single();
+          if (dp) drName = `Dr(a). ${dp.first_name} ${dp.last_name}`;
+        }
+        const schedDate = new Date(ns.scheduled_at);
+        const feeAmount = ((ns.price_at_booking || 89) * 0.5).toFixed(2);
+
+        if (authUser?.user?.email) {
+          const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+          const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+          await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+            body: JSON.stringify({
+              type: "no_show_fee",
+              to: authUser.user.email,
+              data: {
+                patient_name: profile ? `${profile.first_name} ${profile.last_name}` : "Paciente",
+                doctor_name: drName,
+                date: schedDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+                time: schedDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }),
+                amount: feeAmount,
+              },
+            }),
+          });
+        }
+
+        // Notify clinic/admin about no-show for billing
+        const adminRes = await supabase.from("user_roles").select("user_id").eq("role", "admin").limit(1).single();
+        if (adminRes.data) {
+          await supabase.from("notifications").insert({
+            user_id: adminRes.data.user_id,
+            title: "🚫 No-show registrado",
+            message: `Paciente ${profile?.first_name || ""} não compareceu. Taxa de 50% (R$ ${feeAmount}) a cobrar.`,
+            type: "billing",
+            link: "/dashboard?tab=appointments",
+          });
+        }
+      } catch (nsErr) {
+        console.warn("No-show notification failed:", nsErr);
+      }
+    }
+    results.no_show_notifications = recentNoShows?.length ?? 0;
 
     // 3. Send 7-day expiry notifications
     const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
