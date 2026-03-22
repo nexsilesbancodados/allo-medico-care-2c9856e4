@@ -523,7 +523,7 @@ const PrescriptionForm = () => {
         </Card>
 
         {/* Medications */}
-        <Card className="border-border mb-6">
+        <Card variant="elevated" className="mb-6">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Medicamentos</CardTitle>
