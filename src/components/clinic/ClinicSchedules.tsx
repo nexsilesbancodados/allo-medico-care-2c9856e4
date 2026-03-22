@@ -156,7 +156,7 @@ const ClinicSchedules = () => {
 
         {/* Appointments list */}
         <motion.div variants={fadeUp}>
-          <Card className="border-border/50">
+          <Card variant="elevated">
             <CardContent className="p-0">
               {loading ? (
                 <div className="p-4 space-y-3">{[1,2,3,4].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
