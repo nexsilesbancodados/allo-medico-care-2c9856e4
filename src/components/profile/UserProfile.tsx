@@ -200,7 +200,7 @@ const UserProfile = () => {
         <h1 className="text-2xl font-bold text-foreground mb-6">Meu Perfil</h1>
 
         {/* Avatar */}
-        <Card className="border-border mb-6">
+        <Card variant="elevated" className="mb-6">
           <CardContent className="pt-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
             <div className="relative shrink-0">
               <Avatar className="w-20 h-20">
