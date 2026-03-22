@@ -324,7 +324,7 @@ const AdminDashboard = () => {
 
         {/* Real-time banner */}
         <motion.div variants={fadeUp}>
-          <Card className="border-border/20 bg-background shadow-sm rounded-2xl overflow-hidden">
+          <Card variant="elevated" className="bg-background overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-primary via-secondary to-warning" />
             <CardContent className="p-5">
               <div className="flex items-center gap-2 mb-4">
