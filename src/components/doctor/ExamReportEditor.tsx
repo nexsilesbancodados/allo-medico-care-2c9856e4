@@ -1501,15 +1501,16 @@ const ExamReportEditor = () => {
       pdf.setFillColor(245, 245, 245);
       pdf.setDrawColor(200, 200, 200);
 
-      const patientBirthDate = examRequest?.patient_birth_date
-        ? new Date(examRequest.patient_birth_date).toLocaleDateString("pt-BR")
+      const examAny = examRequest as any;
+      const patientBirthDate = examAny?.patient_birth_date
+        ? new Date(examAny.patient_birth_date).toLocaleDateString("pt-BR")
         : "—";
-      const patientSex = examRequest?.patient_sex === "M" ? "Masculino" : examRequest?.patient_sex === "F" ? "Feminino" : "—";
-      const patientAge = examRequest?.patient_birth_date
-        ? `${Math.floor((Date.now() - new Date(examRequest.patient_birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))} anos`
+      const patientSex = examAny?.patient_sex === "M" ? "Masculino" : examAny?.patient_sex === "F" ? "Feminino" : "—";
+      const patientAge = examAny?.patient_birth_date
+        ? `${Math.floor((Date.now() - new Date(examAny.patient_birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))} anos`
         : "—";
-      const examDate = examRequest?.exam_date
-        ? new Date(examRequest.exam_date).toLocaleDateString("pt-BR")
+      const examDate = examAny?.exam_date
+        ? new Date(examAny.exam_date).toLocaleDateString("pt-BR")
         : "—";
       const modality = (examRequest?.exam_type || "DX").substring(0, 2).toUpperCase();
       const laudoDate = new Date().toLocaleDateString("pt-BR");
