@@ -24,6 +24,7 @@ import mascotReading from "@/assets/mascot-reading.png";
 import mascotWelcome from "@/assets/mascot-welcome.png";
 import pingoVirtualAssistant from "@/assets/pingo-virtual-assistant.png";
 import devicesMascot from "@/assets/devices-mascot.png";
+import pingoOftalmo from "@/assets/pingo-oftalmo.png";
 
 const ListItem = forwardRef<HTMLLIElement, React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType; imgSrc?: string; badge?: string }>(({
   className,
