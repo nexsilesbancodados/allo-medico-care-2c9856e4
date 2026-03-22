@@ -245,7 +245,7 @@ const Dashboard = () => {
   if (!user) return <Navigate to="/auth" replace />;
 
   const isAdmin = roles.includes("admin");
-  const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "admin", "laudista"];
+  const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "admin", "laudista", "optician"];
 
   // Allow any user to use ?role= IF they actually have that role (not just admins)
   const primaryRole = (() => {
