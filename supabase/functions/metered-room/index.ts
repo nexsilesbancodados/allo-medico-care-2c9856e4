@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,10 +14,37 @@ serve(async (req) => {
 
   try {
     const { appointmentId } = await req.json();
-    if (!appointmentId) {
-      return new Response(JSON.stringify({ error: "appointmentId required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+
+    // Input validation
+    if (!appointmentId || typeof appointmentId !== "string" || appointmentId.length > 50) {
+      return new Response(JSON.stringify({ error: "Invalid appointmentId" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // UUID format validation
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(appointmentId)) {
+      return new Response(JSON.stringify({ error: "Invalid appointment ID format" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Verify appointment exists and is active
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data: appt } = await supabase
+      .from("appointments")
+      .select("id, status")
+      .eq("id", appointmentId)
+      .in("status", ["confirmed", "in_progress", "scheduled"])
+      .maybeSingle();
+
+    if (!appt) {
+      return new Response(JSON.stringify({ error: "Appointment not found or not active" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -25,15 +53,12 @@ serve(async (req) => {
 
     if (!appName || !secretKey) {
       return new Response(JSON.stringify({ error: "Metered credentials not configured" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Normalize app name — remove .metered.live suffix if present to avoid duplication
     const cleanAppName = appName.replace(/\.metered\.live$/i, "");
     const meteredDomain = `${cleanAppName}.metered.live`;
-
     const roomName = `consulta-${appointmentId.replace(/-/g, "").slice(0, 16)}`;
 
     // Try to get existing room first
@@ -51,7 +76,7 @@ serve(async (req) => {
       });
     }
 
-    // Create room if it doesn't exist
+    // Create room
     const createRes = await fetch(
       `https://${meteredDomain}/api/v1/room?secretKey=${secretKey}`,
       {
@@ -71,9 +96,8 @@ serve(async (req) => {
     if (!createRes.ok) {
       const err = await createRes.text();
       console.error("Metered create room error:", err);
-      return new Response(JSON.stringify({ error: "Failed to create room", details: err }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      return new Response(JSON.stringify({ error: "Failed to create room" }), {
+        status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -86,9 +110,8 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
