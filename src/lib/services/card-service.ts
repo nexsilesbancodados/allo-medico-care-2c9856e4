@@ -21,6 +21,14 @@ export interface CardBenefits {
   usedReschedules: number;
   remainingReschedules: number;
   prioritySupport: boolean;
+  /** Loyalty: total completed consultations */
+  totalCompletedConsultations: number;
+  /** Loyalty: free consultations earned (1 per 5 completed) */
+  freeConsultationsEarned: number;
+  /** Loyalty: free consultations already used */
+  freeConsultationsUsed: number;
+  /** Loyalty: remaining free consultations */
+  freeConsultationsAvailable: number;
 }
 
 // ─── Reschedule Limits by Plan ────────────────────────────────────────────────
