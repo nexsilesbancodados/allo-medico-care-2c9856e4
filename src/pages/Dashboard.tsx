@@ -265,6 +265,7 @@ const Dashboard = () => {
     if (roles.includes("support")) return "support";
     if (roles.includes("clinic")) return "clinic";
     if (roles.includes("partner")) return "partner";
+    if (roles.includes("optician")) return "optician";
     return "patient";
   })();
 
