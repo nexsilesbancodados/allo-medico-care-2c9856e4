@@ -30,7 +30,7 @@ import {
   ArrowLeft, ChevronLeft, ChevronRight, Grid3X3, Monitor, Eye,
   Crosshair, RotateCcw, FlipHorizontal, FlipVertical, Pencil,
   Type, Play, MoreHorizontal, FileText, Clock, AlertTriangle,
-  Info, Clipboard, ListChecks, GitBranch
+  Info, Clipboard, ListChecks, GitBranch, ImageIcon
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
