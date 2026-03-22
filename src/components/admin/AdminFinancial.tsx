@@ -389,7 +389,7 @@ const AdminFinancial = () => {
 
         {/* Monthly Trend + Commission Breakdown */}
         <div className="grid md:grid-cols-2 gap-4">
-          <Card>
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-primary" /> Tendência Mensal (6 meses)
