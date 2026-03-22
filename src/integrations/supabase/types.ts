@@ -918,8 +918,6 @@ export type Database = {
           experience_years: number | null
           id: string
           is_approved: boolean | null
-          pix_key: string | null
-          pix_key_type: string | null
           rating: number | null
           rejection_reason: string | null
           total_reviews: number | null
@@ -941,8 +939,6 @@ export type Database = {
           experience_years?: number | null
           id?: string
           is_approved?: boolean | null
-          pix_key?: string | null
-          pix_key_type?: string | null
           rating?: number | null
           rejection_reason?: string | null
           total_reviews?: number | null
@@ -964,8 +960,6 @@ export type Database = {
           experience_years?: number | null
           id?: string
           is_approved?: boolean | null
-          pix_key?: string | null
-          pix_key_type?: string | null
           rating?: number | null
           rejection_reason?: string | null
           total_reviews?: number | null
