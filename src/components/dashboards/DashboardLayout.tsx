@@ -1,4 +1,4 @@
-import { ReactNode, useState, useMemo, useEffect, useRef } from "react";
+import { ReactNode, useState, useMemo, useEffect, useRef, isValidElement, cloneElement } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
