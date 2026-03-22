@@ -130,7 +130,7 @@ export const getTicketDetail = async (ticketId: string, userId: string): Promise
   try {
     const { data: ticket } = await supabase
       .from("support_tickets")
-      .select("id, subject, status, category, priority, created_at, updated_at, assigned_to, patient_id")
+      .select("id, subject, status, priority, created_at, updated_at, assigned_to, patient_id")
       .eq("id", ticketId)
       .single();
 
