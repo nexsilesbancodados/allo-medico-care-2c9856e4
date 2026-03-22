@@ -2156,7 +2156,7 @@ const ExamReportEditor = () => {
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
-      </div>
+      </motion.div>
 
       {/* ═══ STATUS BAR — VS Code style ═══ */}
       <div className="flex items-center gap-4 px-3 h-6 shrink-0 font-mono text-[10px] select-none" style={{ background: 'hsl(220 20% 7%)', borderTop: '1px solid hsl(220 15% 16%)', color: 'hsl(220 8% 50%)' }}>
