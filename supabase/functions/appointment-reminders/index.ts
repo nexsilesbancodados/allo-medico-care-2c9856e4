@@ -19,18 +19,34 @@ serve(async (req) => {
 
     const now = new Date();
 
-    // Windows: 1h, 30min, 15min before appointment
-    const windows = [
+    // Short-term windows: 1h, 30min, 15min before appointment
+    const shortWindows = [
       { min: 55, max: 65, label: "1 hora" },
       { min: 28, max: 33, label: "30 minutos" },
       { min: 13, max: 18, label: "15 minutos" },
     ];
 
-    const orClauses = windows.map(w => {
+    // Long-term windows: 48h, 24h before appointment
+    const longWindows = [
+      { minH: 47, maxH: 49, label: "48 horas" },
+      { minH: 23, maxH: 25, label: "24 horas" },
+    ];
+
+    // Build OR clauses for short-term
+    const shortClauses = shortWindows.map(w => {
       const from = new Date(now.getTime() + w.min * 60 * 1000);
       const to = new Date(now.getTime() + w.max * 60 * 1000);
       return `and(scheduled_at.gte.${from.toISOString()},scheduled_at.lt.${to.toISOString()})`;
-    }).join(",");
+    });
+
+    // Build OR clauses for long-term
+    const longClauses = longWindows.map(w => {
+      const from = new Date(now.getTime() + w.minH * 3600 * 1000);
+      const to = new Date(now.getTime() + w.maxH * 3600 * 1000);
+      return `and(scheduled_at.gte.${from.toISOString()},scheduled_at.lt.${to.toISOString()})`;
+    });
+
+    const orClauses = [...shortClauses, ...longClauses].join(",");
 
     const { data: appointments } = await supabase
       .from("appointments")
