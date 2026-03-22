@@ -110,7 +110,7 @@ serve(async (req) => {
           console.info(`[Asaas Webhook] Created new discount card for user ${userId}`);
         }
 
-        // Notify user
+        // Notify user (in-app)
         await supabase.from("notifications").insert({
           user_id: userId,
           title: "✅ Cartão de Benefícios Ativado!",
@@ -118,6 +118,40 @@ serve(async (req) => {
           type: "payment",
           link: "/dashboard",
         });
+
+        // Send card activation email
+        try {
+          const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", userId).single();
+          const { data: authUser } = await supabase.auth.admin.getUserById(userId);
+          const patientName = profile ? `${profile.first_name} ${profile.last_name}` : "Paciente";
+          const validUntilStr = validUntil.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+          const planNames: Record<string, string> = {
+            prata_familiar: "Mini Família",
+            ouro_individual: "Solitário",
+            ouro_familiar: "King Família",
+            diamante_familiar: "Prime Família",
+          };
+          if (authUser?.user?.email) {
+            const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+            const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+            await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+              body: JSON.stringify({
+                type: "card_activated",
+                to: authUser.user.email,
+                data: {
+                  patient_name: patientName,
+                  plan_name: planNames[planType] || planType,
+                  valid_until: validUntilStr,
+                  discount_percent: "30",
+                },
+              }),
+            });
+          }
+        } catch (emailErr) {
+          console.warn("Card activation email failed (non-blocking):", emailErr);
+        }
       }
 
       if (["cancelled", "refunded", "chargeback"].includes(newPaymentStatus || "")) {
@@ -246,26 +280,53 @@ serve(async (req) => {
             console.warn("WhatsApp notification failed (non-blocking):", whatsErr);
           }
 
-          // Email notification for guests
+          // Email notification for all patients (registered + guests)
           try {
-            if (appointment.guest_patient_id) {
+            const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+            const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+            
+            let recipientEmail = "";
+            let recipientName = "";
+            
+            if (appointment.patient_id) {
+              const { data: authUser } = await supabase.auth.admin.getUserById(appointment.patient_id);
+              recipientEmail = authUser?.user?.email ?? "";
+              const { data: prof } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", appointment.patient_id).single();
+              recipientName = prof ? `${prof.first_name} ${prof.last_name}` : "Paciente";
+            } else if (appointment.guest_patient_id) {
               const { data: guest } = await supabase.from("guest_patients").select("email, full_name").eq("id", appointment.guest_patient_id).single();
-              if (guest?.email) {
-                const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-                const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-                await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
-                  body: JSON.stringify({
-                    to: guest.email,
-                    subject: "✅ Pagamento Confirmado - Alô Médico",
-                    html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:20px"><h2 style="color:#0ea5e9">Pagamento Confirmado! ✅</h2><p>Olá, <strong>${guest.full_name}</strong>!</p><p>Consulta: ${scheduledDate}</p><p style="color:#64748b;font-size:12px;margin-top:24px">Alô Médico 💚</p></div>`,
-                  }),
-                });
+              recipientEmail = guest?.email ?? "";
+              recipientName = guest?.full_name ?? "Paciente";
+            }
+
+            if (recipientEmail) {
+              // Get doctor name
+              const { data: docProf } = await supabase.from("doctor_profiles").select("user_id").eq("id", appointment.doctor_id).single();
+              let drName = "Médico";
+              if (docProf) {
+                const { data: dp } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", docProf.user_id).single();
+                if (dp) drName = `Dr(a). ${dp.first_name} ${dp.last_name}`;
               }
+              const schedDate = new Date(appointment.scheduled_at);
+              
+              await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+                body: JSON.stringify({
+                  type: "payment_confirmed",
+                  to: recipientEmail,
+                  data: {
+                    patient_name: recipientName,
+                    doctor_name: drName,
+                    date: schedDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+                    time: schedDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }),
+                    amount: payment.value?.toFixed(2) || "",
+                  },
+                }),
+              });
             }
           } catch (emailErr) {
-            console.warn("Email notification failed (non-blocking):", emailErr);
+            console.warn("Payment confirmation email failed (non-blocking):", emailErr);
           }
         }
 

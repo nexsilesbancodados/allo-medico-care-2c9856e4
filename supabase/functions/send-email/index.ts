@@ -353,6 +353,111 @@ const templates: Record<string, (data: Record<string, string>) => { subject: str
       </div>
     `,
   }),
+  payment_confirmed: (d) => ({
+    subject: "✅ Pagamento Confirmado — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#22c55e;">Pagamento Confirmado! ✅</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>Seu pagamento${d.amount ? ` de <strong>R$ ${d.amount}</strong>` : ""} foi confirmado com sucesso!</p>
+        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #22c55e;">
+          <p><strong>🩺 Médico:</strong> ${d.doctor_name || "—"}</p>
+          <p><strong>📅 Data:</strong> ${d.date || "—"}</p>
+          <p><strong>⏰ Horário:</strong> ${d.time || "—"}</p>
+        </div>
+        <p>Sua consulta está <strong>garantida</strong>. Acesse a plataforma 5 minutos antes do horário.</p>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="https://app.aloclinica.com.br/dashboard/appointments" style="background:#1a6fc4;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">Ver Minhas Consultas</a>
+        </div>
+        <div style="background:#f0f9ff;padding:12px;border-radius:8px;margin:16px 0;">
+          <p style="font-size:13px;color:#0369a1;margin:0;">💡 <strong>Dica:</strong> Prepare suas dúvidas e exames anteriores para aproveitar ao máximo sua consulta.</p>
+        </div>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  exam_report_ready: (d) => ({
+    subject: "📋 Resultado de Exame Disponível — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#1a6fc4;">Seu Laudo Está Pronto! 📋</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>O laudo do seu exame de <strong>${d.exam_type || "exame"}</strong> foi finalizado pelo <strong>${d.doctor_name || "médico"}</strong>.</p>
+        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #1a6fc4;">
+          <p><strong>🔬 Tipo de Exame:</strong> ${d.exam_type || "—"}</p>
+          <p><strong>🩺 Laudista:</strong> ${d.doctor_name || "—"}</p>
+          ${d.verification_code ? `<p><strong>🔐 Código de Verificação:</strong> ${d.verification_code}</p>` : ""}
+        </div>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="${d.download_link || "https://app.aloclinica.com.br/dashboard/health"}" style="background:#1a6fc4;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">Acessar Meu Laudo</a>
+        </div>
+        ${d.verification_code ? `<p style="font-size:12px;color:#666;">Verifique a autenticidade em: <a href="${d.validate_link || "#"}" style="color:#1a6fc4;">${d.validate_link || "aloclinica.com.br/validar"}</a></p>` : ""}
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  card_activated: (d) => ({
+    subject: "🎉 Cartão de Benefícios Ativado — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#22c55e;">🎉 Cartão de Benefícios Ativado!</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>Seu <strong>Cartão de Benefícios ${d.plan_name || ""}</strong> foi ativado com sucesso!</p>
+        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;border:1px solid #e2e8f0;">
+          <p><strong>💳 Plano:</strong> ${d.plan_name || "—"}</p>
+          <p><strong>📅 Válido até:</strong> ${d.valid_until || "—"}</p>
+          <p><strong>💰 Desconto:</strong> ${d.discount_percent || "30"}% em consultas</p>
+        </div>
+        <div style="background:#f0fdf4;padding:16px;border-radius:8px;margin:16px 0;">
+          <p style="font-weight:bold;color:#166534;margin:0 0 8px;">Seus benefícios:</p>
+          <ul style="color:#166534;font-size:14px;padding-left:20px;margin:0;">
+            <li>Telemedicina 24h/7</li>
+            <li>Clube de Vantagens (até 80% off)</li>
+            <li>Reagendamentos gratuitos</li>
+            ${d.plan_name?.includes("Família") ? "<li>Cobertura para dependentes</li>" : ""}
+          </ul>
+        </div>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="https://app.aloclinica.com.br/dashboard/schedule" style="background:#22c55e;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">Agendar Consulta com Desconto</a>
+        </div>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  card_expiring: (d) => ({
+    subject: "⚠️ Cartão de Benefícios Expirando — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#f59e0b;">⚠️ Cartão Expirando!</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>Seu <strong>Cartão de Benefícios ${d.plan_name || ""}</strong> expira em <strong>${d.days_left || "poucos"} dias</strong>.</p>
+        <div style="background:#fff8f0;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #f59e0b;">
+          <p><strong>📅 Expira em:</strong> ${d.valid_until || "—"}</p>
+          <p>Renove para manter seus descontos e benefícios!</p>
+        </div>
+        <div style="text-align:center;margin:24px 0;">
+          <a href="https://app.aloclinica.com.br/dashboard/plans" style="background:#f59e0b;color:white;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:bold;">Renovar Meu Cartão</a>
+        </div>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
+  refund_processed: (d) => ({
+    subject: "💸 Reembolso Processado — AloClinica",
+    html: `
+      <div style="font-family:sans-serif;max-width:600px;margin:auto;padding:24px;background:#f8fafc;border-radius:12px;">
+        <h2 style="color:#1a6fc4;">Reembolso Processado 💸</h2>
+        <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
+        <p>Seu reembolso${d.amount ? ` de <strong>R$ ${d.amount}</strong>` : ""} foi processado com sucesso.</p>
+        <div style="background:white;padding:16px;border-radius:8px;margin:16px 0;">
+          ${d.reason ? `<p><strong>Motivo:</strong> ${d.reason}</p>` : ""}
+          <p><strong>Prazo:</strong> O valor será devolvido em até 10 dias úteis.</p>
+        </div>
+        <p>Deseja reagendar sua consulta? Acesse a plataforma!</p>
+        <p style="color:#666;font-size:12px;margin-top:24px;">AloClinica — Telemedicina</p>
+      </div>
+    `,
+  }),
 
 };
 
