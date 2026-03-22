@@ -1441,92 +1441,292 @@ const ExamReportEditor = () => {
       const doctorName = `${profile?.first_name || ""} ${profile?.last_name || ""}`.trim();
       const patientDisplayName = examRequest?.patient_name || "Paciente";
 
-      // Generate professional PDF
+      // ============ GENERATE PROFESSIONAL CLINICAL PDF ============
       const pdf = new jsPDF();
+      const pageW = 210;
+      const marginL = 15;
+      const marginR = 15;
+      const contentW = pageW - marginL - marginR;
+      const pageH = 297;
+      let y = 0;
 
-      // Header
-      pdf.setFillColor(0, 102, 68);
-      pdf.rect(0, 0, 210, 28, "F");
-      pdf.setTextColor(255, 255, 255);
-      pdf.setFontSize(18);
-      pdf.text("LAUDO MÉDICO", 105, 14, { align: "center" });
-      pdf.setFontSize(8);
-      pdf.text("Allo Médico — Plataforma de Telemedicina", 105, 22, { align: "center" });
+      // ---- Helper: add footer to every page ----
+      const addFooter = (pageNum: number, totalPages: number) => {
+        pdf.setFontSize(7);
+        pdf.setTextColor(120, 120, 120);
+        pdf.setDrawColor(200, 200, 200);
+        pdf.line(marginL, 278, pageW - marginR, 278);
+        pdf.text("Allo Médico — Plataforma de Telemedicina", marginL, 282);
+        pdf.text(`Página ${pageNum} de ${totalPages}`, pageW - marginR, 282, { align: "right" });
+        pdf.text(`Código de Verificação: ${verificationCode}`, marginL, 286);
+        pdf.text(`Hash SHA-256: ${documentHash.substring(0, 48)}...`, marginL, 290);
+        pdf.text(`Verificar: allomedico.com/validar?code=${verificationCode}`, marginL, 294);
+        pdf.text(`Gerado em: ${new Date().toLocaleString("pt-BR")}`, pageW - marginR, 290, { align: "right" });
+      };
 
-      pdf.setTextColor(0, 0, 0);
-      pdf.setFontSize(10);
-      let y = 38;
-
-      // Exam info box
-      pdf.setDrawColor(200, 200, 200);
-      pdf.setFillColor(248, 248, 248);
-      pdf.roundedRect(15, y - 5, 180, 30, 2, 2, "FD");
-      pdf.setFontSize(9);
-      pdf.text(`Tipo de Exame: ${examRequest?.exam_type || "—"}`, 20, y + 2);
-      pdf.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 120, y + 2);
-      pdf.text(`Paciente: ${patientDisplayName}`, 20, y + 10);
-      pdf.text(`Médico Laudista: Dr(a). ${doctorName}`, 20, y + 18);
-      pdf.text(`CRM: ${doctorProfile.crm}/${doctorProfile.crm_state}`, 120, y + 18);
-      if (examRequest?.priority === "urgent") {
-        pdf.setTextColor(200, 0, 0);
-        pdf.text("⚠ URGENTE", 120, y + 10);
-        pdf.setTextColor(0, 0, 0);
-      }
-      y += 35;
-
-      // Clinical info
-      if (examRequest?.clinical_info) {
-        pdf.setFontSize(10);
-        pdf.setFont("helvetica", "bold");
-        pdf.text("Informações Clínicas:", 20, y);
-        pdf.setFont("helvetica", "normal");
-        pdf.setFontSize(9);
-        const clinicalLines = pdf.splitTextToSize(examRequest.clinical_info, 170);
-        pdf.text(clinicalLines, 20, y + 7);
-        y += 7 + clinicalLines.length * 4.5 + 5;
-      }
-
-      // Separator
-      pdf.setDrawColor(0, 102, 68);
-      pdf.setLineWidth(0.5);
-      pdf.line(20, y, 190, y);
-      y += 8;
-
-      // Report content
-      pdf.setFontSize(10);
-      pdf.setFont("helvetica", "bold");
-      pdf.text("Laudo:", 20, y);
-      pdf.setFont("helvetica", "normal");
-      pdf.setFontSize(9);
-      y += 6;
-
-      const contentLines = pdf.splitTextToSize(contentForPdf, 170);
-      for (const line of contentLines) {
-        if (y > 260) {
+      // ---- Helper: check page break ----
+      const checkPage = (needed: number) => {
+        if (y + needed > 270) {
           pdf.addPage();
           y = 20;
         }
-        pdf.text(line, 20, y);
-        y += 4.5;
+      };
+
+      // ---- PAGE HEADER ----
+      // Green header bar
+      pdf.setFillColor(0, 102, 68);
+      pdf.rect(0, 0, pageW, 30, "F");
+      pdf.setTextColor(255, 255, 255);
+      pdf.setFontSize(16);
+      pdf.setFont("helvetica", "bold");
+      pdf.text("LAUDO MÉDICO", pageW / 2, 12, { align: "center" });
+      pdf.setFontSize(9);
+      pdf.setFont("helvetica", "normal");
+      pdf.text(`Laudo de ${examRequest?.exam_type || "Exame"}`, pageW / 2, 19, { align: "center" });
+      pdf.setFontSize(7);
+      pdf.text("Allo Médico — Plataforma de Telemedicina", pageW / 2, 26, { align: "center" });
+      pdf.setTextColor(0, 0, 0);
+
+      y = 36;
+
+      // ---- Accent line ----
+      pdf.setDrawColor(0, 102, 68);
+      pdf.setLineWidth(1);
+      pdf.line(marginL, y, pageW - marginR, y);
+      y += 6;
+
+      // ---- PATIENT IDENTIFICATION TABLE ----
+      pdf.setFontSize(8);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFillColor(245, 245, 245);
+      pdf.setDrawColor(200, 200, 200);
+
+      const examAny = examRequest as any;
+      const patientBirthDate = examAny?.patient_birth_date
+        ? new Date(examAny.patient_birth_date).toLocaleDateString("pt-BR")
+        : "—";
+      const patientSex = examAny?.patient_sex === "M" ? "Masculino" : examAny?.patient_sex === "F" ? "Feminino" : "—";
+      const patientAge = examAny?.patient_birth_date
+        ? `${Math.floor((Date.now() - new Date(examAny.patient_birth_date).getTime()) / (365.25 * 24 * 60 * 60 * 1000))} anos`
+        : "—";
+      const examDate = examAny?.exam_date
+        ? new Date(examAny.exam_date).toLocaleDateString("pt-BR")
+        : "—";
+      const modality = (examRequest?.exam_type || "DX").substring(0, 2).toUpperCase();
+      const laudoDate = new Date().toLocaleDateString("pt-BR");
+
+      // Table rows
+      const tableRows = [
+        [
+          { label: "Paciente:", value: patientDisplayName },
+          { label: "Nascimento:", value: patientBirthDate },
+          { label: "Sexo:", value: patientSex },
+          { label: "Idade:", value: patientAge },
+        ],
+        [
+          { label: "Nº Exame:", value: examId?.substring(0, 12) || "—" },
+          { label: "Data Exame:", value: examDate },
+          { label: "Modalidade:", value: modality },
+          { label: "Data Laudo:", value: laudoDate },
+        ],
+      ];
+
+      const colW = contentW / 4;
+      const rowH = 10;
+
+      tableRows.forEach((row, ri) => {
+        row.forEach((cell, ci) => {
+          const x = marginL + ci * colW;
+          pdf.setFillColor(ri % 2 === 0 ? 245 : 252, ri % 2 === 0 ? 245 : 252, ri % 2 === 0 ? 245 : 252);
+          pdf.rect(x, y, colW, rowH, "FD");
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(7);
+          pdf.text(cell.label, x + 2, y + 4);
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(8);
+          pdf.text(cell.value, x + 2, y + 8);
+        });
+        y += rowH;
+      });
+
+      // Urgency badge row
+      if (examRequest?.priority === "urgent") {
+        pdf.setFillColor(255, 230, 230);
+        pdf.rect(marginL, y, contentW, 8, "FD");
+        pdf.setTextColor(200, 0, 0);
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(9);
+        pdf.text("⚠ URGENTE", marginL + 4, y + 5.5);
+        pdf.setTextColor(0, 0, 0);
+        y += 8;
       }
 
-      // Signature area
-      y = Math.max(y + 15, 240);
-      if (y > 260) { pdf.addPage(); y = 40; }
+      y += 4;
 
-      pdf.setDrawColor(100, 100, 100);
+      // ---- CLINICAL INFO ----
+      if (examRequest?.clinical_info) {
+        pdf.setFillColor(240, 248, 255);
+        pdf.setDrawColor(0, 102, 68);
+        const clinicalLines = pdf.splitTextToSize(examRequest.clinical_info, contentW - 8);
+        const boxH = 10 + clinicalLines.length * 4;
+        pdf.roundedRect(marginL, y, contentW, boxH, 2, 2, "FD");
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(9);
+        pdf.text("INDICAÇÃO CLÍNICA", marginL + 4, y + 5);
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(8);
+        pdf.text(clinicalLines, marginL + 4, y + 10);
+        y += boxH + 4;
+      }
+
+      // ---- SEPARATOR ----
+      pdf.setDrawColor(0, 102, 68);
+      pdf.setLineWidth(0.5);
+      pdf.line(marginL, y, pageW - marginR, y);
+      y += 6;
+
+      // ---- REPORT BODY ----
+      // Parse HTML into formatted PDF sections
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = content;
+
+      const processNode = (node: Node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = (node.textContent || "").trim();
+          if (!text) return;
+          checkPage(6);
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(9);
+          const lines = pdf.splitTextToSize(text, contentW - 4);
+          for (const line of lines) {
+            checkPage(5);
+            pdf.text(line, marginL + 2, y);
+            y += 4.2;
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const el = node as HTMLElement;
+          const tag = el.tagName.toLowerCase();
+
+          if (tag === "h1") {
+            checkPage(10);
+            y += 3;
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(14);
+            pdf.text(el.textContent || "", marginL, y);
+            y += 7;
+          } else if (tag === "h2") {
+            checkPage(10);
+            y += 2;
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(12);
+            const h2Text = el.textContent || "";
+            pdf.text(h2Text, marginL, y);
+            // Underline
+            const tw = pdf.getTextWidth(h2Text);
+            pdf.setLineWidth(0.3);
+            pdf.line(marginL, y + 1, marginL + tw, y + 1);
+            y += 6;
+          } else if (tag === "h3") {
+            checkPage(8);
+            y += 1;
+            pdf.setFont("helvetica", "bold");
+            pdf.setFontSize(11);
+            pdf.text(el.textContent || "", marginL, y);
+            y += 5.5;
+          } else if (tag === "strong" || tag === "b") {
+            const text = (el.textContent || "").trim();
+            if (text) {
+              checkPage(5);
+              pdf.setFont("helvetica", "bold");
+              pdf.setFontSize(9);
+              pdf.text(text, marginL + 2, y);
+              y += 4.2;
+              pdf.setFont("helvetica", "normal");
+            }
+          } else if (tag === "em" || tag === "i") {
+            const text = (el.textContent || "").trim();
+            if (text) {
+              checkPage(5);
+              pdf.setFont("helvetica", "italic");
+              pdf.setFontSize(9);
+              pdf.text(text, marginL + 2, y);
+              y += 4.2;
+              pdf.setFont("helvetica", "normal");
+            }
+          } else if (tag === "li") {
+            checkPage(5);
+            pdf.setFont("helvetica", "normal");
+            pdf.setFontSize(9);
+            const liText = `• ${(el.textContent || "").trim()}`;
+            const liLines = pdf.splitTextToSize(liText, contentW - 10);
+            for (const line of liLines) {
+              checkPage(5);
+              pdf.text(line, marginL + 6, y);
+              y += 4.2;
+            }
+          } else if (tag === "br") {
+            y += 2;
+          } else if (tag === "p") {
+            el.childNodes.forEach(processNode);
+            y += 2;
+          } else if (tag === "table") {
+            // Simple table rendering
+            checkPage(15);
+            const rows = el.querySelectorAll("tr");
+            rows.forEach((tr, ri) => {
+              const cells = tr.querySelectorAll("th, td");
+              const cellW = contentW / Math.max(cells.length, 1);
+              cells.forEach((td, ci) => {
+                const x = marginL + ci * cellW;
+                pdf.setFillColor(ri === 0 ? 230 : 250, ri === 0 ? 230 : 250, ri === 0 ? 230 : 250);
+                pdf.rect(x, y, cellW, 7, "FD");
+                pdf.setFontSize(7);
+                pdf.setFont("helvetica", ri === 0 ? "bold" : "normal");
+                pdf.text((td.textContent || "").trim().substring(0, 30), x + 1, y + 5);
+              });
+              y += 7;
+              checkPage(8);
+            });
+            y += 2;
+          } else {
+            el.childNodes.forEach(processNode);
+          }
+        }
+      };
+
+      tempDiv.childNodes.forEach(processNode);
+
+      // ---- DIGITAL SIGNATURE ----
+      checkPage(35);
+      y = Math.max(y + 12, 220);
+      if (y > 255) { pdf.addPage(); y = 40; }
+
+      pdf.setDrawColor(0, 102, 68);
+      pdf.setLineWidth(0.5);
       pdf.line(55, y, 155, y);
+      y += 5;
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(10);
+      pdf.text(`Dr(a). ${doctorName}`, pageW / 2, y, { align: "center" });
+      y += 5;
+      pdf.setFont("helvetica", "normal");
       pdf.setFontSize(9);
-      pdf.text(`Dr(a). ${doctorName}`, 105, y + 5, { align: "center" });
-      pdf.text(`CRM: ${doctorProfile.crm}/${doctorProfile.crm_state}`, 105, y + 10, { align: "center" });
-
-      // Footer
+      pdf.text(`CRM: ${doctorProfile.crm}/${doctorProfile.crm_state}`, pageW / 2, y, { align: "center" });
+      y += 4;
+      pdf.setFontSize(8);
+      pdf.setTextColor(80, 80, 80);
+      pdf.text("Médico Laudista — Allo Médico Telelaudo", pageW / 2, y, { align: "center" });
+      pdf.setTextColor(0, 0, 0);
+      y += 4;
       pdf.setFontSize(7);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text(`Código de Verificação: ${verificationCode}`, 20, 280);
-      pdf.text(`Hash SHA-256: ${documentHash.substring(0, 48)}...`, 20, 284);
-      pdf.text(`Verificar autenticidade: allomedico.com/validar`, 20, 288);
-      pdf.text(`Gerado em: ${new Date().toLocaleString("pt-BR")}`, 130, 288);
+      pdf.text(`Assinado digitalmente em ${new Date().toLocaleString("pt-BR")}`, pageW / 2, y, { align: "center" });
+
+      // ---- ADD FOOTERS TO ALL PAGES ----
+      const totalPages = pdf.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        addFooter(i, totalPages);
+      }
 
       const pdfBlob = pdf.output("blob");
       const pdfPath = `reports/${examId}/${crypto.randomUUID()}.pdf`;

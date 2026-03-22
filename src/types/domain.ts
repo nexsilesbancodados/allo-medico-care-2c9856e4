@@ -153,6 +153,9 @@ export interface ExamRequest {
   specialty_required?: string | null;
   started_at?: string | null;
   completed_at?: string | null;
+  patient_birth_date?: string | null;
+  patient_sex?: string | null;
+  exam_date?: string | null;
 }
 
 export interface ExamReport {
