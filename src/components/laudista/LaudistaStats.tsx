@@ -188,7 +188,7 @@ const LaudistaStats = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
                 >
-                  <Card className="border-border/50 overflow-hidden hover:shadow-md transition-shadow">
+                  <Card variant="kpi" className="overflow-hidden">
                     <CardContent className="p-5">
                       <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${kpi.color} flex items-center justify-center mb-3 shadow-md`}>
                         <kpi.icon className="w-5 h-5 text-white" />
