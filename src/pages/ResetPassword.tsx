@@ -46,7 +46,8 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="min-h-screen relative flex items-center justify-center p-6">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(250,50%,97%)] via-[hsl(260,40%,93%)] to-[hsl(270,35%,88%)] dark:from-[hsl(250,25%,7%)] dark:via-[hsl(260,20%,9%)] dark:to-[hsl(270,18%,11%)]" />
       <SEOHead title="Redefinir Senha" description="Redefina sua senha de acesso à AloClinica." />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         {success ? (

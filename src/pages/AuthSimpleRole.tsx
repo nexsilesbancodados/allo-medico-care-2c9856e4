@@ -51,7 +51,8 @@ const AuthSimpleRole = ({
   const gradient = `from-${gradientFrom} to-${gradientTo}`;
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen relative flex">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(200,50%,97%)] via-[hsl(210,40%,94%)] to-[hsl(220,35%,90%)] dark:from-[hsl(200,25%,7%)] dark:via-[hsl(210,20%,9%)] dark:to-[hsl(220,18%,11%)]" />
       <SEOHead title={title} description={seoDescription} />
 
       {/* ── Left panel — desktop only ── */}

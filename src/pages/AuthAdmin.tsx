@@ -36,7 +36,8 @@ const AuthAdmin = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen relative flex">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(220,45%,97%)] via-[hsl(230,35%,93%)] to-[hsl(240,30%,88%)] dark:from-[hsl(220,25%,7%)] dark:via-[hsl(230,20%,9%)] dark:to-[hsl(240,18%,11%)]" />
       <SEOHead title="Acesso Administrativo" description="Painel administrativo da AloClinica." />
 
       {/* ── Left panel ── */}

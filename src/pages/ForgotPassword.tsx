@@ -31,7 +31,8 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="min-h-screen relative flex items-center justify-center p-6">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(210,55%,97%)] via-[hsl(220,45%,93%)] to-[hsl(230,40%,88%)] dark:from-[hsl(210,25%,7%)] dark:via-[hsl(220,20%,9%)] dark:to-[hsl(230,18%,11%)]" />
       <SEOHead title="Recuperar Senha" description="Recupere sua senha da plataforma AloClinica." />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md">
         <Link to="/" className="inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition text-sm">
