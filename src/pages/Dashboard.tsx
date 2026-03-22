@@ -279,6 +279,7 @@ const Dashboard = () => {
       case "support": return <SupportDashboard />;
       case "clinic": return <ClinicDashboard />;
       case "partner": return <PartnerDashboard />;
+      case "optician": return <OpticianDashboard />;
       default: return <PatientDashboard />;
     }
   };
