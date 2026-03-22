@@ -67,6 +67,12 @@ const LaudistaExamRequest = lazy(() => import("@/components/doctor/ExamRequestFo
 const LaudistaReportEditor = lazy(() => import("@/components/doctor/ExamReportEditor"));
 const RenewalQueue = lazy(() => import("@/components/doctor/RenewalQueue"));
 const OphthalmologyPage = lazy(() => import("@/components/ophthalmology/OphthalmologyDashboardPage"));
+const OpticianDashboard = lazy(() => import("@/components/dashboards/OpticianDashboard"));
+const OpticianOrders = lazy(() => import("@/components/optician/OpticianOrders"));
+const OpticianCatalog = lazy(() => import("@/components/optician/OpticianCatalog"));
+const OpticianStock = lazy(() => import("@/components/optician/OpticianStock"));
+const OpticianProduction = lazy(() => import("@/components/optician/OpticianProduction"));
+const OpticianFinancial = lazy(() => import("@/components/optician/OpticianFinancial"));
 const DiscountCardPage = lazy(() => import("@/pages/DiscountCard"));
 const VideoRoom = lazy(() => import("@/components/consultation/VideoRoom"));
 const PrescriptionForm = lazy(() => import("@/components/consultation/PrescriptionForm"));
@@ -239,7 +245,7 @@ const Dashboard = () => {
   if (!user) return <Navigate to="/auth" replace />;
 
   const isAdmin = roles.includes("admin");
-  const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "admin", "laudista"];
+  const validForceRoles = ["patient", "doctor", "receptionist", "support", "clinic", "partner", "admin", "laudista", "optician"];
 
   // Allow any user to use ?role= IF they actually have that role (not just admins)
   const primaryRole = (() => {
@@ -259,6 +265,7 @@ const Dashboard = () => {
     if (roles.includes("support")) return "support";
     if (roles.includes("clinic")) return "clinic";
     if (roles.includes("partner")) return "partner";
+    if (roles.includes("optician")) return "optician";
     return "patient";
   })();
 
@@ -272,6 +279,7 @@ const Dashboard = () => {
       case "support": return <SupportDashboard />;
       case "clinic": return <ClinicDashboard />;
       case "partner": return <PartnerDashboard />;
+      case "optician": return <OpticianDashboard />;
       default: return <PatientDashboard />;
     }
   };
@@ -399,6 +407,14 @@ const Dashboard = () => {
       <Route path="admin/panel-center" element={<RoleGuard allowed={[]} roles={roles}><PanelCenter /></RoleGuard>} />
       <Route path="admin/financial" element={<RoleGuard allowed={[]} roles={roles}><AdminFinancial /></RoleGuard>} />
       <Route path="admin/coupons" element={<RoleGuard allowed={[]} roles={roles}><AdminCoupons /></RoleGuard>} />
+
+      {/* Optician */}
+      <Route path="optician" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianDashboard /></RoleGuard>} />
+      <Route path="optician/orders" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianOrders /></RoleGuard>} />
+      <Route path="optician/catalog" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianCatalog /></RoleGuard>} />
+      <Route path="optician/stock" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianStock /></RoleGuard>} />
+      <Route path="optician/production" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianProduction /></RoleGuard>} />
+      <Route path="optician/financial" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianFinancial /></RoleGuard>} />
 
       {/* Laudista — blocked when ?role=doctor */}
       <Route path="laudista" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><ContextGuard panel="laudista" forceRole={forceRole} roles={roles}><LaudistaDashboard /></ContextGuard></RoleGuard>} />

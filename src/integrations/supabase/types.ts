@@ -1893,6 +1893,355 @@ export type Database = {
           },
         ]
       }
+      optical_frames: {
+        Row: {
+          brand: string
+          bridge_size: number | null
+          color: string
+          created_at: string
+          discount_price: number | null
+          gender: string
+          id: string
+          image_urls: Json
+          is_active: boolean
+          lens_width: number | null
+          material: string
+          model: string
+          name: string
+          price: number
+          shape: string
+          stock_qty: number
+          temple_length: number | null
+          updated_at: string
+        }
+        Insert: {
+          brand?: string
+          bridge_size?: number | null
+          color?: string
+          created_at?: string
+          discount_price?: number | null
+          gender?: string
+          id?: string
+          image_urls?: Json
+          is_active?: boolean
+          lens_width?: number | null
+          material?: string
+          model?: string
+          name: string
+          price?: number
+          shape?: string
+          stock_qty?: number
+          temple_length?: number | null
+          updated_at?: string
+        }
+        Update: {
+          brand?: string
+          bridge_size?: number | null
+          color?: string
+          created_at?: string
+          discount_price?: number | null
+          gender?: string
+          id?: string
+          image_urls?: Json
+          is_active?: boolean
+          lens_width?: number | null
+          material?: string
+          model?: string
+          name?: string
+          price?: number
+          shape?: string
+          stock_qty?: number
+          temple_length?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      optical_lens_types: {
+        Row: {
+          coatings: string[]
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          lens_type: string
+          material: string
+          name: string
+          price: number
+        }
+        Insert: {
+          coatings?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lens_type?: string
+          material?: string
+          name: string
+          price?: number
+        }
+        Update: {
+          coatings?: string[]
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          lens_type?: string
+          material?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
+      optical_orders: {
+        Row: {
+          cancelled_at: string | null
+          created_at: string
+          delivered_at: string | null
+          discount_amount: number
+          frame_id: string | null
+          frame_price: number
+          id: string
+          internal_notes: string | null
+          interpupillary_distance: number | null
+          lens_price: number
+          lens_type_id: string | null
+          notes: string | null
+          od_addition: number | null
+          od_axis: number | null
+          od_cylindrical: number | null
+          od_spherical: number | null
+          oe_addition: number | null
+          oe_axis: number | null
+          oe_cylindrical: number | null
+          oe_spherical: number | null
+          order_number: string
+          paid_at: string | null
+          patient_id: string
+          payment_id: string | null
+          payment_status: string
+          prescription_id: string | null
+          shipped_at: string | null
+          shipping_address: Json | null
+          status: string
+          total_price: number
+          tracking_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          cancelled_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          discount_amount?: number
+          frame_id?: string | null
+          frame_price?: number
+          id?: string
+          internal_notes?: string | null
+          interpupillary_distance?: number | null
+          lens_price?: number
+          lens_type_id?: string | null
+          notes?: string | null
+          od_addition?: number | null
+          od_axis?: number | null
+          od_cylindrical?: number | null
+          od_spherical?: number | null
+          oe_addition?: number | null
+          oe_axis?: number | null
+          oe_cylindrical?: number | null
+          oe_spherical?: number | null
+          order_number?: string
+          paid_at?: string | null
+          patient_id: string
+          payment_id?: string | null
+          payment_status?: string
+          prescription_id?: string | null
+          shipped_at?: string | null
+          shipping_address?: Json | null
+          status?: string
+          total_price?: number
+          tracking_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cancelled_at?: string | null
+          created_at?: string
+          delivered_at?: string | null
+          discount_amount?: number
+          frame_id?: string | null
+          frame_price?: number
+          id?: string
+          internal_notes?: string | null
+          interpupillary_distance?: number | null
+          lens_price?: number
+          lens_type_id?: string | null
+          notes?: string | null
+          od_addition?: number | null
+          od_axis?: number | null
+          od_cylindrical?: number | null
+          od_spherical?: number | null
+          oe_addition?: number | null
+          oe_axis?: number | null
+          oe_cylindrical?: number | null
+          oe_spherical?: number | null
+          order_number?: string
+          paid_at?: string | null
+          patient_id?: string
+          payment_id?: string | null
+          payment_status?: string
+          prescription_id?: string | null
+          shipped_at?: string | null
+          shipping_address?: Json | null
+          status?: string
+          total_price?: number
+          tracking_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "optical_orders_frame_id_fkey"
+            columns: ["frame_id"]
+            isOneToOne: false
+            referencedRelation: "optical_frames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "optical_orders_lens_type_id_fkey"
+            columns: ["lens_type_id"]
+            isOneToOne: false
+            referencedRelation: "optical_lens_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      optical_production: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          id: string
+          notes: string | null
+          order_id: string
+          stage: string
+          started_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id: string
+          stage?: string
+          started_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          notes?: string | null
+          order_id?: string
+          stage?: string
+          started_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "optical_production_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "optical_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      optical_stock_movements: {
+        Row: {
+          created_at: string
+          frame_id: string
+          id: string
+          movement_type: string
+          order_id: string | null
+          performed_by: string | null
+          quantity: number
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string
+          frame_id: string
+          id?: string
+          movement_type?: string
+          order_id?: string | null
+          performed_by?: string | null
+          quantity: number
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string
+          frame_id?: string
+          id?: string
+          movement_type?: string
+          order_id?: string | null
+          performed_by?: string | null
+          quantity?: number
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "optical_stock_movements_frame_id_fkey"
+            columns: ["frame_id"]
+            isOneToOne: false
+            referencedRelation: "optical_frames"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "optical_stock_movements_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "optical_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      optical_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          id: string
+          order_id: string | null
+          payment_method: string | null
+          type: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          payment_method?: string | null
+          type?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          order_id?: string | null
+          payment_method?: string | null
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "optical_transactions_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "optical_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_profiles: {
         Row: {
           address: string | null
@@ -3158,6 +3507,7 @@ export type Database = {
         | "support"
         | "partner"
         | "affiliate"
+        | "optician"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -3294,6 +3644,7 @@ export const Constants = {
         "support",
         "partner",
         "affiliate",
+        "optician",
       ],
     },
   },
