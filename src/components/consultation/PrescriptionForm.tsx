@@ -503,7 +503,7 @@ const PrescriptionForm = () => {
         )}
 
         {/* Patient info */}
-        <Card className="border-border mb-6">
+        <Card variant="flat" className="mb-6">
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">Paciente</p>
             <p className="font-semibold text-foreground">{patientName || "Carregando..."}</p>
