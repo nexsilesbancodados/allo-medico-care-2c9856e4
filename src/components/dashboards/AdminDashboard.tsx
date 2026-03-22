@@ -511,7 +511,7 @@ const AdminDashboard = () => {
 
         {/* Recent subscriptions */}
         <motion.div variants={fadeUp}>
-          <Card className="border-border/50">
+          <Card variant="elevated">
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm font-semibold">Assinaturas Recentes</CardTitle>
