@@ -297,7 +297,7 @@ const DoctorWaitingRoom = () => {
               {waitingPatients.filter(p => p.status === "scheduled").map(p => {
                 const t = typeLabel[p.appointment_type] ?? typeLabel.first_visit;
                 return (
-                  <Card key={p.id} className="border-border opacity-70">
+                  <Card key={p.id} variant="flat" className="opacity-70">
                     <CardContent className="p-3">
                       <div className="flex items-center justify-between">
                         <div>
