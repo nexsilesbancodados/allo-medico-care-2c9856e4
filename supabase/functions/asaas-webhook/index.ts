@@ -119,6 +119,49 @@ serve(async (req) => {
           link: "/dashboard",
         });
 
+        // Push notification
+        try {
+          const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+          const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+          await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+            body: JSON.stringify({
+              user_id: userId,
+              title: "✅ Cartão Ativado!",
+              message: "Seu Cartão de Benefícios está ativo. Aproveite os descontos!",
+              link: "/dashboard",
+            }),
+          });
+        } catch (pushErr) {
+          console.warn("Card activation push failed:", pushErr);
+        }
+
+        // WhatsApp notification for card activation
+        try {
+          const { data: profile } = await supabase.from("profiles").select("first_name, phone").eq("user_id", userId).single();
+          if (profile?.phone) {
+            const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+            const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+            const planNames: Record<string, string> = {
+              prata_familiar: "Mini Família",
+              ouro_individual: "Solitário",
+              ouro_familiar: "King Família",
+              diamante_familiar: "Prime Família",
+            };
+            await fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+              body: JSON.stringify({
+                phone: profile.phone,
+                message: `✅ *Cartão de Benefícios Ativado!*\n\nOlá ${profile.first_name},\nSeu plano *${planNames[planType] || planType}* está ativo!\n\n💳 Desconto de 30% em todas as consultas\n📅 Válido até ${validUntil.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}\n\nAproveite! 💚`,
+              }),
+            });
+          }
+        } catch (whatsErr) {
+          console.warn("Card activation WhatsApp failed:", whatsErr);
+        }
+
         // Send card activation email
         try {
           const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", userId).single();
@@ -284,6 +327,24 @@ serve(async (req) => {
               message: `Seu pagamento foi aprovado. Consulta agendada para ${scheduledDate}.`,
               type: "payment", link: "/dashboard/appointments",
             });
+
+            // Push notification for patient
+            try {
+              const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+              const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+              await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+                body: JSON.stringify({
+                  user_id: appointment.patient_id,
+                  title: "✅ Pagamento Confirmado!",
+                  message: `Consulta confirmada para ${scheduledDate}.`,
+                  link: "/dashboard/appointments",
+                }),
+              });
+            } catch (pushErr) {
+              console.warn("Payment push failed:", pushErr);
+            }
           }
 
           const { data: doctorProfile } = await supabase
@@ -296,6 +357,24 @@ serve(async (req) => {
               message: `Pagamento confirmado para consulta em ${scheduledDate}.`,
               type: "payment", link: "/dashboard/appointments",
             });
+
+            // Push for doctor
+            try {
+              const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+              const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+              await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+                body: JSON.stringify({
+                  user_id: doctorProfile.user_id,
+                  title: "💰 Pagamento Confirmado",
+                  message: `Novo pagamento para consulta em ${scheduledDate}.`,
+                  link: "/dashboard/appointments",
+                }),
+              });
+            } catch (pushErr) {
+              console.warn("Doctor payment push failed:", pushErr);
+            }
           }
 
           // WhatsApp notification

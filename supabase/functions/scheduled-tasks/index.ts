@@ -42,7 +42,7 @@ serve(async (req) => {
 
     for (const ns of recentNoShows ?? []) {
       try {
-        const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", ns.patient_id).single();
+        const { data: profile } = await supabase.from("profiles").select("first_name, last_name, phone").eq("user_id", ns.patient_id).single();
         const { data: authUser } = await supabase.auth.admin.getUserById(ns.patient_id);
         const { data: docProfile } = await supabase.from("doctor_profiles").select("user_id").eq("id", ns.doctor_id).single();
         let drName = "Médico";
@@ -52,7 +52,47 @@ serve(async (req) => {
         }
         const schedDate = new Date(ns.scheduled_at);
         const feeAmount = ((ns.price_at_booking || 89) * 0.5).toFixed(2);
+        const dateStr = schedDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+        const timeStr = schedDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
 
+        // In-app notification to PATIENT
+        await supabase.from("notifications").insert({
+          user_id: ns.patient_id,
+          title: "🚫 Não comparecimento registrado",
+          message: `Você não compareceu à consulta com ${drName} em ${dateStr} às ${timeStr}. Taxa de R$ ${feeAmount} será cobrada.`,
+          type: "warning",
+          link: "/dashboard/appointments",
+        });
+
+        // WhatsApp to patient
+        if (profile?.phone) {
+          const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+          const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+          await fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+            body: JSON.stringify({
+              phone: profile.phone,
+              message: `🚫 *Não Comparecimento*\n\nOlá ${profile.first_name},\nVocê não compareceu à consulta com ${drName} em ${dateStr} às ${timeStr}.\n\n💰 Taxa de não comparecimento: R$ ${feeAmount}\n\nPara evitar cobranças futuras, cancele com antecedência. 💚`,
+            }),
+          });
+        }
+
+        // Push to patient
+        const SUPABASE_URL2 = Deno.env.get("SUPABASE_URL")!;
+        const SERVICE_KEY2 = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+        await fetch(`${SUPABASE_URL2}/functions/v1/send-push-notification`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY2}` },
+          body: JSON.stringify({
+            user_id: ns.patient_id,
+            title: "🚫 Não comparecimento",
+            message: `Taxa de R$ ${feeAmount} por não comparecimento à consulta.`,
+            link: "/dashboard/appointments",
+          }),
+        });
+
+        // Email to patient
         if (authUser?.user?.email) {
           const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
           const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -65,8 +105,8 @@ serve(async (req) => {
               data: {
                 patient_name: profile ? `${profile.first_name} ${profile.last_name}` : "Paciente",
                 doctor_name: drName,
-                date: schedDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }),
-                time: schedDate.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }),
+                date: dateStr,
+                time: timeStr,
                 amount: feeAmount,
               },
             }),

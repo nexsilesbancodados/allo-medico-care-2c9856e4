@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Loader2, FileText, Download, Eye, ShieldCheck } from "lucide-react";
+import { Loader2, FileText, Download, Eye, ShieldCheck, Share2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { generateShareableLink } from "@/lib/services/report-service";
+import { toastShareLinkCopied, toastShareLinkFailed } from "@/lib/toast-helpers";
 
 const statusLabels: Record<string, string> = {
   pending: "Pendente",
@@ -130,16 +132,34 @@ const PatientExamResults = () => {
                             <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right space-x-1">
                           {report?.pdf_url ? (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDownloadPdf(report.pdf_url)}
-                            >
-                              <Download className="w-3 h-3 mr-1" />
-                              Baixar PDF
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownloadPdf(report.pdf_url)}
+                              >
+                                <Download className="w-3 h-3 mr-1" />
+                                Baixar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={async () => {
+                                  const link = await generateShareableLink(report.pdf_url!);
+                                  if (link) {
+                                    await navigator.clipboard.writeText(link);
+                                    toastShareLinkCopied();
+                                  } else {
+                                    toastShareLinkFailed();
+                                  }
+                                }}
+                              >
+                                <Share2 className="w-3 h-3 mr-1" />
+                                Compartilhar
+                              </Button>
+                            </>
                           ) : exam.status === "reported" || exam.status === "delivered" ? (
                             <Badge variant="secondary" className="text-xs">Processando...</Badge>
                           ) : (
