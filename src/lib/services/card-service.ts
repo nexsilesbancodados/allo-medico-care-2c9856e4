@@ -77,6 +77,10 @@ export const getCardBenefits = async (userId: string): Promise<CardBenefits> => 
       usedReschedules: 0,
       remainingReschedules: 0,
       prioritySupport: false,
+      totalCompletedConsultations: 0,
+      freeConsultationsEarned: 0,
+      freeConsultationsUsed: 0,
+      freeConsultationsAvailable: 0,
     };
   }
 
@@ -87,14 +91,31 @@ export const getCardBenefits = async (userId: string): Promise<CardBenefits> => 
   yearStart.setMonth(0, 1);
   yearStart.setHours(0, 0, 0, 0);
 
-  const { count } = await supabase
-    .from("appointments")
-    .select("id", { count: "exact", head: true })
-    .eq("patient_id", userId)
-    .eq("cancel_reason", "Reagendado pelo paciente")
-    .gte("created_at", yearStart.toISOString());
+  const [rescheduleRes, completedRes, freeUsedRes] = await Promise.all([
+    supabase
+      .from("appointments")
+      .select("id", { count: "exact", head: true })
+      .eq("patient_id", userId)
+      .eq("cancel_reason", "Reagendado pelo paciente")
+      .gte("created_at", yearStart.toISOString()),
+    // Loyalty: count completed consultations since card activation
+    supabase
+      .from("appointments")
+      .select("id", { count: "exact", head: true })
+      .eq("patient_id", userId)
+      .eq("status", "completed"),
+    // Loyalty: count free consultations already redeemed
+    supabase
+      .from("appointments")
+      .select("id", { count: "exact", head: true })
+      .eq("patient_id", userId)
+      .eq("appointment_type", "loyalty_free"),
+  ]);
 
-  const usedReschedules = count ?? 0;
+  const usedReschedules = rescheduleRes.count ?? 0;
+  const totalCompleted = completedRes.count ?? 0;
+  const freeEarned = Math.floor(totalCompleted / 5); // 1 free per 5 completed
+  const freeUsed = freeUsedRes.count ?? 0;
 
   return {
     hasActiveCard: true,
@@ -105,6 +126,10 @@ export const getCardBenefits = async (userId: string): Promise<CardBenefits> => 
     usedReschedules,
     remainingReschedules: Math.max(0, freeReschedules - usedReschedules),
     prioritySupport: ["ouro_familiar", "diamante_familiar"].includes(card.plan_type),
+    totalCompletedConsultations: totalCompleted,
+    freeConsultationsEarned: freeEarned,
+    freeConsultationsUsed: freeUsed,
+    freeConsultationsAvailable: Math.max(0, freeEarned - freeUsed),
   };
 };
 
