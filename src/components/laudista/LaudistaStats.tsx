@@ -206,7 +206,7 @@ const LaudistaStats = () => {
         {/* Tempo Médio */}
         {avgTurnaround && (
           <motion.div variants={fadeUp}>
-            <Card className="border-border/50">
+            <Card variant="kpi">
               <CardContent className="p-5 flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/15 to-secondary/15 flex items-center justify-center">
                   <Zap className="w-6 h-6 text-primary" />
