@@ -213,6 +213,7 @@ const App = () => {
                         <Route path="/para-empresas/cartao" element={<B2BCartao />} />
                         <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
                         <Route path="/teleconsulta" element={<Teleconsulta />} />
+                        <Route path="/oftalmologia" element={<OftalmologiaLanding />} />
                         <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
                         <Route path="/laudista" element={<AuthLaudista />} />
                         <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
