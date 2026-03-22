@@ -37,6 +37,7 @@ import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
 import TipTapEditor from "@/components/telelaudo/TipTapEditor";
 import jsPDF from "jspdf";
+import { motion } from "framer-motion";
 import type { ExamRequest, ExamReport, ReportTemplate } from "@/types/domain";
 
 // ==================== WL PRESETS ====================
@@ -1943,7 +1944,12 @@ const ExamReportEditor = () => {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 min-h-0">
+      <motion.div
+        className="flex-1 min-h-0"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
         <ResizablePanelGroup direction="horizontal">
           <ResizablePanel defaultSize={55} minSize={30}>
             <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} onFilesUploaded={(newUrls) => setFileUrls(prev => [...prev, ...newUrls])} />
@@ -2150,7 +2156,7 @@ const ExamReportEditor = () => {
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
-      </div>
+      </motion.div>
 
       {/* ═══ STATUS BAR — VS Code style ═══ */}
       <div className="flex items-center gap-4 px-3 h-6 shrink-0 font-mono text-[10px] select-none" style={{ background: 'hsl(220 20% 7%)', borderTop: '1px solid hsl(220 15% 16%)', color: 'hsl(220 8% 50%)' }}>
