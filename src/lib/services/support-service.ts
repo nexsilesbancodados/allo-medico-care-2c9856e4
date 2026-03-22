@@ -165,14 +165,15 @@ export const getTicketDetail = async (ticketId: string, userId: string): Promise
       ? await supabase.from("user_roles").select("user_id, role").in("user_id", senderIds).in("role", ["support", "admin"])
       : { data: [] };
 
-    const nameMap = new Map(senderProfiles?.map(p => [p.user_id, `${p.first_name} ${p.last_name}`]) ?? []);
+    const nameMap = new Map<string, string>();
+    senderProfiles?.forEach(p => nameMap.set(p.user_id, `${p.first_name} ${p.last_name}`));
     const staffSet = new Set(staffRoles?.map(r => r.user_id) ?? []);
 
     return {
       id: ticket.id,
       subject: ticket.subject,
       status: ticket.status,
-      category: ticket.category ?? "general",
+      category: (ticket as any).category ?? "general",
       priority: ticket.priority ?? "medium",
       createdAt: ticket.created_at,
       updatedAt: ticket.updated_at,
