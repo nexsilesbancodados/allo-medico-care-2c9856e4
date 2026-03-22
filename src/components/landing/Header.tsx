@@ -163,6 +163,9 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                       <ListItem href="/consulta-avulsa" title="Consulta Avulsa" imgSrc={mascotWave} badge="Rápido">
                         Atendimento rápido, seguro e sem burocracia.
                       </ListItem>
+                      <ListItem href="/oftalmologia" title="Oftalmologia" imgSrc={pingoOftalmo} badge="Novo">
+                        Exames, receitas de óculos e laudos oftalmológicos.
+                      </ListItem>
                     </ul>
                   </div>
                 </NavigationMenuContent>
