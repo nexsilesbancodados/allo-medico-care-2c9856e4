@@ -65,7 +65,8 @@ const LinkRedirect = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center relative">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(210,50%,97%)] via-[hsl(220,40%,93%)] to-[hsl(230,35%,88%)] dark:from-[hsl(210,25%,7%)] dark:via-[hsl(220,20%,9%)] dark:to-[hsl(230,18%,11%)]" />
       <div className="text-center space-y-3">
         <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto" />
         <p className="text-muted-foreground">Redirecionando...</p>

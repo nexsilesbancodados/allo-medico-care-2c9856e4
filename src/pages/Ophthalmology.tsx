@@ -13,7 +13,7 @@ const OphthalmologyDoctorQueue = lazy(() => import("@/components/ophthalmology/O
 const Ophthalmology = () => {
   const { user, roles, loading } = useAuth();
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   if (!user) return <Navigate to="/auth" replace />;
 
   const isDoctor = roles.includes("doctor") || roles.includes("admin");

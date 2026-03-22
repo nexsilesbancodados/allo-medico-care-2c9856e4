@@ -204,7 +204,8 @@ const AuthLaudista = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen relative">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(245,48%,97%)] via-[hsl(255,38%,93%)] to-[hsl(265,33%,87%)] dark:from-[hsl(245,25%,7%)] dark:via-[hsl(255,20%,9%)] dark:to-[hsl(265,18%,11%)]" />
       <SEOHead title="Portal do Médico Laudista — AloClinica" description="Emita laudos médicos à distância com assinatura digital, fila inteligente e suporte de IA." />
       <Header />
 

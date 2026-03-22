@@ -99,7 +99,8 @@ const DoctorPublicProfilePage = () => {
 
   if (!doctorId) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen relative flex items-center justify-center">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(200,55%,97%)] via-[hsl(210,45%,93%)] to-[hsl(220,40%,88%)] dark:from-[hsl(200,25%,7%)] dark:via-[hsl(210,20%,9%)] dark:to-[hsl(220,18%,11%)]" />
         <div className="text-center space-y-4">
           <p className="text-lg font-semibold text-foreground">Médico não encontrado</p>
           <p className="text-muted-foreground text-sm">O perfil solicitado não existe ou não está disponível.</p>

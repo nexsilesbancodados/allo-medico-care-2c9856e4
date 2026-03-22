@@ -229,7 +229,8 @@ const AuthMedico = () => {
   return (
     <>
       <SEOHead title="Sou Médico — Atenda Online | AloClinica" description="Cadastre-se como médico na AloClinica. Atenda por teleconsulta, emita receitas digitais e amplie sua base de pacientes." />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(175,50%,97%)] via-[hsl(185,42%,93%)] to-[hsl(195,38%,87%)] dark:from-[hsl(175,25%,7%)] dark:via-[hsl(185,20%,9%)] dark:to-[hsl(195,18%,11%)]" />
         <Header />
 
         {/* Hero */}
