@@ -110,7 +110,7 @@ serve(async (req) => {
           console.info(`[Asaas Webhook] Created new discount card for user ${userId}`);
         }
 
-        // Notify user
+        // Notify user (in-app)
         await supabase.from("notifications").insert({
           user_id: userId,
           title: "✅ Cartão de Benefícios Ativado!",
@@ -118,6 +118,40 @@ serve(async (req) => {
           type: "payment",
           link: "/dashboard",
         });
+
+        // Send card activation email
+        try {
+          const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", userId).single();
+          const { data: authUser } = await supabase.auth.admin.getUserById(userId);
+          const patientName = profile ? `${profile.first_name} ${profile.last_name}` : "Paciente";
+          const validUntilStr = validUntil.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+          const planNames: Record<string, string> = {
+            prata_familiar: "Mini Família",
+            ouro_individual: "Solitário",
+            ouro_familiar: "King Família",
+            diamante_familiar: "Prime Família",
+          };
+          if (authUser?.user?.email) {
+            const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+            const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+            await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+              body: JSON.stringify({
+                type: "card_activated",
+                to: authUser.user.email,
+                data: {
+                  patient_name: patientName,
+                  plan_name: planNames[planType] || planType,
+                  valid_until: validUntilStr,
+                  discount_percent: "30",
+                },
+              }),
+            });
+          }
+        } catch (emailErr) {
+          console.warn("Card activation email failed (non-blocking):", emailErr);
+        }
       }
 
       if (["cancelled", "refunded", "chargeback"].includes(newPaymentStatus || "")) {
