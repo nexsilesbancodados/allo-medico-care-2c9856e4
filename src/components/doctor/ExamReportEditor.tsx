@@ -607,8 +607,42 @@ const PacsViewer = ({
     { id: "ellipse", icon: Eye, label: "ROI Elíptica" },
     { id: "rectangle", icon: Grid3X3, label: "Retângulo ROI" },
     { id: "windowROI", icon: Monitor, label: "Janela ROI" },
+    { id: "magnify", icon: ZoomIn, label: "Lupa (2x)" },
     { id: "annotate", icon: Type, label: "Anotação" },
   ];
+
+  // Magnify lens effect
+  const handleMagnify = useCallback((e: React.MouseEvent) => {
+    if (tool !== "magnify") { setMagnifyPos(null); return; }
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    setMagnifyPos({ x, y });
+
+    const mag = magnifyCanvasRef.current;
+    const src = canvasRef.current;
+    if (!mag || !src) return;
+    const magCtx = mag.getContext("2d");
+    if (!magCtx) return;
+    const size = 160;
+    mag.width = size;
+    mag.height = size;
+    const scale = 2.5;
+    const sx = (x / zoom) - (size / scale / 2);
+    const sy = (y / zoom) - (size / scale / 2);
+    magCtx.clearRect(0, 0, size, size);
+    magCtx.save();
+    magCtx.beginPath();
+    magCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2);
+    magCtx.clip();
+    magCtx.drawImage(src, sx, sy, size / scale, size / scale, 0, 0, size, size);
+    magCtx.restore();
+    magCtx.strokeStyle = "#f59e0b";
+    magCtx.lineWidth = 2;
+    magCtx.beginPath();
+    magCtx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2);
+    magCtx.stroke();
+  }, [tool, zoom]);
 
   return (
     <div className="flex flex-col h-full bg-black text-white/80">
