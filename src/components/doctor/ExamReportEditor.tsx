@@ -795,6 +795,23 @@ const PacsViewer = ({
 
           <div className="flex-1" />
 
+          {/* Toggle thumbnails */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${showThumbnails ? "bg-amber-500/20 text-amber-400" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+              onClick={() => setShowThumbnails(p => !p)}>
+              <ImageIcon className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Thumbnails</TooltipContent></Tooltip>
+          {/* Toggle overlays */}
+          <Tooltip><TooltipTrigger asChild>
+            <Button size="icon" variant="ghost" className={`h-7 w-7 ${showOverlays ? "bg-amber-500/20 text-amber-400" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+              onClick={() => setShowOverlays(p => !p)}>
+              <Eye className="w-3.5 h-3.5" />
+            </Button>
+          </TooltipTrigger><TooltipContent side="bottom">Overlays DICOM</TooltipContent></Tooltip>
+
+          <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
+
           <Tooltip><TooltipTrigger asChild>
             <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={handleDownloadImage}><Download className="w-3.5 h-3.5" /></Button>
