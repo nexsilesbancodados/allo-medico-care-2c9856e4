@@ -276,7 +276,7 @@ const AdminFinancial = () => {
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
+          <Card variant="kpi">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <DollarSign className="w-4 h-4 text-emerald-500" />
@@ -291,7 +291,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="kpi">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Clock className="w-4 h-4 text-amber-500" />
@@ -302,7 +302,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="kpi">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <AlertTriangle className="w-4 h-4 text-red-500" />
@@ -315,7 +315,7 @@ const AdminFinancial = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card variant="kpi">
             <CardContent className="pt-4 pb-3">
               <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                 <Receipt className="w-4 h-4 text-primary" />
