@@ -203,15 +203,8 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => {
     // Clone NavIcon to inject active state
-    const icon = item.icon && typeof item.icon === "object" && "props" in (item.icon as any)
-      ? (() => {
-          const el = item.icon as React.ReactElement<any>;
-          if (el.props && "color" in el.props) {
-            const { cloneElement } = require("react");
-            return cloneElement(el, { active: item.active });
-          }
-          return item.icon;
-        })()
+    const icon = isValidElement(item.icon) && (item.icon.props as any)?.color
+      ? cloneElement(item.icon as React.ReactElement<any>, { active: item.active })
       : item.icon;
 
     return (
