@@ -47,7 +47,8 @@ const OftalmologiaLanding = () => {
 
       <Suspense fallback={null}><Header /></Suspense>
 
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(170,55%,96%)] via-[hsl(155,45%,91%)] to-[hsl(140,40%,85%)] dark:from-[hsl(170,25%,8%)] dark:via-[hsl(155,20%,10%)] dark:to-[hsl(140,18%,12%)]" />
         {/* Hero */}
         <section className="relative overflow-hidden pt-20 lg:pt-24">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-accent/[0.06]" />

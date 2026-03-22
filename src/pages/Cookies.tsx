@@ -4,7 +4,8 @@ import SEOHead from "@/components/SEOHead";
 import InstitutionalHero from "@/components/landing/InstitutionalHero";
 
 const Cookies = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen relative">
+    <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(35,60%,96%)] via-[hsl(30,50%,93%)] to-[hsl(25,45%,89%)] dark:from-[hsl(35,25%,8%)] dark:via-[hsl(30,20%,10%)] dark:to-[hsl(25,18%,12%)]" />
     <SEOHead title="Política de Cookies" description="Saiba como a AloClinica utiliza cookies em sua plataforma." />
     
     <InstitutionalHero title="Política de Cookies" subtitle="Transparência no uso de dados" icon={Cookie} lastUpdate="Fevereiro de 2026" />

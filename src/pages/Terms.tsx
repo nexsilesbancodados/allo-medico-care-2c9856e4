@@ -4,7 +4,8 @@ import SEOHead from "@/components/SEOHead";
 import InstitutionalHero from "@/components/landing/InstitutionalHero";
 
 const Terms = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen relative">
+    <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(220,60%,96%)] via-[hsl(230,40%,93%)] to-[hsl(250,35%,90%)] dark:from-[hsl(220,30%,8%)] dark:via-[hsl(230,25%,10%)] dark:to-[hsl(250,20%,12%)]" />
     <SEOHead title="Termos de Uso" description="Termos de uso da plataforma AloClinica de telemedicina." canonical="https://allo-medico-care.lovable.app/terms" />
     
     <InstitutionalHero title="Termos de Uso" icon={FileText} lastUpdate="Fevereiro de 2026" />

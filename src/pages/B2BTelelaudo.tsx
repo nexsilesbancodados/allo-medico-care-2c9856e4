@@ -51,7 +51,8 @@ const B2BTelelaudo = () => {
   return (
     <>
       <SEOHead title="Telelaudo para Clínicas | AloClinica" description="Terceirize laudos médicos com segurança, IA de triagem, assinatura digital SHA-256 e SLA de até 2 horas. Integração PACS/DICOM." />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(180,50%,96%)] via-[hsl(190,42%,91%)] to-[hsl(200,38%,85%)] dark:from-[hsl(180,25%,8%)] dark:via-[hsl(190,20%,10%)] dark:to-[hsl(200,18%,12%)]" />
         <Header />
 
         {/* Hero */}
