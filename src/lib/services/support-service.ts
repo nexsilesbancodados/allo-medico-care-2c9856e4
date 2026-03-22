@@ -103,7 +103,7 @@ export const getPatientTickets = async (patientId: string): Promise<TicketSummar
   try {
     const { data } = await supabase
       .from("support_tickets")
-      .select("id, subject, status, category, priority, created_at, updated_at, assigned_to")
+      .select("id, subject, status, priority, created_at, updated_at, assigned_to")
       .eq("patient_id", patientId)
       .order("created_at", { ascending: false });
 
