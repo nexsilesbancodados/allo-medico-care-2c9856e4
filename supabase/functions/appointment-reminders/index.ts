@@ -106,7 +106,9 @@ serve(async (req) => {
         hour: "2-digit", minute: "2-digit" 
       });
       const diffMin = Math.round((scheduledAt.getTime() - now.getTime()) / 60000);
-      const timeUntil = diffMin <= 18 ? "15 minutos" : diffMin <= 33 ? "30 minutos" : "1 hora";
+      const diffHours = diffMin / 60;
+      const timeUntil = diffHours >= 47 ? "48 horas" : diffHours >= 23 ? "24 horas" : diffMin <= 18 ? "15 minutos" : diffMin <= 33 ? "30 minutos" : "1 hora";
+      const isLongTerm = diffHours >= 23;
       const jitsiLink = appt.jitsi_link || `https://meet.jit.si/allo-medico-${appt.id}`;
       const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
       const doctorName = docNameMap.get(appt.doctor_id) ?? "Médico";
