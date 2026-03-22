@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -12,13 +12,15 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import {
   Loader2, ClipboardList, Eye, UserCheck, Search, X, ThumbsUp, ChevronDown,
   FileEdit, Mic, Download, Share2, Send, Filter, Calendar, Sun, Moon, Cloud,
-  ArrowLeft, CalendarDays, CalendarRange, User2
+  ArrowLeft, CalendarDays, CalendarRange, User2, LayoutGrid, List, AlertTriangle,
+  Clock, CheckCircle2, TrendingUp, TrendingDown, Minus, Radio
 } from "lucide-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, setHours, setMinutes } from "date-fns";
+import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subDays, setHours, setMinutes, differenceInMinutes } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Status config ── */
 const statusLabels: Record<string, string> = {
@@ -36,10 +38,40 @@ const statusColors: Record<string, string> = {
   unsigned: "bg-orange-500/15 text-orange-700 border-orange-500/40",
 };
 
+const kanbanColors: Record<string, string> = {
+  pending: "border-l-4 border-l-blue-500",
+  in_review: "border-l-4 border-l-yellow-500",
+  reported: "border-l-4 border-l-green-500",
+  delivered: "border-l-4 border-l-muted-foreground",
+};
+
 const MODALITIES = ["RF", "CT", "CR", "DX", "US", "MG", "MR"] as const;
 const LAUDO_STATUSES = ["pending", "in_review", "reported", "unsigned"] as const;
 
 type DatePreset = "hoje" | "manha" | "tarde" | "noite" | "ontem" | "semana" | "mes" | "custom";
+type ViewMode = "table" | "kanban";
+
+/* ── SLA Countdown ── */
+const SlaCountdown = ({ deadline }: { deadline: string | null }) => {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(t);
+  }, []);
+
+  if (!deadline) return <span className="text-xs text-muted-foreground">—</span>;
+  const mins = differenceInMinutes(new Date(deadline), now);
+  const hrs = Math.floor(Math.abs(mins) / 60);
+  const m = Math.abs(mins) % 60;
+  const overdue = mins < 0;
+  const color = overdue ? "text-destructive" : mins < 60 ? "text-yellow-500" : "text-green-500";
+
+  return (
+    <span className={`text-xs font-mono font-semibold ${color}`}>
+      {overdue ? "-" : ""}{hrs}h{m.toString().padStart(2, "0")}m
+    </span>
+  );
+};
 
 const ExamReportQueue = () => {
   const { user } = useAuth();
@@ -47,6 +79,8 @@ const ExamReportQueue = () => {
   const queryClient = useQueryClient();
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [filtersOpen, setFiltersOpen] = useState(true);
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [newExamIds, setNewExamIds] = useState<Set<string>>(new Set());
 
   /* ── Filter state ── */
   const [datePreset, setDatePreset] = useState<DatePreset>("hoje");
@@ -168,11 +202,62 @@ const ExamReportQueue = () => {
 
       return (data || []).map((e: any) => ({
         ...e,
-        patient_name: e.patient_id ? patientMap[e.patient_id] || "Paciente" : (e.clinical_info?.match(/Paciente: (.+)/)?.[1] || "—"),
+        patient_name: e.patient_id ? patientMap[e.patient_id] || "Paciente" : (e.patient_name || "—"),
       }));
     },
     enabled: !!user,
   });
+
+  /* ── Realtime subscription ── */
+  useEffect(() => {
+    const channel = supabase
+      .channel("exam-requests-realtime")
+      .on(
+        "postgres_changes" as any,
+        { event: "*", schema: "public", table: "exam_requests" },
+        (payload: any) => {
+          if (payload.eventType === "INSERT") {
+            const newExam = payload.new;
+            setNewExamIds(prev => new Set(prev).add(newExam.id));
+            setTimeout(() => {
+              setNewExamIds(prev => {
+                const next = new Set(prev);
+                next.delete(newExam.id);
+                return next;
+              });
+            }, 3000);
+
+            if (newExam.priority === "urgent") {
+              toast.error("🚨 Exame URGENTE recebido!", {
+                description: `${newExam.exam_type} — Prioridade máxima`,
+                duration: 8000,
+              });
+              try {
+                const ctx = new AudioContext();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 880;
+                gain.gain.value = 0.15;
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+              } catch {}
+            } else {
+              toast.info("Novo exame na fila", {
+                description: newExam.exam_type,
+              });
+            }
+          }
+          queryClient.invalidateQueries({ queryKey: ["exam-requests-queue"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
 
   /* ── Client-side filters ── */
   const filtered = useMemo(() => {
@@ -193,6 +278,36 @@ const ExamReportQueue = () => {
     }
     return list;
   }, [examRequests, patientSearch, selectedModalities]);
+
+  /* ── Stats ── */
+  const stats = useMemo(() => {
+    if (!examRequests) return { pending: 0, inReview: 0, reported: 0, slaRisk: 0 };
+    const now = new Date();
+    return {
+      pending: examRequests.filter((e: any) => e.status === "pending").length,
+      inReview: examRequests.filter((e: any) => e.status === "in_review").length,
+      reported: examRequests.filter((e: any) => e.status === "reported" || e.status === "delivered").length,
+      slaRisk: examRequests.filter((e: any) => {
+        if (!e.sla_deadline || e.status === "reported" || e.status === "delivered") return false;
+        return differenceInMinutes(new Date(e.sla_deadline), now) < 60;
+      }).length,
+    };
+  }, [examRequests]);
+
+  /* ── Kanban groups ── */
+  const kanbanGroups = useMemo(() => {
+    const groups: Record<string, any[]> = {
+      pending: [],
+      in_review: [],
+      reported: [],
+      delivered: [],
+    };
+    (filtered || []).forEach((e: any) => {
+      const key = groups[e.status] ? e.status : "pending";
+      groups[key].push(e);
+    });
+    return groups;
+  }, [filtered]);
 
   const handleClaim = async (examId: string) => {
     if (!doctorProfile?.id) return;
@@ -223,17 +338,94 @@ const ExamReportQueue = () => {
     { key: "custom", label: "Personalizado", icon: <User2 className="w-4 h-4" /> },
   ];
 
+  const statCards = [
+    {
+      label: "Pendentes",
+      value: stats.pending,
+      icon: <Clock className="w-5 h-5" />,
+      color: "text-yellow-500",
+      bg: "bg-yellow-500/10 border-yellow-500/20",
+    },
+    {
+      label: "Em Digitação",
+      value: stats.inReview,
+      icon: <FileEdit className="w-5 h-5" />,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10 border-blue-500/20",
+    },
+    {
+      label: "Laudados Hoje",
+      value: stats.reported,
+      icon: <CheckCircle2 className="w-5 h-5" />,
+      color: "text-green-500",
+      bg: "bg-green-500/10 border-green-500/20",
+    },
+    {
+      label: "SLA em Risco",
+      value: stats.slaRisk,
+      icon: <AlertTriangle className="w-5 h-5" />,
+      color: "text-destructive",
+      bg: "bg-destructive/10 border-destructive/20",
+    },
+  ];
+
   return (
     <DashboardLayout nav={getDoctorNav("report-queue")} title="Fila de Laudos">
+      {/* ── Stats Dashboard ── */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        {statCards.map((s) => (
+          <Card key={s.label} className={`border ${s.bg}`}>
+            <CardContent className="p-4 flex items-center gap-3">
+              <div className={`${s.color}`}>{s.icon}</div>
+              <div>
+                <p className="text-2xl font-bold">{s.value}</p>
+                <p className="text-xs text-muted-foreground">{s.label}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       {/* ── Filters Panel ── */}
       <Collapsible open={filtersOpen} onOpenChange={setFiltersOpen} className="mb-4">
-        <CollapsibleTrigger asChild>
-          <Button variant="default" size="sm" className="mb-2 gap-2">
-            <Filter className="w-4 h-4" />
-            Filtros
-            <ChevronDown className={`w-4 h-4 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
-          </Button>
-        </CollapsibleTrigger>
+        <div className="flex items-center gap-2 mb-2">
+          <CollapsibleTrigger asChild>
+            <Button variant="default" size="sm" className="gap-2">
+              <Filter className="w-4 h-4" />
+              Filtros
+              <ChevronDown className={`w-4 h-4 transition-transform ${filtersOpen ? "rotate-180" : ""}`} />
+            </Button>
+          </CollapsibleTrigger>
+
+          {/* View Mode Toggle */}
+          <div className="ml-auto flex items-center gap-1 bg-muted rounded-lg p-0.5">
+            <Button
+              variant={viewMode === "table" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2 gap-1"
+              onClick={() => setViewMode("table")}
+            >
+              <List className="w-4 h-4" />
+              Tabela
+            </Button>
+            <Button
+              variant={viewMode === "kanban" ? "default" : "ghost"}
+              size="sm"
+              className="h-7 px-2 gap-1"
+              onClick={() => setViewMode("kanban")}
+            >
+              <LayoutGrid className="w-4 h-4" />
+              Kanban
+            </Button>
+          </div>
+
+          {/* Realtime indicator */}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Radio className="w-3.5 h-3.5 text-green-500 animate-pulse" />
+            Ao vivo
+          </div>
+        </div>
+
         <CollapsibleContent>
           <Card>
             <CardContent className="pt-6 space-y-4">
@@ -256,18 +448,18 @@ const ExamReportQueue = () => {
               {/* Date Range + Patient */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Data Início <span className="text-destructive">*</span></label>
+                  <label className="text-sm font-medium text-muted-foreground">Data Início</label>
                   <Input
                     type="datetime-local"
-                    value={dateStart.replace("T", "T")}
+                    value={dateStart}
                     onChange={e => { setDateStart(e.target.value); setDatePreset("custom"); }}
                   />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Data Fim <span className="text-destructive">*</span></label>
+                  <label className="text-sm font-medium text-muted-foreground">Data Fim</label>
                   <Input
                     type="datetime-local"
-                    value={dateEnd.replace("T", "T")}
+                    value={dateEnd}
                     onChange={e => { setDateEnd(e.target.value); setDatePreset("custom"); }}
                   />
                 </div>
@@ -322,7 +514,7 @@ const ExamReportQueue = () => {
 
               {/* Modalities */}
               <div>
-                <label className="text-sm font-medium text-muted-foreground">Modalidades <span className="text-destructive">*</span></label>
+                <label className="text-sm font-medium text-muted-foreground">Modalidades</label>
                 <div className="flex flex-wrap gap-1.5 mt-1">
                   {MODALITIES.map(m => (
                     <Badge
@@ -352,145 +544,243 @@ const ExamReportQueue = () => {
         </CollapsibleContent>
       </Collapsible>
 
-      {/* ── Worklist ── */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2 pb-2">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <ClipboardList className="w-5 h-5 text-primary" />
-            Exames ({filtered?.length || 0})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-            </div>
-          ) : !filtered?.length ? (
-            <p className="text-center text-muted-foreground py-8">Nenhum exame encontrado.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-primary/5">
-                    <TableHead className="font-semibold">Prioridade ↕</TableHead>
-                    <TableHead className="font-semibold">Paciente ↕</TableHead>
-                    <TableHead className="font-semibold">Procedimento ↕</TableHead>
-                    <TableHead className="font-semibold">Data/Hora ↕</TableHead>
-                    <TableHead className="font-semibold">Laudo ↕</TableHead>
-                    <TableHead className="text-right font-semibold">Ações</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filtered.map((exam: any) => (
-                    <TableRow key={exam.id} className="group hover:bg-muted/50">
-                      {/* Priority */}
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <ThumbsUp className={`w-5 h-5 ${exam.priority === "urgent" ? "text-destructive" : "text-green-500"}`} />
-                        </div>
-                      </TableCell>
-
-                      {/* Patient */}
-                      <TableCell>
-                        <div className="space-y-0.5">
-                          <p className="font-semibold text-sm">{exam.patient_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Id: {exam.id?.substring(0, 20)}...
-                          </p>
-                        </div>
-                      </TableCell>
-
-                      {/* Procedure */}
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="text-xs font-mono">
-                            {(exam.exam_type || "DX").substring(0, 2).toUpperCase()}
-                          </Badge>
-                          <div className="space-y-0.5">
-                            <p className="font-medium text-sm">{exam.exam_type}</p>
-                            <p className="text-xs text-muted-foreground">
-                              Data de Criação: {format(new Date(exam.created_at), "dd/MM/yyyy - HH:mm:ss", { locale: ptBR })}
-                            </p>
+      {/* ── KANBAN VIEW ── */}
+      {viewMode === "kanban" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {(["pending", "in_review", "reported", "delivered"] as const).map(status => (
+            <div key={status} className="space-y-2">
+              <div className="flex items-center gap-2 px-1">
+                <Badge className={`${statusColors[status]} text-xs`} variant="outline">
+                  {statusLabels[status]}
+                </Badge>
+                <span className="text-xs text-muted-foreground font-mono">
+                  ({kanbanGroups[status]?.length || 0})
+                </span>
+              </div>
+              <div className="space-y-2 min-h-[200px]">
+                <AnimatePresence>
+                  {(kanbanGroups[status] || []).map((exam: any) => (
+                    <motion.div
+                      key={exam.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        boxShadow: newExamIds.has(exam.id) ? "0 0 12px hsl(142 70% 48% / 0.5)" : "none",
+                      }}
+                      exit={{ opacity: 0, x: -50 }}
+                      transition={{ duration: 0.25 }}
+                    >
+                      <Card className={`${kanbanColors[status] || ""} hover:shadow-md transition-shadow cursor-pointer ${
+                        exam.status === "in_review" ? "animate-pulse-subtle" : ""
+                      }`}>
+                        <CardContent className="p-3 space-y-2">
+                          {/* Header */}
+                          <div className="flex items-center justify-between">
+                            <h3 className="font-semibold text-sm truncate">{exam.exam_type}</h3>
+                            {exam.priority === "urgent" && (
+                              <Badge variant="destructive" className="text-[10px] px-1.5 py-0 animate-pulse">
+                                URGENTE
+                              </Badge>
+                            )}
                           </div>
-                        </div>
-                      </TableCell>
 
-                      {/* Date */}
-                      <TableCell>
-                        <div className="text-sm">
-                          <p>{format(new Date(exam.created_at), "EEEE,", { locale: ptBR })}</p>
-                          <p>{format(new Date(exam.created_at), "dd/MM/yyyy-HH:mm:ss", { locale: ptBR })}</p>
-                        </div>
-                      </TableCell>
+                          {/* Patient */}
+                          <p className="text-xs text-muted-foreground truncate">
+                            {exam.patient_name}
+                          </p>
 
-                      {/* Status */}
-                      <TableCell>
-                        <Badge className={`${statusColors[exam.status] || ""} gap-1`} variant="outline">
-                          📄 {statusLabels[exam.status] || exam.status}
-                        </Badge>
-                      </TableCell>
-
-                      {/* Actions */}
-                      <TableCell>
-                        <div className="flex items-center justify-end gap-1">
-                          {/* View */}
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8"
-                            title="Visualizar"
-                            onClick={() => navigate(`/dashboard/doctor/report-editor/${exam.id}?role=doctor`)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          {/* Expand */}
-                          <Button size="icon" variant="ghost" className="h-8 w-8" title="Detalhes">
-                            <ChevronDown className="w-4 h-4" />
-                          </Button>
-                          {/* Edit */}
-                          {(exam.status === "in_review" || exam.status === "pending") && (
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="h-8 w-8"
-                              title="Editar Laudo"
-                              onClick={() => {
-                                if (exam.status === "pending") {
-                                  handleClaim(exam.id);
-                                } else {
-                                  navigate(`/dashboard/doctor/report-editor/${exam.id}?role=doctor`);
-                                }
-                              }}
-                            >
-                              {claimingId === exam.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileEdit className="w-4 h-4" />}
-                            </Button>
+                          {/* Clinic */}
+                          {exam.requesting_clinic_id && (
+                            <p className="text-[10px] text-muted-foreground">
+                              Clínica: {exam.requesting_clinic_id.substring(0, 8)}...
+                            </p>
                           )}
-                          {/* Dictation */}
-                          <Button size="icon" variant="ghost" className="h-8 w-8" title="Ditado">
-                            <Mic className="w-4 h-4" />
-                          </Button>
-                          {/* Download */}
-                          <Button size="icon" variant="ghost" className="h-8 w-8" title="Download">
-                            <Download className="w-4 h-4" />
-                          </Button>
-                          {/* Share */}
-                          <Button size="icon" variant="ghost" className="h-8 w-8" title="Compartilhar">
-                            <Share2 className="w-4 h-4" />
-                          </Button>
-                          {/* Send */}
-                          <Button size="icon" variant="ghost" className="h-8 w-8" title="Enviar">
-                            <Send className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+
+                          {/* SLA */}
+                          <div className="flex items-center justify-between">
+                            <SlaCountdown deadline={exam.sla_deadline} />
+                            <span className="text-[10px] text-muted-foreground">
+                              {format(new Date(exam.created_at), "HH:mm", { locale: ptBR })}
+                            </span>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex gap-1 pt-1">
+                            {exam.status === "pending" && (
+                              <Button
+                                size="sm"
+                                className="h-7 text-xs flex-1 gap-1"
+                                onClick={() => handleClaim(exam.id)}
+                                disabled={claimingId === exam.id}
+                              >
+                                {claimingId === exam.id ? (
+                                  <Loader2 className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <UserCheck className="w-3 h-3" />
+                                )}
+                                Laudar
+                              </Button>
+                            )}
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-7 text-xs gap-1"
+                              onClick={() => navigate(`/dashboard/doctor/report-editor/${exam.id}?role=doctor`)}
+                            >
+                              <Eye className="w-3 h-3" />
+                              {exam.status === "pending" ? "Ver" : "Abrir"}
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   ))}
-                </TableBody>
-              </Table>
+                </AnimatePresence>
+                {(!kanbanGroups[status] || kanbanGroups[status].length === 0) && (
+                  <div className="flex items-center justify-center h-24 text-xs text-muted-foreground border border-dashed rounded-lg">
+                    Nenhum exame
+                  </div>
+                )}
+              </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      ) : (
+        /* ── TABLE VIEW ── */
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2 pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <ClipboardList className="w-5 h-5 text-primary" />
+              Exames ({filtered?.length || 0})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {isLoading ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+              </div>
+            ) : !filtered?.length ? (
+              <p className="text-center text-muted-foreground py-8">Nenhum exame encontrado.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-primary/5">
+                      <TableHead className="font-semibold">Prioridade</TableHead>
+                      <TableHead className="font-semibold">Paciente</TableHead>
+                      <TableHead className="font-semibold">Procedimento</TableHead>
+                      <TableHead className="font-semibold">Data/Hora</TableHead>
+                      <TableHead className="font-semibold">SLA</TableHead>
+                      <TableHead className="font-semibold">Laudo</TableHead>
+                      <TableHead className="text-right font-semibold">Ações</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <AnimatePresence>
+                      {filtered.map((exam: any) => (
+                        <motion.tr
+                          key={exam.id}
+                          initial={newExamIds.has(exam.id) ? { backgroundColor: "hsl(142 70% 48% / 0.15)" } : {}}
+                          animate={{ backgroundColor: "transparent" }}
+                          transition={{ duration: 3 }}
+                          className="group hover:bg-muted/50 border-b"
+                        >
+                          {/* Priority */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              {exam.priority === "urgent" ? (
+                                <AlertTriangle className="w-5 h-5 text-destructive animate-pulse" />
+                              ) : (
+                                <ThumbsUp className="w-5 h-5 text-green-500" />
+                              )}
+                            </div>
+                          </TableCell>
+
+                          {/* Patient */}
+                          <TableCell>
+                            <div className="space-y-0.5">
+                              <p className="font-semibold text-sm">{exam.patient_name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Id: {exam.id?.substring(0, 12)}...
+                              </p>
+                            </div>
+                          </TableCell>
+
+                          {/* Procedure */}
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs font-mono">
+                                {(exam.exam_type || "DX").substring(0, 2).toUpperCase()}
+                              </Badge>
+                              <p className="font-medium text-sm">{exam.exam_type}</p>
+                            </div>
+                          </TableCell>
+
+                          {/* Date */}
+                          <TableCell>
+                            <div className="text-sm">
+                              <p>{format(new Date(exam.created_at), "dd/MM/yyyy", { locale: ptBR })}</p>
+                              <p className="text-xs text-muted-foreground">{format(new Date(exam.created_at), "HH:mm:ss", { locale: ptBR })}</p>
+                            </div>
+                          </TableCell>
+
+                          {/* SLA */}
+                          <TableCell>
+                            <SlaCountdown deadline={exam.sla_deadline} />
+                          </TableCell>
+
+                          {/* Status */}
+                          <TableCell>
+                            <Badge className={`${statusColors[exam.status] || ""} gap-1`} variant="outline">
+                              {statusLabels[exam.status] || exam.status}
+                            </Badge>
+                          </TableCell>
+
+                          {/* Actions */}
+                          <TableCell>
+                            <div className="flex items-center justify-end gap-1">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8"
+                                title="Visualizar"
+                                onClick={() => navigate(`/dashboard/doctor/report-editor/${exam.id}?role=doctor`)}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                              {(exam.status === "in_review" || exam.status === "pending") && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8"
+                                  title={exam.status === "pending" ? "Assumir" : "Editar Laudo"}
+                                  onClick={() => {
+                                    if (exam.status === "pending") {
+                                      handleClaim(exam.id);
+                                    } else {
+                                      navigate(`/dashboard/doctor/report-editor/${exam.id}?role=doctor`);
+                                    }
+                                  }}
+                                >
+                                  {claimingId === exam.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileEdit className="w-4 h-4" />}
+                                </Button>
+                              )}
+                              <Button size="icon" variant="ghost" className="h-8 w-8" title="Download">
+                                <Download className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
     </DashboardLayout>
   );
 };
