@@ -3082,33 +3082,51 @@ export type Database = {
       support_tickets: {
         Row: {
           assigned_to: string | null
+          category: string | null
           closed_at: string | null
           created_at: string
           id: string
           patient_id: string
           priority: string
+          related_entity_id: string | null
+          related_entity_type: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          sla_deadline: string | null
           status: string
           subject: string
           updated_at: string
         }
         Insert: {
           assigned_to?: string | null
+          category?: string | null
           closed_at?: string | null
           created_at?: string
           id?: string
           patient_id: string
           priority?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sla_deadline?: string | null
           status?: string
           subject?: string
           updated_at?: string
         }
         Update: {
           assigned_to?: string | null
+          category?: string | null
           closed_at?: string | null
           created_at?: string
           id?: string
           patient_id?: string
           priority?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          sla_deadline?: string | null
           status?: string
           subject?: string
           updated_at?: string
