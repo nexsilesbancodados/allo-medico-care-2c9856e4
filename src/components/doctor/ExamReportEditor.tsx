@@ -1097,8 +1097,16 @@ const ExamReportEditor = () => {
 
   // Sign confirmation dialog
   const [showSignDialog, setShowSignDialog] = useState(false);
+  const [showShortcuts, setShowShortcuts] = useState(false);
+  const [panelDirection, setPanelDirection] = useState<"horizontal" | "vertical">(() => {
+    try { return (localStorage.getItem("laudo-panel-dir") as "horizontal" | "vertical") || "horizontal"; } catch { return "horizontal"; }
+  });
 
-  // Voice
+  const togglePanelDirection = () => {
+    const next = panelDirection === "horizontal" ? "vertical" : "horizontal";
+    setPanelDirection(next);
+    try { localStorage.setItem("laudo-panel-dir", next); } catch {}
+  };
   const [listening, setListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(true);
   const recognitionRef = useRef<Record<string, unknown> | null>(null);
