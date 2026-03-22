@@ -81,12 +81,12 @@ export const createTicket = async (params: CreateTicketParams): Promise<string |
       content: params.message,
     });
 
-    // Link to appointment if provided
+    // Link to appointment if provided — uses new columns added via migration
     if (params.appointmentId) {
       await supabase.from("support_tickets").update({
         related_entity_id: params.appointmentId,
         related_entity_type: "appointment",
-      }).eq("id", data.id);
+      } as any).eq("id", data.id);
     }
 
     return data.id;
