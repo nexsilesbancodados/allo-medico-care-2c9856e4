@@ -453,7 +453,7 @@ const AdminFinancial = () => {
         </div>
 
         {/* Transactions Table */}
-        <Card>
+        <Card variant="elevated">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <CardTitle className="text-base">Transações</CardTitle>
