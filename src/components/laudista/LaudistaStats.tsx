@@ -223,7 +223,7 @@ const LaudistaStats = () => {
 
         {/* Daily Chart - 30 days */}
         <motion.div variants={fadeUp}>
-          <Card className="border-border/50">
+          <Card variant="elevated">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
