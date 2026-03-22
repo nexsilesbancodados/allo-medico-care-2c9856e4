@@ -74,7 +74,8 @@ const Teleconsulta = () => {
         title="Teleconsulta Médica Online | AloClinica"
         description="Consulte médicos online por vídeo 24h. Entenda como funciona a teleconsulta, benefícios, legalidade e como agendar."
       />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(205,65%,96%)] via-[hsl(215,50%,90%)] to-[hsl(225,45%,84%)] dark:from-[hsl(205,30%,8%)] dark:via-[hsl(215,25%,11%)] dark:to-[hsl(225,20%,13%)]" />
         <Header />
 
         {/* Hero */}

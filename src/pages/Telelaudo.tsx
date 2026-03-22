@@ -79,7 +79,8 @@ const Telelaudo = () => {
         title="Telelaudo - Laudos Médicos a Distância | AloClinica"
         description="Laudos médicos a distância com assinatura digital, verificação por QR Code e notificação automática. Eletro, Raio-X, Ressonância e mais."
       />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(240,45%,97%)] via-[hsl(230,38%,93%)] to-[hsl(220,35%,88%)] dark:from-[hsl(240,25%,8%)] dark:via-[hsl(230,20%,10%)] dark:to-[hsl(220,18%,12%)]" />
         <Header />
 
         {/* Hero */}

@@ -5,7 +5,8 @@ import SEOHead from "@/components/SEOHead";
 import InstitutionalHero from "@/components/landing/InstitutionalHero";
 
 const RefundPolicy = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen relative">
+    <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(10,55%,97%)] via-[hsl(15,45%,93%)] to-[hsl(20,40%,89%)] dark:from-[hsl(10,25%,8%)] dark:via-[hsl(15,20%,10%)] dark:to-[hsl(20,18%,12%)]" />
     <SEOHead title="Política de Reembolso" description="Conheça a política de cancelamento e reembolso da AloClinica." />
     
     <InstitutionalHero title="Política de Reembolso e Cancelamento" icon={ReceiptText} lastUpdate="Fevereiro de 2026" />

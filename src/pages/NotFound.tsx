@@ -38,7 +38,8 @@ const NotFound = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-screen items-center justify-center px-4 relative">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(0,50%,97%)] via-[hsl(340,40%,94%)] to-[hsl(320,35%,90%)] dark:from-[hsl(0,25%,8%)] dark:via-[hsl(340,20%,10%)] dark:to-[hsl(320,18%,12%)]" />
       <SEOHead title="Página não encontrada" description="A página que você procura não existe." />
       <motion.div
         initial={{ opacity: 0, y: 20 }}

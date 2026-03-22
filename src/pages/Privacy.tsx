@@ -4,7 +4,8 @@ import SEOHead from "@/components/SEOHead";
 import InstitutionalHero from "@/components/landing/InstitutionalHero";
 
 const Privacy = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen relative">
+    <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(160,50%,96%)] via-[hsl(170,40%,92%)] to-[hsl(180,35%,88%)] dark:from-[hsl(160,30%,8%)] dark:via-[hsl(170,25%,10%)] dark:to-[hsl(180,20%,12%)]" />
     <SEOHead title="Política de Privacidade" description="Saiba como a AloClinica coleta, usa e protege seus dados pessoais." canonical="https://allo-medico-care.lovable.app/privacy" />
     
     <InstitutionalHero title="Política de Privacidade" subtitle="Proteção de dados é prioridade" icon={Shield} lastUpdate="Fevereiro de 2026" />

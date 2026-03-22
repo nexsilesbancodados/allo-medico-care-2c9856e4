@@ -5,7 +5,8 @@ import SEOHead from "@/components/SEOHead";
 import InstitutionalHero from "@/components/landing/InstitutionalHero";
 
 const LGPD = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen relative">
+    <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(270,45%,96%)] via-[hsl(280,35%,93%)] to-[hsl(290,30%,89%)] dark:from-[hsl(270,25%,8%)] dark:via-[hsl(280,20%,10%)] dark:to-[hsl(290,18%,12%)]" />
     <SEOHead title="Conformidade LGPD" description="Como a AloClinica cumpre a Lei Geral de Proteção de Dados." canonical="https://allo-medico-care.lovable.app/lgpd" />
     
     <InstitutionalHero title="Conformidade LGPD" subtitle="Lei nº 13.709/2018" icon={Shield} lastUpdate="Fevereiro de 2026" />

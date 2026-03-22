@@ -53,7 +53,8 @@ const PaymentSuccess = () => {
   }, [sessionId]);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen flex flex-col relative">
+      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(140,55%,96%)] via-[hsl(150,45%,92%)] to-[hsl(160,40%,87%)] dark:from-[hsl(140,25%,8%)] dark:via-[hsl(150,20%,10%)] dark:to-[hsl(160,18%,12%)]" />
       <SEOHead title="Pagamento Confirmado" description="Seu pagamento foi processado com sucesso na AloClinica." />
 
       {/* Hero banner */}

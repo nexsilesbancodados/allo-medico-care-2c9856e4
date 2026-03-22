@@ -63,7 +63,8 @@ const B2BCartao = () => {
   return (
     <>
       <SEOHead title="Cartão de Benefícios Corporativo | AloClinica" description="Ofereça saúde e bem-estar aos seus funcionários com telemedicina 24h, clube de vantagens e até 30% de desconto." />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(260,50%,97%)] via-[hsl(270,40%,93%)] to-[hsl(280,35%,88%)] dark:from-[hsl(260,25%,8%)] dark:via-[hsl(270,20%,10%)] dark:to-[hsl(280,18%,12%)]" />
         <Header />
 
         {/* Hero */}

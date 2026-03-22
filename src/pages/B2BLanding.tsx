@@ -71,7 +71,8 @@ const B2BLanding = () => {
   return (
     <>
       <SEOHead title="Cartão de Benefícios & Telelaudo para Empresas | AloClinica" description="Cartão de benefícios corporativo com telemedicina 24h e serviço de telelaudo para clínicas. Saúde para colaboradores e laudos médicos a distância." />
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen relative">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(215,55%,96%)] via-[hsl(225,45%,91%)] to-[hsl(235,40%,85%)] dark:from-[hsl(215,28%,8%)] dark:via-[hsl(225,22%,10%)] dark:to-[hsl(235,18%,13%)]" />
         <Header />
 
         {/* Hero with Carousel */}

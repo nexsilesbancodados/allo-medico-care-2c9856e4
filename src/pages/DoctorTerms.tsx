@@ -4,7 +4,8 @@ import SEOHead from "@/components/SEOHead";
 import InstitutionalHero from "@/components/landing/InstitutionalHero";
 
 const DoctorTerms = () => (
-  <div className="min-h-screen bg-background">
+  <div className="min-h-screen relative">
+    <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(190,50%,96%)] via-[hsl(200,45%,92%)] to-[hsl(210,40%,87%)] dark:from-[hsl(190,25%,8%)] dark:via-[hsl(200,22%,10%)] dark:to-[hsl(210,20%,12%)]" />
     <SEOHead title="Termos de Uso para Médicos" description="Termos e condições para médicos cadastrados na AloClinica." />
     
     <InstitutionalHero title="Termos de Uso para Médicos" subtitle="Diretrizes para profissionais" icon={Stethoscope} lastUpdate="Fevereiro de 2026" />
