@@ -61,6 +61,7 @@ const Teleconsulta = lazy(() => import("./pages/Teleconsulta"));
 const Telelaudo = lazy(() => import("./pages/Telelaudo"));
 const AuthLaudista = lazy(() => import("./pages/AuthLaudista"));
 const TelelaudoWorkspace = lazy(() => import("./pages/TelelaudoWorkspace"));
+const OftalmologiaLanding = lazy(() => import("./pages/OftalmologiaLanding"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
