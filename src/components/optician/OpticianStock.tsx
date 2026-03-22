@@ -75,7 +75,7 @@ const OpticianStock = () => {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant="elevated">
         <CardHeader><CardTitle>Últimas Movimentações</CardTitle></CardHeader>
         <CardContent>
           <Table>
