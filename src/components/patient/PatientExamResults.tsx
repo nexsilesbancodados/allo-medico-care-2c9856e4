@@ -132,16 +132,34 @@ const PatientExamResults = () => {
                             <span className="text-xs text-muted-foreground">—</span>
                           )}
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="text-right space-x-1">
                           {report?.pdf_url ? (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDownloadPdf(report.pdf_url)}
-                            >
-                              <Download className="w-3 h-3 mr-1" />
-                              Baixar PDF
-                            </Button>
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDownloadPdf(report.pdf_url)}
+                              >
+                                <Download className="w-3 h-3 mr-1" />
+                                Baixar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={async () => {
+                                  const link = await generateShareableLink(report.pdf_url!);
+                                  if (link) {
+                                    await navigator.clipboard.writeText(link);
+                                    toastShareLinkCopied();
+                                  } else {
+                                    toastShareLinkFailed();
+                                  }
+                                }}
+                              >
+                                <Share2 className="w-3 h-3 mr-1" />
+                                Compartilhar
+                              </Button>
+                            </>
                           ) : exam.status === "reported" || exam.status === "delivered" ? (
                             <Badge variant="secondary" className="text-xs">Processando...</Badge>
                           ) : (
