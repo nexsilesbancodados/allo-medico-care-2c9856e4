@@ -63,11 +63,9 @@ export const createTicket = async (params: CreateTicketParams): Promise<string |
       .insert({
         patient_id: params.patientId,
         subject: params.subject,
-        category: params.category,
         priority,
         status: "open",
-        sla_deadline: slaDeadline.toISOString(),
-      })
+      } as any)
       .select("id")
       .single();
 
