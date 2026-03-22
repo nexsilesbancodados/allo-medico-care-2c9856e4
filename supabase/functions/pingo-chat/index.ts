@@ -192,8 +192,8 @@ ${context ? `\n--- CONTEXTO DO PACIENTE LOGADO ---\n${context}\n---\nUse essas i
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (error) {
-    console.error("chat error:", e);
-    return new Response(JSON.stringify({ error: e instanceof Error ? (error instanceof Error ? error.message : String(error)) : "Erro desconhecido" }), {
+    console.error("chat error:", error);
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Erro desconhecido" }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
