@@ -1978,7 +1978,7 @@ const ExamReportEditor = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <ResizablePanelGroup direction="horizontal">
+        <ResizablePanelGroup direction={panelDirection} key={panelDirection}>
           <ResizablePanel defaultSize={55} minSize={30}>
             <PacsViewer fileUrls={fileUrls} examRequest={examRequest || null} onFilesUploaded={(newUrls) => setFileUrls(prev => [...prev, ...newUrls])} />
           </ResizablePanel>
