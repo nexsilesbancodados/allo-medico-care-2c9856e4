@@ -1,6 +1,6 @@
 import { useState, memo, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Globe } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Globe, Eye } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "@/i18n";
