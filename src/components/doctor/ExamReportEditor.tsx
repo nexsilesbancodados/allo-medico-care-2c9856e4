@@ -2198,6 +2198,49 @@ const ExamReportEditor = () => {
         {doctorProfile?.crm && <span>CRM {doctorProfile.crm}/{doctorProfile.crm_state}</span>}
       </div>
 
+      {/* ═══ SHORTCUTS DIALOG ═══ */}
+      <Dialog open={showShortcuts} onOpenChange={setShowShortcuts}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">⌨️ Atalhos de Teclado</DialogTitle>
+          </DialogHeader>
+          <div className="overflow-y-auto max-h-[60vh]">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="font-semibold">Atalho</TableHead>
+                  <TableHead className="font-semibold">Ação</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[
+                  ["Ctrl+S", "Salvar rascunho"],
+                  ["Ctrl+Enter", "Abrir diálogo de assinatura"],
+                  ["Ctrl+D", "Toggle ditado por voz"],
+                  ["Ctrl+M", "Abrir painel de macros"],
+                  ["Ctrl+Z / Ctrl+Y", "Desfazer / Refazer"],
+                  ["Ctrl+B / I / U", "Negrito / Itálico / Sublinhado"],
+                  ["[ / ]", "Imagem anterior / próxima"],
+                  ["+ / -", "Zoom in / out no viewer"],
+                  ["R", "Rotacionar imagem 90°"],
+                  ["I", "Inverter imagem"],
+                  ["Esc", "Cancelar ferramenta ativa"],
+                  ["F", "Tela cheia no viewer"],
+                  ["Space", "Play/Pause CINE"],
+                ].map(([key, action]) => (
+                  <TableRow key={key}>
+                    <TableCell>
+                      <kbd className="px-1.5 py-0.5 text-xs font-mono bg-muted rounded border">{key}</kbd>
+                    </TableCell>
+                    <TableCell className="text-sm">{action}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Sign Confirmation AlertDialog */}
       <AlertDialog open={showSignDialog} onOpenChange={setShowSignDialog}>
         <AlertDialogContent>
