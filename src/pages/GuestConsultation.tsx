@@ -283,7 +283,8 @@ const GuestConsultation = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen relative flex items-center justify-center p-4">
+        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(0,50%,97%)] via-[hsl(5,42%,94%)] to-[hsl(10,38%,90%)] dark:from-[hsl(0,25%,7%)] dark:via-[hsl(5,20%,9%)] dark:to-[hsl(10,18%,11%)]" />
         <div className="text-center">
           <div className="w-16 h-16 rounded-full bg-destructive/10 mx-auto flex items-center justify-center mb-4">
             <X className="w-8 h-8 text-destructive" />

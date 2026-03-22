@@ -8,7 +8,7 @@ import { warn } from "@/lib/logger";
 
 // ── Invisible loader (no spinner, no flash) ──
 const PageLoader = () => (
-  <div className="min-h-screen bg-background" aria-hidden="true" />
+  <div className="min-h-screen" aria-hidden="true" />
 );
 
 // ── LAZY imports: dashboard shells ──

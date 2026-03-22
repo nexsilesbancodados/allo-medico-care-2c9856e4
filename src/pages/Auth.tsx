@@ -245,7 +245,7 @@ const Auth = () => {
       </div>
 
       {/* ── Right panel — form ── */}
-      <div className="flex-1 flex flex-col min-h-screen bg-background">
+      <div className="flex-1 flex flex-col min-h-screen">
         {/* Mobile gradient header */}
         <div className="lg:hidden bg-gradient-to-br from-primary to-secondary px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8 relative overflow-hidden">
           <div className="absolute top-[-30%] right-[-20%] w-[200px] h-[200px] rounded-full bg-white/[0.06] blur-[60px]" />
