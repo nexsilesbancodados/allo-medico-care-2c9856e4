@@ -325,7 +325,7 @@ const DoctorWaitingRoom = () => {
             </h2>
             <div className="space-y-2">
               {waitingPatients.filter(p => p.status === "in_progress").map(p => (
-                <Card key={p.id} className="border-border border-l-4 border-l-green-500">
+                <Card key={p.id} variant="interactive" className="border-l-4 border-l-green-500">
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between">
                       <div>
