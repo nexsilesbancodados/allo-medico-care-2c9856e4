@@ -1948,6 +1948,26 @@ const ExamReportEditor = () => {
           )}
 
           <span className="hidden lg:inline text-[9px] font-mono" style={{ color: 'hsl(220 8% 40%)' }}>Ctrl+S · Ctrl+⏎</span>
+
+          {/* Orientation toggle */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7 hover:bg-white/5" onClick={togglePanelDirection}>
+                {panelDirection === "horizontal" ? <Grid3X3 className="w-3.5 h-3.5" /> : <Monitor className="w-3.5 h-3.5" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-[10px]">{panelDirection === "horizontal" ? "Layout Vertical" : "Layout Horizontal"}</TooltipContent>
+          </Tooltip>
+
+          {/* Shortcuts help */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button size="icon" variant="ghost" className="h-7 w-7 hover:bg-white/5 font-bold text-sm" onClick={() => setShowShortcuts(true)}>
+                ?
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="text-[10px]">Atalhos de Teclado</TooltipContent>
+          </Tooltip>
         </div>
       </div>
 
