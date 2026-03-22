@@ -1,29 +1,25 @@
-import { lazy, Suspense } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import { useLocation } from "react-router-dom";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
+import { getOpticianNav } from "@/components/optician/opticianNav";
+import OpticianOverview from "@/components/optician/OpticianOverview";
 
-const OpticianOverview = lazy(() => import("@/components/optician/OpticianOverview"));
-const OpticianOrders = lazy(() => import("@/components/optician/OpticianOrders"));
-const OpticianCatalog = lazy(() => import("@/components/optician/OpticianCatalog"));
-const OpticianStock = lazy(() => import("@/components/optician/OpticianStock"));
-const OpticianProduction = lazy(() => import("@/components/optician/OpticianProduction"));
-const OpticianFinancial = lazy(() => import("@/components/optician/OpticianFinancial"));
+const OpticianDashboard = () => {
+  const location = useLocation();
+  const path = location.pathname;
 
-const fallback = <div className="flex justify-center py-12"><Spinner /></div>;
+  const getActive = () => {
+    if (path.includes("/orders")) return "orders";
+    if (path.includes("/catalog")) return "catalog";
+    if (path.includes("/stock")) return "stock";
+    if (path.includes("/production")) return "production";
+    if (path.includes("/financial")) return "financial";
+    return "home";
+  };
 
-interface Props {
-  activeTab: string;
-}
-
-const OpticianDashboard = ({ activeTab }: Props) => {
   return (
-    <Suspense fallback={fallback}>
-      {activeTab === "overview" && <OpticianOverview />}
-      {activeTab === "orders" && <OpticianOrders />}
-      {activeTab === "catalog" && <OpticianCatalog />}
-      {activeTab === "stock" && <OpticianStock />}
-      {activeTab === "production" && <OpticianProduction />}
-      {activeTab === "financial" && <OpticianFinancial />}
-    </Suspense>
+    <DashboardLayout title="Ótica Online" nav={getOpticianNav(getActive())} role="optician">
+      <OpticianOverview />
+    </DashboardLayout>
   );
 };
 
