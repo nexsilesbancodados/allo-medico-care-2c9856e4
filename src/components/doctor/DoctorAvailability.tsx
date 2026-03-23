@@ -26,7 +26,7 @@ interface Slot {
   day_of_week: number;
   start_time: string;
   end_time: string;
-  is_active: boolean | null;
+  is_active: boolean;
 }
 
 interface Absence {
