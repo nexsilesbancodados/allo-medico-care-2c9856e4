@@ -14,6 +14,8 @@ import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
+import { DashboardHero } from "./DashboardHero";
+import { DashboardStatCards } from "./DashboardStatCards";
 
 const getPartnerNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard?role=partner", icon: <TrendingUp className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -119,32 +121,32 @@ const PartnerDashboard = () => {
   return (
     <DashboardLayout title="Portal do Parceiro" nav={getPartnerNav(activeNav)}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-3xl space-y-6">
-        <motion.div variants={fadeUp} className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Portal de Parceiros</h1>
-            <p className="text-sm text-muted-foreground mt-1">Validação de receitas e pedidos de exame</p>
-          </div>
-          <Badge variant="outline" className="text-xs border-success/30 bg-success/10 text-success px-3 py-1.5 rounded-xl">
-            <CheckCircle className="w-3 h-3 mr-1" /> Farmácia Ativa
-          </Badge>
-        </motion.div>
 
-        {/* KPI cards */}
-        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3" role="list" aria-label="Estatísticas do parceiro">
-          {[
-            { label: "Validações", value: validations.length, icon: Pill, color: "text-primary", bg: "bg-primary/10" },
-            { label: "Dispensados", value: dispensedCount, icon: CheckCircle, color: "text-success", bg: "bg-success/10" },
-            { label: "Conversão", value: `${conversionRate}%`, icon: TrendingUp, color: "text-warning", bg: "bg-warning/10" },
-          ].map(kpi => (
-            <div key={kpi.label} className="kpi-card p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${kpi.label}: ${kpi.value}`}>
-              <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
-                <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
-              </div>
-              <p className="text-2xl font-bold text-foreground tabular-nums" aria-hidden="true">{kpi.value}</p>
-              <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
-            </div>
-          ))}
-        </motion.div>
+        {/* ── Partner Hero ── */}
+        <DashboardHero
+          gradient="from-[hsl(142,65%,38%)] via-[hsl(155,60%,40%)] to-[hsl(160,55%,36%)]"
+          name="Portal de Parceiros"
+          subtitle="Validação de receitas e pedidos de exame"
+          greetIcon={<Pill className="w-4 h-4" />}
+          kpis={[
+            { label: "Validações", value: validations.length, icon: <Pill className="w-4 h-4" /> },
+            { label: "Dispensados", value: dispensedCount, icon: <CheckCircle className="w-4 h-4" /> },
+            { label: "Conversão", value: `${conversionRate}%`, icon: <TrendingUp className="w-4 h-4" /> },
+          ]}
+          loading={loading}
+          badge={{ label: "✓ Farmácia Ativa", color: "bg-white/20 text-white backdrop-blur-md" }}
+        />
+
+        {/* ── Stat Cards ── */}
+        <DashboardStatCards
+          cols={3}
+          loading={loading}
+          cards={[
+            { label: "Total de validações", value: validations.length, icon: <Pill className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
+            { label: "Dispensados", value: dispensedCount, icon: <CheckCircle className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
+            { label: "Taxa de conversão", value: `${conversionRate}%`, icon: <TrendingUp className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
+          ]}
+        />
 
         <motion.div variants={fadeUp}>
           <Tabs defaultValue="validate">

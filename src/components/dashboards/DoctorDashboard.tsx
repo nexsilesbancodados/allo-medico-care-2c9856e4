@@ -23,6 +23,10 @@ import DoctorOnboarding from "@/components/doctor/DoctorOnboarding";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import { useDoctorStats } from "@/hooks/useDoctorDashboard";
 import { useQueryClient } from "@tanstack/react-query";
+import { DashboardHero } from "./DashboardHero";
+import { DashboardStatCards } from "./DashboardStatCards";
+import { DashboardQuickActions } from "./DashboardQuickActions";
+import { DashboardShortcuts } from "./DashboardShortcuts";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendado", completed: "Concluída", cancelled: "Cancelada",
@@ -148,96 +152,68 @@ const DoctorDashboard = () => {
           </div>
         )}
 
-        {/* ═══ Doctor Hero — clean white card with accent strip ═══ */}
-        <section className="relative overflow-hidden rounded-3xl bg-card border border-border/30 shadow-sm">
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[hsl(160,55%,45%)] via-[hsl(170,60%,48%)] to-[hsl(142,71%,45%)]" />
-          <div className="p-5 sm:p-6">
-            <div className="flex items-start gap-4">
-              <div className="size-14 rounded-2xl bg-gradient-to-br from-[hsl(160,55%,45%)] to-[hsl(142,71%,45%)] flex items-center justify-center shadow-lg shadow-secondary/20 shrink-0">
-                <Stethoscope className="w-7 h-7 text-white" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="text-xs font-medium text-muted-foreground">{greeting()}</span>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight mt-0.5">
-                  Dr. {profile?.first_name || "Médico"}
-                </h1>
-                <div className="flex items-center gap-3 mt-2 flex-wrap">
-                  {!loading && data?.crm && (
-                    <span className="text-xs text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-lg font-medium">
-                      CRM {data.crm}/{data.crmState}
-                    </span>
-                  )}
-                  {data?.crmVerified && (
-                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-secondary/10 text-secondary text-xs font-bold">
-                      <ShieldCheck className="w-3 h-3" /> Verificado
-                    </span>
-                  )}
-                  {(data?.rating ?? 0) > 0 && (
-                    <span className="flex items-center gap-1 text-foreground/80">
-                      <Star className="w-3.5 h-3.5 text-warning fill-warning" />
-                      <span className="text-xs font-bold">{(data?.rating ?? 0).toFixed(1)}</span>
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-2 shrink-0">
-                <Button size="sm" variant="outline"
-                  className="h-9 rounded-xl gap-1.5 text-xs font-semibold border-border/50"
-                  onClick={() => navigate("/dashboard/doctor/waiting-room")}>
-                  <Bell className="w-4 h-4" />
-                  {waitingCount > 0 && <span className="bg-destructive text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{waitingCount}</span>}
-                </Button>
-              </div>
-            </div>
+        {/* ═══ Doctor Hero ═══ */}
+        <DashboardHero
+          gradient="from-[hsl(160,55%,38%)] via-[hsl(165,60%,42%)] to-[hsl(142,65%,40%)]"
+          greeting={greeting()}
+          greetIcon={<Stethoscope className="w-4 h-4" />}
+          name={`Dr(a). ${profile?.first_name || "Médico"}`}
+          subtitle={data?.crm ? `CRM ${data.crm}/${data.crmState}` : undefined}
+          kpis={[
+            { label: "Hoje", value: stats.today, icon: <Calendar className="w-4 h-4" /> },
+            { label: "Pendentes", value: waitingCount + todayAppts.filter(a => a.status === "scheduled").length, icon: <Clock className="w-4 h-4" /> },
+            { label: "Receitas", value: stats.prescriptions, icon: <FileText className="w-4 h-4" /> },
+            { label: "Faturamento", value: `R$${(stats.totalEarnings / 1000).toFixed(1)}k`, icon: <DollarSign className="w-4 h-4" /> },
+          ]}
+          loading={loading}
+          badge={data?.crmVerified ? { label: "✓ CRM Verificado", color: "bg-white/20 text-white backdrop-blur-md" } : undefined}
+          extra={
+            waitingCount > 0 ? (
+              <Button size="sm" variant="ghost" className="h-9 gap-1.5 rounded-xl border border-white/20 text-white/80 hover:bg-white/15 hover:text-white" onClick={() => navigate("/dashboard/doctor/waiting-room")}>
+                <Bell className="w-4 h-4" />
+                <span className="rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-black text-white">{waitingCount}</span>
+              </Button>
+            ) : undefined
+          }
+        />
 
-            {/* Inline KPIs */}
-            <div className="grid grid-cols-4 gap-2 mt-5">
-              {[
-                { label: "Hoje", value: stats.today, color: "text-primary" },
-                { label: "Pendentes", value: waitingCount + todayAppts.filter(a => a.status === "scheduled").length, color: "text-warning" },
-                { label: "Receitas", value: stats.prescriptions, color: "text-secondary" },
-                { label: "Faturamento", value: `R$${(stats.totalEarnings / 1000).toFixed(1)}k`, color: "text-foreground" },
-              ].map(k => (
-                <div key={k.label} className="text-center p-2.5 rounded-xl bg-muted/40">
-                  <p className={`text-lg font-black leading-none tabular-nums ${k.color}`}>{k.value}</p>
-                  <p className="text-[9px] font-semibold text-muted-foreground/60 uppercase tracking-wider mt-1">{k.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        {/* ═══ Stat Cards ═══ */}
+        <DashboardStatCards
+          cols={4}
+          loading={loading}
+          cards={[
+            { label: "Consultas Hoje", value: stats.today, icon: <Calendar className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
+            { label: "Em Espera", value: waitingCount, icon: <Clock className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
+            { label: "Pacientes", value: stats.total_patients, icon: <Users className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary" },
+            { label: "Receitas", value: stats.prescriptions, icon: <FileText className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
+          ]}
+        />
 
-        {/* ═══ Quick Actions — horizontal pill buttons ═══ */}
-        <div className="flex gap-2.5 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
-          {[
-            { label: "Sala de Espera", icon: Video, path: "/dashboard/doctor/waiting-room", active: waitingCount > 0, badge: waitingCount },
-            { label: "Receitas", icon: FileText, path: "/dashboard/prescriptions" },
-            { label: "Calendário", icon: Calendar, path: "/dashboard/doctor/calendar" },
-            { label: "Ganhos", icon: DollarSign, path: "/dashboard/earnings" },
-            { label: "Pacientes", icon: Users, path: "/dashboard/patients" },
-          ].map((item, i) => (
-            <motion.button
-              key={item.label}
-              initial={{ opacity: 0, x: 12 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.04 }}
-              onClick={() => navigate(item.path)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95 ${
-                item.active
-                  ? "bg-secondary text-white shadow-md shadow-secondary/25"
-                  : "bg-card border border-border/40 text-foreground hover:border-secondary/30 hover:shadow-sm"
-              }`}
-            >
-              <item.icon className="w-4 h-4" />
-              {item.label}
-              {(item.badge ?? 0) > 0 && (
-                <span className="bg-white/25 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                  {item.badge}
-                </span>
-              )}
-            </motion.button>
-          ))}
-        </div>
+        {/* ═══ Quick Actions ═══ */}
+        <DashboardQuickActions
+          title="Ações do Médico"
+          actions={[
+            { label: "Sala de Espera", icon: <Video className="w-6 h-6" />, path: "/dashboard/doctor/waiting-room", gradient: "from-[hsl(160,55%,40%)] to-[hsl(142,65%,38%)]", badge: waitingCount },
+            { label: "Receitas", icon: <FileText className="w-6 h-6" />, path: "/dashboard/prescriptions", gradient: "from-[hsl(210,90%,50%)] to-[hsl(220,85%,45%)]" },
+            { label: "Calendário", icon: <Calendar className="w-6 h-6" />, path: "/dashboard/doctor/calendar", gradient: "from-[hsl(270,60%,55%)] to-[hsl(280,55%,48%)]" },
+            { label: "Ganhos", icon: <DollarSign className="w-6 h-6" />, path: "/dashboard/earnings", gradient: "from-[hsl(38,90%,50%)] to-[hsl(30,85%,45%)]" },
+          ]}
+        />
+
+        {/* ═══ Shortcuts ═══ */}
+        <DashboardShortcuts
+          title="Ferramentas do Médico"
+          shortcuts={[
+            { label: "Sala de Espera", description: "Fila de pacientes ao vivo", icon: <Video className="w-[18px] h-[18px]" />, path: "/dashboard/doctor/waiting-room", iconBg: "bg-secondary/10", iconColor: "text-secondary", badge: waitingCount > 0 ? waitingCount : undefined, badgeColor: "bg-destructive/10 text-destructive" },
+            { label: "Meus Pacientes", description: "Histórico e prontuários", icon: <Users className="w-[18px] h-[18px]" />, path: "/dashboard/patients", iconBg: "bg-primary/10", iconColor: "text-primary" },
+            { label: "Receitas", description: "Emitir prescrições Memed", icon: <FileText className="w-[18px] h-[18px]" />, path: "/dashboard/prescriptions", iconBg: "bg-warning/10", iconColor: "text-warning" },
+            { label: "Agenda", description: "Horários e disponibilidade", icon: <Calendar className="w-[18px] h-[18px]" />, path: "/dashboard/doctor/calendar", iconBg: "bg-purple-500/10", iconColor: "text-purple-500" },
+            { label: "Meus Ganhos", description: "Faturamento e extrato", icon: <DollarSign className="w-[18px] h-[18px]" />, path: "/dashboard/earnings", iconBg: "bg-success/10", iconColor: "text-success" },
+            { label: "Perfil Público", description: "Como pacientes me veem", icon: <Stethoscope className="w-[18px] h-[18px]" />, path: "/dashboard/doctor/public-profile", iconBg: "bg-muted", iconColor: "text-muted-foreground" },
+          ]}
+        />
+
+
 
         {/* ═══ Patients Table ═══ */}
         <Card className="border-border/50 shadow-sm">

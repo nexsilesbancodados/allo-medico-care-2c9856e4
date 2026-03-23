@@ -19,6 +19,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import { toast } from "sonner";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
+import { DashboardHero } from "./DashboardHero";
+import { DashboardStatCards } from "./DashboardStatCards";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } } };
@@ -120,12 +122,7 @@ const LaudistaDashboard = () => {
     }
   };
 
-  const kpis = [
-    { label: "Pendentes", value: stats?.pending ?? 0, icon: Clock, color: "from-warning to-warning/70" },
-    { label: "Em Análise", value: stats?.inReview ?? 0, icon: Activity, color: "from-primary to-secondary" },
-    { label: "Laudados Hoje", value: stats?.todayReported ?? 0, icon: CheckCircle2, color: "from-success to-success/70" },
-    { label: "Total de Laudos", value: stats?.totalReported ?? 0, icon: FileText, color: "from-secondary to-primary" },
-  ];
+
 
   const urgentCount = recentExams?.filter(e => e.priority === "urgent").length ?? 0;
 
@@ -133,51 +130,35 @@ const LaudistaDashboard = () => {
     <DashboardLayout title="Laudista" nav={getLaudistaNav("home")} role="doctor">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
-        {/* ═══ Laudista Hero — dark professional card ═══ */}
-        <motion.section variants={fadeUp} className="relative overflow-hidden rounded-3xl bg-[hsl(220,20%,12%)] shadow-xl">
-          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(195,80%,55%)/0.12] via-transparent to-[hsl(160,55%,45%)/0.08] pointer-events-none" />
-          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[hsl(195,80%,55%)/0.4] to-transparent" />
-          <div className="relative z-10 p-5 sm:p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="size-7 rounded-lg bg-[hsl(195,80%,55%)] flex items-center justify-center">
-                    <ClipboardList className="w-3.5 h-3.5 text-white" />
-                  </span>
-                  <span className="text-[10px] font-bold text-[hsl(195,80%,55%)] uppercase tracking-[0.15em]">Telelaudo</span>
-                </div>
-                <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Painel Laudista</h1>
-                <p className="text-xs text-white/40 mt-1">
-                  {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-                  {doctorProfile?.crm && <span className="ml-2 text-white/30">· CRM {doctorProfile.crm}/{doctorProfile.crm_state}</span>}
-                </p>
-              </div>
-              <Button size="sm" className="h-9 rounded-xl bg-white/10 text-white/80 hover:bg-white/15 gap-1.5 text-xs font-bold border border-white/10" onClick={() => queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] })} disabled={refreshing}>
-                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-              </Button>
-            </div>
+        {/* ── Laudista Hero ── */}
+        <DashboardHero
+          gradient="from-[hsl(195,80%,35%)] via-[hsl(210,75%,38%)] to-[hsl(220,70%,32%)]"
+          greeting={format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+          greetIcon={<ClipboardList className="w-4 h-4" />}
+          name="Painel Laudista"
+          subtitle={doctorProfile?.crm ? `CRM ${doctorProfile.crm}/${doctorProfile.crm_state} · Telelaudo` : "Telelaudo"}
+          kpis={[
+            { label: "Fila", value: stats?.pending ?? 0, icon: <ClipboardList className="w-4 h-4" /> },
+            { label: "Em análise", value: stats?.inReview ?? 0, icon: <Eye className="w-4 h-4" /> },
+            { label: "Laudados", value: stats?.reported ?? 0, icon: <CheckCircle2 className="w-4 h-4" /> },
+            { label: "Hoje", value: stats?.todayReported ?? 0, icon: <Target className="w-4 h-4" /> },
+          ]}
+          loading={loadingStats}
+          onRefresh={() => { queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] }); }}
+          refreshing={refreshing}
+        />
 
-            {/* KPIs — glowing cards on dark */}
-            <div className="grid grid-cols-4 gap-2.5 mt-5">
-              {loadingStats ? (
-                Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-16 rounded-xl bg-white/5 animate-pulse" />)
-              ) : (
-                kpis.map((kpi, i) => (
-                  <motion.div
-                    key={kpi.label}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.06 }}
-                    className="p-3 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] transition-colors"
-                  >
-                    <p className="text-xl font-black text-white leading-none tabular-nums">{kpi.value}</p>
-                    <p className="text-[9px] text-white/40 font-semibold uppercase tracking-wider mt-1.5">{kpi.label}</p>
-                  </motion.div>
-                ))
-              )}
-            </div>
-          </div>
-        </motion.section>
+        {/* ── Stat Cards ── */}
+        <DashboardStatCards
+          cols={4}
+          loading={loadingStats}
+          cards={[
+            { label: "Na fila (pendente)", value: stats?.pending ?? 0, icon: <ClipboardList className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
+            { label: "Em análise", value: stats?.inReview ?? 0, icon: <Eye className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
+            { label: "Total laudados", value: stats?.reported ?? 0, icon: <CheckCircle2 className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
+            { label: "Laudados hoje", value: stats?.todayReported ?? 0, icon: <Target className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary" },
+          ]}
+        />
 
         {/* Urgent Alert */}
         {!loadingExams && urgentCount > 0 && (

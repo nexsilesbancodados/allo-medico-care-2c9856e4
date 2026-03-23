@@ -17,6 +17,8 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
+import { DashboardHero } from "./DashboardHero";
+import { DashboardStatCards } from "./DashboardStatCards";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", waiting: "Na sala", in_progress: "Em consulta",
@@ -159,145 +161,82 @@ const ReceptionDashboard = () => {
     return matchSearch && matchStatus;
   });
 
-  const kpis = [
-    { label: "Consultas", value: stats.total, icon: Calendar, color: "text-primary", bg: "bg-primary/10" },
-    { label: "Na Espera", value: stats.waiting, icon: Clock, color: "text-warning", bg: "bg-warning/10" },
-    { label: "Em Andamento", value: stats.inProgress, icon: Video, color: "text-success", bg: "bg-success/10" },
-    { label: "Concluídas", value: stats.completed, icon: CheckCircle, color: "text-muted-foreground", bg: "bg-muted" },
-  ];
-
   const isToday = isSameDay(selectedDate, new Date());
 
   return (
     <DashboardLayout title="Recepção" nav={getReceptionNav("overview")}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
-        {/* Header */}
-        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel da Recepção</h1>
-            {/* Date navigator */}
-            <div className="flex items-center gap-2 mt-1">
-              <button onClick={() => setSelectedDate(d => subDays(d, 1))} className="w-7 h-7 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors">
-                <ChevronLeft className="w-4 h-4 text-muted-foreground" />
-              </button>
-              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <button className="text-sm font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {isToday ? "Hoje" : format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComp
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={d => { if (d) { setSelectedDate(d); setCalendarOpen(false); } }}
-                    initialFocus
-                    className={cn("p-3 pointer-events-auto")}
-                  />
-                </PopoverContent>
-              </Popover>
-              <button onClick={() => setSelectedDate(d => addDays(d, 1))} className="w-7 h-7 rounded-lg border border-border flex items-center justify-center hover:bg-muted transition-colors">
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
-              </button>
-              {!isToday && (
-                <button onClick={() => setSelectedDate(new Date())} className="text-xs text-primary hover:underline">Hoje</button>
-              )}
-            </div>
-          </div>
-          <div className="flex gap-2 shrink-0 flex-wrap">
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-9 rounded-xl gap-1.5"
-              onClick={async () => {
-                const tomorrow = addDays(new Date(), 1);
-                const dayStart = startOfDay(tomorrow);
-                const dayEnd = endOfDay(tomorrow);
-                const { data } = await supabase
-                  .from("appointments")
-                  .select("id, scheduled_at, patient_id")
-                  .gte("scheduled_at", dayStart.toISOString())
-                  .lte("scheduled_at", dayEnd.toISOString())
-                  .in("status", ["scheduled", "confirmed"]);
-                if (!data || data.length === 0) {
-                  toast.info("Nenhuma consulta agendada para amanhã.");
-                  return;
-                }
-                const patientIds = [...new Set(data.map(a => a.patient_id).filter(Boolean))];
-                const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, phone").in("user_id", patientIds);
-                const phoneMap = new Map(profiles?.map(p => [p.user_id, p]) ?? []);
-                let sent = 0;
-                for (const appt of data) {
-                  const patient = phoneMap.get(appt.patient_id!);
-                  if (patient?.phone) {
-                    const time = format(new Date(appt.scheduled_at), "HH:mm");
-                    const dateStr = format(new Date(appt.scheduled_at), "dd/MM");
-                    try {
-                      await supabase.functions.invoke("send-whatsapp", {
-                        body: {
-                          phone: patient.phone,
-                          message: `🩺 Allo Médico - Lembrete\n\nOlá, ${patient.first_name}! Sua consulta está marcada para amanhã (${dateStr}) às ${time}.\n\nNão se esqueça! 💚`,
-                        },
-                      });
-                      sent++;
-                    } catch { /* skip */ }
-                  }
-                }
-                toast.success(`${sent} lembrete(s) enviado(s) para amanhã!`);
-              }}
-            >
-              <Bell className="w-3.5 h-3.5" /> Lembretes
-            </Button>
-            <Button size="sm" variant="outline" className="h-9 w-9 rounded-xl" onClick={() => fetchToday(true)} disabled={refreshing}>
-              <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-            </Button>
-            <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportCSV} disabled={loading || todayAppts.length === 0}>
-              <Download className="w-4 h-4" /> CSV
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-9 rounded-xl gap-1.5"
-              disabled={loading || todayAppts.length === 0}
-              onClick={async () => {
-                const { default: jsPDF } = await import("jspdf");
-                const doc = new jsPDF();
-                doc.setFontSize(16);
-                doc.text(`Agenda — ${format(selectedDate, "dd/MM/yyyy")}`, 14, 20);
-                doc.setFontSize(10);
-                let y = 35;
-                filteredAppts.forEach(a => {
-                  doc.text(`${format(new Date(a.scheduled_at), "HH:mm")} — ${a.patient_name} — ${a.doctor_name} — ${statusLabel[a.status] ?? a.status}`, 14, y);
-                  y += 7;
-                  if (y > 280) { doc.addPage(); y = 20; }
-                });
-                doc.save(`agenda-${format(selectedDate, "yyyy-MM-dd")}.pdf`);
-                toast.success("PDF exportado!");
-              }}
-            >
-              <Download className="w-4 h-4" /> PDF
-            </Button>
-          </div>
-        </motion.div>
-
-        {/* KPI Cards — unified style */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-3" role="list" aria-label="Resumo do dia">
-          {loading ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="h-24 shimmer-v2/50 rounded-2xl" aria-hidden="true" />)
-          ) : (
-            kpis.map((s) => (
-              <div key={s.label} className="kpi-card p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${s.label}: ${s.value}`}>
-                <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
-                  <s.icon className={`w-4 h-4 ${s.color}`} aria-hidden="true" />
-                </div>
-                <p className="text-2xl font-bold text-foreground tabular-nums" aria-hidden="true">{s.value}</p>
-                <p className="text-xs font-medium text-muted-foreground mt-0.5">{s.label}</p>
+        {/* ── Reception Hero ── */}
+        <DashboardHero
+          gradient="from-[hsl(38,92%,45%)] via-[hsl(30,88%,48%)] to-[hsl(25,85%,42%)]"
+          name="Painel da Recepção"
+          subtitle={isToday ? `Hoje · ${format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}` : format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          greetIcon={<Calendar className="w-4 h-4" />}
+          kpis={[
+            { label: "Total", value: stats.total, icon: <Calendar className="w-4 h-4" /> },
+            { label: "Na Fila", value: stats.waiting, icon: <Clock className="w-4 h-4" /> },
+            { label: "Em Consulta", value: stats.inProgress, icon: <Video className="w-4 h-4" /> },
+            { label: "Concluídas", value: stats.completed, icon: <CheckCircle className="w-4 h-4" /> },
+          ]}
+          loading={loading}
+          onRefresh={() => fetchToday(true)}
+          refreshing={refreshing}
+          extra={
+            <div className="flex gap-1.5">
+              <div className="flex items-center gap-1">
+                <button onClick={() => setSelectedDate(d => subDays(d, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/70 transition-colors hover:bg-white/15">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                  <PopoverTrigger asChild>
+                    <button className="rounded-lg border border-white/20 px-2.5 py-1 text-xs font-semibold text-white/80 transition-colors hover:bg-white/15">
+                      {isToday ? "Hoje" : format(selectedDate, "dd/MM")}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComp
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={d => { if (d) { setSelectedDate(d); setCalendarOpen(false); } }}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+                <button onClick={() => setSelectedDate(d => addDays(d, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/70 transition-colors hover:bg-white/15">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
               </div>
-            ))
-          )}
-        </motion.div>
+            </div>
+          }
+        />
+
+        {/* ── Stat Cards ── */}
+        <DashboardStatCards
+          cols={4}
+          loading={loading}
+          cards={[
+            { label: "Total Hoje", value: stats.total, icon: <Calendar className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
+            { label: "Na Fila", value: stats.waiting, icon: <Clock className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
+            { label: "Em Consulta", value: stats.inProgress, icon: <Video className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
+            { label: "Concluídas", value: stats.completed, icon: <CheckCircle className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary" },
+          ]}
+        />
+
+        {/* Action buttons row */}
+        <div className="flex gap-2 flex-wrap">
+          <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={() => fetchToday(true)} disabled={refreshing}>
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Atualizar
+          </Button>
+          <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportCSV} disabled={loading || todayAppts.length === 0}>
+            <Download className="w-3.5 h-3.5" /> CSV
+          </Button>
+        </div>
+
+
+
+
 
         {/* Agenda */}
         <motion.div variants={fadeUp}>

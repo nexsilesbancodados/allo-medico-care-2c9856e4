@@ -19,6 +19,8 @@ import SupportInbox from "@/components/support/SupportInbox";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
+import { DashboardHero } from "./DashboardHero";
+import { DashboardStatCards } from "./DashboardStatCards";
 
 const getSupportNav = (active: string) => [
   { label: "Helpdesk", href: "/dashboard?role=support", icon: <Activity className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -244,50 +246,34 @@ const SupportDashboard = () => {
     <DashboardLayout title="Suporte Técnico" nav={getSupportNav(activeNav)}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
 
-        {/* Header */}
-        <motion.div variants={fadeUp} className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Helpdesk</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Monitoramento em tempo real · Atualizado{" "}
-              <span className="font-medium text-foreground">
-                {formatDistanceToNow(lastFetch.current, { addSuffix: true, locale: ptBR })}
-              </span>
-            </p>
-          </div>
-          <Button
-            size="sm" variant="outline"
-            onClick={() => fetchData(true)}
-            disabled={refreshing}
-            className="shrink-0 h-9 rounded-xl gap-1.5"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-            Atualizar
-          </Button>
-        </motion.div>
+        {/* ── Support Hero ── */}
+        <DashboardHero
+          gradient="from-[hsl(45,90%,42%)] via-[hsl(38,88%,45%)] to-[hsl(30,85%,40%)]"
+          name="Helpdesk"
+          subtitle={`Monitoramento em tempo real · Atualizado ${formatDistanceToNow(lastFetch.current, { addSuffix: true, locale: ptBR })}`}
+          greetIcon={<Activity className="w-4 h-4" />}
+          kpis={[
+            { label: "Usuários", value: users.length, icon: <Users className="w-4 h-4" /> },
+            { label: "Logs hoje", value: todayLogs, icon: <Activity className="w-4 h-4" /> },
+            { label: "Erros", value: errorCount, icon: <ShieldAlert className="w-4 h-4" /> },
+            { label: "Alertas", value: errorCount + warnCount, icon: <AlertTriangle className="w-4 h-4" /> },
+          ]}
+          loading={loading}
+          onRefresh={() => fetchData(true)}
+          refreshing={refreshing}
+        />
 
-        {/* KPI Cards — unified style (no more BlobKPICard) */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {loading ? (
-            [1, 2, 3, 4].map(i => <div key={i} className="h-24 shimmer-v2/50 rounded-2xl" />)
-          ) : (
-            [
-              { label: "Usuários", value: users.length, icon: Users, color: "text-primary", bg: "bg-primary/10", sub: `${filteredUsers.length} filtrados` },
-              { label: "Logs hoje", value: todayLogs, icon: Activity, color: "text-secondary", bg: "bg-secondary/10", sub: `${logs.length} total` },
-              { label: "Erros", value: errorCount, icon: ShieldAlert, color: "text-destructive", bg: "bg-destructive/10", sub: `${warnCount} avisos` },
-              { label: "Alertas", value: errorCount + warnCount, icon: AlertTriangle, color: "text-warning", bg: "bg-warning/10", sub: "Revisão necessária" },
-            ].map(s => (
-              <div key={s.label} className="kpi-card p-4 rounded-2xl bg-card border border-border/50">
-                <div className={`w-9 h-9 rounded-xl ${s.bg} flex items-center justify-center mb-2`}>
-                  <s.icon className={`w-4 h-4 ${s.color}`} />
-                </div>
-                <p className="text-2xl font-bold text-foreground tabular-nums">{s.value}</p>
-                <p className="text-xs font-medium text-muted-foreground mt-0.5">{s.label}</p>
-                <p className="text-[10px] text-muted-foreground/70 mt-0.5">{s.sub}</p>
-              </div>
-            ))
-          )}
-        </motion.div>
+        {/* ── Stat Cards ── */}
+        <DashboardStatCards
+          cols={4}
+          loading={loading}
+          cards={[
+            { label: "Usuários cadastrados", value: users.length, icon: <Users className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary", sub: `${filteredUsers.length} filtrados` },
+            { label: "Logs hoje", value: todayLogs, icon: <Activity className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary", sub: `${logs.length} total` },
+            { label: "Erros críticos", value: errorCount, icon: <ShieldAlert className="w-4 h-4" />, bg: "bg-destructive/10", text: "text-destructive", sub: `${warnCount} avisos` },
+            { label: "Alertas totais", value: errorCount + warnCount, icon: <AlertTriangle className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning", sub: "Revisão necessária" },
+          ]}
+        />
 
         {/* Alert banner for critical errors */}
         {!loading && errorCount > 0 && (

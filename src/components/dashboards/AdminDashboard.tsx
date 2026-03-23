@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { getAdminNav } from "@/components/admin/adminNav";
-import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, Video, Star, LayoutGrid, Download, RefreshCw, UserPlus } from "lucide-react";
+import { DollarSign, AlertTriangle, Users, TrendingUp, CreditCard, FileText, Activity, Clock, Video, Star, LayoutGrid, Download, RefreshCw, UserPlus, Calendar } from "lucide-react";
 import AdminAnalyticsCharts from "./AdminAnalyticsCharts";
 import { format, startOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 import type { AdminKpiItem } from "@/types/domain";
+import { DashboardHero } from "./DashboardHero";
+import { DashboardStatCards } from "./DashboardStatCards";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -260,11 +262,38 @@ const AdminDashboard = () => {
     <DashboardLayout title="Administração" nav={getAdminNav("overview")}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-6xl space-y-6">
 
-        {/* Header */}
+        {/* ── Admin Hero ── */}
+        <DashboardHero
+          gradient="from-[hsl(0,75%,45%)] via-[hsl(350,70%,48%)] to-[hsl(340,65%,42%)]"
+          name="Painel de Controle"
+          subtitle="Monitoramento em tempo real, finanças e operações"
+          kpis={[
+            { label: "Pacientes", value: stats.total_patients, icon: <Users className="w-4 h-4" /> },
+            { label: "Médicos", value: stats.total_doctors, icon: <Activity className="w-4 h-4" /> },
+            { label: "Assinaturas", value: stats.active_subs, icon: <CreditCard className="w-4 h-4" /> },
+            { label: "Ao Vivo", value: stats.live_now, icon: <Video className="w-4 h-4" /> },
+          ]}
+          loading={loading}
+          onRefresh={() => fetchAll(true)}
+          refreshing={refreshing}
+        />
+
+        {/* ── Stat Cards ── */}
+        <DashboardStatCards
+          cols={4}
+          loading={loading}
+          cards={[
+            { label: "Receita Mensal", value: `R$${(stats.total_revenue / 1000).toFixed(1)}k`, icon: <DollarSign className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
+            { label: "Consultas/mês", value: stats.monthly_appts, icon: <Calendar className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
+            { label: "Avaliação Média", value: stats.avg_rating > 0 ? stats.avg_rating.toFixed(1) : "—", icon: <Star className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
+            { label: "Laudos", value: stats.total_laudos, icon: <FileText className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary" },
+          ]}
+        />
+
+        {/* Header actions */}
         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Painel de Controle</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Monitoramento em tempo real, finanças e operações</p>
+            <h2 className="text-lg font-bold text-foreground tracking-tight">Detalhes Operacionais</h2>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <Select value={periodFilter} onValueChange={setPeriodFilter}>
