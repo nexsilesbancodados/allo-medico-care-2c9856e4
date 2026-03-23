@@ -175,7 +175,7 @@ const DoctorSearch = () => {
       if (sortBy === "rating") return b.rating - a.rating;
       if (sortBy === "price_asc") return a.consultation_price - b.consultation_price;
       if (sortBy === "price_desc") return b.consultation_price - a.consultation_price;
-      if (sortBy === "experience") return b.experience_years - a.experience_years;
+      if (sortBy === "experience") return (b.experience_years ?? 0) - (a.experience_years ?? 0);
       return 0;
     });
 
