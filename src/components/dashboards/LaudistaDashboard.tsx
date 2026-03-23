@@ -160,28 +160,28 @@ const LaudistaDashboard = () => {
           </div>
         </motion.section>
 
-            {/* KPIs */}
-            <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5" role="list" aria-label="Estatísticas do laudista">
-              {loadingStats ? (
-                Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl shimmer-v2 bg-white/10" aria-hidden="true" />)
-              ) : (
-                kpis.map((kpi, i) => (
-                  <motion.div
-                    key={kpi.label}
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
-                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10 hover:bg-white/15 transition-colors"
-                    role="listitem"
-                    aria-label={`${kpi.label}: ${kpi.value}`}
-                  >
-                    <kpi.icon className="w-4 h-4 text-white/70 mb-2" aria-hidden="true" />
-                    <p className="text-2xl font-bold leading-none tabular-nums" aria-hidden="true">{kpi.value}</p>
-                    <p className="text-[10px] text-white/60 mt-1">{kpi.label}</p>
-                  </motion.div>
-                ))
-              )}
-            </div>
+        {/* KPIs */}
+        <motion.div variants={fadeUp}>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3" role="list" aria-label="Estatísticas do laudista">
+            {loadingStats ? (
+              Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl shimmer-v2 bg-muted" aria-hidden="true" />)
+            ) : (
+              kpis.map((kpi, i) => (
+                <motion.div
+                  key={kpi.label}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
+                  className="bg-card rounded-2xl p-4 border border-border/30 hover:shadow-md transition-all"
+                  role="listitem"
+                  aria-label={`${kpi.label}: ${kpi.value}`}
+                >
+                  <kpi.icon className="w-4 h-4 text-primary mb-2" aria-hidden="true" />
+                  <p className="text-2xl font-bold leading-none tabular-nums text-foreground">{kpi.value}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{kpi.label}</p>
+                </motion.div>
+              ))
+            )}
           </div>
         </motion.div>
 
