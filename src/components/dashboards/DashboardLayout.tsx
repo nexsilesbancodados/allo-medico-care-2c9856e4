@@ -52,14 +52,14 @@ const ROLE_ICON: Record<string, string> = {
   support:"🎧", clinic:"🏢", partner:"🤝", ai:"🤖",
 };
 const ROLE_GRADIENT: Record<string, string> = {
-  patient:"from-blue-500 to-cyan-500",
-  doctor:"from-emerald-500 to-teal-500",
-  admin:"from-red-500 to-rose-500",
-  receptionist:"from-amber-500 to-orange-500",
-  support:"from-yellow-500 to-amber-500",
-  clinic:"from-blue-500 to-indigo-500",
-  partner:"from-green-500 to-emerald-500",
-  ai:"from-sky-500 to-blue-500",
+  patient:"from-[hsl(210,90%,45%)] to-[hsl(195,85%,50%)]",
+  doctor:"from-[hsl(160,55%,45%)] to-[hsl(175,60%,45%)]",
+  admin:"from-[hsl(0,84%,60%)] to-[hsl(350,80%,55%)]",
+  receptionist:"from-[hsl(38,92%,50%)] to-[hsl(25,90%,52%)]",
+  support:"from-[hsl(45,90%,50%)] to-[hsl(38,92%,50%)]",
+  clinic:"from-[hsl(210,90%,45%)] to-[hsl(230,70%,55%)]",
+  partner:"from-[hsl(142,71%,45%)] to-[hsl(160,55%,45%)]",
+  ai:"from-[hsl(200,80%,50%)] to-[hsl(210,90%,45%)]",
 };
 
 
@@ -292,97 +292,158 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   return (
     <div className="min-h-screen bg-muted/30 flex flex-col">
 
-      {/* Header */}
+      {/* ═══ Mobile Header — app-like blue gradient ═══ */}
       <header ref={headerRef}
-        className="sticky top-0 z-50 h-14 bg-background/95 backdrop-blur-xl flex items-center px-4 gap-3 border-b border-border/15"
+        className="sticky top-0 z-50 md:h-14 md:bg-background/95 md:backdrop-blur-xl md:border-b md:border-border/15 flex items-center gap-3"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
-        {nav && nav.length > 0 && (
-          <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden h-9 w-9 rounded-xl" aria-label="Abrir menu">
-                <Menu className="w-4.5 h-4.5" aria-hidden="true" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="p-0 w-[260px] border-border/20 bg-background">
-              <SidebarContent onItemClick={() => setSidebarOpen(false)} />
-            </SheetContent>
-          </Sheet>
-        )}
+        {/* Mobile: gradient header */}
+        <div className="md:hidden w-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(195,85%,50%)] px-4 py-3 flex items-center gap-3">
+          {nav && nav.length > 0 && (
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-white/90 hover:bg-white/15" aria-label="Abrir menu">
+                  <Menu className="w-5 h-5" aria-hidden="true" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-[280px] border-border/20 bg-background">
+                <SidebarContent onItemClick={() => setSidebarOpen(false)} />
+              </SheetContent>
+            </Sheet>
+          )}
 
-        <Link to="/" className="flex items-center gap-2 shrink-0 md:hidden" aria-label="Home">
-          <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${grad} flex items-center justify-center`}>
-            <img src={logoImg} alt="" className="w-4 h-4 object-contain brightness-0 invert" />
-          </div>
-        </Link>
-        <Link to="/" className="hidden md:flex items-center gap-2 shrink-0">
-          <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${grad} flex items-center justify-center`}>
-            <img src={logoImg} alt="" className="w-4 h-4 object-contain brightness-0 invert" />
-          </div>
-          <span className="font-bold text-foreground text-sm tracking-tight">AloClínica</span>
-        </Link>
+          <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Home">
+            <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <img src={logoImg} alt="" className="w-5 h-5 object-contain brightness-0 invert" />
+            </div>
+            <span className="font-bold text-white text-sm tracking-tight">AloClínica</span>
+          </Link>
 
-        <button
-          onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }))}
-          className="flex flex-1 max-w-xs items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 hover:bg-muted/80 text-xs text-muted-foreground transition-all group"
-          aria-label="Buscar">
-          <Search className="w-3.5 h-3.5 group-hover:text-foreground transition-colors shrink-0" aria-hidden="true" />
-          <span className="flex-1 text-left hidden sm:block">Buscar...</span>
-          <kbd className="hidden sm:inline font-mono text-[10px] bg-background border border-border/40 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
-        </button>
+          <div className="flex-1" />
 
-        <div className="flex-1" />
-
-        {isAdminViewingOtherPanel && (
-          <Button variant="outline" size="sm"
-            className="h-7 text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/8 rounded-xl hidden sm:flex"
-            onClick={() => navigate("/dashboard")}>
-            <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" /> Admin
-          </Button>
-        )}
-
-        <div className="flex items-center gap-1">
-          <ThemeToggle />
-          <NotificationBell />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="group flex items-center gap-2 h-9 pl-0.5 pr-2.5 rounded-xl hover:bg-muted/60 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
-                <div className="relative">
-                  <Avatar className="h-7 w-7">
+          <div className="flex items-center gap-1.5">
+            <NotificationBell />
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="relative focus-visible:outline-none" aria-label="Menu do usuário">
+                  <Avatar className="h-8 w-8 ring-2 ring-white/30">
                     {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                    <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-[10px] font-bold`}>{initials}</AvatarFallback>
+                    <AvatarFallback className="bg-white/20 text-white text-[10px] font-bold">{initials}</AvatarFallback>
                   </Avatar>
-                  <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-success border-[1.5px] border-background" aria-hidden="true" />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[hsl(var(--success))] border-2 border-[hsl(var(--primary))]" aria-hidden="true" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-2xl border-border/30 shadow-xl p-1.5">
+                <div className="flex items-center gap-2.5 p-2.5 mb-1">
+                  <Avatar className="h-9 w-9">
+                    {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+                    <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-xs font-bold`}>{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{fullName}</p>
+                    <p className="text-[11px] text-muted-foreground">{ROLE_LABELS[role] ?? title}</p>
+                  </div>
                 </div>
-                <span className="hidden md:block text-xs font-medium text-foreground max-w-[90px] truncate">{profile?.first_name ?? "Usuário"}</span>
-                <ChevronDown className="w-3 h-3 text-muted-foreground hidden md:block" aria-hidden="true" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-2xl border-border/30 shadow-xl p-1.5">
-              <div className="flex items-center gap-2.5 p-2.5 mb-1">
-                <Avatar className="h-9 w-9">
-                  {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                  <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-xs font-bold`}>{initials}</AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground truncate">{fullName}</p>
-                  <p className="text-[11px] text-muted-foreground">{ROLE_LABELS[role] ?? title}</p>
+                <DropdownMenuSeparator className="bg-border/15" />
+                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
+                  <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
+                  <Settings className="h-4 w-4 text-muted-foreground" /> Configurações
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border/15" />
+                <DropdownMenuItem onClick={handleSignOut} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2 text-destructive focus:text-destructive focus:bg-destructive/8">
+                  <LogOut className="h-4 w-4" /> Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Desktop: standard header */}
+        <div className="hidden md:flex w-full items-center px-4 h-14 gap-3">
+          {nav && nav.length > 0 && (
+            <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9 rounded-xl" aria-label="Abrir menu">
+                  <Menu className="w-4.5 h-4.5" aria-hidden="true" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="p-0 w-[260px] border-border/20 bg-background">
+                <SidebarContent onItemClick={() => setSidebarOpen(false)} />
+              </SheetContent>
+            </Sheet>
+          )}
+
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${grad} flex items-center justify-center`}>
+              <img src={logoImg} alt="" className="w-4 h-4 object-contain brightness-0 invert" />
+            </div>
+            <span className="font-bold text-foreground text-sm tracking-tight">AloClínica</span>
+          </Link>
+
+          <button
+            onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }))}
+            className="flex flex-1 max-w-xs items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 hover:bg-muted/80 text-xs text-muted-foreground transition-all group"
+            aria-label="Buscar">
+            <Search className="w-3.5 h-3.5 group-hover:text-foreground transition-colors shrink-0" aria-hidden="true" />
+            <span className="flex-1 text-left">Buscar...</span>
+            <kbd className="font-mono text-[10px] bg-background border border-border/40 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
+          </button>
+
+          <div className="flex-1" />
+
+          {isAdminViewingOtherPanel && (
+            <Button variant="outline" size="sm"
+              className="h-7 text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/8 rounded-xl"
+              onClick={() => navigate("/dashboard")}>
+              <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" /> Admin
+            </Button>
+          )}
+
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <NotificationBell />
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="group flex items-center gap-2 h-9 pl-0.5 pr-2.5 rounded-xl hover:bg-muted/60 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
+                  <div className="relative">
+                    <Avatar className="h-7 w-7">
+                      {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+                      <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-[10px] font-bold`}>{initials}</AvatarFallback>
+                    </Avatar>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-[hsl(var(--success))] border-[1.5px] border-background" aria-hidden="true" />
+                  </div>
+                  <span className="text-xs font-medium text-foreground max-w-[90px] truncate">{profile?.first_name ?? "Usuário"}</span>
+                  <ChevronDown className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-2xl border-border/30 shadow-xl p-1.5">
+                <div className="flex items-center gap-2.5 p-2.5 mb-1">
+                  <Avatar className="h-9 w-9">
+                    {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+                    <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-xs font-bold`}>{initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground truncate">{fullName}</p>
+                    <p className="text-[11px] text-muted-foreground">{ROLE_LABELS[role] ?? title}</p>
+                  </div>
                 </div>
-              </div>
-              <DropdownMenuSeparator className="bg-border/15" />
-              <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                <Settings className="h-4 w-4 text-muted-foreground" /> Configurações
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-border/15" />
-              <DropdownMenuItem onClick={handleSignOut} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2 text-destructive focus:text-destructive focus:bg-destructive/8">
-                <LogOut className="h-4 w-4" /> Sair
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuSeparator className="bg-border/15" />
+                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
+                  <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
+                  <Settings className="h-4 w-4 text-muted-foreground" /> Configurações
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border/15" />
+                <DropdownMenuItem onClick={handleSignOut} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2 text-destructive focus:text-destructive focus:bg-destructive/8">
+                  <LogOut className="h-4 w-4" /> Sair
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </header>
 
@@ -394,8 +455,8 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           </aside>
         )}
         <main className="flex-1 min-w-0 overflow-auto pb-24 md:pb-8">
-          <div className="px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
-            <DashboardBreadcrumbs />
+          <div className="px-4 py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
+            <div className="hidden md:block"><DashboardBreadcrumbs /></div>
             {children}
           </div>
         </main>
@@ -404,30 +465,33 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       <GlobalCommand role={role} />
       <PWABanner role={role} />
 
-      {/* ═══ Mobile bottom nav ═══ */}
+      {/* ═══ Mobile bottom nav — app-like with pill active state ═══ */}
       {nav && nav.length > 0 && (
         <nav
-          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/15"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-2xl border-t border-border/10 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]"
           style={{ paddingBottom: "env(safe-area-inset-bottom, 4px)" }}
           aria-label="Navegação principal"
         >
-          <div className="flex items-stretch h-[60px]">
+          <div className="flex items-stretch h-[64px]">
             {bottomNav.map(item => (
               <Link key={item.href} to={item.href}
-                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-colors duration-150 select-none ${item.active ? "text-foreground" : "text-muted-foreground"}`}
+                className={`relative flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 select-none active:scale-90 ${
+                  item.active ? "text-primary" : "text-muted-foreground/60"
+                }`}
               >
-                {item.active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2.5px] rounded-b-full bg-foreground" />
-                )}
-                <span className={`relative flex items-center justify-center w-8 h-6 rounded-lg transition-colors duration-150 ${item.active ? "bg-foreground/10" : ""}`}>
+                <span className={`relative flex items-center justify-center w-10 h-7 rounded-2xl transition-all duration-200 ${
+                  item.active ? "bg-primary/12 scale-105" : ""
+                }`}>
                   {item.icon}
                   {(item.badge ?? 0) > 0 && (
-                    <span className="absolute -top-1 -right-1 text-[8px] font-bold w-3.5 h-3.5 rounded-full bg-destructive text-white flex items-center justify-center tabular-nums">
+                    <span className="absolute -top-1 -right-0.5 text-[8px] font-bold min-w-[16px] h-4 px-1 rounded-full bg-destructive text-white flex items-center justify-center tabular-nums">
                       {(item.badge ?? 0) > 9 ? "9+" : item.badge}
                     </span>
                   )}
                 </span>
-                <span className={`text-[10px] font-medium truncate max-w-[48px] leading-none ${item.active ? "font-semibold" : ""}`}>{item.label}</span>
+                <span className={`text-[10px] truncate max-w-[52px] leading-none ${
+                  item.active ? "font-bold text-primary" : "font-medium"
+                }`}>{item.label}</span>
               </Link>
             ))}
 
@@ -435,12 +499,16 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
                 <SheetTrigger asChild>
                   <button
-                    className={`flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium select-none active:scale-95 transition-transform ${moreNav.some(i => i.active) ? "text-foreground" : "text-muted-foreground"}`}
+                    className={`flex flex-col items-center justify-center gap-1 flex-1 text-[10px] font-medium select-none active:scale-90 transition-all duration-200 ${
+                      moreNav.some(i => i.active) ? "text-primary" : "text-muted-foreground/60"
+                    }`}
                     aria-label="Mais opções">
-                    <span className={`w-8 h-6 rounded-lg flex items-center justify-center transition-colors duration-150 ${moreNav.some(i => i.active) ? "bg-foreground/10" : ""}`}>
-                      <MoreHorizontal className="w-4 h-4" aria-hidden="true" />
+                    <span className={`w-10 h-7 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+                      moreNav.some(i => i.active) ? "bg-primary/12" : ""
+                    }`}>
+                      <MoreHorizontal className="w-5 h-5" aria-hidden="true" />
                     </span>
-                    <span>Mais</span>
+                    <span className={moreNav.some(i => i.active) ? "font-bold" : ""}>Mais</span>
                   </button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="rounded-t-3xl border-border/20 bg-background max-h-[70vh]"

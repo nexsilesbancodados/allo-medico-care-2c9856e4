@@ -133,54 +133,55 @@ const LaudistaDashboard = () => {
     <DashboardLayout title="Laudista" nav={getLaudistaNav("home")} role="doctor">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
-        {/* ═══ Hero Header ═══ */}
-        <motion.div variants={fadeUp}>
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-secondary p-5 sm:p-6 text-primary-foreground shadow-xl shadow-primary/20">
-            <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-white/10 blur-2xl" />
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-white/5 blur-2xl" />
-            
-            <div className="relative flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Painel Laudista</h1>
-                  <Badge className="bg-white/15 text-white border-white/20 text-[10px]">
-                    <ClipboardList className="w-3 h-3 mr-1" /> Telelaudo
-                  </Badge>
+        {/* ═══ Hero Header — app-like gradient ═══ */}
+        <motion.section variants={fadeUp} className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(var(--primary))] via-[hsl(210,85%,50%)] to-[hsl(var(--secondary))] shadow-lg shadow-primary/15">
+          <div className="absolute -right-6 -top-6 w-28 h-28 bg-white/[0.07] rounded-full blur-xl pointer-events-none" />
+          <div className="relative z-10 p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-xs font-medium text-white/60">Telelaudo</span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/15 text-white flex items-center gap-1">
+                    <ClipboardList className="w-3 h-3" /> Laudista
+                  </span>
                 </div>
-                <p className="text-sm text-white/70">
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">Painel Laudista</h1>
+                <p className="text-xs text-white/50 mt-1">
                   {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-                  {doctorProfile?.crm && <span className="ml-2 text-white/50">· CRM {doctorProfile.crm}/{doctorProfile.crm_state}</span>}
+                  {doctorProfile?.crm && <span className="ml-2">· CRM {doctorProfile.crm}/{doctorProfile.crm_state}</span>}
                 </p>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <Button size="sm" className="bg-white/15 text-white border border-white/20 hover:bg-white/25 h-9 gap-1.5 backdrop-blur-sm rounded-xl" onClick={() => queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] })} disabled={refreshing}>
+              <div className="flex gap-2 shrink-0">
+                <Button size="sm" className="h-9 rounded-xl bg-white/20 text-white hover:bg-white/30 gap-1.5 text-xs font-bold backdrop-blur-sm" onClick={() => queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] })} disabled={refreshing}>
                   <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
                 </Button>
               </div>
             </div>
+          </div>
+        </motion.section>
 
-            {/* KPIs */}
-            <div className="relative grid grid-cols-2 lg:grid-cols-4 gap-3 mt-5" role="list" aria-label="Estatísticas do laudista">
-              {loadingStats ? (
-                Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl shimmer-v2 bg-white/10" aria-hidden="true" />)
-              ) : (
-                kpis.map((kpi, i) => (
-                  <motion.div
-                    key={kpi.label}
-                    initial={{ opacity: 0, scale: 0.85 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
-                    className="bg-white/10 backdrop-blur-sm rounded-xl p-3.5 border border-white/10 hover:bg-white/15 transition-colors"
-                    role="listitem"
-                    aria-label={`${kpi.label}: ${kpi.value}`}
-                  >
-                    <kpi.icon className="w-4 h-4 text-white/70 mb-2" aria-hidden="true" />
-                    <p className="text-2xl font-bold leading-none tabular-nums" aria-hidden="true">{kpi.value}</p>
-                    <p className="text-[10px] text-white/60 mt-1">{kpi.label}</p>
-                  </motion.div>
-                ))
-              )}
-            </div>
+        {/* KPIs */}
+        <motion.div variants={fadeUp}>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3" role="list" aria-label="Estatísticas do laudista">
+            {loadingStats ? (
+              Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl shimmer-v2 bg-muted" aria-hidden="true" />)
+            ) : (
+              kpis.map((kpi, i) => (
+                <motion.div
+                  key={kpi.label}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
+                  className="bg-card rounded-2xl p-4 border border-border/30 hover:shadow-md transition-all"
+                  role="listitem"
+                  aria-label={`${kpi.label}: ${kpi.value}`}
+                >
+                  <kpi.icon className="w-4 h-4 text-primary mb-2" aria-hidden="true" />
+                  <p className="text-2xl font-bold leading-none tabular-nums text-foreground">{kpi.value}</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">{kpi.label}</p>
+                </motion.div>
+              ))
+            )}
           </div>
         </motion.div>
 

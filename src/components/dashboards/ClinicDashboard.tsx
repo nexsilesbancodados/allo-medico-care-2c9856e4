@@ -166,28 +166,28 @@ const ClinicDashboard = () => {
 
   return (
     <DashboardLayout title="Clínica" nav={getClinicNav(activeNav)} role="clinic">
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
-        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">{clinicProfile?.name ?? "Minha Clínica"}</h1>
-            <p className="text-sm text-muted-foreground mt-1">Painel de gestão · {format(now, "dd 'de' MMMM", { locale: ptBR })}</p>
+      <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
+        {/* ═══ Hero Header — app-like gradient ═══ */}
+        <motion.section variants={fadeUp} className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(210,90%,45%)] via-[hsl(220,80%,50%)] to-[hsl(230,70%,55%)] shadow-lg shadow-primary/15">
+          <div className="absolute -right-6 -top-6 w-28 h-28 bg-white/[0.07] rounded-full blur-xl pointer-events-none" />
+          <div className="relative z-10 p-5 sm:p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <span className="text-xs font-medium text-white/60">Painel de Gestão</span>
+                <h1 className="text-2xl font-extrabold text-white tracking-tight mt-0.5">{clinicProfile?.name ?? "Minha Clínica"}</h1>
+                <p className="text-xs text-white/50 mt-1">{format(now, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <Button size="sm" className="h-9 rounded-xl bg-white/20 text-white hover:bg-white/30 gap-1.5 text-xs font-bold backdrop-blur-sm" onClick={exportClinicPDF}>
+                  <FileText className="w-3.5 h-3.5" /> PDF
+                </Button>
+                <Button size="sm" className="h-9 rounded-xl bg-white/20 text-white hover:bg-white/30 gap-1.5 text-xs font-bold backdrop-blur-sm" onClick={() => navigate("/dashboard/clinic/schedules")}>
+                  <Calendar className="w-3.5 h-3.5" /> Agenda
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2 shrink-0 flex-wrap">
-            <Button size="sm" variant="outline" className="rounded-xl gap-1.5 h-9" onClick={exportClinicPDF}>
-              <FileText className="w-3.5 h-3.5" /> PDF
-            </Button>
-            <Button size="sm" variant="outline" className="rounded-xl gap-1.5 h-9" onClick={exportClinicCSV}>
-              <Download className="w-3.5 h-3.5" /> CSV
-            </Button>
-            <Button size="sm" variant="outline" className="rounded-xl gap-1.5 h-9" onClick={() => navigate("/dashboard/clinic/doctors")}>
-              <Users className="w-3.5 h-3.5" /> Médicos
-              {pendingDoctors > 0 && <span className="ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-warning text-warning-foreground">{pendingDoctors}</span>}
-            </Button>
-            <Button size="sm" className="rounded-xl gap-1.5 h-9 bg-primary text-primary-foreground" onClick={() => navigate("/dashboard/clinic/schedules")}>
-              <Calendar className="w-3.5 h-3.5" /> Agendamentos
-            </Button>
-          </div>
-        </motion.div>
+        </motion.section>
 
         {/* Alert for pending doctors */}
         {!loading && pendingDoctors > 0 && (
