@@ -13,6 +13,9 @@ import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
+import mascotWave from "@/assets/mascot-wave.png";
+import mascotWelcome from "@/assets/mascot-welcome.png";
+import mascotThumbsup from "@/assets/mascot-thumbsup.png";
 import { notifyWelcomePatient, notifyWelcomeDoctor } from "@/lib/notifications";
 import { translateAuthError } from "@/lib/authErrors";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
@@ -192,32 +195,55 @@ const Auth = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
-              <img src={logo} alt="AloClinica" className="w-16 h-16 rounded-2xl mb-8 shadow-lg ring-2 ring-white/10" />
+              {/* Logo + brand */}
+              <div className="flex items-center gap-3 mb-8">
+                <img src={logo} alt="AloClinica" className="w-14 h-14 rounded-2xl shadow-lg ring-2 ring-white/20" />
+                <div>
+                  <p className="text-2xl font-black text-white tracking-tight leading-none">AloClínica</p>
+                  <p className="text-sm text-white/60 mt-0.5">Telemedicina de excelência</p>
+                </div>
+              </div>
+
+              {/* Pingo mascot — wave pose */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.3, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                className="flex justify-center mb-6"
+              >
+                <motion.img
+                  src={mascotWave}
+                  alt="Pingo, mascote AloClínica"
+                  className="w-52 h-52 object-contain drop-shadow-2xl select-none"
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </motion.div>
               
-              <h1 className="text-5xl font-extrabold text-primary-foreground mb-5 leading-[1.1] tracking-tight">
+              <h1 className="text-4xl font-extrabold text-white mb-4 leading-[1.1] tracking-tight">
                 Saúde na<br />palma da mão
               </h1>
-              <p className="text-lg text-primary-foreground/75 leading-relaxed max-w-md">
-                Consultas por vídeo com médicos qualificados, receitas digitais e atendimento 24h — tudo em um só lugar.
+              <p className="text-base text-white/70 leading-relaxed max-w-md">
+                Consultas por vídeo com médicos qualificados, receitas digitais e atendimento 24h.
               </p>
 
-              <div className="mt-10 space-y-4">
+              <div className="mt-8 space-y-3">
                 {[
-                  "Médicos certificados pelo CFM",
-                  "Receitas e atestados digitais válidos",
-                  "Dados protegidos por criptografia",
+                  { icon: "🏥", label: "Médicos certificados pelo CFM" },
+                  { icon: "📋", label: "Receitas e atestados digitais válidos" },
+                  { icon: "🔒", label: "Dados protegidos pela LGPD" },
                 ].map((item, i) => (
                   <motion.div
-                    key={item}
+                    key={item.label}
                     initial={{ opacity: 0, x: -16 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 + i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                    transition={{ delay: 0.6 + i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                     className="flex items-center gap-3"
                   >
-                    <div className="w-6 h-6 rounded-full bg-white/15 flex items-center justify-center shrink-0">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground/90" />
+                    <div className="w-8 h-8 rounded-xl bg-white/15 flex items-center justify-center shrink-0 text-base border border-white/10">
+                      {item.icon}
                     </div>
-                    <span className="text-sm text-primary-foreground/80 font-medium">{item}</span>
+                    <span className="text-sm text-white/80 font-medium">{item.label}</span>
                   </motion.div>
                 ))}
               </div>
@@ -246,17 +272,33 @@ const Auth = () => {
 
       {/* ── Right panel — form ── */}
       <div className="flex-1 flex flex-col min-h-screen">
-        {/* Mobile gradient header */}
-        <div className="lg:hidden bg-gradient-to-br from-primary to-secondary px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-8 relative overflow-hidden">
+        {/* Mobile header with Pingo + logo */}
+        <div className="lg:hidden bg-gradient-to-br from-primary to-secondary px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-6 relative overflow-hidden">
           <div className="absolute top-[-30%] right-[-20%] w-[200px] h-[200px] rounded-full bg-white/[0.06] blur-[60px]" />
           <Link to="/" className="relative z-10 inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
-          <div className="relative z-10 flex items-center gap-3">
-            <img src={logo} alt="AloClinica" className="w-12 h-12 rounded-xl shadow-lg" />
+          <div className="relative z-10 flex items-center gap-4">
+            {/* Pingo mini on mobile */}
+            <motion.img
+              src={mascotWave}
+              alt="Pingo"
+              className="w-20 h-20 object-contain drop-shadow-lg select-none shrink-0"
+              initial={{ opacity: 0, scale: 0.6 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            />
             <div>
-              <h1 className="text-xl font-bold text-primary-foreground">AloClinica</h1>
-              <p className="text-xs text-primary-foreground/70">Saúde digital</p>
+              <div className="flex items-center gap-2 mb-1">
+                <img src={logo} alt="AloClinica" className="w-8 h-8 rounded-lg shadow" />
+                <h1 className="text-lg font-black text-white tracking-tight">AloClínica</h1>
+              </div>
+              <p className="text-xs text-white/65 leading-relaxed">Telemedicina de excelência</p>
+              <div className="flex gap-2 mt-2">
+                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white/80 text-[9px] font-bold border border-white/20">🏥 CFM</span>
+                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white/80 text-[9px] font-bold border border-white/20">🔒 LGPD</span>
+                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white/80 text-[9px] font-bold border border-white/20">⭐ 4.9</span>
+              </div>
             </div>
           </div>
         </div>
@@ -273,13 +315,18 @@ const Auth = () => {
                   key="success"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-12"
+                  className="text-center py-10"
                 >
-                  <div className="w-20 h-20 mx-auto rounded-full bg-success/10 flex items-center justify-center mb-4">
-                    <CheckCircle2 className="w-10 h-10 text-success" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-foreground mb-2">Conta criada! 🎉</h2>
-                  <p className="text-muted-foreground">Redirecionando para o painel...</p>
+                  <motion.img
+                    src={mascotThumbsup}
+                    alt="Pingo comemorando"
+                    className="w-32 h-32 object-contain mx-auto drop-shadow-xl select-none"
+                    initial={{ opacity: 0, scale: 0.5, y: 20 }}
+                    animate={{ opacity: 1, scale: 1, y: [0, -12, 0] }}
+                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                  <h2 className="text-2xl font-bold text-foreground mt-4 mb-2">Conta criada! 🎉</h2>
+                  <p className="text-muted-foreground text-sm">Redirecionando para o painel...</p>
                 </motion.div>
               ) : mode === "login" ? (
                 <motion.div key="login" {...pageVariants} transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}>

@@ -21,6 +21,7 @@ import type { AdminKpiItem } from "@/types/domain";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { AlertBox } from "./AlertBox";
+import { PingoBanner } from "@/components/mascot/PingoMascot";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -292,6 +293,17 @@ const AdminDashboard = () => {
           { label: "Avaliação média", value: stats.avg_rating > 0 ? stats.avg_rating.toFixed(1) : "—", icon: "⭐", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400" },
           { label: "Laudos emitidos", value: stats.total_laudos, icon: "📋", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueColor: "text-violet-600 dark:text-violet-400", trend: { value: 31 } },
         ]} />
+
+        {/* Pingo Admin Banner */}
+        <PingoBanner
+          variant="admin"
+          mascotSize={88}
+          bgClass="bg-red-50 dark:bg-red-950/20"
+          accentColor="text-red-600 dark:text-red-400"
+          label="Monitoramento ao vivo"
+          title="Plataforma operando normalmente"
+          subtitle="Acompanhe métricas em tempo real do painel abaixo"
+        />
 
         {/* Header actions */}
         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

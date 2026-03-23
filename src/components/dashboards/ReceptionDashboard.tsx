@@ -19,6 +19,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
+import { PingoBanner } from "@/components/mascot/PingoMascot";
 import { TimelineSchedule, ScheduleItem } from "./TimelineSchedule";
 
 const statusLabel: Record<string, string> = {
@@ -217,7 +218,18 @@ const ReceptionDashboard = () => {
 
         {/* ── Timeline ── */}
         {filteredAppts.length > 0 && (
-          <TimelineSchedule
+          
+        {/* Pingo Banner */}
+        <PingoBanner
+          variant="reception"
+          mascotSize={88}
+          bgClass="bg-amber-50 dark:bg-amber-950/20"
+          accentColor="text-amber-600 dark:text-amber-400"
+          label="Recepção"
+          title="Organize a agenda do dia"
+          subtitle="Gerencie agendamentos e filas com facilidade"
+        />
+<TimelineSchedule
             items={filteredAppts.slice(0, 8).map(a => ({
               id: a.id,
               time: format(new Date(a.scheduled_at), "HH:mm"),

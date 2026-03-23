@@ -34,6 +34,7 @@ import { BentoStatCards } from "./BentoStatCards";
 import { HealthMetricsGrid } from "./HealthMetricsGrid";
 import { AlertBox } from "./AlertBox";
 import { DashboardShortcuts } from "./DashboardShortcuts";
+import { PingoBanner, PingoEmpty } from "@/components/mascot/PingoMascot";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada",
@@ -242,21 +243,14 @@ const PatientDashboard = () => {
 
         {/* No appointments */}
         {!loading && upcoming.length === 0 && (
-          <motion.div whileTap={{ scale: 0.98 }}>
-            <Card className="overflow-hidden rounded-2xl border-border/25" style={{ boxShadow: "0 4px 20px rgba(0,0,0,.06)" }}>
-              <CardContent className="p-8 text-center">
-                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/30 ring-4 ring-blue-100 dark:ring-blue-900/20">
-                  <CalendarPlus className="h-7 w-7 text-[#1255C8] dark:text-blue-400" />
-                </div>
-                <h3 className="mb-2 text-[17px] font-extrabold tracking-tight text-foreground">Nenhuma consulta agendada</h3>
-                <p className="mx-auto mb-6 max-w-[220px] text-[13px] leading-relaxed text-muted-foreground">Encontre o médico ideal e agende sua consulta online</p>
-                <Button className="h-12 w-full rounded-xl px-8 text-[13px] font-bold sm:w-auto" style={{ background: "linear-gradient(135deg,#1255C8,#3B7FE8)", boxShadow: "0 6px 20px rgba(18,85,200,.3)" }}
-                  onClick={() => navigate("/dashboard/schedule?role=patient")}>
-                  <Calendar className="mr-2 h-4 w-4" /> Agendar consulta
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <PingoEmpty
+            variant="welcome"
+            size={110}
+            title="Nenhuma consulta agendada"
+            subtitle="Encontre o médico ideal e agende sua consulta online agora mesmo"
+            ctaLabel="Agendar consulta"
+            onCta={() => navigate("/dashboard/schedule?role=patient")}
+          />
         )}
 
         {/* ── Health Metrics ── */}
@@ -305,16 +299,16 @@ const PatientDashboard = () => {
           </div>
         )}
 
-        {/* ── Daily Tip ── */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
-          className="flex items-center gap-3.5 rounded-2xl border border-blue-100 dark:border-blue-900/30 bg-blue-50/60 dark:bg-blue-950/20 p-4"
-        >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30 text-[18px]">💡</div>
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600 dark:text-blue-400">Dica do Dia</p>
-            <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">{todayTip}</p>
-          </div>
-        </motion.div>
+        {/* ── Pingo — Dica do dia ── */}
+        <PingoBanner
+          variant="wave"
+          mascotSize={88}
+          bgClass="bg-blue-50 dark:bg-blue-950/30"
+          accentColor="text-blue-600 dark:text-blue-400"
+          label="Dica do dia"
+          title={todayTip}
+          animateMascot
+        />
 
         {/* ── Shortcuts ── */}
         <DashboardShortcuts shortcuts={shortcuts} />

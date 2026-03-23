@@ -21,6 +21,7 @@ import { PremiumActionGrid } from "./PremiumActionGrid";
 import { LiveQueue, QueueItem } from "./LiveQueue";
 import { GoalProgressCard } from "./GoalProgressCard";
 import { DashboardShortcuts } from "./DashboardShortcuts";
+import { PingoBanner, PingoEmpty } from "@/components/mascot/PingoMascot";
 import { AlertBox } from "./AlertBox";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -142,12 +143,14 @@ const DoctorDashboard = () => {
         )}
 
         {todayAppts.length === 0 && !loading && (
-          <div className="rounded-2xl border border-border/25 bg-card p-8 text-center" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }}>
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 dark:bg-emerald-950/30 text-[24px]">✨</div>
-            <p className="text-[14px] font-bold text-foreground">Agenda livre hoje</p>
-            <p className="mt-1 text-[12px] text-muted-foreground">Nenhuma consulta agendada</p>
-            <Button size="sm" className="mt-4 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700" onClick={() => navigate("/dashboard/availability")}>Configurar horários</Button>
-          </div>
+          <PingoEmpty
+            variant="wave"
+            size={100}
+            title="Agenda livre hoje"
+            subtitle="Nenhuma consulta agendada. Configure seus horários disponíveis."
+            ctaLabel="Configurar horários"
+            onCta={() => navigate("/dashboard/availability")}
+          />
         )}
 
         {/* ── Tabs ── */}
@@ -175,7 +178,19 @@ const DoctorDashboard = () => {
                 ))}
               </div>
             )}
-            {/* Memed card */}
+            {/* Pingo Memed Banner */}
+            <PingoBanner
+              variant="reading"
+              mascotSize={84}
+              bgClass="bg-blue-50 dark:bg-blue-950/30"
+              accentColor="text-blue-600 dark:text-blue-400"
+              label="Receitas Memed"
+              title="Prescreva digitalmente com segurança"
+              subtitle="Base nacional com +60.000 medicamentos integrada"
+              ctaLabel="Acessar Memed"
+              onCta={() => window.open('https://memed.com.br/login','_blank')}
+            />
+            {/* Memed detail card */}
             <div className="rounded-2xl border border-border/25 bg-card p-4" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }}>
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-950/30 text-[20px]">💊</div>

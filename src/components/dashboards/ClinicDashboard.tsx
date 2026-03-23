@@ -19,6 +19,7 @@ import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 import { getClinicNav } from "@/components/clinic/clinicNav";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
+import { PingoBanner } from "@/components/mascot/PingoMascot";
 import { DoctorRanking } from "./DoctorRanking";
 
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--warning))", "hsl(var(--destructive))"];
@@ -204,7 +205,18 @@ const ClinicDashboard = () => {
 
         {/* ── Doctor Ranking ── */}
         {doctorPerformance.length > 0 && (
-          <DoctorRanking
+          
+        {/* Pingo Banner */}
+        <PingoBanner
+          variant="admin"
+          mascotSize={88}
+          bgClass="bg-indigo-50 dark:bg-indigo-950/20"
+          accentColor="text-indigo-600 dark:text-indigo-400"
+          label="Gestão de clínica"
+          title="Bem-vindo ao painel da clínica"
+          subtitle="Acompanhe médicos, consultas e faturamento"
+        />
+<DoctorRanking
             doctors={doctorPerformance.slice(0, 5).map((d, i) => ({
               id: String(i),
               name: d.name,

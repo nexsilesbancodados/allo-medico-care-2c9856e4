@@ -12,6 +12,7 @@ import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { PrescriptionFinder } from "./PrescriptionFinder";
 import { AlertBox } from "./AlertBox";
+import { PingoBanner } from "@/components/mascot/PingoMascot";
 
 const getPartnerNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard?role=partner", icon: <TrendingUp className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -75,7 +76,18 @@ const PartnerDashboard = () => {
           </TabsList>
 
           <TabsContent value="validate" className="mt-5">
-            <PrescriptionFinder onValidated={fetchValidations} />
+            
+        {/* Pingo Banner */}
+        <PingoBanner
+          variant="partner"
+          mascotSize={88}
+          bgClass="bg-teal-50 dark:bg-teal-950/20"
+          accentColor="text-teal-600 dark:text-teal-400"
+          label="Portal Parceiro"
+          title="Valide receitas com segurança"
+          subtitle="Consulte e dispense receitas digitais autenticadas"
+        />
+<PrescriptionFinder onValidated={fetchValidations} />
           </TabsContent>
 
           <TabsContent value="history" className="mt-5">

@@ -21,6 +21,7 @@ import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
+import { PingoBanner } from "@/components/mascot/PingoMascot";
 
 const getSupportNav = (active: string) => [
   { label: "Helpdesk", href: "/dashboard?role=support", icon: <Activity className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -326,7 +327,18 @@ const SupportDashboard = () => {
         )}
 
         <motion.div variants={fadeUp}>
-          <Tabs defaultValue={defaultTab}>
+          
+        {/* Pingo Banner */}
+        <PingoBanner
+          variant="support"
+          mascotSize={88}
+          bgClass="bg-amber-50 dark:bg-amber-950/20"
+          accentColor="text-amber-700 dark:text-amber-400"
+          label="Helpdesk"
+          title="Monitore usuários e logs"
+          subtitle="Acompanhe erros críticos em tempo real"
+        />
+<Tabs defaultValue={defaultTab}>
             <TabsList className="bg-muted/50 border border-border/40 h-10 rounded-xl p-1 w-full sm:w-auto flex-wrap">
               <TabsTrigger value="inbox" className="flex-1 sm:flex-none text-xs gap-1.5 rounded-lg data-[state=active]:bg-card data-[state=active]:shadow-sm">
                 <Inbox className="w-3.5 h-3.5" /> Inbox

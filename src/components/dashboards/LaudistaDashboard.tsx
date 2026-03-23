@@ -22,9 +22,11 @@ import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { AlertBox } from "./AlertBox";
+import { PingoBanner } from "@/components/mascot/PingoMascot";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { AlertBox } from "./AlertBox";
+import { PingoBanner } from "@/components/mascot/PingoMascot";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } } };
@@ -213,6 +215,18 @@ const LaudistaDashboard = () => {
             </Card>
           </motion.div>
         )}
+
+
+        {/* Pingo Banner */}
+        <PingoBanner
+          variant="reading"
+          mascotSize={88}
+          bgClass="bg-blue-50 dark:bg-blue-950/20"
+          accentColor="text-blue-600 dark:text-blue-400"
+          label="Telelaudo"
+          title="Analise exames com precisão"
+          subtitle="Fila organizada por prioridade — urgentes no topo"
+        />
 
         {/* Recent Exams Queue */}
         <motion.div variants={fadeUp}>
