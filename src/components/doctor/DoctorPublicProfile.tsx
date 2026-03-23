@@ -45,7 +45,7 @@ const DoctorPublicProfile = () => {
     const { data: doc } = await supabase
       .from("doctor_profiles")
       .select("id, bio, consultation_price, crm, crm_state, rating, total_reviews, education, experience_years, user_id")
-      .eq("id", doctorId)
+      .eq("id", doctorId!)
       .eq("is_approved", true)
       .single();
 

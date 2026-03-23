@@ -288,7 +288,7 @@ const PatientDashboard = () => {
                   <div className="text-[11px]">
                     <p className="font-semibold text-foreground">{ra.doctor_name}</p>
                     <p className="text-muted-foreground mt-0.5">
-                      {daysRemaining <= 3 ? <span className="font-semibold text-red-500">⚠️ {daysRemaining}d restantes</span> : `Até ${format(new Date(ra.return_deadline), "dd/MM")} (${daysRemaining}d)`}
+                      {daysRemaining <= 3 ? <span className="font-semibold text-red-500">⚠️ {daysRemaining}d restantes</span> : `Até ${format(new Date(ra.return_deadline ?? new Date()), "dd/MM")} (${daysRemaining}d)`}
                     </p>
                   </div>
                   <Button size="sm" className="h-8 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[10.5px] font-bold"

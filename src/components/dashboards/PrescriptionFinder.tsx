@@ -52,7 +52,7 @@ export function PrescriptionFinder({ onValidated }: { onValidated?: () => void }
     if (!found) return;
     setDispensing(true);
     try {
-      await supabase.from("prescription_validations").insert({ prescription_id: found.id, validated_by: "partner", status: "dispensed", notes: "Dispensado pelo parceiro" });
+      await supabase.from("prescription_validations").insert([{ prescription_id: found.id, validated_by: "partner", status: "dispensed", notes: "Dispensado pelo parceiro" }]);
       toast.success("Receita dispensada com sucesso!");
       setFound(null); setCode("");
       onValidated?.();

@@ -99,7 +99,7 @@ const DoctorConsultations = () => {
 
     setAppointments(data.map(a => ({
       ...a,
-      patient_name: a.patient_id ? (pMap.get(a.patient_id ?? "") ?? "Paciente") : (gMap.get(a.guest_patient_id) ?? "Paciente Avulso"),
+      patient_name: a.patient_id ? (pMap.get(a.patient_id ?? "") ?? "Paciente") : (gMap.get(a.guest_patient_id ?? "") ?? "Paciente Avulso"),
     })));
     setLoading(false);
   };
