@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,8 @@ import heroCartao from "@/assets/hero-cartao.png";
 import cardFamily from "@/assets/card-family-telemedicine.jpg";
 import cardClube from "@/assets/card-clube-vantagens.jpg";
 import cardPremium from "@/assets/card-premium-render.png";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
+import { getPatientNav } from "@/components/patient/patientNav";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
