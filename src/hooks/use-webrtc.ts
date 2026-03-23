@@ -18,8 +18,24 @@ const STUN_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun2.l.google.com:19302" },
 ];
 
-// Placeholder para TURN futuro (ex: coturn, OpenRelay)
-const TURN_SERVERS: RTCIceServer[] = [];
+// TURN gratuito via OpenRelay (Metered.ca) — garante conectividade em NATs restritivos
+const TURN_SERVERS: RTCIceServer[] = [
+  {
+    urls: "turn:openrelay.metered.ca:80",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+  {
+    urls: "turn:openrelay.metered.ca:443",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+  {
+    urls: "turn:openrelay.metered.ca:443?transport=tcp",
+    username: "openrelayproject",
+    credential: "openrelayproject",
+  },
+];
 
 const ICE_CONFIG: RTCConfiguration = {
   iceServers: [...STUN_SERVERS, ...TURN_SERVERS],
