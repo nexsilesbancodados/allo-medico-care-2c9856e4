@@ -93,10 +93,10 @@ const PatientDashboard = () => {
   const hoursUntilNext = nextAppt ? Math.max(0, Math.round((new Date(nextAppt.scheduled_at).getTime() - Date.now()) / 3600000)) : null;
 
   const quickActions = [
-    { label: "Agendar", icon: Calendar, path: "/dashboard/schedule?role=patient", color: "text-primary", bg: "bg-primary/10", ring: "ring-primary/20" },
-    { label: "Urgência", icon: Zap, path: "/dashboard/urgent-care?role=patient", color: "text-destructive", bg: "bg-destructive/10", ring: "ring-destructive/20" },
-    { label: "Exames", icon: FileCheck, path: "/dashboard/patient/exam-results?role=patient", color: "text-secondary", bg: "bg-secondary/10", ring: "ring-secondary/20" },
-    { label: "Documentos", icon: FolderLock, path: "/dashboard/patient/documents?role=patient", color: "text-warning", bg: "bg-warning/10", ring: "ring-warning/20" },
+    { label: "Agendar", icon: Calendar, path: "/dashboard/schedule?role=patient", gradient: "from-[hsl(210,90%,50%)] to-[hsl(210,90%,40%)]" },
+    { label: "Urgência", icon: Zap, path: "/dashboard/urgent-care?role=patient", gradient: "from-[hsl(0,80%,55%)] to-[hsl(350,75%,48%)]" },
+    { label: "Exames", icon: FileCheck, path: "/dashboard/patient/exam-results?role=patient", gradient: "from-[hsl(160,55%,45%)] to-[hsl(170,60%,38%)]" },
+    { label: "Documentos", icon: FolderLock, path: "/dashboard/patient/documents?role=patient", gradient: "from-[hsl(270,60%,55%)] to-[hsl(280,55%,45%)]" },
   ];
 
   const shortcuts = [
