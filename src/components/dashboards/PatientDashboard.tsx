@@ -10,11 +10,11 @@ import { getPatientNav } from "@/components/patient/patientNav";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Calendar, FileText, Heart, Video, Clock, Zap, Upload,
+  Calendar, FileText, Heart, Video, Clock, Zap,
   CheckCircle2, AlertCircle, Star, Activity, RefreshCw,
   Gift, ClipboardList, Stethoscope, ChevronRight,
   Pill, User, CreditCard, ArrowRight, Sparkles, CalendarPlus, Shield, Flame,
-  FolderLock, FileCheck, MessageCircle, TrendingUp, Sun, Moon, CloudSun
+  FolderLock, FileCheck, MessageCircle, TrendingUp, Sun, Moon, CloudSun, Upload
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import MedicalHistoryExport from "@/components/patient/MedicalHistoryExport";
@@ -27,8 +27,12 @@ import { usePatientStats, usePatientUpcoming, useReturnAppointments, useFavorite
 import { useActiveSubscription, useUserCredits } from "@/hooks/useProfile";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import { DashboardHero } from "./DashboardHero";
-import { DashboardQuickActions } from "./DashboardQuickActions";
+import { PremiumHero } from "./PremiumHero";
+import { WalletCard } from "./WalletCard";
+import { PremiumActionGrid } from "./PremiumActionGrid";
+import { BentoStatCards } from "./BentoStatCards";
+import { HealthMetricsGrid } from "./HealthMetricsGrid";
+import { AlertBox } from "./AlertBox";
 import { DashboardShortcuts } from "./DashboardShortcuts";
 
 const statusLabel: Record<string, string> = {
@@ -62,18 +66,13 @@ const PatientDashboard = () => {
 
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
-      .channel("patient-updates")
+    const channel = supabase.channel("patient-updates")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "appointments", filter: `patient_id=eq.${user.id}` }, () => {
         queryClient.invalidateQueries({ queryKey: ["patient-upcoming-enriched"] });
         queryClient.invalidateQueries({ queryKey: ["patient-dashboard-stats"] });
       })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "appointments", filter: `patient_id=eq.${user.id}` }, () => {
         queryClient.invalidateQueries({ queryKey: ["patient-upcoming-enriched"] });
-        queryClient.invalidateQueries({ queryKey: ["patient-dashboard-stats"] });
-      })
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => {
-        queryClient.invalidateQueries({ queryKey: ["notifications"] });
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
@@ -103,30 +102,30 @@ const PatientDashboard = () => {
   const greetData = greeting();
 
   const healthTips = [
-    "💧 Beba pelo menos 2L de água hoje",
-    "🏃 30 min de exercício reduz ansiedade em 40%",
-    "😴 Dormir 7-8h melhora a imunidade",
-    "🍎 Inclua 5 porções de frutas e vegetais",
-    "🧘 5 min de respiração profunda reduz o cortisol",
-    "☀️ 15 min de sol ajudam na vitamina D",
-    "🫀 Monitore sua pressão regularmente",
+    "Beba pelo menos 2L de água hoje para manter a hidratação",
+    "30 min de exercício reduz ansiedade em 40% — vai lá!",
+    "Dormir 7-8h por noite fortalece o sistema imunológico",
+    "Inclua 5 porções de frutas e vegetais na sua alimentação",
+    "5 min de respiração profunda reduz o cortisol significativamente",
+    "15 min de sol diário ajudam na produção de vitamina D",
+    "Monitore sua pressão arterial regularmente",
   ];
   const todayTip = healthTips[new Date().getDay() % healthTips.length];
 
-  const quickActions = [
-    { label: "Agendar", icon: <Calendar className="w-6 h-6 sm:w-7 sm:h-7" />, path: "/dashboard/schedule?role=patient", gradient: "from-[hsl(210,90%,50%)] to-[hsl(210,90%,40%)]" },
-    { label: "Urgência", icon: <Zap className="w-6 h-6 sm:w-7 sm:h-7" />, path: "/dashboard/urgent-care?role=patient", gradient: "from-[hsl(0,80%,55%)] to-[hsl(350,75%,48%)]" },
-    { label: "Exames", icon: <FileCheck className="w-6 h-6 sm:w-7 sm:h-7" />, path: "/dashboard/patient/exam-results?role=patient", gradient: "from-[hsl(160,55%,45%)] to-[hsl(170,60%,38%)]" },
-    { label: "Documentos", icon: <FolderLock className="w-6 h-6 sm:w-7 sm:h-7" />, path: "/dashboard/patient/documents?role=patient", gradient: "from-[hsl(270,60%,55%)] to-[hsl(280,55%,45%)]" },
+  const actions = [
+    { label: "Agendar", icon: "📅", path: "/dashboard/schedule?role=patient", gradient: "bg-gradient-to-br from-[#1255C8] to-[#3B7FE8]", shadow: "0 6px 20px rgba(18,85,200,.35)" },
+    { label: "Urgência", icon: "⚡", path: "/dashboard/urgent-care?role=patient", gradient: "bg-gradient-to-br from-[#C41A1A] to-[#EF4444]", shadow: "0 6px 20px rgba(196,26,26,.35)" },
+    { label: "Exames", icon: "🧪", path: "/dashboard/patient/exam-results?role=patient", gradient: "bg-gradient-to-br from-[#0A6B47] to-[#12A36E]", shadow: "0 6px 20px rgba(10,107,71,.3)" },
+    { label: "Docs", icon: "🔒", path: "/dashboard/patient/documents?role=patient", gradient: "bg-gradient-to-br from-[#5B21B6] to-[#7C3AED]", shadow: "0 6px 20px rgba(91,33,182,.3)" },
+    { label: "Receitas", icon: "💊", path: "/dashboard/prescription-renewal?role=patient", gradient: "bg-gradient-to-br from-[#B05000] to-[#D97706]", shadow: "0 6px 20px rgba(176,80,0,.3)" },
   ];
 
   const shortcuts = [
-    { label: "Prontuário", description: "Histórico médico completo", icon: <ClipboardList className="w-[18px] h-[18px]" />, path: "/dashboard/medical-records?role=patient", iconBg: "bg-primary/10", iconColor: "text-primary" },
-    { label: "Minha Saúde", description: "Métricas e bem-estar", icon: <Heart className="w-[18px] h-[18px]" />, path: "/dashboard/patient/health?role=patient", iconBg: "bg-destructive/10", iconColor: "text-destructive" },
-    { label: "Receitas", description: "Renovar prescrições", icon: <Pill className="w-[18px] h-[18px]" />, path: "/dashboard/prescription-renewal?role=patient", iconBg: "bg-secondary/10", iconColor: "text-secondary" },
-    { label: "Pagamentos", description: "Histórico financeiro", icon: <CreditCard className="w-[18px] h-[18px]" />, path: "/dashboard/payment-history?role=patient", iconBg: "bg-warning/10", iconColor: "text-warning" },
-    { label: "Chat de Suporte", description: "Fale com a equipe", icon: <MessageCircle className="w-[18px] h-[18px]" />, path: "/dashboard/chat?role=patient", iconBg: "bg-primary/10", iconColor: "text-primary" },
-    { label: "Perfil", description: "Dados pessoais", icon: <User className="w-[18px] h-[18px]" />, path: "/dashboard/profile?role=patient", iconBg: "bg-muted", iconColor: "text-muted-foreground" },
+    { label: "Prontuário", description: "Histórico médico completo", icon: <ClipboardList className="w-[17px] h-[17px]" />, path: "/dashboard/medical-records?role=patient", iconBg: "bg-blue-50 dark:bg-blue-950/30", iconColor: "text-blue-600 dark:text-blue-400" },
+    { label: "Minha Saúde", description: "Métricas e bem-estar", icon: <Heart className="w-[17px] h-[17px]" />, path: "/dashboard/patient/health?role=patient", iconBg: "bg-red-50 dark:bg-red-950/30", iconColor: "text-red-500" },
+    { label: "Pagamentos", description: "Histórico financeiro", icon: <CreditCard className="w-[17px] h-[17px]" />, path: "/dashboard/payment-history?role=patient", iconBg: "bg-amber-50 dark:bg-amber-950/30", iconColor: "text-amber-600 dark:text-amber-400" },
+    { label: "Chat de Suporte", description: "Fale com a equipe", icon: <MessageCircle className="w-[17px] h-[17px]" />, path: "/dashboard/chat?role=patient", iconBg: "bg-blue-50 dark:bg-blue-950/30", iconColor: "text-blue-600 dark:text-blue-400" },
+    { label: "Perfil", description: "Dados pessoais", icon: <User className="w-[17px] h-[17px]" />, path: "/dashboard/profile?role=patient", iconBg: "bg-muted", iconColor: "text-muted-foreground" },
   ];
 
   return (
@@ -135,23 +134,34 @@ const PatientDashboard = () => {
 
       <div className="mx-auto w-full max-w-5xl space-y-5 pb-24">
 
-        {/* ── Hero ── */}
-        <DashboardHero
-          gradient="from-[hsl(210,90%,45%)] via-[hsl(210,85%,50%)] to-[hsl(195,80%,48%)]"
-          greeting={greetData.text}
-          greetIcon={greetData.icon}
+        {/* ── Premium Hero ── */}
+        <PremiumHero
+          gradient="bg-gradient-to-br from-[#0A2A7A] via-[#1255C8] to-[#1E6DD4]"
+          orb1Color="radial-gradient(#3B7FE8, transparent)"
+          orb2Color="radial-gradient(#10B981, transparent)"
+          tag={`${greetData.text} · ${format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}`}
+          tagIcon={greetData.icon}
           name={profile?.first_name || "Paciente"}
-          subtitle={format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+          badge={activeSub ? { label: "Plano Ativo · Premium" } : undefined}
           kpis={[
             { label: "Consultas", value: stats?.total ?? 0, icon: <Calendar className="w-4 h-4" /> },
             { label: "Receitas", value: stats?.prescriptions ?? 0, icon: <FileText className="w-4 h-4" /> },
             { label: "Documentos", value: stats?.documents ?? 0, icon: <Upload className="w-4 h-4" /> },
+            { label: "Créditos", value: `R$${credits}`, icon: <Sparkles className="w-4 h-4" /> },
           ]}
           loading={loading}
           onRefresh={handleRefresh}
           refreshing={refreshing}
-          extra={<MedicalHistoryExport />}
-          badge={activeSub ? { label: "Plano Ativo ✓", color: "bg-white/20 text-white backdrop-blur-md" } : undefined}
+          topRight={<MedicalHistoryExport />}
+        />
+
+        {/* ── Wallet Card ── */}
+        <WalletCard
+          name={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() || "Paciente"}
+          cardNumber="ALO · XXXX · XXXX · 0001"
+          validUntil="12/2027"
+          planName={(activeSub as Record<string, unknown>)?.plans ? ((activeSub as Record<string, unknown>).plans as Record<string, unknown>)?.name as string : "Plano Básico"}
+          onClick={() => navigate("/dashboard/discount-card?role=patient")}
         />
 
         {/* ── Live consultation ── */}
@@ -161,130 +171,89 @@ const PatientDashboard = () => {
           </SectionErrorBoundary>
         )}
 
-        <SectionErrorBoundary fallbackTitle="Erro no banner">
-          <CheckoutRecoveryBanner />
-        </SectionErrorBoundary>
-        <SectionErrorBoundary fallbackTitle="Erro no banner">
-          <UpsellBanner />
-        </SectionErrorBoundary>
+        <SectionErrorBoundary fallbackTitle="Erro no banner"><CheckoutRecoveryBanner /></SectionErrorBoundary>
+        <SectionErrorBoundary fallbackTitle="Erro no banner"><UpsellBanner /></SectionErrorBoundary>
 
         {/* ── Quick Actions ── */}
-        <DashboardQuickActions actions={quickActions} />
+        <PremiumActionGrid actions={actions} title="Ações Rápidas" />
+
+        {/* ── Bento Stats ── */}
+        <BentoStatCards
+          loading={loading}
+          stats={[
+            { label: "Total de consultas", value: stats?.total ?? 0, icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400", trend: { value: 12 } },
+            { label: "Receitas emitidas", value: stats?.prescriptions ?? 0, icon: "💊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400", trend: { value: 5 } },
+            { label: "Documentos", value: stats?.documents ?? 0, icon: "📂", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueColor: "text-violet-600 dark:text-violet-400" },
+            { label: "Créditos disponíveis", value: `R$${credits}`, icon: "✨", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-600 dark:text-emerald-400" },
+          ]}
+        />
 
         {/* ── Next Appointment ── */}
         {!loading && nextAppt && (
           <section>
-            <div className="mb-3 flex items-center justify-between px-1">
-              <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-                <Calendar className="w-4 h-4 text-primary" /> Próximas Consultas
-              </h2>
+            <div className="mb-2.5 flex items-center justify-between">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">Próximas Consultas</h2>
               <Button variant="link" size="sm" className="h-auto gap-1 p-0 text-[11px] font-semibold text-primary" onClick={() => navigate("/dashboard/appointments?role=patient")}>
-                Ver tudo <ArrowRight className="w-3 h-3" />
+                Ver todas <ArrowRight className="w-3 h-3" />
               </Button>
             </div>
-
-            <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
-              <motion.div
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.35 }}
+            <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.98 }}>
+              <Card className={`cursor-pointer overflow-hidden rounded-2xl border-border/25 transition-all duration-200 hover:shadow-xl ${daysUntilNext === 0 ? "ring-2 ring-blue-500/20" : ""}`}
+                style={{ boxShadow: "0 4px 20px rgba(0,0,0,.06)" }}
+                onClick={() => navigate("/dashboard/appointments?role=patient")}
               >
-                <Card
-                  className={`cursor-pointer overflow-hidden rounded-2xl border-border/30 transition-all duration-200 hover:shadow-lg active:scale-[0.98] ${daysUntilNext === 0 ? "border-primary/30 ring-1 ring-primary/10 shadow-md shadow-primary/8" : ""}`}
-                  onClick={() => navigate("/dashboard/appointments?role=patient")}
-                >
-                  <CardContent className="p-0">
-                    <div className="flex items-stretch">
-                      <div className={`flex w-16 shrink-0 flex-col items-center justify-center py-4 ${daysUntilNext === 0 ? "bg-primary text-primary-foreground" : "bg-muted/40 text-muted-foreground"}`}>
-                        <span className="text-[9px] font-bold uppercase leading-none opacity-70">{format(new Date(nextAppt.scheduled_at), "MMM", { locale: ptBR })}</span>
-                        <span className="mt-0.5 text-2xl font-black leading-none">{format(new Date(nextAppt.scheduled_at), "dd")}</span>
-                        <span className="mt-1 text-[10px] font-semibold opacity-70">{format(new Date(nextAppt.scheduled_at), "EEE", { locale: ptBR })}</span>
-                      </div>
-                      <div className="flex flex-1 items-center gap-3 p-4">
-                        <div className="min-w-0 flex-1">
-                          <h3 className="truncate text-sm font-bold text-foreground">{(nextAppt as Record<string, unknown>).doctor_name as string}</h3>
-                          <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
-                            <Clock className="w-3 h-3 shrink-0" />
-                            {format(new Date(nextAppt.scheduled_at), "HH:mm")} · {nextAppt.duration_minutes || 30}min
+                <CardContent className="p-0">
+                  <div className="flex items-stretch">
+                    <div className={`flex w-[60px] shrink-0 flex-col items-center justify-center py-4 ${daysUntilNext === 0 ? "bg-gradient-to-b from-[#1255C8] to-[#3B7FE8] text-white" : "bg-gradient-to-b from-muted/50 to-muted/30 text-muted-foreground"}`}>
+                      <span className="text-[8px] font-bold uppercase tracking-wider opacity-70">{format(new Date(nextAppt.scheduled_at), "MMM", { locale: ptBR })}</span>
+                      <span className="text-[26px] font-black leading-none">{format(new Date(nextAppt.scheduled_at), "dd")}</span>
+                      <span className="text-[9px] font-semibold opacity-70">{format(new Date(nextAppt.scheduled_at), "EEE", { locale: ptBR })}</span>
+                    </div>
+                    <div className="flex flex-1 items-center gap-3 px-4 py-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13px] font-bold text-foreground">{(nextAppt as Record<string, unknown>).doctor_name as string}</p>
+                        <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                          <Clock className="h-3 w-3" />{format(new Date(nextAppt.scheduled_at), "HH:mm")} · {nextAppt.duration_minutes || 30}min
+                        </p>
+                        {daysUntilNext === 0 && (
+                          <p className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                            <Flame className="h-3 w-3" /> Hoje em {hoursUntilNext}h
                           </p>
-                          {daysUntilNext === 0 && (
-                            <p className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-primary">
-                              <Flame className="w-3 h-3" /> Hoje em {hoursUntilNext}h
-                            </p>
-                          )}
-                          {daysUntilNext !== null && daysUntilNext > 0 && (
-                            <p className="mt-1.5 text-[11px] text-muted-foreground/60">Em {daysUntilNext} dia{daysUntilNext > 1 ? "s" : ""}</p>
-                          )}
-                        </div>
-                        {daysUntilNext === 0 ? (
-                          <Button
-                            size="sm"
-                            className="h-10 shrink-0 rounded-xl bg-primary px-4 text-xs font-bold text-primary-foreground shadow-lg shadow-primary/20"
-                            onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/consultation/${nextAppt.id}`); }}
-                          >
-                            <Video className="mr-1.5 w-4 h-4" /> Entrar
-                          </Button>
-                        ) : (
-                          <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground/25" />
+                        )}
+                        {daysUntilNext !== null && daysUntilNext > 0 && (
+                          <p className="mt-1.5 text-[10px] text-muted-foreground/60">Em {daysUntilNext} dia{daysUntilNext > 1 ? "s" : ""}</p>
                         )}
                       </div>
+                      {daysUntilNext === 0 ? (
+                        <Button size="sm" className="h-10 shrink-0 rounded-xl bg-gradient-to-br from-[#1255C8] to-[#3B7FE8] px-4 text-[11px] font-bold text-white" style={{ boxShadow: "0 4px 14px rgba(18,85,200,.35)" }}
+                          onClick={e => { e.stopPropagation(); navigate(`/dashboard/consultation/${nextAppt.id}`); }}>
+                          <Video className="mr-1.5 h-3.5 w-3.5" /> Entrar
+                        </Button>
+                      ) : (
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/25" />
+                      )}
                     </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-              {upcoming.slice(1, 3).map((a: { id: string; scheduled_at: string; status: string; doctor_name: string; duration_minutes?: number | null }) => (
-                <Card key={a.id} className="cursor-pointer overflow-hidden rounded-xl border-border/30 transition-all duration-150 hover:shadow-sm active:scale-[0.98]" onClick={() => navigate("/dashboard/appointments?role=patient")}>
-                  <CardContent className="p-3 sm:p-3.5">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-lg bg-muted/30 text-muted-foreground">
-                        <span className="text-[8px] font-bold uppercase leading-none">{format(new Date(a.scheduled_at), "MMM", { locale: ptBR })}</span>
-                        <span className="text-sm font-bold leading-none">{format(new Date(a.scheduled_at), "dd")}</span>
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h4 className="truncate text-[13px] font-semibold text-foreground">{a.doctor_name}</h4>
-                        <p className="text-xs text-muted-foreground">{format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min</p>
-                      </div>
-                      <span className="shrink-0 rounded-md bg-muted/30 px-2 py-0.5 text-[10px] font-medium text-muted-foreground/50">
-                        {statusLabel[a.status] ?? a.status}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
           </section>
         )}
 
-        {/* No appointments CTA */}
+        {/* No appointments */}
         {!loading && upcoming.length === 0 && (
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="overflow-hidden rounded-2xl border border-border/30 shadow-sm">
-              <CardContent className="p-0">
-                <div className="relative bg-card p-8 text-center">
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent" />
-                  <div className="relative z-10">
-                    <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/8 ring-4 ring-primary/[0.04]">
-                      <CalendarPlus className="h-7 w-7 text-primary" />
-                    </div>
-                    <h3 className="mb-1.5 text-lg font-extrabold tracking-tight text-foreground">Nenhuma consulta agendada</h3>
-                    <p className="mx-auto mb-6 max-w-[240px] text-sm leading-relaxed text-muted-foreground">Encontre o médico ideal e agende sua consulta</p>
-                    <Button className="h-12 w-full rounded-xl bg-primary px-8 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/15 sm:w-auto" onClick={() => navigate("/dashboard/schedule?role=patient")}>
-                      <Calendar className="mr-2 w-4 h-4" /> Agendar consulta
-                    </Button>
-                    <div className="mt-5 flex items-center justify-center gap-5">
-                      {[
-                        { icon: <Shield className="w-3.5 h-3.5 text-secondary" />, label: "Seguro" },
-                        { icon: <Video className="w-3.5 h-3.5 text-primary" />, label: "HD" },
-                        { icon: <Star className="w-3.5 h-3.5 text-warning" />, label: "4.9★" },
-                      ].map((item, i) => (
-                        <span key={i} className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground/60">
-                          {item.icon} {item.label}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
+          <motion.div whileTap={{ scale: 0.98 }}>
+            <Card className="overflow-hidden rounded-2xl border-border/25" style={{ boxShadow: "0 4px 20px rgba(0,0,0,.06)" }}>
+              <CardContent className="p-8 text-center">
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-950/30 ring-4 ring-blue-100 dark:ring-blue-900/20">
+                  <CalendarPlus className="h-7 w-7 text-[#1255C8] dark:text-blue-400" />
                 </div>
+                <h3 className="mb-2 text-[17px] font-extrabold tracking-tight text-foreground">Nenhuma consulta agendada</h3>
+                <p className="mx-auto mb-6 max-w-[220px] text-[13px] leading-relaxed text-muted-foreground">Encontre o médico ideal e agende sua consulta online</p>
+                <Button className="h-12 w-full rounded-xl px-8 text-[13px] font-bold sm:w-auto" style={{ background: "linear-gradient(135deg,#1255C8,#3B7FE8)", boxShadow: "0 6px 20px rgba(18,85,200,.3)" }}
+                  onClick={() => navigate("/dashboard/schedule?role=patient")}>
+                  <Calendar className="mr-2 h-4 w-4" /> Agendar consulta
+                </Button>
               </CardContent>
             </Card>
           </motion.div>
@@ -293,186 +262,62 @@ const PatientDashboard = () => {
         {/* ── Health Metrics ── */}
         {healthMetrics.length > 0 && (
           <section>
-            <div className="mb-3 flex items-center justify-between px-1">
-              <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-                <Activity className="w-4 h-4 text-primary" /> Métricas de Saúde
-              </h2>
+            <div className="mb-2.5 flex items-center justify-between">
+              <h2 className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">Métricas de Saúde</h2>
               <Button variant="link" size="sm" className="h-auto gap-1 p-0 text-[11px] font-semibold text-primary" onClick={() => navigate("/dashboard/patient/health?role=patient")}>
                 Ver tudo <ArrowRight className="w-3 h-3" />
               </Button>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-2.5 lg:grid-cols-4">
-              {healthMetrics.map((m: { type: string; value: number; unit: string; measured_at: string }) => {
-                const typeConfig: Record<string, { icon: string; color: string; bg: string; label: string }> = {
-                  "pressao_arterial": { icon: "🫀", color: "text-destructive", bg: "bg-destructive/8", label: "Pressão" },
-                  "peso": { icon: "⚖️", color: "text-primary", bg: "bg-primary/8", label: "Peso" },
-                  "glicemia": { icon: "🩸", color: "text-warning", bg: "bg-warning/8", label: "Glicemia" },
-                  "frequencia_cardiaca": { icon: "💓", color: "text-destructive", bg: "bg-destructive/8", label: "Freq. Card." },
-                  "temperatura": { icon: "🌡️", color: "text-warning", bg: "bg-warning/8", label: "Temp." },
-                  "saturacao": { icon: "🫁", color: "text-secondary", bg: "bg-secondary/8", label: "SpO₂" },
-                };
-                const cfg = typeConfig[m.type] ?? { icon: "📊", color: "text-muted-foreground", bg: "bg-muted/40", label: m.type };
-                return (
-                  <motion.div
-                    key={m.type}
-                    whileHover={{ y: -2 }}
-                    whileTap={{ scale: 0.97 }}
-                    className={`cursor-pointer rounded-2xl border border-border/30 p-3.5 transition-all duration-150 hover:border-primary/20 hover:shadow-md ${cfg.bg}`}
-                    onClick={() => navigate("/dashboard/patient/health?role=patient")}
-                  >
-                    <span className="text-lg">{cfg.icon}</span>
-                    <p className={`mt-2 text-xl font-extrabold ${cfg.color}`}>
-                      {m.value}
-                      <span className="ml-0.5 text-[10px] font-normal text-muted-foreground/60">{m.unit}</span>
-                    </p>
-                    <p className="text-[10px] font-medium text-muted-foreground/60">{cfg.label}</p>
-                  </motion.div>
-                );
-              })}
-            </div>
+            <HealthMetricsGrid metrics={healthMetrics as { type: string; value: number; unit: string }[]} />
           </section>
         )}
 
-        {/* ── Subscription ── */}
-        {activeSub && (() => {
-          const daysLeft = (activeSub as Record<string, unknown>).expires_at ? differenceInDays(new Date((activeSub as Record<string, unknown>).expires_at as string), new Date()) : null;
-          const isExpiringSoon = daysLeft !== null && daysLeft <= 7;
-          return (
-            <motion.div
-              whileTap={{ scale: 0.98 }}
-              className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3.5 transition-all duration-150 hover:shadow-sm ${isExpiringSoon ? "border-warning/25 bg-warning/[0.04]" : "border-secondary/25 bg-secondary/[0.04]"}`}
-              onClick={() => navigate(isExpiringSoon ? `/dashboard/plans?action=renew&plan_id=${(activeSub as Record<string, unknown>).plan_id}` : "/dashboard/payment-history?role=patient")}
-            >
-              {isExpiringSoon ? <AlertCircle className="h-5 w-5 shrink-0 text-warning" /> : <CheckCircle2 className="h-5 w-5 shrink-0 text-secondary" />}
-              <div className="min-w-0 flex-1">
-                <p className={`text-sm font-semibold ${isExpiringSoon ? "text-warning" : "text-secondary"}`}>
-                  {isExpiringSoon ? `Plano expira em ${daysLeft}d — Renovar` : "Plano ativo"}
-                </p>
-                <p className="truncate text-xs text-muted-foreground/60">{((activeSub as Record<string, unknown>).plans as Record<string, unknown>)?.name as string ?? "Assinatura"}</p>
-              </div>
-              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/30" />
-            </motion.div>
-          );
-        })()}
+        {/* ── Alerts ── */}
+        {!loading && (stats?.total ?? 0) > 0 && upcoming.length === 0 && (
+          <AlertBox variant="warning" icon={<span className="text-[20px]">📅</span>} title="Sem consultas agendadas" subtitle="Agende agora e cuide da sua saúde!" actionLabel="Agendar" onAction={() => navigate("/dashboard/schedule?role=patient")} />
+        )}
+        {!activeSub && (
+          <AlertBox variant="info" icon={<span className="text-[20px]">💳</span>} title="Assine um plano e economize até 30%" subtitle="Acesso ilimitado a consultas e benefícios exclusivos" actionLabel="Ver planos" onAction={() => navigate("/dashboard/plans?role=patient")} />
+        )}
 
         {/* ── Return appointments ── */}
         {returnAppts.length > 0 && (
-          <Card className="overflow-hidden rounded-2xl border-warning/20 bg-warning/[0.03]">
-            <CardContent className="space-y-2.5 p-4">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/15">
-                  <Gift className="h-4 w-4 text-warning" />
-                </div>
-                <p className="text-sm font-bold text-warning">Retorno Grátis Disponível</p>
-              </div>
-              {returnAppts.map((ra: { id: string; return_deadline: string; doctor_name: string; doctor_id: string }) => {
-                const daysRemaining = differenceInDays(new Date(ra.return_deadline), new Date());
-                return (
-                  <div key={ra.id} className="flex items-center justify-between rounded-xl border border-border/30 bg-card p-3">
-                    <div className="min-w-0 text-xs">
-                      <p className="truncate font-medium text-foreground">{ra.doctor_name}</p>
-                      <p className="text-muted-foreground">
-                        {daysRemaining <= 3
-                          ? <span className="font-semibold text-destructive">⚠️ {daysRemaining}d restantes</span>
-                          : `Até ${format(new Date(ra.return_deadline), "dd/MM")} (${daysRemaining}d)`}
-                      </p>
-                    </div>
-                    <Button size="sm" className="h-8 shrink-0 rounded-xl bg-warning text-warning-foreground text-xs" onClick={() => navigate(`/dashboard/schedule/${ra.doctor_id}?return=true&original=${ra.id}`)}>
-                      Agendar
-                    </Button>
+          <div className="overflow-hidden rounded-2xl border border-amber-200/60 bg-amber-50/50 dark:border-amber-800/30 dark:bg-amber-950/10 p-4">
+            <div className="mb-3 flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30"><Gift className="h-4 w-4 text-amber-600 dark:text-amber-400" /></div>
+              <p className="text-[12px] font-bold text-amber-700 dark:text-amber-400">Retorno Grátis Disponível</p>
+            </div>
+            {returnAppts.map((ra: { id: string; return_deadline: string; doctor_name: string; doctor_id: string }) => {
+              const daysRemaining = differenceInDays(new Date(ra.return_deadline), new Date());
+              return (
+                <div key={ra.id} className="flex items-center justify-between rounded-xl border border-border/25 bg-card p-3 mb-2 last:mb-0">
+                  <div className="text-[11px]">
+                    <p className="font-semibold text-foreground">{ra.doctor_name}</p>
+                    <p className="text-muted-foreground mt-0.5">
+                      {daysRemaining <= 3 ? <span className="font-semibold text-red-500">⚠️ {daysRemaining}d restantes</span> : `Até ${format(new Date(ra.return_deadline), "dd/MM")} (${daysRemaining}d)`}
+                    </p>
                   </div>
-                );
-              })}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* ── Shortcuts ── */}
-        <DashboardShortcuts shortcuts={shortcuts} />
-
-        {/* ── Smart alerts ── */}
-        {!loading && (() => {
-          const alerts: { icon: string; text: string; color: string; bg: string; action?: string }[] = [];
-          if ((stats?.total ?? 0) > 0 && upcoming.length === 0) alerts.push({ icon: "📅", text: "Sem consultas agendadas — cuide da sua saúde!", color: "text-warning", bg: "bg-warning/[0.04] border-warning/20", action: "/dashboard/schedule?role=patient" });
-          if ((stats?.prescriptions ?? 0) > 0 && (stats?.documents ?? 0) === 0) alerts.push({ icon: "📄", text: "Envie seus exames para o cofre de documentos", color: "text-primary", bg: "bg-primary/[0.04] border-primary/20", action: "/dashboard/patient/documents?role=patient" });
-          if (!activeSub) alerts.push({ icon: "💳", text: "Assine um plano e economize até 30%", color: "text-secondary", bg: "bg-secondary/[0.04] border-secondary/20", action: "/dashboard/plans?role=patient" });
-          if (alerts.length === 0) return null;
-          return (
-            <div className="space-y-2">
-              {alerts.map((alert, i) => (
-                <motion.div
-                  key={i}
-                  whileTap={{ scale: 0.98 }}
-                  className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3.5 transition-all duration-150 hover:shadow-sm ${alert.bg}`}
-                  onClick={() => alert.action && navigate(alert.action)}
-                >
-                  <span className="shrink-0 text-base">{alert.icon}</span>
-                  <p className={`flex-1 text-xs font-medium ${alert.color}`}>{alert.text}</p>
-                  <ChevronRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/25" />
-                </motion.div>
-              ))}
-            </div>
-          );
-        })()}
-
-        {/* ── Favorite Doctors ── */}
-        {favDoctors.length > 0 && (
-          <section>
-            <div className="mb-3 flex items-center justify-between px-1">
-              <h2 className="flex items-center gap-2 text-sm font-bold text-foreground">
-                <Stethoscope className="w-4 h-4 text-primary" /> Meus Médicos
-              </h2>
-              <Button variant="link" size="sm" className="h-auto gap-1 p-0 text-[11px] font-semibold text-primary" onClick={() => navigate("/dashboard/doctors?role=patient")}>
-                Ver todos <ArrowRight className="w-3 h-3" />
-              </Button>
-            </div>
-            <div className="-mx-1 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-1 scrollbar-none">
-              {favDoctors.slice(0, 6).map((doc: { id: string; name: string; specs: string[]; rating: number | null }) => (
-                <motion.div
-                  key={doc.id}
-                  whileHover={{ y: -3 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <Card className="w-[120px] shrink-0 cursor-pointer snap-start overflow-hidden rounded-xl border-border/30 transition-all duration-150 hover:shadow-md" onClick={() => navigate(`/dashboard/schedule/${doc.id}?role=patient`)}>
-                    <CardContent className="p-0">
-                      <div className="flex h-14 items-center justify-center bg-gradient-to-br from-primary/[0.04] to-secondary/[0.04]">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/8 text-sm font-bold text-primary">
-                          {doc.name.charAt(6) || "M"}
-                        </div>
-                      </div>
-                      <div className="p-2.5">
-                        <p className="truncate text-[11px] font-semibold text-foreground">{doc.name}</p>
-                        <p className="truncate text-[10px] text-muted-foreground/60">{doc.specs[0] || "Clínico"}</p>
-                        {doc.rating !== null && doc.rating > 0 && (
-                          <div className="mt-1 flex items-center gap-0.5">
-                            <Star className="h-2.5 w-2.5 fill-warning text-warning" />
-                            <span className="text-[10px] text-muted-foreground/60">{Number(doc.rating).toFixed(1)}</span>
-                          </div>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </section>
+                  <Button size="sm" className="h-8 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[10.5px] font-bold"
+                    onClick={() => navigate(`/dashboard/schedule/${ra.doctor_id}?return=true&original=${ra.id}`)}>Agendar</Button>
+                </div>
+              );
+            })}
+          </div>
         )}
 
         {/* ── Daily Tip ── */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="flex items-center gap-3.5 rounded-2xl border border-primary/8 bg-primary/[0.04] p-4"
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }}
+          className="flex items-center gap-3.5 rounded-2xl border border-blue-100 dark:border-blue-900/30 bg-blue-50/60 dark:bg-blue-950/20 p-4"
         >
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/8 text-primary">
-            <TrendingUp className="w-[18px] h-[18px]" />
-          </div>
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30 text-[18px]">💡</div>
           <div className="min-w-0 flex-1">
-            <h4 className="text-[11px] font-bold uppercase tracking-wide text-primary">Dica do Dia</h4>
-            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">{todayTip}</p>
+            <p className="text-[10px] font-bold uppercase tracking-wide text-blue-600 dark:text-blue-400">Dica do Dia</p>
+            <p className="mt-0.5 text-[12px] leading-relaxed text-muted-foreground">{todayTip}</p>
           </div>
         </motion.div>
+
+        {/* ── Shortcuts ── */}
+        <DashboardShortcuts shortcuts={shortcuts} />
 
         {/* Credits */}
         <CreditsWidget />

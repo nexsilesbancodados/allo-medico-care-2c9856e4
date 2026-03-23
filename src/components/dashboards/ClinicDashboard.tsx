@@ -17,8 +17,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 import { getClinicNav } from "@/components/clinic/clinicNav";
-import { DashboardHero } from "./DashboardHero";
-import { DashboardStatCards } from "./DashboardStatCards";
+import { PremiumHero } from "./PremiumHero";
+import { BentoStatCards } from "./BentoStatCards";
+import { DoctorRanking } from "./DoctorRanking";
 
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--warning))", "hsl(var(--destructive))"];
 
@@ -170,12 +171,15 @@ const ClinicDashboard = () => {
     <DashboardLayout title="Clínica" nav={getClinicNav(activeNav)} role="clinic">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
-        {/* ── Clinic Hero ── */}
-        <DashboardHero
-          gradient="from-[hsl(230,70%,48%)] via-[hsl(220,80%,50%)] to-[hsl(210,90%,45%)]"
+        {/* ── Premium Clinic Hero ── */}
+        <PremiumHero
+          gradient="bg-gradient-to-br from-[#1E1B6B] via-[#3730A3] to-[#4F46E5]"
+          orb1Color="radial-gradient(#818CF8, transparent)"
+          orb2Color="radial-gradient(#10B981, transparent)"
+          tag={`Painel de Gestão · ${format(now, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}`}
+          tagIcon={<Stethoscope className="w-4 h-4" />}
           name={clinicProfile?.name ?? "Minha Clínica"}
-          subtitle={`Painel de Gestão · ${format(now, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}`}
-          greetIcon={<Stethoscope className="w-4 h-4" />}
+          subtitle="São Paulo · Telemedicina"
           kpis={[
             { label: "Médicos", value: activeDoctors, icon: <Users className="w-4 h-4" /> },
             { label: "Consultas", value: thisMonthAppts.length, icon: <Calendar className="w-4 h-4" /> },
@@ -183,24 +187,38 @@ const ClinicDashboard = () => {
             { label: "Ocupação", value: `${occupancy}%`, icon: <TrendingUp className="w-4 h-4" /> },
           ]}
           loading={loading}
-          extra={
-            <Button size="sm" variant="ghost" className="h-9 gap-1.5 rounded-xl border border-white/20 px-3 text-xs font-bold text-white/80 hover:bg-white/15 hover:text-white" onClick={exportClinicPDF}>
+          topRight={
+            <Button size="sm" variant="ghost" className="h-9 gap-1.5 rounded-xl border border-white/20 px-3 text-[11px] font-bold text-white/80 hover:bg-white/15 hover:text-white" onClick={exportClinicPDF}>
               <Download className="w-3.5 h-3.5" /> PDF
             </Button>
           }
         />
 
-        {/* ── Stat Cards ── */}
-        <DashboardStatCards
-          cols={4}
-          loading={loading}
-          cards={[
-            { label: "Médicos Ativos", value: activeDoctors, icon: <Users className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
-            { label: "Consultas/mês", value: thisMonthAppts.length, icon: <Calendar className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary" },
-            { label: "Receita Mês", value: `R$${(revenue / 1000).toFixed(1)}k`, icon: <DollarSign className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
-            { label: "Taxa Ocupação", value: `${occupancy}%`, icon: <TrendingUp className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
-          ]}
-        />
+        {/* ── Bento Stats ── */}
+        <BentoStatCards loading={loading} stats={[
+          { label: "Médicos ativos", value: activeDoctors, icon: "🩺", iconBg: "bg-indigo-50 dark:bg-indigo-950/30", valueColor: "text-indigo-700 dark:text-indigo-400", trend: { value: 5 } },
+          { label: "Receita do mês", value: `R$${(revenue / 1000).toFixed(1)}k`, icon: "💰", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 12 } },
+          { label: "Consultas/mês", value: thisMonthAppts.length, icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400", trend: { value: 18 } },
+          { label: "Taxa de ocupação", value: `${occupancy}%`, icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400" },
+        ]} />
+
+        {/* ── Doctor Ranking ── */}
+        {doctorPerformance.length > 0 && (
+          <DoctorRanking
+            doctors={doctorPerformance.slice(0, 5).map((d, i) => ({
+              id: String(i),
+              name: d.name,
+              initials: d.name.split(" ").map((n: string) => n[0]).slice(0, 2).join(""),
+              consultations: d.consultas,
+              revenue: d.consultas * 89,
+              pct: doctorPerformance[0]?.consultas > 0 ? Math.round((d.consultas / doctorPerformance[0].consultas) * 100) : 0,
+              avatarBg: ["bg-indigo-100 dark:bg-indigo-950/40", "bg-emerald-100 dark:bg-emerald-950/40", "bg-amber-100 dark:bg-amber-950/40", "bg-blue-100 dark:bg-blue-950/40", "bg-violet-100 dark:bg-violet-950/40"][i % 5],
+              avatarColor: ["text-indigo-700 dark:text-indigo-300", "text-emerald-700 dark:text-emerald-300", "text-amber-700 dark:text-amber-300", "text-blue-700 dark:text-blue-300", "text-violet-700 dark:text-violet-300"][i % 5],
+            }))}
+            onSeeAll={() => navigate("/dashboard/clinic/doctors")}
+          />
+        )}
+
 
         {/* Alert for pending doctors */}
         {!loading && pendingDoctors > 0 && (

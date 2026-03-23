@@ -3,19 +3,15 @@ import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "./DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, Pill, FlaskConical, CheckCircle, FileText, UserCog, Sparkles, TrendingUp } from "lucide-react";
+import { FileText, UserCog, TrendingUp, Pill, FlaskConical, CheckCircle, Search } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { toast } from "sonner";
 import { motion } from "framer-motion";
-import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
-import { DashboardHero } from "./DashboardHero";
-import { DashboardStatCards } from "./DashboardStatCards";
+import { PremiumHero } from "./PremiumHero";
+import { BentoStatCards } from "./BentoStatCards";
+import { PrescriptionFinder } from "./PrescriptionFinder";
+import { AlertBox } from "./AlertBox";
 
 const getPartnerNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard?role=partner", icon: <TrendingUp className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -23,258 +19,102 @@ const getPartnerNav = (active: string) => [
   { label: "Histórico", href: "/dashboard/partner/history?role=partner", icon: <FileText className="w-4 h-4" />, active: active === "history", group: "Operações" },
   { label: "Conversão", href: "/dashboard/partner/conversion?role=partner", icon: <FlaskConical className="w-4 h-4" />, active: active === "conversion", group: "Operações" },
   { label: "Perfil", href: "/dashboard/profile?role=partner", icon: <UserCog className="w-4 h-4" />, active: active === "profile", group: "Conta" },
-  { label: "Configurações", href: "/dashboard/settings?role=partner", icon: <Search className="w-4 h-4" />, active: active === "settings", group: "Conta" },
 ];
-
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
 
 const PartnerDashboard = () => {
   const { user } = useAuth();
   const location = useLocation();
-  const [prescriptionCode, setPrescriptionCode] = useState("");
-  const kpiRef = useGsapEntrance({ stagger: 0.07, y: 14, delay: 0.2 });
-  const [foundPrescription, setFoundPrescription] = useState<any>(null);
-  const [validations, setValidations] = useState<any[]>([]);
-  const [searching, setSearching] = useState(false);
+  const [validations, setValidations] = useState<Array<{ id: string; prescription_id: string; status: string; notes: string | null; created_at: string }>>([]);
   const [loading, setLoading] = useState(true);
+  const activeNav = location.pathname.includes("validate") ? "validate" : location.pathname.includes("history") ? "history" : location.pathname.includes("conversion") ? "conversion" : "overview";
 
   useEffect(() => { fetchValidations(); }, []);
 
   const fetchValidations = async () => {
     if (!user) return;
-    const { data } = await supabase.from("prescription_validations")
-      .select("id, prescription_id, status, notes, created_at")
-      .eq("validated_by", user.id)
-      .order("created_at", { ascending: false })
-      .limit(50);
+    const { data } = await supabase.from("prescription_validations").select("id, prescription_id, status, notes, created_at").eq("validated_by", user.id).order("created_at", { ascending: false }).limit(50);
     setValidations(data ?? []);
     setLoading(false);
-  };
-
-  const searchPrescription = async () => {
-    if (!prescriptionCode.trim()) return;
-    setSearching(true);
-    setFoundPrescription(null);
-    const { data } = await supabase.from("prescriptions")
-      .select("id, diagnosis, medications, observations, created_at, doctor_id, patient_id")
-      .ilike("id", `${prescriptionCode}%`)
-      .limit(1)
-      .single();
-    if (data) {
-      const [docRes, patRes] = await Promise.all([
-        supabase.from("doctor_profiles").select("user_id").eq("id", data.doctor_id).single(),
-        supabase.from("profiles").select("first_name, last_name").eq("user_id", data.patient_id).single(),
-      ]);
-      let doctorName = "—";
-      if (docRes.data) {
-        const { data: docProfile } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", docRes.data.user_id).single();
-        if (docProfile) doctorName = `Dr(a). ${docProfile.first_name} ${docProfile.last_name}`;
-      }
-      setFoundPrescription({
-        ...data, doctor_name: doctorName,
-        patient_name: patRes.data ? `${patRes.data.first_name} ${patRes.data.last_name}` : "—",
-        medications: Array.isArray(data.medications) ? data.medications : [],
-      });
-    } else {
-      toast.error("Receita não encontrada. Verifique o código.");
-    }
-    setSearching(false);
-  };
-
-  const validatePrescription = async (status: string) => {
-    if (!foundPrescription || !user) return;
-
-    // Check if prescription was already validated (UNIQUE constraint)
-    const { data: existing } = await supabase.from("prescription_validations")
-      .select("id, created_at")
-      .eq("prescription_id", foundPrescription.id)
-      .limit(1);
-
-    if (existing && existing.length > 0) {
-      toast.error(`Esta receita já foi dispensada em ${format(new Date(existing[0].created_at), "dd/MM/yyyy", { locale: ptBR })}.`);
-      return;
-    }
-
-    const { error } = await supabase.from("prescription_validations").insert({
-      prescription_id: foundPrescription.id, validated_by: user.id, status,
-      notes: status === "dispensed" ? "Medicamento dispensado" : "Receita validada",
-    });
-    if (error) {
-      if (error.code === "23505") {
-        toast.error("Esta receita já foi dispensada anteriormente.");
-      } else {
-        toast.error("Erro ao validar receita.");
-      }
-    } else {
-      toast.success(status === "dispensed" ? "Medicamento dispensado com sucesso!" : "Receita validada!");
-      setFoundPrescription(null); setPrescriptionCode(""); fetchValidations();
-    }
   };
 
   const dispensedCount = validations.filter(v => v.status === "dispensed").length;
   const conversionRate = validations.length > 0 ? Math.round((dispensedCount / validations.length) * 100) : 0;
 
-  const pathSegment = location.pathname.split("/").pop() || "";
-  const activeNav = ["validate", "history", "conversion"].includes(pathSegment) ? pathSegment : "overview";
-
   return (
     <DashboardLayout title="Portal do Parceiro" nav={getPartnerNav(activeNav)}>
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-3xl space-y-6">
+      <div className="mx-auto w-full max-w-3xl space-y-5 pb-24">
 
-        {/* ── Partner Hero ── */}
-        <DashboardHero
-          gradient="from-[hsl(142,65%,38%)] via-[hsl(155,60%,40%)] to-[hsl(160,55%,36%)]"
-          name="Portal de Parceiros"
-          subtitle="Validação de receitas e pedidos de exame"
-          greetIcon={<Pill className="w-4 h-4" />}
+        <PremiumHero
+          gradient="bg-gradient-to-br from-[#022B1C] via-[#0B5F4A] to-[#0F6E56]"
+          orb1Color="radial-gradient(#34D399, transparent)"
+          orb2Color="radial-gradient(#10B981, transparent)"
+          tag="Portal de Parceiros · Farmácia"
+          tagIcon={<Pill className="w-4 h-4" />}
+          name="Validação de Receitas"
+          subtitle="Consulte e dispense receitas digitais com segurança"
+          badge={{ label: "Farmácia Ativa · Verificada" }}
           kpis={[
             { label: "Validações", value: validations.length, icon: <Pill className="w-4 h-4" /> },
             { label: "Dispensados", value: dispensedCount, icon: <CheckCircle className="w-4 h-4" /> },
             { label: "Conversão", value: `${conversionRate}%`, icon: <TrendingUp className="w-4 h-4" /> },
           ]}
           loading={loading}
-          badge={{ label: "✓ Farmácia Ativa", color: "bg-white/20 text-white backdrop-blur-md" }}
         />
 
-        {/* ── Stat Cards ── */}
-        <DashboardStatCards
-          cols={3}
-          loading={loading}
-          cards={[
-            { label: "Total de validações", value: validations.length, icon: <Pill className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
-            { label: "Dispensados", value: dispensedCount, icon: <CheckCircle className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
-            { label: "Taxa de conversão", value: `${conversionRate}%`, icon: <TrendingUp className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
-          ]}
-        />
+        <BentoStatCards loading={loading} stats={[
+          { label: "Total de validações", value: validations.length, icon: "💊", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 8 } },
+          { label: "Dispensados", value: dispensedCount, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400" },
+          { label: "Taxa de conversão", value: `${conversionRate}%`, icon: "📈", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400", trend: { value: conversionRate > 50 ? 5 : -2 } },
+          { label: "Hoje", value: validations.filter(v => new Date(v.created_at).toDateString() === new Date().toDateString()).length, icon: "📅", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueColor: "text-violet-600 dark:text-violet-400" },
+        ]} />
 
-        <motion.div variants={fadeUp}>
-          <Tabs defaultValue="validate">
-            <TabsList className="bg-muted/50 border border-border/40 h-10 rounded-xl p-1">
-              <TabsTrigger value="validate" className="rounded-lg text-xs gap-1.5"><Pill className="w-3.5 h-3.5" /> Validar</TabsTrigger>
-              <TabsTrigger value="conversion" className="rounded-lg text-xs gap-1.5"><FlaskConical className="w-3.5 h-3.5" /> Conversão</TabsTrigger>
-              <TabsTrigger value="history" className="rounded-lg text-xs gap-1.5"><FileText className="w-3.5 h-3.5" /> Histórico</TabsTrigger>
-            </TabsList>
+        <Tabs defaultValue="validate">
+          <TabsList className="h-11 rounded-xl border border-border/30 bg-muted/40 p-1">
+            <TabsTrigger value="validate" className="rounded-lg text-[11.5px] gap-1.5 font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm"><Pill className="w-3.5 h-3.5" /> Validar</TabsTrigger>
+            <TabsTrigger value="history" className="rounded-lg text-[11.5px] gap-1.5 font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm"><FileText className="w-3.5 h-3.5" /> Histórico</TabsTrigger>
+          </TabsList>
 
-            <TabsContent value="validate" className="mt-5">
-              <Card className="border-border/50">
-                <CardHeader><CardTitle className="text-sm font-semibold">Consultar Receita Digital</CardTitle></CardHeader>
-                <CardContent>
-                  <div className="flex gap-2 mb-4">
-                    <div className="relative flex-1">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input placeholder="Código da receita (ID)..." value={prescriptionCode} onChange={e => setPrescriptionCode(e.target.value)} className="pl-10 rounded-xl" onKeyDown={e => e.key === "Enter" && searchPrescription()} />
-                    </div>
-                    <Button onClick={searchPrescription} disabled={searching} className="rounded-xl">{searching ? "Buscando..." : "Buscar"}</Button>
-                  </div>
+          <TabsContent value="validate" className="mt-5">
+            <PrescriptionFinder onValidated={fetchValidations} />
+          </TabsContent>
 
-                  {foundPrescription && (
-                    <div className="border border-border/50 rounded-2xl p-5 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="default">✅ Receita Autêntica</Badge>
-                        <span className="text-xs text-muted-foreground font-mono">{foundPrescription.id.slice(0, 12)}...</span>
+          <TabsContent value="history" className="mt-5">
+            <div className="overflow-hidden rounded-2xl border border-border/25 bg-card" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }}>
+              <div className="border-b border-border/15 px-4 py-3">
+                <p className="text-[11.5px] font-bold text-foreground">Histórico de Validações</p>
+              </div>
+              {loading ? (
+                <div className="p-4 space-y-3">{[1,2,3].map(i => <div key={i} className="h-12 animate-pulse rounded-xl bg-muted/50" />)}</div>
+              ) : validations.length === 0 ? (
+                <div className="p-8 text-center">
+                  <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-muted/40 text-[22px]">📋</div>
+                  <p className="text-[13px] font-semibold text-foreground">Nenhuma validação ainda</p>
+                  <p className="mt-1 text-[11.5px] text-muted-foreground">Busque uma receita para começar</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-border/15">
+                  {validations.slice(0, 10).map(v => (
+                    <motion.div key={v.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-muted/20 transition-colors"
+                    >
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-lg text-[14px] ${v.status === "dispensed" ? "bg-emerald-50 dark:bg-emerald-950/30" : "bg-amber-50 dark:bg-amber-950/30"}`}>
+                        {v.status === "dispensed" ? "✅" : "⚠️"}
                       </div>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        {[
-                          { label: "Paciente", value: foundPrescription.patient_name },
-                          { label: "Médico", value: foundPrescription.doctor_name },
-                          { label: "Data", value: format(new Date(foundPrescription.created_at), "dd/MM/yyyy", { locale: ptBR }) },
-                          { label: "Diagnóstico", value: foundPrescription.diagnosis ?? "—" },
-                        ].map(f => (
-                          <div key={f.label}>
-                            <p className="text-xs text-muted-foreground">{f.label}</p>
-                            <p className="font-medium text-foreground">{f.value}</p>
-                          </div>
-                        ))}
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[12px] font-semibold text-foreground truncate">Receita {v.prescription_id?.slice(0, 8)}...</p>
+                        <p className="text-[10.5px] text-muted-foreground">{format(new Date(v.created_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}</p>
                       </div>
-                      {foundPrescription.medications.length > 0 && (
-                        <div>
-                          <p className="text-xs text-muted-foreground mb-2">Medicamentos</p>
-                          <div className="space-y-1.5">
-                            {foundPrescription.medications.map((med: any, i: number) => (
-                              <div key={i} className="text-sm p-3 rounded-xl bg-muted/40 border border-border/30">
-                                <span className="font-medium text-foreground">{typeof med === 'string' ? med : med.name ?? med}</span>
-                                {typeof med !== 'string' && med.dosage && <span className="text-muted-foreground"> · {med.dosage}</span>}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                      <div className="flex gap-2 pt-1">
-                        <Button onClick={() => validatePrescription("dispensed")} className="flex-1 rounded-xl">
-                          <CheckCircle className="w-4 h-4 mr-1.5" /> Dispensar
-                        </Button>
-                        <Button variant="outline" onClick={() => validatePrescription("validated")} className="flex-1 rounded-xl">
-                          Apenas Validar
-                        </Button>
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="conversion" className="mt-5 space-y-4">
-              <Card className="border-border/50">
-                <CardHeader><CardTitle className="text-sm font-semibold">Relatório de Conversão</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    De cada receita validada, <strong className="text-foreground">{conversionRate}%</strong> resultaram em dispensação de medicamento.
-                  </p>
-                  {/* Conversion funnel */}
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
-                      <div className="flex-1 h-8 rounded-xl bg-primary/10 flex items-center px-3">
-                        <span className="text-xs font-semibold text-primary">Receitas consultadas</span>
-                        <span className="ml-auto text-sm font-bold text-primary">{validations.length}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 pl-4">
-                      <div className="flex-1 h-8 rounded-xl bg-success/10 flex items-center px-3" style={{ maxWidth: `${Math.max(conversionRate, 20)}%` }}>
-                        <span className="text-xs font-semibold text-success">Dispensados</span>
-                        <span className="ml-auto text-sm font-bold text-success">{dispensedCount}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {conversionRate >= 80 ? "🎉 Excelente taxa de conversão!" 
-                    : conversionRate >= 50 ? "👍 Boa taxa — continue assim!" 
-                    : "💡 Dica: Ofereça alternativas genéricas para aumentar a conversão"}
-                  </p>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="history" className="mt-5">
-              <Card className="border-border/50">
-                <CardHeader><CardTitle className="text-sm font-semibold">Validações Recentes</CardTitle></CardHeader>
-                <CardContent>
-                  {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> : validations.length === 0 ? (
-                    <div className="text-center py-10">
-                      <Sparkles className="w-8 h-8 text-muted-foreground/40 mx-auto mb-3" />
-                      <p className="text-sm text-muted-foreground">Nenhuma validação realizada.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {validations.map(v => (
-                        <div key={v.id} className="flex items-center justify-between p-3.5 rounded-xl border border-border/50 hover:bg-muted/30 transition-colors">
-                          <div>
-                            <p className="text-sm font-mono text-foreground">{v.prescription_id.slice(0, 12)}...</p>
-                            <p className="text-xs text-muted-foreground">{format(new Date(v.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}</p>
-                          </div>
-                          <Badge variant={v.status === "dispensed" ? "default" : "secondary"}>
-                            {v.status === "dispensed" ? "Dispensado" : v.status === "validated" ? "Validado" : v.status}
-                          </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-      </motion.div>
+                      <span className={`rounded-lg px-2 py-0.5 text-[9px] font-bold ${v.status === "dispensed" ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-400" : "bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400"}`}>
+                        {v.status === "dispensed" ? "Dispensado" : "Pendente"}
+                      </span>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
     </DashboardLayout>
   );
 };

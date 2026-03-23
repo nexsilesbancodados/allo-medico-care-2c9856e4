@@ -955,3 +955,97 @@ select:focus {
     transform: none !important;
   }
 }
+
+/* ─── Premium Dashboard Animations ───────────────────────────────────────────── */
+
+/* Glassmorphism card hover lift */
+.premium-card {
+  transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s cubic-bezier(0.22,1,0.36,1);
+}
+.premium-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 40px rgba(0,0,0,.14);
+}
+.premium-card:active {
+  transform: scale(0.98);
+}
+
+/* Live pulse dot */
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(0.88); }
+}
+.live-dot {
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+
+/* Bento card entrance */
+@keyframes bentoIn {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.bento-in {
+  animation: bentoIn 0.45s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* Hero orbs breathing */
+@keyframes orbBreath {
+  0%, 100% { transform: scale(1) translate(0,0); opacity: 0.6; }
+  50% { transform: scale(1.08) translate(-4px, -4px); opacity: 0.45; }
+}
+.hero-orb-animated {
+  animation: orbBreath 6s ease-in-out infinite;
+}
+
+/* Progress bar fill */
+@keyframes progressFill {
+  from { width: 0; }
+}
+.progress-animate {
+  animation: progressFill 1.2s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* Number counter shimmer */
+@keyframes numberIn {
+  from { opacity: 0; transform: translateY(6px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.number-in {
+  animation: numberIn 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* Wallet card shine sweep */
+@keyframes walletShine {
+  from { transform: translateX(-100%) skewX(-15deg); }
+  to { transform: translateX(220%) skewX(-15deg); }
+}
+.wallet-shine::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  animation: walletShine 3s ease-in-out infinite;
+}
+
+/* Premium button */
+.btn-premium {
+  background: linear-gradient(135deg, #1255C8, #3B7FE8);
+  box-shadow: 0 6px 20px rgba(18,85,200,.3);
+  transition: all 0.2s cubic-bezier(0.22,1,0.36,1);
+}
+.btn-premium:hover {
+  box-shadow: 0 8px 28px rgba(18,85,200,.4);
+  transform: translateY(-1px);
+}
+.btn-premium:active {
+  transform: scale(0.97);
+  box-shadow: 0 3px 12px rgba(18,85,200,.25);
+}
+
+/* Queue item hover */
+.queue-item-hover {
+  transition: background 0.15s ease;
+}
+.queue-item-hover:hover {
+  background: hsl(var(--muted) / 0.2);
+}

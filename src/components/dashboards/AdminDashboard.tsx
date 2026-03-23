@@ -18,8 +18,9 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 import type { AdminKpiItem } from "@/types/domain";
-import { DashboardHero } from "./DashboardHero";
-import { DashboardStatCards } from "./DashboardStatCards";
+import { PremiumHero } from "./PremiumHero";
+import { BentoStatCards } from "./BentoStatCards";
+import { AlertBox } from "./AlertBox";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -262,33 +263,35 @@ const AdminDashboard = () => {
     <DashboardLayout title="Administração" nav={getAdminNav("overview")}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-6xl space-y-6">
 
-        {/* ── Admin Hero ── */}
-        <DashboardHero
-          gradient="from-[hsl(0,75%,45%)] via-[hsl(350,70%,48%)] to-[hsl(340,65%,42%)]"
+        {/* ── Premium Admin Hero ── */}
+        <PremiumHero
+          gradient="bg-gradient-to-br from-[#3B0000] via-[#8B1515] to-[#C41A1A]"
+          orb1Color="radial-gradient(#EF4444, transparent)"
+          orb2Color="radial-gradient(#F97316, transparent)"
+          tag="Monitoramento em tempo real"
+          tagIcon={<Activity className="w-4 h-4" />}
           name="Painel de Controle"
-          subtitle="Monitoramento em tempo real, finanças e operações"
+          subtitle="Finanças, operações e gestão completa da plataforma"
+          liveDot={stats.live_now > 0}
+          liveCount={stats.live_now}
           kpis={[
             { label: "Pacientes", value: stats.total_patients, icon: <Users className="w-4 h-4" /> },
             { label: "Médicos", value: stats.total_doctors, icon: <Activity className="w-4 h-4" /> },
             { label: "Assinaturas", value: stats.active_subs, icon: <CreditCard className="w-4 h-4" /> },
-            { label: "Ao Vivo", value: stats.live_now, icon: <Video className="w-4 h-4" /> },
+            { label: "Ao vivo", value: stats.live_now, icon: <Video className="w-4 h-4" /> },
           ]}
           loading={loading}
           onRefresh={() => fetchAll(true)}
           refreshing={refreshing}
         />
 
-        {/* ── Stat Cards ── */}
-        <DashboardStatCards
-          cols={4}
-          loading={loading}
-          cards={[
-            { label: "Receita Mensal", value: `R$${(stats.total_revenue / 1000).toFixed(1)}k`, icon: <DollarSign className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
-            { label: "Consultas/mês", value: stats.monthly_appts, icon: <Calendar className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
-            { label: "Avaliação Média", value: stats.avg_rating > 0 ? stats.avg_rating.toFixed(1) : "—", icon: <Star className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
-            { label: "Laudos", value: stats.total_laudos, icon: <FileText className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary" },
-          ]}
-        />
+        {/* ── Bento Stats ── */}
+        <BentoStatCards loading={loading} stats={[
+          { label: "Receita mensal", value: `R$${(stats.total_revenue / 1000).toFixed(1)}k`, icon: "💰", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 18 } },
+          { label: "Consultas/mês", value: stats.monthly_appts, icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400", trend: { value: 24 } },
+          { label: "Avaliação média", value: stats.avg_rating > 0 ? stats.avg_rating.toFixed(1) : "—", icon: "⭐", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400" },
+          { label: "Laudos emitidos", value: stats.total_laudos, icon: "📋", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueColor: "text-violet-600 dark:text-violet-400", trend: { value: 31 } },
+        ]} />
 
         {/* Header actions */}
         <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

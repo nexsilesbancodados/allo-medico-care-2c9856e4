@@ -19,8 +19,8 @@ import SupportInbox from "@/components/support/SupportInbox";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
-import { DashboardHero } from "./DashboardHero";
-import { DashboardStatCards } from "./DashboardStatCards";
+import { PremiumHero } from "./PremiumHero";
+import { BentoStatCards } from "./BentoStatCards";
 
 const getSupportNav = (active: string) => [
   { label: "Helpdesk", href: "/dashboard?role=support", icon: <Activity className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -246,12 +246,18 @@ const SupportDashboard = () => {
     <DashboardLayout title="Suporte Técnico" nav={getSupportNav(activeNav)}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
 
-        {/* ── Support Hero ── */}
-        <DashboardHero
-          gradient="from-[hsl(45,90%,42%)] via-[hsl(38,88%,45%)] to-[hsl(30,85%,40%)]"
-          name="Helpdesk"
-          subtitle={`Monitoramento em tempo real · Atualizado ${formatDistanceToNow(lastFetch.current, { addSuffix: true, locale: ptBR })}`}
-          greetIcon={<Activity className="w-4 h-4" />}
+
+        {/* ── Premium Support Hero ── */}
+        <PremiumHero
+          gradient="bg-gradient-to-br from-[#2D1B00] via-[#854F0B] to-[#B45309]"
+          orb1Color="radial-gradient(#FCD34D, transparent)"
+          orb2Color="radial-gradient(#F97316, transparent)"
+          tag="Helpdesk · Monitoramento"
+          tagIcon={<Activity className="w-4 h-4" />}
+          name="Painel de Suporte"
+          subtitle={`Atualizado ${formatDistanceToNow(lastFetch.current, { addSuffix: true, locale: ptBR })}`}
+          liveDot={errorCount > 0}
+          liveCount={errorCount > 0 ? errorCount : undefined}
           kpis={[
             { label: "Usuários", value: users.length, icon: <Users className="w-4 h-4" /> },
             { label: "Logs hoje", value: todayLogs, icon: <Activity className="w-4 h-4" /> },
@@ -263,17 +269,25 @@ const SupportDashboard = () => {
           refreshing={refreshing}
         />
 
-        {/* ── Stat Cards ── */}
-        <DashboardStatCards
-          cols={4}
-          loading={loading}
-          cards={[
-            { label: "Usuários cadastrados", value: users.length, icon: <Users className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary", sub: `${filteredUsers.length} filtrados` },
-            { label: "Logs hoje", value: todayLogs, icon: <Activity className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary", sub: `${logs.length} total` },
-            { label: "Erros críticos", value: errorCount, icon: <ShieldAlert className="w-4 h-4" />, bg: "bg-destructive/10", text: "text-destructive", sub: `${warnCount} avisos` },
-            { label: "Alertas totais", value: errorCount + warnCount, icon: <AlertTriangle className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning", sub: "Revisão necessária" },
-          ]}
-        />
+        {/* ── Bento Stats ── */}
+        <BentoStatCards loading={loading} stats={[
+          { label: "Usuários cadastrados", value: users.length, icon: "👥", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400", sub: `${filteredUsers.length} filtrados` },
+          { label: "Logs hoje", value: todayLogs, icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400", sub: `${logs.length} total` },
+          { label: "Erros críticos", value: errorCount, icon: "🔴", iconBg: "bg-red-50 dark:bg-red-950/30", valueColor: "text-red-600 dark:text-red-400", sub: `${warnCount} avisos`, trend: errorCount > 0 ? { value: -errorCount, positive: false } : undefined },
+          { label: "Alertas totais", value: errorCount + warnCount, icon: "⚠️", iconBg: "bg-orange-50 dark:bg-orange-950/30", valueColor: "text-orange-600 dark:text-orange-400", sub: "Revisão necessária" },
+        ]} />
+
+        {/* ── Error Alert ── */}
+        {!loading && errorCount > 0 && (
+          <AlertBox
+            variant="danger"
+            icon={<span className="text-[20px]">🚨</span>}
+            title={`${errorCount} erro${errorCount > 1 ? "s" : ""} crítico${errorCount > 1 ? "s" : ""} detectado${errorCount > 1 ? "s" : ""}`}
+            subtitle="Revise os logs abaixo para diagnóstico imediato"
+            actionLabel="Ver erros"
+            onAction={() => setLogTypeFilter("error")}
+          />
+        )}
 
         {/* Alert banner for critical errors */}
         {!loading && errorCount > 0 && (

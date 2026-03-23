@@ -17,8 +17,9 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
-import { DashboardHero } from "./DashboardHero";
-import { DashboardStatCards } from "./DashboardStatCards";
+import { PremiumHero } from "./PremiumHero";
+import { BentoStatCards } from "./BentoStatCards";
+import { TimelineSchedule, ScheduleItem } from "./TimelineSchedule";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", waiting: "Na sala", in_progress: "Em consulta",
@@ -167,12 +168,14 @@ const ReceptionDashboard = () => {
     <DashboardLayout title="Recepção" nav={getReceptionNav("overview")}>
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
-        {/* ── Reception Hero ── */}
-        <DashboardHero
-          gradient="from-[hsl(38,92%,45%)] via-[hsl(30,88%,48%)] to-[hsl(25,85%,42%)]"
+        {/* ── Premium Hero ── */}
+        <PremiumHero
+          gradient="bg-gradient-to-br from-[#4A1F00] via-[#B05000] to-[#D97706]"
+          orb1Color="radial-gradient(#FCD34D, transparent)"
+          orb2Color="radial-gradient(#F59E0B, transparent)"
+          tag={isToday ? `Agenda de Hoje · ${format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}` : format(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
+          tagIcon={<Calendar className="w-4 h-4" />}
           name="Painel da Recepção"
-          subtitle={isToday ? `Hoje · ${format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}` : format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-          greetIcon={<Calendar className="w-4 h-4" />}
           kpis={[
             { label: "Total", value: stats.total, icon: <Calendar className="w-4 h-4" /> },
             { label: "Na Fila", value: stats.waiting, icon: <Clock className="w-4 h-4" /> },
@@ -182,170 +185,84 @@ const ReceptionDashboard = () => {
           loading={loading}
           onRefresh={() => fetchToday(true)}
           refreshing={refreshing}
-          extra={
-            <div className="flex gap-1.5">
-              <div className="flex items-center gap-1">
-                <button onClick={() => setSelectedDate(d => subDays(d, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/70 transition-colors hover:bg-white/15">
-                  <ChevronLeft className="w-4 h-4" />
-                </button>
-                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                  <PopoverTrigger asChild>
-                    <button className="rounded-lg border border-white/20 px-2.5 py-1 text-xs font-semibold text-white/80 transition-colors hover:bg-white/15">
-                      {isToday ? "Hoje" : format(selectedDate, "dd/MM")}
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComp
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={d => { if (d) { setSelectedDate(d); setCalendarOpen(false); } }}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-                <button onClick={() => setSelectedDate(d => addDays(d, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/70 transition-colors hover:bg-white/15">
-                  <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+          topRight={
+            <div className="flex items-center gap-1">
+              <button onClick={() => setSelectedDate(d => subDays(d, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/70 hover:bg-white/15 transition-colors">
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <button className="rounded-lg border border-white/20 px-2.5 py-1 text-[11px] font-semibold text-white/80 hover:bg-white/15 transition-colors">
+                    {isToday ? "Hoje" : format(selectedDate, "dd/MM")}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComp mode="single" selected={selectedDate} onSelect={d => { if (d) { setSelectedDate(d); setCalendarOpen(false); } }} initialFocus className={cn("p-3 pointer-events-auto")} />
+                </PopoverContent>
+              </Popover>
+              <button onClick={() => setSelectedDate(d => addDays(d, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/70 hover:bg-white/15 transition-colors">
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           }
         />
 
-        {/* ── Stat Cards ── */}
-        <DashboardStatCards
-          cols={4}
-          loading={loading}
-          cards={[
-            { label: "Total Hoje", value: stats.total, icon: <Calendar className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
-            { label: "Na Fila", value: stats.waiting, icon: <Clock className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
-            { label: "Em Consulta", value: stats.inProgress, icon: <Video className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
-            { label: "Concluídas", value: stats.completed, icon: <CheckCircle className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary" },
-          ]}
-        />
+        {/* ── Bento Stats ── */}
+        <BentoStatCards loading={loading} stats={[
+          { label: "Total hoje", value: stats.total, icon: "📅", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-700 dark:text-amber-400" },
+          { label: "Na fila", value: stats.waiting, icon: "⏳", iconBg: "bg-red-50 dark:bg-red-950/30", valueColor: "text-red-600 dark:text-red-400" },
+          { label: "Em consulta", value: stats.inProgress, icon: "🎥", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-600 dark:text-emerald-400" },
+          { label: "Concluídas", value: stats.completed, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400" },
+        ]} />
 
-        {/* Action buttons row */}
-        <div className="flex gap-2 flex-wrap">
+        {/* ── Timeline ── */}
+        {filteredAppts.length > 0 && (
+          <TimelineSchedule
+            items={filteredAppts.slice(0, 8).map(a => ({
+              id: a.id,
+              time: format(new Date(a.scheduled_at), "HH:mm"),
+              patientName: a.patient_name,
+              doctorName: a.doctor_name,
+              status: a.status as ScheduleItem["status"],
+            }))}
+          />
+        )}
+
+        {/* Search + filter */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="relative flex-1 min-w-[160px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+            <Input placeholder="Buscar paciente ou médico..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-9 text-sm rounded-xl" />
+          </div>
+          <Select value={filterStatus} onValueChange={setFilterStatus}>
+            <SelectTrigger className="h-9 w-36 text-xs rounded-xl">
+              <Filter className="w-3 h-3 mr-1 text-muted-foreground" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              <SelectItem value="scheduled">Agendada</SelectItem>
+              <SelectItem value="waiting">Na espera</SelectItem>
+              <SelectItem value="in_progress">Em andamento</SelectItem>
+              <SelectItem value="completed">Concluída</SelectItem>
+              <SelectItem value="no_show">Faltou</SelectItem>
+            </SelectContent>
+          </Select>
           <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={() => fetchToday(true)} disabled={refreshing}>
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} /> Atualizar
+            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
           </Button>
           <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5" onClick={exportCSV} disabled={loading || todayAppts.length === 0}>
             <Download className="w-3.5 h-3.5" /> CSV
           </Button>
         </div>
 
-
-
-
-
-        {/* Agenda */}
-        <motion.div variants={fadeUp}>
-          <Card className="border-border/50">
-            <CardHeader className="pb-3">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <CardTitle className="text-sm font-semibold">
-                  Agenda — {filteredAppts.length} consulta(s)
-                </CardTitle>
-                <div className="flex gap-2 flex-wrap">
-                  <div className="relative w-full sm:w-44">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                    <Input placeholder="Buscar..." value={search} onChange={e => setSearch(e.target.value)} className="pl-8 h-8 text-sm rounded-xl" aria-label="Buscar por paciente ou médico" />
-                  </div>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="h-8 w-full sm:w-36 text-xs rounded-xl">
-                      <Filter className="w-3 h-3 mr-1 text-muted-foreground" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="scheduled">Agendada</SelectItem>
-                      <SelectItem value="waiting">Na espera</SelectItem>
-                      <SelectItem value="in_progress">Em andamento</SelectItem>
-                      <SelectItem value="completed">Concluída</SelectItem>
-                      <SelectItem value="no_show">Faltou</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              {loading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="flex items-center gap-4 p-4 rounded-xl border border-border/40">
-                      <Skeleton className="h-10 w-14 rounded-lg" />
-                      <div className="flex-1 space-y-2">
-                        <Skeleton className="h-4 w-36" />
-                        <Skeleton className="h-3 w-28" />
-                      </div>
-                      <Skeleton className="h-7 w-20 rounded-full" />
-                    </div>
-                  ))}
-                </div>
-              ) : filteredAppts.length === 0 ? (
-                <div className="text-center py-10">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-3">
-                    <Calendar className="w-7 h-7 text-muted-foreground/40" />
-                  </div>
-                  <p className="text-sm font-medium text-foreground mb-1">
-                    {search ? "Nenhum resultado encontrado" : "Nenhuma consulta para hoje"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {search ? "Tente um nome diferente" : "A agenda está limpa por hoje"}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {filteredAppts.map(a => (
-                    <div
-                      key={a.id}
-                      className={`flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border gap-3 transition-colors ${
-                        a.status === "in_progress" ? "border-success/30 bg-success/5"
-                        : a.status === "waiting" ? "border-warning/30 bg-warning/5"
-                        : "border-border/50 hover:bg-muted/30"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="min-w-[52px] text-center p-1.5 rounded-lg bg-muted/60">
-                          <p className="text-sm font-bold text-foreground">{format(new Date(a.scheduled_at), "HH:mm")}</p>
-                          <p className="text-[10px] text-muted-foreground">{a.duration_minutes || 30}min</p>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-semibold text-foreground truncate">{a.patient_name}</p>
-                          <p className="text-xs text-muted-foreground truncate">{a.doctor_name}</p>
-                          {a.patient_phone && (
-                            <p className="text-xs text-muted-foreground">📞 {a.patient_phone}</p>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border whitespace-nowrap ${statusColor[a.status] ?? "bg-muted text-muted-foreground border-border"}`}>
-                          {a.status === "in_progress" && <span className="inline-block w-1.5 h-1.5 rounded-full bg-success mr-1 align-middle animate-pulse" />}
-                          {statusLabel[a.status] ?? a.status}
-                        </span>
-                         {a.status === "scheduled" && (
-                          <>
-                            <Button size="sm" variant="outline" className="text-xs h-7 rounded-xl" onClick={() => updateStatus(a.id, "waiting")}>
-                              ✅ Check-in
-                            </Button>
-                            {a.patient_phone && (
-                              <Button size="sm" variant="ghost" className="text-xs h-7 rounded-xl" onClick={() => window.open(`tel:${a.patient_phone}`, "_self")}>
-                                📞
-                              </Button>
-                            )}
-                            <Button size="sm" variant="ghost" className="text-xs h-7 text-destructive hover:bg-destructive/10 rounded-xl" onClick={() => updateStatus(a.id, "no_show")}>
-                              Faltou
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
+        {filteredAppts.length === 0 && !loading && (
+          <div className="rounded-2xl border border-border/25 bg-card p-8 text-center">
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-muted/40 text-[22px]">📅</div>
+            <p className="text-[13px] font-semibold text-foreground">Nenhuma consulta encontrada</p>
+            <p className="mt-1 text-[11.5px] text-muted-foreground">{isToday ? "Agenda vazia para hoje" : `Sem consultas em ${format(selectedDate, "dd/MM")}`}</p>
+          </div>
+        )}
       </motion.div>
     </DashboardLayout>
   );

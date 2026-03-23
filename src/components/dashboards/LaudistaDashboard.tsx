@@ -19,8 +19,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import { toast } from "sonner";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
-import { DashboardHero } from "./DashboardHero";
-import { DashboardStatCards } from "./DashboardStatCards";
+import { PremiumHero } from "./PremiumHero";
+import { BentoStatCards } from "./BentoStatCards";
+import { AlertBox } from "./AlertBox";
+import { PremiumHero } from "./PremiumHero";
+import { BentoStatCards } from "./BentoStatCards";
+import { AlertBox } from "./AlertBox";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } } };
@@ -130,15 +134,17 @@ const LaudistaDashboard = () => {
     <DashboardLayout title="Laudista" nav={getLaudistaNav("home")} role="doctor">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
-        {/* ── Laudista Hero ── */}
-        <DashboardHero
-          gradient="from-[hsl(195,80%,35%)] via-[hsl(210,75%,38%)] to-[hsl(220,70%,32%)]"
-          greeting={format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-          greetIcon={<ClipboardList className="w-4 h-4" />}
+        {/* ── Premium Hero ── */}
+        <PremiumHero
+          gradient="bg-gradient-to-br from-[#040D24] via-[#0F2B5E] to-[#1255C8]"
+          orb1Color="radial-gradient(#3B7FE8, transparent)"
+          orb2Color="radial-gradient(#10B981, transparent)"
+          tag={`${format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })} · Telelaudo`}
+          tagIcon={<ClipboardList className="w-4 h-4" />}
           name="Painel Laudista"
-          subtitle={doctorProfile?.crm ? `CRM ${doctorProfile.crm}/${doctorProfile.crm_state} · Telelaudo` : "Telelaudo"}
+          subtitle={doctorProfile?.crm ? `CRM ${doctorProfile.crm}/${doctorProfile.crm_state} · Radiologista` : "Telelaudo · Radiologista"}
           kpis={[
-            { label: "Fila", value: stats?.pending ?? 0, icon: <ClipboardList className="w-4 h-4" /> },
+            { label: "Na fila", value: stats?.pending ?? 0, icon: <ClipboardList className="w-4 h-4" /> },
             { label: "Em análise", value: stats?.inReview ?? 0, icon: <Eye className="w-4 h-4" /> },
             { label: "Laudados", value: stats?.reported ?? 0, icon: <CheckCircle2 className="w-4 h-4" /> },
             { label: "Hoje", value: stats?.todayReported ?? 0, icon: <Target className="w-4 h-4" /> },
@@ -146,30 +152,35 @@ const LaudistaDashboard = () => {
           loading={loadingStats}
           onRefresh={() => { queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] }); }}
           refreshing={refreshing}
+          liveDot={urgentCount > 0}
+          liveCount={urgentCount}
         />
 
-        {/* ── Stat Cards ── */}
-        <DashboardStatCards
-          cols={4}
-          loading={loadingStats}
-          cards={[
-            { label: "Na fila (pendente)", value: stats?.pending ?? 0, icon: <ClipboardList className="w-4 h-4" />, bg: "bg-warning/10", text: "text-warning" },
-            { label: "Em análise", value: stats?.inReview ?? 0, icon: <Eye className="w-4 h-4" />, bg: "bg-primary/10", text: "text-primary" },
-            { label: "Total laudados", value: stats?.reported ?? 0, icon: <CheckCircle2 className="w-4 h-4" />, bg: "bg-success/10", text: "text-success" },
-            { label: "Laudados hoje", value: stats?.todayReported ?? 0, icon: <Target className="w-4 h-4" />, bg: "bg-secondary/10", text: "text-secondary" },
-          ]}
-        />
+        {/* ── Bento Stats ── */}
+        <BentoStatCards loading={loadingStats} stats={[
+          { label: "Na fila (pendente)", value: stats?.pending ?? 0, icon: "📋", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-700 dark:text-amber-400" },
+          { label: "Em análise", value: stats?.inReview ?? 0, icon: "🔍", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400" },
+          { label: "Total laudados", value: stats?.reported ?? 0, icon: "✅", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 22 } },
+          { label: "Laudados hoje", value: stats?.todayReported ?? 0, icon: "🎯", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueColor: "text-violet-600 dark:text-violet-400" },
+        ]} />
 
-        {/* Urgent Alert */}
+        {/* ── Urgent Alert ── */}
         {!loadingExams && urgentCount > 0 && (
-          <motion.div variants={fadeUp}>
-            <div className="flex items-center gap-3 p-4 rounded-2xl bg-destructive/5 border border-destructive/20">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-destructive to-destructive/70 flex items-center justify-center shrink-0 shadow-md shadow-destructive/15">
-                <AlertTriangle className="w-5 h-5 text-white" />
-              </div>
+          <AlertBox
+            variant="danger"
+            icon={<span className="text-[20px]">🚨</span>}
+            title={`${urgentCount} exame${urgentCount > 1 ? "s" : ""} urgente${urgentCount > 1 ? "s" : ""} — prioridade máxima`}
+            subtitle="Laudar imediatamente antes dos exames normais"
+            actionLabel="Ver fila urgente"
+            onAction={() => navigate("/dashboard/laudista/queue?role=doctor")}
+          />
+        )}
+
+        {/* placeholder closing for old block */}
+        {false && urgentCount > 0 && (
+          <div className="hidden">
               <div className="flex-1">
-                <p className="text-sm font-bold text-foreground">🚨 {urgentCount} exame{urgentCount > 1 ? "s" : ""} urgente{urgentCount > 1 ? "s" : ""}</p>
-                <p className="text-xs text-muted-foreground">Priorize os laudos urgentes na fila</p>
+                <p className="text-sm">placeholder</p>
               </div>
               <Button size="sm" className="bg-gradient-to-r from-destructive to-destructive/80 text-white rounded-xl shrink-0" onClick={() => navigate("/dashboard/laudista/queue?role=doctor")}>
                 Ver Fila
