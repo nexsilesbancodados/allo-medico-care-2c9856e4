@@ -389,7 +389,7 @@ const DoctorCalendar = () => {
             ) : (
               <div className="space-y-1.5">
                 {dayAppts.map(a => {
-                  const t = typeLabel[a.appointment_type] ?? typeLabel.first_visit;
+                  const t = typeLabel[a.appointment_type ?? "first_visit"] ?? typeLabel.first_visit;
                   const sc = statusConfig[a.status] ?? statusConfig.scheduled;
                   return (
                     <div
