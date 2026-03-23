@@ -260,7 +260,7 @@ const PatientSupportChat = () => {
           <Card className="border-border">
             <CardContent className="py-12 text-center">
               <MessageCircle className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
-              <p className="text-sm font-medium text-foreground">Nenhum atendimento aberto</p>
+              <><img src="/src/assets/pingo-support.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[13px] font-semibold text-foreground">Nenhum atendimento aberto</p></>
               <p className="text-xs text-muted-foreground mt-1">Clique em "Novo Atendimento" para falar com nossa equipe.</p>
             </CardContent>
           </Card>

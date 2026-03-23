@@ -209,7 +209,7 @@ const PatientHealth = () => {
             {loading ? (
               [0,1,2].map(i => <Skeleton key={i} className="h-20 w-full" />)
             ) : filteredConsultations.length === 0 ? (
-              <Card className="border-border"><CardContent className="py-8 text-center text-muted-foreground">Nenhuma consulta realizada.</CardContent></Card>
+              <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10"><img src="/src/assets/mascot-wave.png" alt="Pingo" className="w-16 h-16 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhuma consulta realizada</p></div>
             ) : filteredConsultations.map(a => (
               <Card key={a.id} className="border-border">
                 <CardContent className="p-4">
@@ -235,7 +235,7 @@ const PatientHealth = () => {
 
           <TabsContent value="prescriptions" className="mt-4 space-y-3">
             {prescriptions.length === 0 ? (
-              <Card className="border-border"><CardContent className="py-8 text-center text-muted-foreground">Nenhuma receita emitida.</CardContent></Card>
+              <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10"><img src="/src/assets/mascot-thumbsup.png" alt="Pingo" className="w-16 h-16 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhuma receita emitida</p></div>
             ) : prescriptions.map(p => (
               <Card key={p.id} className="border-border">
                 <CardContent className="p-4">
@@ -260,7 +260,7 @@ const PatientHealth = () => {
 
           <TabsContent value="documents" className="mt-4 space-y-3">
             {documents.length === 0 ? (
-              <Card className="border-border"><CardContent className="py-8 text-center text-muted-foreground">Nenhum exame enviado.</CardContent></Card>
+              <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10"><img src="/src/assets/mascot-reading.png" alt="Pingo" className="w-16 h-16 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhum exame enviado</p></div>
             ) : documents.map(d => (
               <Card key={d.id} className="border-border">
                 <CardContent className="p-4">

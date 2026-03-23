@@ -178,7 +178,7 @@ const AdminDoctorApplications = () => {
       {loading ? (
         <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
       ) : applications.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">Nenhuma solicitação encontrada.</CardContent></Card>
+        <div className="text-center py-10"><img src="/src/assets/pingo-admin.png" alt="Pingo" className="w-24 h-24 object-contain mx-auto drop-shadow-md mb-3 select-none" /><p className="text-[13px] font-semibold text-foreground mb-1">Nenhuma solicitação encontrada</p><p className="text-[11px] text-muted-foreground">Novas solicitações de médicos aparecerão aqui</p></div>
       ) : (
         <div className="grid gap-3">
           {applications.map(app => (

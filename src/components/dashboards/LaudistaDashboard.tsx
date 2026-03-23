@@ -26,7 +26,6 @@ import { PingoBanner } from "@/components/mascot/PingoMascot";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { AlertBox } from "./AlertBox";
-import { PingoBanner } from "@/components/mascot/PingoMascot";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } } };

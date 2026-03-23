@@ -319,7 +319,7 @@ const AdminApprovals = () => {
                   </>
                 )}
                 {pendingDoctors.length === 0 && approvedDoctors.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">Nenhum médico cadastrado.</p>
+                  <div className="text-center py-8"><img src="/src/assets/pingo-admin.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhum médico cadastrado</p></div>
                 )}
               </TabsContent>
 
@@ -337,7 +337,7 @@ const AdminApprovals = () => {
                   </>
                 )}
                 {pendingClinics.length === 0 && approvedClinics.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">Nenhuma clínica cadastrada.</p>
+                  <div className="text-center py-8"><img src="/src/assets/pingo-admin.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhuma clínica cadastrada</p></div>
                 )}
               </TabsContent>
 
@@ -355,7 +355,7 @@ const AdminApprovals = () => {
                   </>
                 )}
                 {pendingPartners.length === 0 && approvedPartners.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">Nenhum parceiro cadastrado.</p>
+                  <div className="text-center py-8"><img src="/src/assets/pingo-partner.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhum parceiro cadastrado</p></div>
                 )}
               </TabsContent>
 

@@ -164,7 +164,7 @@ const MedicalHistory = () => {
 
         {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> :
         appointments.length === 0 ? (
-          <Card className="border-border"><CardContent className="py-12 text-center text-muted-foreground">Nenhuma consulta realizada ainda.</CardContent></Card>
+          <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10"><img src="/src/assets/mascot-reading.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" /><p className="text-[13px] font-semibold text-foreground mb-1">Nenhuma consulta realizada ainda</p><p className="text-[11px] text-muted-foreground">Seu histórico médico aparecerá aqui após sua primeira consulta</p></div>
         ) : (
           <div className="space-y-4">
             {appointments.map(a => (

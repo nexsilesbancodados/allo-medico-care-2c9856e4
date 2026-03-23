@@ -179,7 +179,7 @@ const AdminLiveConsultations = () => {
             {appointments.length === 0 ? (
               <div className="text-center py-12">
                 <Video className="w-12 h-12 mx-auto text-muted-foreground/20 mb-3" />
-                <p className="text-sm text-muted-foreground">Nenhuma consulta ativa no momento</p>
+                <><img src="/src/assets/mascot-thumbsup.png" alt="Pingo" className="w-16 h-16 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhuma consulta ativa no momento</p></>
               </div>
             ) : (
               <div className="space-y-2">

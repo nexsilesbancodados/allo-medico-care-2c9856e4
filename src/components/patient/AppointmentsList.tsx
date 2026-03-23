@@ -437,10 +437,11 @@ const AppointmentsList = () => {
               ))}
             </div>
           ) : upcoming.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl border border-dashed border-border bg-muted/20">
-              <CalendarIcon className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
-              <p className="text-sm text-muted-foreground">Nenhuma consulta próxima</p>
-              <Button size="sm" variant="outline" className="mt-3 rounded-xl" onClick={() => navigate("/dashboard/schedule")}>
+            <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10">
+              <img src="/src/assets/mascot-welcome.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" />
+              <p className="text-[13px] font-semibold text-foreground mb-1">Nenhuma consulta próxima</p>
+              <p className="text-[11px] text-muted-foreground mb-3">Agende agora e cuide da sua saúde</p>
+              <Button size="sm" className="rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-[0_3px_12px_rgba(37,99,235,.3)]" onClick={() => navigate("/dashboard/schedule")}>
                 Agendar consulta
               </Button>
             </div>
@@ -467,9 +468,10 @@ const AppointmentsList = () => {
               ))}
             </div>
           ) : past.length === 0 ? (
-            <div className="text-center py-10 rounded-2xl border border-dashed border-border bg-muted/20">
-              <FileText className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
-              <p className="text-sm text-muted-foreground">Nenhuma consulta no histórico</p>
+            <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10">
+              <img src="/src/assets/mascot-reading.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" />
+              <p className="text-[13px] font-semibold text-foreground mb-1">Nenhuma consulta no histórico</p>
+              <p className="text-[11px] text-muted-foreground">Suas consultas realizadas aparecerão aqui</p>
             </div>
           ) : (
             <div className="space-y-3">{past.map((a, i) => renderAppointment(a, i))}</div>
