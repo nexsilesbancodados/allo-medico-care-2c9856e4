@@ -661,6 +661,7 @@ const VideoRoom = () => {
   useEffect(() => { elapsedRef.current = elapsed; }, [elapsed]);
 
   const endCall = useCallback(async () => {
+    videoRef.current?.hangUp();
     if (presenceLogId.current) {
       await supabase.from("video_presence_logs").update({
         left_at: new Date().toISOString(),
