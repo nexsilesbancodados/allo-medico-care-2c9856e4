@@ -383,7 +383,7 @@ const VideoRoom = () => {
 
     if (isDoctor) {
       const { data: noteData } = await supabase
-        .from("consultation_notes").select("content").eq("appointment_id", appointmentId).maybeSingle();
+        .from("consultation_notes").select("content").eq("appointment_id", appointmentId ?? '').maybeSingle();
       if (noteData) {
         // Try to parse SOAP JSON, fallback to plain text
         try {
