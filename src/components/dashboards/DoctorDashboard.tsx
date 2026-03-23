@@ -207,41 +207,36 @@ const DoctorDashboard = () => {
           </div>
         </section>
 
-        {/* ═══ KPI Cards — colored left border like reference ═══ */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4" role="list" aria-label="Estatísticas do médico">
-          {loading ? (
-            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-2xl shimmer-v2" />)
-          ) : (
-            kpis.map((kpi, i) => (
-              <motion.div
-                key={kpi.label}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 18 }}
-                role="listitem"
-                aria-label={`${kpi.label}: ${kpi.value}`}
-                className={`kpi-card relative overflow-hidden bg-card rounded-2xl border border-border/40 border-l-[3px] ${kpi.borderColor} p-4 cursor-pointer group`}
-                onClick={() => {
-                  const paths = [null, "/dashboard/doctor/waiting-room", "/dashboard/prescriptions", "/dashboard/earnings"];
-                  if (paths[i]) navigate(paths[i]!);
-                }}
-              >
-                {/* Ambient glow */}
-                <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full blur-2xl opacity-10 pointer-events-none ${kpi.iconBg}`} aria-hidden="true" />
-                
-                <div className="flex items-center justify-between mb-3 relative">
-                  <div className={`size-11 rounded-xl ${kpi.iconBg} flex items-center justify-center shadow-sm ring-1 ring-border/10 group-hover:scale-110 transition-transform duration-200`}>
-                    <kpi.icon className={`w-5 h-5 ${kpi.iconColor}`} />
-                  </div>
-                  <Badge className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border-0 ${kpi.badgeColor}`}>
-                    {kpi.badge}
-                  </Badge>
-                </div>
-                <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider mb-1.5">{kpi.label}</p>
-                <p className={`font-black text-foreground leading-none tabular-nums ${kpi.isLarge ? "text-xl" : "text-2xl"}`}>{kpi.value}</p>
-              </motion.div>
-            ))
-          )}
+        {/* ═══ Quick Actions — horizontal pill buttons ═══ */}
+        <div className="flex gap-2.5 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
+          {[
+            { label: "Sala de Espera", icon: Video, path: "/dashboard/doctor/waiting-room", active: waitingCount > 0, badge: waitingCount },
+            { label: "Receitas", icon: FileText, path: "/dashboard/prescriptions" },
+            { label: "Calendário", icon: Calendar, path: "/dashboard/doctor/calendar" },
+            { label: "Ganhos", icon: DollarSign, path: "/dashboard/earnings" },
+            { label: "Pacientes", icon: Users, path: "/dashboard/patients" },
+          ].map((item, i) => (
+            <motion.button
+              key={item.label}
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.04 }}
+              onClick={() => navigate(item.path)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95 ${
+                item.active
+                  ? "bg-secondary text-white shadow-md shadow-secondary/25"
+                  : "bg-card border border-border/40 text-foreground hover:border-secondary/30 hover:shadow-sm"
+              }`}
+            >
+              <item.icon className="w-4 h-4" />
+              {item.label}
+              {(item.badge ?? 0) > 0 && (
+                <span className="bg-white/25 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                  {item.badge}
+                </span>
+              )}
+            </motion.button>
+          ))}
         </div>
 
         {/* ═══ Patients Table ═══ */}

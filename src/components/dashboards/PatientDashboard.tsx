@@ -260,7 +260,7 @@ const PatientDashboard = () => {
           <UpsellBanner />
         </SectionErrorBoundary>
 
-        {/* ═══ Quick Actions — circular icons like health apps ═══ */}
+        {/* ═══ Quick Actions — circular gradient icons like health apps ═══ */}
         <section>
           <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mb-3 px-1">Ações Rápidas</h2>
           <div className="flex gap-4 justify-around px-2">
@@ -273,8 +273,8 @@ const PatientDashboard = () => {
                 onClick={() => navigate(item.path)}
                 className="group flex flex-col items-center gap-2 active:scale-[0.92] transition-transform"
               >
-                <div className={`size-14 sm:size-16 rounded-full ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-sm`}>
-                  <item.icon className={`w-6 h-6 sm:w-7 sm:h-7 ${item.color}`} />
+                <div className={`size-14 sm:size-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-lg shadow-black/10`}>
+                  <item.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <span className="text-[11px] font-semibold text-foreground/70">{item.label}</span>
               </motion.button>
