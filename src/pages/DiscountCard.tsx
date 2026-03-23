@@ -511,12 +511,24 @@ const DiscountCard = () => {
           </div>
         </section>
 
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+        {!isDashboard && (
+          <Suspense fallback={null}>
+            <Footer />
+          </Suspense>
+        )}
       </div>
     </>
   );
+
+  if (isDashboard) {
+    return (
+      <DashboardLayout title="Cartão de Benefícios" nav={getPatientNav("discount-card")} role="patient">
+        {content}
+      </DashboardLayout>
+    );
+  }
+
+  return content;
 };
 
 export default DiscountCard;
