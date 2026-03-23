@@ -51,8 +51,12 @@ describe("sanitizeEmail", () => {
 });
 
 describe("safeJsonParse", () => {
-  it("parses valid JSON", () => {
-    expect(safeJsonParse('{"a":1}', {})).toEqual({ a: 1 });
+  it("parses valid JSON array", () => {
+    expect(safeJsonParse("[1,2,3]", [])).toEqual([1, 2, 3]);
+  });
+  it("parses primitive JSON", () => {
+    expect(safeJsonParse("42", 0)).toBe(42);
+    expect(safeJsonParse('"hello"', "")).toBe("hello");
   });
   it("returns fallback for invalid JSON", () => {
     expect(safeJsonParse("not json", [])).toEqual([]);
