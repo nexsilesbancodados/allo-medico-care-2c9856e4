@@ -132,86 +132,71 @@ const PatientDashboard = () => {
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
-      <div className="max-w-5xl mx-auto w-full space-y-6 pb-24">
+      <div className="max-w-5xl mx-auto w-full space-y-5 pb-24">
 
-        {/* ═══ HERO — Welcome + Avatar ═══ */}
-        <section className="relative overflow-hidden rounded-3xl border border-border/30 bg-card shadow-sm">
-          {/* Decorative gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.04] via-transparent to-secondary/[0.04] pointer-events-none" />
-          <div className="absolute -right-10 -bottom-6 opacity-10 pointer-events-none">
-            <img src={mascotImg} alt="" className="w-32 h-32 lg:w-40 lg:h-40 object-contain" loading="lazy" />
-          </div>
+        {/* ═══ HERO — Greeting card (app-like, no heavy borders) ═══ */}
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(var(--primary))] via-[hsl(210,85%,50%)] to-[hsl(195,80%,48%)] shadow-lg shadow-primary/15">
+          {/* Decorative circles */}
+          <div className="absolute -right-6 -top-6 w-28 h-28 bg-white/[0.07] rounded-full blur-xl pointer-events-none" />
+          <div className="absolute -left-4 -bottom-4 w-20 h-20 bg-white/[0.05] rounded-full blur-lg pointer-events-none" />
 
-          <div className="relative z-10 p-4 sm:p-5 lg:p-6 pb-4">
-            {/* Top row: avatar + greeting + actions */}
-            <div className="flex items-start gap-3 sm:gap-4">
-              <Avatar className="h-11 w-11 sm:h-[52px] sm:w-[52px] shrink-0 ring-[3px] ring-primary/12 ring-offset-2 ring-offset-card shadow-md">
-                {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                <AvatarFallback className="bg-gradient-to-br from-primary to-secondary text-primary-foreground text-base sm:text-lg font-bold">
-                  {(profile?.first_name?.[0] ?? "") + (profile?.last_name?.[0] ?? "")}
-                </AvatarFallback>
-              </Avatar>
-
+          <div className="relative z-10 p-5 sm:p-6">
+            {/* Top row: greeting + avatar */}
+            <div className="flex items-start gap-3">
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <greetData.icon className="w-3.5 h-3.5 text-warning" />
-                  <span className="text-[11px] font-medium text-muted-foreground">{greetData.text}</span>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <greetData.icon className="w-4 h-4 text-white/70" />
+                  <span className="text-xs font-medium text-white/70">{greetData.text}</span>
                 </div>
-                <h1 className="text-xl sm:text-[22px] lg:text-2xl font-extrabold leading-tight text-foreground tracking-tight truncate">
+                <h1 className="text-2xl sm:text-[26px] font-extrabold leading-tight text-white tracking-tight">
                   {profile?.first_name || "Paciente"}
                 </h1>
-                <p className="text-[11px] text-muted-foreground/70 mt-0.5 capitalize">
+                <p className="text-[11px] text-white/50 mt-1 capitalize">
                   {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
                 </p>
               </div>
 
-              <div className="flex items-center gap-0.5 shrink-0 mt-1">
+              <div className="flex items-center gap-2 shrink-0">
                 <MedicalHistoryExport />
                 <Button size="icon" variant="ghost"
-                  className="h-8 w-8 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  className="h-9 w-9 rounded-xl text-white/70 hover:text-white hover:bg-white/15"
                   onClick={handleRefresh} disabled={refreshing} aria-label="Atualizar"
                 >
-                  <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+                  <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
                 </Button>
               </div>
             </div>
-          </div>
 
-          {/* KPI stats bar */}
-          {!loading && (
-            <div className="relative z-10 px-4 sm:px-5 lg:px-6 pb-4 sm:pb-5">
-              <div className="grid grid-cols-3 gap-2 sm:gap-3" role="list" aria-label="Estatísticas do paciente">
+            {/* KPI pills row */}
+            {!loading && (
+              <div className="flex gap-2.5 mt-4 overflow-x-auto scrollbar-none -mx-1 px-1">
                 {[
-                  { label: "Consultas", value: stats?.total ?? 0, icon: Calendar, color: "text-primary", bgIcon: "bg-primary/10", gradient: "from-primary/5 to-primary/[0.02]" },
-                  { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText, color: "text-secondary", bgIcon: "bg-secondary/10", gradient: "from-secondary/5 to-secondary/[0.02]" },
-                  { label: "Documentos", value: stats?.documents ?? 0, icon: Upload, color: "text-warning", bgIcon: "bg-warning/10", gradient: "from-warning/5 to-warning/[0.02]" },
+                  { label: "Consultas", value: stats?.total ?? 0, icon: Calendar },
+                  { label: "Receitas", value: stats?.prescriptions ?? 0, icon: FileText },
+                  { label: "Documentos", value: stats?.documents ?? 0, icon: Upload },
                 ].map((kpi, i) => (
                   <motion.div
                     key={kpi.label}
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.06, type: "spring", stiffness: 200, damping: 20 }}
-                    role="listitem"
-                    className={`kpi-card relative overflow-hidden flex items-center gap-2 sm:gap-2.5 px-2.5 sm:px-3 py-2.5 sm:py-3 rounded-xl bg-gradient-to-br ${kpi.gradient} border border-border/25 backdrop-blur-sm`}
+                    className="flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-2xl px-3.5 py-2.5 shrink-0"
                   >
-                    <div className={`absolute -top-3 -right-3 w-12 h-12 rounded-full blur-xl opacity-20 ${kpi.bgIcon}`} aria-hidden="true" />
-                    <div className={`size-8 sm:size-9 rounded-xl ${kpi.bgIcon} flex items-center justify-center shrink-0 shadow-sm`}>
-                      <kpi.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${kpi.color}`} />
-                    </div>
-                    <div className="min-w-0 relative">
-                      <p className="text-lg sm:text-xl font-black text-foreground leading-none tabular-nums">{kpi.value}</p>
-                      <p className="text-[9px] sm:text-[10px] text-muted-foreground/70 font-semibold mt-0.5 uppercase tracking-wider">{kpi.label}</p>
+                    <kpi.icon className="w-4 h-4 text-white/80" />
+                    <div>
+                      <p className="text-lg font-black text-white leading-none tabular-nums">{kpi.value}</p>
+                      <p className="text-[9px] text-white/50 font-semibold uppercase tracking-wider">{kpi.label}</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
-            </div>
-          )}
-          {loading && (
-            <div className="px-4 sm:px-5 pb-4 sm:pb-5 grid grid-cols-3 gap-2 sm:gap-3">
-              {[1,2,3].map(i => <div key={i} className="h-16 rounded-xl shimmer-v2" />)}
-            </div>
-          )}
+            )}
+            {loading && (
+              <div className="flex gap-2.5 mt-4">
+                {[1,2,3].map(i => <div key={i} className="h-14 w-28 rounded-2xl bg-white/10 animate-pulse" />)}
+              </div>
+            )}
+          </div>
         </section>
 
         {/* ═══ Digital Card — premium glassmorphism banner ═══ */}
