@@ -170,12 +170,15 @@ const DiscountCard = () => {
     } finally { setSubscribing(null); }
   };
 
-  return (
+  const [searchParams] = useSearchParams();
+  const isDashboard = !!searchParams.get("role");
+
+  const content = (
     <>
       <SEOHead title="Cartão de Benefícios | AloClinica — Telemedicina, Descontos e Assistência" description="Telemedicina 24h, clube de vantagens com até 80% de desconto e assistência funerária. Planos a partir de R$ 39,90/mês." />
-      <div className="min-h-screen relative">
-        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(45,60%,96%)] via-[hsl(40,50%,91%)] to-[hsl(35,45%,85%)] dark:from-[hsl(45,25%,8%)] dark:via-[hsl(40,20%,10%)] dark:to-[hsl(35,18%,12%)]" />
-        <Header />
+      <div className={`${isDashboard ? "" : "min-h-screen"} relative`}>
+        {!isDashboard && <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(45,60%,96%)] via-[hsl(40,50%,91%)] to-[hsl(35,45%,85%)] dark:from-[hsl(45,25%,8%)] dark:via-[hsl(40,20%,10%)] dark:to-[hsl(35,18%,12%)]" />}
+        {!isDashboard && <Header />}
 
         {/* ==================== HERO ==================== */}
         <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "60vh" }}>
