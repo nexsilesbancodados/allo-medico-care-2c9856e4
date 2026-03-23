@@ -138,7 +138,7 @@ const PatientDocuments = () => {
                   <TableRow key={d.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">{fileIcon(d.file_type)}</span>
+                        <span className="text-lg">{fileIcon(d.file_type ?? "")}</span>
                         <div>
                           <p className="text-sm font-medium text-foreground">{d.description || d.file_name}</p>
                           <p className="text-xs text-muted-foreground">{d.file_name}</p>

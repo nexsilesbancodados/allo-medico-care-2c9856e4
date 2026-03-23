@@ -628,7 +628,7 @@ const GuestCheckout = () => {
                                     <span className="font-semibold">{doc.rating.toFixed(1)}</span>
                                   </span>
                                 )}
-                                {doc.experience_years > 0 && (
+                                {(doc.experience_years ?? 0) > 0 && (
                                   <span className="text-xs text-muted-foreground">{doc.experience_years} anos</span>
                                 )}
                               </div>
