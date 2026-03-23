@@ -36,8 +36,8 @@ interface DoctorOption {
   crm_state: string;
   consultation_price: number;
   rating: number;
-  total_reviews: number;
-  experience_years: number;
+  total_reviews: number | null;
+  experience_years: number | null;
   first_name: string;
   last_name: string;
   specialties: string[];

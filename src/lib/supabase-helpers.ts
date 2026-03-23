@@ -34,7 +34,7 @@ export async function safeQuery<T>(
     logError(`Supabase${context ? `:${context}` : ''} unexpected error`, e);
     return {
       data: null,
-      error: { message: String(e), details: '', hint: '', code: 'UNKNOWN' },
+      error: { message: String(e), details: '', hint: '', code: 'UNKNOWN', name: 'UnknownError' } as PostgrestError,
     };
   }
 }

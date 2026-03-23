@@ -802,7 +802,7 @@ const PlansCheckout = () => {
                                 {doc.rating.toFixed(1)}
                               </span>
                             )}
-                            {doc.experience_years > 0 && (
+                            {(doc.experience_years ?? 0) > 0 && (
                               <span className="text-xs text-muted-foreground">{doc.experience_years} anos exp.</span>
                             )}
                           </div>

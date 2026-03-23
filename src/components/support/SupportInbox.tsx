@@ -204,7 +204,7 @@ const SupportInbox = () => {
     return () => { supabase.removeChannel(channel); };
   }, [selectedTicket, fetchTickets, playNotificationSound]);
 
-  useEffect(() => {
+  useEffect((): (() => void) | void => {
     if (selectedTicket) {
       fetchMessages(selectedTicket.id);
       // Setup typing channel for this ticket's patient

@@ -432,7 +432,7 @@ const DoctorSearch = () => {
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         CRM {doctor.crm}/{doctor.crm_state}
-                        {doctor.experience_years > 0 && ` · ${doctor.experience_years}a exp.`}
+                        {(doctor.experience_years ?? 0) > 0 && ` · ${doctor.experience_years}a exp.`}
                       </p>
 
                       {doctor.specialties.length > 0 && (

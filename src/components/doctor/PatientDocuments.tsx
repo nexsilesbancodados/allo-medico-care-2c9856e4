@@ -17,7 +17,7 @@ interface PatientDoc {
   id: string;
   patient_id: string;
   file_name: string;
-  file_type: string | null;
+  file_type: string;
   description: string | null;
   created_at: string;
   patient_name: string;

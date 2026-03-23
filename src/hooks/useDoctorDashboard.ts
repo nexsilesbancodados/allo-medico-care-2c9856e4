@@ -58,8 +58,8 @@ export const useDoctorStats = () => {
             .in("user_id", patientIds)
           : { data: [] as { user_id: string; first_name: string; last_name: string }[] };
         const pMap = new Map(profiles?.map(p => [p.user_id, `${p.first_name} ${p.last_name}`]) ?? []);
-        todayAppts = todayAppts.map(a => ({ ...a, patient_name: pMap.get(a.patient_id) ?? "Paciente" }));
-        upcoming = upcoming.map(a => ({ ...a, patient_name: pMap.get(a.patient_id) ?? "Paciente" }));
+        todayAppts = todayAppts.map(a => ({ ...a, patient_name: pMap.get(a.patient_id ?? "") ?? "Paciente" }));
+        upcoming = upcoming.map(a => ({ ...a, patient_name: pMap.get(a.patient_id ?? "") ?? "Paciente" }));
       }
 
       return {
