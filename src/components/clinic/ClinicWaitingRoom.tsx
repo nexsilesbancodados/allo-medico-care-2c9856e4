@@ -71,7 +71,7 @@ const ClinicWaitingRoom = () => {
     // Patient names
     const patientIds = [...new Set((appts ?? []).map(a => a.patient_id).filter(Boolean))];
     if (patientIds.length > 0) {
-      const { data: patProfiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds);
+      const { data: patProfiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds as string[]);
       const patMap = new Map<string, string>();
       (patProfiles ?? []).forEach(p => patMap.set(p.user_id, `${p.first_name} ${p.last_name}`));
       setPatients(patMap);

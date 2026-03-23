@@ -137,7 +137,7 @@ const AdminDoctors = () => {
                     </TableCell>
                     <TableCell className="text-right space-x-1">
                       <Button size="sm" variant="ghost" onClick={() => openDetail(doc)}><Eye className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => toggleApproval(doc.id, doc.is_approved)}>
+                      <Button size="sm" variant="ghost" onClick={() => toggleApproval(doc.id, !!doc.is_approved)}>
                         {doc.is_approved ? <X className="w-4 h-4 text-destructive" /> : <Check className="w-4 h-4 text-secondary" />}
                       </Button>
                     </TableCell>

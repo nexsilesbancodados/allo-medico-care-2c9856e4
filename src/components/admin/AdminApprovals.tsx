@@ -97,7 +97,7 @@ const AdminApprovals = () => {
     } else if (type === "clinic") {
       const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === id);
       if (clinic) {
-        notifyClinicApproval(clinic.user_id, clinic.name, true).catch(err => logError("notifyClinicApproval failed", err));
+        notifyClinicApproval(clinic.user_id, clinic.name ?? '', true).catch(err => logError("notifyClinicApproval failed", err));
       }
     }
 
@@ -151,7 +151,7 @@ const AdminApprovals = () => {
     } else if (rejectTarget.type === "clinic") {
       const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === rejectTarget.id);
       if (clinic) {
-        notifyClinicApproval(clinic.user_id, clinic.name, false, rejectReason).catch(err => logError("notifyClinicApproval reject failed", err));
+        notifyClinicApproval(clinic.user_id, clinic.name ?? '', false, rejectReason).catch(err => logError("notifyClinicApproval reject failed", err));
       }
     }
     
@@ -187,7 +187,7 @@ const AdminApprovals = () => {
                       variant="ghost"
                       size="sm"
                       className="h-6 px-2 text-xs text-primary hover:text-primary"
-                      onClick={() => window.open(`https://portal.cfm.org.br/busca-medicos/?crm=${encodeURIComponent(item.crm)}&uf=${encodeURIComponent(item.crm_state)}`, "_blank")}
+                      onClick={() => window.open(`https://portal.cfm.org.br/busca-medicos/?crm=${encodeURIComponent(item.crm ?? "")}&uf=${encodeURIComponent(item.crm_state ?? "")}`, "_blank")}
                     >
                       <ExternalLink className="w-3 h-3 mr-1" /> Validar no CFM
                     </Button>
@@ -220,9 +220,9 @@ const AdminApprovals = () => {
                     </label>
                     {item.crm_verified_at && <span className="text-xs text-muted-foreground">({new Date(item.crm_verified_at).toLocaleDateString("pt-BR")})</span>}
                   </div>
-                  {item.specialties?.length > 0 && (
+                  {(item.specialties?.length ?? 0) > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {item.specialties.map((s: string, i: number) => <Badge key={i} variant="outline" className="text-xs bg-secondary/10 text-secondary">{s}</Badge>)}
+                      {item.specialties?.map((s: string, i: number) => <Badge key={i} variant="outline" className="text-xs bg-secondary/10 text-secondary">{s}</Badge>)}
                     </div>
                   )}
                   {item.education && <p className="text-xs text-muted-foreground">Formação: {item.education}</p>}
@@ -239,7 +239,7 @@ const AdminApprovals = () => {
                 <>
                   <p className="font-semibold text-foreground text-lg">{item.business_name}</p>
                   <p className="text-sm text-muted-foreground">
-                    Tipo: <Badge variant="outline" className="text-xs">{partnerTypeLabel[item.partner_type] ?? item.partner_type}</Badge>
+                    Tipo: <Badge variant="outline" className="text-xs">{partnerTypeLabel[item.partner_type ?? ''] ?? item.partner_type}</Badge>
                     {" · "}CNPJ: {item.cnpj || "—"} · Responsável: {item.owner_name}
                   </p>
                 </>
@@ -257,7 +257,7 @@ const AdminApprovals = () => {
                   setRejectTarget({ 
                     id: item.id, 
                     type, 
-                    name: type === "doctor" ? `${item.first_name} ${item.last_name}` : item.name || item.business_name 
+                    name: type === "doctor" ? `${item.first_name} ${item.last_name}` : item.name || item.business_name || '' 
                   }); 
                   setShowReject(true); 
                 }}>
