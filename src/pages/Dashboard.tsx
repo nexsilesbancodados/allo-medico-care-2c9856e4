@@ -290,39 +290,40 @@ const Dashboard = () => {
       <Route index element={<IndexDashboard />} />
 
       {/* Role dashboards (eager) */}
-      <Route path="patient" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientDashboard /></RoleGuard>} />
-      <Route path="doctor" element={<RoleGuard allowed={["doctor"]} roles={roles}><DoctorDashboard /></RoleGuard>} />
-      <Route path="clinic" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
+      {/* Role dashboards (eager) */}
+      <Route path="patient" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><PatientDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="doctor" element={<RoleGuard allowed={["doctor"]} roles={roles}><ContextGuard panel="doctor" forceRole={forceRole} roles={roles}><DoctorDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="clinic" element={<RoleGuard allowed={["clinic"]} roles={roles}><ContextGuard panel="clinic" forceRole={forceRole} roles={roles}><ClinicDashboard /></ContextGuard></RoleGuard>} />
       <Route path="admin" element={<RoleGuard allowed={[]} roles={roles}><AdminDashboard /></RoleGuard>} />
-      <Route path="receptionist" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
-      <Route path="support" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
-      <Route path="partner" element={<RoleGuard allowed={["partner"]} roles={roles}><PartnerDashboard /></RoleGuard>} />
+      <Route path="receptionist" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><ReceptionDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="support" element={<RoleGuard allowed={["support"]} roles={roles}><ContextGuard panel="support" forceRole={forceRole} roles={roles}><SupportDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="partner" element={<RoleGuard allowed={["partner"]} roles={roles}><ContextGuard panel="partner" forceRole={forceRole} roles={roles}><PartnerDashboard /></ContextGuard></RoleGuard>} />
 
-      {/* Shared (eager) */}
+      {/* Shared — preserve ?role context */}
       <Route path="profile" element={<UserProfile />} />
       <Route path="settings" element={<PanelSettings />} />
       <Route path="ai-assistant" element={<AIAssistantPanel />} />
 
       {/* Patient routes */}
-      <Route path="doctors" element={<RoleGuard allowed={["patient"]} roles={roles}><DoctorSearch /></RoleGuard>} />
-      <Route path="appointments" element={<RoleGuard allowed={["patient"]} roles={roles}><AppointmentsList /></RoleGuard>} />
-      <Route path="schedule" element={<RoleGuard allowed={["patient"]} roles={roles}><DoctorSearch /></RoleGuard>} />
-      <Route path="schedule/:doctorId" element={<RoleGuard allowed={["patient"]} roles={roles}><BookAppointment /></RoleGuard>} />
-      <Route path="plans" element={<RoleGuard allowed={["patient"]} roles={roles}><PlansCheckout /></RoleGuard>} />
-      <Route path="history" element={<RoleGuard allowed={["patient"]} roles={roles}><MedicalHistory /></RoleGuard>} />
-      <Route path="payment-history" element={<RoleGuard allowed={["patient"]} roles={roles}><PaymentHistory /></RoleGuard>} />
-      <Route path="patient/documents" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientExamUpload /></RoleGuard>} />
-      <Route path="patient/health" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientHealth /></RoleGuard>} />
-      <Route path="patient/support" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientSupportChat /></RoleGuard>} />
-      <Route path="patient/dependents" element={<RoleGuard allowed={["patient"]} roles={roles}><DependentsManager /></RoleGuard>} />
+      <Route path="doctors" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><DoctorSearch /></ContextGuard></RoleGuard>} />
+      <Route path="appointments" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><AppointmentsList /></ContextGuard></RoleGuard>} />
+      <Route path="schedule" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><DoctorSearch /></ContextGuard></RoleGuard>} />
+      <Route path="schedule/:doctorId" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><BookAppointment /></ContextGuard></RoleGuard>} />
+      <Route path="plans" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><PlansCheckout /></ContextGuard></RoleGuard>} />
+      <Route path="history" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><MedicalHistory /></ContextGuard></RoleGuard>} />
+      <Route path="payment-history" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><PaymentHistory /></ContextGuard></RoleGuard>} />
+      <Route path="patient/documents" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><PatientExamUpload /></ContextGuard></RoleGuard>} />
+      <Route path="patient/health" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><PatientHealth /></ContextGuard></RoleGuard>} />
+      <Route path="patient/support" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><PatientSupportChat /></ContextGuard></RoleGuard>} />
+      <Route path="patient/dependents" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><DependentsManager /></ContextGuard></RoleGuard>} />
       <Route path="chat" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><ChatPage /></RoleGuard>} />
       <Route path="medical-records" element={<RoleGuard allowed={["patient", "doctor"]} roles={roles}><MedicalRecords /></RoleGuard>} />
-      <Route path="timeline" element={<RoleGuard allowed={["patient"]} roles={roles}><HealthTimeline /></RoleGuard>} />
-      <Route path="patient/diary" element={<RoleGuard allowed={["patient"]} roles={roles}><SymptomDiary /></RoleGuard>} />
-      <Route path="urgent-care" element={<RoleGuard allowed={["patient"]} roles={roles}><UrgentCareQueue /></RoleGuard>} />
-      <Route path="prescription-renewal" element={<RoleGuard allowed={["patient"]} roles={roles}><PrescriptionRenewalForm /></RoleGuard>} />
-      <Route path="patient/exam-results" element={<RoleGuard allowed={["patient"]} roles={roles}><PatientExamResults /></RoleGuard>} />
-      <Route path="discount-card" element={<RoleGuard allowed={["patient"]} roles={roles}><DiscountCardPage /></RoleGuard>} />
+      <Route path="timeline" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><HealthTimeline /></ContextGuard></RoleGuard>} />
+      <Route path="patient/diary" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><SymptomDiary /></ContextGuard></RoleGuard>} />
+      <Route path="urgent-care" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><UrgentCareQueue /></ContextGuard></RoleGuard>} />
+      <Route path="prescription-renewal" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><PrescriptionRenewalForm /></ContextGuard></RoleGuard>} />
+      <Route path="patient/exam-results" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><PatientExamResults /></ContextGuard></RoleGuard>} />
+      <Route path="discount-card" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><DiscountCardPage /></ContextGuard></RoleGuard>} />
 
       {/* Doctor routes — blocked when ?role=laudista */}
       <Route path="availability" element={<RoleGuard allowed={["doctor"]} roles={roles}><ContextGuard panel="doctor" forceRole={forceRole} roles={roles}><DoctorAvailability /></ContextGuard></RoleGuard>} />
@@ -352,38 +353,38 @@ const Dashboard = () => {
       <Route path="doctor-profile/:doctorId" element={<DoctorPublicProfile />} />
 
       {/* Clinic */}
-      <Route path="clinic/doctors" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDoctorsManagement /></RoleGuard>} />
-      <Route path="clinic/schedules" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicSchedules /></RoleGuard>} />
-      <Route path="clinic/patients" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicPatients /></RoleGuard>} />
-      <Route path="clinic/waiting-room" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicWaitingRoom /></RoleGuard>} />
-      <Route path="clinic/finance" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
-      <Route path="clinic/reports" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicDashboard /></RoleGuard>} />
-      <Route path="clinic/exam-request" element={<RoleGuard allowed={["clinic"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
-      <Route path="clinic/my-exams" element={<RoleGuard allowed={["clinic"]} roles={roles}><ClinicMyExams /></RoleGuard>} />
+      <Route path="clinic/doctors" element={<RoleGuard allowed={["clinic"]} roles={roles}><ContextGuard panel="clinic" forceRole={forceRole} roles={roles}><ClinicDoctorsManagement /></ContextGuard></RoleGuard>} />
+      <Route path="clinic/schedules" element={<RoleGuard allowed={["clinic"]} roles={roles}><ContextGuard panel="clinic" forceRole={forceRole} roles={roles}><ClinicSchedules /></ContextGuard></RoleGuard>} />
+      <Route path="clinic/patients" element={<RoleGuard allowed={["clinic"]} roles={roles}><ContextGuard panel="clinic" forceRole={forceRole} roles={roles}><ClinicPatients /></ContextGuard></RoleGuard>} />
+      <Route path="clinic/waiting-room" element={<RoleGuard allowed={["clinic"]} roles={roles}><ContextGuard panel="clinic" forceRole={forceRole} roles={roles}><ClinicWaitingRoom /></ContextGuard></RoleGuard>} />
+      <Route path="clinic/finance" element={<RoleGuard allowed={["clinic"]} roles={roles}><ContextGuard panel="clinic" forceRole={forceRole} roles={roles}><ClinicDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="clinic/reports" element={<RoleGuard allowed={["clinic"]} roles={roles}><ContextGuard panel="clinic" forceRole={forceRole} roles={roles}><ClinicDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="clinic/exam-request" element={<RoleGuard allowed={["clinic"]} roles={roles}><ContextGuard panel="clinic" forceRole={forceRole} roles={roles}><LaudistaExamRequest /></ContextGuard></RoleGuard>} />
+      <Route path="clinic/my-exams" element={<RoleGuard allowed={["clinic"]} roles={roles}><ContextGuard panel="clinic" forceRole={forceRole} roles={roles}><ClinicMyExams /></ContextGuard></RoleGuard>} />
 
       {/* Support */}
-      <Route path="support/inbox" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
-      <Route path="support/chat" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
-      <Route path="support/logs" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
-      <Route path="support/users" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
-      <Route path="support/online" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
-      <Route path="support/audit" element={<RoleGuard allowed={["support"]} roles={roles}><SupportDashboard /></RoleGuard>} />
+      <Route path="support/inbox" element={<RoleGuard allowed={["support"]} roles={roles}><ContextGuard panel="support" forceRole={forceRole} roles={roles}><SupportDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="support/chat" element={<RoleGuard allowed={["support"]} roles={roles}><ContextGuard panel="support" forceRole={forceRole} roles={roles}><SupportDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="support/logs" element={<RoleGuard allowed={["support"]} roles={roles}><ContextGuard panel="support" forceRole={forceRole} roles={roles}><SupportDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="support/users" element={<RoleGuard allowed={["support"]} roles={roles}><ContextGuard panel="support" forceRole={forceRole} roles={roles}><SupportDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="support/online" element={<RoleGuard allowed={["support"]} roles={roles}><ContextGuard panel="support" forceRole={forceRole} roles={roles}><SupportDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="support/audit" element={<RoleGuard allowed={["support"]} roles={roles}><ContextGuard panel="support" forceRole={forceRole} roles={roles}><SupportDashboard /></ContextGuard></RoleGuard>} />
 
       {/* Partner */}
-      <Route path="partner/validate" element={<RoleGuard allowed={["partner"]} roles={roles}><PartnerDashboard /></RoleGuard>} />
-      <Route path="partner/history" element={<RoleGuard allowed={["partner"]} roles={roles}><PartnerDashboard /></RoleGuard>} />
-      <Route path="partner/conversion" element={<RoleGuard allowed={["partner"]} roles={roles}><PartnerDashboard /></RoleGuard>} />
+      <Route path="partner/validate" element={<RoleGuard allowed={["partner"]} roles={roles}><ContextGuard panel="partner" forceRole={forceRole} roles={roles}><PartnerDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="partner/history" element={<RoleGuard allowed={["partner"]} roles={roles}><ContextGuard panel="partner" forceRole={forceRole} roles={roles}><PartnerDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="partner/conversion" element={<RoleGuard allowed={["partner"]} roles={roles}><ContextGuard panel="partner" forceRole={forceRole} roles={roles}><PartnerDashboard /></ContextGuard></RoleGuard>} />
 
       {/* Reception */}
-      <Route path="reception/schedules" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionSchedules /></RoleGuard>} />
-      <Route path="reception/checkin" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionCheckin /></RoleGuard>} />
-      <Route path="reception/billing" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionBilling /></RoleGuard>} />
-      <Route path="reception/waiting" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionDashboard /></RoleGuard>} />
-      <Route path="reception/patients" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionPatients /></RoleGuard>} />
-      <Route path="reception/calls" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionCalls /></RoleGuard>} />
-      <Route path="reception/records" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionRecords /></RoleGuard>} />
-      <Route path="reception/messages" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ReceptionMessages /></RoleGuard>} />
-      <Route path="reception/exam-request" element={<RoleGuard allowed={["receptionist"]} roles={roles}><LaudistaExamRequest /></RoleGuard>} />
+      <Route path="reception/schedules" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><ReceptionSchedules /></ContextGuard></RoleGuard>} />
+      <Route path="reception/checkin" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><ReceptionCheckin /></ContextGuard></RoleGuard>} />
+      <Route path="reception/billing" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><ReceptionBilling /></ContextGuard></RoleGuard>} />
+      <Route path="reception/waiting" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><ReceptionDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="reception/patients" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><ReceptionPatients /></ContextGuard></RoleGuard>} />
+      <Route path="reception/calls" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><ReceptionCalls /></ContextGuard></RoleGuard>} />
+      <Route path="reception/records" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><ReceptionRecords /></ContextGuard></RoleGuard>} />
+      <Route path="reception/messages" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><ReceptionMessages /></ContextGuard></RoleGuard>} />
+      <Route path="reception/exam-request" element={<RoleGuard allowed={["receptionist"]} roles={roles}><ContextGuard panel="receptionist" forceRole={forceRole} roles={roles}><LaudistaExamRequest /></ContextGuard></RoleGuard>} />
 
       {/* Admin */}
       <Route path="admin/doctors" element={<RoleGuard allowed={[]} roles={roles}><AdminDoctors /></RoleGuard>} />
@@ -409,12 +410,12 @@ const Dashboard = () => {
       <Route path="admin/coupons" element={<RoleGuard allowed={[]} roles={roles}><AdminCoupons /></RoleGuard>} />
 
       {/* Optician */}
-      <Route path="optician" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianDashboard /></RoleGuard>} />
-      <Route path="optician/orders" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianOrders /></RoleGuard>} />
-      <Route path="optician/catalog" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianCatalog /></RoleGuard>} />
-      <Route path="optician/stock" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianStock /></RoleGuard>} />
-      <Route path="optician/production" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianProduction /></RoleGuard>} />
-      <Route path="optician/financial" element={<RoleGuard allowed={["optician"]} roles={roles}><OpticianFinancial /></RoleGuard>} />
+      <Route path="optician" element={<RoleGuard allowed={["optician"]} roles={roles}><ContextGuard panel="optician" forceRole={forceRole} roles={roles}><OpticianDashboard /></ContextGuard></RoleGuard>} />
+      <Route path="optician/orders" element={<RoleGuard allowed={["optician"]} roles={roles}><ContextGuard panel="optician" forceRole={forceRole} roles={roles}><OpticianOrders /></ContextGuard></RoleGuard>} />
+      <Route path="optician/catalog" element={<RoleGuard allowed={["optician"]} roles={roles}><ContextGuard panel="optician" forceRole={forceRole} roles={roles}><OpticianCatalog /></ContextGuard></RoleGuard>} />
+      <Route path="optician/stock" element={<RoleGuard allowed={["optician"]} roles={roles}><ContextGuard panel="optician" forceRole={forceRole} roles={roles}><OpticianStock /></ContextGuard></RoleGuard>} />
+      <Route path="optician/production" element={<RoleGuard allowed={["optician"]} roles={roles}><ContextGuard panel="optician" forceRole={forceRole} roles={roles}><OpticianProduction /></ContextGuard></RoleGuard>} />
+      <Route path="optician/financial" element={<RoleGuard allowed={["optician"]} roles={roles}><ContextGuard panel="optician" forceRole={forceRole} roles={roles}><OpticianFinancial /></ContextGuard></RoleGuard>} />
 
       {/* Laudista — blocked when ?role=doctor */}
       <Route path="laudista" element={<RoleGuard allowed={["doctor", "laudista"]} roles={roles}><ContextGuard panel="laudista" forceRole={forceRole} roles={roles}><LaudistaDashboard /></ContextGuard></RoleGuard>} />
