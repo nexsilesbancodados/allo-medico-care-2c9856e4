@@ -52,14 +52,14 @@ const ROLE_ICON: Record<string, string> = {
   support:"🎧", clinic:"🏢", partner:"🤝", ai:"🤖",
 };
 const ROLE_GRADIENT: Record<string, string> = {
-  patient:"from-blue-500 to-cyan-500",
-  doctor:"from-emerald-500 to-teal-500",
-  admin:"from-red-500 to-rose-500",
-  receptionist:"from-amber-500 to-orange-500",
-  support:"from-yellow-500 to-amber-500",
-  clinic:"from-blue-500 to-indigo-500",
-  partner:"from-green-500 to-emerald-500",
-  ai:"from-sky-500 to-blue-500",
+  patient:"from-[hsl(210,90%,45%)] to-[hsl(195,85%,50%)]",
+  doctor:"from-[hsl(160,55%,45%)] to-[hsl(175,60%,45%)]",
+  admin:"from-[hsl(0,84%,60%)] to-[hsl(350,80%,55%)]",
+  receptionist:"from-[hsl(38,92%,50%)] to-[hsl(25,90%,52%)]",
+  support:"from-[hsl(45,90%,50%)] to-[hsl(38,92%,50%)]",
+  clinic:"from-[hsl(210,90%,45%)] to-[hsl(230,70%,55%)]",
+  partner:"from-[hsl(142,71%,45%)] to-[hsl(160,55%,45%)]",
+  ai:"from-[hsl(200,80%,50%)] to-[hsl(210,90%,45%)]",
 };
 
 
