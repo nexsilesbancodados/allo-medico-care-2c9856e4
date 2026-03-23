@@ -1192,9 +1192,11 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
         <div className={splitMode && isDoctor && !isMobile ? "w-1/2" : "flex-1"} style={{ minHeight: 0 }}>
           <VideoErrorBoundary onEndCall={endCall}>
             <VideoConsultation
+              ref={videoRef}
               appointmentId={appointmentId!}
               userName={currentUserName}
               onEndCall={endCall}
+              onStatusChange={(s) => setWebrtcStatus(s)}
             />
           </VideoErrorBoundary>
         </div>
