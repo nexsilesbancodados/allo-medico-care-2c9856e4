@@ -87,10 +87,10 @@ const DoctorConsultations = () => {
 
     const [profilesRes, guestsRes] = await Promise.all([
       patientIds.length > 0
-        ? supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds.filter((id): id is string => id !== null))
+        ? supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds.filter((id): id is string => !!id))
         : { data: [] },
       guestIds.length > 0
-        ? supabase.from("guest_patients").select("id, full_name").in("id", guestIds.filter((id): id is string => id !== null))
+        ? supabase.from("guest_patients").select("id, full_name").in("id", guestIds.filter((id): id is string => !!id))
         : { data: [] },
     ]);
 
