@@ -16,7 +16,7 @@ import {
   Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight,
   TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity, Pill,
   ExternalLink, ArrowRight, Sparkles, Star, ShieldCheck, Target,
-  AlertTriangle, Bell, Plus, MoreVertical, Download, Filter, Search
+  AlertTriangle, Bell, Plus, MoreVertical, Download, Filter, Search, Stethoscope
 } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
 import DoctorOnboarding from "@/components/doctor/DoctorOnboarding";
