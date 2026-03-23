@@ -324,7 +324,7 @@ const VideoRoom = () => {
 
   const fetchAppointment = async () => {
     const { data } = await supabase
-      .from("appointments").select("*").eq("id", appointmentId!).single();
+      .from("appointments").select("*").eq("id", appointmentId ?? '').single();
 
     if (!data) { setLoading(false); return; }
 
