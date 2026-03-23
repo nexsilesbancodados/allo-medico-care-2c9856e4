@@ -11,10 +11,10 @@ import {
   MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft,
   UserRound, Pill, PhoneOff, Mic, MicOff, Video, VideoOff, Shield,
   MoreVertical, Maximize2, Minimize2, Copy, Share2, FileBadge, Paperclip, Image,
-  Sparkles, Loader2
+  Sparkles, Loader2, Stethoscope, ClipboardList
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
-import VideoConsultation from "./VideoConsultation";
+import VideoConsultation, { type VideoConsultationHandle } from "./VideoConsultation";
 import VideoErrorBoundary from "./VideoErrorBoundary";
 import PreCallCheck from "./PreCallCheck";
 import ConnectionStatus from "./ConnectionStatus";
@@ -62,6 +62,8 @@ const VideoRoom = () => {
   const [splitMode, setSplitMode] = useState(false);
   const [activePanel, setActivePanel] = useState<"chat" | "notes" | "info" | null>(null);
   const presenceLogId = useRef<string | null>(null);
+  const videoRef = useRef<VideoConsultationHandle>(null);
+  const [webrtcStatus, setWebrtcStatus] = useState<string>("idle");
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
@@ -659,6 +661,7 @@ const VideoRoom = () => {
   useEffect(() => { elapsedRef.current = elapsed; }, [elapsed]);
 
   const endCall = useCallback(async () => {
+    videoRef.current?.hangUp();
     if (presenceLogId.current) {
       await supabase.from("video_presence_logs").update({
         left_at: new Date().toISOString(),
@@ -1065,8 +1068,19 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
             {!isMobile && (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
-                  <Shield className="w-2.5 h-2.5 text-[hsl(150,60%,45%)]" />
-                  <span className="text-[10px] text-[hsl(220,15%,40%)]">E2E</span>
+                  <div className={`w-2 h-2 rounded-full ${
+                    webrtcStatus === "connected" ? "bg-[hsl(150,60%,45%)] animate-pulse" :
+                    webrtcStatus === "connecting" ? "bg-amber-400 animate-pulse" :
+                    webrtcStatus === "failed" ? "bg-destructive" :
+                    "bg-[hsl(220,15%,40%)]"
+                  }`} />
+                  <span className="text-[10px] text-[hsl(220,15%,40%)]">
+                    {webrtcStatus === "connected" ? "P2P Ativo" :
+                     webrtcStatus === "connecting" ? "Conectando" :
+                     webrtcStatus === "waiting_peer" ? "Aguardando" :
+                     webrtcStatus === "reconnecting" ? "Reconectando" :
+                     webrtcStatus === "failed" ? "Falha" : "WebRTC"}
+                  </span>
                 </div>
                 <span className="text-[10px] text-[hsl(220,15%,20%)]">•</span>
                 <span className="text-[10px] text-[hsl(220,15%,40%)]">CFM 2.314/22</span>
@@ -1115,6 +1129,22 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
       {/* Desktop toolbar — below top bar, above video */}
       {!isMobile && (
         <div className="flex items-center justify-center gap-1.5 px-5 py-2 bg-[hsl(220,25%,6%)] border-b border-[hsl(220,15%,10%)] shrink-0">
+          {/* Media controls */}
+          <ToolbarBtn
+            active={videoRef.current?.isMuted}
+            icon={videoRef.current?.isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+            label={videoRef.current?.isMuted ? "Ativar Mic" : "Mutar"}
+            onClick={() => videoRef.current?.toggleMute()}
+          />
+          <ToolbarBtn
+            active={videoRef.current?.isVideoOff}
+            icon={videoRef.current?.isVideoOff ? <VideoOff className="w-3.5 h-3.5" /> : <Video className="w-3.5 h-3.5" />}
+            label={videoRef.current?.isVideoOff ? "Ativar Cam" : "Câmera"}
+            onClick={() => videoRef.current?.toggleVideo()}
+          />
+
+          <div className="w-px h-6 bg-[hsl(220,15%,15%)] mx-1" />
+
           <ToolbarBtn
             active={showChat}
             icon={<MessageSquare className="w-3.5 h-3.5" />}
@@ -1146,6 +1176,7 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
           />
           {isDoctor && (
             <>
+              <div className="w-px h-6 bg-[hsl(220,15%,15%)] mx-1" />
               <ToolbarBtn
                 icon={<Pill className="w-3.5 h-3.5" />}
                 label="Receita"
@@ -1155,6 +1186,11 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
                 icon={<FileBadge className="w-3.5 h-3.5" />}
                 label="Atestado"
                 onClick={() => window.open('/dashboard/certificates', '_blank')}
+              />
+              <ToolbarBtn
+                icon={<Stethoscope className="w-3.5 h-3.5" />}
+                label="Exames"
+                onClick={() => window.open(`/dashboard/exam-request?appointment=${appointmentId}`, '_blank')}
               />
             </>
           )}
@@ -1167,9 +1203,11 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
         <div className={splitMode && isDoctor && !isMobile ? "w-1/2" : "flex-1"} style={{ minHeight: 0 }}>
           <VideoErrorBoundary onEndCall={endCall}>
             <VideoConsultation
+              ref={videoRef}
               appointmentId={appointmentId!}
               userName={currentUserName}
               onEndCall={endCall}
+              onStatusChange={(s) => setWebrtcStatus(s)}
             />
           </VideoErrorBoundary>
         </div>
@@ -1307,6 +1345,18 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
           className="shrink-0 flex items-center justify-around gap-1 px-2 py-2 bg-[hsl(220,25%,6%)] border-t border-[hsl(220,15%,10%)]"
           style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)" }}
         >
+          <ToolbarBtn
+            active={videoRef.current?.isMuted}
+            icon={videoRef.current?.isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            label="Mic"
+            onClick={() => videoRef.current?.toggleMute()}
+          />
+          <ToolbarBtn
+            active={videoRef.current?.isVideoOff}
+            icon={videoRef.current?.isVideoOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+            label="Cam"
+            onClick={() => videoRef.current?.toggleVideo()}
+          />
           <ToolbarBtn
             active={showChat}
             icon={<MessageSquare className="w-5 h-5" />}
