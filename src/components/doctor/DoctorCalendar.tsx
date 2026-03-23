@@ -372,7 +372,7 @@ const DoctorCalendar = () => {
   const MobileWeek = () => (
     <div className="space-y-2">
       {days.map(day => {
-        const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at), day));
+        const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at ?? ""), day));
         const isToday = isSameDay(day, new Date());
         const isAbsent = absences.includes(format(day, "yyyy-MM-dd"));
         return (
