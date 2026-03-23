@@ -153,7 +153,7 @@ const DoctorCalendar = () => {
     const topOffset = ((start.getHours() - START_HOUR) * 60 + start.getMinutes()) * (HOUR_HEIGHT / 60);
     const height = Math.max(duration * (HOUR_HEIGHT / 60), 24);
     const sc = statusConfig[appt.status] ?? statusConfig.scheduled;
-    const t = typeLabel[appt.appointment_type] ?? typeLabel.first_visit;
+    const t = typeLabel[appt.appointment_type ?? "first_visit"] ?? typeLabel.first_visit;
     const isSmall = height < 40;
 
     return (
