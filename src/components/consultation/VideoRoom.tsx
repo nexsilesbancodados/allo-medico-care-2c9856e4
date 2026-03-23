@@ -121,7 +121,7 @@ const VideoRoom = () => {
       const { data } = await supabase
         .from("patient_consents")
         .select("id")
-        .eq("appointment_id", appointmentId!)
+        .eq("appointment_id", appointmentId ?? '')
         .eq("patient_id", user.id)
         .is("revoked_at", null)
         .limit(1);
