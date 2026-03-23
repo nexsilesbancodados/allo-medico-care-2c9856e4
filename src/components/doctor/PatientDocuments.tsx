@@ -55,7 +55,7 @@ const PatientDocuments = () => {
     // Get patient profiles
     const { data: profiles } = await supabase.from("profiles")
       .select("user_id, first_name, last_name")
-      .in("user_id", patientIds);
+      .in("user_id", patientIds.filter((id): id is string => !!id));
     
     setPatients(profiles ?? []);
 
