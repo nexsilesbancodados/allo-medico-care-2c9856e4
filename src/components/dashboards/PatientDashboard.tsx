@@ -93,10 +93,10 @@ const PatientDashboard = () => {
   const hoursUntilNext = nextAppt ? Math.max(0, Math.round((new Date(nextAppt.scheduled_at).getTime() - Date.now()) / 3600000)) : null;
 
   const quickActions = [
-    { label: "Agendar", icon: Calendar, path: "/dashboard/schedule?role=patient", color: "text-primary", bg: "bg-primary/10", ring: "ring-primary/20" },
-    { label: "Urgência", icon: Zap, path: "/dashboard/urgent-care?role=patient", color: "text-destructive", bg: "bg-destructive/10", ring: "ring-destructive/20" },
-    { label: "Exames", icon: FileCheck, path: "/dashboard/patient/exam-results?role=patient", color: "text-secondary", bg: "bg-secondary/10", ring: "ring-secondary/20" },
-    { label: "Documentos", icon: FolderLock, path: "/dashboard/patient/documents?role=patient", color: "text-warning", bg: "bg-warning/10", ring: "ring-warning/20" },
+    { label: "Agendar", icon: Calendar, path: "/dashboard/schedule?role=patient", gradient: "from-[hsl(210,90%,50%)] to-[hsl(210,90%,40%)]" },
+    { label: "Urgência", icon: Zap, path: "/dashboard/urgent-care?role=patient", gradient: "from-[hsl(0,80%,55%)] to-[hsl(350,75%,48%)]" },
+    { label: "Exames", icon: FileCheck, path: "/dashboard/patient/exam-results?role=patient", gradient: "from-[hsl(160,55%,45%)] to-[hsl(170,60%,38%)]" },
+    { label: "Documentos", icon: FolderLock, path: "/dashboard/patient/documents?role=patient", gradient: "from-[hsl(270,60%,55%)] to-[hsl(280,55%,45%)]" },
   ];
 
   const shortcuts = [
@@ -260,7 +260,7 @@ const PatientDashboard = () => {
           <UpsellBanner />
         </SectionErrorBoundary>
 
-        {/* ═══ Quick Actions — circular icons like health apps ═══ */}
+        {/* ═══ Quick Actions — circular gradient icons like health apps ═══ */}
         <section>
           <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mb-3 px-1">Ações Rápidas</h2>
           <div className="flex gap-4 justify-around px-2">
@@ -273,8 +273,8 @@ const PatientDashboard = () => {
                 onClick={() => navigate(item.path)}
                 className="group flex flex-col items-center gap-2 active:scale-[0.92] transition-transform"
               >
-                <div className={`size-14 sm:size-16 rounded-full ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-sm`}>
-                  <item.icon className={`w-6 h-6 sm:w-7 sm:h-7 ${item.color}`} />
+                <div className={`size-14 sm:size-16 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-lg shadow-black/10`}>
+                  <item.icon className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
                 </div>
                 <span className="text-[11px] font-semibold text-foreground/70">{item.label}</span>
               </motion.button>

@@ -167,24 +167,51 @@ const ClinicDashboard = () => {
   return (
     <DashboardLayout title="Clínica" nav={getClinicNav(activeNav)} role="clinic">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
-        {/* ═══ Hero Header — app-like gradient ═══ */}
-        <motion.section variants={fadeUp} className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(210,90%,45%)] via-[hsl(220,80%,50%)] to-[hsl(230,70%,55%)] shadow-lg shadow-primary/15">
-          <div className="absolute -right-6 -top-6 w-28 h-28 bg-white/[0.07] rounded-full blur-xl pointer-events-none" />
-          <div className="relative z-10 p-5 sm:p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <span className="text-xs font-medium text-white/60">Painel de Gestão</span>
-                <h1 className="text-2xl font-extrabold text-white tracking-tight mt-0.5">{clinicProfile?.name ?? "Minha Clínica"}</h1>
-                <p className="text-xs text-white/50 mt-1">{format(now, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
+        {/* ═══ Clinic Hero — split card with accent sidebar ═══ */}
+        <motion.section variants={fadeUp} className="relative overflow-hidden rounded-3xl bg-card border border-border/30 shadow-sm">
+          <div className="flex">
+            {/* Accent side bar */}
+            <div className="w-2 bg-gradient-to-b from-[hsl(230,70%,55%)] via-[hsl(220,80%,50%)] to-[hsl(210,90%,45%)] shrink-0 rounded-l-3xl" />
+            <div className="flex-1 p-5 sm:p-6">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="size-8 rounded-lg bg-gradient-to-br from-[hsl(230,70%,55%)] to-[hsl(210,90%,45%)] flex items-center justify-center">
+                      <Stethoscope className="w-4 h-4 text-white" />
+                    </span>
+                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Painel de Gestão</span>
+                  </div>
+                  <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight">{clinicProfile?.name ?? "Minha Clínica"}</h1>
+                  <p className="text-xs text-muted-foreground mt-1">{format(now, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <Button size="sm" variant="outline" className="h-9 rounded-xl gap-1.5 text-xs font-bold border-border/50" onClick={exportClinicPDF}>
+                    <Download className="w-3.5 h-3.5" /> PDF
+                  </Button>
+                  <Button size="sm" className="h-9 rounded-xl bg-gradient-to-r from-[hsl(230,70%,55%)] to-[hsl(210,90%,45%)] text-white gap-1.5 text-xs font-bold shadow-md" onClick={() => navigate("/dashboard/clinic/schedules")}>
+                    <Calendar className="w-3.5 h-3.5" /> Agenda
+                  </Button>
+                </div>
               </div>
-              <div className="flex gap-2 shrink-0">
-                <Button size="sm" className="h-9 rounded-xl bg-white/20 text-white hover:bg-white/30 gap-1.5 text-xs font-bold backdrop-blur-sm" onClick={exportClinicPDF}>
-                  <FileText className="w-3.5 h-3.5" /> PDF
-                </Button>
-                <Button size="sm" className="h-9 rounded-xl bg-white/20 text-white hover:bg-white/30 gap-1.5 text-xs font-bold backdrop-blur-sm" onClick={() => navigate("/dashboard/clinic/schedules")}>
-                  <Calendar className="w-3.5 h-3.5" /> Agenda
-                </Button>
-              </div>
+
+              {/* KPIs inline */}
+              {!loading && (
+                <div className="grid grid-cols-4 gap-3 mt-5">
+                  {[
+                    { label: "Médicos", value: activeDoctors, icon: Users, color: "text-[hsl(230,70%,55%)]" },
+                    { label: "Consultas", value: thisMonthAppts.length, icon: Calendar, color: "text-secondary" },
+                    { label: "Receita", value: `R$${(revenue/1000).toFixed(1)}k`, icon: DollarSign, color: "text-success" },
+                    { label: "Ocupação", value: `${occupancy}%`, icon: TrendingUp, color: "text-primary" },
+                  ].map(kpi => (
+                    <div key={kpi.label} className="p-3 rounded-xl bg-muted/30 border border-border/20">
+                      <kpi.icon className={`w-4 h-4 ${kpi.color} mb-1.5`} />
+                      <p className={`text-lg font-black leading-none tabular-nums ${kpi.color}`}>{kpi.value}</p>
+                      <p className="text-[9px] font-semibold text-muted-foreground/60 uppercase tracking-wider mt-1">{kpi.label}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {loading && <div className="grid grid-cols-4 gap-3 mt-5">{[1,2,3,4].map(i => <div key={i} className="h-20 rounded-xl bg-muted/30 animate-pulse" />)}</div>}
             </div>
           </div>
         </motion.section>
@@ -222,28 +249,6 @@ const ClinicDashboard = () => {
             </Card>
           </motion.div>
         )}
-
-        {/* KPI Cards */}
-        <motion.div variants={fadeUp} className="grid grid-cols-2 md:grid-cols-4 gap-3" role="list" aria-label="Estatísticas da clínica">
-          {loading ? (
-            [0,1,2,3].map(i => <div key={i} className="h-24 shimmer-v2/50 rounded-2xl" aria-hidden="true" />)
-          ) : (
-            [
-              { label: "Médicos Ativos", value: activeDoctors, icon: Users, color: "text-primary", bg: "bg-primary/10" },
-              { label: "Consultas do Mês", value: thisMonthAppts.length, icon: Calendar, color: "text-secondary", bg: "bg-secondary/10" },
-              { label: "Receita do Mês", value: `R$ ${revenue.toLocaleString("pt-BR")}`, icon: DollarSign, color: "text-success", bg: "bg-success/10" },
-              { label: "Ocupação", value: `${occupancy}%`, icon: TrendingUp, color: "text-primary", bg: "bg-primary/10" },
-            ].map(kpi => (
-              <div key={kpi.label} className="kpi-card p-4 rounded-2xl bg-card border border-border/50" role="listitem" aria-label={`${kpi.label}: ${kpi.value}`}>
-                <div className={`w-9 h-9 rounded-xl ${kpi.bg} flex items-center justify-center mb-2`}>
-                  <kpi.icon className={`w-4 h-4 ${kpi.color}`} aria-hidden="true" />
-                </div>
-                <p className="text-xl font-bold text-foreground" aria-hidden="true">{kpi.value}</p>
-                <p className="text-xs font-medium text-muted-foreground mt-0.5">{kpi.label}</p>
-              </div>
-            ))
-          )}
-        </motion.div>
 
         <motion.div variants={fadeUp}>
           <Tabs defaultValue={defaultTab} className="w-full" onValueChange={(val) => {

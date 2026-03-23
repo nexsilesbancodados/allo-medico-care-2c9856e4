@@ -16,7 +16,7 @@ import {
   Calendar, FileText, Users, DollarSign, Clock, Video, ChevronRight,
   TrendingUp, CheckCircle2, RefreshCw, BarChart2, Activity, Pill,
   ExternalLink, ArrowRight, Sparkles, Star, ShieldCheck, Target,
-  AlertTriangle, Bell, Plus, MoreVertical, Download, Filter, Search
+  AlertTriangle, Bell, Plus, MoreVertical, Download, Filter, Search, Stethoscope
 } from "lucide-react";
 import DoctorAnalyticsCharts from "./DoctorAnalyticsCharts";
 import DoctorOnboarding from "@/components/doctor/DoctorOnboarding";
@@ -148,90 +148,95 @@ const DoctorDashboard = () => {
           </div>
         )}
 
-        {/* ═══ Doctor greeting hero — blue gradient like patient ═══ */}
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(160,55%,45%)] via-[hsl(165,50%,42%)] to-[hsl(175,60%,45%)] shadow-lg shadow-secondary/15">
-          <div className="absolute -right-6 -top-6 w-28 h-28 bg-white/[0.07] rounded-full blur-xl pointer-events-none" />
-          <div className="relative z-10 p-5 sm:p-6">
-            <div className="flex items-start gap-3">
+        {/* ═══ Doctor Hero — clean white card with accent strip ═══ */}
+        <section className="relative overflow-hidden rounded-3xl bg-card border border-border/30 shadow-sm">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[hsl(160,55%,45%)] via-[hsl(170,60%,48%)] to-[hsl(142,71%,45%)]" />
+          <div className="p-5 sm:p-6">
+            <div className="flex items-start gap-4">
+              <div className="size-14 rounded-2xl bg-gradient-to-br from-[hsl(160,55%,45%)] to-[hsl(142,71%,45%)] flex items-center justify-center shadow-lg shadow-secondary/20 shrink-0">
+                <Stethoscope className="w-7 h-7 text-white" />
+              </div>
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-medium text-white/60">{greeting()}</span>
-                <h1 className="text-2xl sm:text-[26px] font-extrabold text-white tracking-tight mt-0.5">
-                  Dr. {profile?.first_name || "Médico"} 👋
+                <span className="text-xs font-medium text-muted-foreground">{greeting()}</span>
+                <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight mt-0.5">
+                  Dr. {profile?.first_name || "Médico"}
                 </h1>
-                <p className="text-xs text-white/50 mt-1">
-                  {!loading ? (
-                    <>{stats.today} consultas hoje, {todayStr}</>
-                  ) : "Carregando..."}
-                </p>
-                {!loading && data?.crm && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[11px] text-white/50">CRM {data.crm}/{data.crmState}</span>
-                    {data?.crmVerified && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-white text-[10px] font-bold">
-                        <ShieldCheck className="w-3 h-3" /> Verificado
-                      </span>
-                    )}
-                    {(data?.rating ?? 0) > 0 && (
-                      <span className="flex items-center gap-1 text-white/80">
-                        <Star className="w-3 h-3 text-warning fill-warning" />
-                        <span className="text-xs font-semibold">{(data?.rating ?? 0).toFixed(1)}</span>
-                      </span>
-                    )}
-                  </div>
-                )}
+                <div className="flex items-center gap-3 mt-2 flex-wrap">
+                  {!loading && data?.crm && (
+                    <span className="text-xs text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-lg font-medium">
+                      CRM {data.crm}/{data.crmState}
+                    </span>
+                  )}
+                  {data?.crmVerified && (
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-secondary/10 text-secondary text-xs font-bold">
+                      <ShieldCheck className="w-3 h-3" /> Verificado
+                    </span>
+                  )}
+                  {(data?.rating ?? 0) > 0 && (
+                    <span className="flex items-center gap-1 text-foreground/80">
+                      <Star className="w-3.5 h-3.5 text-warning fill-warning" />
+                      <span className="text-xs font-bold">{(data?.rating ?? 0).toFixed(1)}</span>
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2 shrink-0">
-                <Button size="sm" variant="ghost"
-                  className="h-9 rounded-xl text-white/80 hover:bg-white/15 gap-1.5 text-xs font-semibold"
+                <Button size="sm" variant="outline"
+                  className="h-9 rounded-xl gap-1.5 text-xs font-semibold border-border/50"
                   onClick={() => navigate("/dashboard/doctor/waiting-room")}>
                   <Bell className="w-4 h-4" />
-                  {waitingCount > 0 && <span className="bg-white/25 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{waitingCount}</span>}
-                </Button>
-                <Button size="sm"
-                  className="h-9 rounded-xl bg-white/20 text-white hover:bg-white/30 gap-1.5 text-xs font-bold backdrop-blur-sm"
-                  onClick={() => navigate("/dashboard/doctor/waiting-room")}>
-                  <Plus className="w-4 h-4" /> Nova
+                  {waitingCount > 0 && <span className="bg-destructive text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{waitingCount}</span>}
                 </Button>
               </div>
+            </div>
+
+            {/* Inline KPIs */}
+            <div className="grid grid-cols-4 gap-2 mt-5">
+              {[
+                { label: "Hoje", value: stats.today, color: "text-primary" },
+                { label: "Pendentes", value: waitingCount + todayAppts.filter(a => a.status === "scheduled").length, color: "text-warning" },
+                { label: "Receitas", value: stats.prescriptions, color: "text-secondary" },
+                { label: "Faturamento", value: `R$${(stats.totalEarnings / 1000).toFixed(1)}k`, color: "text-foreground" },
+              ].map(k => (
+                <div key={k.label} className="text-center p-2.5 rounded-xl bg-muted/40">
+                  <p className={`text-lg font-black leading-none tabular-nums ${k.color}`}>{k.value}</p>
+                  <p className="text-[9px] font-semibold text-muted-foreground/60 uppercase tracking-wider mt-1">{k.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ═══ KPI Cards — colored left border like reference ═══ */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4" role="list" aria-label="Estatísticas do médico">
-          {loading ? (
-            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-2xl shimmer-v2" />)
-          ) : (
-            kpis.map((kpi, i) => (
-              <motion.div
-                key={kpi.label}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 18 }}
-                role="listitem"
-                aria-label={`${kpi.label}: ${kpi.value}`}
-                className={`kpi-card relative overflow-hidden bg-card rounded-2xl border border-border/40 border-l-[3px] ${kpi.borderColor} p-4 cursor-pointer group`}
-                onClick={() => {
-                  const paths = [null, "/dashboard/doctor/waiting-room", "/dashboard/prescriptions", "/dashboard/earnings"];
-                  if (paths[i]) navigate(paths[i]!);
-                }}
-              >
-                {/* Ambient glow */}
-                <div className={`absolute -top-4 -right-4 w-16 h-16 rounded-full blur-2xl opacity-10 pointer-events-none ${kpi.iconBg}`} aria-hidden="true" />
-                
-                <div className="flex items-center justify-between mb-3 relative">
-                  <div className={`size-11 rounded-xl ${kpi.iconBg} flex items-center justify-center shadow-sm ring-1 ring-border/10 group-hover:scale-110 transition-transform duration-200`}>
-                    <kpi.icon className={`w-5 h-5 ${kpi.iconColor}`} />
-                  </div>
-                  <Badge className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border-0 ${kpi.badgeColor}`}>
-                    {kpi.badge}
-                  </Badge>
-                </div>
-                <p className="text-[10px] font-bold text-muted-foreground/70 uppercase tracking-wider mb-1.5">{kpi.label}</p>
-                <p className={`font-black text-foreground leading-none tabular-nums ${kpi.isLarge ? "text-xl" : "text-2xl"}`}>{kpi.value}</p>
-              </motion.div>
-            ))
-          )}
+        {/* ═══ Quick Actions — horizontal pill buttons ═══ */}
+        <div className="flex gap-2.5 overflow-x-auto scrollbar-none -mx-1 px-1 pb-1">
+          {[
+            { label: "Sala de Espera", icon: Video, path: "/dashboard/doctor/waiting-room", active: waitingCount > 0, badge: waitingCount },
+            { label: "Receitas", icon: FileText, path: "/dashboard/prescriptions" },
+            { label: "Calendário", icon: Calendar, path: "/dashboard/doctor/calendar" },
+            { label: "Ganhos", icon: DollarSign, path: "/dashboard/earnings" },
+            { label: "Pacientes", icon: Users, path: "/dashboard/patients" },
+          ].map((item, i) => (
+            <motion.button
+              key={item.label}
+              initial={{ opacity: 0, x: 12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.04 }}
+              onClick={() => navigate(item.path)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold shrink-0 transition-all active:scale-95 ${
+                item.active
+                  ? "bg-secondary text-white shadow-md shadow-secondary/25"
+                  : "bg-card border border-border/40 text-foreground hover:border-secondary/30 hover:shadow-sm"
+              }`}
+            >
+              <item.icon className="w-4 h-4" />
+              {item.label}
+              {(item.badge ?? 0) > 0 && (
+                <span className="bg-white/25 text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                  {item.badge}
+                </span>
+              )}
+            </motion.button>
+          ))}
         </div>
 
         {/* ═══ Patients Table ═══ */}
