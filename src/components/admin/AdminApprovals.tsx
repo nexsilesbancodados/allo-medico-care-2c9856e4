@@ -17,15 +17,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import type { ApprovalItem } from "@/types/domain";
 
 const AdminApprovals = () => {
-  
-  /* eslint-disable @typescript-eslint/no-explicit-any -- Admin approval items have varying shapes across entity types */
   const [pendingDoctors, setPendingDoctors] = useState<ApprovalItem[]>([]);
   const [approvedDoctors, setApprovedDoctors] = useState<ApprovalItem[]>([]);
   const [pendingClinics, setPendingClinics] = useState<ApprovalItem[]>([]);
   const [approvedClinics, setApprovedClinics] = useState<ApprovalItem[]>([]);
   const [pendingPartners, setPendingPartners] = useState<ApprovalItem[]>([]);
   const [approvedPartners, setApprovedPartners] = useState<ApprovalItem[]>([]);
-  /* eslint-enable @typescript-eslint/no-explicit-any */
 
   const [loading, setLoading] = useState(true);
   const [rejectReason, setRejectReason] = useState("");
@@ -92,12 +89,12 @@ const AdminApprovals = () => {
     if (type === "doctor") {
       const doc = [...pendingDoctors, ...approvedDoctors].find(d => d.id === id);
       if (doc) {
-        notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, true).catch(err => logError("notifyDoctorApproval failed", err));
+        notifyDoctorApproval(doc.user_id ?? '', `${doc.first_name ?? ''} ${doc.last_name ?? ''}`, true).catch(err => logError("notifyDoctorApproval failed", err));
       }
     } else if (type === "clinic") {
       const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === id);
       if (clinic) {
-        notifyClinicApproval(clinic.user_id, clinic.name ?? '', true).catch(err => logError("notifyClinicApproval failed", err));
+        notifyClinicApproval(clinic.user_id ?? '', clinic.name ?? '', true).catch(err => logError("notifyClinicApproval failed", err));
       }
     }
 
@@ -135,7 +132,7 @@ const AdminApprovals = () => {
     } finally {
       setVerifyingCrmId(null);
     }
-  }, [toast]);
+  }, []);
 
   const reject = async () => {
     if (!rejectTarget) return;
@@ -146,12 +143,12 @@ const AdminApprovals = () => {
     if (rejectTarget.type === "doctor") {
       const doc = [...pendingDoctors, ...approvedDoctors].find(d => d.id === rejectTarget.id);
       if (doc) {
-        notifyDoctorApproval(doc.user_id, `${doc.first_name} ${doc.last_name}`, false, rejectReason).catch(err => logError("notifyDoctorApproval reject failed", err));
+        notifyDoctorApproval(doc.user_id ?? '', `${doc.first_name ?? ''} ${doc.last_name ?? ''}`, false, rejectReason).catch(err => logError("notifyDoctorApproval reject failed", err));
       }
     } else if (rejectTarget.type === "clinic") {
       const clinic = [...pendingClinics, ...approvedClinics].find(c => c.id === rejectTarget.id);
       if (clinic) {
-        notifyClinicApproval(clinic.user_id, clinic.name ?? '', false, rejectReason).catch(err => logError("notifyClinicApproval reject failed", err));
+        notifyClinicApproval(clinic.user_id ?? '', clinic.name ?? '', false, rejectReason).catch(err => logError("notifyClinicApproval reject failed", err));
       }
     }
     
@@ -187,7 +184,7 @@ const AdminApprovals = () => {
                       variant="ghost"
                       size="sm"
                       className="h-6 px-2 text-xs text-primary hover:text-primary"
-                      onClick={() => window.open(`https://portal.cfm.org.br/busca-medicos/?crm=${encodeURIComponent(item.crm ?? "")}&uf=${encodeURIComponent(item.crm_state ?? "")}`, "_blank")}
+                      onClick={() => window.open(`https://portal.cfm.org.br/busca-medicos/?crm=${encodeURIComponent(String(item.crm ?? ""))}&uf=${encodeURIComponent(String(item.crm_state ?? ""))}`, "_blank")}
                     >
                       <ExternalLink className="w-3 h-3 mr-1" /> Validar no CFM
                     </Button>
@@ -218,11 +215,11 @@ const AdminApprovals = () => {
                         <span className="text-muted-foreground">CRM não verificado</span>
                       )}
                     </label>
-                    {item.crm_verified_at && <span className="text-xs text-muted-foreground">({new Date(item.crm_verified_at).toLocaleDateString("pt-BR")})</span>}
+                    {item.crm_verified_at && <span className="text-xs text-muted-foreground">({new Date(String(item.crm_verified_at)).toLocaleDateString("pt-BR")})</span>}
                   </div>
                   {(item.specialties?.length ?? 0) > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {item.specialties?.map((s: string, i: number) => <Badge key={i} variant="outline" className="text-xs bg-secondary/10 text-secondary">{s}</Badge>)}
+                      {(item.specialties ?? []).map((s: string, i: number) => <Badge key={i} variant="outline" className="text-xs bg-secondary/10 text-secondary">{s}</Badge>)}
                     </div>
                   )}
                   {item.education && <p className="text-xs text-muted-foreground">Formação: {item.education}</p>}
@@ -239,7 +236,7 @@ const AdminApprovals = () => {
                 <>
                   <p className="font-semibold text-foreground text-lg">{item.business_name}</p>
                   <p className="text-sm text-muted-foreground">
-                    Tipo: <Badge variant="outline" className="text-xs">{partnerTypeLabel[item.partner_type ?? ''] ?? item.partner_type}</Badge>
+                    Tipo: <Badge variant="outline" className="text-xs">{partnerTypeLabel[String(item.partner_type ?? '')] ?? item.partner_type}</Badge>
                     {" · "}CNPJ: {item.cnpj || "—"} · Responsável: {item.owner_name}
                   </p>
                 </>
@@ -257,7 +254,7 @@ const AdminApprovals = () => {
                   setRejectTarget({ 
                     id: item.id, 
                     type, 
-                    name: type === "doctor" ? `${item.first_name} ${item.last_name}` : item.name || item.business_name || '' 
+                    name: type === "doctor" ? `${item.first_name ?? ''} ${item.last_name ?? ''}` : item.name || item.business_name || '' 
                   }); 
                   setShowReject(true); 
                 }}>
@@ -319,7 +316,7 @@ const AdminApprovals = () => {
                   </>
                 )}
                 {pendingDoctors.length === 0 && approvedDoctors.length === 0 && (
-                  <div className="text-center py-8"><img src="/src/assets/pingo-admin.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhum médico cadastrado</p></div>
+                  <div className="text-center py-8"><p className="text-[12px] font-semibold text-foreground">Nenhum médico cadastrado</p></div>
                 )}
               </TabsContent>
 
@@ -337,7 +334,7 @@ const AdminApprovals = () => {
                   </>
                 )}
                 {pendingClinics.length === 0 && approvedClinics.length === 0 && (
-                  <div className="text-center py-8"><img src="/src/assets/pingo-admin.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhuma clínica cadastrada</p></div>
+                  <div className="text-center py-8"><p className="text-[12px] font-semibold text-foreground">Nenhuma clínica cadastrada</p></div>
                 )}
               </TabsContent>
 
@@ -355,32 +352,22 @@ const AdminApprovals = () => {
                   </>
                 )}
                 {pendingPartners.length === 0 && approvedPartners.length === 0 && (
-                  <div className="text-center py-8"><img src="/src/assets/pingo-partner.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhum parceiro cadastrado</p></div>
+                  <div className="text-center py-8"><p className="text-[12px] font-semibold text-foreground">Nenhum parceiro cadastrado</p></div>
                 )}
               </TabsContent>
-
             </>
           )}
         </Tabs>
       </div>
 
-      <Dialog open={showReject} onOpenChange={() => { setShowReject(false); setRejectTarget(null); }}>
+      <Dialog open={showReject} onOpenChange={setShowReject}>
         <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Rejeitar Cadastro</DialogTitle>
-          </DialogHeader>
-          {rejectTarget && (
-            <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Rejeitar o cadastro de <strong className="text-foreground">{rejectTarget.name}</strong>?
-              </p>
-              <Textarea placeholder="Motivo da rejeição (opcional)..." value={rejectReason} onChange={e => setRejectReason(e.target.value)} rows={3} />
-              <div className="flex gap-2">
-                <Button variant="destructive" onClick={reject}>Confirmar Rejeição</Button>
-                <Button variant="outline" onClick={() => { setShowReject(false); setRejectTarget(null); }}>Cancelar</Button>
-              </div>
-            </div>
-          )}
+          <DialogHeader><DialogTitle>Rejeitar {rejectTarget?.name}</DialogTitle></DialogHeader>
+          <Textarea placeholder="Motivo da rejeição (opcional)" value={rejectReason} onChange={e => setRejectReason(e.target.value)} />
+          <div className="flex gap-2 justify-end">
+            <Button variant="outline" onClick={() => setShowReject(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={reject}>Confirmar Rejeição</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </DashboardLayout>

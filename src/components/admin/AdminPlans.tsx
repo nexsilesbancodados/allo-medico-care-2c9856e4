@@ -126,7 +126,7 @@ const AdminPlans = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-foreground">R$ {Number(p.price).toFixed(2)}</TableCell>
-                    <TableCell className="text-muted-foreground">{intervalLabel[p.interval ?? 'monthly'] ?? p.interval}</TableCell>
+                    <TableCell className="text-muted-foreground">{intervalLabel[String(p.interval ?? 'monthly')] ?? p.interval}</TableCell>
                     <TableCell className="text-muted-foreground">{p.max_appointments ?? "Ilimitado"}</TableCell>
                     <TableCell><Badge variant={p.is_active ? "default" : "outline"}>{p.is_active ? "Ativo" : "Inativo"}</Badge></TableCell>
                     <TableCell className="text-right space-x-1">
