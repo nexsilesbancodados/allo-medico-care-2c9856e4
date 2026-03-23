@@ -148,51 +148,61 @@ const DoctorDashboard = () => {
           </div>
         )}
 
-        {/* ═══ Doctor greeting hero — blue gradient like patient ═══ */}
-        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(160,55%,45%)] via-[hsl(165,50%,42%)] to-[hsl(175,60%,45%)] shadow-lg shadow-secondary/15">
-          <div className="absolute -right-6 -top-6 w-28 h-28 bg-white/[0.07] rounded-full blur-xl pointer-events-none" />
-          <div className="relative z-10 p-5 sm:p-6">
-            <div className="flex items-start gap-3">
+        {/* ═══ Doctor Hero — clean white card with accent strip ═══ */}
+        <section className="relative overflow-hidden rounded-3xl bg-card border border-border/30 shadow-sm">
+          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[hsl(160,55%,45%)] via-[hsl(170,60%,48%)] to-[hsl(142,71%,45%)]" />
+          <div className="p-5 sm:p-6">
+            <div className="flex items-start gap-4">
+              <div className="size-14 rounded-2xl bg-gradient-to-br from-[hsl(160,55%,45%)] to-[hsl(142,71%,45%)] flex items-center justify-center shadow-lg shadow-secondary/20 shrink-0">
+                <Stethoscope className="w-7 h-7 text-white" />
+              </div>
               <div className="flex-1 min-w-0">
-                <span className="text-xs font-medium text-white/60">{greeting()}</span>
-                <h1 className="text-2xl sm:text-[26px] font-extrabold text-white tracking-tight mt-0.5">
-                  Dr. {profile?.first_name || "Médico"} 👋
+                <span className="text-xs font-medium text-muted-foreground">{greeting()}</span>
+                <h1 className="text-xl sm:text-2xl font-extrabold text-foreground tracking-tight mt-0.5">
+                  Dr. {profile?.first_name || "Médico"}
                 </h1>
-                <p className="text-xs text-white/50 mt-1">
-                  {!loading ? (
-                    <>{stats.today} consultas hoje, {todayStr}</>
-                  ) : "Carregando..."}
-                </p>
-                {!loading && data?.crm && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[11px] text-white/50">CRM {data.crm}/{data.crmState}</span>
-                    {data?.crmVerified && (
-                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-white text-[10px] font-bold">
-                        <ShieldCheck className="w-3 h-3" /> Verificado
-                      </span>
-                    )}
-                    {(data?.rating ?? 0) > 0 && (
-                      <span className="flex items-center gap-1 text-white/80">
-                        <Star className="w-3 h-3 text-warning fill-warning" />
-                        <span className="text-xs font-semibold">{(data?.rating ?? 0).toFixed(1)}</span>
-                      </span>
-                    )}
-                  </div>
-                )}
+                <div className="flex items-center gap-3 mt-2 flex-wrap">
+                  {!loading && data?.crm && (
+                    <span className="text-xs text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-lg font-medium">
+                      CRM {data.crm}/{data.crmState}
+                    </span>
+                  )}
+                  {data?.crmVerified && (
+                    <span className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-secondary/10 text-secondary text-xs font-bold">
+                      <ShieldCheck className="w-3 h-3" /> Verificado
+                    </span>
+                  )}
+                  {(data?.rating ?? 0) > 0 && (
+                    <span className="flex items-center gap-1 text-foreground/80">
+                      <Star className="w-3.5 h-3.5 text-warning fill-warning" />
+                      <span className="text-xs font-bold">{(data?.rating ?? 0).toFixed(1)}</span>
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="flex gap-2 shrink-0">
-                <Button size="sm" variant="ghost"
-                  className="h-9 rounded-xl text-white/80 hover:bg-white/15 gap-1.5 text-xs font-semibold"
+                <Button size="sm" variant="outline"
+                  className="h-9 rounded-xl gap-1.5 text-xs font-semibold border-border/50"
                   onClick={() => navigate("/dashboard/doctor/waiting-room")}>
                   <Bell className="w-4 h-4" />
-                  {waitingCount > 0 && <span className="bg-white/25 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{waitingCount}</span>}
-                </Button>
-                <Button size="sm"
-                  className="h-9 rounded-xl bg-white/20 text-white hover:bg-white/30 gap-1.5 text-xs font-bold backdrop-blur-sm"
-                  onClick={() => navigate("/dashboard/doctor/waiting-room")}>
-                  <Plus className="w-4 h-4" /> Nova
+                  {waitingCount > 0 && <span className="bg-destructive text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{waitingCount}</span>}
                 </Button>
               </div>
+            </div>
+
+            {/* Inline KPIs */}
+            <div className="grid grid-cols-4 gap-2 mt-5">
+              {[
+                { label: "Hoje", value: stats.today, color: "text-primary" },
+                { label: "Pendentes", value: waitingCount + todayAppts.filter(a => a.status === "scheduled").length, color: "text-warning" },
+                { label: "Receitas", value: stats.prescriptions, color: "text-secondary" },
+                { label: "Faturamento", value: `R$${(stats.totalEarnings / 1000).toFixed(1)}k`, color: "text-foreground" },
+              ].map(k => (
+                <div key={k.label} className="text-center p-2.5 rounded-xl bg-muted/40">
+                  <p className={`text-lg font-black leading-none tabular-nums ${k.color}`}>{k.value}</p>
+                  <p className="text-[9px] font-semibold text-muted-foreground/60 uppercase tracking-wider mt-1">{k.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
