@@ -42,7 +42,7 @@ const AdminPlans = () => {
     setEditingPlan(p);
     setForm({
       name: p.name, description: p.description || "", price: String(p.price),
-      interval: p.interval, max_appointments: p.max_appointments ? String(p.max_appointments) : "", is_active: p.is_active,
+      interval: p.interval || "monthly", max_appointments: p.max_appointments ? String(p.max_appointments) : "", is_active: p.is_active,
     });
     setShowForm(true);
   };

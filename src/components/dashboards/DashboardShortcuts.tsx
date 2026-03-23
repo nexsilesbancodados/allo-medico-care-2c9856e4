@@ -27,8 +27,8 @@ export function DashboardShortcuts({ shortcuts, title = "Acesso Rápido" }: Dash
   };
   const item = {
     hidden: { opacity: 0, x: -8 },
-    show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } },
-  };
+    show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" as const } },
+  } as const;
 
   return (
     <section className="overflow-hidden rounded-2xl border border-border/20 bg-card">
