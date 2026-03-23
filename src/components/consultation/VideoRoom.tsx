@@ -11,10 +11,10 @@ import {
   MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft,
   UserRound, Pill, PhoneOff, Mic, MicOff, Video, VideoOff, Shield,
   MoreVertical, Maximize2, Minimize2, Copy, Share2, FileBadge, Paperclip, Image,
-  Sparkles, Loader2
+  Sparkles, Loader2, Stethoscope, ClipboardList
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
-import VideoConsultation from "./VideoConsultation";
+import VideoConsultation, { type VideoConsultationHandle } from "./VideoConsultation";
 import VideoErrorBoundary from "./VideoErrorBoundary";
 import PreCallCheck from "./PreCallCheck";
 import ConnectionStatus from "./ConnectionStatus";
