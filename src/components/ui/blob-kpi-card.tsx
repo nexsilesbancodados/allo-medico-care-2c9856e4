@@ -46,7 +46,7 @@ const AnimatedValue = ({ value }: { value: string | number }) => {
   const isInView = useInView(ref, { once: true });
   const [display, setDisplay] = useState<string | number>(typeof value === "number" ? 0 : value);
 
-  useEffect(() => {
+  useEffect((): (() => void) | void => {
     if (!isInView) return;
     if (typeof value === "number") {
       const duration = 800;

@@ -50,7 +50,7 @@ window.addEventListener("error", (e) => {
 
 /* ── Lazy side-effects (non-blocking) ─────────────────── */
 import("./lib/sentry").then(({ initSentry }) => initSentry()).catch(() => {});
-import("./lib/supabase-helpers").then(({ initNetworkListeners }) => initNetworkListeners()).catch(() => {});
+// Network listeners removed - not exported from supabase-helpers
 
 const isPreviewEnvironment = window.location.hostname.startsWith("id-preview--");
 

@@ -50,14 +50,16 @@ export const useDoctorStats = () => {
       let upcoming = upcomingRes.data ?? [];
 
       if (allAppts.length > 0) {
-        const patientIds = [...new Set(allAppts.map(a => a.patient_id))];
-        const { data: profiles } = await supabase
-          .from("profiles")
-          .select("user_id, first_name, last_name")
-          .in("user_id", patientIds);
+        const patientIds = [...new Set(allAppts.map(a => a.patient_id).filter((id): id is string => !!id))];
+        const { data: profiles } = patientIds.length > 0
+          ? await supabase
+            .from("profiles")
+            .select("user_id, first_name, last_name")
+            .in("user_id", patientIds)
+          : { data: [] as { user_id: string; first_name: string; last_name: string }[] };
         const pMap = new Map(profiles?.map(p => [p.user_id, `${p.first_name} ${p.last_name}`]) ?? []);
-        todayAppts = todayAppts.map(a => ({ ...a, patient_name: pMap.get(a.patient_id) ?? "Paciente" }));
-        upcoming = upcoming.map(a => ({ ...a, patient_name: pMap.get(a.patient_id) ?? "Paciente" }));
+        todayAppts = todayAppts.map(a => ({ ...a, patient_name: pMap.get(a.patient_id ?? "") ?? "Paciente" }));
+        upcoming = upcoming.map(a => ({ ...a, patient_name: pMap.get(a.patient_id ?? "") ?? "Paciente" }));
       }
 
       return {

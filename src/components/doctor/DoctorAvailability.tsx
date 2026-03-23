@@ -26,7 +26,7 @@ interface Slot {
   day_of_week: number;
   start_time: string;
   end_time: string;
-  is_active: boolean | null;
+  is_active: boolean;
 }
 
 interface Absence {
@@ -99,7 +99,7 @@ const DoctorAvailability = () => {
       .eq("doctor_id", profileId)
       .order("day_of_week")
       .order("start_time");
-    if (data) setSlots(data);
+    if (data) setSlots(data.map(s => ({ ...s, is_active: s.is_active ?? true })));
   };
 
   const fetchAbsences = async (profileId: string) => {

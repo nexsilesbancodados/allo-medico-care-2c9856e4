@@ -99,7 +99,7 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
   const handleAdd = async () => {
     if (!form.title.trim()) { toast.error("Título obrigatório"); return; }
 
-    let doctorId = null;
+    let doctorId: string | null = null;
     if (isDoctorRole && user) {
       const { data: doc } = await supabase.from("doctor_profiles").select("id").eq("user_id", user.id).single();
       doctorId = doc?.id ?? null;

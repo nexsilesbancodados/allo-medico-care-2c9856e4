@@ -102,8 +102,8 @@ interface DoctorOption {
   crm_state: string;
   consultation_price: number;
   rating: number;
-  total_reviews: number;
-  experience_years: number;
+  total_reviews: number | null;
+  experience_years: number | null;
   first_name: string;
   last_name: string;
   specialties: string[];
@@ -802,7 +802,7 @@ const PlansCheckout = () => {
                                 {doc.rating.toFixed(1)}
                               </span>
                             )}
-                            {doc.experience_years > 0 && (
+                            {(doc.experience_years ?? 0) > 0 && (
                               <span className="text-xs text-muted-foreground">{doc.experience_years} anos exp.</span>
                             )}
                           </div>

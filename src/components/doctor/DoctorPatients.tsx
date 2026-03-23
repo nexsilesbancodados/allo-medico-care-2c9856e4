@@ -47,9 +47,10 @@ const DoctorPatients = () => {
     // Aggregate by patient
     const patientMap = new Map<string, { count: number; lastDate: string }>();
     appts.forEach(a => {
-      const existing = patientMap.get(a.patient_id ?? '');
+      const pid = a.patient_id ?? '';
+      const existing = patientMap.get(pid);
       if (!existing) {
-        patientMap.set(a.patient_id ?? '', { count: 1, lastDate: a.scheduled_at });
+        patientMap.set(pid, { count: 1, lastDate: a.scheduled_at });
       } else {
         existing.count++;
       }

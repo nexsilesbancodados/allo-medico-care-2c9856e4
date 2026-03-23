@@ -1284,7 +1284,7 @@ const ExamReportEditor = () => {
       const { data } = await supabase
         .from("clinic_profiles")
         .select("name")
-        .eq("id", examRequest!.requesting_clinic_id)
+        .eq("id", examRequest!.requesting_clinic_id!)
         .maybeSingle();
       return data;
     },

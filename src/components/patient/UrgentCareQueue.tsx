@@ -118,7 +118,7 @@ const UrgentCareQueue = () => {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle();
-    setMyEntry(data);
+    if (data) setMyEntry({ id: data.id, status: data.status, position: data.position ?? undefined, created_at: data.created_at });
     if (data?.status === "waiting") {
       const { count } = await supabase
         .from("on_demand_queue")

@@ -138,7 +138,7 @@ const PatientExamResults = () => {
                               <Button
                                 size="sm"
                                 variant="outline"
-                                onClick={() => handleDownloadPdf(report.pdf_url)}
+                                onClick={() => handleDownloadPdf(report.pdf_url!)}
                               >
                                 <Download className="w-3 h-3 mr-1" />
                                 Baixar

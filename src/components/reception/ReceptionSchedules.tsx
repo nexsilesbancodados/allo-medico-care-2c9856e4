@@ -48,7 +48,7 @@ const ReceptionSchedules = () => {
 
     const patientIds = [...new Set(data.map(a => a.patient_id).filter(Boolean))];
     const { data: pProfiles } = patientIds.length > 0
-      ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds)
+      ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds.filter((id): id is string => !!id))
       : { data: [] };
     const pMap = new Map((pProfiles ?? []).map(p => [p.user_id, `${p.first_name} ${p.last_name}`]));
 

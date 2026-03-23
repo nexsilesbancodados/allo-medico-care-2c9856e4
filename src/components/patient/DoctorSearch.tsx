@@ -23,8 +23,8 @@ interface DoctorResult {
   bio: string | null;
   consultation_price: number;
   rating: number;
-  total_reviews: number;
-  experience_years: number;
+  total_reviews: number | null;
+  experience_years: number | null;
   available_now?: boolean;
   available_now_since?: string | null;
   profile: { first_name: string; last_name: string; avatar_url: string | null } | null;
@@ -175,7 +175,7 @@ const DoctorSearch = () => {
       if (sortBy === "rating") return b.rating - a.rating;
       if (sortBy === "price_asc") return a.consultation_price - b.consultation_price;
       if (sortBy === "price_desc") return b.consultation_price - a.consultation_price;
-      if (sortBy === "experience") return b.experience_years - a.experience_years;
+      if (sortBy === "experience") return (b.experience_years ?? 0) - (a.experience_years ?? 0);
       return 0;
     });
 
@@ -432,7 +432,7 @@ const DoctorSearch = () => {
                       </h3>
                       <p className="text-xs text-muted-foreground mt-0.5">
                         CRM {doctor.crm}/{doctor.crm_state}
-                        {doctor.experience_years > 0 && ` · ${doctor.experience_years}a exp.`}
+                        {(doctor.experience_years ?? 0) > 0 && ` · ${doctor.experience_years}a exp.`}
                       </p>
 
                       {doctor.specialties.length > 0 && (

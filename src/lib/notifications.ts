@@ -504,7 +504,7 @@ export const notifyExamReportReady = async (
     if (!examReq) return;
 
     const [reqDoctor, patProfile] = await Promise.all([
-      getDoctorInfo(examReq.requesting_doctor_id),
+      getDoctorInfo(examReq.requesting_doctor_id ?? ""),
       examReq.patient_id ? getProfile(examReq.patient_id) : Promise.resolve(null),
     ]);
 

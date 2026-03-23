@@ -265,6 +265,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
             </p>
           </div>
         );
+      default: return null;
     }
   };
 

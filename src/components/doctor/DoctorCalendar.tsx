@@ -153,7 +153,7 @@ const DoctorCalendar = () => {
     const topOffset = ((start.getHours() - START_HOUR) * 60 + start.getMinutes()) * (HOUR_HEIGHT / 60);
     const height = Math.max(duration * (HOUR_HEIGHT / 60), 24);
     const sc = statusConfig[appt.status] ?? statusConfig.scheduled;
-    const t = typeLabel[appt.appointment_type] ?? typeLabel.first_visit;
+    const t = typeLabel[appt.appointment_type ?? "first_visit"] ?? typeLabel.first_visit;
     const isSmall = height < 40;
 
     return (
@@ -254,7 +254,7 @@ const DoctorCalendar = () => {
 
           {/* Day columns */}
           {days.map(day => {
-            const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at), day));
+            const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at ?? ""), day));
             const isToday = isSameDay(day, new Date());
             const isAbsent = absences.includes(format(day, "yyyy-MM-dd"));
             return (
@@ -297,7 +297,7 @@ const DoctorCalendar = () => {
 
   /* ── Day Time Grid ── */
   const DayTimeGrid = () => {
-    const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at), currentDate));
+    const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at ?? ""), currentDate));
     const isAbsent = absences.includes(format(currentDate, "yyyy-MM-dd"));
     return (
       <div className={`border border-border rounded-xl overflow-hidden bg-card ${isAbsent ? "bg-destructive/5" : ""}`}>
@@ -337,7 +337,7 @@ const DoctorCalendar = () => {
         <div key={`pad-${i}`} className="min-h-[80px]" />
       ))}
       {days.map(day => {
-        const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at), day));
+         const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at ?? ""), day));
         const isToday = isSameDay(day, new Date());
         const isAbsent = absences.includes(format(day, "yyyy-MM-dd"));
         return (
@@ -352,10 +352,10 @@ const DoctorCalendar = () => {
             {dayAppts.length > 0 && (
               <div className="mt-1 space-y-0.5">
                 {dayAppts.slice(0, 2).map(a => {
-                  const t = typeLabel[a.appointment_type] ?? typeLabel.first_visit;
-                  return (
-                    <div key={a.id} className={`text-[10px] truncate px-1 py-0.5 rounded ${t.bg}`}>
-                      {format(new Date(a.scheduled_at), "HH:mm")} {a.patient_name?.split(" ")[0]}
+                   const t = typeLabel[a.appointment_type ?? "first_visit"] ?? typeLabel.first_visit;
+                    return (
+                     <div key={a.id} className={`text-[10px] truncate px-1 py-0.5 rounded ${t.bg}`}>
+                       {format(new Date(a.scheduled_at ?? ""), "HH:mm")} {a.patient_name?.split(" ")[0]}
                     </div>
                   );
                 })}
@@ -372,7 +372,7 @@ const DoctorCalendar = () => {
   const MobileWeek = () => (
     <div className="space-y-2">
       {days.map(day => {
-        const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at), day));
+        const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at ?? ""), day));
         const isToday = isSameDay(day, new Date());
         const isAbsent = absences.includes(format(day, "yyyy-MM-dd"));
         return (
@@ -389,7 +389,7 @@ const DoctorCalendar = () => {
             ) : (
               <div className="space-y-1.5">
                 {dayAppts.map(a => {
-                  const t = typeLabel[a.appointment_type] ?? typeLabel.first_visit;
+                  const t = typeLabel[a.appointment_type ?? "first_visit"] ?? typeLabel.first_visit;
                   const sc = statusConfig[a.status] ?? statusConfig.scheduled;
                   return (
                     <div
@@ -402,7 +402,7 @@ const DoctorCalendar = () => {
                         <span className={`text-[10px] ${sc.text}`}>{sc.label}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground">
-                        {format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min
+                        {format(new Date(a.scheduled_at ?? ""), "HH:mm")} · {a.duration_minutes || 30}min
                       </p>
                     </div>
                   );

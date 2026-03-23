@@ -102,7 +102,7 @@ export const useDoctorProfile = () => {
       if (error) throw error;
       
       // Fetch financial data separately (protected table)
-      let financial = null;
+      let financial: { pix_key: string | null; pix_key_type: string | null } | null = null;
       if (data) {
         const { data: fin } = await supabase
           .from("doctor_financial")

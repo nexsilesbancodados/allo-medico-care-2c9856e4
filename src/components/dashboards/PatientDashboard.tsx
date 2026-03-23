@@ -281,14 +281,14 @@ const PatientDashboard = () => {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-900/30"><Gift className="h-4 w-4 text-amber-600 dark:text-amber-400" /></div>
               <p className="text-[12px] font-bold text-amber-700 dark:text-amber-400">Retorno Grátis Disponível</p>
             </div>
-            {returnAppts.map((ra: { id: string; return_deadline: string | null; doctor_name: string; doctor_id: string; scheduled_at: string }) => {
-              const daysRemaining = differenceInDays(new Date(ra.return_deadline), new Date());
+            {returnAppts.map((ra) => {
+              const daysRemaining = differenceInDays(new Date(ra.return_deadline ?? new Date()), new Date());
               return (
                 <div key={ra.id} className="flex items-center justify-between rounded-xl border border-border/25 bg-card p-3 mb-2 last:mb-0">
                   <div className="text-[11px]">
                     <p className="font-semibold text-foreground">{ra.doctor_name}</p>
                     <p className="text-muted-foreground mt-0.5">
-                      {daysRemaining <= 3 ? <span className="font-semibold text-red-500">⚠️ {daysRemaining}d restantes</span> : `Até ${format(new Date(ra.return_deadline), "dd/MM")} (${daysRemaining}d)`}
+                      {daysRemaining <= 3 ? <span className="font-semibold text-red-500">⚠️ {daysRemaining}d restantes</span> : `Até ${format(new Date(ra.return_deadline ?? new Date()), "dd/MM")} (${daysRemaining}d)`}
                     </p>
                   </div>
                   <Button size="sm" className="h-8 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[10.5px] font-bold"
