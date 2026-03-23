@@ -1,8 +1,7 @@
 /**
  * VideoConsultation — Componente de vídeo P2P nativo via WebRTC
  * 
- * Renderiza vídeo local + remoto. Expõe controles via props
- * para que VideoRoom orquestre mute/camera/hangup de forma centralizada.
+ * Compatível com PC e Mobile (touch targets, safe areas, câmera flip).
  */
 
 import { useEffect, useRef, useImperativeHandle, forwardRef } from "react";
@@ -17,6 +16,7 @@ export interface VideoConsultationHandle {
   hangUp: () => void;
   toggleMute: () => void;
   toggleVideo: () => void;
+  switchCamera: () => Promise<void>;
   isMuted: boolean;
   isVideoOff: boolean;
   status: CallStatus;
@@ -48,6 +48,7 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
 
     const localVideoRef = useRef<HTMLVideoElement>(null);
     const remoteVideoRef = useRef<HTMLVideoElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     const {
       localStream,
@@ -57,6 +58,7 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
       isVideoOff,
       toggleMute,
       toggleVideo,
+      switchCamera,
       hangUp,
       startCall,
     } = useWebRTC({
@@ -66,17 +68,16 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
       displayName: userName,
     });
 
-    // Expor controles para o VideoRoom
     useImperativeHandle(ref, () => ({
       hangUp,
       toggleMute,
       toggleVideo,
+      switchCamera,
       isMuted,
       isVideoOff,
       status,
-    }), [hangUp, toggleMute, toggleVideo, isMuted, isVideoOff, status]);
+    }), [hangUp, toggleMute, toggleVideo, switchCamera, isMuted, isVideoOff, status]);
 
-    // Notificar mudanças de status
     useEffect(() => {
       onStatusChange?.(status);
     }, [status, onStatusChange]);
@@ -84,6 +85,7 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
     // Iniciar chamada automaticamente
     useEffect(() => {
       startCall();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // Vincular streams aos elementos de vídeo
@@ -99,10 +101,10 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
       }
     }, [remoteStream]);
 
-    // Som de entrada
+    // Som de entrada (beep suave)
     useEffect(() => {
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
@@ -114,7 +116,7 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
         osc.start(audioCtx.currentTime);
         osc.stop(audioCtx.currentTime + 0.35);
       } catch {
-        // ignore
+        // ignore — some mobile browsers block autoplay audio
       }
     }, []);
 
@@ -123,6 +125,7 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
       if (status === "ended") {
         onEndCall();
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status]);
 
     const isWaiting = status === "idle" || status === "requesting_media" || status === "waiting_peer";
@@ -130,7 +133,11 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
     const hasRemoteVideo = remoteStream && remoteStream.getVideoTracks().some(t => t.enabled);
 
     return (
-      <div className="relative w-full h-full overflow-hidden" style={{ background: "hsl(220, 25%, 4%)" }}>
+      <div
+        ref={containerRef}
+        className="relative w-full h-full overflow-hidden touch-none"
+        style={{ background: "hsl(220, 25%, 4%)" }}
+      >
         {/* ===== VÍDEO REMOTO — tela cheia ===== */}
         <video
           ref={remoteVideoRef}
@@ -145,11 +152,11 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
         {(!hasRemoteVideo || !isActive) && (
           <div className="absolute inset-0 z-[1] flex items-center justify-center">
             <div className="flex flex-col items-center gap-5">
-              <div className="w-28 h-28 rounded-full bg-[hsl(220,20%,12%)] border-2 border-[hsl(220,15%,20%)] flex items-center justify-center">
-                <UserRound className="w-14 h-14 text-[hsl(220,15%,40%)]" />
+              <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-[hsl(220,20%,12%)] border-2 border-[hsl(220,15%,20%)] flex items-center justify-center">
+                <UserRound className="w-12 h-12 md:w-14 md:h-14 text-[hsl(220,15%,40%)]" />
               </div>
-              <div className="text-center space-y-2">
-                <p className="text-base font-medium text-white">
+              <div className="text-center space-y-2 px-4">
+                <p className="text-sm md:text-base font-medium text-white">
                   {STATUS_LABELS[status]}
                 </p>
                 {isWaiting && (
@@ -169,7 +176,7 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
                     variant="outline"
                     size="sm"
                     onClick={() => startCall()}
-                    className="mt-2 border-white/20 text-white hover:bg-white/10"
+                    className="mt-2 border-white/20 text-white hover:bg-white/10 min-h-[44px] min-w-[44px] rounded-xl"
                   >
                     Tentar novamente
                   </Button>
@@ -182,11 +189,13 @@ const VideoConsultation = forwardRef<VideoConsultationHandle, VideoConsultationP
         {/* ===== VÍDEO LOCAL — miniatura PIP ===== */}
         <motion.div
           drag
-          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+          dragConstraints={containerRef}
           dragElastic={0.1}
+          dragMomentum={false}
           className={`absolute z-10 rounded-2xl overflow-hidden shadow-2xl border-2 border-white/10 ${
-            isMobile ? "bottom-4 right-3 w-24 h-32" : "bottom-4 right-4 w-44 h-32"
+            isMobile ? "bottom-4 right-3 w-[100px] h-[140px]" : "bottom-4 right-4 w-44 h-32"
           }`}
+          style={{ touchAction: "none" }}
         >
           <video
             ref={localVideoRef}
