@@ -260,10 +260,10 @@ const PatientDashboard = () => {
           <UpsellBanner />
         </SectionErrorBoundary>
 
-        {/* ═══ Quick Actions — 4-col grid ═══ */}
+        {/* ═══ Quick Actions — circular icons like health apps ═══ */}
         <section>
-          <h2 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Ações Rápidas</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+          <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest mb-3 px-1">Ações Rápidas</h2>
+          <div className="flex gap-4 justify-around px-2">
             {quickActions.map((item, i) => (
               <motion.button
                 key={item.label}
@@ -271,12 +271,12 @@ const PatientDashboard = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05, type: "spring", stiffness: 200, damping: 20 }}
                 onClick={() => navigate(item.path)}
-                className="card-interactive group flex flex-col items-center gap-2.5 py-4 sm:py-4.5 rounded-2xl bg-card border border-border/30 hover:border-primary/20 hover:shadow-lg active:scale-[0.96] transition-all duration-200"
+                className="group flex flex-col items-center gap-2 active:scale-[0.92] transition-transform"
               >
-                <div className={`size-11 sm:size-12 rounded-2xl ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-sm`}>
-                  <item.icon className={`w-[18px] h-[18px] sm:w-5 sm:h-5 ${item.color}`} />
+                <div className={`size-14 sm:size-16 rounded-full ${item.bg} ring-1 ${item.ring} flex items-center justify-center group-hover:scale-110 transition-transform duration-200 shadow-sm`}>
+                  <item.icon className={`w-6 h-6 sm:w-7 sm:h-7 ${item.color}`} />
                 </div>
-                <span className="text-[11px] sm:text-xs font-bold text-foreground/80">{item.label}</span>
+                <span className="text-[11px] font-semibold text-foreground/70">{item.label}</span>
               </motion.button>
             ))}
           </div>
