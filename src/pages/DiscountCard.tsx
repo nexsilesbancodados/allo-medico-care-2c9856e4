@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,8 @@ import heroCartao from "@/assets/hero-cartao.png";
 import cardFamily from "@/assets/card-family-telemedicine.jpg";
 import cardClube from "@/assets/card-clube-vantagens.jpg";
 import cardPremium from "@/assets/card-premium-render.png";
+import DashboardLayout from "@/components/dashboards/DashboardLayout";
+import { getPatientNav } from "@/components/patient/patientNav";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
@@ -168,15 +170,18 @@ const DiscountCard = () => {
     } finally { setSubscribing(null); }
   };
 
-  return (
+  const [searchParams] = useSearchParams();
+  const isDashboard = !!searchParams.get("role");
+
+  const content = (
     <>
       <SEOHead title="Cartão de Benefícios | AloClinica — Telemedicina, Descontos e Assistência" description="Telemedicina 24h, clube de vantagens com até 80% de desconto e assistência funerária. Planos a partir de R$ 39,90/mês." />
-      <div className="min-h-screen relative">
-        <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(45,60%,96%)] via-[hsl(40,50%,91%)] to-[hsl(35,45%,85%)] dark:from-[hsl(45,25%,8%)] dark:via-[hsl(40,20%,10%)] dark:to-[hsl(35,18%,12%)]" />
-        <Header />
+      <div className={`${isDashboard ? "" : "min-h-screen"} relative`}>
+        {!isDashboard && <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(45,60%,96%)] via-[hsl(40,50%,91%)] to-[hsl(35,45%,85%)] dark:from-[hsl(45,25%,8%)] dark:via-[hsl(40,20%,10%)] dark:to-[hsl(35,18%,12%)]" />}
+        {!isDashboard && <Header />}
 
         {/* ==================== HERO ==================== */}
-        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "60vh" }}>
+        <section className={`relative overflow-hidden ${isDashboard ? "" : "mt-[70px]"}`} style={{ minHeight: isDashboard ? "40vh" : "60vh" }}>
           <img src={heroCartao} alt="Cartão de Benefícios" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
@@ -506,12 +511,24 @@ const DiscountCard = () => {
           </div>
         </section>
 
-        <Suspense fallback={null}>
-          <Footer />
-        </Suspense>
+        {!isDashboard && (
+          <Suspense fallback={null}>
+            <Footer />
+          </Suspense>
+        )}
       </div>
     </>
   );
+
+  if (isDashboard) {
+    return (
+      <DashboardLayout title="Cartão de Benefícios" nav={getPatientNav("discount-card")} role="patient">
+        {content}
+      </DashboardLayout>
+    );
+  }
+
+  return content;
 };
 
 export default DiscountCard;
