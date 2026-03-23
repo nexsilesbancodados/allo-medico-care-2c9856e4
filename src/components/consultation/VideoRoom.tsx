@@ -151,7 +151,7 @@ const VideoRoom = () => {
         .select("id, scheduled_at")
         .eq("doctor_id", appointment.doctor_id)
         .eq("status", "in_progress")
-        .neq("id", appointmentId!);
+        .neq("id", appointmentId ?? '');
 
       if (activeAppts && activeAppts.length > 0) {
         setDoctorBusy(true);
