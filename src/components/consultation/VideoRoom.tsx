@@ -160,7 +160,7 @@ const VideoRoom = () => {
           .select("id")
           .eq("doctor_id", appointment.doctor_id)
           .in("status", ["waiting", "in_progress"])
-          .neq("id", appointmentId!)
+          .neq("id", appointmentId ?? '')
           .lt("scheduled_at", appointment.scheduled_at);
         setQueuePosition((waitingAhead?.length ?? 0) + 1);
       } else {
