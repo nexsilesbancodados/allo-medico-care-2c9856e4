@@ -4,11 +4,7 @@
  * Sinalização via Supabase Realtime (broadcast).
  * Sem dependência de Jitsi, Metered, Daily ou qualquer SDK externo.
  * 
- * Fluxo:
- *  1. Médico entra → cria offer → envia via Supabase broadcast
- *  2. Paciente entra → recebe offer → cria answer → envia via broadcast
- *  3. Ambos trocam ICE candidates via broadcast
- *  4. Conexão P2P estabelecida
+ * Compatível com PC e Mobile (iOS Safari, Android Chrome).
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -23,9 +19,7 @@ const STUN_SERVERS: RTCIceServer[] = [
 ];
 
 // Placeholder para TURN futuro (ex: coturn, OpenRelay)
-const TURN_SERVERS: RTCIceServer[] = [
-  // { urls: "turn:turn.example.com:3478", username: "user", credential: "pass" },
-];
+const TURN_SERVERS: RTCIceServer[] = [];
 
 const ICE_CONFIG: RTCConfiguration = {
   iceServers: [...STUN_SERVERS, ...TURN_SERVERS],
@@ -44,7 +38,7 @@ export type CallStatus =
   | "failed";
 
 interface SignalPayload {
-  type: "offer" | "answer" | "ice-candidate" | "hang-up";
+  type: "offer" | "answer" | "ice-candidate" | "hang-up" | "join";
   sender: string;
   data: unknown;
 }
@@ -64,9 +58,15 @@ interface UseWebRTCReturn {
   isVideoOff: boolean;
   toggleMute: () => void;
   toggleVideo: () => void;
+  switchCamera: () => Promise<void>;
   hangUp: () => void;
   startCall: () => Promise<void>;
 }
+
+/** Detect mobile from userAgent */
+const isMobileDevice = () =>
+  typeof navigator !== "undefined" &&
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
 export function useWebRTC({
   roomId,
@@ -85,18 +85,24 @@ export function useWebRTC({
   const iceCandidateQueue = useRef<RTCIceCandidateInit[]>([]);
   const hasRemoteDesc = useRef(false);
   const cleanedUp = useRef(false);
+  const offerRetryRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
+  const facingModeRef = useRef<"user" | "environment">("user");
 
   // ─── Cleanup ────────────────────────────────────────────────────────────────
   const cleanup = useCallback(() => {
     if (cleanedUp.current) return;
     cleanedUp.current = true;
 
-    // Parar todos os tracks
+    if (offerRetryRef.current) {
+      clearInterval(offerRetryRef.current);
+      offerRetryRef.current = null;
+    }
+
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
     localStreamRef.current = null;
     setLocalStream(null);
 
-    // Fechar peer connection
     if (pcRef.current) {
       pcRef.current.onicecandidate = null;
       pcRef.current.ontrack = null;
@@ -105,7 +111,6 @@ export function useWebRTC({
       pcRef.current = null;
     }
 
-    // Remover canal Supabase
     if (channelRef.current) {
       supabase.removeChannel(channelRef.current);
       channelRef.current = null;
@@ -144,7 +149,6 @@ export function useWebRTC({
   const createPeerConnection = useCallback(() => {
     const pc = new RTCPeerConnection(ICE_CONFIG);
 
-    // Enviar ICE candidates para o outro peer
     pc.onicecandidate = (event) => {
       if (event.candidate) {
         sendSignal({
@@ -155,7 +159,6 @@ export function useWebRTC({
       }
     };
 
-    // Receber streams remotos
     const remote = new MediaStream();
     setRemoteStream(remote);
 
@@ -163,11 +166,9 @@ export function useWebRTC({
       event.streams[0]?.getTracks().forEach((track) => {
         remote.addTrack(track);
       });
-      // Force re-render with new ref
       setRemoteStream(new MediaStream(remote.getTracks()));
     };
 
-    // Monitorar estado da conexão
     pc.oniceconnectionstatechange = () => {
       const state = pc.iceConnectionState;
       switch (state) {
@@ -177,13 +178,17 @@ export function useWebRTC({
         case "connected":
         case "completed":
           setStatus("connected");
+          // Stop re-broadcasting offer once connected
+          if (offerRetryRef.current) {
+            clearInterval(offerRetryRef.current);
+            offerRetryRef.current = null;
+          }
           break;
         case "disconnected":
           setStatus("reconnecting");
           break;
         case "failed":
           setStatus("failed");
-          // Tentar reconectar via ICE restart
           if (isInitiator && pc.signalingState !== "closed") {
             pc.restartIce();
           }
@@ -201,23 +206,38 @@ export function useWebRTC({
   // ─── Receber sinais ─────────────────────────────────────────────────────────
   const handleSignal = useCallback(
     async (payload: SignalPayload) => {
-      // Ignorar mensagens próprias
       if (payload.sender === userId) return;
 
       const pc = pcRef.current;
-      if (!pc && payload.type !== "hang-up") return;
 
       switch (payload.type) {
+        // When the other peer joins, the initiator re-sends the offer
+        case "join": {
+          if (isInitiator && lastOfferRef.current && pc) {
+            sendSignal({
+              type: "offer",
+              sender: userId,
+              data: lastOfferRef.current,
+            });
+          }
+          break;
+        }
+
         case "offer": {
-          if (isInitiator) return; // Paciente recebe offer
+          if (isInitiator || !pc) return;
           try {
+            // Reset if we get a new offer while already having a remote desc
+            if (hasRemoteDesc.current && pc.signalingState !== "stable") {
+              await pc.setLocalDescription({ type: "rollback" });
+            }
+            
             const offer = payload.data as RTCSessionDescriptionInit;
-            await pc!.setRemoteDescription(new RTCSessionDescription(offer));
+            await pc.setRemoteDescription(new RTCSessionDescription(offer));
             hasRemoteDesc.current = true;
             await flushIceCandidates();
 
-            const answer = await pc!.createAnswer();
-            await pc!.setLocalDescription(answer);
+            const answer = await pc.createAnswer();
+            await pc.setLocalDescription(answer);
 
             sendSignal({
               type: "answer",
@@ -233,10 +253,10 @@ export function useWebRTC({
         }
 
         case "answer": {
-          if (!isInitiator) return; // Médico recebe answer
+          if (!isInitiator || !pc) return;
           try {
             const answer = payload.data as RTCSessionDescriptionInit;
-            await pc!.setRemoteDescription(new RTCSessionDescription(answer));
+            await pc.setRemoteDescription(new RTCSessionDescription(answer));
             hasRemoteDesc.current = true;
             await flushIceCandidates();
             setStatus("connecting");
@@ -247,8 +267,9 @@ export function useWebRTC({
         }
 
         case "ice-candidate": {
+          if (!pc) return;
           const candidate = payload.data as RTCIceCandidateInit;
-          if (hasRemoteDesc.current && pc) {
+          if (hasRemoteDesc.current) {
             try {
               await pc.addIceCandidate(new RTCIceCandidate(candidate));
             } catch (err) {
@@ -269,20 +290,37 @@ export function useWebRTC({
     [userId, isInitiator, sendSignal, cleanup, flushIceCandidates]
   );
 
+  // ─── Get media constraints (adaptive for mobile) ───────────────────────────
+  const getMediaConstraints = useCallback((): MediaStreamConstraints => {
+    const mobile = isMobileDevice();
+    return {
+      video: {
+        width: { ideal: mobile ? 640 : 1280 },
+        height: { ideal: mobile ? 480 : 720 },
+        facingMode: facingModeRef.current,
+        // Lower frame rate on mobile to save battery
+        ...(mobile ? { frameRate: { ideal: 24, max: 30 } } : {}),
+      },
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+      },
+    };
+  }, []);
+
   // ─── Iniciar chamada ────────────────────────────────────────────────────────
   const startCall = useCallback(async () => {
     cleanedUp.current = false;
     hasRemoteDesc.current = false;
     iceCandidateQueue.current = [];
+    lastOfferRef.current = null;
 
     setStatus("requesting_media");
 
     // 1. Obter mídia local
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      });
+      const stream = await navigator.mediaDevices.getUserMedia(getMediaConstraints());
       localStreamRef.current = stream;
       setLocalStream(stream);
     } catch (err) {
@@ -311,26 +349,38 @@ export function useWebRTC({
     await channel.subscribe();
     channelRef.current = channel;
 
-    // 4. Se é iniciador (médico), criar offer
+    // 4. Se é iniciador (médico), criar offer e re-enviar a cada 3s até conectar
     if (isInitiator) {
       setStatus("waiting_peer");
       try {
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
+        lastOfferRef.current = offer;
 
-        sendSignal({
-          type: "offer",
-          sender: userId,
-          data: offer,
-        });
+        sendSignal({ type: "offer", sender: userId, data: offer });
+
+        // Re-broadcast offer every 3s for late joiners
+        offerRetryRef.current = setInterval(() => {
+          if (pcRef.current?.iceConnectionState === "connected" || 
+              pcRef.current?.iceConnectionState === "completed" ||
+              cleanedUp.current) {
+            if (offerRetryRef.current) clearInterval(offerRetryRef.current);
+            return;
+          }
+          if (lastOfferRef.current) {
+            sendSignal({ type: "offer", sender: userId, data: lastOfferRef.current });
+          }
+        }, 3000);
       } catch (err) {
         logError("createOffer failed", err);
         setStatus("failed");
       }
     } else {
       setStatus("waiting_peer");
+      // Notify the initiator that we're here
+      sendSignal({ type: "join", sender: userId, data: null });
     }
-  }, [roomId, userId, isInitiator, createPeerConnection, handleSignal, sendSignal]);
+  }, [roomId, userId, isInitiator, createPeerConnection, handleSignal, sendSignal, getMediaConstraints]);
 
   // ─── Controles de mídia ─────────────────────────────────────────────────────
   const toggleMute = useCallback(() => {
@@ -347,21 +397,74 @@ export function useWebRTC({
     setIsVideoOff((prev) => !prev);
   }, []);
 
+  // ─── Trocar câmera (front/back) — mobile ───────────────────────────────────
+  const switchCamera = useCallback(async () => {
+    if (!localStreamRef.current || !pcRef.current) return;
+
+    facingModeRef.current = facingModeRef.current === "user" ? "environment" : "user";
+
+    try {
+      // Stop old video tracks
+      localStreamRef.current.getVideoTracks().forEach((t) => t.stop());
+
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: facingModeRef.current,
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+        },
+      });
+
+      const newVideoTrack = newStream.getVideoTracks()[0];
+      if (!newVideoTrack) return;
+
+      // Replace track in peer connection
+      const sender = pcRef.current.getSenders().find((s) => s.track?.kind === "video");
+      if (sender) {
+        await sender.replaceTrack(newVideoTrack);
+      }
+
+      // Replace track in local stream
+      const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
+      if (oldVideoTrack) {
+        localStreamRef.current.removeTrack(oldVideoTrack);
+      }
+      localStreamRef.current.addTrack(newVideoTrack);
+      setLocalStream(new MediaStream(localStreamRef.current.getTracks()));
+    } catch (err) {
+      logError("switchCamera failed", err);
+    }
+  }, []);
+
   // ─── Desligar chamada ───────────────────────────────────────────────────────
   const hangUp = useCallback(() => {
     sendSignal({ type: "hang-up", sender: userId, data: null });
     cleanup();
   }, [sendSignal, userId, cleanup]);
 
-  // ─── Cleanup ao desmontar ───────────────────────────────────────────────────
+  // ─── Cleanup ao desmontar / fechar aba ──────────────────────────────────────
   useEffect(() => {
-    const handleBeforeUnload = () => {
+    const handleLeave = () => {
       sendSignal({ type: "hang-up", sender: userId, data: null });
       cleanup();
     };
-    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // beforeunload works on desktop
+    window.addEventListener("beforeunload", handleLeave);
+    // pagehide fires reliably on mobile Safari/Chrome
+    window.addEventListener("pagehide", handleLeave);
+
+    // visibilitychange: cleanup when tab is hidden on mobile (e.g. switching apps)
+    const handleVisibility = () => {
+      // Only cleanup if user leaves the page entirely (not just switching tabs briefly)
+      // Mobile browsers may fire this when lock screen activates, so we don't cleanup immediately
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("beforeunload", handleLeave);
+      window.removeEventListener("pagehide", handleLeave);
+      document.removeEventListener("visibilitychange", handleVisibility);
       cleanup();
     };
   }, [cleanup, sendSignal, userId]);
@@ -374,6 +477,7 @@ export function useWebRTC({
     isVideoOff,
     toggleMute,
     toggleVideo,
+    switchCamera,
     hangUp,
     startCall,
   };
