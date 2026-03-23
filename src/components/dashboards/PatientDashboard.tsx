@@ -516,26 +516,24 @@ const PatientDashboard = () => {
           </Card>
         )}
 
-        {/* ═══ Shortcuts grid ═══ */}
-        <section>
-          <h2 className="text-[11px] font-bold text-muted-foreground/70 uppercase tracking-widest mb-3 px-1">Acesso Rápido</h2>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 sm:gap-2.5">
-            {shortcuts.map((item, i) => (
-              <motion.button
-                key={item.label}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.03, type: "spring", stiffness: 200, damping: 20 }}
-                onClick={() => navigate(item.path)}
-                className="card-interactive group flex flex-col items-center gap-2.5 py-3.5 sm:py-4 rounded-xl bg-card border border-border/30 hover:border-primary/15 hover:shadow-md active:scale-[0.96] transition-all duration-200"
-              >
-                <div className="size-10 sm:size-11 rounded-xl bg-muted/30 flex items-center justify-center group-hover:bg-muted/50 group-hover:scale-110 transition-all duration-200 shadow-sm">
-                  <item.icon className={`w-[18px] h-[18px] sm:w-5 sm:h-5 ${item.color}`} />
-                </div>
-                <span className="text-[10px] sm:text-[11px] font-bold text-muted-foreground">{item.label}</span>
-              </motion.button>
-            ))}
+        {/* ═══ Shortcuts — clean list-style like profile references ═══ */}
+        <section className="bg-card rounded-2xl border border-border/20 overflow-hidden divide-y divide-border/10">
+          <div className="px-4 py-3">
+            <h2 className="text-xs font-bold text-muted-foreground/60 uppercase tracking-widest">Acesso Rápido</h2>
           </div>
+          {shortcuts.map((item) => (
+            <button
+              key={item.label}
+              onClick={() => navigate(item.path)}
+              className="w-full flex items-center gap-3.5 px-4 py-3.5 hover:bg-muted/30 active:bg-muted/50 transition-colors text-left"
+            >
+              <div className="size-9 rounded-xl bg-muted/40 flex items-center justify-center shrink-0">
+                <item.icon className={`w-[18px] h-[18px] ${item.color}`} />
+              </div>
+              <span className="text-[13px] font-medium text-foreground flex-1">{item.label}</span>
+              <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+            </button>
+          ))}
         </section>
 
         {/* ═══ Smart health alerts ═══ */}

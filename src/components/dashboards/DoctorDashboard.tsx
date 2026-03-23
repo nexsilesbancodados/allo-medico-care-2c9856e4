@@ -130,14 +130,14 @@ const DoctorDashboard = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("home")} role="doctor">
-      <div className="max-w-6xl space-y-6">
+      <div className="max-w-6xl space-y-5">
         <SectionErrorBoundary fallbackTitle="Erro no checklist de ativação">
           <DoctorOnboarding />
         </SectionErrorBoundary>
 
         {/* CRM verification banner */}
         {!loading && data && !data.crmVerified && (
-          <div className="rounded-xl bg-warning/10 border border-warning/30 p-4 flex items-start gap-3">
+          <div className="rounded-2xl bg-warning/10 border border-warning/30 p-4 flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-warning shrink-0 mt-0.5" />
             <div>
               <p className="font-semibold text-foreground text-sm">Perfil em análise</p>
@@ -148,61 +148,54 @@ const DoctorDashboard = () => {
           </div>
         )}
 
-        {/* ═══ Top bar: Search + Actions ═══ */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              type="text"
-              placeholder="Buscar paciente, prontuário ou exame..."
-              className="w-full h-10 pl-10 pr-4 rounded-xl bg-card border border-border/60 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/40 transition-all"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Button size="icon" variant="outline" className="h-10 w-10 rounded-xl relative" aria-label="Ação" onClick={() =>  navigate("/dashboard/doctor/waiting-room")}>
-              <Bell className="w-4 h-4 text-muted-foreground" />
-              {waitingCount > 0 && <span className="absolute -top-1 -right-1 size-4 bg-destructive text-destructive-foreground text-[10px] rounded-full flex items-center justify-center font-bold">{waitingCount}</span>}
-            </Button>
-            <Button
-              className="h-10 rounded-xl bg-primary text-primary-foreground gap-2 px-5 shadow-md shadow-primary/20 font-semibold"
-              onClick={() => navigate("/dashboard/doctor/waiting-room")}
-            >
-              <Plus className="w-4 h-4" /> Nova Consulta
-            </Button>
-          </div>
-        </div>
-
-        {/* ═══ Greeting ═══ */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            {greeting()}, Dr. {profile?.first_name || "Médico"} 👋
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            {!loading ? (
-              <>Você tem <span className="font-semibold text-foreground">{stats.today} consultas</span> agendadas para hoje, {todayStr}.</>
-            ) : (
-              "Carregando suas informações..."
-            )}
-          </p>
-          {!loading && data?.crm && (
-            <div className="flex items-center gap-3 mt-2">
-              <span className="text-xs text-muted-foreground">CRM {data.crm}/{data.crmState}</span>
-              {data?.crmVerified && (
-                <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-success/10 text-success">
-                  <ShieldCheck className="w-3 h-3" />
-                  <span className="text-[10px] font-bold">Verificado</span>
-                </div>
-              )}
-              {(data?.rating ?? 0) > 0 && (
-                <div className="flex items-center gap-1">
-                  <Star className="w-3 h-3 text-warning fill-warning" />
-                  <span className="text-xs font-semibold text-foreground">{(data?.rating ?? 0).toFixed(1)}</span>
-                  <span className="text-[10px] text-muted-foreground">({data?.totalReviews ?? 0})</span>
-                </div>
-              )}
+        {/* ═══ Doctor greeting hero — blue gradient like patient ═══ */}
+        <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(160,55%,45%)] via-[hsl(165,50%,42%)] to-[hsl(175,60%,45%)] shadow-lg shadow-secondary/15">
+          <div className="absolute -right-6 -top-6 w-28 h-28 bg-white/[0.07] rounded-full blur-xl pointer-events-none" />
+          <div className="relative z-10 p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <span className="text-xs font-medium text-white/60">{greeting()}</span>
+                <h1 className="text-2xl sm:text-[26px] font-extrabold text-white tracking-tight mt-0.5">
+                  Dr. {profile?.first_name || "Médico"} 👋
+                </h1>
+                <p className="text-xs text-white/50 mt-1">
+                  {!loading ? (
+                    <>{stats.today} consultas hoje, {todayStr}</>
+                  ) : "Carregando..."}
+                </p>
+                {!loading && data?.crm && (
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-[11px] text-white/50">CRM {data.crm}/{data.crmState}</span>
+                    {data?.crmVerified && (
+                      <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 text-white text-[10px] font-bold">
+                        <ShieldCheck className="w-3 h-3" /> Verificado
+                      </span>
+                    )}
+                    {(data?.rating ?? 0) > 0 && (
+                      <span className="flex items-center gap-1 text-white/80">
+                        <Star className="w-3 h-3 text-warning fill-warning" />
+                        <span className="text-xs font-semibold">{(data?.rating ?? 0).toFixed(1)}</span>
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <Button size="sm" variant="ghost"
+                  className="h-9 rounded-xl text-white/80 hover:bg-white/15 gap-1.5 text-xs font-semibold"
+                  onClick={() => navigate("/dashboard/doctor/waiting-room")}>
+                  <Bell className="w-4 h-4" />
+                  {waitingCount > 0 && <span className="bg-white/25 text-white text-[10px] px-1.5 py-0.5 rounded-full font-bold">{waitingCount}</span>}
+                </Button>
+                <Button size="sm"
+                  className="h-9 rounded-xl bg-white/20 text-white hover:bg-white/30 gap-1.5 text-xs font-bold backdrop-blur-sm"
+                  onClick={() => navigate("/dashboard/doctor/waiting-room")}>
+                  <Plus className="w-4 h-4" /> Nova
+                </Button>
+              </div>
             </div>
-          )}
-        </div>
+          </div>
+        </section>
 
         {/* ═══ KPI Cards — colored left border like reference ═══ */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4" role="list" aria-label="Estatísticas do médico">
