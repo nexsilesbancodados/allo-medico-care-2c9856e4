@@ -265,8 +265,8 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
             </p>
           </div>
         );
+      default: return null;
     }
-  };
 
   return (
     <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">

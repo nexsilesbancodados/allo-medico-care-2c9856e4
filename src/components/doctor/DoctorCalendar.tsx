@@ -402,7 +402,7 @@ const DoctorCalendar = () => {
                         <span className={`text-[10px] ${sc.text}`}>{sc.label}</span>
                       </div>
                       <p className="text-[11px] text-muted-foreground">
-                        {format(new Date(a.scheduled_at), "HH:mm")} · {a.duration_minutes || 30}min
+                        {format(new Date(a.scheduled_at ?? ""), "HH:mm")} · {a.duration_minutes || 30}min
                       </p>
                     </div>
                   );

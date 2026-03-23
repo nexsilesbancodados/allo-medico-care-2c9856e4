@@ -143,7 +143,7 @@ const BookAppointment = () => {
     const { data: doc } = await supabase
       .from("doctor_profiles")
       .select("id, user_id, crm, crm_state, bio, consultation_price, rating, experience_years")
-      .eq("id", doctorId)
+      .eq("id", doctorId!)
       .single();
 
     if (!doc) { setLoading(false); return; }

@@ -77,7 +77,7 @@ const LaudistaFinanceiro = () => {
       const monthStart = startOfMonth(now);
       const thisMonthReports = reports.filter((r: any) => new Date(r.created_at) >= monthStart);
 
-      const chartData = [];
+      const chartData: { month: string; laudos: number; valor: number }[] = [];
       for (let i = 5; i >= 0; i--) {
         const m = subMonths(now, i);
         const mStart = startOfMonth(m);

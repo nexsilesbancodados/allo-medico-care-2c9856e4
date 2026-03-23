@@ -186,7 +186,7 @@ const RenewalQueue = () => {
                   ))}
                 </div>
                 {selectedRenewal.original_prescription_url && (
-                  <Button variant="outline" className="w-full" onClick={() => viewPrescription(selectedRenewal.original_prescription_url)}>
+                  <Button variant="outline" className="w-full" onClick={() => viewPrescription(selectedRenewal.original_prescription_url!)}>
                     <Eye className="w-4 h-4 mr-2" /> Ver Receita Original
                   </Button>
                 )}

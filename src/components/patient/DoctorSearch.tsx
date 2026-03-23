@@ -23,8 +23,8 @@ interface DoctorResult {
   bio: string | null;
   consultation_price: number;
   rating: number;
-  total_reviews: number;
-  experience_years: number;
+  total_reviews: number | null;
+  experience_years: number | null;
   available_now?: boolean;
   available_now_since?: string | null;
   profile: { first_name: string; last_name: string; avatar_url: string | null } | null;

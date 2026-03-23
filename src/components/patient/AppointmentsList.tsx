@@ -26,7 +26,7 @@ interface Appointment {
   scheduled_at: string;
   status: string;
   payment_status: string;
-  duration_minutes: number;
+  duration_minutes: number | null;
   doctor_id: string;
   doctor_name: string;
   doctor_crm: string;
