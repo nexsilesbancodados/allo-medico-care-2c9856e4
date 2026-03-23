@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { getSubdomainRole } from "./use-subdomain-redirect";
 
 /**
  * Centralized post-login redirect logic.
@@ -42,7 +43,12 @@ export function useAuthRedirect() {
       }
     }
 
-    navigate("/dashboard");
+    const subRole = getSubdomainRole();
+    if (subRole) {
+      navigate(`/dashboard?role=${subRole}`);
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   return { redirectAfterLogin };
