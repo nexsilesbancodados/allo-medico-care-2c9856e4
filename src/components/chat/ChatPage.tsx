@@ -64,10 +64,10 @@ const ChatPage = () => {
     let nameMap = new Map<string, string>();
 
     if (isDoctor) {
-      const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", otherIds as string[]);
+      const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", otherIds.filter((id): id is string => id !== null));
       profiles?.forEach(p => nameMap.set(p.user_id, `${p.first_name} ${p.last_name}`));
     } else {
-      const { data: docs } = await supabase.from("doctor_profiles").select("id, user_id").in("id", otherIds as string[]);
+      const { data: docs } = await supabase.from("doctor_profiles").select("id, user_id").in("id", otherIds.filter((id): id is string => id !== null));
       const docUserIds = docs?.map(d => d.user_id) ?? [];
       const { data: profiles } = docUserIds.length > 0
         ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", docUserIds)

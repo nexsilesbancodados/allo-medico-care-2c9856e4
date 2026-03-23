@@ -93,7 +93,7 @@ const ReceptionDashboard = () => {
     const doctorIds = [...new Set(data.map(a => a.doctor_id))];
 
     const [pRes, dRes] = await Promise.all([
-      patientIds.length > 0 ? supabase.from("profiles").select("user_id, first_name, last_name, phone").in("user_id", patientIds) : { data: [] },
+      patientIds.length > 0 ? supabase.from("profiles").select("user_id, first_name, last_name, phone").in("user_id", patientIds.filter((id): id is string => id !== null)) : { data: [] },
       supabase.from("doctor_profiles").select("id, user_id").in("id", doctorIds),
     ]);
 

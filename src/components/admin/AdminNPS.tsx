@@ -50,7 +50,7 @@ const AdminNPS = () => {
 
     // NPS trend by month
     const now = new Date();
-    const trend: { month: string; nps: number; respostas: number }[] = [];
+    const trend: ChartDataPoint[] = [];
     for (let i = 5; i >= 0; i--) {
       const m = subMonths(now, i);
       const mStart = startOfMonth(m);
@@ -74,8 +74,8 @@ const AdminNPS = () => {
     setNpsTrend(trend);
 
     // Averages
-    const easeScores = all.filter(s => s.ease_score != null).map(s => s.ease_score!);
-    const qualityScores = all.filter(s => s.quality_score != null).map(s => s.quality_score!);
+    const easeScores = all.filter(s => s.ease_score != null).map(s => Number(s.ease_score));
+    const qualityScores = all.filter(s => s.quality_score != null).map(s => Number(s.quality_score));
     setAvgEase(easeScores.length > 0 ? easeScores.reduce((a, b) => a + b, 0) / easeScores.length : 0);
     setAvgQuality(qualityScores.length > 0 ? qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length : 0);
 
@@ -83,18 +83,21 @@ const AdminNPS = () => {
     setRecommendRate(recommends.length > 0 ? (recommends.filter(s => s.would_recommend).length / recommends.length) * 100 : 0);
 
     // Top doctors by NPS
-    const byDoctor = new Map<string, any[]>();
+    const byDoctor = new Map<string, SurveyRow[]>();
     all.forEach(s => {
-      const arr = byDoctor.get(s.doctor_id ?? '') ?? [];
+      const key = s.doctor_id ?? '';
+      const arr = byDoctor.get(key) ?? [];
       arr.push(s);
-      byDoctor.set(s.doctor_id ?? '', arr);
+      byDoctor.set(key, arr);
     });
 
-    const doctorIds = [...byDoctor.keys()];
-    const { data: docs } = await supabase.from("doctor_profiles").select("id, user_id").in("id", doctorIds);
+    const doctorIds = [...byDoctor.keys()].filter(Boolean);
+    const { data: docs } = doctorIds.length > 0
+      ? await supabase.from("doctor_profiles").select("id, user_id").in("id", doctorIds)
+      : { data: [] };
     const userIds = docs?.map(d => d.user_id) ?? [];
     const { data: profiles } = userIds.length > 0
-      ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds as string[])
+      ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds)
       : { data: [] };
 
     const docNameMap = new Map<string, string>();
@@ -103,15 +106,16 @@ const AdminNPS = () => {
       if (p) docNameMap.set(d.id, `Dr(a). ${p.first_name} ${p.last_name}`);
     });
 
-    const doctorStats = Array.from(byDoctor.entries()).map(([docId, surveys]) => {
-      const p = surveys.filter(s => s.nps_score >= 9).length;
-      const d = surveys.filter(s => s.nps_score <= 6).length;
+    const doctorStats = Array.from(byDoctor.entries()).map(([docId, docSurveys]) => {
+      const p = docSurveys.filter(s => s.nps_score >= 9).length;
+      const d = docSurveys.filter(s => s.nps_score <= 6).length;
+      const qualScores = docSurveys.filter(s => s.quality_score != null).map(s => Number(s.quality_score));
       return {
         id: docId,
         name: docNameMap.get(docId) ?? "Médico",
-        nps: Math.round(((p - d) / surveys.length) * 100),
-        responses: surveys.length,
-        avgQuality: surveys.filter(s => (s as SurveyRow & { quality_score?: number }).quality_score).reduce((a: number, s: SurveyRow & { quality_score?: number }) => a + (s.quality_score ?? 0), 0) / (surveys.filter(s => s.quality_score).length || 1),
+        nps: Math.round(((p - d) / docSurveys.length) * 100),
+        responses: docSurveys.length,
+        avgQuality: qualScores.length > 0 ? qualScores.reduce((a, b) => a + b, 0) / qualScores.length : 0,
       };
     }).sort((a, b) => b.nps - a.nps).slice(0, 5);
     setTopDoctors(doctorStats);
@@ -138,7 +142,7 @@ const AdminNPS = () => {
         <h1 className="text-2xl font-bold text-foreground mb-1">NPS & Satisfação</h1>
         <p className="text-muted-foreground mb-6">Análise de satisfação dos pacientes</p>
 
-        {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : surveys.length === 0 ? (
+        {surveys.length === 0 ? (
           <Card className="border-border">
             <CardContent className="py-12 text-center">
               <Star className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
@@ -190,7 +194,7 @@ const AdminNPS = () => {
                     <ResponsiveContainer width={200} height={200}>
                       <PieChart>
                         <Pie data={npsDistribution} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={({ percent }: { percent: number }) => `${(percent * 100).toFixed(0)}%`}>
-                          {npsDistribution.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
+                          {npsDistribution.map((entry, i) => <Cell key={i} fill={entry.fill as string} />)}
                         </Pie>
                         <Tooltip />
                       </PieChart>
@@ -198,7 +202,7 @@ const AdminNPS = () => {
                     <div className="space-y-2">
                       {npsDistribution.map(d => (
                         <div key={d.name} className="flex items-center gap-2 text-sm">
-                          <div className="w-3 h-3 rounded-full" style={{ background: d.fill }} />
+                          <div className="w-3 h-3 rounded-full" style={{ background: d.fill as string }} />
                           <span className="text-foreground">{d.name}: {d.value}</span>
                         </div>
                       ))}

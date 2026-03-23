@@ -56,7 +56,7 @@ const AdminAppointments = () => {
     const patientIds = [...new Set(data.map(a => a.patient_id).filter((id): id is string => Boolean(id)))];
     const doctorIds = [...new Set(data.map(a => a.doctor_id))];
     const [pRes, dRes] = await Promise.all([
-      patientIds.length > 0 ? supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds as string[]) : { data: [] as any[] },
+      patientIds.length > 0 ? supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds.filter((id): id is string => id !== null)) : { data: [] as any[] },
       supabase.from("doctor_profiles").select("id, user_id").in("id", doctorIds),
     ]);
     const pMap = new Map((pRes.data ?? []).map(p => [p.user_id, `${p.first_name} ${p.last_name}`]));

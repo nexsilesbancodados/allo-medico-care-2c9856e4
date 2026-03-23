@@ -49,7 +49,7 @@ const AdminLiveConsultations = () => {
     const { data: docs } = await supabase.from("doctor_profiles").select("id, user_id").in("id", doctorIds);
     const allUserIds = [
       ...(docs?.map(d => d.user_id) ?? []),
-      ...(patientIds as string[]),
+      ...(patientIds.filter((id): id is string => id !== null)),
     ];
     const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", allUserIds);
 

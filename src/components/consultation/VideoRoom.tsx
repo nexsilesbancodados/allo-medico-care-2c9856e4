@@ -121,7 +121,7 @@ const VideoRoom = () => {
       const { data } = await supabase
         .from("patient_consents")
         .select("id")
-        .eq("appointment_id", appointmentId!)
+        .eq("appointment_id", appointmentId ?? '')
         .eq("patient_id", user.id)
         .is("revoked_at", null)
         .limit(1);
@@ -151,7 +151,7 @@ const VideoRoom = () => {
         .select("id, scheduled_at")
         .eq("doctor_id", appointment.doctor_id)
         .eq("status", "in_progress")
-        .neq("id", appointmentId!);
+        .neq("id", appointmentId ?? '');
 
       if (activeAppts && activeAppts.length > 0) {
         setDoctorBusy(true);
@@ -160,7 +160,7 @@ const VideoRoom = () => {
           .select("id")
           .eq("doctor_id", appointment.doctor_id)
           .in("status", ["waiting", "in_progress"])
-          .neq("id", appointmentId!)
+          .neq("id", appointmentId ?? '')
           .lt("scheduled_at", appointment.scheduled_at);
         setQueuePosition((waitingAhead?.length ?? 0) + 1);
       } else {
@@ -324,7 +324,7 @@ const VideoRoom = () => {
 
   const fetchAppointment = async () => {
     const { data } = await supabase
-      .from("appointments").select("*").eq("id", appointmentId!).single();
+      .from("appointments").select("*").eq("id", appointmentId ?? '').single();
 
     if (!data) { setLoading(false); return; }
 
@@ -359,9 +359,9 @@ const VideoRoom = () => {
     setAppointment(data);
 
     if (isDoctor) {
-      await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId!);
+      await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId ?? '');
       const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
-      notifyConsultationStarted(appointmentId!, docName).catch(err => logError("notifyConsultationStarted failed", err));
+      notifyConsultationStarted(appointmentId ?? '', docName).catch(err => logError("notifyConsultationStarted failed", err));
     }
 
     const otherUserId = isDoctor ? data.patient_id : null;
@@ -383,7 +383,7 @@ const VideoRoom = () => {
 
     if (isDoctor) {
       const { data: noteData } = await supabase
-        .from("consultation_notes").select("content").eq("appointment_id", appointmentId).maybeSingle();
+        .from("consultation_notes").select("content").eq("appointment_id", appointmentId ?? '').maybeSingle();
       if (noteData) {
         // Try to parse SOAP JSON, fallback to plain text
         try {
@@ -669,7 +669,7 @@ const VideoRoom = () => {
       }).eq("id", presenceLogId.current);
     }
     if (isDoctor && notesRef.current) await saveNotes(true);
-    await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId);
+    await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId ?? '');
     
     // Notify patient that consultation is completed
     if (isDoctor) {

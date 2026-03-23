@@ -73,7 +73,7 @@ const PrescriptionForm = () => {
     const { data: appt } = await supabase
       .from("appointments")
       .select("patient_id, doctor_id, guest_patient_id")
-      .eq("id", appointmentId!)
+      .eq("id", appointmentId ?? '')
       .single();
 
     if (!appt) return;
@@ -393,8 +393,7 @@ const PrescriptionForm = () => {
     const verificationCode = gerarCodigoVerificacao();
 
     const { error } = await supabase.from("prescriptions").insert({
-      // @ts-expect-error - Supabase types mismatch on insert shape
-      appointment_id: appointmentId,
+      appointment_id: appointmentId!,
       doctor_id: doctorInfo!.id,
       patient_id: patientId,
       medications: validMeds as unknown as Parameters<typeof supabase.from>[0],

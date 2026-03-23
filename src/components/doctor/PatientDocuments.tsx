@@ -62,7 +62,7 @@ const PatientDocuments = () => {
     // Get documents for these patients
     const { data: docs } = await supabase.from("patient_documents")
       .select("*")
-      .in("patient_id", patientIds)
+      .in("patient_id", patientIds.filter((id): id is string => id !== null))
       .order("created_at", { ascending: false });
 
     if (docs) {

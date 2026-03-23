@@ -117,7 +117,7 @@ const DoctorEarnings = () => {
     });
 
     // Last 6 months chart
-    const chartData = [];
+    const chartData: { month: string; consultas: number; valor: number }[] = [];
     for (let i = 5; i >= 0; i--) {
       const m = subMonths(now, i);
       const mStart = startOfMonth(m);

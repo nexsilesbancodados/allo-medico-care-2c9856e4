@@ -24,7 +24,7 @@ const statusConfig = {
 };
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.05 } } };
-const item = { hidden: { opacity: 0, x: -8 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } } };
+const item = { hidden: { opacity: 0, x: -8 }, show: { opacity: 1, x: 0, transition: { duration: 0.3, ease: [0, 0, 0.2, 1] as const } } };
 
 export function LiveQueue({ items, title, linkLabel, onLinkClick }: {
   items: QueueItem[];

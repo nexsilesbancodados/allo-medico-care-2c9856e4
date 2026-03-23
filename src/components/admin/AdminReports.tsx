@@ -22,10 +22,10 @@ interface ChartDataPoint {
 }
 
 const AdminReports = () => {
-  const [revenueData, setRevenueData] = useState<ChartDataPoint[]>([]);
-  const [userGrowth, setUserGrowth] = useState<ChartDataPoint[]>([]);
+  const [revenueData, setRevenueData] = useState<Record<string, string | number>[]>([]);
+  const [userGrowth, setUserGrowth] = useState<Record<string, string | number>[]>([]);
   const [specialtyData, setSpecialtyData] = useState<{ name: string; value: number }[]>([]);
-  const [cancellationData, setCancellationData] = useState<ChartDataPoint[]>([]);
+  const [cancellationData, setCancellationData] = useState<Record<string, string | number>[]>([]);
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const [topDoctors, setTopDoctors] = useState<DoctorPerformanceRow[]>([]);
   /* eslint-enable @typescript-eslint/no-explicit-any */
