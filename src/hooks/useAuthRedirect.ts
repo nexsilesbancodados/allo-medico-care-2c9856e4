@@ -43,7 +43,12 @@ export function useAuthRedirect() {
       }
     }
 
-    navigate("/dashboard");
+    const subRole = getSubdomainRole();
+    if (subRole) {
+      navigate(`/dashboard?role=${subRole}`);
+    } else {
+      navigate("/dashboard");
+    }
   };
 
   return { redirectAfterLogin };
