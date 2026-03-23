@@ -216,9 +216,6 @@ const ReceptionDashboard = () => {
           { label: "Concluídas", value: stats.completed, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400" },
         ]} />
 
-        {/* ── Timeline ── */}
-        {filteredAppts.length > 0 && (
-          
         {/* Pingo Banner */}
         <PingoBanner
           variant="reception"
@@ -229,7 +226,10 @@ const ReceptionDashboard = () => {
           title="Organize a agenda do dia"
           subtitle="Gerencie agendamentos e filas com facilidade"
         />
-<TimelineSchedule
+
+        {/* ── Timeline ── */}
+        {filteredAppts.length > 0 && (
+          <TimelineSchedule
             items={filteredAppts.slice(0, 8).map(a => ({
               id: a.id,
               time: format(new Date(a.scheduled_at), "HH:mm"),

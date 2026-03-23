@@ -177,18 +177,6 @@ const LaudistaDashboard = () => {
           />
         )}
 
-        {/* placeholder closing for old block */}
-        {false && urgentCount > 0 && (
-          <div className="hidden">
-              <div className="flex-1">
-                <p className="text-sm">placeholder</p>
-              </div>
-              <Button size="sm" className="bg-gradient-to-r from-destructive to-destructive/80 text-white rounded-xl shrink-0" onClick={() => navigate("/dashboard/laudista/queue?role=doctor")}>
-                Ver Fila
-              </Button>
-            </div>
-          </motion.div>
-        )}
 
         {/* Daily Progress */}
         {!loadingStats && (stats?.todayReported ?? 0) > 0 && (

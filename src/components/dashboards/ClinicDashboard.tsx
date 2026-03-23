@@ -203,9 +203,6 @@ const ClinicDashboard = () => {
           { label: "Taxa de ocupação", value: `${occupancy}%`, icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400" },
         ]} />
 
-        {/* ── Doctor Ranking ── */}
-        {doctorPerformance.length > 0 && (
-          
         {/* Pingo Banner */}
         <PingoBanner
           variant="admin"
@@ -216,7 +213,10 @@ const ClinicDashboard = () => {
           title="Bem-vindo ao painel da clínica"
           subtitle="Acompanhe médicos, consultas e faturamento"
         />
-<DoctorRanking
+
+        {/* ── Doctor Ranking ── */}
+        {doctorPerformance.length > 0 && (
+          <DoctorRanking
             doctors={doctorPerformance.slice(0, 5).map((d, i) => ({
               id: String(i),
               name: d.name,
