@@ -1068,8 +1068,19 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
             {!isMobile && (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-1">
-                  <Shield className="w-2.5 h-2.5 text-[hsl(150,60%,45%)]" />
-                  <span className="text-[10px] text-[hsl(220,15%,40%)]">E2E</span>
+                  <div className={`w-2 h-2 rounded-full ${
+                    webrtcStatus === "connected" ? "bg-[hsl(150,60%,45%)] animate-pulse" :
+                    webrtcStatus === "connecting" ? "bg-amber-400 animate-pulse" :
+                    webrtcStatus === "failed" ? "bg-destructive" :
+                    "bg-[hsl(220,15%,40%)]"
+                  }`} />
+                  <span className="text-[10px] text-[hsl(220,15%,40%)]">
+                    {webrtcStatus === "connected" ? "P2P Ativo" :
+                     webrtcStatus === "connecting" ? "Conectando" :
+                     webrtcStatus === "waiting_peer" ? "Aguardando" :
+                     webrtcStatus === "reconnecting" ? "Reconectando" :
+                     webrtcStatus === "failed" ? "Falha" : "WebRTC"}
+                  </span>
                 </div>
                 <span className="text-[10px] text-[hsl(220,15%,20%)]">•</span>
                 <span className="text-[10px] text-[hsl(220,15%,40%)]">CFM 2.314/22</span>
