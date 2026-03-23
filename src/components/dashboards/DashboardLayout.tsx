@@ -465,30 +465,33 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       <GlobalCommand role={role} />
       <PWABanner role={role} />
 
-      {/* ═══ Mobile bottom nav ═══ */}
+      {/* ═══ Mobile bottom nav — app-like with pill active state ═══ */}
       {nav && nav.length > 0 && (
         <nav
-          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-xl border-t border-border/15"
+          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-2xl border-t border-border/10 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]"
           style={{ paddingBottom: "env(safe-area-inset-bottom, 4px)" }}
           aria-label="Navegação principal"
         >
-          <div className="flex items-stretch h-[60px]">
+          <div className="flex items-stretch h-[64px]">
             {bottomNav.map(item => (
               <Link key={item.href} to={item.href}
-                className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-colors duration-150 select-none ${item.active ? "text-foreground" : "text-muted-foreground"}`}
+                className={`relative flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 select-none active:scale-90 ${
+                  item.active ? "text-primary" : "text-muted-foreground/60"
+                }`}
               >
-                {item.active && (
-                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-[2.5px] rounded-b-full bg-foreground" />
-                )}
-                <span className={`relative flex items-center justify-center w-8 h-6 rounded-lg transition-colors duration-150 ${item.active ? "bg-foreground/10" : ""}`}>
+                <span className={`relative flex items-center justify-center w-10 h-7 rounded-2xl transition-all duration-200 ${
+                  item.active ? "bg-primary/12 scale-105" : ""
+                }`}>
                   {item.icon}
                   {(item.badge ?? 0) > 0 && (
-                    <span className="absolute -top-1 -right-1 text-[8px] font-bold w-3.5 h-3.5 rounded-full bg-destructive text-white flex items-center justify-center tabular-nums">
+                    <span className="absolute -top-1 -right-0.5 text-[8px] font-bold min-w-[16px] h-4 px-1 rounded-full bg-destructive text-white flex items-center justify-center tabular-nums">
                       {(item.badge ?? 0) > 9 ? "9+" : item.badge}
                     </span>
                   )}
                 </span>
-                <span className={`text-[10px] font-medium truncate max-w-[48px] leading-none ${item.active ? "font-semibold" : ""}`}>{item.label}</span>
+                <span className={`text-[10px] truncate max-w-[52px] leading-none ${
+                  item.active ? "font-bold text-primary" : "font-medium"
+                }`}>{item.label}</span>
               </Link>
             ))}
 
@@ -496,12 +499,16 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
                 <SheetTrigger asChild>
                   <button
-                    className={`flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium select-none active:scale-95 transition-transform ${moreNav.some(i => i.active) ? "text-foreground" : "text-muted-foreground"}`}
+                    className={`flex flex-col items-center justify-center gap-1 flex-1 text-[10px] font-medium select-none active:scale-90 transition-all duration-200 ${
+                      moreNav.some(i => i.active) ? "text-primary" : "text-muted-foreground/60"
+                    }`}
                     aria-label="Mais opções">
-                    <span className={`w-8 h-6 rounded-lg flex items-center justify-center transition-colors duration-150 ${moreNav.some(i => i.active) ? "bg-foreground/10" : ""}`}>
-                      <MoreHorizontal className="w-4 h-4" aria-hidden="true" />
+                    <span className={`w-10 h-7 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+                      moreNav.some(i => i.active) ? "bg-primary/12" : ""
+                    }`}>
+                      <MoreHorizontal className="w-5 h-5" aria-hidden="true" />
                     </span>
-                    <span>Mais</span>
+                    <span className={moreNav.some(i => i.active) ? "font-bold" : ""}>Mais</span>
                   </button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="rounded-t-3xl border-border/20 bg-background max-h-[70vh]"
