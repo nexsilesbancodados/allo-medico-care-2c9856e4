@@ -669,7 +669,7 @@ const VideoRoom = () => {
       }).eq("id", presenceLogId.current);
     }
     if (isDoctor && notesRef.current) await saveNotes(true);
-    await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId);
+    await supabase.from("appointments").update({ status: "completed" }).eq("id", appointmentId ?? '');
     
     // Notify patient that consultation is completed
     if (isDoctor) {
