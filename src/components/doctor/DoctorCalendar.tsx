@@ -352,10 +352,10 @@ const DoctorCalendar = () => {
             {dayAppts.length > 0 && (
               <div className="mt-1 space-y-0.5">
                 {dayAppts.slice(0, 2).map(a => {
-                  const t = typeLabel[a.appointment_type] ?? typeLabel.first_visit;
-                  return (
-                    <div key={a.id} className={`text-[10px] truncate px-1 py-0.5 rounded ${t.bg}`}>
-                      {format(new Date(a.scheduled_at), "HH:mm")} {a.patient_name?.split(" ")[0]}
+                   const t = typeLabel[a.appointment_type ?? "first_visit"] ?? typeLabel.first_visit;
+                    return (
+                     <div key={a.id} className={`text-[10px] truncate px-1 py-0.5 rounded ${t.bg}`}>
+                       {format(new Date(a.scheduled_at ?? ""), "HH:mm")} {a.patient_name?.split(" ")[0]}
                     </div>
                   );
                 })}
