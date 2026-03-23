@@ -150,7 +150,7 @@ const RenewalQueue = () => {
                     </TableCell>
                     <TableCell>
                       {r.original_prescription_url && (
-                        <Button size="sm" variant="ghost" onClick={() => viewPrescription(r.original_prescription_url)}>
+                        <Button size="sm" variant="ghost" onClick={() => viewPrescription(r.original_prescription_url!)}>
                           <Eye className="w-3 h-3 mr-1" /> Ver
                         </Button>
                       )}
