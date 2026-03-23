@@ -12,9 +12,9 @@ export const getPatientNav = (active: string) => [
   { label: "Agendar", href: "/dashboard/schedule?role=patient", icon: <NavIcon icon={<Search className="w-3.5 h-3.5" />} color="cyan" />, active: active === "schedule" || active === "doctors", group: "Principal" },
   { label: "Urgência", href: "/dashboard/urgent-care?role=patient", icon: <NavIcon icon={<Zap className="w-3.5 h-3.5" />} color="amber" />, active: active === "urgent-care", group: "Principal" },
   { label: "Consultas", href: "/dashboard/appointments?role=patient", icon: <NavIcon icon={<Clock className="w-3.5 h-3.5" />} color="blue" />, active: active === "appointments", group: "Principal" },
+  { label: "Minha Saúde", href: "/dashboard/patient/health?role=patient", icon: <NavIcon icon={<Heart className="w-3.5 h-3.5" />} color="rose" />, active: active === "health", group: "Principal" },
 
   // ── Saúde ──
-  { label: "Minha Saúde", href: "/dashboard/patient/health?role=patient", icon: <NavIcon icon={<Heart className="w-3.5 h-3.5" />} color="rose" />, active: active === "health", group: "Saúde" },
   { label: "Prontuário", href: "/dashboard/medical-records?role=patient", icon: <NavIcon icon={<ClipboardList className="w-3.5 h-3.5" />} color="emerald" />, active: active === "medical-records", group: "Saúde" },
   { label: "Diário de Saúde", href: "/dashboard/patient/diary?role=patient", icon: <NavIcon icon={<Smile className="w-3.5 h-3.5" />} color="amber" />, active: active === "diary", group: "Saúde" },
   { label: "Exames", href: "/dashboard/patient/exam-results?role=patient", icon: <NavIcon icon={<FileCheck className="w-3.5 h-3.5" />} color="green" />, active: active === "exam-results", group: "Saúde" },
