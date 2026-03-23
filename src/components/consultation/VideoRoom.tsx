@@ -1358,6 +1358,11 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
             onClick={() => videoRef.current?.toggleVideo()}
           />
           <ToolbarBtn
+            icon={<SwitchCamera className="w-5 h-5" />}
+            label="Flip"
+            onClick={() => videoRef.current?.switchCamera()}
+          />
+          <ToolbarBtn
             active={showChat}
             icon={<MessageSquare className="w-5 h-5" />}
             label="Chat"
