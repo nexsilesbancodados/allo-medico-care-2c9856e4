@@ -297,7 +297,7 @@ const DoctorCalendar = () => {
 
   /* ── Day Time Grid ── */
   const DayTimeGrid = () => {
-    const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at), currentDate));
+    const dayAppts = appointments.filter(a => isSameDay(new Date(a.scheduled_at ?? ""), currentDate));
     const isAbsent = absences.includes(format(currentDate, "yyyy-MM-dd"));
     return (
       <div className={`border border-border rounded-xl overflow-hidden bg-card ${isAbsent ? "bg-destructive/5" : ""}`}>
