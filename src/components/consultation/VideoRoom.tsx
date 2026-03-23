@@ -62,6 +62,8 @@ const VideoRoom = () => {
   const [splitMode, setSplitMode] = useState(false);
   const [activePanel, setActivePanel] = useState<"chat" | "notes" | "info" | null>(null);
   const presenceLogId = useRef<string | null>(null);
+  const videoRef = useRef<VideoConsultationHandle>(null);
+  const [webrtcStatus, setWebrtcStatus] = useState<string>("idle");
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [chatInput, setChatInput] = useState("");
