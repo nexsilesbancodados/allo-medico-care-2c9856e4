@@ -2,7 +2,8 @@
  * useWebRTC — Hook nativo de videochamada P2P
  * 
  * Sinalização via Supabase Realtime (broadcast).
- * Sem dependência de Jitsi, Metered, Daily ou qualquer SDK externo.
+ * TURN dinâmico via Edge Function turn-credentials (Metered.live).
+ * Fallback para OpenRelay + STUN do Google.
  * 
  * Compatível com PC e Mobile (iOS Safari, Android Chrome).
  */
@@ -11,15 +12,11 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { logError } from "@/lib/logger";
 
-// ─── ICE Servers ──────────────────────────────────────────────────────────────
-const STUN_SERVERS: RTCIceServer[] = [
+// ─── Fallback ICE Servers (usados se edge function falhar) ────────────────────
+const FALLBACK_ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
   { urls: "stun:stun1.l.google.com:19302" },
   { urls: "stun:stun2.l.google.com:19302" },
-];
-
-// TURN gratuito via OpenRelay (Metered.ca) — garante conectividade em NATs restritivos
-const TURN_SERVERS: RTCIceServer[] = [
   {
     urls: "turn:openrelay.metered.ca:80",
     username: "openrelayproject",
@@ -36,11 +33,6 @@ const TURN_SERVERS: RTCIceServer[] = [
     credential: "openrelayproject",
   },
 ];
-
-const ICE_CONFIG: RTCConfiguration = {
-  iceServers: [...STUN_SERVERS, ...TURN_SERVERS],
-  iceCandidatePoolSize: 10,
-};
 
 // ─── Tipos ────────────────────────────────────────────────────────────────────
 export type CallStatus =
@@ -62,7 +54,7 @@ interface SignalPayload {
 interface UseWebRTCOptions {
   roomId: string;
   userId: string;
-  isInitiator: boolean; // true = médico (cria offer)
+  isInitiator: boolean;
   displayName?: string;
 }
 
@@ -79,10 +71,25 @@ interface UseWebRTCReturn {
   startCall: () => Promise<void>;
 }
 
-/** Detect mobile from userAgent */
 const isMobileDevice = () =>
   typeof navigator !== "undefined" &&
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+// ─── Buscar credenciais TURN dinâmicas ────────────────────────────────────────
+async function fetchIceServers(): Promise<RTCIceServer[]> {
+  try {
+    const { data, error } = await supabase.functions.invoke("turn-credentials");
+    if (error) throw error;
+    if (data?.iceServers && Array.isArray(data.iceServers) && data.iceServers.length > 0) {
+      console.info(`[WebRTC] Usando ${data.iceServers.length} ICE servers dinâmicos`);
+      return data.iceServers;
+    }
+  } catch (err) {
+    logError("fetchIceServers failed, using fallback", err);
+  }
+  console.info("[WebRTC] Usando ICE servers de fallback");
+  return FALLBACK_ICE_SERVERS;
+}
 
 export function useWebRTC({
   roomId,
@@ -104,6 +111,7 @@ export function useWebRTC({
   const offerRetryRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastOfferRef = useRef<RTCSessionDescriptionInit | null>(null);
   const facingModeRef = useRef<"user" | "environment">("user");
+  const iceServersRef = useRef<RTCIceServer[]>(FALLBACK_ICE_SERVERS);
 
   // ─── Cleanup ────────────────────────────────────────────────────────────────
   const cleanup = useCallback(() => {
@@ -123,6 +131,7 @@ export function useWebRTC({
       pcRef.current.onicecandidate = null;
       pcRef.current.ontrack = null;
       pcRef.current.oniceconnectionstatechange = null;
+      pcRef.current.onnegotiationneeded = null;
       pcRef.current.close();
       pcRef.current = null;
     }
@@ -151,19 +160,25 @@ export function useWebRTC({
   // ─── Processar ICE candidates enfileirados ──────────────────────────────────
   const flushIceCandidates = useCallback(async () => {
     if (!pcRef.current || !hasRemoteDesc.current) return;
-    for (const candidate of iceCandidateQueue.current) {
+    const queue = [...iceCandidateQueue.current];
+    iceCandidateQueue.current = [];
+    for (const candidate of queue) {
       try {
         await pcRef.current.addIceCandidate(new RTCIceCandidate(candidate));
       } catch (err) {
         logError("addIceCandidate failed", err);
       }
     }
-    iceCandidateQueue.current = [];
   }, []);
 
   // ─── Criar PeerConnection ──────────────────────────────────────────────────
   const createPeerConnection = useCallback(() => {
-    const pc = new RTCPeerConnection(ICE_CONFIG);
+    const config: RTCConfiguration = {
+      iceServers: iceServersRef.current,
+      iceCandidatePoolSize: 10,
+    };
+
+    const pc = new RTCPeerConnection(config);
 
     pc.onicecandidate = (event) => {
       if (event.candidate) {
@@ -187,6 +202,7 @@ export function useWebRTC({
 
     pc.oniceconnectionstatechange = () => {
       const state = pc.iceConnectionState;
+      console.info(`[WebRTC] ICE state: ${state}`);
       switch (state) {
         case "checking":
           setStatus("connecting");
@@ -194,7 +210,6 @@ export function useWebRTC({
         case "connected":
         case "completed":
           setStatus("connected");
-          // Stop re-broadcasting offer once connected
           if (offerRetryRef.current) {
             clearInterval(offerRetryRef.current);
             offerRetryRef.current = null;
@@ -202,11 +217,33 @@ export function useWebRTC({
           break;
         case "disconnected":
           setStatus("reconnecting");
+          // Auto-reconnect after 3s if still disconnected
+          setTimeout(() => {
+            if (pcRef.current?.iceConnectionState === "disconnected") {
+              console.info("[WebRTC] Still disconnected, attempting ICE restart");
+              if (isInitiator && pcRef.current.signalingState !== "closed") {
+                pcRef.current.restartIce();
+                // Re-create and send offer for ICE restart
+                pcRef.current.createOffer({ iceRestart: true }).then(offer => {
+                  pcRef.current?.setLocalDescription(offer);
+                  lastOfferRef.current = offer;
+                  sendSignal({ type: "offer", sender: userId, data: offer });
+                }).catch(err => logError("ICE restart offer failed", err));
+              }
+            }
+          }, 3000);
           break;
         case "failed":
           setStatus("failed");
+          // Aggressive reconnect: restart ICE
           if (isInitiator && pc.signalingState !== "closed") {
+            console.info("[WebRTC] Connection failed, restarting ICE");
             pc.restartIce();
+            pc.createOffer({ iceRestart: true }).then(offer => {
+              pc.setLocalDescription(offer);
+              lastOfferRef.current = offer;
+              sendSignal({ type: "offer", sender: userId, data: offer });
+            }).catch(err => logError("ICE restart on failed", err));
           }
           break;
         case "closed":
@@ -227,9 +264,9 @@ export function useWebRTC({
       const pc = pcRef.current;
 
       switch (payload.type) {
-        // When the other peer joins, the initiator re-sends the offer
         case "join": {
           if (isInitiator && lastOfferRef.current && pc) {
+            console.info("[WebRTC] Peer joined, re-sending offer");
             sendSignal({
               type: "offer",
               sender: userId,
@@ -242,11 +279,12 @@ export function useWebRTC({
         case "offer": {
           if (isInitiator || !pc) return;
           try {
-            // Reset if we get a new offer while already having a remote desc
-            if (hasRemoteDesc.current && pc.signalingState !== "stable") {
+            // Handle glare: rollback if we're in an incompatible state
+            if (pc.signalingState !== "stable") {
+              console.info("[WebRTC] Rolling back to handle new offer");
               await pc.setLocalDescription({ type: "rollback" });
             }
-            
+
             const offer = payload.data as RTCSessionDescriptionInit;
             await pc.setRemoteDescription(new RTCSessionDescription(offer));
             hasRemoteDesc.current = true;
@@ -271,6 +309,11 @@ export function useWebRTC({
         case "answer": {
           if (!isInitiator || !pc) return;
           try {
+            // Only set remote description if we're in have-local-offer state
+            if (pc.signalingState !== "have-local-offer") {
+              console.info("[WebRTC] Ignoring answer — wrong state:", pc.signalingState);
+              return;
+            }
             const answer = payload.data as RTCSessionDescriptionInit;
             await pc.setRemoteDescription(new RTCSessionDescription(answer));
             hasRemoteDesc.current = true;
@@ -306,7 +349,7 @@ export function useWebRTC({
     [userId, isInitiator, sendSignal, cleanup, flushIceCandidates]
   );
 
-  // ─── Get media constraints (adaptive for mobile) ───────────────────────────
+  // ─── Get media constraints ─────────────────────────────────────────────────
   const getMediaConstraints = useCallback((): MediaStreamConstraints => {
     const mobile = isMobileDevice();
     return {
@@ -314,7 +357,6 @@ export function useWebRTC({
         width: { ideal: mobile ? 640 : 1280 },
         height: { ideal: mobile ? 480 : 720 },
         facingMode: facingModeRef.current,
-        // Lower frame rate on mobile to save battery
         ...(mobile ? { frameRate: { ideal: 24, max: 30 } } : {}),
       },
       audio: {
@@ -334,23 +376,31 @@ export function useWebRTC({
 
     setStatus("requesting_media");
 
-    // 1. Obter mídia local
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia(getMediaConstraints());
-      localStreamRef.current = stream;
-      setLocalStream(stream);
-    } catch (err) {
-      logError("getUserMedia failed", err);
+    // 1. Buscar credenciais TURN dinâmicas em paralelo com getUserMedia
+    const [iceServers, stream] = await Promise.all([
+      fetchIceServers(),
+      navigator.mediaDevices.getUserMedia(getMediaConstraints()).catch((err) => {
+        logError("getUserMedia failed", err);
+        return null;
+      }),
+    ]);
+
+    iceServersRef.current = iceServers;
+
+    if (!stream) {
       setStatus("failed");
       return;
     }
 
-    // 2. Criar PeerConnection
+    localStreamRef.current = stream;
+    setLocalStream(stream);
+
+    // 2. Criar PeerConnection com TURN dinâmico
     const pc = createPeerConnection();
 
     // Adicionar tracks locais
-    localStreamRef.current!.getTracks().forEach((track) => {
-      pc.addTrack(track, localStreamRef.current!);
+    stream.getTracks().forEach((track) => {
+      pc.addTrack(track, stream);
     });
 
     // 3. Conectar canal de sinalização Supabase
@@ -365,7 +415,7 @@ export function useWebRTC({
     await channel.subscribe();
     channelRef.current = channel;
 
-    // 4. Se é iniciador (médico), criar offer e re-enviar a cada 3s até conectar
+    // 4. Se é iniciador (médico), criar offer e re-enviar periodicamente
     if (isInitiator) {
       setStatus("waiting_peer");
       try {
@@ -375,11 +425,16 @@ export function useWebRTC({
 
         sendSignal({ type: "offer", sender: userId, data: offer });
 
-        // Re-broadcast offer every 3s for late joiners
+        // Re-broadcast offer every 3s for late joiners (max 60s)
+        let retryCount = 0;
         offerRetryRef.current = setInterval(() => {
-          if (pcRef.current?.iceConnectionState === "connected" || 
-              pcRef.current?.iceConnectionState === "completed" ||
-              cleanedUp.current) {
+          retryCount++;
+          if (
+            pcRef.current?.iceConnectionState === "connected" ||
+            pcRef.current?.iceConnectionState === "completed" ||
+            cleanedUp.current ||
+            retryCount > 20
+          ) {
             if (offerRetryRef.current) clearInterval(offerRetryRef.current);
             return;
           }
@@ -393,8 +448,22 @@ export function useWebRTC({
       }
     } else {
       setStatus("waiting_peer");
-      // Notify the initiator that we're here
+      // Notify the initiator that we joined
       sendSignal({ type: "join", sender: userId, data: null });
+      // Re-send join every 2s in case initiator missed it (max 30s)
+      let joinRetry = 0;
+      const joinInterval = setInterval(() => {
+        joinRetry++;
+        if (
+          hasRemoteDesc.current ||
+          cleanedUp.current ||
+          joinRetry > 15
+        ) {
+          clearInterval(joinInterval);
+          return;
+        }
+        sendSignal({ type: "join", sender: userId, data: null });
+      }, 2000);
     }
   }, [roomId, userId, isInitiator, createPeerConnection, handleSignal, sendSignal, getMediaConstraints]);
 
@@ -420,7 +489,6 @@ export function useWebRTC({
     facingModeRef.current = facingModeRef.current === "user" ? "environment" : "user";
 
     try {
-      // Stop old video tracks
       localStreamRef.current.getVideoTracks().forEach((t) => t.stop());
 
       const newStream = await navigator.mediaDevices.getUserMedia({
@@ -434,13 +502,11 @@ export function useWebRTC({
       const newVideoTrack = newStream.getVideoTracks()[0];
       if (!newVideoTrack) return;
 
-      // Replace track in peer connection
       const sender = pcRef.current.getSenders().find((s) => s.track?.kind === "video");
       if (sender) {
         await sender.replaceTrack(newVideoTrack);
       }
 
-      // Replace track in local stream
       const oldVideoTrack = localStreamRef.current.getVideoTracks()[0];
       if (oldVideoTrack) {
         localStreamRef.current.removeTrack(oldVideoTrack);
@@ -465,22 +531,12 @@ export function useWebRTC({
       cleanup();
     };
 
-    // beforeunload works on desktop
     window.addEventListener("beforeunload", handleLeave);
-    // pagehide fires reliably on mobile Safari/Chrome
     window.addEventListener("pagehide", handleLeave);
-
-    // visibilitychange: cleanup when tab is hidden on mobile (e.g. switching apps)
-    const handleVisibility = () => {
-      // Only cleanup if user leaves the page entirely (not just switching tabs briefly)
-      // Mobile browsers may fire this when lock screen activates, so we don't cleanup immediately
-    };
-    document.addEventListener("visibilitychange", handleVisibility);
 
     return () => {
       window.removeEventListener("beforeunload", handleLeave);
       window.removeEventListener("pagehide", handleLeave);
-      document.removeEventListener("visibilitychange", handleVisibility);
       cleanup();
     };
   }, [cleanup, sendSignal, userId]);
