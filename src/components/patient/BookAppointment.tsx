@@ -39,7 +39,7 @@ interface DoctorInfo {
   bio: string | null;
   consultation_price: number;
   rating: number;
-  experience_years: number;
+  experience_years: number | null;
   first_name: string;
   last_name: string;
   specialties: string[];
