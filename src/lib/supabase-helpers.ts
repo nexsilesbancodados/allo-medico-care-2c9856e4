@@ -1,76 +1,61 @@
-import { toast } from "sonner";
-import { warn } from "@/lib/logger";
+/**
+ * Supabase error handling utilities.
+ * Wraps common patterns to avoid silent failures in production.
+ */
+import { PostgrestError } from '@supabase/supabase-js';
+import { logError } from './logger';
 
-interface SupabaseError {
-  message?: string;
-  status?: number;
-  code?: string;
+export interface SupabaseResult<T> {
+  data: T | null;
+  error: PostgrestError | null;
 }
 
 /**
- * Wraps a Supabase query with automatic retry on rate-limit (429) or network errors.
- * Shows a toast on final failure.
+ * Safely executes a Supabase query and logs errors automatically.
+ * Use this instead of raw await calls to prevent silent failures.
+ *
+ * @example
+ * const { data, error } = await safeQuery(
+ *   supabase.from('profiles').select('*').eq('user_id', userId),
+ *   'fetchProfile'
+ * );
  */
-export async function withRetry<T>(
-  fn: () => Promise<{ data: T | null; error: SupabaseError | null }>,
-  maxRetries = 3,
-  baseDelay = 1000
-): Promise<{ data: T | null; error: SupabaseError | null }> {
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const result = await fn();
-
-    if (!result.error) return result;
-
-    const status = result.error?.status ?? result.error?.code;
-    const isRetryable = status === 429 || status === 500 || status === 503 || status === "PGRST301";
-
-    if (!isRetryable || attempt === maxRetries) {
-      showErrorToast(result.error);
-      return result;
+export async function safeQuery<T>(
+  query: PromiseLike<{ data: T | null; error: PostgrestError | null }>,
+  context?: string
+): Promise<SupabaseResult<T>> {
+  try {
+    const result = await query;
+    if (result.error) {
+      logError(`Supabase${context ? `:${context}` : ''} query error`, result.error);
     }
-
-    // Exponential backoff with jitter
-    const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 500;
-    await new Promise(r => setTimeout(r, delay));
+    return result;
+  } catch (e) {
+    logError(`Supabase${context ? `:${context}` : ''} unexpected error`, e);
+    return {
+      data: null,
+      error: { message: String(e), details: '', hint: '', code: 'UNKNOWN' },
+    };
   }
-
-  // Should never reach here, but just in case
-  return { data: null, error: { message: "Max retries exceeded" } };
-}
-
-function showErrorToast(error: SupabaseError | null) {
-  const message = error?.message || "Ocorreu um erro inesperado.";
-  const isRateLimit = error?.status === 429;
-  const isNetwork = !navigator.onLine || message.includes("fetch");
-
-  const title = isRateLimit
-    ? "Muitas requisições"
-    : isNetwork
-      ? "Sem conexão"
-      : "Erro";
-
-  const description = isRateLimit
-    ? "Aguarde alguns segundos e tente novamente."
-    : isNetwork
-      ? "Verifique sua conexão com a internet."
-      : message;
-
-  toast.error(title, { description });
 }
 
 /**
- * Global network error listener — shows toast when connection is lost/restored.
+ * Throws if error is present. Use in critical paths where failure must bubble up.
  */
-export function initNetworkListeners() {
-  window.addEventListener("offline", () => {
-    toast.error("Conexão perdida", {
-      description: "Você está offline. Algumas funcionalidades podem não funcionar.",
-    });
-  });
+export function assertNoError<T>(result: SupabaseResult<T>, message: string): T {
+  if (result.error || result.data === null) {
+    throw new Error(`${message}: ${result.error?.message ?? 'Dados não encontrados'}`);
+  }
+  return result.data;
+}
 
-  window.addEventListener("online", () => {
-    toast.success("Conexão restaurada ✅", {
-      description: "Você está online novamente.",
-    });
-  });
+/**
+ * Returns a user-friendly message from a Supabase/unknown error.
+ */
+export function getErrorMessage(error: PostgrestError | null | unknown): string {
+  if (!error) return 'Erro desconhecido';
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return (error as { message: string }).message;
+  }
+  return String(error);
 }

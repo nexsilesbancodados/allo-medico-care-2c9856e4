@@ -136,13 +136,74 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
   build: {
-    // Lower target to avoid white-screen parse failures on older Safari/iOS WebViews
-    // that support modules but choke on ES2020 syntax before React can mount.
     target: "es2018",
     cssTarget: "safari13",
     chunkSizeWarningLimit: 600,
     minify: "esbuild",
     sourcemap: false,
     cssCodeSplit: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core
+          "vendor-react": ["react", "react-dom", "react/jsx-runtime"],
+          // Router
+          "vendor-router": ["react-router-dom"],
+          // Supabase
+          "vendor-supabase": ["@supabase/supabase-js"],
+          // TanStack Query
+          "vendor-query": ["@tanstack/react-query"],
+          // UI primitives (Radix)
+          "vendor-radix": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-select",
+            "@radix-ui/react-tabs",
+            "@radix-ui/react-tooltip",
+            "@radix-ui/react-popover",
+            "@radix-ui/react-accordion",
+            "@radix-ui/react-avatar",
+            "@radix-ui/react-checkbox",
+            "@radix-ui/react-label",
+            "@radix-ui/react-progress",
+            "@radix-ui/react-radio-group",
+            "@radix-ui/react-scroll-area",
+            "@radix-ui/react-separator",
+            "@radix-ui/react-slider",
+            "@radix-ui/react-switch",
+            "@radix-ui/react-toggle",
+          ],
+          // Charts
+          "vendor-charts": ["recharts"],
+          // Animations
+          "vendor-motion": ["framer-motion"],
+          // GSAP (heavy)
+          "vendor-gsap": ["gsap", "@gsap/react"],
+          // Rich text editor (heavy)
+          "vendor-tiptap": [
+            "@tiptap/react",
+            "@tiptap/starter-kit",
+            "@tiptap/extension-highlight",
+            "@tiptap/extension-placeholder",
+            "@tiptap/extension-table",
+            "@tiptap/extension-table-cell",
+            "@tiptap/extension-table-header",
+            "@tiptap/extension-table-row",
+            "@tiptap/extension-text-align",
+            "@tiptap/extension-typography",
+            "@tiptap/extension-underline",
+            "@tiptap/extension-character-count",
+          ],
+          // Forms
+          "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
+          // Date utilities
+          "vendor-dates": ["date-fns", "react-day-picker"],
+          // PDF generation
+          "vendor-pdf": ["jspdf"],
+          // Medical imaging (very heavy)
+          "vendor-medical": ["dwv"],
+        },
+      },
+    },
   },
 }));

@@ -12,6 +12,18 @@ dist
 dist-ssr
 *.local
 
+# Environment variables — NEVER commit these
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.*.local
+
+# Temporary debug files
+tmp/
+temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,3 +34,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Playwright test results
+test-results/
+playwright-report/
