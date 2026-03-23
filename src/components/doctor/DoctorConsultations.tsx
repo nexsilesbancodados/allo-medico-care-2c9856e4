@@ -87,10 +87,10 @@ const DoctorConsultations = () => {
 
     const [profilesRes, guestsRes] = await Promise.all([
       patientIds.length > 0
-        ? supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds)
+        ? supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds.filter((id): id is string => id !== null))
         : { data: [] },
       guestIds.length > 0
-        ? supabase.from("guest_patients").select("id, full_name").in("id", guestIds)
+        ? supabase.from("guest_patients").select("id, full_name").in("id", guestIds.filter((id): id is string => id !== null))
         : { data: [] },
     ]);
 
@@ -99,7 +99,7 @@ const DoctorConsultations = () => {
 
     setAppointments(data.map(a => ({
       ...a,
-      patient_name: a.patient_id ? (pMap.get(a.patient_id) ?? "Paciente") : (gMap.get(a.guest_patient_id) ?? "Paciente Avulso"),
+      patient_name: a.patient_id ? (pMap.get(a.patient_id ?? "") ?? "Paciente") : (gMap.get(a.guest_patient_id) ?? "Paciente Avulso"),
     })));
     setLoading(false);
   };

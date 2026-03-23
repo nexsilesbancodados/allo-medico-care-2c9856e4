@@ -144,7 +144,7 @@ const LaudistaDashboard = () => {
           kpis={[
             { label: "Na fila", value: stats?.pending ?? 0, icon: <ClipboardList className="w-4 h-4" /> },
             { label: "Em análise", value: stats?.inReview ?? 0, icon: <Eye className="w-4 h-4" /> },
-            { label: "Laudados", value: stats?.reported ?? 0, icon: <CheckCircle2 className="w-4 h-4" /> },
+            { label: "Laudados", value: stats?.totalReported ?? 0, icon: <CheckCircle2 className="w-4 h-4" /> },
             { label: "Hoje", value: stats?.todayReported ?? 0, icon: <Target className="w-4 h-4" /> },
           ]}
           loading={loadingStats}
@@ -158,7 +158,7 @@ const LaudistaDashboard = () => {
         <BentoStatCards loading={loadingStats} stats={[
           { label: "Na fila (pendente)", value: stats?.pending ?? 0, icon: "📋", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-700 dark:text-amber-400" },
           { label: "Em análise", value: stats?.inReview ?? 0, icon: "🔍", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400" },
-          { label: "Total laudados", value: stats?.reported ?? 0, icon: "✅", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 22 } },
+          { label: "Total laudados", value: stats?.totalReported ?? 0, icon: "✅", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 22 } },
           { label: "Laudados hoje", value: stats?.todayReported ?? 0, icon: "🎯", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueColor: "text-violet-600 dark:text-violet-400" },
         ]} />
 

@@ -120,8 +120,8 @@ const DoctorCalendar = () => {
     const guestIds = [...new Set(data.filter(a => a.guest_patient_id).map(a => a.guest_patient_id))];
 
     const [pRes, gRes] = await Promise.all([
-      patientIds.length ? supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds) : { data: [] },
-      guestIds.length ? supabase.from("guest_patients").select("id, full_name").in("id", guestIds) : { data: [] },
+      patientIds.length ? supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds.filter((id): id is string => id !== null)) : { data: [] },
+      guestIds.length ? supabase.from("guest_patients").select("id, full_name").in("id", guestIds.filter((id): id is string => id !== null)) : { data: [] },
     ]);
 
     const pMap = new Map((pRes.data ?? []).map((p: { user_id: string; first_name: string; last_name: string }) => [p.user_id, `${p.first_name} ${p.last_name}`]));
@@ -129,7 +129,7 @@ const DoctorCalendar = () => {
 
     setAppointments(data.map(a => ({
       ...a,
-      patient_name: a.patient_id ? (pMap.get(a.patient_id) ?? "Paciente") : (gMap.get(a.guest_patient_id) ?? "Avulso"),
+      patient_name: a.patient_id ? (pMap.get(a.patient_id ?? "") ?? "Paciente") : (gMap.get(a.guest_patient_id ?? "") ?? "Avulso"),
     })));
     setLoading(false);
   };
