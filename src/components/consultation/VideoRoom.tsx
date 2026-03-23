@@ -1118,6 +1118,22 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
       {/* Desktop toolbar — below top bar, above video */}
       {!isMobile && (
         <div className="flex items-center justify-center gap-1.5 px-5 py-2 bg-[hsl(220,25%,6%)] border-b border-[hsl(220,15%,10%)] shrink-0">
+          {/* Media controls */}
+          <ToolbarBtn
+            active={videoRef.current?.isMuted}
+            icon={videoRef.current?.isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+            label={videoRef.current?.isMuted ? "Ativar Mic" : "Mutar"}
+            onClick={() => videoRef.current?.toggleMute()}
+          />
+          <ToolbarBtn
+            active={videoRef.current?.isVideoOff}
+            icon={videoRef.current?.isVideoOff ? <VideoOff className="w-3.5 h-3.5" /> : <Video className="w-3.5 h-3.5" />}
+            label={videoRef.current?.isVideoOff ? "Ativar Cam" : "Câmera"}
+            onClick={() => videoRef.current?.toggleVideo()}
+          />
+
+          <div className="w-px h-6 bg-[hsl(220,15%,15%)] mx-1" />
+
           <ToolbarBtn
             active={showChat}
             icon={<MessageSquare className="w-3.5 h-3.5" />}
@@ -1149,6 +1165,7 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
           />
           {isDoctor && (
             <>
+              <div className="w-px h-6 bg-[hsl(220,15%,15%)] mx-1" />
               <ToolbarBtn
                 icon={<Pill className="w-3.5 h-3.5" />}
                 label="Receita"
@@ -1158,6 +1175,11 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
                 icon={<FileBadge className="w-3.5 h-3.5" />}
                 label="Atestado"
                 onClick={() => window.open('/dashboard/certificates', '_blank')}
+              />
+              <ToolbarBtn
+                icon={<Stethoscope className="w-3.5 h-3.5" />}
+                label="Exames"
+                onClick={() => window.open(`/dashboard/exam-request?appointment=${appointmentId}`, '_blank')}
               />
             </>
           )}
