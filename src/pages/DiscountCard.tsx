@@ -181,7 +181,7 @@ const DiscountCard = () => {
         {!isDashboard && <Header />}
 
         {/* ==================== HERO ==================== */}
-        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "60vh" }}>
+        <section className={`relative overflow-hidden ${isDashboard ? "" : "mt-[70px]"}`} style={{ minHeight: isDashboard ? "40vh" : "60vh" }}>
           <img src={heroCartao} alt="Cartão de Benefícios" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
