@@ -1335,6 +1335,18 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
           style={{ paddingBottom: "max(env(safe-area-inset-bottom, 0px), 8px)" }}
         >
           <ToolbarBtn
+            active={videoRef.current?.isMuted}
+            icon={videoRef.current?.isMuted ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            label="Mic"
+            onClick={() => videoRef.current?.toggleMute()}
+          />
+          <ToolbarBtn
+            active={videoRef.current?.isVideoOff}
+            icon={videoRef.current?.isVideoOff ? <VideoOff className="w-5 h-5" /> : <Video className="w-5 h-5" />}
+            label="Cam"
+            onClick={() => videoRef.current?.toggleVideo()}
+          />
+          <ToolbarBtn
             active={showChat}
             icon={<MessageSquare className="w-5 h-5" />}
             label="Chat"
