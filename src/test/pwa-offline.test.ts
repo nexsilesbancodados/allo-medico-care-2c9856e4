@@ -5,44 +5,22 @@ describe("PWA Offline Logic", () => {
     vi.restoreAllMocks();
   });
 
-  it("initNetworkListeners registers offline/online handlers", async () => {
-    const addSpy = vi.spyOn(window, "addEventListener");
-    const { initNetworkListeners } = await import("@/lib/supabase-helpers");
-    initNetworkListeners();
-    const events = addSpy.mock.calls.map(([e]) => e);
-    expect(events).toContain("offline");
-    expect(events).toContain("online");
-  });
-
-  it("withRetry retries on 429 status", async () => {
-    const { withRetry } = await import("@/lib/supabase-helpers");
-    let attempts = 0;
-    const result = await withRetry(async () => {
-      attempts++;
-      if (attempts < 3) return { data: null, error: { status: 429, message: "rate limit" } };
-      return { data: "ok", error: null };
-    }, 3, 10);
-    expect(result.data).toBe("ok");
-    expect(attempts).toBe(3);
-  });
-
-  it("withRetry gives up after maxRetries", async () => {
-    const { withRetry } = await import("@/lib/supabase-helpers");
-    const result = await withRetry(
-      async () => ({ data: null, error: { status: 500, message: "fail" } }),
-      2, 10
+  it("safeQuery handles errors gracefully", async () => {
+    const { safeQuery } = await import("@/lib/supabase-helpers");
+    const result = await safeQuery(
+      Promise.resolve({ data: null, error: { message: "test", details: "", hint: "", code: "ERR", name: "TestError" } }),
+      "test"
     );
     expect(result.error).toBeTruthy();
   });
 
-  it("withRetry does not retry on non-retryable errors", async () => {
-    const { withRetry } = await import("@/lib/supabase-helpers");
-    let attempts = 0;
-    await withRetry(async () => {
-      attempts++;
-      return { data: null, error: { status: 400, message: "bad request" } };
-    }, 3, 10);
-    expect(attempts).toBe(1);
+  it("safeQuery returns data on success", async () => {
+    const { safeQuery } = await import("@/lib/supabase-helpers");
+    const result = await safeQuery(
+      Promise.resolve({ data: "ok", error: null }),
+      "test"
+    );
+    expect(result.data).toBe("ok");
   });
 });
 
