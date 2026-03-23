@@ -20,7 +20,7 @@ interface BentoStatCardsProps {
 }
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
-const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as unknown as number[] } } };
+const item = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } } as const;
 
 export function BentoStatCards({ stats, loading = false }: BentoStatCardsProps) {
   if (loading) return (

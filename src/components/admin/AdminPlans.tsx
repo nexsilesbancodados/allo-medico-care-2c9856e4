@@ -42,7 +42,7 @@ const AdminPlans = () => {
     setEditingPlan(p);
     setForm({
       name: p.name, description: p.description || "", price: String(p.price),
-      interval: p.interval, max_appointments: p.max_appointments ? String(p.max_appointments) : "", is_active: p.is_active,
+      interval: p.interval || "monthly", max_appointments: p.max_appointments ? String(p.max_appointments) : "", is_active: p.is_active,
     });
     setShowForm(true);
   };
@@ -126,7 +126,7 @@ const AdminPlans = () => {
                       </div>
                     </TableCell>
                     <TableCell className="text-foreground">R$ {Number(p.price).toFixed(2)}</TableCell>
-                    <TableCell className="text-muted-foreground">{intervalLabel[p.interval] ?? p.interval}</TableCell>
+                    <TableCell className="text-muted-foreground">{intervalLabel[p.interval ?? 'monthly'] ?? p.interval}</TableCell>
                     <TableCell className="text-muted-foreground">{p.max_appointments ?? "Ilimitado"}</TableCell>
                     <TableCell><Badge variant={p.is_active ? "default" : "outline"}>{p.is_active ? "Ativo" : "Inativo"}</Badge></TableCell>
                     <TableCell className="text-right space-x-1">

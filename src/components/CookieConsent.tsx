@@ -15,6 +15,7 @@ const CookieConsent = forwardRef<HTMLDivElement>((_props, _ref) => {
       const timer = setTimeout(() => setVisible(true), 2000);
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, []);
 
   const accept = () => {

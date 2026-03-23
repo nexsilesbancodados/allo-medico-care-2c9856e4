@@ -50,7 +50,7 @@ const AdminNPS = () => {
 
     // NPS trend by month
     const now = new Date();
-    const trend = [];
+    const trend: { month: string; nps: number; respostas: number }[] = [];
     for (let i = 5; i >= 0; i--) {
       const m = subMonths(now, i);
       const mStart = startOfMonth(m);
@@ -74,10 +74,10 @@ const AdminNPS = () => {
     setNpsTrend(trend);
 
     // Averages
-    const easeScores = all.filter(s => s.ease_score).map(s => s.ease_score);
-    const qualityScores = all.filter(s => s.quality_score).map(s => s.quality_score);
-    setAvgEase(easeScores.length > 0 ? easeScores.reduce((a: number, b: number) => a + b, 0) / easeScores.length : 0);
-    setAvgQuality(qualityScores.length > 0 ? qualityScores.reduce((a: number, b: number) => a + b, 0) / qualityScores.length : 0);
+    const easeScores = all.filter(s => s.ease_score != null).map(s => s.ease_score!);
+    const qualityScores = all.filter(s => s.quality_score != null).map(s => s.quality_score!);
+    setAvgEase(easeScores.length > 0 ? easeScores.reduce((a, b) => a + b, 0) / easeScores.length : 0);
+    setAvgQuality(qualityScores.length > 0 ? qualityScores.reduce((a, b) => a + b, 0) / qualityScores.length : 0);
 
     const recommends = all.filter(s => s.would_recommend !== null);
     setRecommendRate(recommends.length > 0 ? (recommends.filter(s => s.would_recommend).length / recommends.length) * 100 : 0);
@@ -85,16 +85,16 @@ const AdminNPS = () => {
     // Top doctors by NPS
     const byDoctor = new Map<string, any[]>();
     all.forEach(s => {
-      const arr = byDoctor.get(s.doctor_id) ?? [];
+      const arr = byDoctor.get(s.doctor_id ?? '') ?? [];
       arr.push(s);
-      byDoctor.set(s.doctor_id, arr);
+      byDoctor.set(s.doctor_id ?? '', arr);
     });
 
     const doctorIds = [...byDoctor.keys()];
     const { data: docs } = await supabase.from("doctor_profiles").select("id, user_id").in("id", doctorIds);
     const userIds = docs?.map(d => d.user_id) ?? [];
     const { data: profiles } = userIds.length > 0
-      ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds)
+      ? await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds as string[])
       : { data: [] };
 
     const docNameMap = new Map<string, string>();
@@ -236,11 +236,11 @@ const AdminNPS = () => {
                           <span className="text-lg font-bold text-muted-foreground w-6">#{i + 1}</span>
                           <div>
                             <p className="text-sm font-medium text-foreground">{d.name}</p>
-                            <p className="text-xs text-muted-foreground">{d.responses} respostas · ⭐ {d.avgQuality.toFixed(1)}</p>
+                            <p className="text-xs text-muted-foreground">{d.responses} respostas · ⭐ {(d.avgQuality ?? 0).toFixed(1)}</p>
                           </div>
                         </div>
-                        <Badge className={d.nps >= 50 ? "bg-green-100 text-green-800" : d.nps >= 0 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}>
-                          NPS {d.nps}
+                        <Badge className={(d.nps ?? 0) >= 50 ? "bg-green-100 text-green-800" : (d.nps ?? 0) >= 0 ? "bg-yellow-100 text-yellow-800" : "bg-red-100 text-red-800"}>
+                          NPS {d.nps ?? 0}
                         </Badge>
                       </div>
                     ))}

@@ -48,7 +48,7 @@ const AdminReports = () => {
     const { data: plans } = await supabase.from("plans").select("id, price");
     const planPriceMap = new Map(plans?.map(p => [p.id, Number(p.price)]) ?? []);
 
-    const revChart = [];
+    const revChart: ChartDataPoint[] = [];
     let totalRevAll = 0;
     for (let i = monthsBack - 1; i >= 0; i--) {
       const m = subMonths(now, i);
@@ -66,7 +66,7 @@ const AdminReports = () => {
 
     // User growth
     const { data: roles } = await supabase.from("user_roles").select("role, created_at");
-    const growthChart = [];
+    const growthChart: ChartDataPoint[] = [];
     for (let i = monthsBack - 1; i >= 0; i--) {
       const m = subMonths(now, i);
       const mEnd = endOfMonth(m);
@@ -96,7 +96,7 @@ const AdminReports = () => {
     }
 
     // Cancellation trends
-    const cancelChart = [];
+    const cancelChart: ChartDataPoint[] = [];
     let totalAppts = 0, totalCancelled = 0, totalNoShow = 0;
     for (let i = monthsBack - 1; i >= 0; i--) {
       const m = subMonths(now, i);

@@ -57,6 +57,7 @@ const ConnectionStatus = ({ onReconnect }: ConnectionStatusProps) => {
       return () => clearTimeout(timer);
     }
     setShowQualityBadge(false);
+    return undefined;
   }, [networkQuality]);
 
   useEffect(() => {

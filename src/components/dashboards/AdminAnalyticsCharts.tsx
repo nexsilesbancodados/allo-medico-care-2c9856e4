@@ -191,7 +191,7 @@ const AdminAnalyticsCharts = () => {
     // Avg wait time (from created_at to assigned_at)
     const assignedItems = queueItems.filter(q => q.assigned_at && q.created_at);
     const avgWaitMs = assignedItems.length > 0
-      ? assignedItems.reduce((sum, q) => sum + (new Date(q.assigned_at).getTime() - new Date(q.created_at).getTime()), 0) / assignedItems.length
+      ? assignedItems.reduce((sum, q) => sum + (new Date(q.assigned_at!).getTime() - new Date(q.created_at).getTime()), 0) / assignedItems.length
       : 0;
     
     setUrgentCareKPIs({ total: ucTotal, waiting: ucWaiting, completed: ucCompleted, refunded: ucRefunded, avgWait: Math.round(avgWaitMs / 60000), revenue: ucRevenue });
@@ -218,7 +218,7 @@ const AdminAnalyticsCharts = () => {
     
     const reviewedItems = renewalItems.filter(r => r.reviewed_at && r.created_at);
     const avgReviewMs = reviewedItems.length > 0
-      ? reviewedItems.reduce((sum, r) => sum + (new Date(r.reviewed_at).getTime() - new Date(r.created_at).getTime()), 0) / reviewedItems.length
+      ? reviewedItems.reduce((sum, r) => sum + (new Date(r.reviewed_at!).getTime() - new Date(r.created_at).getTime()), 0) / reviewedItems.length
       : 0;
     
     setRenewalKPIs({ total: rnTotal, pending: rnPending, approved: rnApproved, rejected: rnRejected, avgReviewDays: +(avgReviewMs / 86400000).toFixed(1) });

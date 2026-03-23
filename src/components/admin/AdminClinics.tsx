@@ -116,7 +116,7 @@ const AdminClinics = () => {
                     <TableCell><Badge variant={c.is_approved ? "default" : "outline"}>{c.is_approved ? "Aprovada" : "Pendente"}</Badge></TableCell>
                     <TableCell className="text-right space-x-1">
                       <Button size="sm" variant="ghost" onClick={() => openDetail(c)}><Eye className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => toggleApproval(c.id, c.is_approved)}>
+                      <Button size="sm" variant="ghost" onClick={() => toggleApproval(c.id, !!c.is_approved)}>
                         <span className={`text-xs font-medium ${c.is_approved ? "text-destructive" : "text-secondary"}`}>{c.is_approved ? "Desativar" : "Aprovar"}</span>
                       </Button>
                     </TableCell>
