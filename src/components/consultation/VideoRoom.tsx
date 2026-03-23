@@ -11,7 +11,7 @@ import {
   MessageSquare, FileText, Clock, Send, X, PanelLeftClose, PanelLeft,
   UserRound, Pill, PhoneOff, Mic, MicOff, Video, VideoOff, Shield,
   MoreVertical, Maximize2, Minimize2, Copy, Share2, FileBadge, Paperclip, Image,
-  Sparkles, Loader2, Stethoscope, ClipboardList
+  Sparkles, Loader2, Stethoscope, ClipboardList, SwitchCamera
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation, { type VideoConsultationHandle } from "./VideoConsultation";
