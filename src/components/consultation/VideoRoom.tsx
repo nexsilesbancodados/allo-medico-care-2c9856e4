@@ -359,7 +359,7 @@ const VideoRoom = () => {
     setAppointment(data);
 
     if (isDoctor) {
-      await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId!);
+      await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId ?? '');
       const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
       notifyConsultationStarted(appointmentId!, docName).catch(err => logError("notifyConsultationStarted failed", err));
     }
