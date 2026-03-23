@@ -133,57 +133,51 @@ const LaudistaDashboard = () => {
     <DashboardLayout title="Laudista" nav={getLaudistaNav("home")} role="doctor">
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
-        {/* ═══ Hero Header — app-like gradient ═══ */}
-        <motion.section variants={fadeUp} className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[hsl(var(--primary))] via-[hsl(210,85%,50%)] to-[hsl(var(--secondary))] shadow-lg shadow-primary/15">
-          <div className="absolute -right-6 -top-6 w-28 h-28 bg-white/[0.07] rounded-full blur-xl pointer-events-none" />
+        {/* ═══ Laudista Hero — dark professional card ═══ */}
+        <motion.section variants={fadeUp} className="relative overflow-hidden rounded-3xl bg-[hsl(220,20%,12%)] shadow-xl">
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(195,80%,55%)/0.12] via-transparent to-[hsl(160,55%,45%)/0.08] pointer-events-none" />
+          <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[hsl(195,80%,55%)/0.4] to-transparent" />
           <div className="relative z-10 p-5 sm:p-6">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-xs font-medium text-white/60">Telelaudo</span>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/15 text-white flex items-center gap-1">
-                    <ClipboardList className="w-3 h-3" /> Laudista
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="size-7 rounded-lg bg-[hsl(195,80%,55%)] flex items-center justify-center">
+                    <ClipboardList className="w-3.5 h-3.5 text-white" />
                   </span>
+                  <span className="text-[10px] font-bold text-[hsl(195,80%,55%)] uppercase tracking-[0.15em]">Telelaudo</span>
                 </div>
-                <h1 className="text-2xl font-extrabold text-white tracking-tight">Painel Laudista</h1>
-                <p className="text-xs text-white/50 mt-1">
+                <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight">Painel Laudista</h1>
+                <p className="text-xs text-white/40 mt-1">
                   {format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })}
-                  {doctorProfile?.crm && <span className="ml-2">· CRM {doctorProfile.crm}/{doctorProfile.crm_state}</span>}
+                  {doctorProfile?.crm && <span className="ml-2 text-white/30">· CRM {doctorProfile.crm}/{doctorProfile.crm_state}</span>}
                 </p>
               </div>
-              <div className="flex gap-2 shrink-0">
-                <Button size="sm" className="h-9 rounded-xl bg-white/20 text-white hover:bg-white/30 gap-1.5 text-xs font-bold backdrop-blur-sm" onClick={() => queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] })} disabled={refreshing}>
-                  <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
-                </Button>
-              </div>
+              <Button size="sm" className="h-9 rounded-xl bg-white/10 text-white/80 hover:bg-white/15 gap-1.5 text-xs font-bold border border-white/10" onClick={() => queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] })} disabled={refreshing}>
+                <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? "animate-spin" : ""}`} />
+              </Button>
+            </div>
+
+            {/* KPIs — glowing cards on dark */}
+            <div className="grid grid-cols-4 gap-2.5 mt-5">
+              {loadingStats ? (
+                Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-16 rounded-xl bg-white/5 animate-pulse" />)
+              ) : (
+                kpis.map((kpi, i) => (
+                  <motion.div
+                    key={kpi.label}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.06 }}
+                    className="p-3 rounded-xl bg-white/[0.06] border border-white/[0.08] hover:bg-white/[0.1] transition-colors"
+                  >
+                    <p className="text-xl font-black text-white leading-none tabular-nums">{kpi.value}</p>
+                    <p className="text-[9px] text-white/40 font-semibold uppercase tracking-wider mt-1.5">{kpi.label}</p>
+                  </motion.div>
+                ))
+              )}
             </div>
           </div>
         </motion.section>
-
-        {/* KPIs */}
-        <motion.div variants={fadeUp}>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3" role="list" aria-label="Estatísticas do laudista">
-            {loadingStats ? (
-              Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-20 rounded-xl shimmer-v2 bg-muted" aria-hidden="true" />)
-            ) : (
-              kpis.map((kpi, i) => (
-                <motion.div
-                  key={kpi.label}
-                  initial={{ opacity: 0, scale: 0.85 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.07, type: "spring", stiffness: 200, damping: 15 }}
-                  className="bg-card rounded-2xl p-4 border border-border/30 hover:shadow-md transition-all"
-                  role="listitem"
-                  aria-label={`${kpi.label}: ${kpi.value}`}
-                >
-                  <kpi.icon className="w-4 h-4 text-primary mb-2" aria-hidden="true" />
-                  <p className="text-2xl font-bold leading-none tabular-nums text-foreground">{kpi.value}</p>
-                  <p className="text-[10px] text-muted-foreground mt-1">{kpi.label}</p>
-                </motion.div>
-              ))
-            )}
-          </div>
-        </motion.div>
 
         {/* Urgent Alert */}
         {!loadingExams && urgentCount > 0 && (
