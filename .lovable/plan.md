@@ -1,91 +1,150 @@
 
 
-## Plano: Correção e Completude do Módulo Telelaudo para Clínicas
+# Plano: Suíte de Testes Completa
 
-### Problema
-A clínica não consegue enviar exames porque `exam_requests.requesting_doctor_id` é FK para `doctor_profiles`, mas o usuário clínica não possui `doctor_profile`.
-
-### Resumo das Alterações
-
-```text
-┌─────────────────────┐     ┌──────────────────────┐     ┌─────────────────────┐
-│  Clínica envia      │────▶│  exam_requests       │────▶│  Laudista vê na     │
-│  ExamRequestForm    │     │  requesting_clinic_id │     │  fila + nome clínica│
-│  (sem doctor_id)    │     │  patient_name (texto) │     │  LaudistaReportQueue│
-└─────────────────────┘     └──────────────────────┘     └─────────────────────┘
-         │                                                         │
-         ▼                                                         ▼
-┌─────────────────────┐                               ┌─────────────────────┐
-│  ClinicMyExams      │◀──── real-time channel ───────│  exam_reports       │
-│  (nova página)      │                               │  signed_at → status │
-│  Ver laudo + PDF    │                               │  = 'reported'       │
-└─────────────────────┘                               └─────────────────────┘
-```
+## Estado Atual
+- **Vitest** já instalado e configurado (`vitest.config.ts`, `src/test/setup.ts`)
+- **@testing-library/react** e **jest-dom** já em devDependencies
+- **28 arquivos de teste** existentes em `src/test/` (unitários e de fluxo)
+- **CI/CD** já existe em `.github/workflows/test.yml` (quality → test → build)
+- **Faltam**: `@testing-library/user-event`, `msw`, `@playwright/test`, mocks MSW, testes E2E, testes RLS
 
 ---
 
-### Etapa 1 — Migration SQL
+## Etapa 1 — Dependências e Configuração
 
-Adicionar colunas a `exam_requests`:
-- `requesting_clinic_id UUID REFERENCES clinic_profiles(id) NULL`
-- `patient_name TEXT NULL`
-- `patient_birth_date DATE NULL`
-- `patient_sex TEXT CHECK (patient_sex IN ('M','F','O')) NULL`
-- `exam_date DATE NULL`
+**Instalar pacotes faltantes:**
+- `@testing-library/user-event` (devDep)
+- `msw` (devDep)
+- `@playwright/test` (devDep)
 
-Tornar `requesting_doctor_id` nullable (atualmente obrigatório, impede clínica de inserir).
-
-Atualizar RLS de `exam_requests`:
-- Clínica: SELECT/INSERT onde `requesting_clinic_id` = seu `clinic_profiles.id`
-- Laudista: SELECT onde `status IN ('pending','in_review')` ou `assigned_to = seu doctor_profile.id`
-
-Atualizar RLS de `exam_reports`:
-- SELECT para clínica dona do `exam_request` via subquery
-
-Criar trigger: quando `exam_reports.signed_at` muda de NULL para valor, UPDATE `exam_requests.status = 'reported'` no registro correspondente.
-
-### Etapa 2 — ExamRequestForm (corrigir para clínica)
-
-Arquivo: `src/components/doctor/ExamRequestForm.tsx`
-
-Quando `isClinic`:
-- Buscar `clinic_profiles.id` via `user_id = auth.uid()`
-- No insert: usar `requesting_clinic_id` em vez de `requesting_doctor_id`
-- Remover validação que exige `effectiveDoctorProfileId`
-- Adicionar campos: Nome do Paciente (obrigatório), Data de Nascimento, Sexo, Data de Realização do Exame
-- Após sucesso: redirecionar para `/dashboard/clinic/my-exams?role=clinic`
-
-### Etapa 3 — ClinicMyExams (novo componente)
-
-Arquivo: `src/components/clinic/ClinicMyExams.tsx`
-
-- Buscar `clinic_profiles.id` do usuário
-- Query `exam_requests` WHERE `requesting_clinic_id = clinicId`, ORDER BY `created_at DESC`
-- Tabela: Paciente, Tipo, Data Envio, Prioridade, Status (badge amarelo/azul/verde), Laudo
-- Coluna Laudo: botão "Ver Laudo" quando `status = 'reported'`
-- Dialog com dados do exame + texto do laudo (query `exam_reports` WHERE `exam_request_id`) + botão PDF
-- Botão "+ Solicitar Exame" → navegar para `/dashboard/clinic/exam-request?role=clinic`
-- Real-time via Supabase channel em `exam_requests`
-- Skeleton loading
-
-### Etapa 4 — Rota no Dashboard.tsx
-
-Adicionar lazy import para `ClinicMyExams` e rota:
-```
-<Route path="clinic/my-exams" element={<RoleGuard allowed={["clinic"]}><ClinicMyExams /></RoleGuard>} />
+**Adicionar scripts ao `package.json`:**
+```json
+"test:e2e": "playwright test",
+"test:e2e:ui": "playwright test --ui"
 ```
 
-### Etapa 5 — ClinicDashboard nav
+**Criar `playwright.config.ts`:**
+- Base URL: `http://localhost:5173`
+- Timeout: 30s
+- Retries: 1
+- Screenshots: on failure
+- Video: retain on failure
+- Projeto: chromium only
+- Web server: `npm run dev`
 
-Em `getClinicNav`, adicionar item "Meus Laudos" com href `/dashboard/clinic/my-exams?role=clinic`, ícone FileText, group "Telelaudo". Atualizar `activeNav` para reconhecer `my-exams`.
+---
 
-### Etapa 6 — LaudistaReportQueue (coluna Origem)
+## Etapa 2 — Testes Unitários Novos
 
-Na query da fila, após buscar pacientes, buscar `clinic_profiles` via `requesting_clinic_id` para obter nome da clínica. Adicionar coluna "Origem" na tabela entre "Paciente" e "Prioridade", exibindo nome da clínica ou "Médico" como fallback.
+Criar em `src/__tests__/`:
 
-### Restrições respeitadas
-- ExamReportEditor: sem alterações
-- LaudistaMyReports: sem alterações
-- Wallet/triggers financeiros: sem alterações
-- Design: mesmos componentes shadcn/ui existentes
+| Arquivo | Escopo |
+|---|---|
+| `utils/cpf.test.ts` | `validarCPF`, `formatarCPF` — válidos, inválidos, repetidos, edge cases |
+| `utils/cnpj.test.ts` | `validarCNPJ`, `formatarCNPJ` — mesma lógica |
+| `utils/sanitize.test.ts` | `stripHtml`, `sanitizeText`, `sanitizeName`, `sanitizePhone`, `sanitizeEmail`, `safeJsonParse`, `isValidUUID` |
+| `hooks/use-cooldown.test.ts` | Timer fake, bloqueio e desbloqueio |
+| `hooks/use-debounce.test.ts` | Debounce com timer fake |
+| `hooks/use-local-storage.test.ts` | Get/set/fallback |
+| `components/auth/ProtectedRoute.test.tsx` | Redireciona sem user, permite com role certa, bloqueia role errada |
+| `components/auth/Auth.test.tsx` | Renderiza login, valida email vazio, troca para cadastro |
+
+Mocks padrão: `supabase`, `framer-motion`, `logo.png` (já existem nos testes atuais — reutilizar padrão).
+
+---
+
+## Etapa 3 — MSW + Testes de Integração
+
+**Criar `src/mocks/`:**
+
+| Arquivo | Conteúdo |
+|---|---|
+| `handlers.ts` | Handlers REST interceptando `*/rest/v1/appointments*`, `*/rest/v1/profiles*`, etc. |
+| `server.ts` | `setupServer(...handlers)` com `beforeAll/afterAll` |
+
+**Criar `src/__tests__/integration/`:**
+
+| Arquivo | Cenários |
+|---|---|
+| `appointments-list.test.tsx` | GET retorna lista → renderiza cards; GET 500 → mostra erro |
+| `crud-flow.test.tsx` | POST cria → aparece na lista; DELETE → desaparece |
+
+---
+
+## Etapa 4 — Testes E2E (Playwright)
+
+Criar em `tests/`:
+
+| Arquivo | Cenários |
+|---|---|
+| `auth.spec.ts` | Login válido → dashboard; senha errada → erro; /dashboard sem login → redirect; logout |
+| `crud.spec.ts` | Criar registro → listagem; editar; deletar; form vazio → erros |
+| `navigation.spec.ts` | Rotas do menu carregam; 404; viewports mobile/desktop |
+| `ui.spec.ts` | Sem erros de console; loading states; empty states |
+
+---
+
+## Etapa 5 — Testes RLS
+
+Criar `tests/rls.spec.ts`:
+- Usa Supabase client direto com credenciais de teste
+- Testa: user A não lê dados de user B; anon retorna 0; update cross-user falha
+- Tabelas: `appointments`, `profiles`, `prescriptions`, `medical_records`
+- Cleanup via DELETE ao final
+
+---
+
+## Etapa 6 — CI/CD Atualizado
+
+Atualizar `.github/workflows/test.yml`:
+- Manter jobs existentes (quality, test, build)
+- Adicionar job `e2e` após `build`:
+  - `npx playwright install --with-deps chromium`
+  - `npm run build` + `npx vite preview &`
+  - `npx playwright test`
+  - Upload artifacts: `playwright-report/`
+
+---
+
+## Etapa 7 — TEST_PLAN.md
+
+Documento na raiz com:
+- Lista de todos os arquivos de teste criados
+- Comandos: `npm test`, `npm run test:run`, `npm run test:e2e`
+- Cobertura por área (auth, CRUD, RLS, UI, utils, hooks)
+- Instruções para configurar secrets no GitHub (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `TEST_USER_EMAIL`, `TEST_USER_PASSWORD`)
+
+---
+
+## Arquivos Criados/Modificados
+
+```text
+CRIADOS:
+  playwright.config.ts
+  TEST_PLAN.md
+  src/mocks/handlers.ts
+  src/mocks/server.ts
+  src/__tests__/utils/cpf.test.ts
+  src/__tests__/utils/cnpj.test.ts
+  src/__tests__/utils/sanitize.test.ts
+  src/__tests__/hooks/use-cooldown.test.ts
+  src/__tests__/hooks/use-debounce.test.ts
+  src/__tests__/hooks/use-local-storage.test.ts
+  src/__tests__/components/ProtectedRoute.test.tsx
+  src/__tests__/components/Auth.test.tsx
+  src/__tests__/integration/appointments-list.test.tsx
+  src/__tests__/integration/crud-flow.test.tsx
+  tests/auth.spec.ts
+  tests/crud.spec.ts
+  tests/navigation.spec.ts
+  tests/ui.spec.ts
+  tests/rls.spec.ts
+
+MODIFICADOS:
+  package.json (scripts + devDeps)
+  .github/workflows/test.yml (job e2e)
+```
+
+Nenhum componente, página, lógica ou estilo existente será alterado.
 
