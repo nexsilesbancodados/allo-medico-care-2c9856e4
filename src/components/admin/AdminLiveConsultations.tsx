@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import mascotThumbsup from "@/assets/mascot-thumbsup.png";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getAdminNav } from "./adminNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

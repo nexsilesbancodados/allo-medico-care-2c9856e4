@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import mascotReading from "@/assets/mascot-reading.png";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getPatientNav } from "@/components/patient/patientNav";
