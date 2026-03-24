@@ -171,7 +171,7 @@ const ReceptionDashboard = () => {
 
   return (
     <DashboardLayout title="Recepção" nav={getReceptionNav("overview")}>
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 pb-24 md:pb-8">
 
         {/* ── Premium Hero ── */}
         <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">

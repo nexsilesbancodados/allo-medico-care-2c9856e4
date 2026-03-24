@@ -173,7 +173,7 @@ const PanelCenter = () => {
 
   return (
     <DashboardLayout title="Centro de Painéis" nav={getAdminNav("switch-panel")}>
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-6xl space-y-8">
+      <motion.div variants={container} initial="hidden" animate="show" className="w-full max-w-6xl space-y-8 pb-24 md:pb-8">
 
         {/* Hero Header */}
         <motion.div variants={fadeUp} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 via-secondary/5 to-purple-500/5 border border-border/40 p-6 sm:p-8">

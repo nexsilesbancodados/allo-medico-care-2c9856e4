@@ -294,7 +294,7 @@ const AppointmentsList = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("appointments")}>
-      <div className="max-w-2xl mx-auto pb-6 pb-24 md:pb-6">
+      <div className="w-full max-w-2xl mx-auto pb-24 md:pb-6">
         {/* Back */}
         <button
           onClick={() => navigate("/dashboard?role=patient")}

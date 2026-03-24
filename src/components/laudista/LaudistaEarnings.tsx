@@ -174,7 +174,7 @@ const LaudistaEarnings = () => {
         </div>
 
         {/* Split info */}
-        <div className="p-3 rounded-xl bg-secondary/5 border border-secondary/20 flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="p-3 rounded-xl bg-secondary/5 border border-secondary/20 flex items-center gap-3 text-xs text-muted-foreground pb-24 md:pb-8">
           <Wallet className="w-4 h-4 shrink-0 text-secondary" />
           <span>Split automático: <strong className="text-foreground">{LAUDISTA_PERCENT}% Laudista</strong> · {100 - LAUDISTA_PERCENT}% Plataforma · Base R$ {EXAM_BASE_PRICE}/laudo</span>
         </div>

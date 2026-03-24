@@ -102,7 +102,7 @@ const LaudistaMyReports = () => {
       >
         {/* Summary badges */}
         {!isLoading && reports && (
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pb-24 md:pb-8">
             <Badge variant="outline" className="text-xs gap-1.5 py-1 px-3">
               <FileText className="w-3 h-3" /> {reports.length} laudos
             </Badge>

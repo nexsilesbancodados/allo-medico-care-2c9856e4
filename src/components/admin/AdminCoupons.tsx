@@ -88,7 +88,7 @@ const AdminCoupons = () => {
 
   return (
     <DashboardLayout title="Cupons de Desconto" nav={nav} role="admin">
-      <div className="space-y-6">
+      <div className="space-y-6 pb-24 md:pb-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground tabular-nums">Cupons</h1>

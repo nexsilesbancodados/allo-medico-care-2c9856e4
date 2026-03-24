@@ -18,7 +18,9 @@ const OpticianDashboard = () => {
 
   return (
     <DashboardLayout title="Ótica Online" nav={getOpticianNav(getActive())} role="optician">
-      <OpticianOverview />
+      <div className="pb-24 md:pb-8">
+        <OpticianOverview />
+      </div>
     </DashboardLayout>
   );
 };

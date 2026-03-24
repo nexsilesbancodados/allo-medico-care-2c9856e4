@@ -240,7 +240,7 @@ const DiscountCard = () => {
 
         {/* ==================== 3 PILARES ==================== */}
         <section className="py-20">
-          <div className="container mx-auto px-4 max-w-5xl">
+          <div className="container mx-auto px-4 max-w-5xl pb-24 md:pb-8">
             <motion.div variants={stagger} initial="hidden" whileInView="show" viewport={{ once: true }}>
               <motion.div variants={fadeUp} className="text-center mb-14">
                 <Badge variant="outline" className="mb-3 text-sm px-4 py-1 rounded-full"><Zap className="w-3.5 h-3.5 mr-1.5" /> 3 em 1</Badge>

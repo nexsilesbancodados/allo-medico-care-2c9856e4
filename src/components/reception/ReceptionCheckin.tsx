@@ -102,7 +102,7 @@ const ReceptionCheckin = () => {
 
   return (
     <DashboardLayout title="Recepção" nav={getReceptionNav("checkin")}>
-      <div className="max-w-3xl">
+      <div className="max-w-3xl pb-24 md:pb-8">
         <h1 className="text-2xl font-bold text-foreground mb-1">Check-in de Pacientes</h1>
         <p className="text-muted-foreground text-sm mb-4">Marque a chegada do paciente na sala virtual</p>
 

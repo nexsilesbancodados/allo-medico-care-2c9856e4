@@ -20,7 +20,7 @@ const Ophthalmology = () => {
 
   return (
     <DashboardLayout role="doctor" title="Oftalmologia" nav={getDoctorNav("ophthalmology")}>
-      <div className="p-4 md:p-6">
+      <div className="p-4 md:p-6 pb-24 md:pb-8">
         <Tabs defaultValue={isDoctor ? "queue" : "upload"} className="space-y-6">
           <TabsList className="bg-muted/50 rounded-xl p-1 h-auto">
             <TabsTrigger value="upload" className="rounded-lg gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">

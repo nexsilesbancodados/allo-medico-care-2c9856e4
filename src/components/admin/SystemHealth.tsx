@@ -190,7 +190,7 @@ const SystemHealth = () => {
             <h1 className="text-2xl font-bold text-foreground tabular-nums">Saúde do Sistema</h1>
             <p className="text-sm text-muted-foreground">Diagnóstico em tempo real · {checks.filter(c => c.status === "ok").length}/{checks.length} serviços ok</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 pb-24 md:pb-8">
             {lastCheck && (
               <span className="text-xs text-muted-foreground">
                 {format(lastCheck, "HH:mm:ss")}

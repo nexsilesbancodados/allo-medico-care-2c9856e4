@@ -98,7 +98,7 @@ const ReceptionBilling = () => {
 
   return (
     <DashboardLayout title="Recepção" nav={getReceptionNav("billing")}>
-      <div className="max-w-4xl">
+      <div className="max-w-4xl pb-24 md:pb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground mb-1">Faturamento de Convênios</h1>

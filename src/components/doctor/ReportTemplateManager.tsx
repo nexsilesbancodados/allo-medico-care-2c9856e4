@@ -139,7 +139,7 @@ const ReportTemplateManager = () => {
               <DialogHeader>
                 <DialogTitle>{editingId ? "Editar Template" : "Novo Template"}</DialogTitle>
               </DialogHeader>
-              <div className="space-y-4">
+              <div className="space-y-4 pb-24 md:pb-8">
                 <div>
                   <Label>Título</Label>
                   <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Raio-X Tórax Normal" />

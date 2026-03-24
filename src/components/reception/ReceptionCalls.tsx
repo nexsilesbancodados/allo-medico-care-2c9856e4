@@ -123,7 +123,7 @@ const ReceptionCalls = () => {
           <CardHeader>
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
               <CardTitle className="text-lg">Histórico de Chamadas</CardTitle>
-              <div className="relative w-full sm:w-64">
+              <div className="relative w-full sm:w-64 pb-24 md:pb-8">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input placeholder="Buscar..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
               </div>

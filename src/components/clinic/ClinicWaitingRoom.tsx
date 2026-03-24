@@ -123,7 +123,7 @@ const ClinicWaitingRoom = () => {
           <Card className="border-border/50">
             <CardContent className="p-0">
               {loading ? (
-                <div className="p-4 space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
+                <div className="p-4 space-y-3 pb-24 md:pb-8">{[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
               ) : waiting.length === 0 ? (
                 <div className="text-center py-14">
                   <Sparkles className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />

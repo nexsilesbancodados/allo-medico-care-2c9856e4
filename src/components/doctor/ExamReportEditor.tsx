@@ -858,7 +858,7 @@ const PacsViewer = ({
                       : "border-white/10 hover:border-white/30"
                   }`}
                 >
-                  <img src={url} className="w-full h-full object-cover" style={{ filter: "brightness(0.7)" }} />
+                  <img src={url} alt="Imagem do exame" className="w-full h-full object-cover" style={{ filter: "brightness(0.7)" }} />
                   <div className={`absolute inset-0 flex items-center justify-center text-[9px] font-mono font-bold ${
                     activeIndex === i ? "text-amber-400" : "text-white/50"
                   }`}>
@@ -976,7 +976,7 @@ const PacsViewer = ({
           {/* Dual view */}
           {dualView && fileUrls.length > 1 && (
             <div className="flex-1 relative overflow-hidden bg-black border-l border-white/10">
-              <img src={fileUrls[dualIndex] || ""} className="w-full h-full object-contain"
+              <img src={fileUrls[dualIndex] || ""} alt="Imagem do exame" className="w-full h-full object-contain"
                 style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}` }} />
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1">
                 <Button size="icon" variant="ghost" className="h-5 w-5 text-white/50"

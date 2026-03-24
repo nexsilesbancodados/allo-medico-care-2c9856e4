@@ -59,7 +59,7 @@ const ReceptionRecords = () => {
           <CardHeader>
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
               <CardTitle className="text-lg">Registros Médicos</CardTitle>
-              <div className="relative w-full sm:w-72">
+              <div className="relative w-full sm:w-72 pb-24 md:pb-8">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar por título..."

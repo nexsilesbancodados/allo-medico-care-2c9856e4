@@ -417,7 +417,7 @@ const BookAppointment = () => {
 
   if (loading) return (
     <DashboardLayout title="Paciente" nav={patientNav}>
-      <div className="max-w-lg mx-auto pb-8 space-y-4 pb-24 md:pb-6">
+      <div className="w-full max-w-lg mx-auto space-y-4 pb-24 md:pb-6">
         <div className="h-6 w-20 rounded-lg shimmer-v2" />
         <div className="flex items-center gap-3 p-4 rounded-2xl border border-border/30">
           <div className="w-14 h-14 rounded-xl shimmer-v2" />
@@ -446,7 +446,7 @@ const BookAppointment = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={patientNav}>
-      <div className="max-w-lg mx-auto pb-8">
+      <div className="w-full max-w-lg mx-auto pb-24 md:pb-6">
         {/* Back */}
         <button onClick={() => {
           if (paymentStep) { setPaymentStep(false); return; }

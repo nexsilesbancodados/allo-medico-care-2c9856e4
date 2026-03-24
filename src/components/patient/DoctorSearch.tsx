@@ -256,7 +256,7 @@ const DoctorSearch = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("doctors")}>
-      <div className="max-w-2xl mx-auto pb-6">
+      <div className="w-full max-w-2xl mx-auto pb-24 md:pb-6">
         {/* Urgency banner */}
         {isUrgency && (
           <motion.div

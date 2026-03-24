@@ -143,7 +143,7 @@ const PatientDashboard = () => {
       </div>
 
       {/* ── MAIN CONTENT — responsive 1-col mobile / 2-col desktop ── */}
-      <div className="mt-4 md:mt-5 space-y-4">
+      <div className="mt-4 md:mt-5 space-y-4 pb-24 md:pb-8">
 
         {/* Live consultation */}
         {waitingAppt && (

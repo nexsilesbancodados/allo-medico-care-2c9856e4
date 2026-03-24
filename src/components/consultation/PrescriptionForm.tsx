@@ -463,7 +463,7 @@ const PrescriptionForm = () => {
 
   return (
     <DashboardLayout title="Médico" nav={doctorNav}>
-      <div className="max-w-3xl">
+      <div className="max-w-3xl pb-24 md:pb-8">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>

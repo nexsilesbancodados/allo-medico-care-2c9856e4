@@ -174,7 +174,7 @@ const ClinicDashboard = () => {
 
   return (
     <DashboardLayout title="Clínica" nav={getClinicNav(activeNav)} role="clinic">
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 pb-24 md:pb-8">
 
         {/* ── Premium Clinic Hero ── */}
         <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">

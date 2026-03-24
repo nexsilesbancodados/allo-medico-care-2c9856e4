@@ -251,7 +251,7 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
 
   function InnerContent() {
     return (
-      <div className="max-w-3xl">
+      <div className="max-w-3xl pb-24 md:pb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-xl font-bold text-foreground">Prontuário Eletrônico</h2>

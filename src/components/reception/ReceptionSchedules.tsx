@@ -67,7 +67,7 @@ const ReceptionSchedules = () => {
 
   return (
     <DashboardLayout title="Recepção" nav={getReceptionNav("schedules")}>
-      <div className="max-w-6xl">
+      <div className="w-full max-w-6xl pb-24 md:pb-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground mb-1">Agendas</h1>
@@ -94,7 +94,7 @@ const ReceptionSchedules = () => {
                     <p>{format(day, "EEE", { locale: ptBR })}</p>
                     <p className="text-lg font-bold">{format(day, "dd")}</p>
                   </div>
-                  <div className="border border-border rounded-b-lg min-h-[200px] p-1 space-y-1">
+                  <div className="border border-border rounded-b-lg min-h-[200px] p-1 space-y-1 pb-24 md:pb-8">
                     {dayAppts.length === 0 ? (
                       <p className="text-[10px] text-muted-foreground text-center py-4">—</p>
                     ) : dayAppts.map(a => (

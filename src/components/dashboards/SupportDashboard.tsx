@@ -250,7 +250,7 @@ const SupportDashboard = () => {
 
   return (
     <DashboardLayout title="Suporte Técnico" nav={getSupportNav(activeNav)}>
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 pb-24 md:pb-8">
 
 
         {/* ── Premium Support Hero ── */}
