@@ -325,6 +325,36 @@
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { display: none; }
 
+/* ── Mobile responsive utilities ── */
+@media (max-width: 374px) {
+  /* Very small screens (iPhone SE, older devices) */
+  .dashboard-grid { grid-template-columns: 1fr !important; }
+  h1 { font-size: 1.35rem !important; }
+  h2 { font-size: 1.15rem !important; }
+}
+
+/* Touch-friendly tap targets — minimum 44x44px on mobile */
+@media (pointer: coarse) {
+  button, a, [role="button"], input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Exception: inline text links and nav labels */
+  nav a, .nav-item, .bottom-nav-item { min-height: unset; min-width: unset; }
+}
+
+/* Landscape mobile — reduce vertical padding */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pb-\\[88px\\] { padding-bottom: 64px !important; }
+}
+
+/* Dark mode bottom nav glass */
+@media (prefers-color-scheme: dark) {
+  .dark nav[aria-label="Navegação principal"] {
+    background: linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.9) 100%) !important;
+  }
+}
+
 /* ── Dashboard card interactive hover ── */
 .card-interactive {
   transition: transform 220ms var(--ease-spring, cubic-bezier(0.22,1,0.36,1)),
