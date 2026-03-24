@@ -24,7 +24,6 @@ import { ActionPills } from "./ActionPills";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { AlertBox } from "./AlertBox";
-import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import pingoAdmin from "@/assets/pingo-admin.png";
 
 const panelOptions = [
@@ -581,6 +580,8 @@ const AdminDashboard = () => {
                 <p className="text-sm text-muted-foreground text-center py-6">Nenhuma assinatura registrada.</p>
               ) : (
                 <div className="overflow-auto rounded-xl border border-border/50">
+                  <div className="overflow-x-auto rounded-xl">
+
                   <Table>
                     <TableHeader>
                       <TableRow className="bg-muted/30">
@@ -609,6 +610,7 @@ const AdminDashboard = () => {
                       ))}
                     </TableBody>
                   </Table>
+            </div>
                 </div>
               )}
             </CardContent>

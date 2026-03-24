@@ -15,7 +15,6 @@ import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { PrescriptionFinder } from "./PrescriptionFinder";
 import { AlertBox } from "./AlertBox";
-import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import pingoPartner from "@/assets/pingo-partner.png";
 
 const getPartnerNav = (active: string) => [

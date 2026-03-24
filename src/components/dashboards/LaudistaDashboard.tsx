@@ -25,7 +25,6 @@ import { ActionPills } from "./ActionPills";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { AlertBox } from "./AlertBox";
-import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import mascotReading from "@/assets/mascot-reading.png";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };

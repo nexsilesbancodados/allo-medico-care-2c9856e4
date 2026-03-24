@@ -22,7 +22,6 @@ import { StatBento } from "./StatBento";
 import { ActionPills } from "./ActionPills";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
-import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { TimelineSchedule, ScheduleItem } from "./TimelineSchedule";
 import pingoReception from "@/assets/pingo-reception.png";
 

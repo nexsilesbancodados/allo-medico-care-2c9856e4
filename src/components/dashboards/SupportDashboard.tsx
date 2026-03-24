@@ -25,7 +25,6 @@ import { StatBento } from "./StatBento";
 import { ActionPills } from "./ActionPills";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
-import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import pingoSupport from "@/assets/pingo-support.png";
 
 const getSupportNav = (active: string) => [
@@ -444,6 +443,8 @@ const SupportDashboard = () => {
               ) : (
                 <div className="rounded-xl border border-border/50 overflow-hidden">
                   <div className="max-h-[480px] overflow-y-auto">
+                    <div className="overflow-x-auto rounded-xl">
+
                     <Table>
                       <TableHeader className="sticky top-0 bg-background z-10">
                         <TableRow className="bg-muted/30">
@@ -486,6 +487,7 @@ const SupportDashboard = () => {
                         )}
                       </TableBody>
                     </Table>
+            </div>
                   </div>
                 </div>
               )}

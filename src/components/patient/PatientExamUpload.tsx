@@ -14,7 +14,6 @@ import { Upload, FileText, Trash2, Eye, Plus, Search, FolderLock } from "lucide-
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { toast } from "sonner";
-import { useEffect } from "react";
 
 const PatientExamUpload = () => {
   const { user } = useAuth();
@@ -197,6 +196,8 @@ const PatientExamUpload = () => {
 
         {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
           <div className="rounded-lg border border-border overflow-hidden">
+            <div className="overflow-x-auto rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -245,6 +246,7 @@ const PatientExamUpload = () => {
                 )}
               </TableBody>
             </Table>
+            </div>
           </div>
         )}
       </div>

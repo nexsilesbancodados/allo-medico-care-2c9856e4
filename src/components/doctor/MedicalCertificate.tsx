@@ -1,6 +1,5 @@
 import { logError } from "@/lib/logger";
 import { useState, useEffect } from "react";
-import { warn } from "@/lib/logger";
 import { useAuth } from "@/contexts/AuthContext";
 import { notifyCertificateSent } from "@/lib/notifications";
 import { supabase } from "@/integrations/supabase/client";
