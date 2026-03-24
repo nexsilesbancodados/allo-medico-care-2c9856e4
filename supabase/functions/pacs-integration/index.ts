@@ -20,6 +20,16 @@ serve(async (req) => {
 
     // ── orthanc_webhook: Receives DICOM study from Orthanc DICOM Router ──
     if (action === "orthanc_webhook") {
+      // Validate webhook secret if configured
+      const webhookSecret = Deno.env.get("PACS_WEBHOOK_SECRET");
+      if (webhookSecret) {
+        const providedSecret = req.headers.get("x-pacs-secret") || body.webhook_secret;
+        if (providedSecret !== webhookSecret) {
+          return new Response(JSON.stringify({ error: "Webhook secret inválido" }), {
+            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
       const {
         study_uid, patient_name, patient_id: orthancPatientId,
         modality, study_description, exam_type,
