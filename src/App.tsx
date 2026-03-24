@@ -7,14 +7,11 @@ import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
 const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
+const ProtectedRoute = lazy(() => import("@/components/auth/ProtectedRoute"));
 import { logError } from "@/lib/logger";
-import { Button } from "@/components/ui/button";
-import { useKeyboardShortcuts } from "./hooks/use-keyboard-shortcuts";
-import { useSubdomainRedirect } from "./hooks/use-subdomain-redirect";
 import { prefetchOnIdle } from "./hooks/use-prefetch-route";
 import ScrollToTop from "./components/ScrollToTop";
 
@@ -76,22 +73,25 @@ const queryClient = new QueryClient({
 
 import PingoLoader from "./components/PingoLoader";
 
-const KeyboardShortcutsProvider = () => {
-  useKeyboardShortcuts();
-  return null;
-};
+// Lazy-load non-critical hooks to keep initial bundle small
+const KeyboardShortcutsProvider = lazy(() =>
+  import("./hooks/use-keyboard-shortcuts").then((m) => ({
+    default: () => { m.useKeyboardShortcuts(); return null; },
+  }))
+);
 
-const SubdomainRedirectProvider = () => {
-  useSubdomainRedirect();
-  return null;
-};
+const SubdomainRedirectProvider = lazy(() =>
+  import("./hooks/use-subdomain-redirect").then((m) => ({
+    default: () => { m.useSubdomainRedirect(); return null; },
+  }))
+);
 
 const App = () => {
   const lastUnhandledToastRef = useRef(0);
   const [showDeferredFeatures, setShowDeferredFeatures] = useState(false);
 
   useEffect(() => {
-    const timerId = window.setTimeout(() => setShowDeferredFeatures(true), 1200);
+    const timerId = window.setTimeout(() => setShowDeferredFeatures(true), 2500);
     return () => window.clearTimeout(timerId);
   }, []);
 
@@ -172,8 +172,10 @@ const App = () => {
               <Sonner />
               <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                 <AuthProvider>
-                  <KeyboardShortcutsProvider />
-                  <SubdomainRedirectProvider />
+                  <Suspense fallback={null}>
+                    <KeyboardShortcutsProvider />
+                    <SubdomainRedirectProvider />
+                  </Suspense>
                   <ScrollToTop />
                   <a
                     href="#main-content"
