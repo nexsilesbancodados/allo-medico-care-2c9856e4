@@ -61,6 +61,38 @@ const ROLE_GRADIENT: Record<string, string> = {
   partner:"from-[hsl(142,71%,45%)] to-[hsl(160,55%,45%)]",
   ai:"from-[hsl(200,80%,50%)] to-[hsl(210,90%,45%)]",
 };
+// Mobile header gradient per role — each role gets a unique color identity
+const ROLE_HEADER_GRADIENT: Record<string, string> = {
+  patient:"bg-gradient-to-r from-[hsl(210,90%,45%)] via-[hsl(200,88%,48%)] to-[hsl(195,85%,50%)]",
+  doctor:"bg-gradient-to-r from-[hsl(155,60%,38%)] via-[hsl(160,55%,42%)] to-[hsl(170,50%,45%)]",
+  admin:"bg-gradient-to-r from-[hsl(260,65%,50%)] via-[hsl(270,60%,48%)] to-[hsl(280,55%,52%)]",
+  receptionist:"bg-gradient-to-r from-[hsl(25,85%,48%)] via-[hsl(30,88%,50%)] to-[hsl(38,92%,52%)]",
+  support:"bg-gradient-to-r from-[hsl(38,85%,45%)] via-[hsl(42,90%,48%)] to-[hsl(48,85%,52%)]",
+  clinic:"bg-gradient-to-r from-[hsl(215,75%,42%)] via-[hsl(225,70%,48%)] to-[hsl(235,65%,52%)]",
+  partner:"bg-gradient-to-r from-[hsl(142,65%,38%)] via-[hsl(150,60%,42%)] to-[hsl(160,55%,45%)]",
+  ai:"bg-gradient-to-r from-[hsl(200,80%,45%)] via-[hsl(210,85%,48%)] to-[hsl(220,80%,52%)]",
+};
+// Bottom nav active color per role
+const ROLE_ACTIVE_COLOR: Record<string, string> = {
+  patient:"text-[hsl(210,90%,45%)]",
+  doctor:"text-[hsl(160,55%,42%)]",
+  admin:"text-[hsl(265,60%,52%)]",
+  receptionist:"text-[hsl(30,88%,48%)]",
+  support:"text-[hsl(42,90%,48%)]",
+  clinic:"text-[hsl(225,70%,48%)]",
+  partner:"text-[hsl(148,60%,40%)]",
+  ai:"text-[hsl(210,85%,48%)]",
+};
+const ROLE_ACTIVE_BG: Record<string, string> = {
+  patient:"bg-[hsl(210,90%,45%,0.12)]",
+  doctor:"bg-[hsl(160,55%,42%,0.12)]",
+  admin:"bg-[hsl(265,60%,52%,0.12)]",
+  receptionist:"bg-[hsl(30,88%,48%,0.12)]",
+  support:"bg-[hsl(42,90%,48%,0.12)]",
+  clinic:"bg-[hsl(225,70%,48%,0.12)]",
+  partner:"bg-[hsl(148,60%,40%,0.12)]",
+  ai:"bg-[hsl(210,85%,48%,0.12)]",
+};
 
 
 // ── PWA Banner ────────────────────────────────────────────────────────────────
