@@ -206,12 +206,11 @@
     height: auto;
   }
 
-  /* Ensure tables don't overflow */
+  /* Keep tables responsive without forcing all tables to become block elements */
   table {
-    overflow-x: auto;
-    display: block;
     max-width: 100%;
   }
+
 
   /* Prevent long words/URLs from causing horizontal overflow */
   p, li, td, th, span, a, label {
