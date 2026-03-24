@@ -153,7 +153,7 @@ const ChatPage = () => {
           </div>
 
           {/* Chat area */}
-          <div className="min-h-[500px]">
+          <div className="min-h-[300px] sm:min-h-[400px]">
             {selected ? (
               <AppointmentChat appointmentId={selected.appointmentId} otherUserName={selected.otherName} />
             ) : (
