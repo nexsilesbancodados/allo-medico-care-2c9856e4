@@ -8,11 +8,16 @@ import { FileText, UserCog, TrendingUp, Pill, FlaskConical, CheckCircle, Search 
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
+import { HeroBanner } from "./HeroBanner";
+import { StatBento } from "./StatBento";
+import { ActionPills } from "./ActionPills";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { PrescriptionFinder } from "./PrescriptionFinder";
 import { AlertBox } from "./AlertBox";
 import { PingoBanner } from "@/components/mascot/PingoMascot";
+import pingoPartner from "@/assets/pingo-partner.png";
 
 const getPartnerNav = (active: string) => [
   { label: "Visão Geral", href: "/dashboard?role=partner", icon: <TrendingUp className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -45,28 +50,32 @@ const PartnerDashboard = () => {
     <DashboardLayout title="Portal do Parceiro" nav={getPartnerNav(activeNav)}>
       <div className="mx-auto w-full max-w-3xl space-y-5 pb-24">
 
-        <PremiumHero
-          gradient="bg-gradient-to-br from-[#022B1C] via-[#0B5F4A] to-[#0F6E56]"
-          orb1Color="radial-gradient(#34D399, transparent)"
-          orb2Color="radial-gradient(#10B981, transparent)"
-          tag="Portal de Parceiros · Farmácia"
-          tagIcon={<Pill className="w-4 h-4" />}
-          name="Validação de Receitas"
-          subtitle="Consulte e dispense receitas digitais com segurança"
-          badge={{ label: "Farmácia Ativa · Verificada" }}
+                <HeroBanner
+          gradient="from-[#022B1C] via-[#065f46] to-[#059669]"
+          pingoSrc={pingoPartner}
+          pingoAlt="Pingo"
+          liveDot={true}
+          liveColor="green"
+          bubble={{
+            greeting: "🤝 Portal de parceiros",
+            name: "Farmácia Saúde+",
+            sub: "Validação de receitas",
+          }}
           kpis={[
-            { label: "Validações", value: validations.length, icon: <Pill className="w-4 h-4" /> },
-            { label: "Dispensados", value: dispensedCount, icon: <CheckCircle className="w-4 h-4" /> },
-            { label: "Conversão", value: `${conversionRate}%`, icon: <TrendingUp className="w-4 h-4" /> },
+            { label: "Validações", value: validations.length },
+            { label: "Dispensados", value: dispensedCount },
+            { label: "Conversão", value: `${conversionRate}%` },
           ]}
           loading={loading}
+          onRefresh={undefined}
+          refreshing={refreshing}
         />
 
-        <BentoStatCards loading={loading} stats={[
-          { label: "Total de validações", value: validations.length, icon: "💊", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 8 } },
-          { label: "Dispensados", value: dispensedCount, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400" },
-          { label: "Taxa de conversão", value: `${conversionRate}%`, icon: "📈", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400", trend: { value: conversionRate > 50 ? 5 : -2 } },
-          { label: "Hoje", value: validations.filter(v => new Date(v.created_at).toDateString() === new Date().toDateString()).length, icon: "📅", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueColor: "text-violet-600 dark:text-violet-400" },
+        <StatBento loading={loading} stats={[
+          { label: "Total de validações", value: validations.length, icon: "💊", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: { value: 8 } },
+          { label: "Dispensados", value: dispensedCount, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400" },
+          { label: "Taxa de conversão", value: `${conversionRate}%`, icon: "📈", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", trend: { value: conversionRate > 50 ? 5 : -2 } },
+          { label: "Hoje", value: validations.filter(v => new Date(v.created_at).toDateString() === new Date().toDateString()).length, icon: "📅", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueClass: "text-violet-600 dark:text-violet-400" },
         ]} />
 
         <Tabs defaultValue="validate">

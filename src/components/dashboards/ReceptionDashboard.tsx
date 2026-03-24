@@ -17,10 +17,15 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { useDebounce } from "@/hooks/use-debounce";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
+import { HeroBanner } from "./HeroBanner";
+import { StatBento } from "./StatBento";
+import { ActionPills } from "./ActionPills";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { PingoBanner } from "@/components/mascot/PingoMascot";
 import { TimelineSchedule, ScheduleItem } from "./TimelineSchedule";
+import pingoReception from "@/assets/pingo-reception.png";
 
 const statusLabel: Record<string, string> = {
   scheduled: "Agendada", waiting: "Na sala", in_progress: "Em consulta",
@@ -170,50 +175,34 @@ const ReceptionDashboard = () => {
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
         {/* ── Premium Hero ── */}
-        <PremiumHero
-          gradient="bg-gradient-to-br from-[#4A1F00] via-[#B05000] to-[#D97706]"
-          orb1Color="radial-gradient(#FCD34D, transparent)"
-          orb2Color="radial-gradient(#F59E0B, transparent)"
-          tag={isToday ? `Agenda de Hoje · ${format(selectedDate, "dd 'de' MMMM", { locale: ptBR })}` : format(selectedDate, "EEEE, dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-          tagIcon={<Calendar className="w-4 h-4" />}
-          name="Painel da Recepção"
+                <HeroBanner
+          gradient="from-[#451a03] via-[#b45309] to-[#d97706]"
+          pingoSrc={pingoReception}
+          pingoAlt="Pingo"
+          liveDot={false}
+          liveColor="green"
+          bubble={{
+            greeting: "🗓️ Agenda de hoje",
+            name: "Painel da Recepção",
+            sub: "22 consultas agendadas",
+          }}
           kpis={[
-            { label: "Total", value: stats.total, icon: <Calendar className="w-4 h-4" /> },
-            { label: "Na Fila", value: stats.waiting, icon: <Clock className="w-4 h-4" /> },
-            { label: "Em Consulta", value: stats.inProgress, icon: <Video className="w-4 h-4" /> },
-            { label: "Concluídas", value: stats.completed, icon: <CheckCircle className="w-4 h-4" /> },
+            { label: "Total", value: stats.total },
+            { label: "Na Fila", value: stats.waiting },
+            { label: "Em Consulta", value: stats.inProgress },
+            { label: "Concluídas", value: stats.completed },
           ]}
           loading={loading}
           onRefresh={() => fetchToday(true)}
           refreshing={refreshing}
-          topRight={
-            <div className="flex items-center gap-1">
-              <button onClick={() => setSelectedDate(d => subDays(d, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/70 hover:bg-white/15 transition-colors">
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <button className="rounded-lg border border-white/20 px-2.5 py-1 text-[11px] font-semibold text-white/80 hover:bg-white/15 transition-colors">
-                    {isToday ? "Hoje" : format(selectedDate, "dd/MM")}
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComp mode="single" selected={selectedDate} onSelect={d => { if (d) { setSelectedDate(d); setCalendarOpen(false); } }} initialFocus className={cn("p-3 pointer-events-auto")} />
-                </PopoverContent>
-              </Popover>
-              <button onClick={() => setSelectedDate(d => addDays(d, 1))} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/20 text-white/70 hover:bg-white/15 transition-colors">
-                <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
-          }
         />
 
         {/* ── Bento Stats ── */}
-        <BentoStatCards loading={loading} stats={[
-          { label: "Total hoje", value: stats.total, icon: "📅", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-700 dark:text-amber-400" },
-          { label: "Na fila", value: stats.waiting, icon: "⏳", iconBg: "bg-red-50 dark:bg-red-950/30", valueColor: "text-red-600 dark:text-red-400" },
-          { label: "Em consulta", value: stats.inProgress, icon: "🎥", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-600 dark:text-emerald-400" },
-          { label: "Concluídas", value: stats.completed, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400" },
+        <StatBento loading={loading} stats={[
+          { label: "Total hoje", value: stats.total, icon: "📅", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-700 dark:text-amber-400" },
+          { label: "Na fila", value: stats.waiting, icon: "⏳", iconBg: "bg-red-50 dark:bg-red-950/30", valueClass: "text-red-600 dark:text-red-400" },
+          { label: "Em consulta", value: stats.inProgress, icon: "🎥", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-600 dark:text-emerald-400" },
+          { label: "Concluídas", value: stats.completed, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400" },
         ]} />
 
         {/* Pingo Banner */}

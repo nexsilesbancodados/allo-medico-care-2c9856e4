@@ -19,10 +19,15 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import { toast } from "sonner";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
+import { HeroBanner } from "./HeroBanner";
+import { StatBento } from "./StatBento";
+import { ActionPills } from "./ActionPills";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { AlertBox } from "./AlertBox";
 import { PingoBanner } from "@/components/mascot/PingoMascot";
+import mascotReading from "@/assets/mascot-reading.png";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
 const fadeUp = { hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const } } };
@@ -133,33 +138,34 @@ const LaudistaDashboard = () => {
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
         {/* ── Premium Hero ── */}
-        <PremiumHero
-          gradient="bg-gradient-to-br from-[#040D24] via-[#0F2B5E] to-[#1255C8]"
-          orb1Color="radial-gradient(#3B7FE8, transparent)"
-          orb2Color="radial-gradient(#10B981, transparent)"
-          tag={`${format(now, "EEEE, dd 'de' MMMM", { locale: ptBR })} · Telelaudo`}
-          tagIcon={<ClipboardList className="w-4 h-4" />}
-          name="Painel Laudista"
-          subtitle={doctorProfile?.crm ? `CRM ${doctorProfile.crm}/${doctorProfile.crm_state} · Radiologista` : "Telelaudo · Radiologista"}
+                <HeroBanner
+          gradient="from-[#040D24] via-[#0F2B5E] to-[#1e40af]"
+          pingoSrc={mascotReading}
+          pingoAlt="Pingo"
+          liveDot={true}
+          liveColor="red"
+          bubble={{
+            greeting: "📋 Telelaudo",
+            name: "Painel Laudista",
+            sub: "2 exames urgentes",
+          }}
           kpis={[
-            { label: "Na fila", value: stats?.pending ?? 0, icon: <ClipboardList className="w-4 h-4" /> },
-            { label: "Em análise", value: stats?.inReview ?? 0, icon: <Eye className="w-4 h-4" /> },
-            { label: "Laudados", value: stats?.totalReported ?? 0, icon: <CheckCircle2 className="w-4 h-4" /> },
-            { label: "Hoje", value: stats?.todayReported ?? 0, icon: <Target className="w-4 h-4" /> },
+            { label: "Fila", value: stats?.pending ?? 0 },
+            { label: "Em análise", value: stats?.inReview ?? 0 },
+            { label: "Laudados", value: stats?.reported ?? 0 },
+            { label: "Hoje", value: stats?.todayReported ?? 0 },
           ]}
-          loading={loadingStats}
+          loading={loading}
           onRefresh={() => { queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] }); }}
           refreshing={refreshing}
-          liveDot={urgentCount > 0}
-          liveCount={urgentCount}
         />
 
         {/* ── Bento Stats ── */}
-        <BentoStatCards loading={loadingStats} stats={[
-          { label: "Na fila (pendente)", value: stats?.pending ?? 0, icon: "📋", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-700 dark:text-amber-400" },
-          { label: "Em análise", value: stats?.inReview ?? 0, icon: "🔍", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400" },
-          { label: "Total laudados", value: stats?.totalReported ?? 0, icon: "✅", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 22 } },
-          { label: "Laudados hoje", value: stats?.todayReported ?? 0, icon: "🎯", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueColor: "text-violet-600 dark:text-violet-400" },
+        <StatBento loading={loadingStats} stats={[
+          { label: "Na fila (pendente)", value: stats?.pending ?? 0, icon: "📋", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-700 dark:text-amber-400", accentClass: "bg-amber-500" },
+          { label: "Em análise", value: stats?.inReview ?? 0, icon: "🔍", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", accentClass: "bg-blue-500" },
+          { label: "Total laudados", value: stats?.totalReported ?? 0, icon: "✅", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: { value: 22, accentClass: "bg-blue-500" } },
+          { label: "Laudados hoje", value: stats?.todayReported ?? 0, icon: "🎯", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueClass: "text-violet-600 dark:text-violet-400", accentClass: "bg-violet-500" },
         ]} />
 
         {/* ── Urgent Alert ── */}

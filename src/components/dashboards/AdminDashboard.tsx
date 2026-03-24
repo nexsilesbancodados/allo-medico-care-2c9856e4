@@ -18,10 +18,15 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 import type { AdminKpiItem } from "@/types/domain";
+import { HeroBanner } from "./HeroBanner";
+import { StatBento } from "./StatBento";
+import { ActionPills } from "./ActionPills";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { AlertBox } from "./AlertBox";
 import { PingoBanner } from "@/components/mascot/PingoMascot";
+import pingoAdmin from "@/assets/pingo-admin.png";
 
 const panelOptions = [
   { label: "Paciente", role: "patient", icon: "👤", description: "Ver como paciente" },
@@ -265,21 +270,22 @@ const AdminDashboard = () => {
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-6xl space-y-6">
 
         {/* ── Premium Admin Hero ── */}
-        <PremiumHero
-          gradient="bg-gradient-to-br from-[#3B0000] via-[#8B1515] to-[#C41A1A]"
-          orb1Color="radial-gradient(#EF4444, transparent)"
-          orb2Color="radial-gradient(#F97316, transparent)"
-          tag="Monitoramento em tempo real"
-          tagIcon={<Activity className="w-4 h-4" />}
-          name="Painel de Controle"
-          subtitle="Finanças, operações e gestão completa da plataforma"
-          liveDot={stats.live_now > 0}
-          liveCount={stats.live_now}
+                <HeroBanner
+          gradient="from-[#3B0000] via-[#8B1515] to-[#C41A1A]"
+          pingoSrc={pingoAdmin}
+          pingoAlt="Pingo"
+          liveDot={true}
+          liveColor="red"
+          bubble={{
+            greeting: "Monitoramento · Admin",
+            name: "Painel de Controle",
+            sub: "12 consultas ao vivo agora",
+          }}
           kpis={[
-            { label: "Pacientes", value: stats.total_patients, icon: <Users className="w-4 h-4" /> },
-            { label: "Médicos", value: stats.total_doctors, icon: <Activity className="w-4 h-4" /> },
-            { label: "Assinaturas", value: stats.active_subs, icon: <CreditCard className="w-4 h-4" /> },
-            { label: "Ao vivo", value: stats.live_now, icon: <Video className="w-4 h-4" /> },
+            { label: "Pacientes", value: stats.total_patients },
+            { label: "Médicos", value: stats.total_doctors },
+            { label: "Receita", value: `R$${(stats.total_revenue/1000).toFixed(1)}k` },
+            { label: "Ao vivo", value: stats.live_now },
           ]}
           loading={loading}
           onRefresh={() => fetchAll(true)}
@@ -287,11 +293,11 @@ const AdminDashboard = () => {
         />
 
         {/* ── Bento Stats ── */}
-        <BentoStatCards loading={loading} stats={[
-          { label: "Receita mensal", value: `R$${(stats.total_revenue / 1000).toFixed(1)}k`, icon: "💰", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 18 } },
-          { label: "Consultas/mês", value: stats.monthly_appts, icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400", trend: { value: 24 } },
-          { label: "Avaliação média", value: stats.avg_rating > 0 ? stats.avg_rating.toFixed(1) : "—", icon: "⭐", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400" },
-          { label: "Laudos emitidos", value: stats.total_laudos, icon: "📋", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueColor: "text-violet-600 dark:text-violet-400", trend: { value: 31 } },
+        <StatBento loading={loading} stats={[
+          { label: "Receita mensal", value: `R$${(stats.total_revenue / 1000).toFixed(1)}k`, icon: "💰", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: { value: 18 } },
+          { label: "Consultas/mês", value: stats.monthly_appts, icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", trend: { value: 24 } },
+          { label: "Avaliação média", value: stats.avg_rating > 0 ? stats.avg_rating.toFixed(1) : "—", icon: "⭐", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400" },
+          { label: "Laudos emitidos", value: stats.total_laudos, icon: "📋", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueClass: "text-violet-600 dark:text-violet-400", trend: { value: 31 } },
         ]} />
 
         {/* Pingo Admin Banner */}

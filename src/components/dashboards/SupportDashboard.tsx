@@ -20,9 +20,14 @@ import SupportInbox from "@/components/support/SupportInbox";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
+import { HeroBanner } from "./HeroBanner";
+import { StatBento } from "./StatBento";
+import { ActionPills } from "./ActionPills";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { PingoBanner } from "@/components/mascot/PingoMascot";
+import pingoSupport from "@/assets/pingo-support.png";
 
 const getSupportNav = (active: string) => [
   { label: "Helpdesk", href: "/dashboard?role=support", icon: <Activity className="w-4 h-4" />, active: active === "overview", group: "Principal" },
@@ -250,33 +255,35 @@ const SupportDashboard = () => {
 
 
         {/* ── Premium Support Hero ── */}
-        <PremiumHero
-          gradient="bg-gradient-to-br from-[#2D1B00] via-[#854F0B] to-[#B45309]"
-          orb1Color="radial-gradient(#FCD34D, transparent)"
-          orb2Color="radial-gradient(#F97316, transparent)"
-          tag="Helpdesk · Monitoramento"
-          tagIcon={<Activity className="w-4 h-4" />}
-          name="Painel de Suporte"
-          subtitle={`Atualizado ${formatDistanceToNow(lastFetch.current, { addSuffix: true, locale: ptBR })}`}
-          liveDot={errorCount > 0}
-          liveCount={errorCount > 0 ? errorCount : undefined}
+                <HeroBanner
+          gradient="from-[#2D1B00] via-[#854F0B] to-[#B45309]"
+          pingoSrc={pingoSupport}
+          pingoAlt="Pingo"
+          liveDot={false}
+          liveColor="green"
+          bubble={{
+            greeting: "🎧 Helpdesk",
+            name: "Painel de Suporte",
+            sub: "Monitoramento em tempo real",
+          }}
           kpis={[
-            { label: "Usuários", value: users.length, icon: <Users className="w-4 h-4" /> },
-            { label: "Logs hoje", value: todayLogs, icon: <Activity className="w-4 h-4" /> },
-            { label: "Erros", value: errorCount, icon: <ShieldAlert className="w-4 h-4" /> },
-            { label: "Alertas", value: errorCount + warnCount, icon: <AlertTriangle className="w-4 h-4" /> },
+            { label: "Usuários", value: users.length },
+            { label: "Logs hoje", value: todayLogs },
+            { label: "Erros", value: errorCount },
+            { label: "Alertas", value: errorCount + warnCount },
           ]}
           loading={loading}
           onRefresh={() => fetchData(true)}
           refreshing={refreshing}
         />
 
+
         {/* ── Bento Stats ── */}
-        <BentoStatCards loading={loading} stats={[
-          { label: "Usuários cadastrados", value: users.length, icon: "👥", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400", sub: `${filteredUsers.length} filtrados` },
-          { label: "Logs hoje", value: todayLogs, icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400", sub: `${logs.length} total` },
-          { label: "Erros críticos", value: errorCount, icon: "🔴", iconBg: "bg-red-50 dark:bg-red-950/30", valueColor: "text-red-600 dark:text-red-400", sub: `${warnCount} avisos`, trend: errorCount > 0 ? { value: -errorCount, positive: false } : undefined },
-          { label: "Alertas totais", value: errorCount + warnCount, icon: "⚠️", iconBg: "bg-orange-50 dark:bg-orange-950/30", valueColor: "text-orange-600 dark:text-orange-400", sub: "Revisão necessária" },
+        <StatBento loading={loading} stats={[
+          { label: "Usuários cadastrados", value: users.length, icon: "👥", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", sub: `${filteredUsers.length} filtrados` },
+          { label: "Logs hoje", value: todayLogs, icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", sub: `${logs.length} total` },
+          { label: "Erros críticos", value: errorCount, icon: "🔴", iconBg: "bg-red-50 dark:bg-red-950/30", valueClass: "text-red-600 dark:text-red-400", sub: `${warnCount} avisos`, trend: errorCount > 0 ? { value: -errorCount, positive: false } : undefined },
+          { label: "Alertas totais", value: errorCount + warnCount, icon: "⚠️", iconBg: "bg-orange-50 dark:bg-orange-950/30", valueClass: "text-orange-600 dark:text-orange-400", sub: "Revisão necessária" },
         ]} />
 
         {/* ── Error Alert ── */}

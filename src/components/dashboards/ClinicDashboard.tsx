@@ -17,10 +17,15 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { motion } from "framer-motion";
 import { useGsapEntrance } from "@/hooks/use-gsap-entrance";
 import { getClinicNav } from "@/components/clinic/clinicNav";
+import { HeroBanner } from "./HeroBanner";
+import { StatBento } from "./StatBento";
+import { ActionPills } from "./ActionPills";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { PingoBanner } from "@/components/mascot/PingoMascot";
 import { DoctorRanking } from "./DoctorRanking";
+import pingoAdmin from "@/assets/pingo-admin.png";
 
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--warning))", "hsl(var(--destructive))"];
 
@@ -173,34 +178,34 @@ const ClinicDashboard = () => {
       <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
 
         {/* ── Premium Clinic Hero ── */}
-        <PremiumHero
-          gradient="bg-gradient-to-br from-[#1E1B6B] via-[#3730A3] to-[#4F46E5]"
-          orb1Color="radial-gradient(#818CF8, transparent)"
-          orb2Color="radial-gradient(#10B981, transparent)"
-          tag={`Painel de Gestão · ${format(now, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}`}
-          tagIcon={<Stethoscope className="w-4 h-4" />}
-          name={clinicProfile?.name ?? "Minha Clínica"}
-          subtitle="São Paulo · Telemedicina"
+                <HeroBanner
+          gradient="from-[#1e1b6b] via-[#3730a3] to-[#6366f1]"
+          pingoSrc={pingoAdmin}
+          pingoAlt="Pingo"
+          liveDot={false}
+          liveColor="green"
+          bubble={{
+            greeting: "🏥 Gestão da clínica",
+            name: "Clínica VidaSaúde",
+            sub: "12 médicos ativos hoje",
+          }}
           kpis={[
-            { label: "Médicos", value: activeDoctors, icon: <Users className="w-4 h-4" /> },
-            { label: "Consultas", value: thisMonthAppts.length, icon: <Calendar className="w-4 h-4" /> },
-            { label: "Receita", value: `R$${(revenue / 1000).toFixed(1)}k`, icon: <DollarSign className="w-4 h-4" /> },
-            { label: "Ocupação", value: `${occupancy}%`, icon: <TrendingUp className="w-4 h-4" /> },
+            { label: "Médicos", value: activeDoctors },
+            { label: "Consultas", value: thisMonthAppts.length },
+            { label: "Receita", value: `R$${(revenue/1000).toFixed(1)}k` },
+            { label: "Ocupação", value: `${occupancy}%` },
           ]}
           loading={loading}
-          topRight={
-            <Button size="sm" variant="ghost" className="h-9 gap-1.5 rounded-xl border border-white/20 px-3 text-[11px] font-bold text-white/80 hover:bg-white/15 hover:text-white" onClick={exportClinicPDF}>
-              <Download className="w-3.5 h-3.5" /> PDF
-            </Button>
-          }
+          onRefresh={undefined}
+          refreshing={refreshing}
         />
 
         {/* ── Bento Stats ── */}
-        <BentoStatCards loading={loading} stats={[
-          { label: "Médicos ativos", value: activeDoctors, icon: "🩺", iconBg: "bg-indigo-50 dark:bg-indigo-950/30", valueColor: "text-indigo-700 dark:text-indigo-400", trend: { value: 5 } },
-          { label: "Receita do mês", value: `R$${(revenue / 1000).toFixed(1)}k`, icon: "💰", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueColor: "text-emerald-700 dark:text-emerald-400", trend: { value: 12 } },
-          { label: "Consultas/mês", value: thisMonthAppts.length, icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueColor: "text-[#1255C8] dark:text-blue-400", trend: { value: 18 } },
-          { label: "Taxa de ocupação", value: `${occupancy}%`, icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueColor: "text-amber-600 dark:text-amber-400" },
+        <StatBento loading={loading} stats={[
+          { label: "Médicos ativos", value: activeDoctors, icon: "🩺", iconBg: "bg-indigo-50 dark:bg-indigo-950/30", valueClass: "text-indigo-700 dark:text-indigo-400", trend: { value: 5 } },
+          { label: "Receita do mês", value: `R$${(revenue / 1000).toFixed(1)}k`, icon: "💰", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: { value: 12 } },
+          { label: "Consultas/mês", value: thisMonthAppts.length, icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", trend: { value: 18 } },
+          { label: "Taxa de ocupação", value: `${occupancy}%`, icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400" },
         ]} />
 
         {/* Pingo Banner */}
