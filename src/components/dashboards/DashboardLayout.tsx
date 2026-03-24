@@ -636,16 +636,23 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
                 <SheetTrigger asChild>
                   <button
-                    className={`flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium select-none active:scale-[0.88] transition-all duration-300 ${
-                      moreNav.some(i => i.active) ? (ROLE_ACTIVE_COLOR[role] ?? "text-primary") : "text-muted-foreground/50"
+                    className={`flex flex-col items-center justify-center gap-1 flex-1 select-none group ${
+                      moreNav.some(i => i.active) ? (ROLE_ACTIVE_COLOR[role] ?? "text-primary") : "text-muted-foreground/60"
                     }`}
                     aria-label="Mais opções">
-                    <span className={`w-10 h-7 rounded-2xl flex items-center justify-center transition-all duration-300 ${
-                      moreNav.some(i => i.active) ? (ROLE_ACTIVE_BG[role] ?? "bg-primary/12") : ""
-                    }`}>
+                    <motion.span
+                      className={`flex items-center justify-center rounded-full transition-colors duration-300 ${
+                        moreNav.some(i => i.active) ? `${ROLE_ACTIVE_BG[role] ?? "bg-primary/12"} w-12 h-12 shadow-lg` : "w-10 h-10 group-hover:bg-muted/40"
+                      }`}
+                      whileTap={{ scale: 0.82, rotate: 90 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 22 }}
+                    >
                       <MoreHorizontal className="w-5 h-5" aria-hidden="true" />
-                    </span>
-                    <span className={moreNav.some(i => i.active) ? "font-extrabold" : ""}>Mais</span>
+                    </motion.span>
+                    <motion.span
+                      className={`text-[10px] ${moreNav.some(i => i.active) ? "font-bold" : "font-medium"}`}
+                      animate={moreNav.some(i => i.active) ? { y: -4 } : { y: 0 }}
+                    >Mais</motion.span>
                   </button>
                 </SheetTrigger>
                 <SheetContent side="bottom" className="rounded-t-[28px] border-border/15 bg-background/98 backdrop-blur-xl max-h-[78vh]"
@@ -680,7 +687,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                                 className={`flex flex-col items-center gap-1.5 p-2.5 xs:p-3 rounded-2xl text-[11px] font-medium transition-all duration-200 active:scale-[0.93] ${
                                   item.active ? `bg-foreground/6 ${activeColor} font-semibold` : "text-muted-foreground hover:bg-muted/40"
                                 }`}>
-                                <span className={`w-11 h-11 rounded-[14px] flex items-center justify-center transition-all duration-200 shadow-sm ${
+                                <span className={`w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm ${
                                   item.active ? `${ROLE_ACTIVE_BG[role] ?? "bg-primary/12"} ring-1 ring-current/15` : "bg-muted/60"
                                 }`}>
                                   {item.icon}
@@ -699,7 +706,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                         onClick={() => { setMoreOpen(false); window.dispatchEvent(new Event("open-pingo-chat")); }}
                         className="w-full flex items-center gap-3 p-3.5 rounded-2xl hover:bg-muted/40 transition-colors active:scale-[0.98]"
                       >
-                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                           <img src={mascotImg} alt="" className="w-7 h-7 object-cover rounded-full" />
                         </div>
                         <div className="text-left">
@@ -713,6 +720,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                 </SheetContent>
               </Sheet>
             )}
+          </div>
           </div>
         </nav>
       )}
