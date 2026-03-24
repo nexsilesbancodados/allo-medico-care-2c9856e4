@@ -181,7 +181,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const bottomNav = nav?.slice(0, BOTTOM_COUNT) ?? [];
   const moreNav  = nav && nav.length > BOTTOM_COUNT ? nav.slice(BOTTOM_COUNT) : [];
 
-  // GSAP sidebar entrance — only on first mount
+  // GSAP sidebar entrance — only on first mount (no dep on nav to avoid flicker)
   const sidebarAnimated = useRef(false);
   useEffect(() => {
     if (sidebarAnimated.current || !sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -190,7 +190,8 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
     import("gsap").then(({ default: gsap }) => {
       gsap.fromTo(items, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.035, ease: "power2.out", clearProps: "transform,opacity" });
     }).catch(() => {});
-  }, [nav]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // GSAP header entrance
   useEffect(() => {
