@@ -237,7 +237,7 @@ const Dashboard = () => {
   }, [loading, checkingPlan, roles]);
 
   if (loading || checkingPlan) {
-    return <PageLoader />;
+    return <PingoLoader />;
   }
 
   if (!user) return <Navigate to="/auth" replace />;
@@ -283,7 +283,7 @@ const Dashboard = () => {
   };
 
   return (
-    <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={<PingoLoader />}>
     <Routes>
       <Route index element={<IndexDashboard />} />
 

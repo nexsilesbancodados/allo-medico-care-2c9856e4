@@ -175,7 +175,7 @@ const App = () => {
                     Pular para o conteúdo
                   </a>
                   <main id="main-content">
-                    <Suspense fallback={<PageLoader />}>
+                    <Suspense fallback={<PingoLoader />}>
                       <Routes>
                         <Route path="/" element={<Index />} />
                         <Route path="/auth" element={<Auth />} />
