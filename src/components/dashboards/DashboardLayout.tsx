@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, User, Settings, MoreHorizontal, Search, Menu, ShieldCheck, ChevronDown, Download, X, Smartphone } from "lucide-react";
+import { LogOut, User, Settings, MoreHorizontal, Search, Menu, ShieldCheck, ChevronDown, Download, X, Smartphone, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
 import GlobalCommand from "@/components/GlobalCommand";
@@ -148,6 +148,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const [searchParams] = useSearchParams();
   const [moreOpen, setMoreOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage("sidebar-collapsed", false);
   const { signOut } = useAuth();
   const sidebarRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -229,20 +230,27 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
     );
   };
 
-  const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
+  const SidebarContent = ({ onItemClick, collapsed = false }: { onItemClick?: () => void; collapsed?: boolean }) => (
     <div ref={sidebarRef} className="flex flex-col h-full">
       {/* Spacer top */}
       <div className="h-3 shrink-0" />
 
       {/* Role badge */}
-      <div className="px-3 pt-2 pb-1 shrink-0">
-        <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${ROLE_COLORS[role] ?? ROLE_COLORS.patient}`}>
-          <span className="text-xs">{ROLE_ICON[role] ?? "👤"}</span>
-          {ROLE_LABELS[role] ?? title}
+      {!collapsed && (
+        <div className="px-3 pt-2 pb-1 shrink-0">
+          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${ROLE_COLORS[role] ?? ROLE_COLORS.patient}`}>
+            <span className="text-xs">{ROLE_ICON[role] ?? "👤"}</span>
+            {ROLE_LABELS[role] ?? title}
+          </div>
         </div>
-      </div>
+      )}
+      {collapsed && (
+        <div className="flex justify-center pt-2 pb-1 shrink-0">
+          <span className="text-base">{ROLE_ICON[role] ?? "👤"}</span>
+        </div>
+      )}
 
-      {isAdminViewingOtherPanel && (
+      {isAdminViewingOtherPanel && !collapsed && (
         <div className="px-3 pb-1 shrink-0">
           <button onClick={() => { navigate("/dashboard"); onItemClick?.(); }}
             className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-destructive bg-destructive/8 hover:bg-destructive/15 transition-all duration-200">
@@ -252,16 +260,42 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       )}
 
       {nav && nav.length > 0 && (
-        <nav className="flex-1 overflow-y-auto px-2.5 py-2 scrollbar-thin scrollbar-thumb-border/50">
+        <nav className={`flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-border/50 ${collapsed ? "px-1.5" : "px-2.5"}`}>
           {navGroups.map((group, gi) => (
             <div key={gi}>
-              {group.label && (
+              {group.label && !collapsed && (
                 <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.12em] px-2.5 pt-4 pb-1.5">
                   {group.label}
                 </p>
               )}
+              {group.label && collapsed && gi > 0 && (
+                <div className="mx-2 my-2 border-t border-border/10" />
+              )}
               <div className="space-y-0.5">
-                {group.items.map(item => <NavItemRow key={item.href} item={item} onClick={onItemClick} />)}
+                {group.items.map(item => (
+                  collapsed ? (
+                    <Link key={item.href} to={item.href} onClick={onItemClick}
+                      title={item.label}
+                      className={`nav-item group flex items-center justify-center p-2 rounded-xl transition-all duration-200 relative ${
+                        item.active
+                          ? "bg-primary text-primary-foreground shadow-[0_2px_8px_rgba(0,0,0,.15)]"
+                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                      }`}>
+                      <span className="shrink-0">{
+                        isValidElement(item.icon) && (item.icon.props as any)?.color
+                          ? cloneElement(item.icon as React.ReactElement<any>, { active: item.active })
+                          : item.icon
+                      }</span>
+                      {(item.badge ?? 0) > 0 && (
+                        <span className="absolute -top-0.5 -right-0.5 text-[8px] font-bold min-w-[14px] h-3.5 px-1 rounded-full bg-destructive text-white flex items-center justify-center">
+                          {(item.badge ?? 0) > 9 ? "9+" : item.badge}
+                        </span>
+                      )}
+                    </Link>
+                  ) : (
+                    <NavItemRow key={item.href} item={item} onClick={onItemClick} />
+                  )
+                ))}
               </div>
             </div>
           ))}
@@ -269,18 +303,29 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       )}
 
       {/* User area */}
-      <div className="p-2.5 mt-auto shrink-0 border-t border-border/10">
-        <button onClick={() => { navigate("/dashboard/profile"); onItemClick?.(); }}
-          className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-muted/50 transition-all duration-200 text-left group">
-          <Avatar className="h-8 w-8 ring-2 ring-border/15 group-hover:ring-primary/25 transition-all">
-            {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-            <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-[10px] font-bold`}>{initials}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="text-[13px] font-semibold text-foreground truncate leading-tight">{fullName}</p>
-            <p className="text-[10px] text-muted-foreground truncate leading-tight">{ROLE_LABELS[role] ?? title}</p>
-          </div>
-        </button>
+      <div className={`mt-auto shrink-0 border-t border-border/10 ${collapsed ? "p-1.5" : "p-2.5"}`}>
+        {collapsed ? (
+          <button onClick={() => { navigate("/dashboard/profile"); onItemClick?.(); }}
+            title="Meu Perfil"
+            className="w-full flex items-center justify-center p-2 rounded-xl hover:bg-muted/50 transition-all duration-200">
+            <Avatar className="h-7 w-7 ring-2 ring-border/15">
+              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+              <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-[9px] font-bold`}>{initials}</AvatarFallback>
+            </Avatar>
+          </button>
+        ) : (
+          <button onClick={() => { navigate("/dashboard/profile"); onItemClick?.(); }}
+            className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-muted/50 transition-all duration-200 text-left group">
+            <Avatar className="h-8 w-8 ring-2 ring-border/15 group-hover:ring-primary/25 transition-all">
+              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
+              <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-[10px] font-bold`}>{initials}</AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-semibold text-foreground truncate leading-tight">{fullName}</p>
+              <p className="text-[10px] text-muted-foreground truncate leading-tight">{ROLE_LABELS[role] ?? title}</p>
+            </div>
+          </button>
+        )}
       </div>
     </div>
   );
@@ -443,8 +488,23 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {/* Body */}
       <div className="flex flex-1 min-h-0">
         {nav && nav.length > 0 && (
-          <aside className="hidden md:flex w-52 lg:w-60 xl:w-64 shrink-0 flex-col bg-background border-r border-border/15 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
-            <SidebarContent />
+          <aside className={`hidden md:flex shrink-0 flex-col bg-background border-r border-border/15 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto transition-all duration-200 ${
+            sidebarCollapsed ? "w-[52px]" : "w-52 lg:w-60 xl:w-64"
+          }`}>
+            <SidebarContent collapsed={sidebarCollapsed} />
+            {/* Collapse toggle */}
+            <div className={`shrink-0 border-t border-border/10 ${sidebarCollapsed ? "p-1.5" : "px-2.5 py-1.5"}`}>
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                title={sidebarCollapsed ? "Expandir menu" : "Encolher menu"}
+                className="w-full flex items-center justify-center gap-2 px-2 py-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 text-[11px]"
+              >
+                {sidebarCollapsed
+                  ? <PanelLeftOpen className="w-4 h-4 shrink-0" />
+                  : <><PanelLeftClose className="w-4 h-4 shrink-0" /><span>Encolher</span></>
+                }
+              </button>
+            </div>
           </aside>
         )}
         <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-24 md:pb-10 scroll-smooth">
