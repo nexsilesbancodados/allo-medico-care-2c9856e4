@@ -136,7 +136,7 @@ export default defineConfig(({ mode }) => ({
     dedupe: ["react", "react-dom", "react/jsx-runtime"],
   },
   build: {
-    target: "es2018",
+    target: "es2015",
     cssTarget: "safari13",
     chunkSizeWarningLimit: 600,
     minify: "esbuild",
