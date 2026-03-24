@@ -29,8 +29,12 @@ interface OnboardingStep {
 
 const steps: OnboardingStep[] = [
   {
-    id: "profile", label: "Completar perfil", description: "Bio, foto e experiência",
-    icon: User, path: "/dashboard/profile", check: (d) => !!d.docProfile?.bio && d.docProfile.bio.length > 10, estimatedMin: 3,
+    id: "photo", label: "Adicionar foto profissional", description: "Foto que pacientes verão ao buscar médicos",
+    icon: User, path: "/dashboard/profile", check: (d) => !!d.avatarUrl, estimatedMin: 1,
+  },
+  {
+    id: "profile", label: "Completar perfil", description: "Bio, experiência e formação",
+    icon: Stethoscope, path: "/dashboard/profile", check: (d) => !!d.docProfile?.bio && d.docProfile.bio.length > 10, estimatedMin: 3,
   },
   {
     id: "specialties", label: "Adicionar especialidades", description: "Selecione suas áreas de atuação",
@@ -86,15 +90,17 @@ const DoctorOnboarding = () => {
       const { data: kycData } = await supabase.from("doctor_profiles").select("kyc_status" as any).eq("id", docProfile.id).single();
       if (kycData) docProfile.kyc_status = (kycData as any).kyc_status;
 
-      const [specRes, slotRes] = await Promise.all([
+      const [specRes, slotRes, profileRes] = await Promise.all([
         supabase.from("doctor_specialties").select("id", { count: "exact", head: true }).eq("doctor_id", docProfile.id),
         supabase.from("availability_slots").select("id", { count: "exact", head: true }).eq("doctor_id", docProfile.id),
+        supabase.from("profiles").select("avatar_url").eq("user_id", user.id).single(),
       ]);
 
       setData({
         docProfile,
         specialtyCount: specRes.count ?? 0,
         slotCount: slotRes.count ?? 0,
+        avatarUrl: profileRes.data?.avatar_url ?? null,
         cameraChecked: localStorage.getItem(CAMERA_CHECK_KEY) === "true",
       });
     };

@@ -11,7 +11,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail, Lock, Stethoscope, KeyRound, Check, MessageCircle, LogIn, Eye, EyeOff,
   Shield, Star, Sparkles, Award, Video, FileText, Users, ChevronRight, ArrowRight,
-  Calendar, DollarSign, BarChart3, Globe, Zap, HelpCircle, CheckCircle2, Smartphone
+  Calendar, DollarSign, BarChart3, Globe, Zap, HelpCircle, CheckCircle2, Smartphone,
+  Camera, Upload, ImagePlus
 } from "lucide-react";
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
@@ -119,6 +120,9 @@ const AuthMedico = () => {
   const [experienceYears, setExperienceYears] = useState("");
   const [consultationType, setConsultationType] = useState("");
   const [howFound, setHowFound] = useState("");
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const navigate = useNavigate();
   
   const formRef = useRef<HTMLDivElement>(null);
@@ -207,9 +211,20 @@ const AuthMedico = () => {
     }
   };
 
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Arquivo muito grande", { description: "Máximo 5 MB" }); return; }
+    setPhotoFile(file);
+    const reader = new FileReader();
+    reader.onload = (ev) => setPhotoPreview(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!termsAccepted) { toast.error("Aceite os termos"); return; }
+    if (!photoFile) { toast.error("Foto obrigatória", { description: "Adicione uma foto profissional para seu perfil público." }); return; }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({
       email, password,
@@ -217,6 +232,15 @@ const AuthMedico = () => {
     });
     if (error) { setLoading(false); toast.error("Erro no cadastro", { description: translateAuthError(error.message) }); return; }
     if (data.user) {
+      // Upload photo
+      const ext = photoFile.name.split(".").pop() || "jpg";
+      const path = `${data.user.id}/avatar.${ext}`;
+      const { error: uploadErr } = await supabase.storage.from("avatars").upload(path, photoFile, { upsert: true });
+      if (!uploadErr) {
+        const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+        await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", data.user.id);
+      }
+
       await supabase.functions.invoke("assign-role", { body: { user_id: data.user.id, role: "doctor", profile_data: { crm, crm_state: crmState, invite_code_id: validatedCodeId } } });
       await registerConsent(data.user.id, "terms_and_privacy_doctor");
       supabase.functions.invoke("send-email", { body: { type: "welcome_doctor", to: email, data: { name: `${firstName} ${lastName}`, crm: `${crm}/${crmState}` } } }).catch(() => {});
@@ -494,6 +518,43 @@ const AuthMedico = () => {
                     {crm && crmState.length === 2 && (
                       <Button type="button" variant="outline" size="sm" className="w-full text-primary border-primary/30 hover:bg-primary/10" onClick={() => window.open(`https://portal.cfm.org.br/busca-medicos/?crm=${encodeURIComponent(crm)}&uf=${encodeURIComponent(crmState)}`, "_blank")}>🔍 Validar CRM no Portal CFM</Button>
                     )}
+
+                    {/* Photo upload / capture */}
+                    <div>
+                      <Label className="flex items-center gap-1.5">
+                        <Camera className="w-4 h-4 text-primary" /> Foto Profissional *
+                      </Label>
+                      <p className="text-[11px] text-muted-foreground mt-0.5 mb-2">
+                        Esta foto será visível para os pacientes ao buscar médicos.
+                      </p>
+                      {photoPreview ? (
+                        <div className="flex items-center gap-4">
+                          <div className="w-20 h-20 rounded-2xl overflow-hidden ring-2 ring-primary/20 shrink-0">
+                            <img src={photoPreview} alt="Prévia" className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1 space-y-2">
+                            <p className="text-xs text-muted-foreground">Foto selecionada ✓</p>
+                            <Button type="button" variant="outline" size="sm" className="text-xs" onClick={() => { setPhotoFile(null); setPhotoPreview(null); }}>
+                              Trocar foto
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-2 gap-2">
+                          <label className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-dashed border-primary/20 hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all text-center">
+                            <Camera className="w-6 h-6 text-primary" />
+                            <span className="text-xs font-medium text-foreground">Tirar foto</span>
+                            <input type="file" accept="image/*" capture="user" className="hidden" onChange={handlePhotoSelect} />
+                          </label>
+                          <label className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-dashed border-border hover:border-primary/30 hover:bg-primary/5 cursor-pointer transition-all text-center">
+                            <Upload className="w-6 h-6 text-muted-foreground" />
+                            <span className="text-xs font-medium text-foreground">Enviar arquivo</span>
+                            <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden" onChange={handlePhotoSelect} />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+
                     <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
                     <Button type="submit" className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={loading || !termsAccepted}>
                       {loading ? <motion.span animate={{ opacity: [1, 0.5, 1] }} transition={{ repeat: Infinity, duration: 1.2 }} className="flex items-center gap-2"><Sparkles className="w-4 h-4 animate-spin" /> Criando conta...</motion.span> : "Cadastrar como Médico"}
