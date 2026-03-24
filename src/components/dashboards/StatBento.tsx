@@ -8,7 +8,7 @@ export interface BentoItem {
   icon: string;
   iconBg: string;
   valueClass: string;
-  accentClass: string;
+  accentClass?: string;
   trend?: number;
   sub?: string;
   wide?: boolean;
