@@ -237,7 +237,7 @@ const DoctorCalendar = () => {
       </div>
 
       {/* Time grid body */}
-      <div ref={gridRef} className="overflow-y-auto max-h-[600px]">
+      <div ref={gridRef} className="overflow-y-auto max-h-[50vh] sm:max-h-[600px]">
         <div className="grid grid-cols-[56px_repeat(7,1fr)] relative" style={{ height: `${HOURS.length * HOUR_HEIGHT}px` }}>
           {/* Hour labels */}
           <div className="relative">
