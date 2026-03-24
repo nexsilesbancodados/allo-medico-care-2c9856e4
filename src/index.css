@@ -730,18 +730,23 @@
 
 /* ─── Mobile — App Feel ──────────────────────────────────────────────── */
 @media (max-width: 767px) {
-  * { -webkit-overflow-scrolling: touch; }
+  html, body, #root {
+    min-height: 100%;
+    overflow-x: clip;
+  }
 
-  /* iOS tap feedback */
+  body {
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+    touch-action: pan-y;
+  }
+
   a, button { -webkit-tap-highlight-color: transparent; }
 
-  /* Scroll containers */
   .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
   .scrollbar-none::-webkit-scrollbar { display: none; }
-
-  /* Prevent pull-to-refresh on dashboard */
-  body { overscroll-behavior-y: contain; }
 }
+
 
 /* ─── Gradient Text ──────────────────────────────────────────────────── */
 .text-gradient-brand {
