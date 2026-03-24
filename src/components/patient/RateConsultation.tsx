@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Star, ThumbsUp, ThumbsDown, Stethoscope, Clock, Clock as VideoIcon, MessageSquare } from "lucide-react";
+import { Star, ThumbsUp, ThumbsDown, Stethoscope, Clock, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -197,7 +197,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
                 <StarRow label="Qualidade" value={quality} onChange={setQuality} icon={Stethoscope} />
                 <StarRow label="Facilidade" value={ease} onChange={setEase} icon={MessageSquare} />
                 <StarRow label="Pontualidade" value={punctuality} onChange={setPunctuality} icon={Clock} />
-                <StarRow label="Videochamada" value={videoQuality} onChange={setVideoQuality} icon={VideoIcon} />
+                <StarRow label="Videochamada" value={videoQuality} onChange={setVideoQuality} icon={Clock} />
               </div>
 
               <Button
