@@ -275,7 +275,7 @@ const CfmPrescription = ({
               </Badge>
             </div>
             <Button variant="ghost"
-              size="icon"
+              size="icon" aria-label="Fechar"
               onClick={handleCloseIframe}
               className="h-8 w-8" aria-label="Fechar"
             >

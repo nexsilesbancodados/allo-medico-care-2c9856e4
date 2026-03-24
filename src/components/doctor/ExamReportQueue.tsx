@@ -766,7 +766,7 @@ const ExamReportQueue = () => {
                                   {claimingId === exam.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileEdit className="w-4 h-4" />}
                                 </Button>
                               )}
-                              <Button size="icon" variant="ghost" className="h-8 w-8" title="Download">
+                              <Button size="icon" aria-label="Baixar" variant="ghost" className="h-8 w-8" title="Download">
                                 <Download className="w-4 h-4" />
                               </Button>
                             </div>

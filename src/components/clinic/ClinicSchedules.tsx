@@ -106,14 +106,14 @@ const ClinicSchedules = () => {
 
         {/* Date navigation */}
         <motion.div variants={fadeUp} className="flex items-center gap-3">
-          <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl" onClick={() => setSelectedDate(d => subDays(d, 1))}>
+          <Button variant="outline" size="icon" aria-label="Anterior" className="h-9 w-9 rounded-xl" onClick={() => setSelectedDate(d => subDays(d, 1))}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <div className="text-center min-w-[140px]">
             <p className="text-sm font-semibold text-foreground">{dateLabel}</p>
             <p className="text-xs text-muted-foreground">{format(selectedDate, "EEEE", { locale: ptBR })}</p>
           </div>
-          <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl" onClick={() => setSelectedDate(d => addDays(d, 1))}>
+          <Button variant="outline" size="icon" aria-label="Próximo" className="h-9 w-9 rounded-xl" onClick={() => setSelectedDate(d => addDays(d, 1))}>
             <ChevronRight className="w-4 h-4" />
           </Button>
           {!isToday(selectedDate) && (

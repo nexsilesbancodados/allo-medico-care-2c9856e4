@@ -128,7 +128,7 @@ export function HeroBanner({
             <div className="flex gap-1.5">
               {topRight}
               {onRefresh && (
-                <Button size="icon" variant="ghost" onClick={onRefresh} disabled={refreshing}
+                <Button size="icon" aria-label="Atualizar" variant="ghost" onClick={onRefresh} disabled={refreshing}
                   className="h-8 w-8 rounded-xl border border-white/20 text-white/60 hover:bg-white/15 hover:text-white">
                   <RefreshCw className={cn("h-3.5 w-3.5", refreshing && "animate-spin")} />
                 </Button>

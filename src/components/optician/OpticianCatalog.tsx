@@ -144,8 +144,8 @@ const OpticianCatalog = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">
-                        <Button variant="ghost" size="icon" onClick={() => openEdit(f)}><Edit className="w-4 h-4" /></Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteMutation.mutate(f.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                        <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(f)}><Edit className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="icon" aria-label="Excluir" onClick={() => deleteMutation.mutate(f.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>

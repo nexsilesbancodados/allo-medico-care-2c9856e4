@@ -653,7 +653,7 @@ const PacsViewer = ({
         <TooltipProvider delayDuration={200}>
           <div className="flex items-center gap-0.5 mr-1">
             <Tooltip><TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+              <Button size="icon" aria-label="Anterior" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
                 onClick={() => setActiveIndex(i => Math.max(0, i - 1))} disabled={activeIndex === 0}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
@@ -662,7 +662,7 @@ const PacsViewer = ({
               {fileUrls.length > 0 ? `${activeIndex + 1}/${fileUrls.length}` : "—"}
             </span>
             <Tooltip><TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+              <Button size="icon" aria-label="Próximo" variant="ghost" className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
                 onClick={() => setActiveIndex(i => Math.min(fileUrls.length - 1, i + 1))} disabled={activeIndex >= fileUrls.length - 1}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
@@ -684,14 +684,14 @@ const PacsViewer = ({
           <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+            <Button size="icon" aria-label="Ampliar" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => setZoom(z => Math.min(z + 0.25, 8))}>
               <ZoomIn className="w-3.5 h-3.5" />
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Zoom +</TooltipContent></Tooltip>
           <span className="text-[9px] text-white/40 min-w-[28px] text-center font-mono">{Math.round(zoom * 100)}%</span>
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+            <Button size="icon" aria-label="Reduzir" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => setZoom(z => Math.max(z - 0.25, 0.1))}>
               <ZoomOut className="w-3.5 h-3.5" />
             </Button>
@@ -733,7 +733,7 @@ const PacsViewer = ({
           <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+            <Button size="icon" aria-label="Rotacionar" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => setRotation(r => (r + 90) % 360)}>
               <RotateCw className="w-3.5 h-3.5" />
             </Button>
@@ -782,7 +782,7 @@ const PacsViewer = ({
           )}
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+            <Button size="icon" aria-label="Rotacionar" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={resetView}>
               <RotateCcw className="w-3.5 h-3.5" />
             </Button>
@@ -806,7 +806,7 @@ const PacsViewer = ({
           </TooltipTrigger><TooltipContent side="bottom">Thumbnails</TooltipContent></Tooltip>
           {/* Toggle overlays */}
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className={`h-7 w-7 ${showOverlays ? "bg-amber-500/20 text-amber-400" : "text-white/60 hover:text-white hover:bg-white/10"}`}
+            <Button size="icon" aria-label="Visualizar" variant="ghost" className={`h-7 w-7 ${showOverlays ? "bg-amber-500/20 text-amber-400" : "text-white/60 hover:text-white hover:bg-white/10"}`}
               onClick={() => setShowOverlays(p => !p)}>
               <Eye className="w-3.5 h-3.5" />
             </Button>
@@ -815,7 +815,7 @@ const PacsViewer = ({
           <Separator orientation="vertical" className="h-5 bg-white/10 mx-0.5" />
 
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+            <Button size="icon" aria-label="Baixar" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={handleDownloadImage}><Download className="w-3.5 h-3.5" /></Button>
           </TooltipTrigger><TooltipContent side="bottom">Baixar</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
@@ -831,7 +831,7 @@ const PacsViewer = ({
             </Button>
           </TooltipTrigger><TooltipContent side="bottom">Info DICOM</TooltipContent></Tooltip>
           <Tooltip><TooltipTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
+            <Button size="icon" aria-label="Tela cheia" variant="ghost" className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10"
               onClick={() => containerRef.current?.requestFullscreen?.()}>
               <Maximize2 className="w-3.5 h-3.5" />
             </Button>
@@ -979,12 +979,12 @@ const PacsViewer = ({
               <img src={fileUrls[dualIndex] || ""} alt="Imagem do exame" className="w-full h-full object-contain"
                 style={{ filter: `brightness(${brightness}%) contrast(${contrast}%) ${invert ? "invert(1)" : ""}` }} />
               <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1">
-                <Button size="icon" variant="ghost" className="h-5 w-5 text-white/50"
+                <Button size="icon" aria-label="Anterior" variant="ghost" className="h-5 w-5 text-white/50"
                   onClick={() => setDualIndex(i => Math.max(0, i - 1))} disabled={dualIndex === 0}>
                   <ChevronLeft className="w-3 h-3" />
                 </Button>
                 <span className="text-[9px] text-white/40 font-mono">{dualIndex + 1}/{fileUrls.length}</span>
-                <Button size="icon" variant="ghost" className="h-5 w-5 text-white/50"
+                <Button size="icon" aria-label="Próximo" variant="ghost" className="h-5 w-5 text-white/50"
                   onClick={() => setDualIndex(i => Math.min(fileUrls.length - 1, i + 1))} disabled={dualIndex >= fileUrls.length - 1}>
                   <ChevronRight className="w-3 h-3" />
                 </Button>
@@ -1953,7 +1953,7 @@ const ExamReportEditor = () => {
           {/* Orientation toggle */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-7 w-7 hover:bg-white/5" onClick={togglePanelDirection}>
+              <Button size="icon" aria-label="Sistema" variant="ghost" className="h-7 w-7 hover:bg-white/5" onClick={togglePanelDirection}>
                 {panelDirection === "horizontal" ? <Grid3X3 className="w-3.5 h-3.5" /> : <Monitor className="w-3.5 h-3.5" />}
               </Button>
             </TooltipTrigger>

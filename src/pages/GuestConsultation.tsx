@@ -428,7 +428,7 @@ const GuestConsultation = () => {
                 placeholder="Mensagem..."
                 className="flex-1 bg-[hsl(220,20%,10%)] border border-[hsl(220,15%,18%)] rounded-xl px-3 py-2 text-sm text-[hsl(220,20%,95%)] placeholder:text-[hsl(220,15%,30%)] outline-none focus:border-primary transition-colors"
               />
-              <Button size="icon" variant="ghost" onClick={sendMessage} className="shrink-0">
+              <Button size="icon" aria-label="Enviar" variant="ghost" onClick={sendMessage} className="shrink-0">
                 <Send className="w-4 h-4 text-primary" />
               </Button>
             </div>
