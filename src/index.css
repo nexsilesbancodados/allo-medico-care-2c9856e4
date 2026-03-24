@@ -206,6 +206,11 @@
     height: auto;
   }
 
+  /* Prevent horizontal overflow without creating a scroll container */
+  #root {
+    overflow-x: clip;
+  }
+
   /* Keep tables responsive without forcing all tables to become block elements */
   table {
     max-width: 100%;
