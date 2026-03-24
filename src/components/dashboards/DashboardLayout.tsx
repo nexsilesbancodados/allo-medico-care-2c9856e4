@@ -371,7 +371,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         {/* Mobile: gradient header */}
-        <div className="md:hidden w-full bg-gradient-to-r from-[hsl(var(--primary))] to-[hsl(195,85%,50%)] px-4 py-3 flex items-center gap-3">
+        <div className={`md:hidden w-full ${ROLE_HEADER_GRADIENT[role] ?? ROLE_HEADER_GRADIENT.patient} px-4 py-3 flex items-center gap-3`}>
           {nav && nav.length > 0 && (
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger asChild>
