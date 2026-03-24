@@ -283,7 +283,7 @@ const SupportInbox = () => {
 
   if (loading) {
     return (
-      <Card className="border-border h-[600px] flex items-center justify-center">
+      <Card className="border-border h-[60vh] min-h-[400px] max-h-[700px] flex items-center justify-center">
         <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
       </Card>
     );
