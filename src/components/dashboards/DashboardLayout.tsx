@@ -488,8 +488,23 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {/* Body */}
       <div className="flex flex-1 min-h-0">
         {nav && nav.length > 0 && (
-          <aside className="hidden md:flex w-52 lg:w-60 xl:w-64 shrink-0 flex-col bg-background border-r border-border/15 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
-            <SidebarContent />
+          <aside className={`hidden md:flex shrink-0 flex-col bg-background border-r border-border/15 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto transition-all duration-200 ${
+            sidebarCollapsed ? "w-[52px]" : "w-52 lg:w-60 xl:w-64"
+          }`}>
+            <SidebarContent collapsed={sidebarCollapsed} />
+            {/* Collapse toggle */}
+            <div className={`shrink-0 border-t border-border/10 ${sidebarCollapsed ? "p-1.5" : "px-2.5 py-1.5"}`}>
+              <button
+                onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+                title={sidebarCollapsed ? "Expandir menu" : "Encolher menu"}
+                className="w-full flex items-center justify-center gap-2 px-2 py-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 text-[11px]"
+              >
+                {sidebarCollapsed
+                  ? <PanelLeftOpen className="w-4 h-4 shrink-0" />
+                  : <><PanelLeftClose className="w-4 h-4 shrink-0" /><span>Encolher</span></>
+                }
+              </button>
+            </div>
           </aside>
         )}
         <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-24 md:pb-10 scroll-smooth">
