@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, User, Settings, MoreHorizontal, Search, Menu, ShieldCheck, ChevronDown, Download, X, Smartphone } from "lucide-react";
+import { LogOut, User, Settings, MoreHorizontal, Search, Menu, ShieldCheck, ChevronDown, Download, X, Smartphone, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
 import GlobalCommand from "@/components/GlobalCommand";
