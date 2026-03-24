@@ -51,7 +51,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
   }, []);
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-x-hidden">
       {/* Fixed subtle gradient background */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(195,100%,95%)] via-[hsl(200,85%,88%)] to-[hsl(210,90%,72%)] dark:from-[hsl(210,40%,10%)] dark:via-[hsl(200,35%,14%)] dark:to-[hsl(195,30%,12%)]" />
       <SEOHead
@@ -249,7 +249,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         <FAQSection />
 
         <section aria-labelledby="triage-heading" className="py-16 px-4">
-          <div className="max-w-[1800px] mx-auto max-w-2xl text-center space-y-5">
+          <div className="max-w-2xl mx-auto text-center space-y-5">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
               <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
             </div>
