@@ -86,11 +86,6 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
     document.body.appendChild(a);
 
     a.click();
-
-    document.body.removeChild(a);
-
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("Conversa exportada!");
@@ -254,13 +249,13 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
                       </div>
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <Button variant="ghost" size="icon" aria-label="Baixar"
+                      <Button variant="ghost" size="icon"
                         className="h-8 w-8 text-muted-foreground"
                         aria-label="Exportar" onClick={(ev) => { ev.stopPropagation(); exportConversation(conv); }}
                       >
                         <Download className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" aria-label="Excluir"
+                      <Button variant="ghost" size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                         aria-label="Excluir" onClick={(ev) => { ev.stopPropagation(); deleteConversation(conv.id); }}
                       >

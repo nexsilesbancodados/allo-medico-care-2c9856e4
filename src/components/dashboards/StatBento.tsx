@@ -8,7 +8,7 @@ export interface BentoItem {
   icon: string;
   iconBg: string;
   valueClass: string;
-  accentClass: string;
+  accentClass?: string;
   trend?: number;
   sub?: string;
   wide?: boolean;
@@ -18,7 +18,7 @@ export interface BentoItem {
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 const item = {
   hidden: { opacity: 0, y: 14 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] as unknown as number[] } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.38, ease: [0.22, 1, 0.36, 1] as [number, number, number, number] } },
 };
 
 export function StatBento({ stats, loading = false }: { stats: BentoItem[]; loading?: boolean }) {

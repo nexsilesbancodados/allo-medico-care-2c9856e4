@@ -1,4 +1,7 @@
 import { useState, useEffect } from "react";
+import mascotWave from "@/assets/mascot-wave.png";
+import mascotThumbsup from "@/assets/mascot-thumbsup.png";
+import mascotReading from "@/assets/mascot-reading.png";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
