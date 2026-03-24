@@ -1,6 +1,6 @@
 import { useState, useEffect, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/mascot.png";
 
 const SplashScreen = memo(({ onFinish }: { onFinish: () => void }) => {
   const [visible, setVisible] = useState(true);
