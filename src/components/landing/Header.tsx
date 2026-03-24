@@ -89,15 +89,11 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
     <header
       ref={ref}
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-[background-color,box-shadow] duration-300",
+        "fixed top-0 left-0 right-0 z-50 border-b transition-[background-color,box-shadow,border-color] duration-200",
         scrolled
-          ? "bg-background/95 shadow-sm shadow-foreground/[0.03] border-b border-border/40"
-          : "bg-background/70"
+          ? "bg-background shadow-sm shadow-foreground/[0.03] border-border/40"
+          : "bg-background/92 border-transparent"
       )}
-      style={{
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-      }}
     >
       <div className="max-w-[1800px] mx-auto flex items-center justify-between h-14 lg:h-[60px] px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
