@@ -214,7 +214,7 @@ const KYCVerification = ({ doctorProfileId, userName, userCRM, onComplete }: {
 
   useEffect(() => {
     return () => {
-      if (blinkFrameRef.current) cancelAnimationFrame(blinkFrameRef.current);
+      if (blinkFrameRef.current) clearTimeout(blinkFrameRef.current);
     };
   }, []);
 
