@@ -78,7 +78,7 @@ const DoctorOnboarding = () => {
     if (!user) return;
     const fetchData = async () => {
       const [docRes] = await Promise.all([
-        supabase.from("doctor_profiles").select("id, bio, consultation_price, is_approved, crm_verified").eq("user_id", user.id).single(),
+        supabase.from("doctor_profiles").select("id, bio, consultation_price, is_approved, crm_verified, crm, kyc_status" as any).eq("user_id", user.id).single(),
       ]);
 
       const docProfile = docRes.data;
