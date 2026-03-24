@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Cookie } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
 import InstitutionalHero from "@/components/landing/InstitutionalHero";

@@ -6,21 +6,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { Calendar as CalendarIcon, Clock, FileText, Video, Search, Download, Filter, ArrowLeft, ChevronRight, MoreHorizontal, CreditCard } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, FileText, Video, Search, Download, Filter, ArrowLeft, MoreHorizontal, CreditCard } from "lucide-react";
 import { format, isWithinInterval, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getPatientNav } from "./patientNav";
 import { cn } from "@/lib/utils";
 import jsPDF from "jspdf";
 import CancelRescheduleDialog from "./CancelRescheduleDialog";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
 interface Appointment {

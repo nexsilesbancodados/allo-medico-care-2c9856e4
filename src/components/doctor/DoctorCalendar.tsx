@@ -4,12 +4,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "./doctorNav";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { ChevronLeft, ChevronRight, Video, UserCheck, UserPlus, AlertTriangle, Clock, FileText, Users, CalendarDays } from "lucide-react";
+import { ChevronLeft, ChevronRight, Video, UserCheck, UserPlus, AlertTriangle, Clock, FileText, CalendarDays } from "lucide-react";
 import {
   format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays,
   addWeeks, addMonths, subDays, subWeeks, subMonths, isSameDay,

@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Video, FileText, Pill, Upload, ArrowLeft, Activity, Heart, Smile, TrendingUp, Filter, Download } from "lucide-react";
+import { Video, FileText, Pill, Upload, ArrowLeft, Activity, Smile, TrendingUp, Filter, Download } from "lucide-react";
 import { getPatientNav } from "./patientNav";
 import { motion, AnimatePresence } from "framer-motion";
 import jsPDF from "jspdf";

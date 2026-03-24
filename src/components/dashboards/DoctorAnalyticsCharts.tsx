@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ComposedChart, Line, PieChart, Pie, Cell, RadialBarChart, RadialBar } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, ComposedChart, Line, PieChart, Pie, Cell } from "recharts";
 import { format, subDays, startOfDay, getDay, getHours, subMonths, startOfMonth } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import type { ChartDataPoint } from "@/types/domain";

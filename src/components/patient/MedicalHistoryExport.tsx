@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Download, Loader2, FileText } from "lucide-react";
+import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const MedicalHistoryExport = () => {

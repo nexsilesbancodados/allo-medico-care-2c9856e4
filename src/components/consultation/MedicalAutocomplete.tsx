@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback } from "react";
-import { useDebounce } from "@/hooks/use-debounce";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";

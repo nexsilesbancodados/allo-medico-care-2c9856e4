@@ -5,9 +5,8 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Clock, User, Stethoscope, Timer, Sparkles } from "lucide-react";
+import { Clock, Stethoscope, Timer, Sparkles } from "lucide-react";
 import { format, differenceInMinutes } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { motion } from "framer-motion";
 import { getClinicNav } from "./clinicNav";
 

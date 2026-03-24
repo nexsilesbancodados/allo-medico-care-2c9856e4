@@ -7,11 +7,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Phone, Clock, UserCheck, Zap, Users } from "lucide-react";
+import { Clock, UserCheck, Zap, Users } from "lucide-react";
 import { toast } from "sonner";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-
 const DoctorOnDutyPanel = () => {
   const { user } = useAuth();
   const [queue, setQueue] = useState<any[]>([]);

@@ -1,4 +1,3 @@
-import { Link } from "react-router-dom";
 import { Shield, Lock, Eye, FileCheck, UserCheck, Database } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import SEOHead from "@/components/SEOHead";

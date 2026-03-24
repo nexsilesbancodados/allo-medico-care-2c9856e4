@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "./doctorNav";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Loader2, Shield, Star, Stethoscope, Phone, Mail, Award, QrCode, Copy, CheckCircle2, MapPin, GraduationCap, Heart, Sparkles } from "lucide-react";
+import { Loader2, Shield, Star, Stethoscope, Phone, Mail, Award, QrCode, Copy, CheckCircle2, GraduationCap, Heart, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";

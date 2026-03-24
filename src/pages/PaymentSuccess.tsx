@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { CheckCircle, Calendar, ArrowRight, Home, Loader2, PartyPopper, Shield, Sparkles } from "lucide-react";
+import { CheckCircle, Calendar, ArrowRight, Home, Loader2, Shield, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SEOHead from "@/components/SEOHead";

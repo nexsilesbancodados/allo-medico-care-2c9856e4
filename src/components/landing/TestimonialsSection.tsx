@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState, useCallback } from "react";
+import { forwardRef, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ShieldCheck, Heart, Quote, X } from "lucide-react";
 import avatarMaria from "@/assets/avatar-maria.png";

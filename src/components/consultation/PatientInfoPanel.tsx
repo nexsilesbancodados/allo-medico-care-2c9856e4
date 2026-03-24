@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Badge } from "@/components/ui/badge";
 import {
   User, Heart, AlertTriangle, Droplets, FileText, Stethoscope,
   ChevronDown, ChevronUp, Clock, Pill, Activity, Calendar,

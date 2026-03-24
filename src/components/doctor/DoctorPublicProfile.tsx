@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star, MapPin, GraduationCap, Clock, Calendar, ArrowLeft, Video, Award } from "lucide-react";
+import { Star, GraduationCap, Clock, Calendar, ArrowLeft, Award } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface DoctorPublicData {

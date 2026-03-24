@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart, ChevronRight, MapPin, Clock } from "lucide-react";
+import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart, ChevronRight, Clock } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
