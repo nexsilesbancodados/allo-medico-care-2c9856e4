@@ -201,7 +201,7 @@ const ClinicDashboard = () => {
       </div>
 
       {/* ── CONTENT ── */}
-      <div className="mt-4 space-y-4">
+      <div className="mt-4 space-y-4 pb-24 md:pb-8">
 
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
