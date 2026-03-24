@@ -449,9 +449,9 @@ const UrgentCareQueue = () => {
                   ))}
                 </div>
 
-                <Button onClick={handleStartPayment} disabled={joining} className="w-full h-12 text-base" size="lg">
-                  <Zap className="w-5 h-5 mr-2" />
-                  Entrar na Fila — Atendimento Imediato
+                <Button onClick={handleStartPayment} disabled={joining} className="w-full h-12 text-sm sm:text-base" size="lg">
+                  <Zap className="w-5 h-5 mr-2 shrink-0" />
+                  <span className="truncate">Entrar na Fila — Atendimento Imediato</span>
                 </Button>
                 <p className="text-xs text-muted-foreground text-center mt-3">
                   SLA de 15 minutos • Reembolso automático se exceder

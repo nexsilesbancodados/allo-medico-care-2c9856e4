@@ -102,7 +102,7 @@ const ClinicWaitingRoom = () => {
         </motion.div>
 
         {/* KPIs */}
-        <motion.div variants={fadeUp} className="grid grid-cols-3 gap-3">
+        <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {[
             { label: "Aguardando", value: waiting.length, color: "text-primary", bg: "bg-primary/10", icon: Clock },
             { label: "Atrasados", value: waiting.filter(w => differenceInMinutes(new Date(w.scheduled_at), now) < 0).length, color: "text-destructive", bg: "bg-destructive/10", icon: Timer },

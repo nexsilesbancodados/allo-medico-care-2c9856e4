@@ -215,7 +215,7 @@ const PatientHealth = () => {
         </motion.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
           {loading ? (
             [0,1,2,3].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)
           ) : (

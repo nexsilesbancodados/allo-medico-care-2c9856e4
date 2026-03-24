@@ -42,7 +42,7 @@ const ReceptionMessages = () => {
           <p className="text-muted-foreground text-sm">Comunicação com pacientes via chat interno</p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[600px]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[60vh] min-h-[400px] max-h-[700px]">
           {/* Conversations List */}
           <Card className="lg:col-span-1">
             <CardHeader className="pb-3">
@@ -57,7 +57,7 @@ const ReceptionMessages = () => {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[500px]">
+              <ScrollArea className="h-[40vh] sm:h-[500px]">
                 {filtered.map(conv => (
                   <div key={conv.id}>
                     <button

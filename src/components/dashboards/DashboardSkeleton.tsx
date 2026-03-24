@@ -108,7 +108,7 @@ const DashboardSkeleton = () => (
 
       <motion.div variants={item} className="space-y-4">
         {/* Metrics 3x2 */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
           {[0,1,2,3,4,5].map(i => (
             <div key={i} className="rounded-2xl border border-border/20 bg-card p-3 space-y-1.5 text-center">
               <Bone className="h-5 w-5 mx-auto rounded-lg" />
