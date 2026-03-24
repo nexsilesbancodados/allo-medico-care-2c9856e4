@@ -409,6 +409,7 @@ const Dashboard = () => {
       <Route path="admin/panel-center" element={<RoleGuard allowed={[]} roles={roles}><PanelCenter /></RoleGuard>} />
       <Route path="admin/financial" element={<RoleGuard allowed={[]} roles={roles}><AdminFinancial /></RoleGuard>} />
       <Route path="admin/coupons" element={<RoleGuard allowed={[]} roles={roles}><AdminCoupons /></RoleGuard>} />
+      <Route path="admin/pacs" element={<RoleGuard allowed={[]} roles={roles}><AdminPACSConfig /></RoleGuard>} />
 
       {/* Optician */}
       <Route path="optician" element={<RoleGuard allowed={["optician"]} roles={roles}><ContextGuard panel="optician" forceRole={forceRole} roles={roles}><OpticianDashboard /></ContextGuard></RoleGuard>} />
