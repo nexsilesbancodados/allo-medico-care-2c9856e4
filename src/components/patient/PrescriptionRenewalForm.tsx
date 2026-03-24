@@ -204,7 +204,7 @@ const PrescriptionRenewalForm = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("renewal")}>
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto pb-24 md:pb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">💊 Renovar Receita</h1>
         <p className="text-muted-foreground text-sm mb-6">Renove sua receita sem precisar de videoconsulta</p>
 

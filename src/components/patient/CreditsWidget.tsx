@@ -88,7 +88,7 @@ const CreditsWidget = () => {
               <span className="font-medium">{level.name}</span>
               <span className="font-medium">{nextLevel.name} ({nextLevel.min} pts)</span>
             </div>
-            <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
+            <div className="w-full h-2 rounded-full bg-muted overflow-hidden pb-24 md:pb-6">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progress}%` }}

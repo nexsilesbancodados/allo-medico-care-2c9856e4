@@ -66,7 +66,7 @@ const RateDoctor = ({ doctorId, appointmentId, doctorName }: RateDoctorProps) =>
         <DialogHeader>
           <DialogTitle>Avaliar {doctorName}</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4 pt-2">
+        <div className="space-y-4 pt-2 pb-24 md:pb-6">
           <div>
             <Label>Nota</Label>
             <div className="flex gap-1 mt-2">

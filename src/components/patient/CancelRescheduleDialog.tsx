@@ -190,7 +190,7 @@ const CancelRescheduleDialog = ({ appointmentId, doctorId, currentDate, schedule
           </div>
         )}
 
-        <div className="space-y-4 pt-2">
+        <div className="space-y-4 pt-2 pb-24 md:pb-6">
           <div className="p-3 rounded-lg bg-muted/50 text-sm">
             <p className="font-medium text-foreground">{doctorName}</p>
             <p className="text-xs text-muted-foreground mt-0.5">{currentDate}</p>

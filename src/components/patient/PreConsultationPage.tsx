@@ -15,7 +15,7 @@ const PreConsultationPage = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
-      <div className="max-w-lg mx-auto">
+      <div className="max-w-lg mx-auto pb-24 md:pb-6">
         <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
           <ArrowLeft className="w-4 h-4" /> Voltar
         </button>

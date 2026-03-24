@@ -557,7 +557,7 @@ const ExamReportQueue = () => {
                   ({kanbanGroups[status]?.length || 0})
                 </span>
               </div>
-              <div className="space-y-2 min-h-[200px]">
+              <div className="space-y-2 min-h-[200px] pb-24 md:pb-6">
                 <AnimatePresence>
                   {(kanbanGroups[status] || []).map((exam: any) => (
                     <motion.div

@@ -189,7 +189,7 @@ const DoctorSearch = () => {
   };
 
   const FiltersContent = () => (
-    <div className="space-y-5 py-2">
+    <div className="space-y-5 py-2 pb-24 md:pb-6">
       {/* Price */}
       <div>
         <p className="text-sm font-medium text-foreground mb-3">

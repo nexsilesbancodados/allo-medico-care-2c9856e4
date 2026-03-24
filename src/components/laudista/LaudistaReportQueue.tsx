@@ -51,7 +51,7 @@ function SlaCountdown({ deadline, priority }: { deadline: string; priority: stri
     : formatDistanceToNow(deadlineDate, { addSuffix: false, locale: ptBR });
 
   return (
-    <div className="space-y-1 min-w-[120px]">
+    <div className="space-y-1 min-w-[120px] pb-24 md:pb-6">
       <div className="flex items-center gap-1">
         {isOverdue ? (
           <AlertTriangle className="w-3.5 h-3.5 text-destructive animate-pulse" />

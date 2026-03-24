@@ -49,7 +49,7 @@ const DoctorWallet = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("wallet")}>
-      <div className="max-w-lg mx-auto space-y-6">
+      <div className="max-w-lg mx-auto space-y-6 pb-24 md:pb-6">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-bold text-foreground flex items-center gap-2">
             <Award className="w-5 h-5 text-primary" />

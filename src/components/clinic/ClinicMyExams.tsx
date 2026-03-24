@@ -87,7 +87,7 @@ const ClinicMyExams = () => {
 
   return (
     <DashboardLayout nav={getClinicNav("my-exams")} title="Meus Laudos" role="clinic">
-      <div className="max-w-5xl mx-auto space-y-4">
+      <div className="max-w-5xl mx-auto space-y-4 pb-24 md:pb-6">
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">Exames Enviados</h1>
           <Button onClick={() => navigate("/dashboard/clinic/exam-request?role=clinic")} className="gap-2">

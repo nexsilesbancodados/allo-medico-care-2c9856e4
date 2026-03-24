@@ -243,7 +243,7 @@ const SimplePrescription = () => {
 
   return (
     <DashboardLayout nav={getDoctorNav("simple-prescription")} title="Receituário Digital">
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div className="max-w-2xl mx-auto space-y-6 pb-24 md:pb-6">
         {/* Header Card */}
         <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
           <CardHeader className="pb-3">

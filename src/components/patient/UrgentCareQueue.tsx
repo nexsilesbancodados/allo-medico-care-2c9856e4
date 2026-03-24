@@ -266,7 +266,7 @@ const UrgentCareQueue = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("urgent-care")}>
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto pb-24 md:pb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">🚨 Plantão 24h</h1>
         <p className="text-muted-foreground text-sm mb-6">Pronto-atendimento digital com clínico geral</p>
 

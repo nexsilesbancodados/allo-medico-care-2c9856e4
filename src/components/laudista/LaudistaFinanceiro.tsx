@@ -268,7 +268,7 @@ const LaudistaFinanceiro = () => {
 
           {/* ══════ ABA CARTEIRA ══════ */}
           <TabsContent value="carteira">
-            <div className="max-w-lg mx-auto space-y-4">
+            <div className="max-w-lg mx-auto space-y-4 pb-24 md:pb-6">
               <div className="flex justify-end">
                 <Button size="sm" variant="outline" className="text-xs gap-1.5" onClick={() => setFlipped(!flipped)}>
                   <Sparkles className="w-3.5 h-3.5" /> {flipped ? "Frente" : "Verso"}

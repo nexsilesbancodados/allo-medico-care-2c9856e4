@@ -228,7 +228,7 @@ const ExamRequestForm = () => {
 
   return (
     <DashboardLayout nav={getNav()} title="Solicitar Laudo" role={roleLabel}>
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto pb-24 md:pb-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">

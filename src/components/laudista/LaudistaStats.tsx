@@ -352,7 +352,7 @@ const LaudistaStats = () => {
                           <span className="text-xs font-bold text-muted-foreground w-5 text-right tabular-nums">{i + 1}.</span>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-foreground truncate">{item.name}</p>
-                            <div className="w-full h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
+                            <div className="w-full h-1.5 bg-muted rounded-full mt-1 overflow-hidden pb-24 md:pb-6">
                               <div
                                 className="h-full rounded-full transition-all"
                                 style={{
