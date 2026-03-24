@@ -96,6 +96,13 @@ const App = () => {
   }, []);
 
   useEffect(() => {
+    document.documentElement.setAttribute("data-app-mounted", "true");
+    document.body.setAttribute("data-app-mounted", "true");
+    document.getElementById("initial-loader")?.remove();
+    window.dispatchEvent(new CustomEvent("app:mounted"));
+  }, []);
+
+  useEffect(() => {
     const cancelCriticalPrefetch = prefetchOnIdle(
       [
         () => import("./pages/Auth"),
