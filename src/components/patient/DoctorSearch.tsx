@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart, ChevronRight, MapPin, Clock } from "lucide-react";
@@ -422,6 +422,9 @@ const DoctorSearch = () => {
                   <div className="flex items-start gap-3">
                     {/* Avatar — gradient */}
                     <Avatar className="w-14 h-14 rounded-2xl shrink-0">
+                      {doctor.profile?.avatar_url && (
+                        <AvatarImage src={doctor.profile.avatar_url} alt={`Dr(a). ${doctor.profile?.first_name}`} className="rounded-2xl object-cover" />
+                      )}
                       <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-secondary text-white font-bold text-base">
                         {doctor.profile?.first_name?.[0]}{doctor.profile?.last_name?.[0]}
                       </AvatarFallback>
