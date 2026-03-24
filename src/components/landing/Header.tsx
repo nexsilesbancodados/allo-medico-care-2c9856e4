@@ -1,4 +1,4 @@
-import { useState, memo, forwardRef } from "react";
+import { useState, memo, forwardRef, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Globe, Eye } from "lucide-react";
 import { motion, AnimatePresence, useMotionValueEvent, useScroll } from "framer-motion";
@@ -26,7 +26,7 @@ import pingoVirtualAssistant from "@/assets/pingo-virtual-assistant.png";
 import devicesMascot from "@/assets/devices-mascot.png";
 import pingoOftalmo from "@/assets/pingo-oftalmo.png";
 
-const ListItem = forwardRef<HTMLLIElement, React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType; imgSrc?: string; badge?: string }>(({
+const ListItem = forwardRef<HTMLLIElement, React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType; imgSrc?: string; badge?: string }>(({ 
   className,
   title,
   children,
@@ -81,10 +81,15 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
   const { t } = useTranslation();
   const { user, profile, signOut } = useAuth();
   const [scrolled, setScrolled] = useState(false);
+  const scrolledRef = useRef(false);
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, "change", (latest) => {
-    setScrolled(latest > 20);
+    const nextScrolled = latest > 20;
+    if (scrolledRef.current !== nextScrolled) {
+      scrolledRef.current = nextScrolled;
+      setScrolled(nextScrolled);
+    }
   });
 
   const mobileLinks = [
