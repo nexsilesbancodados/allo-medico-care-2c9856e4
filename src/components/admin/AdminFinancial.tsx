@@ -14,7 +14,7 @@ import {
   DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Download,
   CreditCard, Receipt, Clock, CheckCircle2, XCircle, RefreshCw
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart, Line, Area, AreaChart } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Area, AreaChart } from "recharts";
 
 const adminNav = getAdminNav("financial");
 

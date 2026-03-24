@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, QrCode, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Search, QrCode, Loader2, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";

@@ -12,7 +12,7 @@ import {
   ClipboardList, Users, BarChart3, MessageSquare, RefreshCw,
   Zap, Heart, Shield, Pill
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 
 type Msg = { role: "user" | "assistant"; content: string };

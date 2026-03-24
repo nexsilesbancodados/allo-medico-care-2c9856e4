@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Stethoscope, AlertTriangle, ArrowRight, RotateCcw, Loader2, ThermometerSun, Clock, MapPin, Copy, Check, Plus, X } from "lucide-react";
+import { Stethoscope, AlertTriangle, ArrowRight, RotateCcw, Loader2, ThermometerSun, Clock, MapPin, Copy, Check, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
