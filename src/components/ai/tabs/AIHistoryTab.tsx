@@ -86,11 +86,6 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
     document.body.appendChild(a);
 
     a.click();
-
-    document.body.removeChild(a);
-
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-
     document.body.removeChild(a);
     setTimeout(() => URL.revokeObjectURL(url), 5000);
     toast.success("Conversa exportada!");
