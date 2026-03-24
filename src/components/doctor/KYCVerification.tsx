@@ -168,7 +168,7 @@ const KYCVerification = ({ doctorProfileId, userName, userCRM, onComplete }: {
     earHistoryRef.current = [];
 
     const checkBlink = async () => {
-      if (!videoRef.current || !streamRef.current) return;
+      if (!videoRef.current || !streamRef.current?.active) return;
       try {
         const result = await detectFace(videoRef.current);
         if (result) {
@@ -190,7 +190,7 @@ const KYCVerification = ({ doctorProfileId, userName, userCRM, onComplete }: {
               const blob = captureFrame();
               if (blob) {
                 setSelfieCapture(URL.createObjectURL(blob));
-                const faceRes = await detectFace(videoRef.current);
+                const faceRes = await detectFace(videoRef.current!);
                 if (faceRes) {
                   setSelfieDescriptor(faceRes.descriptor);
                   console.log("[KYC] Selfie face descriptor captured");
@@ -204,18 +204,17 @@ const KYCVerification = ({ doctorProfileId, userName, userCRM, onComplete }: {
       } catch (err) {
         console.error("[KYC] Liveness frame error:", err);
       }
-      blinkFrameRef.current = requestAnimationFrame(checkBlink);
+      // Use setTimeout to avoid overwhelming the CPU with rAF
+      blinkFrameRef.current = window.setTimeout(checkBlink, 250) as unknown as number;
     };
 
-    // Wait a moment for camera to stabilize
-    setTimeout(() => {
-      blinkFrameRef.current = requestAnimationFrame(checkBlink);
-    }, 1000);
+    // Wait for camera to stabilize
+    setTimeout(() => { checkBlink(); }, 1500);
   }, [startCamera, captureFrame, stopCamera]);
 
   useEffect(() => {
     return () => {
-      if (blinkFrameRef.current) cancelAnimationFrame(blinkFrameRef.current);
+      if (blinkFrameRef.current) clearTimeout(blinkFrameRef.current);
     };
   }, []);
 
