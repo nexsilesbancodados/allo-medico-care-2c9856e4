@@ -417,7 +417,7 @@ const DoctorCalendar = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("calendar")}>
-      <div className="max-w-6xl">
+      <div className="w-full mx-auto max-w-6xl pb-24 md:pb-6">
         {/* Header */}
         <div className="flex flex-col gap-3 mb-5">
           <div className="flex items-center justify-between">

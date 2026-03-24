@@ -46,7 +46,7 @@ const AdminSpecialties = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("specialties")}>
-      <div className="max-w-4xl">
+      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">Especialidades</h1>
         <p className="text-muted-foreground text-sm mb-6">Gerencie as especialidades disponíveis</p>
 

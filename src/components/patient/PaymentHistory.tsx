@@ -177,7 +177,7 @@ const PaymentHistory = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("payments")}>
-      <div className="max-w-3xl space-y-6">
+      <div className="w-full mx-auto max-w-3xl space-y-6 pb-24 md:pb-6">
         <button
           onClick={() => navigate("/dashboard?role=patient")}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"

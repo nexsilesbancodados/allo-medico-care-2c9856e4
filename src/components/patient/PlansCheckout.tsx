@@ -606,7 +606,7 @@ const PlansCheckout = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={patientNav}>
-      <div className="max-w-5xl">
+      <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
         {/* Tab selector */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
           <TabsList className="grid w-full grid-cols-3">

@@ -22,7 +22,7 @@ const AdminSwitchPanel = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("switch-panel")}>
-      <div className="max-w-3xl">
+      <div className="w-full mx-auto max-w-3xl pb-24 md:pb-6">
         <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard")} className="mb-4 gap-2">
           <ArrowLeft className="w-4 h-4" /> Voltar ao Painel Admin
         </Button>

@@ -94,7 +94,7 @@ const AdminLiveConsultations = () => {
 
   return (
     <DashboardLayout title="Admin" nav={getAdminNav("live")}>
-      <div className="max-w-4xl space-y-5">
+      <div className="w-full mx-auto max-w-4xl space-y-5 pb-24 md:pb-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground tabular-nums">Consultas ao Vivo</h1>

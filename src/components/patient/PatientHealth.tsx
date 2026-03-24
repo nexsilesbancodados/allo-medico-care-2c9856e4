@@ -159,7 +159,7 @@ const PatientHealth = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("health")} role="patient">
-      <div className="max-w-4xl">
+      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6">
         <div className="flex items-center gap-3 mb-1">
           <Heart className="w-6 h-6 text-primary" />
           <h1 className="text-2xl font-bold text-foreground tabular-nums">Minha Saúde</h1>

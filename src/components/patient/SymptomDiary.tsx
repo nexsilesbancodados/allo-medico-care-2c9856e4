@@ -117,7 +117,7 @@ const SymptomDiary = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("diary")}>
-      <div className="max-w-3xl space-y-5">
+      <div className="w-full mx-auto max-w-3xl space-y-5 pb-24 md:pb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground tabular-nums">Diário de Sintomas</h1>
           <p className="text-sm text-muted-foreground">Registre como você se sente diariamente para auxiliar seus médicos</p>

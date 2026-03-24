@@ -74,7 +74,7 @@ const AdminDoctors = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("doctors")}>
-      <div className="max-w-5xl">
+      <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">Médicos</h1>
         <p className="text-muted-foreground text-sm mb-4">{filtered.length} médico(s)</p>
 

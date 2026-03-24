@@ -58,7 +58,7 @@ const AdminInviteCodes = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("invite-codes")}>
-      <div className="max-w-4xl">
+      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground mb-1">Códigos de Convite</h1>

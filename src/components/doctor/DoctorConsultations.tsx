@@ -188,7 +188,7 @@ const DoctorConsultations = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("consultations")}>
-      <div className="max-w-5xl space-y-5">
+      <div className="w-full mx-auto max-w-5xl space-y-5 pb-24 md:pb-6">
         {/* Back button */}
         <button
           onClick={() => navigate("/dashboard")}

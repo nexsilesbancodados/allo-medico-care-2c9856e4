@@ -221,7 +221,7 @@ const ClinicDoctorsManagement = () => {
 
   return (
     <DashboardLayout title="Clínica" nav={nav.map(n => ({ ...n, active: n.href === "/dashboard/clinic/doctors" }))}>
-      <div className="max-w-3xl">
+      <div className="w-full mx-auto max-w-3xl pb-24 md:pb-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground tabular-nums">Médicos Vinculados</h1>

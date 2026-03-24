@@ -204,10 +204,10 @@ const ReceptionDashboard = () => {
 
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
-          { label: "Total hoje", value: stats.total, icon: "📅", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-700 dark:text-amber-400" },
-          { label: "Na fila", value: stats.waiting, icon: "⏳", iconBg: "bg-red-50 dark:bg-red-950/30", valueClass: "text-red-600 dark:text-red-400" },
-          { label: "Em consulta", value: stats.inProgress, icon: "🎥", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-600 dark:text-emerald-400" },
-          { label: "Concluídas", value: stats.completed, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400" },
+          { label: "Total hoje", value: stats.total, icon: "📅", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-700 dark:text-amber-400", accentClass: "bg-amber-500" },
+          { label: "Na fila", value: stats.waiting, icon: "⏳", iconBg: "bg-red-50 dark:bg-red-950/30", valueClass: "text-red-600 dark:text-red-400", accentClass: "bg-red-500" },
+          { label: "Em consulta", value: stats.inProgress, icon: "🎥", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-600 dark:text-emerald-400", accentClass: "bg-emerald-500" },
+          { label: "Concluídas", value: stats.completed, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", accentClass: "bg-blue-500" },
         ]} />
 
         {/* Pingo Banner */}

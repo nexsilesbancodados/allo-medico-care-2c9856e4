@@ -313,10 +313,8 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           )}
 
           <Link to="/" className="flex items-center gap-2 shrink-0" aria-label="Home">
-            <div className="w-8 h-8 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <img src={logoImg} alt="" className="w-5 h-5 object-contain brightness-0 invert" />
-            </div>
-            <span className="font-bold text-white text-sm tracking-tight">AloClínica</span>
+            <img src={mascotImg} alt="AloClínica" className="w-8 h-8 object-contain select-none" style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,.2))" }} />
+            <span className="font-black text-white text-[15px] tracking-tight">AloClínica</span>
           </Link>
 
           <div className="flex-1" />

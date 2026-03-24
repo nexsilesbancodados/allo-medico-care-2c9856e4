@@ -164,7 +164,7 @@ const PatientSupportChat = () => {
     const statusConf = STATUS_LABELS[selectedTicket.status] ?? STATUS_LABELS.bot;
     return (
       <DashboardLayout title="Paciente" nav={nav} role="patient">
-        <div className="max-w-2xl">
+        <div className="w-full mx-auto max-w-2xl pb-24 md:pb-6">
           <Card className="border-border h-[550px] flex flex-col">
             <CardHeader className="pb-3 border-b border-border">
               <div className="flex items-center gap-3">
@@ -242,7 +242,7 @@ const PatientSupportChat = () => {
   // Tickets list
   return (
     <DashboardLayout title="Paciente" nav={nav} role="patient">
-      <div className="max-w-2xl">
+      <div className="w-full mx-auto max-w-2xl pb-24 md:pb-6">
         <Button variant="ghost" size="sm" onClick={() => navigate("/dashboard?role=patient")} className="mb-4 gap-2">
           <ArrowLeft className="w-4 h-4" /> Voltar ao Painel
         </Button>

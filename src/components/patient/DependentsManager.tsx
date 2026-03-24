@@ -124,7 +124,7 @@ const DependentsManager = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("dependents")}>
-      <div className="max-w-3xl">
+      <div className="w-full mx-auto max-w-3xl pb-24 md:pb-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground tabular-nums">Dependentes</h1>

@@ -119,7 +119,7 @@ const RenewalQueue = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("renewal-queue")}>
-      <div className="max-w-4xl">
+      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">💊 Renovações de Receita</h1>
         <p className="text-muted-foreground text-sm mb-6">Analise e aprove solicitações de renovação</p>
 

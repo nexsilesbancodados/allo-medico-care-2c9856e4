@@ -205,7 +205,7 @@ const MedicalCertificate = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("certificates")}>
-      <div className="max-w-3xl">
+      <div className="w-full mx-auto max-w-3xl pb-24 md:pb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">Atestados e Declarações</h1>
         <p className="text-muted-foreground mb-6">Gere documentos médicos profissionais em PDF com QR Code de verificação</p>
 

@@ -138,7 +138,7 @@ const AdminNPS = () => {
   );
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("nps")}>
-      <div className="max-w-6xl">
+      <div className="w-full mx-auto max-w-6xl pb-24 md:pb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">NPS & Satisfação</h1>
         <p className="text-muted-foreground mb-6">Análise de satisfação dos pacientes</p>
 

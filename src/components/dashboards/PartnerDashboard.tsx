@@ -74,9 +74,9 @@ const PartnerDashboard = () => {
       </div>
 
         <StatBento loading={loading} stats={[
-          { label: "Total de validações", value: validations.length, icon: "💊", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: { value: 8 } },
+          { label: "Total de validações", value: validations.length, icon: "💊", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: 8 , accentClass: "bg-emerald-500" },
           { label: "Dispensados", value: dispensedCount, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400" },
-          { label: "Taxa de conversão", value: `${conversionRate}%`, icon: "📈", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", trend: { value: conversionRate > 50 ? 5 : -2 } },
+          { label: "Taxa de conversão", value: `${conversionRate}%`, icon: "📈", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", trend: { value: conversionRate > 50 ? 5 : -2 , accentClass: "bg-amber-500" } },
           { label: "Hoje", value: validations.filter(v => new Date(v.created_at).toDateString() === new Date().toDateString()).length, icon: "📅", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueClass: "text-violet-600 dark:text-violet-400" },
         ]} />
 

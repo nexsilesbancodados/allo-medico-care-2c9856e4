@@ -154,7 +154,7 @@ const AdminPatients = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("patients")}>
-      <div className="max-w-5xl">
+      <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">

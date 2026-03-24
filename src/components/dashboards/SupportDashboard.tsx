@@ -283,10 +283,10 @@ const SupportDashboard = () => {
 
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
-          { label: "Usuários cadastrados", value: users.length, icon: "👥", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", sub: `${filteredUsers.length} filtrados` },
-          { label: "Logs hoje", value: todayLogs, icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", sub: `${logs.length} total` },
-          { label: "Erros críticos", value: errorCount, icon: "🔴", iconBg: "bg-red-50 dark:bg-red-950/30", valueClass: "text-red-600 dark:text-red-400", sub: `${warnCount} avisos`, trend: errorCount > 0 ? { value: -errorCount, positive: false } : undefined },
-          { label: "Alertas totais", value: errorCount + warnCount, icon: "⚠️", iconBg: "bg-orange-50 dark:bg-orange-950/30", valueClass: "text-orange-600 dark:text-orange-400", sub: "Revisão necessária" },
+          { label: "Usuários cadastrados", value: users.length, icon: "👥", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", sub: `${filteredUsers.length} filtrados`, accentClass: "bg-blue-500" },
+          { label: "Logs hoje", value: todayLogs, icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", sub: `${logs.length} total`, accentClass: "bg-amber-500" },
+          { label: "Erros críticos", value: errorCount, icon: "🔴", iconBg: "bg-red-50 dark:bg-red-950/30", valueClass: "text-red-600 dark:text-red-400", sub: `${warnCount} avisos`, trend: errorCount > 0 ? -errorCount : undefined, accentClass: "bg-red-500" },
+          { label: "Alertas totais", value: errorCount + warnCount, icon: "⚠️", iconBg: "bg-orange-50 dark:bg-orange-950/30", valueClass: "text-orange-600 dark:text-orange-400", sub: "Revisão necessária", accentClass: "bg-orange-500" },
         ]} />
 
         {/* ── Error Alert ── */}

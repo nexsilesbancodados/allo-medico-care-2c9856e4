@@ -111,7 +111,7 @@ const ChatPage = () => {
 
   return (
     <DashboardLayout title={activeRole === "doctor" ? "Médico" : "Paciente"} nav={nav} role={activeRole}>
-      <div className="max-w-4xl">
+      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6">
         <Button variant="ghost" size="sm" onClick={() => navigate(backHref)} className="mb-4 gap-2">
           <ArrowLeft className="w-4 h-4" /> Voltar ao Painel
         </Button>

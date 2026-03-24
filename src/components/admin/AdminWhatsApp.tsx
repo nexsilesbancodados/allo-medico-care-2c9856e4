@@ -151,7 +151,7 @@ const AdminWhatsApp = () => {
 
   return (
     <DashboardLayout title="WhatsApp" nav={getAdminNav("whatsapp")}>
-      <div className="max-w-4xl space-y-6">
+      <div className="w-full mx-auto max-w-4xl space-y-6 pb-24 md:pb-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
             <MessageCircle className="w-6 h-6 text-primary" />

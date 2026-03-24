@@ -178,7 +178,7 @@ const DoctorAvailability = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("availability")}>
-      <div className="max-w-3xl">
+      <div className="w-full mx-auto max-w-3xl pb-24 md:pb-6">
         <h1 className="text-2xl font-bold text-foreground mb-1">Disponibilidade</h1>
         <p className="text-muted-foreground mb-4">Configure os horários em que você atende</p>
 
