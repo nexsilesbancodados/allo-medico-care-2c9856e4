@@ -550,56 +550,75 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       <GlobalCommand role={role} />
       <PWABanner role={role} />
 
-      {/* ═══ Mobile bottom nav — app-like with pill active state ═══ */}
+      {/* ═══ Mobile bottom nav — liquid glass with role-colored active pill ═══ */}
       {nav && nav.length > 0 && (
         <nav
-          className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/98 backdrop-blur-2xl border-t border-border/10 shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.08)]"
-          style={{ paddingBottom: "env(safe-area-inset-bottom, 4px)" }}
+          className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10"
+          style={{
+            paddingBottom: "env(safe-area-inset-bottom, 4px)",
+            background: "linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.92) 100%)",
+            backdropFilter: "saturate(180%) blur(20px)",
+            WebkitBackdropFilter: "saturate(180%) blur(20px)",
+            boxShadow: "0 -1px 0 rgba(0,0,0,0.04), 0 -8px 32px -4px rgba(0,0,0,0.06)",
+          }}
           aria-label="Navegação principal"
         >
-          <div className="flex items-stretch h-[64px]">
-            {bottomNav.map(item => (
-              <Link key={item.href} to={item.href}
-                className={`relative flex flex-col items-center justify-center gap-1 flex-1 transition-all duration-200 select-none active:scale-90 ${
-                  item.active ? "text-primary" : "text-muted-foreground/60"
-                }`}
-              >
-                <span className={`relative flex items-center justify-center w-10 h-7 rounded-2xl transition-all duration-200 ${
-                  item.active ? "bg-primary/12 scale-105" : ""
-                }`}>
-                  {item.icon}
-                  {(item.badge ?? 0) > 0 && (
-                    <span className="absolute -top-1 -right-0.5 text-[8px] font-bold min-w-[16px] h-4 px-1 rounded-full bg-destructive text-white flex items-center justify-center tabular-nums">
-                      {(item.badge ?? 0) > 9 ? "9+" : item.badge}
-                    </span>
+          <div className="dark:bg-background/85 flex items-stretch h-[62px]">
+            {bottomNav.map(item => {
+              const activeColor = ROLE_ACTIVE_COLOR[role] ?? ROLE_ACTIVE_COLOR.patient;
+              const activeBg = ROLE_ACTIVE_BG[role] ?? ROLE_ACTIVE_BG.patient;
+              return (
+                <Link key={item.href} to={item.href}
+                  className={`relative flex flex-col items-center justify-center gap-0.5 flex-1 transition-all duration-300 select-none active:scale-[0.88] ${
+                    item.active ? activeColor : "text-muted-foreground/50"
+                  }`}
+                >
+                  {/* Active pill indicator */}
+                  {item.active && (
+                    <motion.span
+                      layoutId="bottomNavPill"
+                      className={`absolute -top-[1px] left-1/2 -translate-x-1/2 w-8 h-[3px] rounded-full`}
+                      style={{ background: "currentColor", opacity: 0.7 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 35 }}
+                    />
                   )}
-                </span>
-                <span className={`text-[10px] truncate max-w-[52px] leading-none ${
-                  item.active ? "font-bold text-primary" : "font-medium"
-                }`}>{item.label}</span>
-              </Link>
-            ))}
+                  <span className={`relative flex items-center justify-center w-10 h-7 rounded-2xl transition-all duration-300 ${
+                    item.active ? `${activeBg} scale-110` : ""
+                  }`}>
+                    {item.icon}
+                    {(item.badge ?? 0) > 0 && (
+                      <span className="absolute -top-1.5 -right-1 text-[8px] font-bold min-w-[16px] h-4 px-1 rounded-full bg-destructive text-white flex items-center justify-center tabular-nums shadow-sm">
+                        {(item.badge ?? 0) > 9 ? "9+" : item.badge}
+                      </span>
+                    )}
+                  </span>
+                  <span className={`text-[10px] truncate max-w-[52px] leading-none transition-all duration-200 ${
+                    item.active ? "font-extrabold" : "font-medium"
+                  }`}>{item.label}</span>
+                </Link>
+              );
+            })}
 
             {moreNav.length > 0 && (
               <Sheet open={moreOpen} onOpenChange={setMoreOpen}>
                 <SheetTrigger asChild>
                   <button
-                    className={`flex flex-col items-center justify-center gap-1 flex-1 text-[10px] font-medium select-none active:scale-90 transition-all duration-200 ${
-                      moreNav.some(i => i.active) ? "text-primary" : "text-muted-foreground/60"
+                    className={`flex flex-col items-center justify-center gap-0.5 flex-1 text-[10px] font-medium select-none active:scale-[0.88] transition-all duration-300 ${
+                      moreNav.some(i => i.active) ? (ROLE_ACTIVE_COLOR[role] ?? "text-primary") : "text-muted-foreground/50"
                     }`}
                     aria-label="Mais opções">
-                    <span className={`w-10 h-7 rounded-2xl flex items-center justify-center transition-all duration-200 ${
-                      moreNav.some(i => i.active) ? "bg-primary/12" : ""
+                    <span className={`w-10 h-7 rounded-2xl flex items-center justify-center transition-all duration-300 ${
+                      moreNav.some(i => i.active) ? (ROLE_ACTIVE_BG[role] ?? "bg-primary/12") : ""
                     }`}>
                       <MoreHorizontal className="w-5 h-5" aria-hidden="true" />
                     </span>
-                    <span className={moreNav.some(i => i.active) ? "font-bold" : ""}>Mais</span>
+                    <span className={moreNav.some(i => i.active) ? "font-extrabold" : ""}>Mais</span>
                   </button>
                 </SheetTrigger>
-                <SheetContent side="bottom" className="rounded-t-3xl border-border/20 bg-background max-h-[70vh]"
+                <SheetContent side="bottom" className="rounded-t-[28px] border-border/15 bg-background/98 backdrop-blur-xl max-h-[72vh]"
                   style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}>
                   <div className="pt-2 overflow-y-auto">
-                    <div className="w-10 h-1 bg-muted-foreground/15 rounded-full mx-auto mb-4" aria-hidden="true" />
+                    <div className="w-10 h-1 bg-muted-foreground/15 rounded-full mx-auto mb-5" aria-hidden="true" />
 
                     {(() => {
                       const groups: { label: string; items: NavItem[] }[] = [];
@@ -612,16 +631,22 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                       });
                       if (cur.items.length) groups.push(cur);
 
+                      const activeColor = ROLE_ACTIVE_COLOR[role] ?? ROLE_ACTIVE_COLOR.patient;
+
                       return groups.map((group, gi) => (
-                        <div key={gi} className="mb-4">
+                        <div key={gi} className="mb-5">
                           {group.label && (
-                            <p className="text-[10px] font-semibold text-muted-foreground/50 uppercase tracking-widest mb-2 px-4">{group.label}</p>
+                            <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-2.5 px-4">{group.label}</p>
                           )}
-                          <div className="grid grid-cols-4 gap-2 px-2">
+                          <div className="grid grid-cols-4 gap-2.5 px-3">
                             {group.items.map(item => (
                               <Link key={item.href} to={item.href} onClick={() => setMoreOpen(false)}
-                                className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl text-[11px] font-medium transition-all ${item.active ? "bg-foreground/8 text-foreground" : "text-muted-foreground hover:bg-muted/50"}`}>
-                                <span className={`w-9 h-9 rounded-xl flex items-center justify-center ${item.active ? "bg-foreground text-background" : "bg-muted/60"}`}>
+                                className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl text-[11px] font-medium transition-all duration-200 active:scale-95 ${
+                                  item.active ? `bg-foreground/6 ${activeColor} font-bold` : "text-muted-foreground hover:bg-muted/40"
+                                }`}>
+                                <span className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+                                  item.active ? `${ROLE_ACTIVE_BG[role] ?? "bg-primary/12"}` : "bg-muted/50"
+                                }`}>
                                   {item.icon}
                                 </span>
                                 <span className="text-center leading-tight line-clamp-1">{item.label}</span>
@@ -633,19 +658,19 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                     })()}
 
                     {/* Pingo assistant in More sheet */}
-                    <div className="px-2 mt-2 mb-2">
+                    <div className="px-3 mt-2 mb-2">
                       <button
                         onClick={() => { setMoreOpen(false); window.dispatchEvent(new Event("open-pingo-chat")); }}
-                        className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-muted/50 transition-colors"
+                        className="w-full flex items-center gap-3 p-3.5 rounded-2xl hover:bg-muted/40 transition-colors active:scale-[0.98]"
                       >
-                        <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
                           <img src={mascotImg} alt="" className="w-7 h-7 object-cover rounded-full" />
                         </div>
                         <div className="text-left">
-                          <p className="text-sm font-semibold text-foreground">Pingo IA</p>
+                          <p className="text-sm font-bold text-foreground">Pingo IA</p>
                           <p className="text-[11px] text-muted-foreground">Assistente virtual</p>
                         </div>
-                        <span className="ml-auto w-2 h-2 rounded-full bg-success" aria-hidden="true" />
+                        <span className="ml-auto w-2.5 h-2.5 rounded-full bg-success animate-pulse" aria-hidden="true" />
                       </button>
                     </div>
                   </div>
