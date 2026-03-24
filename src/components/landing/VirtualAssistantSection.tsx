@@ -71,8 +71,7 @@ const VirtualAssistantSection = () => {
               <img
                 src={mascotWave}
                 alt="Pingo - Assistente Virtual"
-                className="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-xl mx-auto"
-              />
+                className="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-xl mx-auto" loading="lazy" decoding="async" width={112} height={112} />
               {/* Online badge */}
               <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-1.5 px-3 py-1 rounded-full bg-card border border-border shadow-md">
                 <span className="w-2 h-2 rounded-full bg-medical-green animate-pulse" />
@@ -180,7 +179,7 @@ const VirtualAssistantSection = () => {
               {/* Chat header */}
               <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted/30">
                 <div className="relative">
-                  <img src={pingoAssistant} alt="Pingo" className="w-9 h-9 rounded-full object-contain bg-primary/10 p-0.5" />
+                  <img src={pingoAssistant} alt="Pingo" className="w-9 h-9 rounded-full object-contain bg-primary/10 p-0.5" loading="lazy" decoding="async" width={36} height={36} />
                   <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-medical-green border-2 border-card" />
                 </div>
                 <div className="flex-1">

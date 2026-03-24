@@ -12,8 +12,7 @@ const PingoLoader = memo(() => (
         alt="Pingo carregando"
         className="relative w-20 h-20 md:w-24 md:h-24 object-contain drop-shadow-lg"
         style={{ animation: "pingo-bounce 1.8s ease-in-out infinite" }}
-        draggable={false}
-      />
+        draggable={false} loading="lazy" decoding="async" width={80} height={80} />
     </div>
 
     {/* Loading dots */}

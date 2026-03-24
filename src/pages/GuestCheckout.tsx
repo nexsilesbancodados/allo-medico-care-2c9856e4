@@ -483,8 +483,7 @@ const GuestCheckout = () => {
                   <img
                     src={teleconsultaHero}
                     alt="Paciente em teleconsulta médica"
-                    className="w-full h-48 sm:h-full sm:min-h-[280px] object-cover"
-                  />
+                    className="w-full h-48 sm:h-full sm:min-h-[280px] object-cover" loading="lazy" decoding="async" />
                   <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-transparent to-transparent sm:block hidden" />
                   <div className="absolute inset-0 bg-gradient-to-t from-primary/40 via-transparent to-transparent sm:hidden" />
                 </div>
@@ -714,7 +713,7 @@ const GuestCheckout = () => {
                         className={`${glassCard} rounded-2xl p-5 border-primary/20`}
                       >
                         <div className="flex items-start gap-3">
-                          <img src={mascotThumbsup} alt="" className="w-12 h-12 flex-shrink-0" />
+                          <img src={mascotThumbsup} alt="" className="w-12 h-12 flex-shrink-0" loading="lazy" decoding="async" width={48} height={48} />
                           <div className="flex-1">
                             <h3 className="font-bold text-foreground mb-2 text-sm">Resumo</h3>
                             <div className="space-y-1.5 text-xs text-muted-foreground">
@@ -750,7 +749,7 @@ const GuestCheckout = () => {
                 </div>
                 <div className={`${glassCard} rounded-2xl p-6 md:p-8`}>
                   <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/10">
-                    <img src={mascotReading} alt="" className="w-14 h-14" />
+                    <img src={mascotReading} alt="" className="w-14 h-14" loading="lazy" decoding="async" width={56} height={56} />
                     <p className="text-sm text-muted-foreground">Seus dados são protegidos e usados apenas para esta consulta.</p>
                   </div>
                   <div className="space-y-5">
@@ -1013,7 +1012,7 @@ const GuestCheckout = () => {
                         <QrCode className="w-5 h-5 text-primary" /> Pague com PIX
                       </h3>
                       <div className="bg-white rounded-xl p-4 mb-4">
-                        <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-48 h-48 mx-auto" />
+                        <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-48 h-48 mx-auto" loading="lazy" decoding="async" />
                       </div>
                       {pixCopyPaste && (
                         <div>

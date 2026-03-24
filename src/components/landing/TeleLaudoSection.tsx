@@ -29,8 +29,7 @@ const TeleLaudoSection = () => {
                 src={teleLaudoImg}
                 alt="Médico laudando exames de imagem em monitor"
                 className="w-full h-auto object-cover"
-                loading="lazy"
-              />
+                loading="lazy" decoding="async" />
               <div className="absolute inset-0 bg-gradient-to-t from-primary/20 to-transparent" />
             </div>
             {/* Floating badge */}

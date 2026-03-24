@@ -36,7 +36,7 @@ const fadeUp = { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0, transi
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.1 } } };
 
 const HeroImage = () => (
-  <img src={b2bHero2} alt="Benefícios corporativos" className="absolute inset-0 w-full h-full object-cover" />
+  <img src={b2bHero2} alt="Benefícios corporativos" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
 );
 
 const B2BLanding = () => {
@@ -124,7 +124,7 @@ const B2BLanding = () => {
                     <Card className="h-full border-border/50 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
                       <CardContent className="p-6 flex flex-col items-start">
                         <div className="w-20 h-20 mb-4 group-hover:scale-110 transition-transform duration-300">
-                          <img src={s.mascot} alt={s.title} className="w-full h-full object-contain" loading="lazy" />
+                          <img src={s.mascot} alt={s.title} className="w-full h-full object-contain" loading="lazy" decoding="async" />
                         </div>
                         <h3 className="font-bold text-foreground text-lg mb-2">{s.title}</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
@@ -139,7 +139,7 @@ const B2BLanding = () => {
 
         {/* ==================== BANNER CORPORATIVO ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
-          <img src={bannerCorporate} alt="Reunião corporativa sobre benefícios" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={bannerCorporate} alt="Reunião corporativa sobre benefícios" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
           <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "320px" }}>
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">
@@ -221,7 +221,7 @@ const B2BLanding = () => {
 
         {/* ==================== BANNER TELELAUDO ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
-          <img src={bannerTelelaudoWorkflow} alt="Centro de laudos médicos digitais" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={bannerTelelaudoWorkflow} alt="Centro de laudos médicos digitais" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-l from-secondary/90 via-secondary/70 to-transparent" />
           <div className="container mx-auto px-4 relative flex items-center justify-end" style={{ minHeight: "320px" }}>
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10 text-right">

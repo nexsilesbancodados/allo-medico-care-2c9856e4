@@ -81,8 +81,7 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
                       src={step.image}
                       alt={step.title}
                       className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110 group-hover:rotate-1"
-                      loading="lazy"
-                    />
+                      loading="lazy" decoding="async" />
                     {/* Shimmer overlay on hover */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
                     {/* Step number badge */}
@@ -144,7 +143,7 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
                 <div className="flex-1 bg-card rounded-2xl border border-border/50 overflow-hidden shadow-sm">
                   {/* Mobile image */}
                   <div className="relative w-full h-28 overflow-hidden">
-                    <img src={step.image} alt={step.title} className="w-full h-full object-cover" loading="lazy" />
+                    <img src={step.image} alt={step.title} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                     <div className={`absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent`} />
                   </div>
                   <div className="p-4 -mt-4 relative">

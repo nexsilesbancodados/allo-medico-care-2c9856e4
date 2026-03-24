@@ -116,7 +116,7 @@ const DoctorWallet = () => {
                       <div className="relative">
                         <div className="absolute inset-0 bg-gradient-to-br from-primary to-secondary rounded-2xl blur-md opacity-40 scale-105" />
                         {profile?.avatar_url ? (
-                          <img src={profile.avatar_url} alt={fullName} className="relative w-24 h-24 rounded-2xl object-cover border-4 border-card shadow-xl" />
+                          <img src={profile.avatar_url} alt={fullName} className="relative w-24 h-24 rounded-2xl object-cover border-4 border-card shadow-xl" loading="lazy" decoding="async" />
                         ) : (
                           <div className="relative w-24 h-24 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white text-3xl font-black border-4 border-card shadow-xl">
                             {initial}

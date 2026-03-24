@@ -182,7 +182,7 @@ const DiscountCard = () => {
 
         {/* ==================== HERO ==================== */}
         <section className={`relative overflow-hidden ${isDashboard ? "" : "mt-[70px]"}`} style={{ minHeight: isDashboard ? "40vh" : "60vh" }}>
-          <img src={heroCartao} alt="Cartão de Benefícios" className="absolute inset-0 w-full h-full object-cover" loading="eager" />
+          <img src={heroCartao} alt="Cartão de Benefícios" className="absolute inset-0 w-full h-full object-cover" loading="eager" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           <div className="container mx-auto px-4 relative flex items-end pb-16" style={{ minHeight: "60vh" }}>
@@ -275,7 +275,7 @@ const DiscountCard = () => {
 
         {/* ==================== BANNER TELEMEDICINA ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "340px" }}>
-          <img src={cardFamily} alt="Família usando telemedicina" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={cardFamily} alt="Família usando telemedicina" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
           <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "340px" }}>
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-12">
@@ -325,7 +325,7 @@ const DiscountCard = () => {
 
         {/* ==================== BANNER CLUBE ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "340px" }}>
-          <img src={cardClube} alt="Clube de vantagens com descontos" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={cardClube} alt="Clube de vantagens com descontos" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-l from-secondary/90 via-secondary/70 to-transparent" />
           <div className="container mx-auto px-4 relative flex items-center justify-end" style={{ minHeight: "340px" }}>
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-12 text-right">
@@ -431,7 +431,7 @@ const DiscountCard = () => {
                 </Button>
               </motion.div>
               <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} className="flex items-center justify-center">
-                <img src={cardPremium} alt="Cartão Premium AloClinica" className="w-full max-w-sm rounded-2xl shadow-2xl shadow-secondary/10" loading="lazy" />
+                <img src={cardPremium} alt="Cartão Premium AloClinica" className="w-full max-w-sm rounded-2xl shadow-2xl shadow-secondary/10" loading="lazy" decoding="async" />
               </motion.div>
             </div>
           </div>

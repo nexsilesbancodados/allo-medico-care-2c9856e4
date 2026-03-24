@@ -282,7 +282,7 @@ const AdminWhatsApp = () => {
                 </div>
               ) : qrCode ? (
                 <div className="text-center">
-                  <img src={qrCode} alt="WhatsApp QR Code" className="w-64 h-64 mx-auto rounded-lg border border-border" />
+                  <img src={qrCode} alt="WhatsApp QR Code" className="w-64 h-64 mx-auto rounded-lg border border-border" loading="lazy" decoding="async" />
                   <p className="text-sm text-muted-foreground mt-3">Escaneie com o WhatsApp do seu celular</p>
                   {polling && (
                     <p className="text-xs text-primary mt-1 flex items-center justify-center gap-1">

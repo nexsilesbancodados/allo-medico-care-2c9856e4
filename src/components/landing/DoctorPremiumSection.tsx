@@ -173,7 +173,7 @@ const DoctorPremiumSection = () => {
                 transition={{ delay: 0.45 }}
                 className="flex items-start gap-3 p-3.5 rounded-xl bg-primary/5 border border-primary/10 mb-6 max-w-sm"
               >
-                <img src={avatarCarlos} alt="Dr. Carlos" className="w-9 h-9 rounded-full object-cover shrink-0" />
+                <img src={avatarCarlos} alt="Dr. Carlos" className="w-9 h-9 rounded-full object-cover shrink-0" loading="lazy" decoding="async" width={36} height={36} />
                 <div>
                   <div className="flex items-center gap-1 mb-1">
                     <Quote className="w-3 h-3 text-primary/40" />
@@ -233,7 +233,7 @@ const DoctorPremiumSection = () => {
                 transition={{ delay: 0.3, duration: 0.6 }}
                 className="absolute top-0 left-2 sm:left-8 w-40 sm:w-52 lg:w-64 h-56 sm:h-72 lg:h-80 rounded-2xl overflow-hidden shadow-elevated z-10"
               >
-                <img src={doctorImg1} alt="Médica profissional" className="w-full h-full object-cover" loading="lazy" />
+                <img src={doctorImg1} alt="Médica profissional" className="w-full h-full object-cover" loading="lazy" decoding="async" />
               </motion.div>
 
               <motion.div
@@ -243,7 +243,7 @@ const DoctorPremiumSection = () => {
                 transition={{ delay: 0.5, duration: 0.6 }}
                 className="absolute bottom-0 right-2 sm:right-8 w-36 sm:w-48 lg:w-56 h-52 sm:h-64 lg:h-72 rounded-2xl overflow-hidden shadow-elevated z-20"
               >
-                <img src={doctorImg2} alt="Médico atendendo online" className="w-full h-full object-cover" loading="lazy" />
+                <img src={doctorImg2} alt="Médico atendendo online" className="w-full h-full object-cover" loading="lazy" decoding="async" />
               </motion.div>
 
               {/* Floating stat badges */}

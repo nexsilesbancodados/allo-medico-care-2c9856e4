@@ -59,7 +59,7 @@ const PaymentSuccess = () => {
 
       {/* Hero banner */}
       <section className="relative overflow-hidden" style={{ minHeight: "180px" }}>
-        <img src={bannerSuccess} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        <img src={bannerSuccess} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
         <div className="absolute inset-0 bg-gradient-to-r from-success/80 via-success/60 to-transparent" />
         <div className="container mx-auto px-4 relative z-10 flex items-center justify-center h-full py-10">
           <motion.div

@@ -201,8 +201,7 @@ const ClinicPresentialSection = () => {
                   src={clinicReceptionist}
                   alt="Recepcionista da clínica AloClinica"
                   className="w-full h-48 sm:h-64 md:h-80 object-cover"
-                  loading="lazy"
-                />
+                  loading="lazy" decoding="async" />
               </div>
 
               {/* Floating review card */}
@@ -271,8 +270,7 @@ const ClinicPresentialSection = () => {
                     src={clinicPatientChat}
                     alt="Paciente agendando consulta"
                     className="w-full h-full object-cover"
-                    loading="lazy"
-                  />
+                    loading="lazy" decoding="async" />
                 </div>
 
                 <div className="flex-1 bg-background/10 backdrop-blur-sm rounded-2xl border border-background/10 shadow-xl overflow-hidden">

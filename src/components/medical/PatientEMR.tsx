@@ -466,7 +466,7 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
                 <div className="relative shrink-0">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center ring-2 ring-primary/20 ring-offset-2 ring-offset-background">
                     {patient?.avatar_url ? (
-                      <img src={patient.avatar_url} alt="" className="w-16 h-16 rounded-2xl object-cover" />
+                      <img src={patient.avatar_url} alt="" className="w-16 h-16 rounded-2xl object-cover" loading="lazy" decoding="async" />
                     ) : (
                       <UserCircle className="w-8 h-8 text-primary" />
                     )}

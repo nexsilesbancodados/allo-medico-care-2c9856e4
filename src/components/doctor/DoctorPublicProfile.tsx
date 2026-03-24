@@ -135,7 +135,7 @@ const DoctorPublicProfile = () => {
                 {/* Avatar */}
                 <div className="w-28 h-28 rounded-2xl bg-primary/10 flex items-center justify-center overflow-hidden shrink-0 ring-4 ring-background shadow-lg">
                   {doctor.avatar_url ? (
-                    <img src={doctor.avatar_url} alt={doctor.name} className="w-full h-full object-cover" />
+                    <img src={doctor.avatar_url} alt={doctor.name} className="w-full h-full object-cover" loading="lazy" decoding="async" />
                   ) : (
                     <span className="text-3xl font-bold text-primary">
                       {doctor.name.split(" ").map(n => n[0]).slice(0, 2).join("")}
