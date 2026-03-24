@@ -213,13 +213,6 @@
     max-width: 100%;
   }
 
-  /* Force all landing sections to be visible — prevents GSAP/framer-motion
-     whileInView from leaving sections stuck at opacity:0 */
-  section {
-    opacity: 1 !important;
-    transform: none !important;
-    filter: none !important;
-  }
 
 
   /* Prevent long words/URLs from causing horizontal overflow */

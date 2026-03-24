@@ -51,7 +51,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-background" style={{ overflowX: 'clip' }}>
+    <div className="relative min-h-screen bg-background">
       <div className="absolute inset-0 -z-10 bg-[image:var(--landing-bg)] pointer-events-none" />
       <SEOHead
         title="Consultas Médicas Online por Vídeo 24h | AloClínica"
