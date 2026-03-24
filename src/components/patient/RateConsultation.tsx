@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Star, ThumbsUp, ThumbsDown, Stethoscope, Clock, Video as VideoIcon, MessageSquare } from "lucide-react";
+import { Star, ThumbsUp, ThumbsDown, Stethoscope, Clock as VideoIcon, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 

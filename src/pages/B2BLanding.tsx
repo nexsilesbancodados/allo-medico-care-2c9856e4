@@ -1,13 +1,10 @@
-import { useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, CheckCircle2, ArrowRight, Shield, Users, Heart, Stethoscope, Clock, Star, Building2, Phone, FileText, Brain, Fingerprint, Zap, Upload, ChevronRight, TrendingUp, Video } from "lucide-react";
+import { CreditCard, CheckCircle2, ArrowRight, Shield, Users, Heart, Clock, Star, Building2, Phone, FileText, Brain, Fingerprint, Zap, Upload, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import bannerCorporate from "@/assets/banner-b2b-corporate.jpg";
 import bannerTelelaudoWorkflow from "@/assets/banner-telelaudo-workflow.jpg";
@@ -168,8 +165,6 @@ const B2BLanding = () => {
             </motion.div>
           </div>
         </section>
-
-
 
         {/* ==================== TELELAUDO PARA CLÍNICAS ==================== */}
         <section id="telelaudo" className="py-20 bg-muted/30 scroll-mt-24">

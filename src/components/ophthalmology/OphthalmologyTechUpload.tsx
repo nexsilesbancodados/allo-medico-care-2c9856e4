@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Eye, Upload, Send, Loader2, Plus, CheckCircle2 } from "lucide-react";
+import { Eye, Send, Loader2, CheckCircle2 } from "lucide-react";
 
 const EXAM_TYPES = [
   { value: "refração", label: "Refração / Autorefração" },
