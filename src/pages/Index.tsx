@@ -51,7 +51,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
   }, []);
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-x-hidden">
       {/* Fixed subtle gradient background */}
       <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(195,100%,95%)] via-[hsl(200,85%,88%)] to-[hsl(210,90%,72%)] dark:from-[hsl(210,40%,10%)] dark:via-[hsl(200,35%,14%)] dark:to-[hsl(195,30%,12%)]" />
       <SEOHead
