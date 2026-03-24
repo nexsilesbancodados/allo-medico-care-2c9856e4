@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { Calendar as CalendarIcon, Clock, FileText, Video, Search, Download, Filter, ArrowLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, FileText, Video, Search, Download, Filter, ArrowLeft, ChevronRight, MoreHorizontal, CreditCard } from "lucide-react";
 import { format, isWithinInterval, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getPatientNav } from "./patientNav";
