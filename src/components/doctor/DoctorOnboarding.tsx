@@ -72,6 +72,7 @@ const DoctorOnboarding = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [dismissed, setDismissed] = useState(false);
+  const [showKYC, setShowKYC] = useState(false);
 
   useEffect(() => {
     if (!user) return;
