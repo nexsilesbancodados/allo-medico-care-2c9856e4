@@ -49,6 +49,10 @@ const steps: OnboardingStep[] = [
     icon: Video, path: "/dashboard/doctor/waiting-room", check: (d) => d.cameraChecked, estimatedMin: 1,
   },
   {
+    id: "kyc", label: "Verificação KYC", description: "Validação facial e do documento",
+    icon: ShieldCheck, path: "#kyc", check: (d) => d.docProfile?.kyc_status === "verified", estimatedMin: 3,
+  },
+  {
     id: "approval", label: "Aprovação do CRM", description: "Verificação administrativa obrigatória",
     icon: ShieldCheck, path: "/dashboard/profile", check: (d) => !!d.docProfile?.is_approved, estimatedMin: 0,
   },
