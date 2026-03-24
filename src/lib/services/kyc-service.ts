@@ -1,6 +1,6 @@
 import * as faceapi from "face-api.js";
 
-const MODELS_URL = "https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights";
+const MODELS_URL = "https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.14/model";
 
 let modelsLoaded = false;
 
