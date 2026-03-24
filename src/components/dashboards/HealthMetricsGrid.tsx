@@ -21,7 +21,7 @@ export function HealthMetricsGrid({ metrics }: { metrics: Metric[] }) {
   if (!metrics.length) return null;
 
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
       {metrics.slice(0, 6).map((m, i) => {
         const cfg = CONFIG[m.type] ?? { icon: "📊", color: "text-muted-foreground", bg: "bg-muted/40", label: m.type };
         return (
