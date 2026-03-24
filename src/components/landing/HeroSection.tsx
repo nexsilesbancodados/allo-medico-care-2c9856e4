@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { useState, memo, forwardRef, useEffect, useRef } from "react";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
 import heroDoctor from "@/assets/hero-doctor.png";
-import gsap from "gsap";
 
 const poseContent = [
   {
@@ -51,26 +50,29 @@ const HeroSection = memo(
 
     useEffect(() => {
       if (window.matchMedia("(prefers-reduced-motion: reduce), (max-width: 767px)").matches) return;
-      const ctx = gsap.context(() => {
-        const items = heroRef.current?.querySelectorAll(".gsap-hero-item");
-        if (items?.length) {
-          gsap.fromTo(
-            items,
-            { opacity: 0, y: 20, filter: "blur(4px)" },
-            {
-              opacity: 1,
-              y: 0,
-              filter: "blur(0px)",
-              stagger: 0.09,
-              duration: 0.7,
-              ease: "power3.out",
-              delay: 0.05,
-              clearProps: "transform,opacity,filter",
-            }
-          );
-        }
-      }, heroRef);
-      return () => ctx.revert();
+      let ctx: { revert: () => void } | null = null;
+      import("gsap").then(({ default: gsap }) => {
+        ctx = gsap.context(() => {
+          const items = heroRef.current?.querySelectorAll(".gsap-hero-item");
+          if (items?.length) {
+            gsap.fromTo(
+              items,
+              { opacity: 0, y: 20, filter: "blur(4px)" },
+              {
+                opacity: 1,
+                y: 0,
+                filter: "blur(0px)",
+                stagger: 0.09,
+                duration: 0.7,
+                ease: "power3.out",
+                delay: 0.05,
+                clearProps: "transform,opacity,filter",
+              }
+            );
+          }
+        }, heroRef);
+      });
+      return () => ctx?.revert();
     }, []);
 
     return (
