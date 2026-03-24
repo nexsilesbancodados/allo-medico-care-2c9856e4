@@ -6,7 +6,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { toast } from "sonner"; // used in unhandledrejection handler
 import ErrorBoundary from "./components/ErrorBoundary";
 const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -103,32 +103,41 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const cancelCriticalPrefetch = prefetchOnIdle(
-      [
-        () => import("./pages/Auth"),
-        () => import("./pages/AuthPaciente"),
-        () => import("./pages/AuthMedico"),
-      ],
-      5000,
-    );
+    // Delay prefetching to avoid competing with initial render for main-thread time
+    const timer = window.setTimeout(() => {
+      const cancelCriticalPrefetch = prefetchOnIdle(
+        [
+          () => import("./pages/Auth"),
+          () => import("./pages/AuthPaciente"),
+          () => import("./pages/AuthMedico"),
+        ],
+        8000,
+      );
 
-    const cancelSecondaryPrefetch = prefetchOnIdle(
-      [
-        () => import("./pages/AuthAdmin"),
-        () => import("./pages/AuthClinica"),
-        () => import("./pages/AuthRecepcionista"),
-        () => import("./pages/AuthSuporte"),
-        () => import("./pages/AuthParceiro"),
-        () => import("./pages/AuthLaudista"),
-        () => import("./pages/GuestCheckout"),
-        () => import("./pages/ForgotPassword"),
-      ],
-      12000,
-    );
+      const cancelSecondaryPrefetch = prefetchOnIdle(
+        [
+          () => import("./pages/AuthAdmin"),
+          () => import("./pages/AuthClinica"),
+          () => import("./pages/AuthRecepcionista"),
+          () => import("./pages/AuthSuporte"),
+          () => import("./pages/AuthParceiro"),
+          () => import("./pages/AuthLaudista"),
+          () => import("./pages/GuestCheckout"),
+          () => import("./pages/ForgotPassword"),
+        ],
+        20000,
+      );
 
+      cleanupRef.current = () => {
+        cancelCriticalPrefetch();
+        cancelSecondaryPrefetch();
+      };
+    }, 3000);
+
+    const cleanupRef = { current: () => {} };
     return () => {
-      cancelCriticalPrefetch();
-      cancelSecondaryPrefetch();
+      window.clearTimeout(timer);
+      cleanupRef.current();
     };
   }, []);
 
