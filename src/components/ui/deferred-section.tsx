@@ -1,4 +1,4 @@
-import { PropsWithChildren, useEffect, useRef, useState, useCallback } from "react";
+import { PropsWithChildren, Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -18,10 +18,19 @@ const DeferredSection = ({
   const [isVisible, setIsVisible] = useState(false);
   const heightRef = useRef<number | undefined>(undefined);
 
-  // Capture the placeholder height before swapping to real content
+  const fallbackNode = (
+    <div
+      aria-hidden="true"
+      className={cn("w-full rounded-3xl bg-muted/20", fallbackClassName)}
+    />
+  );
+
   const captureHeight = useCallback(() => {
-    if (containerRef.current && !isVisible) {
-      heightRef.current = containerRef.current.getBoundingClientRect().height;
+    if (!containerRef.current || isVisible) return;
+
+    const nextHeight = containerRef.current.getBoundingClientRect().height;
+    if (nextHeight > 0) {
+      heightRef.current = nextHeight;
     }
   }, [isVisible]);
 
@@ -43,30 +52,44 @@ const DeferredSection = ({
 
     observer.observe(element);
     return () => observer.disconnect();
-  }, [isVisible, rootMargin, captureHeight]);
+  }, [captureHeight, isVisible, rootMargin]);
 
-  // After real content renders, clear the locked height so layout is natural
   useEffect(() => {
     if (!isVisible || !containerRef.current || !heightRef.current) return;
+
     const el = containerRef.current;
-    // Lock height for one frame to prevent scroll jump
-    el.style.minHeight = `${heightRef.current}px`;
-    const raf = requestAnimationFrame(() => {
-      el.style.minHeight = "";
-    });
-    return () => cancelAnimationFrame(raf);
+    const lockedHeight = heightRef.current;
+    let resizeObserver: ResizeObserver | null = null;
+
+    el.style.minHeight = `${lockedHeight}px`;
+
+    const releaseLock = () => {
+      if (el.getBoundingClientRect().height >= lockedHeight - 1) {
+        el.style.minHeight = "";
+        resizeObserver?.disconnect();
+      }
+    };
+
+    if (typeof ResizeObserver === "undefined") {
+      const raf = requestAnimationFrame(() => {
+        el.style.minHeight = "";
+      });
+      return () => cancelAnimationFrame(raf);
+    }
+
+    resizeObserver = new ResizeObserver(releaseLock);
+    resizeObserver.observe(el);
+
+    const raf = requestAnimationFrame(releaseLock);
+    return () => {
+      cancelAnimationFrame(raf);
+      resizeObserver?.disconnect();
+    };
   }, [isVisible]);
 
   return (
     <div ref={containerRef} className={className}>
-      {isVisible ? (
-        children
-      ) : (
-        <div
-          aria-hidden="true"
-          className={cn("w-full rounded-3xl bg-muted/20", fallbackClassName)}
-        />
-      )}
+      {isVisible ? <Suspense fallback={fallbackNode}>{children}</Suspense> : fallbackNode}
     </div>
   );
 };
