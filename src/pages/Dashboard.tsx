@@ -6,7 +6,7 @@ import { lazy, Suspense, ReactNode, useEffect, useState, useCallback } from "rea
 import { supabase } from "@/integrations/supabase/client";
 import { warn } from "@/lib/logger";
 
-const PageLoader = lazy(() => import("@/components/PingoLoader"));
+import PingoLoader from "@/components/PingoLoader";
 
 // ── LAZY imports: dashboard shells ──
 const PatientDashboard = lazy(() => import("@/components/dashboards/PatientDashboard"));

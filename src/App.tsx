@@ -74,7 +74,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = lazy(() => import("./components/PingoLoader"));
+import PingoLoader from "./components/PingoLoader";
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();
