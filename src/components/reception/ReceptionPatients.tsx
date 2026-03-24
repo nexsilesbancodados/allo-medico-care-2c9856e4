@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Users, Phone, Mail, Calendar, FileText, Eye } from "lucide-react";
+import { Search, Users, Phone, Eye } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -37,7 +37,7 @@ const ReceptionPatients = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-foreground tabular-nums">Cadastro de Pacientes</h2>
+            <h2 className="text-2xl font-bold text-foreground">Cadastro de Pacientes</h2>
             <p className="text-muted-foreground text-sm">Gerencie os dados dos pacientes da clínica</p>
           </div>
           <Badge variant="secondary" className="gap-1">
@@ -50,7 +50,7 @@ const ReceptionPatients = () => {
           <CardHeader>
             <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
               <CardTitle className="text-lg">Lista de Pacientes</CardTitle>
-              <div className="relative w-full sm:w-72 pb-24 md:pb-8">
+              <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
                   placeholder="Buscar por nome, CPF ou telefone..."
@@ -70,44 +70,42 @@ const ReceptionPatients = () => {
                 <p className="text-muted-foreground">Nenhum paciente encontrado</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nome</TableHead>
-                      <TableHead>CPF</TableHead>
-                      <TableHead>Telefone</TableHead>
-                      <TableHead>Data Nasc.</TableHead>
-                      <TableHead>Cadastro</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>CPF</TableHead>
+                    <TableHead>Telefone</TableHead>
+                    <TableHead>Data Nasc.</TableHead>
+                    <TableHead>Cadastro</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {patients.map((p) => (
+                    <TableRow key={p.id}>
+                      <TableCell data-label="Nome" className="font-medium">{p.first_name} {p.last_name}</TableCell>
+                      <TableCell data-label="CPF" className="text-muted-foreground">{p.cpf || "—"}</TableCell>
+                      <TableCell data-label="Telefone">
+                        {p.phone ? (
+                          <span className="flex items-center gap-1 text-sm">
+                            <Phone className="w-3.5 h-3.5" /> {p.phone}
+                          </span>
+                        ) : "—"}
+                      </TableCell>
+                      <TableCell data-label="Nasc." className="text-muted-foreground">{p.date_of_birth || "—"}</TableCell>
+                      <TableCell data-label="Cadastro" className="text-muted-foreground text-xs">
+                        {new Date(p.created_at).toLocaleDateString("pt-BR")}
+                      </TableCell>
+                      <TableCell data-label="" className="text-right">
+                        <Button variant="ghost" size="sm">
+                          <Eye className="w-4 h-4 mr-1" /> Ver
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {patients.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell className="font-medium">{p.first_name} {p.last_name}</TableCell>
-                        <TableCell className="text-muted-foreground">{p.cpf || "—"}</TableCell>
-                        <TableCell>
-                          {p.phone ? (
-                            <span className="flex items-center gap-1 text-sm">
-                              <Phone className="w-3.5 h-3.5" /> {p.phone}
-                            </span>
-                          ) : "—"}
-                        </TableCell>
-                        <TableCell className="text-muted-foreground">{p.date_of_birth || "—"}</TableCell>
-                        <TableCell className="text-muted-foreground text-xs">
-                          {new Date(p.created_at).toLocaleDateString("pt-BR")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button variant="ghost" size="sm">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                  ))}
+                </TableBody>
+              </Table>
             )}
           </CardContent>
         </Card>
