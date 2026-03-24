@@ -249,7 +249,7 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
                       </div>
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <Button variant="ghost" size="icon" aria-label="Baixar"
+                      <Button variant="ghost" size="icon"
                         className="h-8 w-8 text-muted-foreground"
                         aria-label="Exportar" onClick={(ev) => { ev.stopPropagation(); exportConversation(conv); }}
                       >
