@@ -51,7 +51,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
   }, []);
 
   return (
-    <div className="relative min-h-screen overflow-x-clip bg-background">
+    <div className="relative min-h-screen overflow-x-hidden overflow-y-visible bg-background">
       <div className="absolute inset-0 -z-10 bg-[image:var(--landing-bg)] pointer-events-none" />
       <SEOHead
         title="Consultas Médicas Online por Vídeo 24h | AloClínica"

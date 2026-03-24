@@ -176,17 +176,30 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
     overflow-x: hidden;
+    min-height: 100%;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
-    overscroll-behavior-y: contain;
+    overscroll-behavior-y: auto;
     overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 100dvh;
     padding-top: env(safe-area-inset-top, 0px);
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
+  }
+
+  #root {
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  main#main-content {
+    min-height: 100dvh;
+    overflow: visible;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -218,6 +231,16 @@
   p, li, td, th, span, a, label {
     overflow-wrap: break-word;
     word-break: break-word;
+  }
+}
+
+@supports not (height: 100dvh) {
+  @layer base {
+    body,
+    #root,
+    main#main-content {
+      min-height: 100vh;
+    }
   }
 }
 
