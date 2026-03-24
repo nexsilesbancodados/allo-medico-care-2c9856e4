@@ -540,8 +540,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             </div>
           </aside>
         )}
-        <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-24 md:pb-10 scroll-smooth">
-          <div className="px-4 py-4 md:px-6 md:py-5 lg:px-8 lg:py-6 min-h-0 max-w-[1400px] mx-auto">
+        <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-[88px] md:pb-10 scroll-smooth">
+          <div className="px-3 xs:px-4 py-3 xs:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6 min-h-0 max-w-[1400px] mx-auto w-full"
+            style={{ paddingLeft: "max(0.75rem, env(safe-area-inset-left, 0px))", paddingRight: "max(0.75rem, env(safe-area-inset-right, 0px))" }}>
             <div className="hidden md:block"><DashboardBreadcrumbs /></div>
             {children}
           </div>
