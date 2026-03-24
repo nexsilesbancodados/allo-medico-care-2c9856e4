@@ -158,7 +158,7 @@ const DoctorOnboarding = () => {
           {/* Next step highlight */}
           {nextStep && (
             <button
-              onClick={() => navigate(nextStep.path)}
+              onClick={() => nextStep.id === "kyc" ? setShowKYC(true) : navigate(nextStep.path)}
               className="w-full flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/15 transition-all mb-3 text-left active:scale-[0.98]"
             >
               <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
