@@ -278,6 +278,17 @@ const AppointmentsList = () => {
               )}
 
               {(appt.status === "scheduled" || appt.status === "payment_pending") && (
+                <>
+                {appt.status === "payment_pending" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-3 rounded-xl text-xs font-medium gap-1 border-amber-500/30 text-amber-600 hover:bg-amber-500/10"
+                    onClick={() => navigate(`/dashboard/schedule/${appt.doctor_id}?resume=${appt.id}`)}
+                  >
+                    <CreditCard className="w-3.5 h-3.5" /> Pagar
+                  </Button>
+                )}
                 <CancelRescheduleDialog
                   appointmentId={appt.id}
                   doctorId={appt.doctor_id}
@@ -286,6 +297,7 @@ const AppointmentsList = () => {
                   doctorName={appt.doctor_name}
                   onSuccess={fetchAppointments}
                 />
+                </>
               )}
             </div>
           </div>
