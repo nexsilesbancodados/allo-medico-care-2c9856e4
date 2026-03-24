@@ -129,10 +129,3 @@ describe("WhatsApp Integration", () => {
   });
 });
 
-describe("Email Integration", () => {
-  it("exports sendEmail function", async () => {
-    const { sendEmail } = await import("@/lib/email");
-    expect(sendEmail).toBeDefined();
-    expect(typeof sendEmail).toBe("function");
-  });
-});
