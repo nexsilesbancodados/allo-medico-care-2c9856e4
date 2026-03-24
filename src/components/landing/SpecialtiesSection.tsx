@@ -1,25 +1,12 @@
 import { forwardRef } from "react";
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-gsap.registerPlugin(ScrollTrigger);
-import { motion } from "framer-motion";
-import { useState } from "react";
 import { Stethoscope, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import OptimizedImage from "@/components/ui/optimized-image";
 import cardSpecialties from "@/assets/card-specialties.png";
 import cardMultidisciplinary from "@/assets/card-multidisciplinary.png";
 import cardAi from "@/assets/card-ai.png";
 import cardTrained from "@/assets/card-trained.png";
-import specCardiology from "@/assets/spec-cardiology.png";
-import specNeurology from "@/assets/spec-neurology.png";
-import specPediatrics from "@/assets/spec-pediatrics.png";
-import specDermatology from "@/assets/spec-dermatology.png";
-import specOrthopedics from "@/assets/spec-orthopedics.png";
-import specOphthalmology from "@/assets/spec-ophthalmology.png";
-import specEndocrinology from "@/assets/spec-endocrinology.png";
-import specGeneral from "@/assets/spec-general.png";
 
 const highlights = [
   { badge: "Cuidado completo", title: "Mais de 8 especialidades médicas disponíveis", image: cardSpecialties },
@@ -28,99 +15,53 @@ const highlights = [
   { badge: "Equipe capacitada", title: "Especialistas selecionados e treinados para atendimento online", image: cardTrained },
 ];
 
-const specialtyGrid = [
-  { name: "Cardiologia", image: specCardiology },
-  { name: "Neurologia", image: specNeurology },
-  { name: "Pediatria", image: specPediatrics },
-  { name: "Dermatologia", image: specDermatology },
-  { name: "Ortopedia", image: specOrthopedics },
-  { name: "Oftalmologia", image: specOphthalmology },
-  { name: "Endocrinologia", image: specEndocrinology },
-  { name: "Clínico Geral", image: specGeneral },
-];
-
 const SpecialtiesSection = forwardRef<HTMLElement>((_, ref) => {
-  const [isPaused, setIsPaused] = useState(false);
   const navigate = useNavigate();
 
   return (
-    <section id="especialidades" className="py-12 md:py-24">
+    <section ref={ref} id="especialidades" className="py-12 md:py-24">
       <div className="container mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-10 md:mb-16"
-        >
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 text-primary text-sm font-semibold mb-4"
-          >
+        <div className="text-center mb-10 md:mb-14">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/30 text-primary text-sm font-semibold mb-4">
             <Stethoscope className="w-3.5 h-3.5" />
             +20 especialidades
-          </motion.span>
+          </span>
           <h2 className="text-2xl md:text-4xl font-extrabold text-foreground mb-3">
             Nossas <span className="text-gradient">especialidades</span>
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Mais de 200 médicos em diversas áreas prontos para atender você.
+            Mais de 200 médicos e profissionais de saúde em uma vitrine clara, rápida e fácil de explorar.
           </p>
-        </motion.div>
-
-
-        {/* Auto-scrolling highlight cards */}
-        <div
-          className="overflow-hidden"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-        >
-          <motion.div
-            className="flex gap-5"
-            animate={{ x: ["0%", "-50%"] }}
-            transition={{
-              x: { duration: 35, repeat: Infinity, ease: "linear" },
-            }}
-            style={{ animationPlayState: isPaused ? "paused" : "running" }}
-          >
-            {[...highlights, ...highlights].map((item, i) => (
-              <motion.div
-                key={i}
-                whileHover={{ scale: 1.03, y: -5 }}
-                transition={{ duration: 0.3 }}
-                className="relative flex-shrink-0 w-72 md:w-80 h-[420px] rounded-3xl overflow-hidden group cursor-pointer"
-              >
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-300 group-hover:from-black/80" />
-                <div className="absolute top-4 left-4">
-                  <span className="px-3 py-1 rounded-full bg-background/80 backdrop-blur-sm text-xs font-semibold text-foreground transition-all duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
-                    {item.badge}
-                  </span>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-6 transition-transform duration-300 group-hover:translate-y-[-4px]">
-                  <h3 className="text-xl md:text-2xl font-extrabold text-white leading-tight">
-                    {item.title}
-                  </h3>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
         </div>
 
-        {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-          className="text-center mt-10"
-        >
+        <div className="flex gap-4 overflow-x-auto pb-2 md:grid md:grid-cols-2 xl:grid-cols-4 md:overflow-visible md:gap-5">
+          {highlights.map((item) => (
+            <article
+              key={item.title}
+              className="group relative min-w-[272px] md:min-w-0 aspect-[4/5] rounded-[2rem] overflow-hidden border border-border/40 bg-card shadow-card"
+            >
+              <OptimizedImage
+                src={item.image}
+                alt={item.title}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                aspectRatio="4 / 5"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-foreground/85 via-foreground/25 to-transparent" />
+              <div className="absolute inset-x-0 top-0 p-4 md:p-5">
+                <span className="inline-flex rounded-full border border-background/30 bg-background/85 px-3 py-1 text-xs font-semibold text-foreground shadow-sm">
+                  {item.badge}
+                </span>
+              </div>
+              <div className="absolute inset-x-0 bottom-0 p-5 md:p-6">
+                <h3 className="text-2xl font-extrabold leading-tight text-primary-foreground text-balance">
+                  {item.title}
+                </h3>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        <div className="text-center mt-10">
           <Button
             size="lg"
             className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105 cta-shimmer group"
@@ -128,7 +69,7 @@ const SpecialtiesSection = forwardRef<HTMLElement>((_, ref) => {
           >
             Ver todas especialidades <ArrowRight className="w-4 h-4 ml-1 transition-transform group-hover:translate-x-1" />
           </Button>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

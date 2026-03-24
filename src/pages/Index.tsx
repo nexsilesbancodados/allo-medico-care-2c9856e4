@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-import { logError } from "@/lib/logger";
 import { useEffect, useState, forwardRef, lazy, Suspense } from "react";
 import { useTheme } from "next-themes";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +7,7 @@ import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
 import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
+import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
 import { Stethoscope, ShieldCheck, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
 
@@ -93,183 +92,161 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       <HeroSection />
       <SocialProofBar />
 
-      {/* Plantão 24h — animated urgency strip */}
       <section className="py-8 px-4 relative overflow-hidden">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
-          <motion.div
-            initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
-            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            viewport={{ once: true, amount: 0.4 }}
-            transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
-            className="relative rounded-3xl overflow-hidden"
-          >
-            {/* Animated gradient background */}
-            <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_100%] animate-[gradient-slide_6s_ease-in-out_infinite]" />
-
-            {/* Floating orbs */}
-            <motion.div
-              className="absolute w-40 h-40 rounded-full bg-white/[0.06] blur-2xl"
-              style={{ top: "-20%", left: "10%" }}
-              animate={{ x: [0, 30, 0], y: [0, 15, 0] }}
-              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="absolute w-32 h-32 rounded-full bg-white/[0.05] blur-2xl"
-              style={{ bottom: "-15%", right: "15%" }}
-              animate={{ x: [0, -20, 0], y: [0, -12, 0] }}
-              transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            />
-
+          <div className="relative rounded-3xl overflow-hidden bg-gradient-hero shadow-elevated">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary-foreground)/0.22),transparent_38%),radial-gradient(circle_at_bottom_right,hsl(var(--primary-foreground)/0.14),transparent_34%)]" />
             <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-5 px-6 sm:px-10 py-7 sm:py-8">
-              {/* Pulse indicator + text */}
               <div className="flex items-center gap-5 text-center sm:text-left">
-                {/* Animated pulse ring */}
                 <div className="relative shrink-0 hidden sm:flex">
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl bg-white/20"
-                    animate={{ scale: [1, 1.5, 1], opacity: [0.4, 0, 0.4] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut" }}
-                  />
-                  <motion.div
-                    className="absolute inset-0 rounded-2xl bg-white/15"
-                    animate={{ scale: [1, 1.8, 1], opacity: [0.3, 0, 0.3] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeOut", delay: 0.5 }}
-                  />
-                  <div className="relative w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
-                    <Stethoscope className="w-6 h-6 text-white" />
+                  <div className="relative w-14 h-14 rounded-2xl bg-primary-foreground/15 flex items-center justify-center border border-primary-foreground/15 shadow-lg shadow-foreground/10">
+                    <Stethoscope className="w-6 h-6 text-primary-foreground" />
                   </div>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
-                    <motion.span
-                      className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-lg shadow-emerald-400/50"
-                      animate={{ opacity: [1, 0.4, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    />
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-white/60">Ao vivo agora</span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-primary-foreground animate-pulse" />
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-primary-foreground/70">Ao vivo agora</span>
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-extrabold text-white leading-tight">
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-primary-foreground leading-tight">
                     Plantão Clínico 24h
                   </h2>
-                  <p className="text-sm text-white/70 mt-1 font-medium">
+                  <p className="text-sm text-primary-foreground/80 mt-1 font-medium">
                     Médicos disponíveis agora · Sem agendamento
                   </p>
                 </div>
               </div>
 
-              {/* CTA Button */}
-              <motion.div
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.96 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              <Button
+                size="lg"
+                className="bg-background text-primary hover:bg-background/95 rounded-2xl px-8 gap-2.5 shadow-lg shadow-foreground/10 font-extrabold shrink-0 transition-all text-sm sm:text-base"
+                onClick={() => navigate(user ? "/dashboard/urgent-care" : "/consulta-avulsa")}
               >
-                <Button
-                  size="lg"
-                  className="bg-white text-primary hover:bg-white/95 rounded-2xl px-8 gap-2.5 shadow-2xl shadow-black/15 font-extrabold shrink-0 transition-all relative z-10 text-sm sm:text-base"
-                  onClick={() => navigate(user ? "/dashboard/urgent-care" : "/consulta-avulsa")}
-                >
-                  <motion.div
-                    animate={{ rotate: [0, -8, 8, 0] }}
-                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-                  >
-                    <Stethoscope className="w-5 h-5" />
-                  </motion.div>
-                  Acessar Plantão
-                </Button>
-              </motion.div>
+                <Stethoscope className="w-5 h-5" />
+                Acessar Plantão
+              </Button>
             </div>
-          </motion.div>
+          </div>
         </div>
       </section>
 
       <Suspense fallback={null}>
-        <StatsSection />
+        <DeferredSection fallbackClassName="h-28 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">
+          <StatsSection />
+        </DeferredSection>
 
-        <InfoBannerStrip
-          icon={ShieldCheck}
-          label="Cartão de Benefícios"
-          title="Economize até 30% em todas as consultas"
-          highlight="A partir de R$37,90/mês"
-          href="/cartao-beneficios"
-          gradient="from-secondary to-emerald-600"
-          mascotSrc={bannerBenefits}
-        />
+        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <InfoBannerStrip
+            icon={ShieldCheck}
+            label="Cartão de Benefícios"
+            title="Economize até 30% em todas as consultas"
+            highlight="A partir de R$37,90/mês"
+            href="/cartao-beneficios"
+            gradient="from-secondary to-emerald-600"
+            mascotSrc={bannerBenefits}
+          />
+        </DeferredSection>
 
-        <HowItWorksSection />
+        <DeferredSection fallbackClassName="h-[520px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <HowItWorksSection />
+        </DeferredSection>
 
-        <InfoBannerStrip
-          icon={Brain}
-          label="Inteligência Artificial"
-          title="Triagem inteligente com IA"
-          highlight="Descubra o especialista ideal em segundos"
-          href="/teleconsulta"
-          gradient="from-blue-600 to-primary"
-          mascotSrc={bannerAi}
-        />
+        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <InfoBannerStrip
+            icon={Brain}
+            label="Inteligência Artificial"
+            title="Triagem inteligente com IA"
+            highlight="Descubra o especialista ideal em segundos"
+            href="/teleconsulta"
+            gradient="from-blue-600 to-primary"
+            mascotSrc={bannerAi}
+          />
+        </DeferredSection>
 
-        <SpecialtiesSection />
+        <DeferredSection fallbackClassName="h-[620px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <SpecialtiesSection />
+        </DeferredSection>
 
-        <InfoBannerStrip
-          icon={CreditCard}
-          label="Consulta Avulsa"
-          title="Consulte agora sem mensalidade"
-          highlight="A partir de R$89 com receita digital"
-          href="/consulta-avulsa"
-          gradient="from-primary to-violet-600"
-          mascotSrc={bannerConsulta}
-        />
+        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <InfoBannerStrip
+            icon={CreditCard}
+            label="Consulta Avulsa"
+            title="Consulte agora sem mensalidade"
+            highlight="A partir de R$89 com receita digital"
+            href="/consulta-avulsa"
+            gradient="from-primary to-violet-600"
+            mascotSrc={bannerConsulta}
+          />
+        </DeferredSection>
 
-        <PlansSection />
+        <DeferredSection fallbackClassName="h-[720px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <PlansSection />
+        </DeferredSection>
 
-        <InfoBannerStrip
-          icon={HeartPulse}
-          label="Plantão 24h"
-          title="Precisa de atendimento urgente?"
-          highlight="Médicos disponíveis agora"
-          href="/consulta-avulsa"
-          gradient="from-rose-500 to-primary"
-          mascotSrc={bannerPlantao}
-        />
+        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <InfoBannerStrip
+            icon={HeartPulse}
+            label="Plantão 24h"
+            title="Precisa de atendimento urgente?"
+            highlight="Médicos disponíveis agora"
+            href="/consulta-avulsa"
+            gradient="from-rose-500 to-primary"
+            mascotSrc={bannerPlantao}
+          />
+        </DeferredSection>
 
-        <TestimonialsSection />
+        <DeferredSection fallbackClassName="h-[520px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <TestimonialsSection />
+        </DeferredSection>
 
-        <InfoBannerStrip
-          icon={FileText}
-          label="Telelaudo"
-          title="Laudos médicos à distância com IA"
-          highlight="Para clínicas e hospitais"
-          href="/telelaudo"
-          gradient="from-amber-500 to-orange-600"
-          mascotSrc={bannerTelelaudo}
-        />
+        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <InfoBannerStrip
+            icon={FileText}
+            label="Telelaudo"
+            title="Laudos médicos à distância com IA"
+            highlight="Para clínicas e hospitais"
+            href="/telelaudo"
+            gradient="from-amber-500 to-orange-600"
+            mascotSrc={bannerTelelaudo}
+          />
+        </DeferredSection>
 
-        <CTABanner />
-        <FAQSection />
+        <DeferredSection fallbackClassName="h-[340px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <CTABanner />
+        </DeferredSection>
 
-        <section aria-labelledby="triage-heading" className="py-16 px-4">
-          <div className="max-w-2xl mx-auto text-center space-y-5">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
-              <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
+        <DeferredSection fallbackClassName="h-[560px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+          <FAQSection />
+        </DeferredSection>
+
+        <DeferredSection fallbackClassName="h-[260px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="220px 0px">
+          <section aria-labelledby="triage-heading" className="py-16 px-4">
+            <div className="max-w-2xl mx-auto text-center space-y-5">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
+                <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
+              </div>
+              <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
+                Não sabe qual especialidade procurar?
+              </h2>
+              <p className="text-muted-foreground max-w-md mx-auto">
+                Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
+              </p>
+              <Button
+                size="lg"
+                className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
+                onClick={() => setShowQuiz(true)}
+              >
+                <Stethoscope className="w-5 h-5" aria-hidden="true" />
+                Fazer Triagem Gratuita
+              </Button>
             </div>
-            <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
-              Não sabe qual especialidade procurar?
-            </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
-            </p>
-            <Button
-              size="lg"
-              className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
-              onClick={() => setShowQuiz(true)}
-            >
-              <Stethoscope className="w-5 h-5" aria-hidden="true" />
-              Fazer Triagem Gratuita
-            </Button>
-          </div>
-        </section>
+          </section>
+        </DeferredSection>
 
-        <Footer />
+        <DeferredSection fallbackClassName="h-72 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">
+          <Footer />
+        </DeferredSection>
       </Suspense>
 
       <FloatingMobileCTA />
