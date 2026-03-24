@@ -113,6 +113,7 @@ const SystemHealth = lazy(() => import("@/components/admin/SystemHealth"));
 const AdminFinancial = lazy(() => import("@/components/admin/AdminFinancial"));
 const AdminCoupons = lazy(() => import("@/components/admin/AdminCoupons"));
 const AdminDoctorApplications = lazy(() => import("@/components/admin/AdminDoctorApplications"));
+const AdminPACSConfig = lazy(() => import("@/components/admin/AdminPACSConfig"));
 const SupportInbox = lazy(() => import("@/components/support/SupportInbox"));
 
 // EMR wrapper with route params
