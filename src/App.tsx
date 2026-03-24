@@ -109,7 +109,7 @@ const App = () => {
         () => import("./pages/AuthPaciente"),
         () => import("./pages/AuthMedico"),
       ],
-      3000,
+      5000,
     );
 
     const cancelSecondaryPrefetch = prefetchOnIdle(
@@ -123,7 +123,7 @@ const App = () => {
         () => import("./pages/GuestCheckout"),
         () => import("./pages/ForgotPassword"),
       ],
-      8000,
+      12000,
     );
 
     return () => {

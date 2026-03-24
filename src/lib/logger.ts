@@ -1,4 +1,3 @@
-import { captureError } from "@/lib/sentry";
 
 const isDev = import.meta.env.DEV;
 
@@ -25,9 +24,9 @@ export const logError = (
 
     // Wire to Sentry when DSN is configured
     if (error instanceof Error) {
-      captureError(error, { message, ts, ...context });
+      import("@/lib/sentry").then(m => m.captureError(error, { message, ts, ...context })).catch(() => {});
     } else if (error !== undefined && error !== null) {
-      captureError(new Error(String(error)), { message, ts, ...context });
+      import("@/lib/sentry").then(m => m.captureError(new Error(String(error)), { message, ts, ...context })).catch(() => {});
     }
   }
 };
