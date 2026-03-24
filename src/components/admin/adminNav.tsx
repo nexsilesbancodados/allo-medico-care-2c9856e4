@@ -1,4 +1,4 @@
-import { Users, Stethoscope, Building2, Calendar, Shield, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet, Tag, ClipboardList } from "lucide-react";
+import { Users, Stethoscope, Building2, Calendar, Shield, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet, Tag, ClipboardList, Server } from "lucide-react";
 import { NavIcon } from "@/components/ui/nav-icon";
 
 export const getAdminNav = (active: string) => [
