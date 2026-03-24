@@ -91,7 +91,7 @@ const App = () => {
   const [showDeferredFeatures, setShowDeferredFeatures] = useState(false);
 
   useEffect(() => {
-    const timerId = window.setTimeout(() => setShowDeferredFeatures(true), 1200);
+    const timerId = window.setTimeout(() => setShowDeferredFeatures(true), 2500);
     return () => window.clearTimeout(timerId);
   }, []);
 
