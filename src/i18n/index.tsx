@@ -1,14 +1,19 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from "react";
 import ptBR, { type TranslationKeys } from "./locales/pt-BR";
-import en from "./locales/en";
-import es from "./locales/es";
 import { warn } from "@/lib/logger";
+
 export type Locale = "pt-BR" | "en" | "es";
 
-const translations: Record<Locale, Record<TranslationKeys, string>> = {
+// Lazy-load non-default locales to reduce initial JS payload
+const localeLoaders: Record<Locale, () => Promise<Record<TranslationKeys, string>>> = {
+  "pt-BR": () => Promise.resolve(ptBR),
+  en: () => import("./locales/en").then((m) => m.default),
+  es: () => import("./locales/es").then((m) => m.default),
+};
+
+// Cache loaded locales
+const loadedLocales: Partial<Record<Locale, Record<TranslationKeys, string>>> = {
   "pt-BR": ptBR,
-  en,
-  es,
 };
 
 export const LOCALE_LABELS: Record<Locale, string> = {
@@ -38,7 +43,7 @@ const I18nContext = createContext<I18nContextType>({
 const getInitialLocale = (): Locale => {
   try {
     const stored = window.localStorage.getItem("locale") as Locale | null;
-    if (stored && translations[stored]) return stored;
+    if (stored && localeLoaders[stored]) return stored;
 
     const browserLang = navigator.language;
     if (browserLang.startsWith("es")) return "es";
@@ -52,9 +57,26 @@ const getInitialLocale = (): Locale => {
 
 export const I18nProvider = ({ children }: { children: ReactNode }) => {
   const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+  const [translations, setTranslations] = useState<Record<TranslationKeys, string>>(
+    () => loadedLocales[getInitialLocale()] ?? ptBR
+  );
 
   const setLocale = useCallback((l: Locale) => {
-    setLocaleState(l);
+    const cached = loadedLocales[l];
+    if (cached) {
+      setLocaleState(l);
+      setTranslations(cached);
+    } else {
+      localeLoaders[l]()
+        .then((dict) => {
+          loadedLocales[l] = dict;
+          setLocaleState(l);
+          setTranslations(dict);
+        })
+        .catch(() => {
+          warn("[i18n] Failed to load locale:", l);
+        });
+    }
 
     try {
       window.localStorage.setItem("locale", l);
@@ -67,9 +89,22 @@ export const I18nProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  // On mount, load non-default locale if needed
+  useState(() => {
+    const initial = getInitialLocale();
+    if (initial !== "pt-BR" && !loadedLocales[initial]) {
+      localeLoaders[initial]()
+        .then((dict) => {
+          loadedLocales[initial] = dict;
+          setTranslations(dict);
+        })
+        .catch(() => {});
+    }
+  });
+
   const t = useCallback(
-    (key: TranslationKeys): string => translations[locale][key] ?? translations["pt-BR"][key] ?? key,
-    [locale]
+    (key: TranslationKeys): string => translations[key] ?? ptBR[key] ?? key,
+    [translations]
   );
 
   return (
