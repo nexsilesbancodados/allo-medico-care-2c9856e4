@@ -22,7 +22,7 @@ import bannerTelelaudo from "@/assets/banner-telelaudo.png";
 const InfoBannerStrip = lazy(() => import("@/components/landing/InfoBannerStrip"));
 const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
 const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection"));
-const SpecialtiesSection = lazy(() => import("@/components/landing/SpecialtiesSection"));
+
 const PlansSection = lazy(() => import("@/components/landing/PlansSection"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
 const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
@@ -168,9 +168,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         />
       </DeferredSection>
 
-      <DeferredSection fallbackClassName="h-[620px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-        <SpecialtiesSection />
-      </DeferredSection>
 
       <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <InfoBannerStrip
