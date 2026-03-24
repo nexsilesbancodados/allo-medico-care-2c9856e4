@@ -206,12 +206,11 @@
     height: auto;
   }
 
-  /* Ensure tables don't overflow */
+  /* Keep tables responsive without forcing all tables to become block elements */
   table {
-    overflow-x: auto;
-    display: block;
     max-width: 100%;
   }
+
 
   /* Prevent long words/URLs from causing horizontal overflow */
   p, li, td, th, span, a, label {
@@ -345,7 +344,7 @@
 
 /* Landscape mobile — reduce vertical padding */
 @media (max-height: 500px) and (orientation: landscape) {
-  .pb-\\[88px\\] { padding-bottom: 64px !important; }
+  [class~="pb-[88px]"] { padding-bottom: 64px !important; }
 }
 
 /* Dark mode bottom nav glass */
@@ -731,18 +730,23 @@
 
 /* ─── Mobile — App Feel ──────────────────────────────────────────────── */
 @media (max-width: 767px) {
-  * { -webkit-overflow-scrolling: touch; }
+  html, body, #root {
+    min-height: 100%;
+    overflow-x: clip;
+  }
 
-  /* iOS tap feedback */
+  body {
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+    touch-action: pan-y;
+  }
+
   a, button { -webkit-tap-highlight-color: transparent; }
 
-  /* Scroll containers */
   .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
   .scrollbar-none::-webkit-scrollbar { display: none; }
-
-  /* Prevent pull-to-refresh on dashboard */
-  body { overscroll-behavior-y: contain; }
 }
+
 
 /* ─── Gradient Text ──────────────────────────────────────────────────── */
 .text-gradient-brand {
@@ -1100,11 +1104,11 @@ select:focus {
 
 /* ─── Mobile-first app utilities ─────────────────────────────────────────────── */
 
-/* Prevent body bounce on iOS */
+/* Keep native vertical scrolling working on mobile */
 html, body {
-  overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
 }
+
 
 /* Hide scrollbar globally for horizontal scroll areas */
 .scrollbar-none {

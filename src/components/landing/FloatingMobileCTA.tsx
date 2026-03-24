@@ -7,18 +7,19 @@ import { useNavigate } from "react-router-dom";
 const FloatingMobileCTA = forwardRef<HTMLDivElement>((_, ref) => {
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
-  const [showQuiz, setShowQuiz] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      setVisible(window.scrollY > 400);
+      const nextVisible = window.scrollY > 400;
+      setVisible((prevVisible) => (prevVisible === nextVisible ? prevVisible : nextVisible));
     };
+
+    handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const openQuiz = () => {
-    // Dispatch event to open SpecialtyQuiz from Index
     window.dispatchEvent(new CustomEvent("open-specialty-quiz"));
   };
 
@@ -26,14 +27,14 @@ const FloatingMobileCTA = forwardRef<HTMLDivElement>((_, ref) => {
     <AnimatePresence>
       {visible && (
         <motion.div
+          ref={ref}
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom,8px)+6px)] pt-2 bg-gradient-to-t from-background via-background/95 to-transparent"
+          className="pointer-events-none md:hidden fixed bottom-0 left-0 right-0 z-40 px-3 pb-[calc(env(safe-area-inset-bottom,8px)+6px)] pt-2 bg-gradient-to-t from-background via-background/95 to-transparent"
         >
-          <div className="space-y-1.5">
-            {/* Urgency text */}
+          <div className="space-y-1.5 pointer-events-auto">
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
