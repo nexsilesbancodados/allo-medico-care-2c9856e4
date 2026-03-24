@@ -57,7 +57,7 @@ const ReceptionMessages = () => {
               </div>
             </CardHeader>
             <CardContent className="p-0">
-              <ScrollArea className="h-[500px]">
+              <ScrollArea className="h-[40vh] sm:h-[500px]">
                 {filtered.map(conv => (
                   <div key={conv.id}>
                     <button

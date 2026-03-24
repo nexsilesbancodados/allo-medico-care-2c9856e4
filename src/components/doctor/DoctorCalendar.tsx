@@ -306,7 +306,7 @@ const DoctorCalendar = () => {
             📅 Dia bloqueado (ausência)
           </div>
         )}
-        <div className="overflow-y-auto max-h-[500px]">
+        <div className="overflow-y-auto max-h-[50vh] sm:max-h-[500px]">
           <div className="grid grid-cols-[56px_1fr] relative" style={{ height: `${HOURS.length * HOUR_HEIGHT}px` }}>
             <div className="relative">
               {HOURS.map(h => (
