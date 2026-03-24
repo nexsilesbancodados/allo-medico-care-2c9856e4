@@ -619,10 +619,10 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                     <span className={moreNav.some(i => i.active) ? "font-extrabold" : ""}>Mais</span>
                   </button>
                 </SheetTrigger>
-                <SheetContent side="bottom" className="rounded-t-[28px] border-border/15 bg-background/98 backdrop-blur-xl max-h-[72vh]"
+                <SheetContent side="bottom" className="rounded-t-[28px] border-border/15 bg-background/98 backdrop-blur-xl max-h-[78vh]"
                   style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 1.5rem)" }}>
                   <div className="pt-2 overflow-y-auto">
-                    <div className="w-10 h-1 bg-muted-foreground/15 rounded-full mx-auto mb-5" aria-hidden="true" />
+                    <div className="w-10 h-1 bg-muted-foreground/15 rounded-full mx-auto mb-4" aria-hidden="true" />
 
                     {(() => {
                       const groups: { label: string; items: NavItem[] }[] = [];
@@ -638,22 +638,25 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                       const activeColor = ROLE_ACTIVE_COLOR[role] ?? ROLE_ACTIVE_COLOR.patient;
 
                       return groups.map((group, gi) => (
-                        <div key={gi} className="mb-5">
+                        <div key={gi} className="mb-4">
                           {group.label && (
-                            <p className="text-[10px] font-bold text-muted-foreground/40 uppercase tracking-[0.15em] mb-2.5 px-4">{group.label}</p>
+                            <div className="flex items-center gap-2 mb-2.5 px-4">
+                              <p className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-[0.15em]">{group.label}</p>
+                              <div className="flex-1 h-px bg-border/20" />
+                            </div>
                           )}
-                          <div className="grid grid-cols-4 gap-2.5 px-3">
+                          <div className="grid grid-cols-3 xs:grid-cols-4 gap-1.5 xs:gap-2 px-2.5">
                             {group.items.map(item => (
                               <Link key={item.href} to={item.href} onClick={() => setMoreOpen(false)}
-                                className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl text-[11px] font-medium transition-all duration-200 active:scale-95 ${
-                                  item.active ? `bg-foreground/6 ${activeColor} font-bold` : "text-muted-foreground hover:bg-muted/40"
+                                className={`flex flex-col items-center gap-1.5 p-2.5 xs:p-3 rounded-2xl text-[11px] font-medium transition-all duration-200 active:scale-[0.93] ${
+                                  item.active ? `bg-foreground/6 ${activeColor} font-semibold` : "text-muted-foreground hover:bg-muted/40"
                                 }`}>
-                                <span className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-200 ${
-                                  item.active ? `${ROLE_ACTIVE_BG[role] ?? "bg-primary/12"}` : "bg-muted/50"
+                                <span className={`w-11 h-11 rounded-[14px] flex items-center justify-center transition-all duration-200 shadow-sm ${
+                                  item.active ? `${ROLE_ACTIVE_BG[role] ?? "bg-primary/12"} ring-1 ring-current/15` : "bg-muted/60"
                                 }`}>
                                   {item.icon}
                                 </span>
-                                <span className="text-center leading-tight line-clamp-1">{item.label}</span>
+                                <span className="text-center leading-tight line-clamp-2 min-h-[26px] flex items-center">{item.label}</span>
                               </Link>
                             ))}
                           </div>
