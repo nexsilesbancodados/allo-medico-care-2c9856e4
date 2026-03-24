@@ -121,7 +121,7 @@ const AdminCoupons = () => {
                   <TableRow><TableCell colSpan={6} className="text-center py-8 text-muted-foreground">Nenhum cupom cadastrado</TableCell></TableRow>
                 ) : coupons.map(c => (
                   <TableRow key={c.id}>
-                    <TableCell>
+                    <TableCell data-label="Código">
                       <div className="flex items-center gap-2">
                         <code className="bg-muted px-2 py-1 rounded text-sm font-mono font-bold">{c.code}</code>
                         <button onClick={() => copyCode(c.code, c.id)} className="text-muted-foreground hover:text-foreground">
@@ -129,14 +129,14 @@ const AdminCoupons = () => {
                         </button>
                       </div>
                     </TableCell>
-                    <TableCell><Badge variant="secondary">{c.discount_percentage}%</Badge></TableCell>
-                    <TableCell>{c.times_used}{c.max_uses ? ` / ${c.max_uses}` : " / ∞"}</TableCell>
-                    <TableCell>{c.expires_at ? format(new Date(c.expires_at), "dd/MM/yyyy", { locale: ptBR }) : "Sem expiração"}</TableCell>
-                    <TableCell>
+                    <TableCell data-label="Desconto"><Badge variant="secondary">{c.discount_percentage}%</Badge></TableCell>
+                    <TableCell data-label="Usos">{c.times_used}{c.max_uses ? ` / ${c.max_uses}` : " / ∞"}</TableCell>
+                    <TableCell data-label="Expira">{c.expires_at ? format(new Date(c.expires_at), "dd/MM/yyyy", { locale: ptBR }) : "Sem expiração"}</TableCell>
+                    <TableCell data-label="Ativo">
                       <Switch checked={c.is_active} onCheckedChange={() => toggleActive(c.id, c.is_active)} />
                     </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="icon" aria-label="Ação" onClick={() =>  deleteCoupon(c.id)} className="text-destructive hover:text-destructive">
+                    <TableCell data-label="">
+                      <Button variant="ghost" size="icon" aria-label="Excluir" onClick={() => deleteCoupon(c.id)} className="text-destructive hover:text-destructive">
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </TableCell>

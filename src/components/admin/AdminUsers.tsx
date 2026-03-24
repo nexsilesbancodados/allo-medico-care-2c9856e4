@@ -173,7 +173,7 @@ const AdminUsers = () => {
 
                 ) : filtered.map(u => (
                   <TableRow key={u.user_id}>
-                    <TableCell>
+                    <TableCell data-label="Usuário">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback className="bg-primary/10 text-primary text-xs">
@@ -183,8 +183,8 @@ const AdminUsers = () => {
                         <span className="font-medium text-foreground">{u.first_name} {u.last_name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{u.phone || "—"}</TableCell>
-                    <TableCell>
+                    <TableCell data-label="Telefone" className="text-muted-foreground">{u.phone || "—"}</TableCell>
+                    <TableCell data-label="Roles">
                       <div className="flex flex-wrap gap-1">
                         {u.roles.map((r: string) => (
                           <Badge key={r} variant="outline" className={`text-xs ${ROLE_COLORS[r] ?? ""}`}>
@@ -193,10 +193,10 @@ const AdminUsers = () => {
                         ))}
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{new Date(u.created_at).toLocaleDateString("pt-BR")}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell data-label="Cadastro" className="text-muted-foreground">{new Date(u.created_at).toLocaleDateString("pt-BR")}</TableCell>
+                    <TableCell data-label="">
                       <Button size="sm" variant="ghost" onClick={() => openDetail(u)}>
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-4 h-4 mr-1" /> Ver
                       </Button>
                     </TableCell>
                   </TableRow>

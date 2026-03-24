@@ -231,7 +231,7 @@ const AdminPatients = () => {
 
                   ) : paged.map(p => (
                     <TableRow key={p.user_id}>
-                      <TableCell>
+                      <TableCell data-label="Paciente">
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
                             <AvatarFallback className="bg-primary/10 text-primary text-xs">
@@ -241,12 +241,12 @@ const AdminPatients = () => {
                           <span className="font-medium text-foreground">{p.first_name} {p.last_name}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">{p.phone || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{p.cpf || "—"}</TableCell>
-                      <TableCell className="text-muted-foreground">{new Date(p.created_at).toLocaleDateString("pt-BR")}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell data-label="Telefone" className="text-muted-foreground">{p.phone || "—"}</TableCell>
+                      <TableCell data-label="CPF" className="text-muted-foreground">{p.cpf || "—"}</TableCell>
+                      <TableCell data-label="Cadastro" className="text-muted-foreground">{new Date(p.created_at).toLocaleDateString("pt-BR")}</TableCell>
+                      <TableCell data-label="">
                         <Button size="sm" variant="ghost" onClick={() => openDetail(p)}>
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4 mr-1" /> Ver
                         </Button>
                       </TableCell>
                     </TableRow>

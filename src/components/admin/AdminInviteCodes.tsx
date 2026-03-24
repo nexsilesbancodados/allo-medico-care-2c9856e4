@@ -107,18 +107,18 @@ const AdminInviteCodes = () => {
 
                 ) : codes.map(c => (
                   <TableRow key={c.id}>
-                    <TableCell className="font-mono font-bold text-foreground tracking-wider">{c.code}</TableCell>
-                    <TableCell>
+                    <TableCell data-label="Código" className="font-mono font-bold text-foreground tracking-wider">{c.code}</TableCell>
+                    <TableCell data-label="Status">
                       {c.is_used ? (
                         <Badge variant="outline">Utilizado</Badge>
                       ) : (
                         <Badge variant="default" className="bg-secondary text-secondary-foreground">Disponível</Badge>
                       )}
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
+                    <TableCell data-label="Criado" className="text-muted-foreground text-sm">
                       {format(new Date(c.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
                     </TableCell>
-                    <TableCell>
+                    <TableCell data-label="">
                       {!c.is_used && (
                         <Button size="sm" variant="ghost" onClick={() => copyCode(c.code, c.id)}>
                           {copiedId === c.id ? <Check className="w-4 h-4 text-secondary" /> : <Copy className="w-4 h-4" />}

@@ -97,16 +97,16 @@ const AdminLogs = () => {
                 ))
               ) : filtered.map(l => (
                   <TableRow key={l.id}>
-                    <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
+                    <TableCell data-label="Data" className="text-muted-foreground text-xs whitespace-nowrap">
                       {format(new Date(l.created_at), "dd/MM/yyyy HH:mm", { locale: ptBR })}
                     </TableCell>
-                    <TableCell className="font-medium text-foreground">{l.action}</TableCell>
-                    <TableCell>
+                    <TableCell data-label="Ação" className="font-medium text-foreground">{l.action}</TableCell>
+                    <TableCell data-label="Tipo">
                       <Badge variant="outline" className={entityColor[l.entity_type] ?? ""}>
                         {l.entity_type}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-xs text-muted-foreground max-w-xs truncate">
+                    <TableCell data-label="Detalhes" className="text-xs text-muted-foreground max-w-xs truncate">
                       {l.details ? JSON.stringify(l.details) : "—"}
                     </TableCell>
                   </TableRow>
