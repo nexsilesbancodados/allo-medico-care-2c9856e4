@@ -1,7 +1,7 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import "./App.css";
-import { unregisterLegacyRootPushServiceWorkers } from "@/lib/push-service-worker";
+// push-service-worker cleanup deferred to after mount
 import App from "./App";
 import ErrorBoundary from "./components/ErrorBoundary";
 
@@ -51,21 +51,32 @@ window.addEventListener("error", (e) => {
   if (isChunkError((e as ErrorEvent).error ?? (e as ErrorEvent).message)) recover();
 }, true);
 
-/* ── Lazy side-effects (non-blocking) ─────────────────── */
-import("./lib/sentry").then(({ initSentry }) => initSentry()).catch(() => {});
-// Network listeners removed - not exported from supabase-helpers
+// Defer Sentry and SW cleanup to after mount to reduce main-thread work during boot
+requestIdleCallback(() => {
+  import("./lib/sentry").then(({ initSentry }) => initSentry()).catch(() => {});
 
-const isPreviewEnvironment = window.location.hostname.startsWith("id-preview--");
-
-if ("serviceWorker" in navigator) {
-  if (isPreviewEnvironment) {
-    void navigator.serviceWorker.getRegistrations()
-      .then((regs) => Promise.all(regs.map((r) => r.unregister()))).catch(() => {});
-    if ("caches" in window) {
-      void caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).catch(() => {});
+  const isPreviewEnvironment = window.location.hostname.startsWith("id-preview--");
+  if ("serviceWorker" in navigator) {
+    if (isPreviewEnvironment) {
+      void navigator.serviceWorker.getRegistrations()
+        .then((regs) => Promise.all(regs.map((r) => r.unregister()))).catch(() => {});
+      if ("caches" in window) {
+        void caches.keys().then((keys) => Promise.all(keys.map((k) => caches.delete(k)))).catch(() => {});
+      }
+    } else {
+      import("@/lib/push-service-worker")
+        .then(({ unregisterLegacyRootPushServiceWorkers }) => unregisterLegacyRootPushServiceWorkers())
+        .catch(() => {});
     }
+  }
+}, { timeout: 5000 });
+
+// requestIdleCallback polyfill for Safari
+function requestIdleCallback(cb: (deadline: { didTimeout: boolean; timeRemaining: () => number }) => void, opts?: { timeout: number }) {
+  if ('requestIdleCallback' in window) {
+    (window as any).requestIdleCallback(cb, opts);
   } else {
-    void unregisterLegacyRootPushServiceWorkers().catch(() => {});
+    setTimeout(() => cb({ didTimeout: true, timeRemaining: () => 0 }), opts?.timeout ?? 1000);
   }
 }
 
