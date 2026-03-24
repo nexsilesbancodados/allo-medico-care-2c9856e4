@@ -209,17 +209,17 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
     return (
       <Link to={item.href} onClick={onClick}
-        className={`nav-item group flex items-center gap-2.5 px-2 py-1.5 rounded-xl text-[13px] transition-all duration-200 relative ${
+        className={`nav-item group flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 relative ${
           item.active
-            ? "bg-foreground text-background font-semibold shadow-md"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted/40"
+            ? "bg-primary text-primary-foreground font-semibold shadow-[0_2px_8px_rgba(0,0,0,.15)]"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
         }`}
       >
-        {icon}
+        <span className={`shrink-0 transition-transform duration-200 ${item.active ? "" : "group-hover:scale-110"}`}>{icon}</span>
         <span className="flex-1 truncate">{item.label}</span>
         {(item.badge ?? 0) > 0 && (
-          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center tabular-nums ${
-            item.active ? "bg-background/20 text-background" : "bg-destructive text-white"
+          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center tabular-nums ${
+            item.active ? "bg-white/25 text-white" : "bg-destructive text-white"
           }`}>
             {(item.badge ?? 0) > 99 ? "99+" : item.badge}
           </span>
@@ -230,12 +230,11 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <div ref={sidebarRef} className="flex flex-col h-full">
-      {/* Logo area */}
-      <div className="flex items-center gap-2.5 px-4 h-14 shrink-0">
-        <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${grad} flex items-center justify-center shadow-md`}>
-          <img src={logoImg} alt="AloClínica" className="w-4.5 h-4.5 object-contain brightness-0 invert" loading="lazy" />
-        </div>
-        <span className="font-bold text-sm tracking-tight text-foreground">AloClínica</span>
+      {/* Logo area — Pingo mascot like mobile header */}
+      <div className="flex items-center gap-2.5 px-4 h-14 shrink-0 border-b border-border/10">
+        <img src={mascotImg} alt="AloClínica" className="w-8 h-8 object-contain select-none shrink-0"
+          style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,.15))" }} />
+        <span className="font-black text-[15px] tracking-tight text-foreground">AloClínica</span>
       </div>
 
       {/* Role badge */}

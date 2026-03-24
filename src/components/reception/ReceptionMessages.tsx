@@ -36,7 +36,7 @@ const ReceptionMessages = () => {
 
   return (
     <DashboardLayout title="Mensagens" nav={getReceptionNav("messages")} role="receptionist">
-      <div className="space-y-6">
+      <div className="space-y-6 pb-24 md:pb-8">
         <div>
           <h2 className="text-2xl font-bold text-foreground tabular-nums">Central de Mensagens</h2>
           <p className="text-muted-foreground text-sm">Comunicação com pacientes via chat interno</p>

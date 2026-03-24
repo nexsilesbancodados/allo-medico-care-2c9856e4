@@ -177,9 +177,10 @@ const AdminLiveConsultations = () => {
           </CardHeader>
           <CardContent>
             {appointments.length === 0 ? (
-              <div className="text-center py-12">
-                <Video className="w-12 h-12 mx-auto text-muted-foreground/20 mb-3" />
-                <><img src={mascotThumbsup} alt="Pingo" className="w-16 h-16 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[12px] font-semibold text-foreground">Nenhuma consulta ativa no momento</p></>
+              <div className="flex flex-col items-center py-10">
+                <img src={mascotThumbsup} alt="Pingo" className="w-24 h-24 object-contain select-none mb-3" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }} />
+                <p className="text-[13px] font-bold text-foreground">Nenhuma consulta ativa</p>
+                <p className="text-[11px] text-muted-foreground mt-1">As consultas em andamento aparecerão aqui</p>
               </div>
             ) : (
               <div className="space-y-2">
