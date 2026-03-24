@@ -12,6 +12,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import type { SpecialtyRow } from "@/types/domain";
+import { lazy, Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const KYCVerification = lazy(() => import("@/components/doctor/KYCVerification"));
 
 interface OnboardingStep {
   id: string;
@@ -45,6 +49,10 @@ const steps: OnboardingStep[] = [
     icon: Video, path: "/dashboard/doctor/waiting-room", check: (d) => d.cameraChecked, estimatedMin: 1,
   },
   {
+    id: "kyc", label: "Verificação KYC", description: "Validação facial e do documento",
+    icon: ShieldCheck, path: "#kyc", check: (d) => d.docProfile?.kyc_status === "verified", estimatedMin: 3,
+  },
+  {
     id: "approval", label: "Aprovação do CRM", description: "Verificação administrativa obrigatória",
     icon: ShieldCheck, path: "/dashboard/profile", check: (d) => !!d.docProfile?.is_approved, estimatedMin: 0,
   },
@@ -64,16 +72,19 @@ const DoctorOnboarding = () => {
   const navigate = useNavigate();
   const [data, setData] = useState<any>(null);
   const [dismissed, setDismissed] = useState(false);
+  const [showKYC, setShowKYC] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [docRes] = await Promise.all([
-        supabase.from("doctor_profiles").select("id, bio, consultation_price, is_approved, crm_verified").eq("user_id", user.id).single(),
-      ]);
+      const docRes = await supabase.from("doctor_profiles").select("id, bio, consultation_price, is_approved, crm_verified, crm").eq("user_id", user.id).single();
 
-      const docProfile = docRes.data;
+      const docProfile = docRes.data as any;
       if (!docProfile) return;
+
+      // Fetch kyc_status separately since it may not be in generated types yet
+      const { data: kycData } = await supabase.from("doctor_profiles").select("kyc_status" as any).eq("id", docProfile.id).single();
+      if (kycData) docProfile.kyc_status = (kycData as any).kyc_status;
 
       const [specRes, slotRes] = await Promise.all([
         supabase.from("doctor_specialties").select("id", { count: "exact", head: true }).eq("doctor_id", docProfile.id),
@@ -147,7 +158,7 @@ const DoctorOnboarding = () => {
           {/* Next step highlight */}
           {nextStep && (
             <button
-              onClick={() => navigate(nextStep.path)}
+              onClick={() => nextStep.id === "kyc" ? setShowKYC(true) : navigate(nextStep.path)}
               className="w-full flex items-center gap-3 p-3 rounded-xl bg-primary/10 border border-primary/20 hover:bg-primary/15 transition-all mb-3 text-left active:scale-[0.98]"
             >
               <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
@@ -169,7 +180,11 @@ const DoctorOnboarding = () => {
               return (
                 <button
                   key={step.id}
-                  onClick={() => !done && navigate(step.path)}
+                  onClick={() => {
+                    if (done) return;
+                    if (step.id === "kyc") { setShowKYC(true); return; }
+                    navigate(step.path);
+                  }}
                   disabled={done}
                   className={`w-full flex items-center gap-3 p-2 rounded-xl text-left transition-all ${
                     done
@@ -190,6 +205,27 @@ const DoctorOnboarding = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* KYC Verification Panel */}
+      {showKYC && data?.docProfile && (
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl mt-4" />}>
+          <div className="mt-4">
+            <KYCVerification
+              doctorProfileId={data.docProfile.id}
+              userName={user?.user_metadata?.full_name || ""}
+              userCRM={data.docProfile.crm || ""}
+              onComplete={() => {
+                setShowKYC(false);
+                // Refresh data
+                setData((prev: any) => ({
+                  ...prev,
+                  docProfile: { ...prev.docProfile, kyc_status: "verified" },
+                }));
+              }}
+            />
+          </div>
+        </Suspense>
+      )}
     </motion.div>
   );
 };

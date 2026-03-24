@@ -918,6 +918,9 @@ export type Database = {
           experience_years: number | null
           id: string
           is_approved: boolean | null
+          kyc_face_match_score: number | null
+          kyc_status: string
+          kyc_verified_at: string | null
           rating: number | null
           rejection_reason: string | null
           total_reviews: number | null
@@ -939,6 +942,9 @@ export type Database = {
           experience_years?: number | null
           id?: string
           is_approved?: boolean | null
+          kyc_face_match_score?: number | null
+          kyc_status?: string
+          kyc_verified_at?: string | null
           rating?: number | null
           rejection_reason?: string | null
           total_reviews?: number | null
@@ -960,6 +966,9 @@ export type Database = {
           experience_years?: number | null
           id?: string
           is_approved?: boolean | null
+          kyc_face_match_score?: number | null
+          kyc_status?: string
+          kyc_verified_at?: string | null
           rating?: number | null
           rejection_reason?: string | null
           total_reviews?: number | null
