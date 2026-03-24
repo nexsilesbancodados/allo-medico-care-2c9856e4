@@ -1099,11 +1099,11 @@ select:focus {
 
 /* ─── Mobile-first app utilities ─────────────────────────────────────────────── */
 
-/* Prevent body bounce on iOS */
+/* Keep native vertical scrolling working on mobile */
 html, body {
-  overscroll-behavior: none;
   -webkit-tap-highlight-color: transparent;
 }
+
 
 /* Hide scrollbar globally for horizontal scroll areas */
 .scrollbar-none {
