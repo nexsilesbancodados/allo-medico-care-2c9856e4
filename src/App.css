@@ -1,10 +1,19 @@
-/* ── Dashboard scroll fix ──
-   On mobile, the main content area inside DashboardLayout needs
-   a constrained height to activate overflow-y-auto scrolling.
-   The header is ~56px on mobile, bottom nav is ~68px + safe area. */
+/* ── Dashboard mobile scroll fix ──
+   Constrains main content height on mobile so overflow-y-auto triggers.
+   Without this, the flex parent grows infinitely and content never scrolls. */
 @media (max-width: 767px) {
-  main.overflow-y-auto {
+  main.overflow-y-auto.scroll-smooth {
     max-height: calc(100dvh - 56px);
+    min-height: 0;
     -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Fallback for browsers without dvh support */
+@supports not (height: 100dvh) {
+  @media (max-width: 767px) {
+    main.overflow-y-auto.scroll-smooth {
+      max-height: calc(100vh - 56px);
+    }
   }
 }
