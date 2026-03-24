@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Send, Headphones, Sparkles, CalendarDays, CreditCard, Stethoscope, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -78,7 +78,7 @@ async function streamChat({
   onDone();
 }
 
-const PingoChatbot = forwardRef<HTMLDivElement>((_, _ref) => {
+const PingoChatbot = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, roles, profile } = useAuth();
@@ -466,7 +466,6 @@ const PingoChatbot = forwardRef<HTMLDivElement>((_, _ref) => {
       </AnimatePresence>
     </>
   );
-});
+};
 
-PingoChatbot.displayName = "PingoChatbot";
 export default PingoChatbot;

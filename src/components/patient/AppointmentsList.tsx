@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
-import { Calendar as CalendarIcon, Clock, FileText, Video, Search, Download, Filter, ArrowLeft, ChevronRight, MoreHorizontal } from "lucide-react";
+import { Calendar as CalendarIcon, Clock, FileText, Video, Search, Download, Filter, ArrowLeft, ChevronRight, MoreHorizontal, CreditCard } from "lucide-react";
 import { format, isWithinInterval, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, subMonths } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getPatientNav } from "./patientNav";
@@ -278,6 +278,17 @@ const AppointmentsList = () => {
               )}
 
               {(appt.status === "scheduled" || appt.status === "payment_pending") && (
+                <>
+                {appt.status === "payment_pending" && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-3 rounded-xl text-xs font-medium gap-1 border-amber-500/30 text-amber-600 hover:bg-amber-500/10"
+                    onClick={() => navigate(`/dashboard/schedule/${appt.doctor_id}?resume=${appt.id}`)}
+                  >
+                    <CreditCard className="w-3.5 h-3.5" /> Pagar
+                  </Button>
+                )}
                 <CancelRescheduleDialog
                   appointmentId={appt.id}
                   doctorId={appt.doctor_id}
@@ -286,6 +297,7 @@ const AppointmentsList = () => {
                   doctorName={appt.doctor_name}
                   onSuccess={fetchAppointments}
                 />
+                </>
               )}
             </div>
           </div>
