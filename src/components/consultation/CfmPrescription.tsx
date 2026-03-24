@@ -277,7 +277,7 @@ const CfmPrescription = ({
             <Button variant="ghost"
               size="icon" aria-label="Fechar"
               onClick={handleCloseIframe}
-              className="h-8 w-8" aria-label="Fechar"
+              className="h-8 w-8"
             >
               <X className="w-4 h-4" />
             </Button>

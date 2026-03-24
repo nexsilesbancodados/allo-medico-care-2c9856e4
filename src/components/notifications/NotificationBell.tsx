@@ -170,8 +170,7 @@ const NotificationBell = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Notificações" className="relative h-9 w-9 rounded-xl"
-              aria-label="Notificações">
+        <Button variant="ghost" size="icon" aria-label="Notificações" className="relative h-9 w-9 rounded-xl">
           <Bell className="w-4.5 h-4.5" />
           <AnimatePresence>
             {unreadCount > 0 && (

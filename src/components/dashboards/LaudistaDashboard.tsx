@@ -151,10 +151,10 @@ const LaudistaDashboard = () => {
           kpis={[
             { label: "Fila", value: stats?.pending ?? 0 },
             { label: "Em análise", value: stats?.inReview ?? 0 },
-            { label: "Laudados", value: stats?.reported ?? 0 },
+            { label: "Laudados", value: stats?.totalReported ?? 0 },
             { label: "Hoje", value: stats?.todayReported ?? 0 },
           ]}
-          loading={loading}
+          loading={loadingStats}
           onRefresh={() => { queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] }); }}
           refreshing={refreshing}
         />

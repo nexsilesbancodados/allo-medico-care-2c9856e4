@@ -188,7 +188,7 @@ const MedicalCertificate = () => {
       document_hash: documentHash,
       details: { days: certType === "absence" ? days : null, cid: cid || null, reason: reason || null },
     }).then(({ error }) => {
-      if (error) warn("Failed to persist verification:", error);
+      if (error) console.warn("Failed to persist verification:", error);
     });
 
     setGenerating(false);

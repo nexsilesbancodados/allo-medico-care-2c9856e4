@@ -255,7 +255,7 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
                       >
                         <Download className="w-3.5 h-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" aria-label="Excluir"
+                      <Button variant="ghost" size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-destructive"
                         aria-label="Excluir" onClick={(ev) => { ev.stopPropagation(); deleteConversation(conv.id); }}
                       >

@@ -196,7 +196,7 @@ const ClinicDashboard = () => {
           ]}
           loading={loading}
           onRefresh={undefined}
-          refreshing={refreshing}
+          refreshing={false}
         />
       </div>
 

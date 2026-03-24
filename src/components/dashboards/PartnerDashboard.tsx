@@ -67,7 +67,7 @@ const PartnerDashboard = () => {
           ]}
           loading={loading}
           onRefresh={undefined}
-          refreshing={refreshing}
+          refreshing={false}
         />
       </div>
 
