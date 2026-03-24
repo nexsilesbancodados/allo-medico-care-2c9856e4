@@ -73,12 +73,17 @@ if ("serviceWorker" in navigator) {
 const root = document.getElementById("root");
 if (!root) throw new Error("Root element not found");
 
+document.documentElement.setAttribute("data-app-booting", "true");
+document.body.setAttribute("data-app-booting", "true");
+
 try {
   createRoot(root).render(
     <ErrorBoundary>
       <App />
     </ErrorBoundary>,
   );
+  document.documentElement.removeAttribute("data-app-booting");
+  document.body.removeAttribute("data-app-booting");
   clearReloadFlag();
 } catch (err) {
   if (isChunkError(err)) { recover(); }
