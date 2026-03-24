@@ -9,7 +9,7 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
-const Index = lazy(() => import("./pages/Index"));
+import Index from "./pages/Index";
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 import { logError } from "@/lib/logger";
 import { Button } from "@/components/ui/button";

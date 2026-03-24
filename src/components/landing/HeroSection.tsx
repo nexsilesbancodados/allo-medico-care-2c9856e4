@@ -50,7 +50,7 @@ const HeroSection = memo(
     }, []);
 
     useEffect(() => {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (window.matchMedia("(prefers-reduced-motion: reduce), (max-width: 767px)").matches) return;
       const ctx = gsap.context(() => {
         const items = heroRef.current?.querySelectorAll(".gsap-hero-item");
         if (items?.length) {

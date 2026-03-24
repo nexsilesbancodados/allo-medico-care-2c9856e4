@@ -51,9 +51,8 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-x-clip">
-      {/* Fixed subtle gradient background */}
-      <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(195,100%,95%)] via-[hsl(200,85%,88%)] to-[hsl(210,90%,72%)] dark:from-[hsl(210,40%,10%)] dark:via-[hsl(200,35%,14%)] dark:to-[hsl(195,30%,12%)] pointer-events-none" />
+    <div className="relative min-h-screen overflow-x-clip bg-background">
+      <div className="absolute inset-0 -z-10 bg-[image:var(--landing-bg)] pointer-events-none" />
       <SEOHead
         title="Consultas Médicas Online por Vídeo 24h | AloClínica"
         description="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades, plantão clínico 24h. Sua saúde na palma da mão."
