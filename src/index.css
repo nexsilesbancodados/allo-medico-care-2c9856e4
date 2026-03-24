@@ -730,17 +730,6 @@
 
 /* ─── Mobile — App Feel ──────────────────────────────────────────────── */
 @media (max-width: 767px) {
-  html, body, #root {
-    min-height: 100%;
-    overflow-x: clip;
-  }
-
-  body {
-    overflow-y: auto;
-    overscroll-behavior-y: auto;
-    touch-action: pan-y;
-  }
-
   a, button { -webkit-tap-highlight-color: transparent; }
 
   .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
