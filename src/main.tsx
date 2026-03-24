@@ -1,5 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import "./App.css";
 import { unregisterLegacyRootPushServiceWorkers } from "@/lib/push-service-worker";
 
 /* ── Chunk-error recovery ─────────────────────────────── */
