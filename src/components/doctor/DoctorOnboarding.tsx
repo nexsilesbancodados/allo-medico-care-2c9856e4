@@ -77,12 +77,14 @@ const DoctorOnboarding = () => {
   useEffect(() => {
     if (!user) return;
     const fetchData = async () => {
-      const [docRes] = await Promise.all([
-        supabase.from("doctor_profiles").select("id, bio, consultation_price, is_approved, crm_verified, crm, kyc_status" as any).eq("user_id", user.id).single(),
-      ]);
+      const docRes = await supabase.from("doctor_profiles").select("id, bio, consultation_price, is_approved, crm_verified, crm").eq("user_id", user.id).single();
 
-      const docProfile = docRes.data;
+      const docProfile = docRes.data as any;
       if (!docProfile) return;
+
+      // Fetch kyc_status separately since it may not be in generated types yet
+      const { data: kycData } = await supabase.from("doctor_profiles").select("kyc_status" as any).eq("id", docProfile.id).single();
+      if (kycData) docProfile.kyc_status = (kycData as any).kyc_status;
 
       const [specRes, slotRes] = await Promise.all([
         supabase.from("doctor_specialties").select("id", { count: "exact", head: true }).eq("doctor_id", docProfile.id),
