@@ -922,16 +922,7 @@ select:focus {
 .mb-safe { margin-bottom: env(safe-area-inset-bottom, 0px); }
 .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
 
-/* ─── Improved scrollbar ─────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: hsl(var(--border));
-  border-radius: 99px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
-}
+/* ─── Hidden scrollbar (already applied globally) ─────────────────────────── */
 
 /* ─── Print styles ───────────────────────────────────────────────────────────── */
 @media print {
