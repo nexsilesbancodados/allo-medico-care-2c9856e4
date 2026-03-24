@@ -1,46 +1,15 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
-import { useInView } from "framer-motion";
+import { forwardRef, useEffect, useState } from "react";
 import { Users, Stethoscope, Star, Clock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
 import mascotWave from "@/assets/mascot-wave.png";
 import mascotWelcome from "@/assets/mascot-welcome.png";
 import mascotReading from "@/assets/mascot-reading.png";
 
-gsap.registerPlugin(ScrollTrigger);
-
-const GsapCounter = ({ target, suffix, decimals = 0 }: { target: number; suffix: string; decimals?: number }) => {
-  const ref = useRef<HTMLSpanElement>(null);
-  const wrapRef = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(wrapRef, { once: true });
-
-  useEffect(() => {
-    if (!isInView || !ref.current) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      ref.current.textContent = decimals > 0 ? target.toFixed(decimals) : target.toLocaleString("pt-BR");
-      return;
-    }
-    const obj = { val: 0 };
-    const tween = gsap.to(obj, {
-      val: target, duration: 1.8, ease: "power2.out",
-      onUpdate: () => {
-        if (ref.current)
-          ref.current.textContent = decimals > 0
-            ? obj.val.toFixed(decimals)
-            : Math.round(obj.val).toLocaleString("pt-BR");
-      },
-    });
-    return () => { tween.kill(); };
-  }, [isInView, target, decimals]);
-
-  return (
-    <span ref={wrapRef}>
-      <span ref={ref}>0</span>{suffix}
-    </span>
-  );
+const formatStatValue = (target: number, suffix: string, decimals = 0) => {
+  const value = decimals > 0 ? target.toFixed(decimals) : target.toLocaleString("pt-BR");
+  return `${value}${suffix}`;
 };
 
 const iconStyles = [
@@ -59,24 +28,6 @@ const fallbackStats = [
 
 const StatsSection = forwardRef<HTMLElement>((_, ref) => {
   const [stats, setStats] = useState(fallbackStats);
-  const sectionRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const cards = el.querySelectorAll(".stat-card");
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: el, start: "top 82%", once: true,
-        onEnter: () =>
-          gsap.fromTo(cards,
-            { opacity: 0, y: 20, filter: "blur(4px)" },
-            { opacity: 1, y: 0, filter: "blur(0px)", stagger: 0.09, duration: 0.6, ease: "power3.out", clearProps: "all" }
-          ),
-      });
-    }, el);
-    return () => ctx.revert();
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -105,11 +56,11 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
   return (
     <section ref={ref} className="py-12 md:py-20 relative">
       <div className="container mx-auto px-4 sm:px-6">
-        <div ref={sectionRef} className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
           {stats.map((stat, i) => (
             <div
               key={i}
-              className="stat-card group relative rounded-2xl bg-card border border-border/40 p-5 sm:p-6 overflow-hidden hover:border-primary/20 hover:shadow-lg hover:shadow-primary/[0.04] hover:-translate-y-0.5 transition-all duration-300 cursor-default"
+              className="stat-card group relative rounded-2xl bg-card border border-border/40 p-5 sm:p-6 overflow-hidden hover:border-primary/20 hover:shadow-lg hover:shadow-primary/[0.04] transition-colors duration-200 cursor-default"
             >
               {/* Mascot watermark */}
               <img
@@ -127,7 +78,7 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
 
                 {/* Number */}
                 <p className="text-2xl sm:text-3xl lg:text-[2rem] font-extrabold tracking-tight text-foreground leading-none tabular-nums">
-                  <GsapCounter target={stat.target} suffix={stat.suffix} decimals={stat.decimals} />
+                  {formatStatValue(stat.target, stat.suffix, stat.decimals)}
                 </p>
 
                 {/* Label */}

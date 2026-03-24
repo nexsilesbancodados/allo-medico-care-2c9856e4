@@ -57,10 +57,7 @@ const HeroSection = memo(
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-24 items-center">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-primary/20 bg-primary/[0.06] text-primary text-sm font-semibold mb-8 select-none">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
-                </span>
+                <span className="inline-flex h-2 w-2 rounded-full bg-success shadow-sm shadow-success/40" />
                 Médicos disponíveis agora
               </div>
 
