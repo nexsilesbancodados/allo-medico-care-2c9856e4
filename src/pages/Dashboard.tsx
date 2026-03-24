@@ -6,10 +6,7 @@ import { lazy, Suspense, ReactNode, useEffect, useState, useCallback } from "rea
 import { supabase } from "@/integrations/supabase/client";
 import { warn } from "@/lib/logger";
 
-// ── Invisible loader (no spinner, no flash) ──
-const PageLoader = () => (
-  <div className="min-h-screen" aria-hidden="true" />
-);
+import PingoLoader from "@/components/PingoLoader";
 
 // ── LAZY imports: dashboard shells ──
 const PatientDashboard = lazy(() => import("@/components/dashboards/PatientDashboard"));
@@ -240,7 +237,7 @@ const Dashboard = () => {
   }, [loading, checkingPlan, roles]);
 
   if (loading || checkingPlan) {
-    return <PageLoader />;
+    return <PingoLoader />;
   }
 
   if (!user) return <Navigate to="/auth" replace />;
@@ -286,7 +283,7 @@ const Dashboard = () => {
   };
 
   return (
-    <Suspense fallback={<PageLoader />}>
+    <Suspense fallback={<PingoLoader />}>
     <Routes>
       <Route index element={<IndexDashboard />} />
 

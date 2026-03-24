@@ -74,11 +74,7 @@ const queryClient = new QueryClient({
   },
 });
 
-const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen bg-background">
-    <div className="w-8 h-8 border-3 border-primary/30 border-t-primary rounded-full animate-spin" />
-  </div>
-);
+import PingoLoader from "./components/PingoLoader";
 
 const KeyboardShortcutsProvider = () => {
   useKeyboardShortcuts();
@@ -179,7 +175,7 @@ const App = () => {
                     Pular para o conteúdo
                   </a>
                   <main id="main-content">
-                    <Suspense fallback={<PageLoader />}>
+                    <Suspense fallback={<PingoLoader />}>
                       <Routes>
                         <Route path="/" element={<Index />} />
                         <Route path="/auth" element={<Auth />} />
