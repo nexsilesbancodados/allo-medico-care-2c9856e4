@@ -71,21 +71,15 @@ const PartnerDashboard = () => {
         />
       </div>
 
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
+        <div className="space-y-4">
         <StatBento loading={loading} stats={[
-          { label: "Total de validações", value: validations.length, icon: "💊", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: 8 , accentClass: "bg-emerald-500" },
-          { label: "Dispensados", value: dispensedCount, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400" },
-          { label: "Taxa de conversão", value: `${conversionRate}%`, icon: "📈", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", trend: { value: conversionRate > 50 ? 5 : -2 , accentClass: "bg-amber-500" } },
-          { label: "Hoje", value: validations.filter(v => new Date(v.created_at).toDateString() === new Date().toDateString()).length, icon: "📅", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueClass: "text-violet-600 dark:text-violet-400" },
+          { label: "Total de validações", value: validations.length, icon: "💊", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: 8, accentClass: "bg-emerald-500" },
+          { label: "Dispensados", value: dispensedCount, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", accentClass: "bg-blue-500" },
+          { label: "Taxa de conversão", value: `${conversionRate}%`, icon: "📈", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", accentClass: "bg-amber-500" },
+          { label: "Hoje", value: validations.filter(v => new Date(v.created_at).toDateString() === new Date().toDateString()).length, icon: "📅", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueClass: "text-violet-600 dark:text-violet-400", accentClass: "bg-violet-500" },
         ]} />
 
-        <Tabs defaultValue="validate">
-          <TabsList className="h-11 rounded-xl border border-border/30 bg-muted/40 p-1">
-            <TabsTrigger value="validate" className="rounded-lg text-[11.5px] gap-1.5 font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm"><Pill className="w-3.5 h-3.5" /> Validar</TabsTrigger>
-            <TabsTrigger value="history" className="rounded-lg text-[11.5px] gap-1.5 font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm"><FileText className="w-3.5 h-3.5" /> Histórico</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="validate" className="mt-5">
-            
         {/* Pingo Banner */}
         <PingoBannerCard
           pingImg={pingoPartner}
@@ -98,6 +92,17 @@ const PartnerDashboard = () => {
           title="Receitas 100% autênticas"
           subtitle="Busque e dispense com segurança"
         />
+        </div>{/* end LEFT col */}
+
+        <div className="space-y-4">
+        <Tabs defaultValue="validate">
+          <TabsList className="h-11 rounded-xl border border-border/30 bg-muted/40 p-1">
+            <TabsTrigger value="validate" className="rounded-lg text-[11.5px] gap-1.5 font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm"><Pill className="w-3.5 h-3.5" /> Validar</TabsTrigger>
+            <TabsTrigger value="history" className="rounded-lg text-[11.5px] gap-1.5 font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm"><FileText className="w-3.5 h-3.5" /> Histórico</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="validate" className="mt-5">
+            
 <PrescriptionFinder onValidated={fetchValidations} />
           </TabsContent>
 
@@ -137,6 +142,8 @@ const PartnerDashboard = () => {
             </div>
           </TabsContent>
         </Tabs>
+        </div>
+        </div>
       </div>
     </DashboardLayout>
   );

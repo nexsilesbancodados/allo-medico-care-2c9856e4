@@ -161,15 +161,21 @@ const LaudistaDashboard = () => {
       </div>
 
       {/* ── CONTENT ── */}
-      <div className="mt-4 space-y-4">
+      <div className="mt-4 space-y-4 pb-24 md:pb-8">
 
-        {/* ── Bento Stats ── */}
+        {/* ── Bento Stats — full width ── */}
         <StatBento loading={loadingStats} stats={[
           { label: "Na fila (pendente)", value: stats?.pending ?? 0, icon: "📋", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-700 dark:text-amber-400", accentClass: "bg-amber-500" },
           { label: "Em análise", value: stats?.inReview ?? 0, icon: "🔍", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", accentClass: "bg-blue-500" },
-          { label: "Total laudados", value: stats?.totalReported ?? 0, icon: "✅", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: 22 , accentClass: "bg-emerald-500" },
+          { label: "Total laudados", value: stats?.totalReported ?? 0, icon: "✅", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: 22, accentClass: "bg-emerald-500" },
           { label: "Laudados hoje", value: stats?.todayReported ?? 0, icon: "🎯", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueClass: "text-violet-600 dark:text-violet-400", accentClass: "bg-violet-500" },
         ]} />
+
+        {/* ── Desktop 2-col grid ── */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
+
+        {/* LEFT col */}
+        <div className="space-y-4">
 
         {/* ── Urgent Alert ── */}
         {!loadingExams && urgentCount > 0 && (
@@ -211,6 +217,10 @@ const LaudistaDashboard = () => {
 
 
         {/* Pingo Banner */}
+        </div>{/* end LEFT col */}
+
+        {/* RIGHT col */}
+        <div className="space-y-4">
         <PingoBannerCard
           pingImg={mascotReading}
           pingAlt="Pingo"
@@ -348,7 +358,9 @@ const LaudistaDashboard = () => {
             ))}
           </div>
         </motion.div>
-      </div>
+        </div>{/* end RIGHT col */}
+        </div>{/* end 2-col grid */}
+      </div>{/* end content */}
       </motion.div>
     </DashboardLayout>
   );

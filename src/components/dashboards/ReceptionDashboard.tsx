@@ -198,9 +198,9 @@ const ReceptionDashboard = () => {
       </div>
 
       {/* ── CONTENT ── */}
-      <div className="mt-4 space-y-4">
+      <div className="mt-4 space-y-4 pb-24 md:pb-8">
 
-        {/* ── Bento Stats ── */}
+        {/* ── Bento Stats — full width ── */}
         <StatBento loading={loading} stats={[
           { label: "Total hoje", value: stats.total, icon: "📅", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-700 dark:text-amber-400", accentClass: "bg-amber-500" },
           { label: "Na fila", value: stats.waiting, icon: "⏳", iconBg: "bg-red-50 dark:bg-red-950/30", valueClass: "text-red-600 dark:text-red-400", accentClass: "bg-red-500" },
@@ -209,6 +209,8 @@ const ReceptionDashboard = () => {
         ]} />
 
         {/* Pingo Banner */}
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
+        <div className="space-y-4">
         <PingoBannerCard
           pingImg={pingoReception}
           pingAlt="Pingo"
@@ -222,6 +224,8 @@ const ReceptionDashboard = () => {
         />
 
         {/* ── Timeline ── */}
+        </div>{/* end LEFT col */}
+        <div className="space-y-4">
         {filteredAppts.length > 0 && (
           <TimelineSchedule
             items={filteredAppts.slice(0, 8).map(a => ({
@@ -269,6 +273,8 @@ const ReceptionDashboard = () => {
             <p className="mt-1 text-[11.5px] text-muted-foreground">{isToday ? "Agenda vazia para hoje" : `Sem consultas em ${format(selectedDate, "dd/MM")}`}</p>
           </div>
         )}
+        </div>{/* end RIGHT col */}
+        </div>{/* end 2-col grid */}
       </div>
       </motion.div>
     </DashboardLayout>
