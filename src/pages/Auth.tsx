@@ -273,37 +273,45 @@ const Auth = () => {
       {/* ── Right panel — form ── */}
       <div className="flex-1 flex flex-col min-h-screen">
         {/* Mobile header with Pingo + logo */}
-        <div className="lg:hidden bg-gradient-to-br from-primary to-secondary px-6 pt-[max(env(safe-area-inset-top,12px),12px)] pb-6 relative overflow-hidden">
+        {/* Mobile header — Pingo + brand */}
+        <div className="lg:hidden bg-gradient-to-br from-primary to-secondary px-5 pt-[max(env(safe-area-inset-top,16px),16px)] pb-0 relative overflow-hidden">
+          {/* Orbs */}
           <div className="absolute top-[-30%] right-[-20%] w-[200px] h-[200px] rounded-full bg-white/[0.06] blur-[60px]" />
-          <Link to="/" className="relative z-10 inline-flex items-center gap-2 text-primary-foreground/80 hover:text-primary-foreground transition text-sm mb-4">
-            <ArrowLeft className="w-4 h-4" /> Voltar
+          <div className="absolute bottom-[-10%] left-[-10%] w-[150px] h-[150px] rounded-full bg-white/[0.04] blur-[40px]" />
+          {/* Back link */}
+          <Link to="/" className="relative z-10 inline-flex items-center gap-1.5 text-white/70 hover:text-white transition text-sm mb-3">
+            <ArrowLeft className="w-4 h-4" /> Voltar ao início
           </Link>
-          <div className="relative z-10 flex items-center gap-4">
-            {/* Pingo mini on mobile */}
-            <motion.img
-              src={mascotWave}
-              alt="Pingo"
-              className="w-20 h-20 object-contain drop-shadow-lg select-none shrink-0"
-              initial={{ opacity: 0, scale: 0.6 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-            />
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <img src={logo} alt="AloClinica" className="w-8 h-8 rounded-lg shadow" />
-                <h1 className="text-lg font-black text-white tracking-tight">AloClínica</h1>
+          {/* Brand + Pingo */}
+          <div className="relative z-10 flex items-end justify-between">
+            <div className="pb-4">
+              <div className="flex items-center gap-2.5 mb-2">
+                <img src={logo} alt="AloClínica" className="w-10 h-10 rounded-2xl shadow-lg ring-2 ring-white/20" />
+                <div>
+                  <h1 className="text-[20px] font-black text-white tracking-tight leading-none">AloClínica</h1>
+                  <p className="text-[10.5px] text-white/60 mt-0.5">Telemedicina de excelência</p>
+                </div>
               </div>
-              <p className="text-xs text-white/65 leading-relaxed">Telemedicina de excelência</p>
-              <div className="flex gap-2 mt-2">
-                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white/80 text-[9px] font-bold border border-white/20">🏥 CFM</span>
-                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white/80 text-[9px] font-bold border border-white/20">🔒 LGPD</span>
-                <span className="px-2 py-0.5 rounded-full bg-white/15 text-white/80 text-[9px] font-bold border border-white/20">⭐ 4.9</span>
+              <div className="flex gap-1.5">
+                <span className="px-2 py-1 rounded-full bg-white/15 text-white/85 text-[9px] font-bold border border-white/20">🏥 CFM</span>
+                <span className="px-2 py-1 rounded-full bg-white/15 text-white/85 text-[9px] font-bold border border-white/20">🔒 LGPD</span>
+                <span className="px-2 py-1 rounded-full bg-white/15 text-white/85 text-[9px] font-bold border border-white/20">⭐ 4.9/5</span>
               </div>
             </div>
+            {/* Pingo — large, coming out of the header */}
+            <motion.img
+              src={mascotWave}
+              alt="Pingo AloClínica"
+              className="w-[110px] h-[110px] object-contain select-none relative z-10"
+              style={{ filter: "drop-shadow(0 -4px 20px rgba(0,0,50,.25))" }}
+              initial={{ opacity: 0, scale: 0.6, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+            />
           </div>
         </div>
 
-        <div className="flex-1 flex items-center justify-center p-6 overflow-y-auto">
+        <div className="flex-1 flex items-center justify-center px-4 py-5 overflow-y-auto sm:p-6">
           <div className="w-full max-w-[420px] py-8">
             <Link to="/" className="lg:hidden inline-flex items-center gap-2 mb-6 text-muted-foreground hover:text-foreground transition text-sm">
               <ArrowLeft className="w-4 h-4" /> Voltar

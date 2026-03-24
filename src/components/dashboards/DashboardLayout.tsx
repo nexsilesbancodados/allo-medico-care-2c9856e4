@@ -450,12 +450,12 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {/* Body */}
       <div className="flex flex-1 min-h-0">
         {nav && nav.length > 0 && (
-          <aside className="hidden md:flex w-52 lg:w-56 shrink-0 flex-col bg-background border-r border-border/15 sticky top-14 h-[calc(100vh-3.5rem)]">
+          <aside className="hidden md:flex w-52 lg:w-60 xl:w-64 shrink-0 flex-col bg-background border-r border-border/15 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto">
             <SidebarContent />
           </aside>
         )}
-        <main className="flex-1 min-w-0 overflow-auto pb-24 md:pb-8">
-          <div className="px-4 py-4 md:px-6 md:py-5 lg:px-8 lg:py-6">
+        <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-24 md:pb-10 scroll-smooth">
+          <div className="px-4 py-4 md:px-6 md:py-5 lg:px-8 lg:py-6 min-h-0 max-w-[1400px] mx-auto">
             <div className="hidden md:block"><DashboardBreadcrumbs /></div>
             {children}
           </div>

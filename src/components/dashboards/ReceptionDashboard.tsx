@@ -23,7 +23,7 @@ import { ActionPills } from "./ActionPills";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
-import { PingoBanner } from "@/components/mascot/PingoMascot";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { TimelineSchedule, ScheduleItem } from "./TimelineSchedule";
 import pingoReception from "@/assets/pingo-reception.png";
 
@@ -172,10 +172,11 @@ const ReceptionDashboard = () => {
 
   return (
     <DashboardLayout title="Recepção" nav={getReceptionNav("overview")}>
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
 
         {/* ── Premium Hero ── */}
-                <HeroBanner
+        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <HeroBanner
           gradient="from-[#451a03] via-[#b45309] to-[#d97706]"
           pingoSrc={pingoReception}
           pingoAlt="Pingo"
@@ -196,6 +197,10 @@ const ReceptionDashboard = () => {
           onRefresh={() => fetchToday(true)}
           refreshing={refreshing}
         />
+      </div>
+
+      {/* ── CONTENT ── */}
+      <div className="mt-4 space-y-4">
 
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
@@ -206,14 +211,16 @@ const ReceptionDashboard = () => {
         ]} />
 
         {/* Pingo Banner */}
-        <PingoBanner
-          variant="reception"
-          mascotSize={88}
+        <PingoBannerCard
+          pingImg={pingoReception}
+          pingAlt="Pingo"
+          pingSize={82}
           bgClass="bg-amber-50 dark:bg-amber-950/20"
-          accentColor="text-amber-600 dark:text-amber-400"
-          label="Recepção"
-          title="Organize a agenda do dia"
-          subtitle="Gerencie agendamentos e filas com facilidade"
+          borderClass="border-amber-100 dark:border-amber-900/30"
+          label="Agenda do dia"
+          labelColor="text-amber-600 dark:text-amber-400"
+          title="Organize os atendimentos"
+          subtitle="Fila, horários e status de cada consulta"
         />
 
         {/* ── Timeline ── */}
@@ -264,6 +271,7 @@ const ReceptionDashboard = () => {
             <p className="mt-1 text-[11.5px] text-muted-foreground">{isToday ? "Agenda vazia para hoje" : `Sem consultas em ${format(selectedDate, "dd/MM")}`}</p>
           </div>
         )}
+      </div>
       </motion.div>
     </DashboardLayout>
   );

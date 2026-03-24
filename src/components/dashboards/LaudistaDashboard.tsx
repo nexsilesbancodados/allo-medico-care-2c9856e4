@@ -26,7 +26,7 @@ import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { AlertBox } from "./AlertBox";
-import { PingoBanner } from "@/components/mascot/PingoMascot";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import mascotReading from "@/assets/mascot-reading.png";
 
 const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
@@ -135,10 +135,11 @@ const LaudistaDashboard = () => {
 
   return (
     <DashboardLayout title="Laudista" nav={getLaudistaNav("home")} role="doctor">
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
 
         {/* ── Premium Hero ── */}
-                <HeroBanner
+        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <HeroBanner
           gradient="from-[#040D24] via-[#0F2B5E] to-[#1e40af]"
           pingoSrc={mascotReading}
           pingoAlt="Pingo"
@@ -159,6 +160,10 @@ const LaudistaDashboard = () => {
           onRefresh={() => { queryClient.refetchQueries({ queryKey: ["laudista-recent-exams"] }); }}
           refreshing={refreshing}
         />
+      </div>
+
+      {/* ── CONTENT ── */}
+      <div className="mt-4 space-y-4">
 
         {/* ── Bento Stats ── */}
         <StatBento loading={loadingStats} stats={[
@@ -208,14 +213,16 @@ const LaudistaDashboard = () => {
 
 
         {/* Pingo Banner */}
-        <PingoBanner
-          variant="reading"
-          mascotSize={88}
+        <PingoBannerCard
+          pingImg={mascotReading}
+          pingAlt="Pingo"
+          pingSize={82}
           bgClass="bg-blue-50 dark:bg-blue-950/20"
-          accentColor="text-blue-600 dark:text-blue-400"
-          label="Telelaudo"
-          title="Analise exames com precisão"
-          subtitle="Fila organizada por prioridade — urgentes no topo"
+          borderClass="border-blue-100 dark:border-blue-900/30"
+          label="Fila de exames"
+          labelColor="text-blue-600 dark:text-blue-400"
+          title="Analise com precisão"
+          subtitle="Urgentes no topo — laudar imediatamente"
         />
 
         {/* Recent Exams Queue */}
@@ -343,6 +350,7 @@ const LaudistaDashboard = () => {
             ))}
           </div>
         </motion.div>
+      </div>
       </motion.div>
     </DashboardLayout>
   );

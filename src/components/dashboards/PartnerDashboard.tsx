@@ -16,7 +16,7 @@ import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { PrescriptionFinder } from "./PrescriptionFinder";
 import { AlertBox } from "./AlertBox";
-import { PingoBanner } from "@/components/mascot/PingoMascot";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import pingoPartner from "@/assets/pingo-partner.png";
 
 const getPartnerNav = (active: string) => [
@@ -50,7 +50,8 @@ const PartnerDashboard = () => {
     <DashboardLayout title="Portal do Parceiro" nav={getPartnerNav(activeNav)}>
       <div className="mx-auto w-full max-w-3xl space-y-5 pb-24">
 
-                <HeroBanner
+                <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <HeroBanner
           gradient="from-[#022B1C] via-[#065f46] to-[#059669]"
           pingoSrc={pingoPartner}
           pingoAlt="Pingo"
@@ -70,6 +71,7 @@ const PartnerDashboard = () => {
           onRefresh={undefined}
           refreshing={refreshing}
         />
+      </div>
 
         <StatBento loading={loading} stats={[
           { label: "Total de validações", value: validations.length, icon: "💊", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: { value: 8 } },
@@ -87,14 +89,16 @@ const PartnerDashboard = () => {
           <TabsContent value="validate" className="mt-5">
             
         {/* Pingo Banner */}
-        <PingoBanner
-          variant="partner"
-          mascotSize={88}
+        <PingoBannerCard
+          pingImg={pingoPartner}
+          pingAlt="Pingo"
+          pingSize={82}
           bgClass="bg-teal-50 dark:bg-teal-950/20"
-          accentColor="text-teal-600 dark:text-teal-400"
-          label="Portal Parceiro"
-          title="Valide receitas com segurança"
-          subtitle="Consulte e dispense receitas digitais autenticadas"
+          borderClass="border-teal-100 dark:border-teal-900/30"
+          label="Portal parceiro"
+          labelColor="text-teal-600 dark:text-teal-400"
+          title="Receitas 100% autênticas"
+          subtitle="Busque e dispense com segurança"
         />
 <PrescriptionFinder onValidated={fetchValidations} />
           </TabsContent>

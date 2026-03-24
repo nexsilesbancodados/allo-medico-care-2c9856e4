@@ -26,7 +26,7 @@ import { ActionPills } from "./ActionPills";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
-import { PingoBanner } from "@/components/mascot/PingoMascot";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import pingoSupport from "@/assets/pingo-support.png";
 
 const getSupportNav = (active: string) => [
@@ -251,11 +251,12 @@ const SupportDashboard = () => {
 
   return (
     <DashboardLayout title="Suporte Técnico" nav={getSupportNav(activeNav)}>
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-6">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
 
 
         {/* ── Premium Support Hero ── */}
-                <HeroBanner
+        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <HeroBanner
           gradient="from-[#2D1B00] via-[#854F0B] to-[#B45309]"
           pingoSrc={pingoSupport}
           pingoAlt="Pingo"
@@ -276,6 +277,8 @@ const SupportDashboard = () => {
           onRefresh={() => fetchData(true)}
           refreshing={refreshing}
         />
+      </div>
+
 
 
         {/* ── Bento Stats ── */}
@@ -337,12 +340,14 @@ const SupportDashboard = () => {
         <motion.div variants={fadeUp}>
           
         {/* Pingo Banner */}
-        <PingoBanner
-          variant="support"
-          mascotSize={88}
+        <PingoBannerCard
+          pingImg={pingoSupport}
+          pingAlt="Pingo"
+          pingSize={82}
           bgClass="bg-amber-50 dark:bg-amber-950/20"
-          accentColor="text-amber-700 dark:text-amber-400"
+          borderClass="border-amber-100 dark:border-amber-900/30"
           label="Helpdesk"
+          labelColor="text-amber-700 dark:text-amber-400"
           title="Monitore usuários e logs"
           subtitle="Acompanhe erros críticos em tempo real"
         />

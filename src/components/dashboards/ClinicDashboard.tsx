@@ -23,7 +23,7 @@ import { ActionPills } from "./ActionPills";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
-import { PingoBanner } from "@/components/mascot/PingoMascot";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { DoctorRanking } from "./DoctorRanking";
 import pingoAdmin from "@/assets/pingo-admin.png";
 
@@ -175,10 +175,11 @@ const ClinicDashboard = () => {
 
   return (
     <DashboardLayout title="Clínica" nav={getClinicNav(activeNav)} role="clinic">
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-5xl space-y-5">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4">
 
         {/* ── Premium Clinic Hero ── */}
-                <HeroBanner
+        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <HeroBanner
           gradient="from-[#1e1b6b] via-[#3730a3] to-[#6366f1]"
           pingoSrc={pingoAdmin}
           pingoAlt="Pingo"
@@ -199,6 +200,10 @@ const ClinicDashboard = () => {
           onRefresh={undefined}
           refreshing={refreshing}
         />
+      </div>
+
+      {/* ── CONTENT ── */}
+      <div className="mt-4 space-y-4">
 
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
@@ -209,14 +214,16 @@ const ClinicDashboard = () => {
         ]} />
 
         {/* Pingo Banner */}
-        <PingoBanner
-          variant="admin"
-          mascotSize={88}
+        <PingoBannerCard
+          pingImg={pingoAdmin}
+          pingAlt="Pingo"
+          pingSize={82}
           bgClass="bg-indigo-50 dark:bg-indigo-950/20"
-          accentColor="text-indigo-600 dark:text-indigo-400"
-          label="Gestão de clínica"
-          title="Bem-vindo ao painel da clínica"
-          subtitle="Acompanhe médicos, consultas e faturamento"
+          borderClass="border-indigo-100 dark:border-indigo-900/30"
+          label="Gestão da clínica"
+          labelColor="text-indigo-600 dark:text-indigo-400"
+          title="Acompanhe seus médicos"
+          subtitle="Rankings, consultas e faturamento em tempo real"
         />
 
         {/* ── Doctor Ranking ── */}
@@ -439,6 +446,7 @@ const ClinicDashboard = () => {
             </TabsContent>
           </Tabs>
         </motion.div>
+      </div>
       </motion.div>
     </DashboardLayout>
   );

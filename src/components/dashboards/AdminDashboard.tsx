@@ -25,7 +25,7 @@ import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
 import { BentoStatCards } from "./BentoStatCards";
 import { AlertBox } from "./AlertBox";
-import { PingoBanner } from "@/components/mascot/PingoMascot";
+import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import pingoAdmin from "@/assets/pingo-admin.png";
 
 const panelOptions = [
@@ -267,10 +267,11 @@ const AdminDashboard = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("overview")}>
-      <motion.div variants={container} initial="hidden" animate="show" className="max-w-6xl space-y-6">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-5">
 
         {/* ── Premium Admin Hero ── */}
-                <HeroBanner
+        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <HeroBanner
           gradient="from-[#3B0000] via-[#8B1515] to-[#C41A1A]"
           pingoSrc={pingoAdmin}
           pingoAlt="Pingo"
@@ -291,6 +292,10 @@ const AdminDashboard = () => {
           onRefresh={() => fetchAll(true)}
           refreshing={refreshing}
         />
+      </div>
+
+      {/* ── CONTENT ── */}
+      <div className="mt-4 space-y-4">
 
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
@@ -301,14 +306,16 @@ const AdminDashboard = () => {
         ]} />
 
         {/* Pingo Admin Banner */}
-        <PingoBanner
-          variant="admin"
-          mascotSize={88}
+        <PingoBannerCard
+          pingImg={pingoAdmin}
+          pingAlt="Pingo"
+          pingSize={82}
           bgClass="bg-red-50 dark:bg-red-950/20"
-          accentColor="text-red-600 dark:text-red-400"
-          label="Monitoramento ao vivo"
-          title="Plataforma operando normalmente"
-          subtitle="Acompanhe métricas em tempo real do painel abaixo"
+          borderClass="border-red-100 dark:border-red-900/30"
+          label="Controle Total"
+          labelColor="text-red-600 dark:text-red-400"
+          title="Plataforma operando"
+          subtitle="Acompanhe métricas em tempo real"
         />
 
         {/* Header actions */}
@@ -608,6 +615,7 @@ const AdminDashboard = () => {
             </CardContent>
           </Card>
         </motion.div>
+      </div>
       </motion.div>
     </DashboardLayout>
   );

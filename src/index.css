@@ -1049,3 +1049,120 @@ select:focus {
 .queue-item-hover:hover {
   background: hsl(var(--muted) / 0.2);
 }
+
+/* ─── Mobile-first app utilities ─────────────────────────────────────────────── */
+
+/* Prevent body bounce on iOS */
+html, body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Hide scrollbar globally for horizontal scroll areas */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth momentum scroll in containers */
+.scroll-smooth-mobile {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Hero banner edge-to-edge on mobile */
+@media (max-width: 767px) {
+  .hero-full-bleed {
+    margin-left: -1rem;
+    margin-right: -1rem;
+    margin-top: -1rem;
+    border-radius: 0 0 24px 24px;
+  }
+}
+
+/* Bottom nav safe area */
+.bottom-nav-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 8px), 8px);
+}
+
+/* Touch-friendly minimum tap targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Card hover lift — consistent everywhere */
+.card-hover {
+  transition: transform 0.2s cubic-bezier(0.22,1,0.36,1), box-shadow 0.2s cubic-bezier(0.22,1,0.36,1);
+}
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,.10);
+}
+.card-hover:active {
+  transform: scale(0.98);
+}
+
+/* Pill / badge shimmer */
+@keyframes badgePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+.badge-live {
+  animation: badgePulse 1.4s ease-in-out infinite;
+}
+
+/* Pingo float — used as class directly */
+@keyframes pingoFloat {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+.pingo-float {
+  animation: pingoFloat 3.4s ease-in-out infinite;
+}
+.pingo-float-slow {
+  animation: pingoFloat 4.2s ease-in-out infinite;
+}
+
+/* Speech bubble tail */
+.bubble-tail::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 14px;
+  width: 0;
+  height: 0;
+  border-left: 8px solid transparent;
+  border-top: 9px solid white;
+}
+
+/* Line clamp utilities */
+.line-clamp-1 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; }
+.line-clamp-2 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.line-clamp-3 { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+
+/* Focus ring — accessible */
+.focus-ring:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Gradient text */
+.gradient-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Haptic press simulation */
+@media (hover: none) {
+  .press-effect:active {
+    transform: scale(0.95);
+    transition: transform 0.1s ease;
+  }
+}
