@@ -113,6 +113,7 @@ const SystemHealth = lazy(() => import("@/components/admin/SystemHealth"));
 const AdminFinancial = lazy(() => import("@/components/admin/AdminFinancial"));
 const AdminCoupons = lazy(() => import("@/components/admin/AdminCoupons"));
 const AdminDoctorApplications = lazy(() => import("@/components/admin/AdminDoctorApplications"));
+const AdminPACSConfig = lazy(() => import("@/components/admin/AdminPACSConfig"));
 const SupportInbox = lazy(() => import("@/components/support/SupportInbox"));
 
 // EMR wrapper with route params
@@ -408,6 +409,7 @@ const Dashboard = () => {
       <Route path="admin/panel-center" element={<RoleGuard allowed={[]} roles={roles}><PanelCenter /></RoleGuard>} />
       <Route path="admin/financial" element={<RoleGuard allowed={[]} roles={roles}><AdminFinancial /></RoleGuard>} />
       <Route path="admin/coupons" element={<RoleGuard allowed={[]} roles={roles}><AdminCoupons /></RoleGuard>} />
+      <Route path="admin/pacs" element={<RoleGuard allowed={[]} roles={roles}><AdminPACSConfig /></RoleGuard>} />
 
       {/* Optician */}
       <Route path="optician" element={<RoleGuard allowed={["optician"]} roles={roles}><ContextGuard panel="optician" forceRole={forceRole} roles={roles}><OpticianDashboard /></ContextGuard></RoleGuard>} />

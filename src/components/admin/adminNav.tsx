@@ -1,4 +1,4 @@
-import { Users, Stethoscope, Building2, Calendar, Shield, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet, Tag, ClipboardList } from "lucide-react";
+import { Users, Stethoscope, Building2, Calendar, Shield, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet, Tag, ClipboardList, Server } from "lucide-react";
 import { NavIcon } from "@/components/ui/nav-icon";
 
 export const getAdminNav = (active: string) => [
@@ -21,5 +21,6 @@ export const getAdminNav = (active: string) => [
   { label: "Cupons", href: "/dashboard/admin/coupons?role=admin", icon: <NavIcon icon={<Tag className="w-3.5 h-3.5" />} color="orange" />, active: active === "coupons", group: "Operações" },
   { label: "Histórico", href: "/dashboard/admin/logs?role=admin", icon: <NavIcon icon={<History className="w-3.5 h-3.5" />} color="slate" />, active: active === "logs", group: "Sistema" },
   { label: "WhatsApp", href: "/dashboard/admin/whatsapp?role=admin", icon: <NavIcon icon={<MessageCircle className="w-3.5 h-3.5" />} color="green" />, active: active === "whatsapp", group: "Sistema" },
+  { label: "PACS / DICOM", href: "/dashboard/admin/pacs?role=admin", icon: <NavIcon icon={<Server className="w-3.5 h-3.5" />} color="cyan" />, active: active === "pacs", group: "Sistema" },
   { label: "Configurações", href: "/dashboard/settings?role=admin", icon: <NavIcon icon={<SlidersHorizontal className="w-3.5 h-3.5" />} color="slate" />, active: active === "settings", group: "Sistema" },
 ];

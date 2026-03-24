@@ -20,6 +20,16 @@ serve(async (req) => {
 
     // ── orthanc_webhook: Receives DICOM study from Orthanc DICOM Router ──
     if (action === "orthanc_webhook") {
+      // Validate webhook secret if configured
+      const webhookSecret = Deno.env.get("PACS_WEBHOOK_SECRET");
+      if (webhookSecret) {
+        const providedSecret = req.headers.get("x-pacs-secret") || body.webhook_secret;
+        if (providedSecret !== webhookSecret) {
+          return new Response(JSON.stringify({ error: "Webhook secret inválido" }), {
+            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
       const {
         study_uid, patient_name, patient_id: orthancPatientId,
         modality, study_description, exam_type,
@@ -212,7 +222,7 @@ serve(async (req) => {
       error: "Ação inválida. Use: orthanc_webhook, search_studies, get_files, upload_file, delete_file, get_signed_url",
     }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (error) {
-    console.error("PACS integration error:", err);
-    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    console.error("PACS integration error:", error);
+    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
   }
 });
