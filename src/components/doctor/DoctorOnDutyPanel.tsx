@@ -132,20 +132,20 @@ const DoctorOnDutyPanel = () => {
               <TableBody>
                 {queue.map((entry, i) => (
                   <TableRow key={entry.id} className={i === 0 ? "bg-primary/5" : ""}>
-                    <TableCell>
+                    <TableCell data-label="Posição">
                       <Badge variant={i === 0 ? "default" : "outline"}>{i + 1}º</Badge>
                     </TableCell>
-                    <TableCell className="text-sm">
+                    <TableCell data-label="Turno" className="text-sm">
                       {entry.shift === "day" ? "☀️ Diurno" : entry.shift === "night" ? "🌙 Noturno" : "🌃 Madrugada"}
                     </TableCell>
-                    <TableCell className="text-sm font-medium">R$ {Number(entry.price).toFixed(2)}</TableCell>
-                    <TableCell>
+                    <TableCell data-label="Preço" className="text-sm font-medium">R$ {Number(entry.price).toFixed(2)}</TableCell>
+                    <TableCell data-label="Espera">
                       <div className="flex items-center gap-1 text-sm">
                         <Clock className="w-3 h-3" />
                         {waitTime(entry.created_at)}
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell data-label="">
                       <Button size="sm" disabled={accepting} onClick={() => handleAcceptPatient(entry)}>
                         <UserCheck className="w-4 h-4 mr-1" /> Atender
                       </Button>

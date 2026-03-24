@@ -90,13 +90,13 @@ const OpticianOrders = () => {
               <TableBody>
                 {filtered.map((o: any) => (
                   <TableRow key={o.id}>
-                    <TableCell className="font-mono font-bold text-xs">{o.order_number}</TableCell>
-                    <TableCell>{o.optical_frames?.name || "—"} <span className="text-muted-foreground text-xs">{o.optical_frames?.brand}</span></TableCell>
-                    <TableCell>{o.optical_lens_types?.name || "—"}</TableCell>
-                    <TableCell className="text-right font-semibold">R$ {Number(o.total_price).toFixed(2)}</TableCell>
-                    <TableCell><Badge variant={statusMap[o.status]?.variant || "secondary"}>{statusMap[o.status]?.label || o.status}</Badge></TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{format(new Date(o.created_at), "dd/MM/yyyy")}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell data-label="Pedido" className="font-mono font-bold text-xs">{o.order_number}</TableCell>
+                    <TableCell data-label="Armação">{o.optical_frames?.name || "—"} <span className="text-muted-foreground text-xs">{o.optical_frames?.brand}</span></TableCell>
+                    <TableCell data-label="Lente">{o.optical_lens_types?.name || "—"}</TableCell>
+                    <TableCell data-label="Total" className="font-semibold">R$ {Number(o.total_price).toFixed(2)}</TableCell>
+                    <TableCell data-label="Status"><Badge variant={statusMap[o.status]?.variant || "secondary"}>{statusMap[o.status]?.label || o.status}</Badge></TableCell>
+                    <TableCell data-label="Data" className="text-xs text-muted-foreground">{format(new Date(o.created_at), "dd/MM/yyyy")}</TableCell>
+                    <TableCell data-label="">
                       <Select onValueChange={v => updateStatus.mutate({ id: o.id, status: v })}>
                         <SelectTrigger className="w-[140px] h-8 text-xs"><SelectValue placeholder="Alterar status" /></SelectTrigger>
                         <SelectContent>

@@ -132,18 +132,18 @@ const OpticianCatalog = () => {
               <TableBody>
                 {filtered.map((f: any) => (
                   <TableRow key={f.id}>
-                    <TableCell className="font-medium">{f.name}</TableCell>
-                    <TableCell>{f.brand}</TableCell>
-                    <TableCell><Badge variant="secondary">{f.material}</Badge></TableCell>
-                    <TableCell>{f.color}</TableCell>
-                    <TableCell className="text-right font-semibold">R$ {Number(f.price).toFixed(2)}</TableCell>
-                    <TableCell className="text-center">
+                    <TableCell data-label="Nome" className="font-medium">{f.name}</TableCell>
+                    <TableCell data-label="Marca">{f.brand}</TableCell>
+                    <TableCell data-label="Material"><Badge variant="secondary">{f.material}</Badge></TableCell>
+                    <TableCell data-label="Cor">{f.color}</TableCell>
+                    <TableCell data-label="Preço" className="font-semibold">R$ {Number(f.price).toFixed(2)}</TableCell>
+                    <TableCell data-label="Estoque">
                       <Badge variant={f.stock_qty > 5 ? "default" : f.stock_qty > 0 ? "secondary" : "destructive"}>
                         {f.stock_qty}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
+                    <TableCell data-label="">
+                      <div className="flex gap-1">
                         <Button variant="ghost" size="icon" aria-label="Editar" onClick={() => openEdit(f)}><Edit className="w-4 h-4" /></Button>
                         <Button variant="ghost" size="icon" aria-label="Excluir" onClick={() => deleteMutation.mutate(f.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                       </div>

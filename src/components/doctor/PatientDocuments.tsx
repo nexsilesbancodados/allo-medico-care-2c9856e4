@@ -138,7 +138,7 @@ const PatientDocuments = () => {
               <TableBody>
                 {filtered.map(d => (
                   <TableRow key={d.id}>
-                    <TableCell>
+                    <TableCell data-label="Documento">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">{fileIcon(d.file_type ?? "")}</span>
                         <div>
@@ -147,12 +147,12 @@ const PatientDocuments = () => {
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{d.patient_name}</TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
+                    <TableCell data-label="Paciente" className="text-muted-foreground">{d.patient_name}</TableCell>
+                    <TableCell data-label="Data" className="text-muted-foreground text-sm">
                       {format(new Date(d.created_at), "dd/MM/yyyy", { locale: ptBR })}
                     </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{d.file_type?.split("/")[1] ?? "—"}</TableCell>
-                    <TableCell className="text-right">
+                    <TableCell data-label="Tipo" className="text-muted-foreground text-sm">{d.file_type?.split("/")[1] ?? "—"}</TableCell>
+                    <TableCell data-label="">
                       <Button size="sm" variant="outline" onClick={() => viewDocument(d)}>
                         <Eye className="w-3 h-3 mr-1" /> Ver
                       </Button>
