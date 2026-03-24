@@ -85,21 +85,61 @@
     </a>
     <div id="root">
       <!-- Inline loading skeleton — visible instantly while JS downloads & parses -->
-      <div id="initial-loader" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:#f8fafc;flex-direction:column;gap:16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
-        <div style="width:48px;height:48px;border:3px solid hsl(210 60% 85%);border-top-color:hsl(210 70% 45%);border-radius:50%;animation:ld-spin .7s linear infinite"></div>
-        <span style="font-size:14px;color:hsl(210 10% 55%);font-weight:500;letter-spacing:.02em">Carregando AloClínica…</span>
-        <style>@keyframes ld-spin{to{transform:rotate(360deg)}}</style>
+      <div id="initial-loader" style="display:flex;align-items:center;justify-content:center;min-height:100vh;background:hsl(210 33% 99%);flex-direction:column;gap:18px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:24px;text-align:center">
+        <div style="position:relative;width:112px;height:112px;display:grid;place-items:center">
+          <div style="position:absolute;inset:10px;border-radius:9999px;background:hsl(210 90% 45% / .10);filter:blur(18px);animation:ld-pulse 1.8s ease-in-out infinite"></div>
+          <img src="/pingo-loader.png" alt="Pingo carregando" width="96" height="96" style="position:relative;width:96px;height:96px;object-fit:contain;user-select:none;-webkit-user-drag:none;animation:ld-bounce 1.8s ease-in-out infinite" />
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:6px">
+          <span style="display:block;width:8px;height:8px;border-radius:9999px;background:hsl(210 90% 45% / .65);animation:ld-dot 1.4s ease-in-out infinite"></span>
+          <span style="display:block;width:8px;height:8px;border-radius:9999px;background:hsl(210 90% 45% / .65);animation:ld-dot 1.4s ease-in-out .2s infinite"></span>
+          <span style="display:block;width:8px;height:8px;border-radius:9999px;background:hsl(210 90% 45% / .65);animation:ld-dot 1.4s ease-in-out .4s infinite"></span>
+        </div>
+        <span style="font-size:14px;color:hsl(210 15% 45%);font-weight:600;letter-spacing:.02em">Carregando AloClínica…</span>
+        <style>
+          @keyframes ld-bounce{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-10px) scale(1.04)}}
+          @keyframes ld-dot{0%,80%,100%{opacity:.3;transform:scale(.82)}40%{opacity:1;transform:scale(1.18)}}
+          @keyframes ld-pulse{0%,100%{transform:scale(.96);opacity:.75}50%{transform:scale(1.08);opacity:1}}
+        </style>
       </div>
     </div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      // Remove inline loader as soon as React mounts (or after 6s safety)
-      var __ldObs = new MutationObserver(function(m){
-        var ld = document.getElementById('initial-loader');
-        if(ld && document.getElementById('root').children.length > 1){ld.remove();__ldObs.disconnect()}
-      });
-      __ldObs.observe(document.getElementById('root'),{childList:true});
-      setTimeout(function(){var ld=document.getElementById('initial-loader');if(ld)ld.remove();__ldObs.disconnect()},6000);
+      (function () {
+        var root = document.getElementById('root');
+        var loader = document.getElementById('initial-loader');
+        if (!root || !loader) return;
+
+        var cleanedUp = false;
+        var cleanup = function () {
+          if (cleanedUp) return;
+          cleanedUp = true;
+          var current = document.getElementById('initial-loader');
+          if (current) current.remove();
+          if (observer) observer.disconnect();
+          window.removeEventListener('app:mounted', cleanup);
+        };
+
+        var shouldCleanup = function () {
+          return document.documentElement.getAttribute('data-app-mounted') === 'true'
+            || document.body.getAttribute('data-app-mounted') === 'true'
+            || root.children.length > 1
+            || (root.firstElementChild && root.firstElementChild.id !== 'initial-loader');
+        };
+
+        var observer = new MutationObserver(function () {
+          if (shouldCleanup()) cleanup();
+        });
+
+        observer.observe(root, { childList: true, subtree: false });
+        window.addEventListener('app:mounted', cleanup);
+
+        setTimeout(function () {
+          if (shouldCleanup()) cleanup();
+        }, 1200);
+
+        setTimeout(cleanup, 8000);
+      })();
     </script>
   </body>
 </html>
