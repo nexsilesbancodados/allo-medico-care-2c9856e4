@@ -131,123 +131,121 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         </div>
       </section>
 
-      <Suspense fallback={null}>
-        <DeferredSection fallbackClassName="h-28 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">
-          <StatsSection />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-28 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">
+        <StatsSection />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <InfoBannerStrip
-            icon={ShieldCheck}
-            label="Cartão de Benefícios"
-            title="Economize até 30% em todas as consultas"
-            highlight="A partir de R$37,90/mês"
-            href="/cartao-beneficios"
-            gradient="from-secondary to-emerald-600"
-            mascotSrc={bannerBenefits}
-          />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <InfoBannerStrip
+          icon={ShieldCheck}
+          label="Cartão de Benefícios"
+          title="Economize até 30% em todas as consultas"
+          highlight="A partir de R$37,90/mês"
+          href="/cartao-beneficios"
+          gradient="from-secondary to-emerald-600"
+          mascotSrc={bannerBenefits}
+        />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-[520px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <HowItWorksSection />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-[520px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <HowItWorksSection />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <InfoBannerStrip
-            icon={Brain}
-            label="Inteligência Artificial"
-            title="Triagem inteligente com IA"
-            highlight="Descubra o especialista ideal em segundos"
-            href="/teleconsulta"
-            gradient="from-blue-600 to-primary"
-            mascotSrc={bannerAi}
-          />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <InfoBannerStrip
+          icon={Brain}
+          label="Inteligência Artificial"
+          title="Triagem inteligente com IA"
+          highlight="Descubra o especialista ideal em segundos"
+          href="/teleconsulta"
+          gradient="from-blue-600 to-primary"
+          mascotSrc={bannerAi}
+        />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-[620px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <SpecialtiesSection />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-[620px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <SpecialtiesSection />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <InfoBannerStrip
-            icon={CreditCard}
-            label="Consulta Avulsa"
-            title="Consulte agora sem mensalidade"
-            highlight="A partir de R$89 com receita digital"
-            href="/consulta-avulsa"
-            gradient="from-primary to-violet-600"
-            mascotSrc={bannerConsulta}
-          />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <InfoBannerStrip
+          icon={CreditCard}
+          label="Consulta Avulsa"
+          title="Consulte agora sem mensalidade"
+          highlight="A partir de R$89 com receita digital"
+          href="/consulta-avulsa"
+          gradient="from-primary to-violet-600"
+          mascotSrc={bannerConsulta}
+        />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-[720px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <PlansSection />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-[720px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <PlansSection />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <InfoBannerStrip
-            icon={HeartPulse}
-            label="Plantão 24h"
-            title="Precisa de atendimento urgente?"
-            highlight="Médicos disponíveis agora"
-            href="/consulta-avulsa"
-            gradient="from-rose-500 to-primary"
-            mascotSrc={bannerPlantao}
-          />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <InfoBannerStrip
+          icon={HeartPulse}
+          label="Plantão 24h"
+          title="Precisa de atendimento urgente?"
+          highlight="Médicos disponíveis agora"
+          href="/consulta-avulsa"
+          gradient="from-rose-500 to-primary"
+          mascotSrc={bannerPlantao}
+        />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-[520px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <TestimonialsSection />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-[520px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <TestimonialsSection />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <InfoBannerStrip
-            icon={FileText}
-            label="Telelaudo"
-            title="Laudos médicos à distância com IA"
-            highlight="Para clínicas e hospitais"
-            href="/telelaudo"
-            gradient="from-amber-500 to-orange-600"
-            mascotSrc={bannerTelelaudo}
-          />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <InfoBannerStrip
+          icon={FileText}
+          label="Telelaudo"
+          title="Laudos médicos à distância com IA"
+          highlight="Para clínicas e hospitais"
+          href="/telelaudo"
+          gradient="from-amber-500 to-orange-600"
+          mascotSrc={bannerTelelaudo}
+        />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-[340px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <CTABanner />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-[340px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <CTABanner />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-[560px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-          <FAQSection />
-        </DeferredSection>
+      <DeferredSection fallbackClassName="h-[560px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
+        <FAQSection />
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-[260px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="220px 0px">
-          <section aria-labelledby="triage-heading" className="py-16 px-4">
-            <div className="max-w-2xl mx-auto text-center space-y-5">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
-                <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
-              </div>
-              <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
-                Não sabe qual especialidade procurar?
-              </h2>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
-              </p>
-              <Button
-                size="lg"
-                className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
-                onClick={() => setShowQuiz(true)}
-              >
-                <Stethoscope className="w-5 h-5" aria-hidden="true" />
-                Fazer Triagem Gratuita
-              </Button>
+      <DeferredSection fallbackClassName="h-[260px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="220px 0px">
+        <section aria-labelledby="triage-heading" className="py-16 px-4">
+          <div className="max-w-2xl mx-auto text-center space-y-5">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
+              <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
             </div>
-          </section>
-        </DeferredSection>
+            <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
+              Não sabe qual especialidade procurar?
+            </h2>
+            <p className="text-muted-foreground max-w-md mx-auto">
+              Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
+            </p>
+            <Button
+              size="lg"
+              className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
+              onClick={() => setShowQuiz(true)}
+            >
+              <Stethoscope className="w-5 h-5" aria-hidden="true" />
+              Fazer Triagem Gratuita
+            </Button>
+          </div>
+        </section>
+      </DeferredSection>
 
-        <DeferredSection fallbackClassName="h-72 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">
-          <Footer />
-        </DeferredSection>
-      </Suspense>
+      <DeferredSection fallbackClassName="h-72 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">
+        <Footer />
+      </DeferredSection>
 
       <FloatingMobileCTA />
       {showQuiz && (

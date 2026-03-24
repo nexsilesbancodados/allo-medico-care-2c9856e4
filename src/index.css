@@ -925,11 +925,6 @@ a[class*="text-primary"]:not([class*="button"]):not([class*="btn"]) {
   opacity: 0.8;
 }
 
-/* ─── Smooth page scrolling ──────────────────────────────────────────────── */
-html {
-  scroll-behavior: smooth;
-}
-
 
 /* ═══════════════════════════════════════════════════════════════════
    GLOBAL CARD ANIMATIONS — aplica automaticamente a TODOS os cards
