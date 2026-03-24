@@ -292,11 +292,9 @@
   100% { transform: translateX(-50%); }
 }
 
-/* ── Smooth scrollbar ── */
-* { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
-*::-webkit-scrollbar { width: 5px; height: 5px; }
-*::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background-color: hsl(var(--border)); border-radius: 999px; }
+/* ── Hidden scrollbar (functional scroll, invisible bar) ── */
+* { scrollbar-width: none; -ms-overflow-style: none; }
+*::-webkit-scrollbar { display: none; }
 
 /* ── Dashboard card interactive hover ── */
 .card-interactive {
