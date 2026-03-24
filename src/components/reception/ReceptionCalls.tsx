@@ -130,6 +130,8 @@ const ReceptionCalls = () => {
             </div>
           </CardHeader>
           <CardContent>
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -164,6 +166,7 @@ const ReceptionCalls = () => {
                 })}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

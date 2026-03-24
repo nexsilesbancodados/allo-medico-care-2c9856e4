@@ -78,6 +78,8 @@ const AdminClinics = () => {
 
         {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
           <div className="rounded-lg border border-border overflow-hidden">
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -125,6 +127,7 @@ const AdminClinics = () => {
                 {filtered.length === 0 && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhuma clínica.</TableCell></TableRow>}
               </TableBody>
             </Table>
+            </div>
           </div>
         )}
       </div>

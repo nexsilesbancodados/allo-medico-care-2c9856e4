@@ -117,6 +117,8 @@ const DoctorOnDutyPanel = () => {
           </Card>
         ) : (
           <div className="rounded-lg border border-border overflow-hidden">
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -152,6 +154,7 @@ const DoctorOnDutyPanel = () => {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
         )}
       </div>

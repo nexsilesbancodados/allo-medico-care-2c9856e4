@@ -101,6 +101,8 @@ const AdminCoupons = () => {
 
         <Card>
           <CardContent className="p-0">
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -142,6 +144,7 @@ const AdminCoupons = () => {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
 

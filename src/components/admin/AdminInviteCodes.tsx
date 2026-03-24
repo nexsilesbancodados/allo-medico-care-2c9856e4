@@ -72,6 +72,8 @@ const AdminInviteCodes = () => {
 
         <Card className="border-border">
           <CardContent className="p-0">
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -127,6 +129,7 @@ const AdminInviteCodes = () => {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </CardContent>
         </Card>
       </div>

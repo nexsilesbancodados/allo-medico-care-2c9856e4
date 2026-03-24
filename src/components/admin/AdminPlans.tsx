@@ -91,6 +91,8 @@ const AdminPlans = () => {
 
         {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
           <div className="rounded-lg border border-border overflow-hidden">
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -138,6 +140,7 @@ const AdminPlans = () => {
                 {plans.length === 0 && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">Nenhum plano cadastrado.</TableCell></TableRow>}
               </TableBody>
             </Table>
+            </div>
           </div>
         )}
       </div>

@@ -2206,6 +2206,8 @@ const ExamReportEditor = () => {
             <DialogTitle className="flex items-center gap-2">⌨️ Atalhos de Teclado</DialogTitle>
           </DialogHeader>
           <div className="overflow-y-auto max-h-[60vh]">
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -2238,6 +2240,7 @@ const ExamReportEditor = () => {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

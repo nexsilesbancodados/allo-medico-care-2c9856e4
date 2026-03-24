@@ -116,6 +116,8 @@ const ReceptionBilling = () => {
 
         {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> : (
           <div className="rounded-lg border border-border overflow-hidden">
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -150,6 +152,7 @@ const ReceptionBilling = () => {
                 )}
               </TableBody>
             </Table>
+            </div>
           </div>
         )}
       </div>

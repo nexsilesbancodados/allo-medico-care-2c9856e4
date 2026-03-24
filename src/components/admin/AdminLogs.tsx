@@ -72,6 +72,8 @@ const AdminLogs = () => {
 
         {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
           <div className="rounded-lg border border-border overflow-hidden">
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -118,6 +120,7 @@ const AdminLogs = () => {
                 )}
               </TableBody>
             </Table>
+            </div>
           </div>
         )}
       </div>

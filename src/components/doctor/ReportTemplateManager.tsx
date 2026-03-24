@@ -182,6 +182,8 @@ const ReportTemplateManager = () => {
           ) : !templates?.length ? (
             <p className="text-center text-muted-foreground py-8">Nenhum template criado ainda.</p>
           ) : (
+            <div className="overflow-x-auto -mx-0.5 rounded-xl">
+
             <Table>
               <TableHeader>
                 <TableRow>
@@ -213,6 +215,7 @@ const ReportTemplateManager = () => {
                 ))}
               </TableBody>
             </Table>
+            </div>
           )}
         </CardContent>
       </Card>
