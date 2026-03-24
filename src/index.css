@@ -206,10 +206,7 @@
     height: auto;
   }
 
-  /* Prevent horizontal overflow without creating a scroll container */
-  #root {
-    overflow-x: clip;
-  }
+  /* Prevent horizontal overflow — applied per-page via overflow-x-clip class, not globally on #root */
 
   /* Keep tables responsive without forcing all tables to become block elements */
   table {

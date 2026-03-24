@@ -173,7 +173,6 @@ const HeroSection = memo(
                   alt="Pingo - Mascote do AloClinica"
                   className="w-full h-auto drop-shadow-xl"
                   loading="eager"
-                  fetchPriority="high"
                 />
 
                 {/* Floating card — Security */}
