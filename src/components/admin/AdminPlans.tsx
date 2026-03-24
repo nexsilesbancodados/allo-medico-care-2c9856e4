@@ -121,19 +121,21 @@ const AdminPlans = () => {
 
                 ) : plans.map(p => (
                   <TableRow key={p.id}>
-                    <TableCell>
+                    <TableCell data-label="Plano">
                       <div>
                         <p className="font-medium text-foreground">{p.name}</p>
                         {p.description && <p className="text-xs text-muted-foreground">{p.description}</p>}
                       </div>
                     </TableCell>
-                    <TableCell className="text-foreground">R$ {Number(p.price).toFixed(2)}</TableCell>
-                    <TableCell className="text-muted-foreground">{intervalLabel[String(p.interval ?? 'monthly')] ?? p.interval}</TableCell>
-                    <TableCell className="text-muted-foreground">{p.max_appointments ?? "Ilimitado"}</TableCell>
-                    <TableCell><Badge variant={p.is_active ? "default" : "outline"}>{p.is_active ? "Ativo" : "Inativo"}</Badge></TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <Button size="sm" variant="ghost" onClick={() => openEdit(p)}><Edit className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => deletePlan(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                    <TableCell data-label="Preço" className="text-foreground">R$ {Number(p.price).toFixed(2)}</TableCell>
+                    <TableCell data-label="Tipo" className="text-muted-foreground">{intervalLabel[String(p.interval ?? 'monthly')] ?? p.interval}</TableCell>
+                    <TableCell data-label="Consultas" className="text-muted-foreground">{p.max_appointments ?? "Ilimitado"}</TableCell>
+                    <TableCell data-label="Status"><Badge variant={p.is_active ? "default" : "outline"}>{p.is_active ? "Ativo" : "Inativo"}</Badge></TableCell>
+                    <TableCell data-label="">
+                      <div className="flex items-center gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => openEdit(p)}><Edit className="w-4 h-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => deletePlan(p.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

@@ -89,9 +89,9 @@ const AdminSpecialties = () => {
 
               ) : specialties.map(s => (
                 <TableRow key={s.id}>
-                  <TableCell className="font-medium text-foreground">{s.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{s.description || "—"}</TableCell>
-                  <TableCell>
+                  <TableCell data-label="Nome" className="font-medium text-foreground">{s.name}</TableCell>
+                  <TableCell data-label="Descrição" className="text-muted-foreground">{s.description || "—"}</TableCell>
+                  <TableCell data-label="Preço">
                     <Input
                       type="number" min={0} step={0.01} className="w-24"
                       defaultValue={s.consultation_price ?? ""}
@@ -99,7 +99,7 @@ const AdminSpecialties = () => {
                       onBlur={e => updatePrice(s.id, e.target.value)}
                     />
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell data-label="">
                     <Button size="sm" variant="ghost" onClick={() => removeSpecialty(s.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                   </TableCell>
                 </TableRow>

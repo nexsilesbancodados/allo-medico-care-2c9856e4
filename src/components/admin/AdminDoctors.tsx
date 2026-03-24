@@ -124,7 +124,7 @@ const AdminDoctors = () => {
 
                 ) : filtered.map(doc => (
                   <TableRow key={doc.id}>
-                    <TableCell>
+                    <TableCell data-label="Médico">
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback className="bg-primary/10 text-primary text-xs">{doc.first_name?.[0]}{doc.last_name?.[0]}</AvatarFallback>
@@ -132,16 +132,18 @@ const AdminDoctors = () => {
                         <span className="font-medium text-foreground">Dr(a). {doc.first_name} {doc.last_name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{doc.crm}/{doc.crm_state}</TableCell>
-                    <TableCell className="text-muted-foreground">R$ {doc.consultation_price || "—"}</TableCell>
-                    <TableCell>
+                    <TableCell data-label="CRM" className="text-muted-foreground">{doc.crm}/{doc.crm_state}</TableCell>
+                    <TableCell data-label="Preço" className="text-muted-foreground">R$ {doc.consultation_price || "—"}</TableCell>
+                    <TableCell data-label="Status">
                       <Badge variant={doc.is_approved ? "default" : "outline"}>{doc.is_approved ? "Aprovado" : "Pendente"}</Badge>
                     </TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <Button size="sm" variant="ghost" onClick={() => openDetail(doc)}><Eye className="w-4 h-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={() => toggleApproval(doc.id, doc.is_approved === true)}>
-                        {doc.is_approved ? <X className="w-4 h-4 text-destructive" /> : <Check className="w-4 h-4 text-secondary" />}
-                      </Button>
+                    <TableCell data-label="">
+                      <div className="flex items-center gap-1">
+                        <Button size="sm" variant="ghost" onClick={() => openDetail(doc)}><Eye className="w-4 h-4" /></Button>
+                        <Button size="sm" variant="ghost" onClick={() => toggleApproval(doc.id, doc.is_approved === true)}>
+                          {doc.is_approved ? <X className="w-4 h-4 text-destructive" /> : <Check className="w-4 h-4 text-secondary" />}
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

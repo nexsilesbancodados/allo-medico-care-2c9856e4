@@ -173,22 +173,24 @@ const AdminSubscriptions = () => {
 
                 ) : filtered.map(s => (
                   <TableRow key={s.id}>
-                    <TableCell className="font-medium text-foreground">{s.user_name}</TableCell>
-                    <TableCell className="text-muted-foreground">{s.plan_name}</TableCell>
-                    <TableCell className="text-muted-foreground">{format(new Date(s.starts_at), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
-                    <TableCell className="text-muted-foreground">{s.expires_at ? format(new Date(s.expires_at), "dd/MM/yyyy", { locale: ptBR }) : "—"}</TableCell>
-                    <TableCell><Badge variant={statusVariant[s.status] ?? "outline"}>{statusLabel[s.status] ?? s.status}</Badge></TableCell>
-                    <TableCell className="text-right flex items-center justify-end gap-1">
-                      <Select value={s.status} onValueChange={v => updateStatus(s.id, v)}>
-                        <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="active">Ativa</SelectItem>
-                          <SelectItem value="paused">Pausada</SelectItem>
-                          <SelectItem value="cancelled">Cancelada</SelectItem>
-                          <SelectItem value="expired">Expirada</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteSub(s.id)}>✕</Button>
+                    <TableCell data-label="Usuário" className="font-medium text-foreground">{s.user_name}</TableCell>
+                    <TableCell data-label="Plano" className="text-muted-foreground">{s.plan_name}</TableCell>
+                    <TableCell data-label="Início" className="text-muted-foreground">{format(new Date(s.starts_at), "dd/MM/yyyy", { locale: ptBR })}</TableCell>
+                    <TableCell data-label="Expira" className="text-muted-foreground">{s.expires_at ? format(new Date(s.expires_at), "dd/MM/yyyy", { locale: ptBR }) : "—"}</TableCell>
+                    <TableCell data-label="Status"><Badge variant={statusVariant[s.status] ?? "outline"}>{statusLabel[s.status] ?? s.status}</Badge></TableCell>
+                    <TableCell data-label="">
+                      <div className="flex items-center gap-1">
+                        <Select value={s.status} onValueChange={v => updateStatus(s.id, v)}>
+                          <SelectTrigger className="w-28 h-8 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="active">Ativa</SelectItem>
+                            <SelectItem value="paused">Pausada</SelectItem>
+                            <SelectItem value="cancelled">Cancelada</SelectItem>
+                            <SelectItem value="expired">Expirada</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteSub(s.id)}>✕</Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
