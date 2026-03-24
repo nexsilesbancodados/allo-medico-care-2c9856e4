@@ -1,15 +1,10 @@
-/* ── Dashboard layout height constraint ──
-   Forces the dashboard root to be exactly viewport height
-   so the main content area scrolls properly via overflow-y-auto */
-@supports (height: 100dvh) {
-  body > #root > div > div.min-h-screen {
-    min-height: unset;
-    height: 100dvh;
-  }
-}
-@supports not (height: 100dvh) {
-  body > #root > div > div.min-h-screen {
-    min-height: unset;
-    height: 100vh;
+/* ── Dashboard scroll fix ──
+   On mobile, the main content area inside DashboardLayout needs
+   a constrained height to activate overflow-y-auto scrolling.
+   The header is ~56px on mobile, bottom nav is ~68px + safe area. */
+@media (max-width: 767px) {
+  main.overflow-y-auto {
+    max-height: calc(100dvh - 56px);
+    -webkit-overflow-scrolling: touch;
   }
 }
