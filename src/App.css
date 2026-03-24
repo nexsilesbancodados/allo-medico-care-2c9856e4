@@ -1,15 +1,15 @@
-/* ── Dashboard scroll fix ── */
-/* Force the dashboard layout root to constrain to viewport height
-   so inner overflow-y-auto containers scroll properly on mobile */
-.min-h-screen.flex.flex-col {
-  max-height: 100dvh;
-  height: 100dvh;
+/* ── Dashboard layout height constraint ──
+   Forces the dashboard root to be exactly viewport height
+   so the main content area scrolls properly via overflow-y-auto */
+@supports (height: 100dvh) {
+  body > #root > div > div.min-h-screen {
+    min-height: unset;
+    height: 100dvh;
+  }
 }
-
-/* Ensure the main content area scrolls on mobile */
-@media (max-width: 767px) {
-  main.overflow-y-auto {
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-y: contain;
+@supports not (height: 100dvh) {
+  body > #root > div > div.min-h-screen {
+    min-height: unset;
+    height: 100vh;
   }
 }
