@@ -392,9 +392,9 @@ const SupportInbox = () => {
 
   // Ticket list view
   return (
-    <Card className="border-border h-[600px] flex flex-col">
+    <Card className="border-border h-[60vh] min-h-[400px] max-h-[700px] flex flex-col">
       <CardHeader className="pb-3 border-b border-border">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-2">
           <CardTitle className="text-lg flex items-center gap-2">
             <Inbox className="w-5 h-5 text-primary" />
             Tickets de Suporte

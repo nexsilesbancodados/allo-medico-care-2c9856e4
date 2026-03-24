@@ -249,7 +249,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         <FAQSection />
 
         <section aria-labelledby="triage-heading" className="py-16 px-4">
-          <div className="max-w-[1800px] mx-auto max-w-2xl text-center space-y-5">
+          <div className="max-w-2xl mx-auto text-center space-y-5">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
               <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
             </div>
