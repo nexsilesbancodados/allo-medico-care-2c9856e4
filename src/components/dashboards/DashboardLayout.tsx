@@ -230,12 +230,8 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
   const SidebarContent = ({ onItemClick }: { onItemClick?: () => void }) => (
     <div ref={sidebarRef} className="flex flex-col h-full">
-      {/* Logo area — Pingo mascot like mobile header */}
-      <div className="flex items-center gap-2.5 px-4 h-14 shrink-0 border-b border-border/10">
-        <img src={mascotImg} alt="AloClínica" className="w-8 h-8 object-contain select-none shrink-0"
-          style={{ filter: "drop-shadow(0 2px 6px rgba(0,0,0,.15))" }} />
-        <span className="font-black text-[15px] tracking-tight text-foreground">AloClínica</span>
-      </div>
+      {/* Spacer top */}
+      <div className="h-3 shrink-0" />
 
       {/* Role badge */}
       <div className="px-3 pt-2 pb-1 shrink-0">
