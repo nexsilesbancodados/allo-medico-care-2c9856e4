@@ -118,9 +118,9 @@ const ChatPage = () => {
         <h1 className="text-2xl font-bold text-foreground mb-1">Mensagens</h1>
         <p className="text-muted-foreground mb-6">Converse com {activeRole === "doctor" ? "seus pacientes" : "seus médicos"}</p>
 
-        <div className="grid md:grid-cols-[300px_1fr] gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-4">
           {/* Conversations list */}
-          <div className="space-y-2 max-h-[500px] overflow-y-auto">
+          <div className="space-y-2 max-h-[40vh] md:max-h-[60vh] overflow-y-auto">
             {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : conversations.length === 0 ? (
               <Card className="border-border">
                 <CardContent className="py-8 text-center">
