@@ -153,11 +153,6 @@ export default defineConfig(({ mode }) => ({
         );
       },
     },
-    cssTarget: "safari14",
-    chunkSizeWarningLimit: 600,
-    minify: "esbuild",
-    sourcemap: false,
-    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
