@@ -455,8 +455,7 @@ const PingoChatbot = forwardRef<HTMLDivElement>((_, _ref) => {
                   className="flex-1 text-sm"
                   disabled={isLoading}
                 />
-                <Button type="submit" size="icon" aria-label="Enviar" disabled={isLoading || !input.trim()}
-
+                <Button type="submit" size="icon" aria-label="Enviar" disabled={isLoading || !input.trim()}>
                   <Send className="w-4 h-4" />
                 </Button>
               </form>
