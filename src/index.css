@@ -344,7 +344,7 @@
 
 /* Landscape mobile — reduce vertical padding */
 @media (max-height: 500px) and (orientation: landscape) {
-  .pb-\\[88px\\] { padding-bottom: 64px !important; }
+  [class~="pb-[88px]"] { padding-bottom: 64px !important; }
 }
 
 /* Dark mode bottom nav glass */
