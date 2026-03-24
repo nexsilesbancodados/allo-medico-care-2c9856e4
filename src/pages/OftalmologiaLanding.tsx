@@ -84,11 +84,11 @@ const OftalmologiaLanding = () => {
 
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="relative">
                 <div className="relative rounded-2xl overflow-hidden shadow-2xl shadow-primary/10 border border-border/40">
-                  <img src={ophthalmologyHero} alt="Equipamento oftalmológico profissional" className="w-full h-auto object-cover" loading="eager" />
+                  <img src={ophthalmologyHero} alt="Equipamento oftalmológico profissional" className="w-full h-auto object-cover" loading="eager" decoding="async" />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
                 </div>
                 <motion.div className="absolute -bottom-6 -left-6 z-10" animate={{ y: [0, -8, 0] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}>
-                  <img src={pingoOftalmo} alt="Pingo Oftalmologista" className="w-28 h-28 drop-shadow-xl" />
+                  <img src={pingoOftalmo} alt="Pingo Oftalmologista" className="w-28 h-28 drop-shadow-xl" loading="lazy" decoding="async" width={112} height={112} />
                 </motion.div>
               </motion.div>
             </div>
@@ -105,7 +105,7 @@ const OftalmologiaLanding = () => {
             className="max-w-7xl mx-auto"
           >
             <div className="relative rounded-3xl overflow-hidden shadow-2xl shadow-primary/10 group cursor-pointer">
-              <img src={oticaBanner} alt="Ótica Online — Óculos com entrega em todo Brasil" className="w-full h-[280px] sm:h-[360px] lg:h-[420px] object-cover transition-transform duration-700 group-hover:scale-[1.02]" loading="lazy" />
+              <img src={oticaBanner} alt="Ótica Online — Óculos com entrega em todo Brasil" className="w-full h-[280px] sm:h-[360px] lg:h-[420px] object-cover transition-transform duration-700 group-hover:scale-[1.02]" loading="lazy" decoding="async" />
               <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/40 to-transparent" />
               <div className="absolute inset-0 flex items-center">
                 <div className="px-8 sm:px-14 lg:px-20 max-w-2xl">
@@ -149,7 +149,7 @@ const OftalmologiaLanding = () => {
               <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.6 }}
                 className="relative rounded-3xl overflow-hidden shadow-xl border border-border/40 group min-h-[320px]"
               >
-                <img src={oticaDelivery} alt="Entrega premium de óculos" className="w-full h-full object-cover absolute inset-0 transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                <img src={oticaDelivery} alt="Entrega premium de óculos" className="w-full h-full object-cover absolute inset-0 transition-transform duration-500 group-hover:scale-105" loading="lazy" decoding="async" />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
                   <h3 className="text-xl sm:text-2xl font-extrabold text-white mb-2">Embalagem Premium</h3>
@@ -162,7 +162,7 @@ const OftalmologiaLanding = () => {
               <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-60px" }} transition={{ duration: 0.6, delay: 0.1 }}
                 className="relative rounded-3xl overflow-hidden shadow-xl border border-border/40 group min-h-[320px]"
               >
-                <img src={oticaLifestyle} alt="Cliente feliz com óculos novos" className="w-full h-full object-cover absolute inset-0 transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                <img src={oticaLifestyle} alt="Cliente feliz com óculos novos" className="w-full h-full object-cover absolute inset-0 transition-transform duration-500 group-hover:scale-105" loading="lazy" decoding="async" />
                 <div className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
                   <h3 className="text-xl sm:text-2xl font-extrabold text-white mb-2">Experimente em Casa</h3>
@@ -271,7 +271,7 @@ const OftalmologiaLanding = () => {
         <section className="py-20 lg:py-28 bg-gradient-to-br from-primary/[0.06] to-accent/[0.04]">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-12 text-center">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-              <img src={pingoOftalmo} alt="Pingo" className="w-20 h-20 mx-auto mb-6 drop-shadow-lg" />
+              <img src={pingoOftalmo} alt="Pingo" className="w-20 h-20 mx-auto mb-6 drop-shadow-lg" loading="lazy" decoding="async" width={80} height={80} />
               <h2 className="text-3xl lg:text-4xl font-extrabold text-foreground">Pronto para digitalizar sua clínica?</h2>
               <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">Comece hoje mesmo a usar o módulo de oftalmologia. Sem instalação, sem burocracia.</p>
               <div className="flex flex-wrap justify-center gap-4 mt-8">

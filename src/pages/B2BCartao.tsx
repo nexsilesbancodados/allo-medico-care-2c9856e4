@@ -69,7 +69,7 @@ const B2BCartao = () => {
 
         {/* Hero */}
         <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "55vh" }}>
-          <img src={b2bHero2} alt="Benefícios corporativos" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={b2bHero2} alt="Benefícios corporativos" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent z-10" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10" />
           <div className="container mx-auto px-4 relative z-20 flex items-end pb-12" style={{ minHeight: "55vh" }}>
@@ -119,7 +119,7 @@ const B2BCartao = () => {
                     <Card className="h-full border-border/50 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
                       <CardContent className="p-6 flex flex-col items-start">
                         <div className="w-20 h-20 mb-4 group-hover:scale-110 transition-transform duration-300">
-                          <img src={s.mascot} alt={s.title} className="w-full h-full object-contain" loading="lazy" />
+                          <img src={s.mascot} alt={s.title} className="w-full h-full object-contain" loading="lazy" decoding="async" />
                         </div>
                         <h3 className="font-bold text-foreground text-lg mb-2">{s.title}</h3>
                         <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
@@ -134,7 +134,7 @@ const B2BCartao = () => {
 
         {/* ==================== BANNER VISUAL ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "300px" }}>
-          <img src={bannerCorporate} alt="Equipe corporativa discutindo benefícios" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={bannerCorporate} alt="Equipe corporativa discutindo benefícios" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
           <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "300px" }}>
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">

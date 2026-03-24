@@ -55,8 +55,7 @@ const InfoBannerStrip = ({ icon: Icon, label, title, highlight, href, gradient =
                 alt=""
                 aria-hidden="true"
                 className="w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] object-contain drop-shadow-2xl hidden sm:block select-none"
-                draggable={false}
-              />
+                draggable={false} loading="lazy" decoding="async" />
             )}
             <div className="flex items-center gap-1.5 text-white/90 text-xs font-bold shrink-0 group-hover:text-white transition-colors duration-300 bg-white/[0.12] hover:bg-white/[0.18] rounded-full px-4 sm:px-5 py-2.5 border border-white/[0.1] shadow-sm">
               <span className="hidden sm:inline tracking-wide">Saiba mais</span>

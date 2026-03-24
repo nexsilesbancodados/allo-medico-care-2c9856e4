@@ -154,7 +154,7 @@ const Telelaudo = () => {
 
         {/* ==================== BANNER WORKFLOW ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
-          <img src={bannerTelelaudoWorkflow} alt="Centro de diagnóstico por imagem" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={bannerTelelaudoWorkflow} alt="Centro de diagnóstico por imagem" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-r from-[hsl(210,50%,8%)]/90 via-[hsl(210,50%,8%)]/60 to-transparent" />
           <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "320px" }}>
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">
@@ -250,7 +250,7 @@ const Telelaudo = () => {
           <div className="container mx-auto px-4 relative">
             <div className="grid md:grid-cols-2 gap-10 items-center max-w-5xl mx-auto">
               <motion.div initial={{ opacity: 0, scale: 0.9 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="flex items-center justify-center">
-                <img src={bannerLaudoDigital} alt="Documento digital com assinatura" className="w-full max-w-sm rounded-2xl shadow-2xl shadow-secondary/10" loading="lazy" />
+                <img src={bannerLaudoDigital} alt="Documento digital com assinatura" className="w-full max-w-sm rounded-2xl shadow-2xl shadow-secondary/10" loading="lazy" decoding="async" />
               </motion.div>
               <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }}>
                 <Badge className="mb-4 bg-secondary/20 text-secondary border-secondary/30 text-xs">

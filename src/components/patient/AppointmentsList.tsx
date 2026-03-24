@@ -451,7 +451,7 @@ const AppointmentsList = () => {
             </div>
           ) : upcoming.length === 0 ? (
             <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10">
-              <img src={mascotWelcome} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" />
+              <img src={mascotWelcome} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" loading="lazy" decoding="async" width={80} height={80} />
               <p className="text-[13px] font-semibold text-foreground mb-1">Nenhuma consulta próxima</p>
               <p className="text-[11px] text-muted-foreground mb-3">Agende agora e cuide da sua saúde</p>
               <Button size="sm" className="rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-[0_3px_12px_rgba(37,99,235,.3)]" onClick={() => navigate("/dashboard/schedule")}>
@@ -482,7 +482,7 @@ const AppointmentsList = () => {
             </div>
           ) : past.length === 0 ? (
             <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10">
-              <img src={mascotReading} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" />
+              <img src={mascotReading} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" loading="lazy" decoding="async" width={80} height={80} />
               <p className="text-[13px] font-semibold text-foreground mb-1">Nenhuma consulta no histórico</p>
               <p className="text-[11px] text-muted-foreground">Suas consultas realizadas aparecerão aqui</p>
             </div>

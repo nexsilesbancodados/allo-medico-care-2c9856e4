@@ -80,7 +80,7 @@ const Teleconsulta = () => {
 
         {/* Hero */}
         <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "55vh" }}>
-          <img src={heroTeleconsulta} alt="Teleconsulta" className="absolute inset-0 w-full h-full object-cover" />
+          <img src={heroTeleconsulta} alt="Teleconsulta" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/35 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
           <div className="container mx-auto px-4 relative flex items-end pb-12" style={{ minHeight: "55vh" }}>
@@ -172,7 +172,7 @@ const Teleconsulta = () => {
 
         {/* ==================== BANNER MÉDICO ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
-          <img src={bannerDoctor} alt="Médica em teleconsulta" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={bannerDoctor} alt="Médica em teleconsulta" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
           <div className="container mx-auto px-4 relative flex items-center" style={{ minHeight: "320px" }}>
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10">
@@ -269,7 +269,7 @@ const Teleconsulta = () => {
 
         {/* ==================== BANNER PACIENTE ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>
-          <img src={bannerPatient} alt="Paciente usando teleconsulta de casa" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={bannerPatient} alt="Paciente usando teleconsulta de casa" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-l from-secondary/90 via-secondary/70 to-transparent" />
           <div className="container mx-auto px-4 relative flex items-center justify-end" style={{ minHeight: "320px" }}>
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="max-w-lg py-10 text-right">

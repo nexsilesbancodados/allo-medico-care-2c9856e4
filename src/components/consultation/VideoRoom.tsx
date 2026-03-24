@@ -811,7 +811,7 @@ const VideoRoom = () => {
               }`}>
                 {msg.fileUrl && msg.fileType?.startsWith("image/") && (
                   <a href={msg.fileUrl} target="_blank" rel="noopener noreferrer" className="block mb-2">
-                    <img src={msg.fileUrl} alt={msg.fileName} className="max-w-full rounded-lg max-h-48 object-cover" />
+                    <img src={msg.fileUrl} alt={msg.fileName} className="max-w-full rounded-lg max-h-48 object-cover" loading="lazy" decoding="async" />
                   </a>
                 )}
                 {msg.fileUrl && !msg.fileType?.startsWith("image/") && (

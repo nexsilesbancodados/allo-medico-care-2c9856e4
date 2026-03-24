@@ -101,8 +101,7 @@ const AuthSimpleRole = ({
                 src={mascotSrc}
                 alt={`Pingo - ${title}`}
                 className="w-56 h-56 object-contain drop-shadow-2xl"
-                loading="eager"
-              />
+                loading="eager" decoding="async" width={224} height={224} />
             </motion.div>
           )}
         </div>
@@ -118,7 +117,7 @@ const AuthSimpleRole = ({
           </Link>
           <div className="relative z-10 flex items-center gap-3">
             {mascotSrc ? (
-              <img src={mascotSrc} alt="Pingo" className="w-14 h-14 object-contain drop-shadow-lg" />
+              <img src={mascotSrc} alt="Pingo" className="w-14 h-14 object-contain drop-shadow-lg" loading="lazy" decoding="async" width={56} height={56} />
             ) : (
               <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                 <Icon className="w-6 h-6 text-primary-foreground" />

@@ -166,7 +166,7 @@ const LaudistaMyReports = () => {
               </div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-8">
-              <img src={mascotReading} alt="Pingo" className="w-20 h-20 object-contain mx-auto mb-3 select-none" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }} />
+              <img src={mascotReading} alt="Pingo" className="w-20 h-20 object-contain mx-auto mb-3 select-none" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }} loading="lazy" decoding="async" width={80} height={80} />
                 <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="text-sm font-semibold text-foreground mb-1">
                   {search || statusFilter !== "all" ? "Nenhum resultado" : "Nenhum laudo emitido ainda"}

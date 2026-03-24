@@ -81,7 +81,7 @@ const AuthAdmin = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            <img src={pingoAdmin} alt="Pingo Admin" className="w-56 h-56 object-contain drop-shadow-2xl" loading="eager" />
+            <img src={pingoAdmin} alt="Pingo Admin" className="w-56 h-56 object-contain drop-shadow-2xl" loading="eager" decoding="async" width={224} height={224} />
           </motion.div>
         </div>
       </div>
@@ -94,7 +94,7 @@ const AuthAdmin = () => {
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
           <div className="relative z-10 flex items-center gap-3">
-            <img src={pingoAdmin} alt="Pingo" className="w-14 h-14 object-contain drop-shadow-lg" />
+            <img src={pingoAdmin} alt="Pingo" className="w-14 h-14 object-contain drop-shadow-lg" loading="lazy" decoding="async" width={56} height={56} />
             <div>
               <h1 className="text-xl font-bold text-background">Painel Administrativo</h1>
               <p className="text-xs text-background/70">Área restrita</p>

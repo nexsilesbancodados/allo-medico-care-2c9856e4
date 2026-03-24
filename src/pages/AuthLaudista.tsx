@@ -236,7 +236,7 @@ const AuthLaudista = () => {
               </motion.div>
             </motion.div>
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.6 }} className="hidden lg:block">
-              <img src={telelaudoImg} alt="Telelaudo" className="w-full max-w-md mx-auto rounded-2xl shadow-2xl" loading="lazy" />
+              <img src={telelaudoImg} alt="Telelaudo" className="w-full max-w-md mx-auto rounded-2xl shadow-2xl" loading="lazy" decoding="async" />
             </motion.div>
           </div>
         </div>
@@ -326,7 +326,7 @@ const AuthLaudista = () => {
 
       {/* ==================== IMAGE BANNER CTA ==================== */}
       <section className="relative overflow-hidden" style={{ minHeight: "280px" }}>
-        <img src={bannerLaudistaCta} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+        <img src={bannerLaudistaCta} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
         <div className="absolute inset-0 bg-gradient-to-r from-[hsl(210,60%,15%)]/95 via-[hsl(210,60%,15%)]/75 to-transparent" />
         <div className="container mx-auto px-4 relative z-10 flex items-center" style={{ minHeight: "280px" }}>
           <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="max-w-lg">
@@ -621,7 +621,7 @@ const AuthLaudista = () => {
 
       {/* Mascot */}
       <section className="py-10 text-center">
-        <img src={mascotThumbsup} alt="Pingo mascote" className="w-24 mx-auto opacity-80" loading="lazy" />
+        <img src={mascotThumbsup} alt="Pingo mascote" className="w-24 mx-auto opacity-80" loading="lazy" decoding="async" width={96} />
       </section>
 
       <Suspense fallback={null}><Footer /></Suspense>

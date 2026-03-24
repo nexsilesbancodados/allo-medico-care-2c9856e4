@@ -106,7 +106,7 @@ const AuthParceiro = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ delay: 0.5, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
-            <img src={pingoPartner} alt="Pingo Parceiro" className="w-56 h-56 object-contain drop-shadow-2xl" loading="eager" />
+            <img src={pingoPartner} alt="Pingo Parceiro" className="w-56 h-56 object-contain drop-shadow-2xl" loading="eager" decoding="async" width={224} height={224} />
           </motion.div>
         </div>
       </div>
@@ -119,7 +119,7 @@ const AuthParceiro = () => {
             <ArrowLeft className="w-4 h-4" /> Voltar
           </Link>
           <div className="relative z-10 flex items-center gap-3">
-            <img src={pingoPartner} alt="Pingo" className="w-14 h-14 object-contain drop-shadow-lg" />
+            <img src={pingoPartner} alt="Pingo" className="w-14 h-14 object-contain drop-shadow-lg" loading="lazy" decoding="async" width={56} height={56} />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">Portal do Parceiro</h1>
               <p className="text-xs text-primary-foreground/70">Farmácias & Laboratórios</p>

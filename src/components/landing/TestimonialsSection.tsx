@@ -84,8 +84,7 @@ const TestimonialsSection = forwardRef<HTMLElement>((_, ref) => {
                   src={item.avatar}
                   alt={item.name}
                   className="w-full h-full rounded-full object-cover border-[3px] border-card"
-                  loading="lazy"
-                />
+                  loading="lazy" decoding="async" />
               </div>
               <span className="text-[11px] font-medium max-w-[72px] sm:max-w-20 truncate text-muted-foreground group-hover:text-foreground transition-colors">
                 {item.name.split(" ")[0]}
@@ -133,8 +132,7 @@ const TestimonialsSection = forwardRef<HTMLElement>((_, ref) => {
                       <img
                         src={t.avatar}
                         alt={t.name}
-                        className="w-full h-full rounded-full object-cover border-2 border-card"
-                      />
+                        className="w-full h-full rounded-full object-cover border-2 border-card" loading="lazy" decoding="async" />
                     </div>
                     {t.verified && (
                       <ShieldCheck className="w-4 h-4 text-primary absolute -bottom-0.5 -right-0.5 bg-card rounded-full" />

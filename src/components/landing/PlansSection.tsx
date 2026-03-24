@@ -129,8 +129,7 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
                     src={spec.mascot}
                     alt=""
                     aria-hidden="true"
-                    className="absolute -bottom-3 -right-3 w-24 h-24 object-contain opacity-[0.08] group-hover:opacity-[0.18] group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 pointer-events-none select-none"
-                  />
+                    className="absolute -bottom-3 -right-3 w-24 h-24 object-contain opacity-[0.08] group-hover:opacity-[0.18] group-hover:scale-110 group-hover:-rotate-6 transition-all duration-500 pointer-events-none select-none" loading="lazy" decoding="async" width={96} height={96} />
                   {/* Glow effect on hover */}
                   <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-[radial-gradient(circle_at_50%_50%,hsl(var(--primary)/0.08),transparent_70%)]" />
                   

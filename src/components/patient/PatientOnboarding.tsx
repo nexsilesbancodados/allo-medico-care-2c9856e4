@@ -132,7 +132,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
       case "welcome":
         return (
           <div className="text-center">
-            <img src={mascotWelcome} alt="Mascot" className="w-20 h-20 mx-auto mb-3" />
+            <img src={mascotWelcome} alt="Mascot" className="w-20 h-20 mx-auto mb-3" loading="lazy" decoding="async" width={80} height={80} />
             <h2 className="text-lg font-bold text-foreground mb-2">Bem-vindo(a) à AloClínica!</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
               Sua saúde agora está a um clique de distância. Vamos preencher seus dados para personalizar sua experiência em poucos passos.

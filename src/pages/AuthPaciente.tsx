@@ -535,8 +535,7 @@ const AuthPaciente = () => {
                       src={pingoCartao}
                       alt="Pingo mascote"
                       className="w-48 h-48 object-contain drop-shadow-2xl"
-                      loading="eager"
-                    />
+                      loading="eager" decoding="async" width={192} height={192} />
                   </motion.div>
                 </div>
 
@@ -688,8 +687,7 @@ const AuthPaciente = () => {
                           alt=""
                           aria-hidden="true"
                           className="pointer-events-none absolute inset-0 w-[90%] h-[90%] m-auto object-contain opacity-10 select-none mix-blend-multiply dark:mix-blend-screen"
-                          loading="lazy"
-                        />
+                          loading="lazy" decoding="async" />
                         <h3 className={`font-bold text-xl tracking-tight ${isPremium ? "text-primary-foreground" : "text-foreground"}`}>
                           {plan.name}
                         </h3>
@@ -934,8 +932,7 @@ const AuthPaciente = () => {
                         <img
                           src={`data:image/png;base64,${paymentData.pixQrCode}`}
                           alt="QR Code PIX"
-                          className="w-48 h-48 mx-auto"
-                        />
+                          className="w-48 h-48 mx-auto" loading="lazy" decoding="async" />
                       </div>
                       <p className="text-sm text-muted-foreground">Escaneie o QR Code com o app do seu banco</p>
                       {paymentData.pixCopyPaste && (

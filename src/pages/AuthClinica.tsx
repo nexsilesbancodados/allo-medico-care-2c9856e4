@@ -278,7 +278,7 @@ const AuthClinica = () => {
 
         {/* ==================== IMAGE BANNER CTA ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "280px" }}>
-          <img src={bannerClinicaCta} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+          <img src={bannerClinicaCta} alt="" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
           <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/70 to-transparent" />
           <div className="container mx-auto px-4 relative z-10 flex items-center" style={{ minHeight: "280px" }}>
             <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="max-w-lg">

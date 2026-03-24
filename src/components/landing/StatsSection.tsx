@@ -67,8 +67,7 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
                 src={stat.mascot}
                 alt=""
                 aria-hidden="true"
-                className="absolute -bottom-2 -right-2 w-20 h-20 sm:w-24 sm:h-24 object-contain opacity-[0.07] group-hover:opacity-[0.12] group-hover:rotate-6 transition-all duration-500 pointer-events-none select-none"
-              />
+                className="absolute -bottom-2 -right-2 w-20 h-20 sm:w-24 sm:h-24 object-contain opacity-[0.07] group-hover:opacity-[0.12] group-hover:rotate-6 transition-all duration-500 pointer-events-none select-none" loading="lazy" decoding="async" width={80} height={80} />
 
               <div className="relative flex flex-col gap-3">
                 {/* Icon with glow */}

@@ -303,7 +303,7 @@ const DoctorConsultations = () => {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-8 rounded-2xl border border-dashed border-border/40">
-          <img src={mascotWave} alt="Pingo" className="w-20 h-20 object-contain mx-auto mb-3 select-none" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }} />
+          <img src={mascotWave} alt="Pingo" className="w-20 h-20 object-contain mx-auto mb-3 select-none" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }} loading="lazy" decoding="async" width={80} height={80} />
             <Users className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
             <p className="text-sm font-medium text-foreground mb-1">Nenhuma consulta encontrada</p>
             <p className="text-xs text-muted-foreground">Tente ajustar os filtros</p>

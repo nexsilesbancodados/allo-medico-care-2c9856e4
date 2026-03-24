@@ -239,7 +239,7 @@ const CardSubscriptionCheckout = ({
                 {pixQrCode ? (
                   <>
                     <div className="w-48 h-48 mx-auto rounded-2xl bg-card border-2 border-border p-2 mb-4">
-                      <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-full h-full object-contain rounded-xl" />
+                      <img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-full h-full object-contain rounded-xl" loading="lazy" decoding="async" />
                     </div>
                     <p className="text-xs text-muted-foreground mb-3">Escaneie o QR Code ou copie o código</p>
                     <Button variant="outline" className="w-full mb-4 font-mono text-xs" onClick={handleCopyPix}>

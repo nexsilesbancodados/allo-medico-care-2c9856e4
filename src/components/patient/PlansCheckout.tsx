@@ -1032,8 +1032,7 @@ const PlansCheckout = () => {
                                 <img
                                   src={`data:image/png;base64,${pixQrCode}`}
                                   alt="QR Code PIX"
-                                  className="w-full h-full object-contain rounded-xl"
-                                />
+                                  className="w-full h-full object-contain rounded-xl" loading="lazy" decoding="async" />
                               </div>
                               <p className="text-xs text-muted-foreground mb-3">Escaneie o QR Code ou copie o código</p>
                               <Button

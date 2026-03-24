@@ -304,7 +304,7 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
         {/* Compact top bar */}
         <div className="flex items-center justify-between px-4 pt-[max(env(safe-area-inset-top,8px),8px)] pb-2 bg-[hsl(220,20%,8%)] border-b border-[hsl(220,15%,15%)]">
           <div className="flex items-center gap-2 min-w-0">
-            <img src={mascotImg} alt="Mascot" className="w-7 h-7 shrink-0" />
+            <img src={mascotImg} alt="Mascot" className="w-7 h-7 shrink-0" loading="lazy" decoding="async" width={28} height={28} />
             <h1 className="text-sm font-bold text-white truncate">
               {isDoctor ? "Preparar" : "Pré-consulta"}
             </h1>
@@ -636,7 +636,7 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
         {/* Top bar */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <img src={mascotImg} alt="Mascot" className="w-10 h-10" />
+            <img src={mascotImg} alt="Mascot" className="w-10 h-10" loading="lazy" decoding="async" width={40} height={40} />
             <div>
               <h1 className="text-lg font-bold text-white">
                 {isDoctor ? "Preparar Atendimento" : "Pronto para entrar?"}

@@ -321,7 +321,7 @@ const PingoChatbot = () => {
               className="relative w-16 h-16 rounded-full bg-primary shadow-lg flex items-center justify-center overflow-hidden border-2 border-primary-foreground/20 hover:shadow-xl transition-shadow"
             >
               <span className="absolute inset-0 rounded-full bg-primary animate-ping opacity-20" />
-              <img src={mascotImg} alt="Pingo" className="w-14 h-14 object-cover relative z-10" />
+              <img src={mascotImg} alt="Pingo" className="w-14 h-14 object-cover relative z-10" loading="lazy" decoding="async" width={56} height={56} />
             </motion.button>
           </motion.div>
         )}
@@ -343,7 +343,7 @@ const PingoChatbot = () => {
           >
             {/* Header */}
             <div className="flex items-center gap-3 px-4 py-3 bg-gradient-hero text-primary-foreground">
-              <img src={mascotImg} alt="Pingo" className="w-10 h-10 rounded-full bg-white/20 object-cover" />
+              <img src={mascotImg} alt="Pingo" className="w-10 h-10 rounded-full bg-white/20 object-cover" loading="lazy" decoding="async" width={40} height={40} />
               <div className="flex-1">
                 <p className="font-bold text-sm">Pingo 🐧</p>
                 <p className="text-xs opacity-80">
@@ -364,7 +364,7 @@ const PingoChatbot = () => {
             <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 && (
                 <div className="text-center py-6">
-                  <img src={mascotImg} alt="Pingo" className="w-16 h-16 mx-auto mb-3 opacity-80" />
+                  <img src={mascotImg} alt="Pingo" className="w-16 h-16 mx-auto mb-3 opacity-80" loading="lazy" decoding="async" width={64} height={64} />
                   <p className="text-sm font-semibold text-foreground">
                     {user && profile?.first_name ? `Olá, ${profile.first_name}! 🐧` : "Olá! Eu sou o Pingo! 🐧"}
                   </p>

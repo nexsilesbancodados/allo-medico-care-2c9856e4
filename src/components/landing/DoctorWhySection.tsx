@@ -185,8 +185,7 @@ const DoctorWhySection = () => {
                   src={card.image}
                   alt={card.title}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
+                  loading="lazy" decoding="async" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute top-4 left-4 z-10">
                   <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white text-xs font-semibold border border-white/20 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-primary transition-all duration-300">
