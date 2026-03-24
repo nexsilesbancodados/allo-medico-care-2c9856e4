@@ -1,3 +1,46 @@
+/* ── WCAG AA Contrast Fixes ──
+   Overrides CSS variables from index.css (protected) to meet 4.5:1 minimum contrast.
+   Strategy: use dark foreground on vivid mid-tone backgrounds instead of white. */
+
+:root {
+  /* secondary (green): dark fg instead of white — 4.54:1 */
+  --secondary-foreground: 160 60% 15%;
+
+  /* muted-fg: slight darken 45→43% — 4.70:1 on muted bg */
+  --muted-foreground: 210 15% 43%;
+
+  /* destructive: darken bg 60→46% — 5.23:1 with white */
+  --destructive: 0 84% 46%;
+
+  /* warning: dark fg instead of white — 4.93:1 */
+  --warning-foreground: 38 90% 18%;
+
+  /* success: dark fg instead of white — 4.54:1 */
+  --success-foreground: 142 70% 17%;
+
+  /* laudo-text-muted: lighten 50→55% — 4.70:1 on surface */
+  --laudo-text-muted: 220 8% 55%;
+}
+
+.dark {
+  /* primary: dark fg instead of white — 5.29:1 */
+  --primary-foreground: 210 90% 12%;
+
+  /* secondary: dark fg — 5.15:1 */
+  --secondary-foreground: 160 60% 15%;
+
+  /* warning: dark fg — 4.75:1 */
+  --warning-foreground: 38 90% 20%;
+
+  /* success: dark fg — 4.84:1 */
+  --success-foreground: 142 70% 17%;
+}
+
+/* laudo workspace muted text override */
+.laudo-workspace {
+  --muted-foreground: 220 8% 55%;
+}
+
 /* ── Dashboard mobile scroll fix ──
    Constrains main content height on mobile so overflow-y-auto triggers. */
 @media (max-width: 767px) {
