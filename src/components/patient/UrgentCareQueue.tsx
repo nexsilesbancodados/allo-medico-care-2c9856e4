@@ -419,31 +419,32 @@ const UrgentCareQueue = () => {
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="mb-6">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-foreground">{shiftInfo?.label}</h3>
+                <div className="flex flex-wrap items-start justify-between gap-2 mb-4">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-foreground text-sm sm:text-base">{shiftInfo?.label}</h3>
                     <p className="text-xs text-muted-foreground">Turno atual</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right shrink-0">
                     {discountPercent > 0 && (
-                      <p className="text-sm text-muted-foreground line-through">R$ {shiftInfo?.price.toFixed(2)}</p>
+                      <p className="text-xs sm:text-sm text-muted-foreground line-through">R$ {shiftInfo?.price.toFixed(2)}</p>
                     )}
-                    <p className="text-2xl font-bold text-primary">R$ {priceWithDiscount.toFixed(2)}</p>
+                    <p className="text-xl sm:text-2xl font-bold text-primary">R$ {priceWithDiscount.toFixed(2)}</p>
                     {discountPercent > 0 && (
-                      <Badge variant="secondary" className="text-xs">-{discountPercent}% Cartão Desconto</Badge>
+                      <Badge variant="secondary" className="text-[10px] sm:text-xs">-{discountPercent}% Cartão Desconto</Badge>
                     )}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-3 mb-6 text-center text-xs">
+                <div className="flex flex-wrap gap-2 mb-6">
                   {[
-                    { label: "Diurno 07–19h", price: "R$ 75", active: shiftInfo?.shift === "day" },
-                    { label: "Noturno 19–00h", price: "R$ 100", active: shiftInfo?.shift === "night" },
-                    { label: "Madrugada 00–07h", price: "R$ 120", active: shiftInfo?.shift === "dawn" },
+                    { label: "Diurno", hours: "07–19h", price: "R$ 75", active: shiftInfo?.shift === "day" },
+                    { label: "Noturno", hours: "19–00h", price: "R$ 100", active: shiftInfo?.shift === "night" },
+                    { label: "Madrugada", hours: "00–07h", price: "R$ 120", active: shiftInfo?.shift === "dawn" },
                   ].map(s => (
-                    <div key={s.label} className={`rounded-lg p-3 border ${s.active ? "border-primary bg-primary/10 font-bold" : "border-border"}`}>
-                      <p className="text-foreground">{s.label}</p>
-                      <p className="text-primary font-semibold">{s.price}</p>
+                    <div key={s.label} className={`flex-1 min-w-[90px] rounded-xl p-2.5 sm:p-3 border text-center text-xs transition-all ${s.active ? "border-primary bg-primary/10 font-bold shadow-sm" : "border-border"}`}>
+                      <p className="text-foreground font-medium leading-tight">{s.label}</p>
+                      <p className="text-muted-foreground text-[10px]">{s.hours}</p>
+                      <p className="text-primary font-semibold mt-0.5">{s.price}</p>
                     </div>
                   ))}
                 </div>
