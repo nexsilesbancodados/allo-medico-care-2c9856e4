@@ -180,7 +180,11 @@ const DoctorOnboarding = () => {
               return (
                 <button
                   key={step.id}
-                  onClick={() => !done && navigate(step.path)}
+                  onClick={() => {
+                    if (done) return;
+                    if (step.id === "kyc") { setShowKYC(true); return; }
+                    navigate(step.path);
+                  }}
                   disabled={done}
                   className={`w-full flex items-center gap-3 p-2 rounded-xl text-left transition-all ${
                     done
@@ -201,6 +205,27 @@ const DoctorOnboarding = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* KYC Verification Panel */}
+      {showKYC && data?.docProfile && (
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl mt-4" />}>
+          <div className="mt-4">
+            <KYCVerification
+              doctorProfileId={data.docProfile.id}
+              userName={user?.user_metadata?.full_name || ""}
+              userCRM={data.docProfile.crm || ""}
+              onComplete={() => {
+                setShowKYC(false);
+                // Refresh data
+                setData((prev: any) => ({
+                  ...prev,
+                  docProfile: { ...prev.docProfile, kyc_status: "verified" },
+                }));
+              }}
+            />
+          </div>
+        </Suspense>
+      )}
     </motion.div>
   );
 };
