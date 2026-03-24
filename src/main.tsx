@@ -2,6 +2,8 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import "./App.css";
 import { unregisterLegacyRootPushServiceWorkers } from "@/lib/push-service-worker";
+import App from "./App";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 /* ── Chunk-error recovery ─────────────────────────────── */
 const CHUNK_RELOAD_KEY = "__chunk_reloaded";
