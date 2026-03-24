@@ -557,7 +557,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         <nav
           className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10"
           style={{
-            paddingBottom: "env(safe-area-inset-bottom, 4px)",
+            paddingBottom: "max(4px, env(safe-area-inset-bottom, 4px))",
+            paddingLeft: "env(safe-area-inset-left, 0px)",
+            paddingRight: "env(safe-area-inset-right, 0px)",
             background: "linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.92) 100%)",
             backdropFilter: "saturate(180%) blur(20px)",
             WebkitBackdropFilter: "saturate(180%) blur(20px)",
@@ -565,7 +567,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           }}
           aria-label="Navegação principal"
         >
-          <div className="dark:bg-background/85 flex items-stretch h-[62px]">
+          <div className="dark:bg-background/85 flex items-stretch h-[58px] xs:h-[62px]">
             {bottomNav.map(item => {
               const activeColor = ROLE_ACTIVE_COLOR[role] ?? ROLE_ACTIVE_COLOR.patient;
               const activeBg = ROLE_ACTIVE_BG[role] ?? ROLE_ACTIVE_BG.patient;
