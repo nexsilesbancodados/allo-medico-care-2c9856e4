@@ -142,6 +142,22 @@ export default defineConfig(({ mode }) => ({
     minify: "esbuild",
     sourcemap: false,
     cssCodeSplit: true,
+    // Only modulepreload critical-path chunks; let others load on demand
+    modulePreload: {
+      resolveDependencies: (_filename, deps, { hostId: _hostId, hostType }) => {
+        // Only keep modulepreload for the entry HTML, not for lazy chunks
+        if (hostType !== "html") return [];
+        const CRITICAL_CHUNKS = ["vendor-react", "vendor-router", "vendor-query"];
+        return deps.filter((dep) =>
+          CRITICAL_CHUNKS.some((c) => dep.includes(c)) || !dep.includes("vendor-")
+        );
+      },
+    },
+    cssTarget: "safari14",
+    chunkSizeWarningLimit: 600,
+    minify: "esbuild",
+    sourcemap: false,
+    cssCodeSplit: true,
     rollupOptions: {
       output: {
         manualChunks: {
