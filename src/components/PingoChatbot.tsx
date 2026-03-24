@@ -9,10 +9,11 @@ import { supabase } from "@/integrations/supabase/client";
 import mascotImg from "@/assets/mascot.png";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ReactMarkdown from "react-markdown";
+import { SUPABASE_FUNCTIONS_URL, SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-config";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
-const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pingo-chat`;
+const CHAT_URL = `${SUPABASE_FUNCTIONS_URL}/pingo-chat`;
 
 async function streamChat({
   messages,
@@ -31,7 +32,7 @@ async function streamChat({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
     },
     body: JSON.stringify({ messages, context }),
   });

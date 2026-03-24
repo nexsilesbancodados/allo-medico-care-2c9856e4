@@ -6,8 +6,9 @@ import { Separator } from "@/components/ui/separator";
 import { Copy, CheckCircle2, Server, FileText, AlertTriangle, RefreshCw, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_FUNCTIONS_URL } from "@/lib/supabase-config";
 
-const WEBHOOK_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID || "oaixgmuocuwhsabidpei"}.supabase.co/functions/v1/pacs-integration`;
+const WEBHOOK_URL = `${SUPABASE_FUNCTIONS_URL}/pacs-integration`;
 
 const LUA_SCRIPT = `-- Orthanc Lua Script: Auto-send DICOM studies to Allo Médico
 function OnStableStudy(studyId, tags, metadata)

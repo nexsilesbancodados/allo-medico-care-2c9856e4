@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 
 import { AI_URL } from "@/lib/ai";
+import { SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-config";
 
 const DOC_TYPES = [
   { value: "atestado", label: "📋 Atestado Médico", prompt: "Gere um rascunho de atestado médico", description: "Afastamento, comparecimento" },
@@ -64,7 +65,7 @@ IMPORTANTE: Este é apenas um RASCUNHO para revisão do médico. O documento fin
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
           messages: [{ role: "user", content: prompt }],

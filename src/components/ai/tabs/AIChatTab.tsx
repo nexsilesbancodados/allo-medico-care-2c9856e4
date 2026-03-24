@@ -18,6 +18,7 @@ import ReactMarkdown from "react-markdown";
 type Msg = { role: "user" | "assistant"; content: string };
 
 import { AI_URL } from "@/lib/ai";
+import { SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-config";
 
 interface QuickAction {
   label: string;
@@ -202,7 +203,7 @@ const AIChatTab = ({ primaryRole }: Props) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
           messages: [...messages, userMsg],

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import jsPDF from "jspdf";
 
 import { AI_URL } from "@/lib/ai";
+import { SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-config";
 
 interface Props {
   primaryRole: string;
@@ -135,7 +136,7 @@ Estruture em:
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
           messages: [{ role: "user", content: prompt }],
