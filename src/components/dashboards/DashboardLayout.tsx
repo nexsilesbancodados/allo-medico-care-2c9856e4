@@ -148,6 +148,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const [searchParams] = useSearchParams();
   const [moreOpen, setMoreOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useLocalStorage("sidebar-collapsed", false);
   const { signOut } = useAuth();
   const sidebarRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
