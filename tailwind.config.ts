@@ -15,11 +15,9 @@ export default {
     extend: {
       screens: {
         'xs': '375px',
-        '3xl': '1800px',
       },
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', 'sans-serif'],
-        display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -74,11 +72,7 @@ export default {
           foreground: "hsl(var(--success-foreground))",
         },
         medical: {
-          blue: "hsl(var(--medical-blue))",
-          "blue-light": "hsl(var(--medical-blue-light))",
           green: "hsl(var(--medical-green))",
-          "green-light": "hsl(var(--medical-green-light))",
-          navy: "hsl(var(--medical-navy))",
         },
       },
       boxShadow: {
@@ -99,18 +93,6 @@ export default {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
-        "float": {
-          "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-10px)" },
-        },
-        "pulse-soft": {
-          "0%, 100%": { opacity: "1" },
-          "50%": { opacity: "0.7" },
-        },
-        "marquee": {
-          "0%": { transform: "translateX(0%)" },
-          "100%": { transform: "translateX(-50%)" },
-        },
         "marquee-right": {
           "0%": { transform: "translateX(-50%)" },
           "100%": { transform: "translateX(0%)" },
@@ -119,71 +101,19 @@ export default {
           "0%": { transform: "translateX(0%)" },
           "100%": { transform: "translateX(-50%)" },
         },
-        "fade-in": {
-          "0%": { opacity: "0", transform: "translateY(8px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        "fade-in-up": {
-          "0%": { opacity: "0", transform: "translateY(10px)" },
-          "100%": { opacity: "1", transform: "translateY(0)" },
-        },
-        "scale-in": {
-          "0%": { opacity: "0", transform: "scale(0.96)" },
-          "100%": { opacity: "1", transform: "scale(1)" },
-        },
-        "slide-in-right": {
-          "0%": { transform: "translateX(100%)" },
-          "100%": { transform: "translateX(0)" },
-        },
-        "slide-up-bounce": {
-          "0%":   { opacity: "0", transform: "translateY(20px) scale(0.96)" },
-          "70%":  { transform: "translateY(-4px) scale(1.01)" },
-          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
-        },
-        "gradient-slide": {
-          "0%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
-          "100%": { backgroundPosition: "0% 50%" },
-        },
-        "shimmer-move": {
-          "0%":   { backgroundPosition: "-600px 0" },
-          "100%": { backgroundPosition: "600px 0" },
-        },
-        "glow-pulse": {
-          "0%, 100%": { boxShadow: "0 0 16px hsl(var(--primary) / 0.2)" },
-          "50%":      { boxShadow: "0 0 32px hsl(var(--primary) / 0.4)" },
-        },
-        "spin-slow": {
-          "0%":   { transform: "rotate(0deg)" },
-          "100%": { transform: "rotate(360deg)" },
-        },
       },
       animation: {
         "accordion-down":  "accordion-down 0.2s ease-out",
         "accordion-up":    "accordion-up 0.2s ease-out",
-        "float":           "float 6s ease-in-out infinite",
-        "pulse-soft":      "pulse-soft 3s ease-in-out infinite",
-        "marquee":         "marquee 25s linear infinite",
         "marquee-right":   "marquee-right 30s linear infinite",
         "marquee-left":    "marquee-left 30s linear infinite",
-        "fade-in":         "fade-in 0.3s ease-out both",
-        "fade-in-up":      "fade-in-up 0.35s ease-out both",
-        "scale-in":        "scale-in 0.2s ease-out both",
-        "slide-in-right":  "slide-in-right 0.3s ease-out",
-        "slide-up-bounce": "slide-up-bounce 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both",
-        "shimmer-move":    "shimmer-move 1.8s ease-in-out infinite",
-        "glow-pulse":      "glow-pulse 2.5s ease-in-out infinite",
-        "spin-slow":       "spin-slow 8s linear infinite",
-        "gradient-slide":  "gradient-slide 6s ease-in-out infinite",
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
   safelist: [
-    "card-interactive", "kpi-card", "glass", "glass-strong",
-    "shimmer-v2", "text-gradient-brand", "mesh-gradient",
-    "pulse-dot", "bell-ring", "tabular-nums",
-    { pattern: /^shadow-(card|elevated|glow)/ },
-    { pattern: /^animate-(bell-ring|glow-pulse|float|fade-in)/ },
+    "card-interactive", "kpi-card", "glass",
+    "shimmer-v2", "tabular-nums",
+    { pattern: /^shadow-(card|elevated)/ },
   ],
 } satisfies Config;
