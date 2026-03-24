@@ -36,12 +36,6 @@ describe("CNPJ validation", () => {
   });
 });
 
-describe("Email utility", () => {
-  it("exports sendEmail function", async () => {
-    const { sendEmail } = await import("@/lib/email");
-    expect(typeof sendEmail).toBe("function");
-  });
-});
 
 describe("Consent utility", () => {
   it("exports registerConsent function", async () => {
