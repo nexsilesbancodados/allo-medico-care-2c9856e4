@@ -11,6 +11,7 @@ import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 
 import { AI_URL } from "@/lib/ai";
+import { SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-config";
 
 const SEVERITY_OPTIONS = [
   { value: "leve", label: "🟢 Leve", description: "Desconforto tolerável", color: "border-green-500/30 bg-green-500/5" },
@@ -86,7 +87,7 @@ IMPORTANTE: Não dê diagnóstico. Sempre recomende consultar um médico.`;
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
           messages: [{ role: "user", content: prompt }],

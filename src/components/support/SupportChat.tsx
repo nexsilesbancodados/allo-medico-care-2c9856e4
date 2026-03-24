@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { SUPABASE_FUNCTIONS_URL, SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-config";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { Send, Bot, User, Loader2, Headset } from "lucide-react";
 type Message = { role: "user" | "assistant" | "support"; content: string };
 
 const WELCOME_MSG = "Olá! 🐧 Sou o Pingo, assistente virtual da Alô Médico. Como posso ajudar a equipe de suporte hoje?";
+const CHAT_URL = `${SUPABASE_FUNCTIONS_URL}/pingo-chat`;
 
 const SupportChat = () => {
   const { user } = useAuth();
@@ -102,13 +104,11 @@ const SupportChat = () => {
     persistMessage("user", userMsg.content);
 
     try {
-      const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pingo-chat`;
-
       const resp = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({
           messages: allMessages.map((m) => ({ role: m.role, content: m.content })),

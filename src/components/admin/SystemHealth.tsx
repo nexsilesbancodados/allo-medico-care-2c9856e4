@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { RefreshCw, CheckCircle2, XCircle, Clock, Database, Bot, Globe, Server, Users, FileText, Calendar, HardDrive } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
+import { SUPABASE_FUNCTIONS_URL, SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-config";
 
 interface HealthCheck {
   name: string;
@@ -100,11 +101,11 @@ const SystemHealth = () => {
     // 3. Edge Functions
     const efStart = performance.now();
     try {
-      const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/calculate-shift-price`, {
+      const res = await fetch(`${SUPABASE_FUNCTIONS_URL}/calculate-shift-price`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify({}),
       });

@@ -1,1 +1,3 @@
-export const AI_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`;
+import { SUPABASE_FUNCTIONS_URL } from "@/lib/supabase-config";
+
+export const AI_URL = `${SUPABASE_FUNCTIONS_URL}/ai-assistant`;
