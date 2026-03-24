@@ -93,7 +93,7 @@ const PatientExamResults = () => {
           ) : !examRequests?.length ? (
             <div className="text-center py-12 space-y-2">
               <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto" />
-              <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10 mt-4"><img src="/src/assets/mascot-reading.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[13px] font-semibold text-foreground mb-1">Nenhum exame solicitado ainda</p><p className="text-[11px] text-muted-foreground">Seus exames solicitados aparecerão aqui</p></div>
+              <div className="text-center py-8 rounded-2xl border border-dashed border-border/40 bg-muted/10 mt-4"><img src={mascotReading} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-2 select-none" /><p className="text-[13px] font-semibold text-foreground mb-1">Nenhum exame solicitado ainda</p><p className="text-[11px] text-muted-foreground">Seus exames solicitados aparecerão aqui</p></div>
               <p className="text-xs text-muted-foreground">Quando seu médico solicitar laudos, eles aparecerão aqui.</p>
             </div>
           ) : (

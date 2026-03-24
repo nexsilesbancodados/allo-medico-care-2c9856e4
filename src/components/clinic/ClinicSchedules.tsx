@@ -161,7 +161,8 @@ const ClinicSchedules = () => {
               {loading ? (
                 <div className="p-4 space-y-3">{[1,2,3,4].map(i => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
               ) : filtered.length === 0 ? (
-                <div className="text-center py-12">
+                <div className="text-center py-8">
+                <img src={pingoReception} alt="Pingo" className="w-20 h-20 object-contain mx-auto mb-3 select-none" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }} />
                   <Calendar className="w-10 h-10 text-muted-foreground/40 mx-auto mb-3" />
                   <p className="text-sm text-muted-foreground">Nenhuma consulta para este dia</p>
                 </div>

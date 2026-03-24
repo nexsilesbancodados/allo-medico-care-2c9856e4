@@ -25,7 +25,6 @@ import { StatBento } from "./StatBento";
 import { ActionPills } from "./ActionPills";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
-import { BentoStatCards } from "./BentoStatCards";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import pingoSupport from "@/assets/pingo-support.png";
 

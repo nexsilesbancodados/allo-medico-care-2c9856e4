@@ -42,7 +42,7 @@ class ErrorBoundary extends Component<Props, State> {
           <div className="text-center max-w-sm">
             {/* Pingo com expressão preocupada */}
             <img
-              src="/src/assets/mascot-wave.png"
+              src={mascotWave}
               alt="Pingo preocupado"
               className="w-32 h-32 object-contain mx-auto drop-shadow-xl mb-4 select-none"
               style={{ filter: "hue-rotate(0deg) saturate(0.8)", opacity: 0.9 }}

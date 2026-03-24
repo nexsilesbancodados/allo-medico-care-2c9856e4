@@ -390,7 +390,7 @@ const DoctorSearch = () => {
             <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
               <Search className="w-8 h-8 text-muted-foreground/40" />
             </div>
-            <><img src="/src/assets/mascot-wave.png" alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" /><p className="text-[13px] font-semibold text-foreground">Nenhum médico encontrado</p></>
+            <><img src={mascotWave} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" /><p className="text-[13px] font-semibold text-foreground">Nenhum médico encontrado</p></>
             <p className="text-sm text-muted-foreground mt-1">Ajuste os filtros de busca</p>
           </div>
         ) : (

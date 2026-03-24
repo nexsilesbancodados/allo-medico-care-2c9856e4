@@ -13,7 +13,6 @@ import { StatBento } from "./StatBento";
 import { ActionPills } from "./ActionPills";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { PremiumHero } from "./PremiumHero";
-import { BentoStatCards } from "./BentoStatCards";
 import { PrescriptionFinder } from "./PrescriptionFinder";
 import { AlertBox } from "./AlertBox";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
