@@ -430,7 +430,7 @@ const AIChatTab = ({ primaryRole }: Props) => {
               {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
           </div>
-          <Button type="submit" size="icon" aria-label="Enviar" disabled={isLoading || !input.trim()} className="shrink-0 h-11 w-11 rounded-xl"
+          <Button type="submit" size="icon" aria-label="Enviar" disabled={isLoading || !input.trim()} className="shrink-0 h-11 w-11 rounded-xl">
             <Send className="w-4 h-4" />
           </Button>
         </form>
