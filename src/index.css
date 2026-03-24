@@ -168,12 +168,14 @@
 
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
 
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    overflow-x: hidden;
   }
 
   body {
@@ -181,6 +183,7 @@
     font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: contain;
+    overflow-x: hidden;
     padding-top: env(safe-area-inset-top, 0px);
     padding-left: env(safe-area-inset-left, 0px);
     padding-right: env(safe-area-inset-right, 0px);
@@ -188,6 +191,32 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* Fluid typography — prevents text from being too large or cut on small screens */
+  h1 { font-size: clamp(1.5rem, 4vw + 0.5rem, 2.75rem); }
+  h2 { font-size: clamp(1.25rem, 3vw + 0.4rem, 2.25rem); }
+  h3 { font-size: clamp(1.1rem, 2.5vw + 0.3rem, 1.75rem); }
+
+  /* Prevent images/media from overflowing */
+  img, video, canvas, svg {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* Ensure tables don't overflow */
+  table {
+    overflow-x: auto;
+    display: block;
+    max-width: 100%;
+  }
+
+  /* Prevent long words/URLs from causing horizontal overflow */
+  p, li, td, th, span, a, label {
+    overflow-wrap: break-word;
+    word-break: break-word;
   }
 }
 
@@ -295,6 +324,36 @@
 /* ── Hidden scrollbar (functional scroll, invisible bar) ── */
 * { scrollbar-width: none; -ms-overflow-style: none; }
 *::-webkit-scrollbar { display: none; }
+
+/* ── Mobile responsive utilities ── */
+@media (max-width: 374px) {
+  /* Very small screens (iPhone SE, older devices) */
+  .dashboard-grid { grid-template-columns: 1fr !important; }
+  h1 { font-size: 1.35rem !important; }
+  h2 { font-size: 1.15rem !important; }
+}
+
+/* Touch-friendly tap targets — minimum 44x44px on mobile */
+@media (pointer: coarse) {
+  button, a, [role="button"], input[type="checkbox"], input[type="radio"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Exception: inline text links and nav labels */
+  nav a, .nav-item, .bottom-nav-item { min-height: unset; min-width: unset; }
+}
+
+/* Landscape mobile — reduce vertical padding */
+@media (max-height: 500px) and (orientation: landscape) {
+  .pb-\\[88px\\] { padding-bottom: 64px !important; }
+}
+
+/* Dark mode bottom nav glass */
+@media (prefers-color-scheme: dark) {
+  .dark nav[aria-label="Navegação principal"] {
+    background: linear-gradient(180deg, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.9) 100%) !important;
+  }
+}
 
 /* ── Dashboard card interactive hover ── */
 .card-interactive {

@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      screens: {
+        'xs': '375px',
+        '3xl': '1800px',
+      },
       fontFamily: {
         sans: ['"Plus Jakarta Sans"', '"Inter"', 'system-ui', 'sans-serif'],
         display: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],

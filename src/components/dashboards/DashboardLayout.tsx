@@ -371,7 +371,8 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         {/* Mobile: gradient header */}
-        <div className={`md:hidden w-full ${ROLE_HEADER_GRADIENT[role] ?? ROLE_HEADER_GRADIENT.patient} px-4 py-3 flex items-center gap-3`}>
+        <div className={`md:hidden w-full ${ROLE_HEADER_GRADIENT[role] ?? ROLE_HEADER_GRADIENT.patient} px-3 xs:px-4 py-2.5 xs:py-3 flex items-center gap-2 xs:gap-3`}
+          style={{ paddingLeft: "max(0.75rem, env(safe-area-inset-left, 0px))", paddingRight: "max(0.75rem, env(safe-area-inset-right, 0px))" }}>
           {nav && nav.length > 0 && (
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger asChild>
@@ -539,8 +540,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             </div>
           </aside>
         )}
-        <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-24 md:pb-10 scroll-smooth">
-          <div className="px-4 py-4 md:px-6 md:py-5 lg:px-8 lg:py-6 min-h-0 max-w-[1400px] mx-auto">
+        <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-[88px] md:pb-10 scroll-smooth">
+          <div className="px-3 xs:px-4 py-3 xs:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6 min-h-0 max-w-[1400px] mx-auto w-full"
+            style={{ paddingLeft: "max(0.75rem, env(safe-area-inset-left, 0px))", paddingRight: "max(0.75rem, env(safe-area-inset-right, 0px))" }}>
             <div className="hidden md:block"><DashboardBreadcrumbs /></div>
             {children}
           </div>
@@ -555,7 +557,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         <nav
           className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10"
           style={{
-            paddingBottom: "env(safe-area-inset-bottom, 4px)",
+            paddingBottom: "max(4px, env(safe-area-inset-bottom, 4px))",
+            paddingLeft: "env(safe-area-inset-left, 0px)",
+            paddingRight: "env(safe-area-inset-right, 0px)",
             background: "linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(255,255,255,0.92) 100%)",
             backdropFilter: "saturate(180%) blur(20px)",
             WebkitBackdropFilter: "saturate(180%) blur(20px)",
@@ -563,7 +567,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           }}
           aria-label="Navegação principal"
         >
-          <div className="dark:bg-background/85 flex items-stretch h-[62px]">
+          <div className="dark:bg-background/85 flex items-stretch h-[58px] xs:h-[62px]">
             {bottomNav.map(item => {
               const activeColor = ROLE_ACTIVE_COLOR[role] ?? ROLE_ACTIVE_COLOR.patient;
               const activeBg = ROLE_ACTIVE_BG[role] ?? ROLE_ACTIVE_BG.patient;
