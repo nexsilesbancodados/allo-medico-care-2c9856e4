@@ -91,7 +91,7 @@ const TeleLaudoSection = () => {
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Link to="/medico">
-                <Button size="lg" className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 shadow-elevated">
+                <Button variant="rainbow" size="lg" className="rounded-full px-8 gap-2">
                   Começar a Laudar
                   <ArrowRight className="w-4 h-4" />
                 </Button>

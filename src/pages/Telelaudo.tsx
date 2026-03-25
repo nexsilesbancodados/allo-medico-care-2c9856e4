@@ -101,7 +101,7 @@ const Telelaudo = () => {
                 Laudos assinados digitalmente por especialistas. Upload, análise com IA e verificação por QR Code.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-3">
-                <Button size="default" className="bg-white text-secondary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl shadow-black/20" asChild>
+                <Button variant="rainbow" size="default" className="rounded-2xl px-8 font-bold" asChild>
                   <Link to="/medico">Começar a Usar <ArrowRight className="w-4 h-4 ml-2" /></Link>
                 </Button>
                 <Button size="default" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl px-6 font-semibold" asChild>
@@ -237,7 +237,7 @@ const Telelaudo = () => {
                 </h3>
                 <p className="text-sm opacity-70 mt-1">Laudos rápidos, seguros e verificáveis para sua operação.</p>
               </div>
-              <Button size="lg" className="bg-white text-secondary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
+              <Button variant="rainbow" size="lg" className="rounded-full px-8 font-bold shrink-0" asChild>
                 <Link to="/para-empresas/telelaudo">Solicitar Acesso <ChevronRight className="w-4 h-4 ml-1" /></Link>
               </Button>
             </div>

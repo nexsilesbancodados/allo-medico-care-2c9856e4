@@ -71,7 +71,7 @@ const B2BTelelaudo = () => {
               <p className="text-sm text-white/70 max-w-lg mb-6 leading-relaxed text-left">
                 Terceirize laudos médicos com segurança, agilidade e assinatura digital verificável. Sem equipe própria de laudistas.
               </p>
-              <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
+              <Button variant="rainbow" size="default" className="rounded-2xl px-8 font-bold" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
                 Solicitar Acesso <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
               <div className="flex flex-wrap items-start gap-4 mt-6">

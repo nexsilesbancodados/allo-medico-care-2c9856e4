@@ -666,7 +666,7 @@ const AuthMedico = () => {
               <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-3 tracking-tight">Transforme sua prática médica</h2>
               <p className="text-muted-foreground max-w-md mx-auto mb-8">Junte-se a mais de 500 médicos que já atendem pela AloClinica.</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button size="lg" className="bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-2xl h-14 px-10 text-base font-bold shadow-xl" onClick={scrollToForm}>Criar Minha Conta <ArrowRight className="w-5 h-5 ml-2" /></Button>
+                <Button variant="rainbow" size="lg" className="rounded-2xl h-14 px-10 text-base font-bold" onClick={scrollToForm}>Criar Minha Conta <ArrowRight className="w-5 h-5 ml-2" /></Button>
                 <Button size="lg" variant="outline" className="rounded-2xl h-14 px-8 text-base font-semibold" asChild>
                   <a href="https://wa.me/5511999999999?text=Olá! Sou médico e gostaria de saber mais." target="_blank" rel="noopener noreferrer">Falar pelo WhatsApp</a>
                 </Button>

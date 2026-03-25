@@ -412,7 +412,7 @@ const AuthClinica = () => {
               <h2 className="text-2xl sm:text-3xl font-black text-foreground mb-3 tracking-tight">Leve sua clínica para o futuro</h2>
               <p className="text-muted-foreground max-w-md mx-auto mb-8">Cadastro gratuito, sem mensalidade e com suporte dedicado.</p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Button size="lg" className="bg-gradient-to-r from-secondary to-primary text-primary-foreground rounded-2xl h-14 px-10 text-base font-bold shadow-xl" onClick={scrollToForm}>Cadastrar Clínica <ArrowRight className="w-5 h-5 ml-2" /></Button>
+                <Button variant="rainbow" size="lg" className="rounded-2xl h-14 px-10 text-base font-bold" onClick={scrollToForm}>Cadastrar Clínica <ArrowRight className="w-5 h-5 ml-2" /></Button>
                 <Button size="lg" variant="outline" className="rounded-2xl h-14 px-8 text-base font-semibold" asChild>
                   <a href="https://wa.me/5511999999999?text=Olá! Gostaria de cadastrar minha clínica." target="_blank" rel="noopener noreferrer">Falar pelo WhatsApp</a>
                 </Button>

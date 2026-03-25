@@ -194,8 +194,9 @@ const DoctorPremiumSection = () => {
                 className="flex flex-wrap gap-3"
               >
                 <Button
+                  variant="rainbow"
                   size="lg"
-                  className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  className="rounded-full px-8 font-bold"
                   onClick={() => navigate("/medico")}
                 >
                   Cadastre-se <ArrowRight className="w-4 h-4 ml-2" />
