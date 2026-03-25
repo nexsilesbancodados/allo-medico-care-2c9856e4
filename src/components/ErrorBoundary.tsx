@@ -53,9 +53,11 @@ class ErrorBoundary extends Component<Props, State> {
               <p className="text-[13px] text-muted-foreground mb-4 leading-relaxed">
                 O Pingo encontrou um erro inesperado. Tente recarregar a página ou voltar ao início.
               </p>
-              {import.meta.env.DEV && this.state.error && (
+              {this.state.error && (
                 <pre className="text-left text-[10px] bg-red-50 rounded-xl p-3 mb-4 overflow-auto max-h-28 text-red-600 border border-red-100">
                   {this.state.error.message}
+                  {"\n"}
+                  {this.state.error.stack?.split("\n").slice(0, 5).join("\n")}
                 </pre>
               )}
               <div className="flex gap-3 justify-center">
