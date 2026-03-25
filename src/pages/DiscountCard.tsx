@@ -500,7 +500,7 @@ const DiscountCard = () => {
               <h2 className="text-2xl sm:text-3xl font-black mb-3 relative">Comece a economizar hoje</h2>
               <p className="text-white/70 mb-6 max-w-md mx-auto relative">Ative seu Cartão de Benefícios e tenha acesso imediato a telemedicina, descontos e assistência funerária.</p>
               <div className="flex flex-wrap gap-3 justify-center relative">
-                <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-2xl h-14 px-10 text-base font-bold shadow-2xl" onClick={() => document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })}>
+                <Button variant="rainbow" size="lg" className="rounded-2xl h-14 px-10 text-base font-bold" onClick={() => document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })}>
                   Ver Planos <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
                 <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-2xl h-14 px-8 text-base font-bold backdrop-blur-sm">

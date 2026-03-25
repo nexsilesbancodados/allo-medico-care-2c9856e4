@@ -159,8 +159,9 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
             className="text-center"
           >
             <Button
+              variant="rainbow"
               size="lg"
-              className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 font-bold shadow-lg shadow-primary/20 hover:shadow-xl hover:scale-105 transition-all cta-shimmer group"
+              className="rounded-full px-8 font-bold group"
               onClick={() => setShowAll(!showAll)}
             >
               {showAll ? "Ver menos" : "Ver Todas as Especialidades"}
