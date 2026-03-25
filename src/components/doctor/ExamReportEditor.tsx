@@ -1817,6 +1817,21 @@ const ExamReportEditor = () => {
   };
 
   // ---- Keyboard shortcuts ----
+  // Force dark theme for workstation
+  useEffect(() => {
+    document.documentElement.classList.add('laudo-workspace');
+    return () => document.documentElement.classList.remove('laudo-workspace');
+  }, []);
+
+  const slaPercent = useMemo(() => {
+    if (!examRequest?.sla_deadline || !examRequest?.created_at) return null;
+    const total = new Date(examRequest.sla_deadline).getTime() - new Date(examRequest.created_at).getTime();
+    const elapsed = Date.now() - new Date(examRequest.created_at).getTime();
+    return Math.min(100, Math.max(0, (elapsed / total) * 100));
+  }, [examRequest?.sla_deadline, examRequest?.created_at]);
+
+  const isReported = examRequest?.status === "reported" && existingReport?.signed_at;
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === "s") {
@@ -1831,7 +1846,7 @@ const ExamReportEditor = () => {
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [content, autoSaveDraft]);
+  }, [content, autoSaveDraft, isReported]);
 
   if (loadingExam) {
     return (
@@ -1840,21 +1855,6 @@ const ExamReportEditor = () => {
       </div>
     );
   }
-
-  const isReported = examRequest?.status === "reported" && existingReport?.signed_at;
-
-  // Force dark theme for workstation
-  useEffect(() => {
-    document.documentElement.classList.add('laudo-workspace');
-    return () => document.documentElement.classList.remove('laudo-workspace');
-  }, []);
-
-  const slaPercent = useMemo(() => {
-    if (!examRequest?.sla_deadline || !examRequest?.created_at) return null;
-    const total = new Date(examRequest.sla_deadline).getTime() - new Date(examRequest.created_at).getTime();
-    const elapsed = Date.now() - new Date(examRequest.created_at).getTime();
-    return Math.min(100, Math.max(0, (elapsed / total) * 100));
-  }, [examRequest?.sla_deadline, examRequest?.created_at]);
 
   return (
     <div className="h-screen flex flex-col overflow-hidden" style={{ background: 'hsl(220 20% 8%)' }}>
