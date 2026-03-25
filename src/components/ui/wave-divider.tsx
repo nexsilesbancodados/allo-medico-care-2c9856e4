@@ -11,32 +11,30 @@ const WaveDivider = memo(({ fill, showAccent = true, className = "" }: WaveDivid
 
   return (
     <div
-      className={`absolute bottom-0 left-0 w-full overflow-hidden pointer-events-none ${className}`}
-      style={{ height: 200, lineHeight: 0 }}
+      className={`absolute bottom-0 left-0 w-full pointer-events-none ${className}`}
+      style={{ height: 160, lineHeight: 0, overflow: "hidden" }}
       aria-hidden="true"
     >
       <style>{`
-        .elementor-shape-wave{
+        .wave-el {
           position: absolute;
           bottom: 0;
-          display: block;
-          width: 200% !important;
-          height: 160px;
-          animation: waveShape 10s ease-in-out infinite;
-          will-change: transform, left;
           left: 0;
+          display: block;
+          width: 200%;
+          height: 160px;
+          animation: waveSlide 10s ease-in-out infinite;
         }
-        @keyframes waveShape {
+        @keyframes waveSlide {
           0%   { left: 0; }
           50%  { left: -50%; }
           100% { left: 0; }
         }
       `}</style>
 
-      {/* Camada 1 — onda azul translúcida (sobe um pouco acima da branca) */}
       {showAccent && (
         <svg
-          className="elementor-shape-wave"
+          className="wave-el"
           viewBox="0 0 1440 120"
           preserveAspectRatio="none"
           style={{ zIndex: 2, opacity: 0.5, bottom: 20, animationDuration: "14s", animationDelay: "-3s" }}
@@ -48,9 +46,8 @@ const WaveDivider = memo(({ fill, showAccent = true, className = "" }: WaveDivid
         </svg>
       )}
 
-      {/* Camada 2 — onda sólida (fundo da próxima seção) */}
       <svg
-        className="elementor-shape-wave"
+        className="wave-el"
         viewBox="0 0 1440 120"
         preserveAspectRatio="none"
         style={{ zIndex: 3 }}
