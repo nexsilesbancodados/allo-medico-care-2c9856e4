@@ -1,26 +1,20 @@
 import { memo } from "react";
 
 interface WaveDividerProps {
-  fill?: string;
-  accentColor?: string;
-  showAccent?: boolean;
+  color?: string;
   className?: string;
 }
 
 /**
- * Animated overlapping wave section divider.
- * Faithfully replicates the two-layer wave from the reference:
- * - Shape container with overflow:hidden at the bottom of a section
- * - Two SVGs at width:200% animated with left:-50% keyframes
- * - Light-blue accent wave (z-index 2) sits above the white wave (z-index 3)
+ * Two overlapping decorative light-blue waves, matching the reference image.
+ * Both waves are translucent accent shapes — NOT background fills.
  */
-const WaveDivider = memo(({ fill, accentColor, showAccent = true, className = "" }: WaveDividerProps) => {
-  const solidFill = fill ?? "hsl(var(--background))";
-  const accent = accentColor ?? "hsl(var(--primary) / 0.35)";
+const WaveDivider = memo(({ color, className = "" }: WaveDividerProps) => {
+  const waveColor = color ?? "hsl(var(--primary) / 0.12)";
 
   return (
     <div
-      className={`shape-container ${className}`}
+      className={className}
       aria-hidden="true"
       style={{
         position: "absolute",
@@ -29,38 +23,34 @@ const WaveDivider = memo(({ fill, accentColor, showAccent = true, className = ""
         width: "100%",
         overflow: "hidden",
         lineHeight: 0,
-        height: 200,
+        height: 140,
+        pointerEvents: "none",
       }}
     >
-      {/* Accent wave — light blue, translucent, sits above */}
-      {showAccent && (
-        <svg
-          className="elementor-shape shape-light-blue"
-          viewBox="0 0 1440 120"
-          preserveAspectRatio="none"
-          style={{
-            position: "absolute",
-            bottom: 20,
-            left: 0,
-            display: "block",
-            width: "200%",
-            height: 160,
-            zIndex: 2,
-            opacity: 0.5,
-            animation: "waveSlide 14s ease-in-out infinite",
-            animationDelay: "-3s",
-          }}
-        >
-          <path
-            d="M0,40 C180,90 360,0 540,50 C720,100 900,20 1080,60 C1260,100 1440,30 1440,30 L1440,120 L0,120 Z"
-            fill={accent}
-          />
-        </svg>
-      )}
-
-      {/* Main wave — solid white, matches next section bg */}
+      {/* Back wave — slower, offset upward */}
       <svg
-        className="elementor-shape shape-white"
+        viewBox="0 0 1440 120"
+        preserveAspectRatio="none"
+        style={{
+          position: "absolute",
+          bottom: 12,
+          left: 0,
+          display: "block",
+          width: "200%",
+          height: 120,
+          zIndex: 1,
+          animation: "waveSlide 14s ease-in-out infinite",
+          animationDelay: "-4s",
+        }}
+      >
+        <path
+          d="M0,50 C160,100 320,10 480,55 C640,100 800,20 960,60 C1120,100 1280,25 1440,50 L1440,120 L0,120 Z"
+          fill={waveColor}
+        />
+      </svg>
+
+      {/* Front wave — faster, sits lower */}
+      <svg
         viewBox="0 0 1440 120"
         preserveAspectRatio="none"
         style={{
@@ -69,14 +59,14 @@ const WaveDivider = memo(({ fill, accentColor, showAccent = true, className = ""
           left: 0,
           display: "block",
           width: "200%",
-          height: 160,
-          zIndex: 3,
+          height: 110,
+          zIndex: 2,
           animation: "waveSlide 10s ease-in-out infinite",
         }}
       >
         <path
-          d="M0,60 C240,120 480,0 720,60 C960,120 1200,0 1440,60 L1440,120 L0,120 Z"
-          fill={solidFill}
+          d="M0,65 C200,110 400,15 600,60 C800,105 1000,20 1200,65 C1320,95 1440,40 1440,40 L1440,120 L0,120 Z"
+          fill={waveColor}
         />
       </svg>
 
