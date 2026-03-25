@@ -29,7 +29,7 @@ const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
 const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
 const Footer = lazy(() => import("@/components/landing/Footer"));
 const SpecialtyQuiz = lazy(() => import("@/components/landing/SpecialtyQuiz"));
-const MarqueeCards = lazy(() => import("@/components/landing/MarqueeCards"));
+const HorizontalScrollCards = lazy(() => import("@/components/landing/HorizontalScrollCards"));
 
 const Index = forwardRef<HTMLDivElement>((_, ref) => {
   const { setTheme, theme } = useTheme();
@@ -132,8 +132,8 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         </div>
       </section>
 
-      <DeferredSection fallbackClassName="h-[380px]" rootMargin="180px 0px">
-        <MarqueeCards />
+      <DeferredSection fallbackClassName="h-screen" rootMargin="300px 0px">
+        <HorizontalScrollCards />
       </DeferredSection>
 
       <DeferredSection fallbackClassName="h-28 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">
