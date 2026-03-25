@@ -1,6 +1,7 @@
 import { useState, memo, forwardRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Eye, HeartPulse } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Eye } from "lucide-react";
+import mascot from "@/assets/mascot.png";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -97,9 +98,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
     >
       <div className="max-w-[1800px] mx-auto flex items-center justify-between h-14 lg:h-[60px] px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-          <span className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-hero text-primary-foreground shadow-sm transition-transform duration-200 group-hover:scale-105">
-            <HeartPulse className="w-4.5 h-4.5" />
-          </span>
+          <img src={mascot} alt="Pingo" className="w-9 h-9 rounded-2xl object-contain transition-transform duration-200 group-hover:scale-105" width={36} height={36} />
           <span className="text-lg font-extrabold text-foreground tracking-tight">
             Alo<span className="text-primary">Clinica</span>
           </span>
