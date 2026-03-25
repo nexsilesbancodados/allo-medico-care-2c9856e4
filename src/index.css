@@ -1313,4 +1313,41 @@ html, body {
     opacity: 0.85;
     filter: blur(36px);
   }
+
+  /* ── Fold / Corner-peel effect for secondary buttons ── */
+  .btn-irish-glint[data-variant="secondary"] {
+    position: relative;
+    overflow: visible;
+  }
+
+  .btn-irish-glint[data-variant="secondary"]::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--foreground)) 0%,
+      hsl(var(--foreground)) 50%,
+      hsl(var(--secondary) / 0.7) 50%,
+      hsl(var(--secondary)) 60%
+    );
+    border-radius: 0 0 0.5em 0;
+    box-shadow: 0.15em 0.15em 0.2em hsl(var(--foreground) / 0.15);
+    transition: width 0.3s ease, height 0.3s ease;
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  .btn-irish-glint[data-variant="secondary"]:hover::before {
+    width: 1.4em;
+    height: 1.4em;
+  }
+
+  /* Disable the glint sweep on secondary — fold is the star */
+  .btn-irish-glint[data-variant="secondary"]::after {
+    display: none;
+  }
 }
