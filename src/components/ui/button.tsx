@@ -21,6 +21,7 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground",
         link:
           "text-primary underline-offset-4 hover:underline",
+        rainbow: "",
       },
       size: {
         default: "h-10 px-5 py-2",
@@ -43,15 +44,43 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
+    const isRainbow = variant === "rainbow";
+
+    if (isRainbow) {
+      return (
+        <Comp
+          className={cn(
+            "btn-rainbow-wrap btn-irish-glint relative z-0 rounded-xl font-black text-white uppercase tracking-wider cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+            buttonVariants({ variant: undefined, size, className }),
+          )}
+          data-variant="rainbow"
+          ref={ref}
+          style={{
+            background: "linear-gradient(0deg, #000, #272727)",
+            border: "none",
+          }}
+          {...props}
+        >
+          {/* Animated rainbow border */}
+          <span className="btn-rainbow-border pointer-events-none absolute rounded-xl" aria-hidden="true" />
+          {/* Blurred glow */}
+          <span className="btn-rainbow-glow pointer-events-none absolute rounded-xl" aria-hidden="true" />
+          <span className="relative z-30">{children}</span>
+        </Comp>
+      );
+    }
+
     return (
       <Comp
         className={cn("btn-irish-glint", buttonVariants({ variant, size, className }))}
         data-variant={variant ?? "default"}
         ref={ref}
         {...props}
-      />
+      >
+        {children}
+      </Comp>
     );
   },
 );
