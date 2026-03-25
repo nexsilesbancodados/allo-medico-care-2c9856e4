@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
+import WaveDivider from "@/components/ui/wave-divider";
 import bannerLegal from "@/assets/banner-legal-hero.jpg";
 
 interface InstitutionalHeroProps {
@@ -11,7 +12,7 @@ interface InstitutionalHeroProps {
 }
 
 const InstitutionalHero = ({ title, subtitle, icon: Icon, lastUpdate }: InstitutionalHeroProps) => (
-  <section className="relative overflow-hidden" style={{ minHeight: "220px" }}>
+  <section className="relative overflow-hidden pb-12" style={{ minHeight: "260px" }}>
     <img src={bannerLegal} alt="" className="absolute inset-0 w-full h-full object-cover" loading="eager" decoding="async" />
     <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/75 to-primary/50" />
     <div className="container mx-auto px-4 relative z-10 flex items-end pb-8 pt-12 max-w-3xl">
@@ -37,6 +38,7 @@ const InstitutionalHero = ({ title, subtitle, icon: Icon, lastUpdate }: Institut
         )}
       </motion.div>
     </div>
+    <WaveDivider />
   </section>
 );
 
