@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { BannerCTA } from "@/components/ui/banner-cta";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, Clock, Star, Check, X, Heart, Zap, Sparkles } from "lucide-react";
