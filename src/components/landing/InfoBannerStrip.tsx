@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, type LucideIcon } from "lucide-react";
+import { type LucideIcon } from "lucide-react";
+import { BannerCTA } from "@/components/ui/banner-cta";
 
 interface InfoBannerStripProps {
   icon: LucideIcon;
@@ -57,10 +58,9 @@ const InfoBannerStrip = ({ icon: Icon, label, title, highlight, href, gradient =
                 className="w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] object-contain drop-shadow-2xl hidden sm:block select-none"
                 draggable={false} loading="lazy" decoding="async" />
             )}
-            <div className="flex items-center gap-1.5 text-white/90 text-xs font-bold shrink-0 group-hover:text-white transition-colors duration-300 bg-white/[0.12] hover:bg-white/[0.18] rounded-full px-4 sm:px-5 py-2.5 border border-white/[0.1] shadow-sm">
-              <span className="hidden sm:inline tracking-wide">Saiba mais</span>
-              <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
-            </div>
+            <BannerCTA tone="light" size="sm">
+              <span className="hidden sm:inline">Saiba mais</span>
+            </BannerCTA>
           </div>
         </button>
       </div>

@@ -5,6 +5,7 @@
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
+import { BannerCTA } from "@/components/ui/banner-cta";
 
 interface PingoBannerCardProps {
   pingImg: string;
@@ -67,18 +68,14 @@ export function PingoBannerCard({
         )}
         {children}
         {ctaLabel && onCta && (
-          <motion.button
-            whileTap={{ scale: 0.94 }}
+          <BannerCTA
+            tone="dark"
+            size="sm"
             onClick={onCta}
-            className={cn(
-              "mt-2.5 inline-flex items-center gap-1 rounded-xl px-3.5 py-1.5",
-              "text-[10.5px] font-bold text-white transition-all active:scale-95",
-              "shadow-[0_3px_10px_rgba(37,99,235,.3)]",
-              ctaBg
-            )}
+            className={cn("mt-2.5", ctaBg)}
           >
-            {ctaLabel} →
-          </motion.button>
+            {ctaLabel}
+          </BannerCTA>
         )}
       </div>
     </div>
