@@ -359,7 +359,7 @@ const LaudistaReportQueue = () => {
                               </Button>
                             )}
                             {(exam.status === "in_review" || exam.status === "reported") && (
-                              <Button size="sm" variant={exam.status === "in_review" && isOverdue ? "destructive" : "default"} onClick={() => navigate(`/dashboard/laudista/report-editor/${exam.id}?role=doctor`)} className="rounded-lg">
+                              <Button size="sm" variant={exam.status === "in_review" && isOverdue ? "destructive" : "default"} onClick={() => navigate(`/dashboard/laudista/report-editor/${exam.id}?role=laudista`)} className="rounded-lg">
                                 <Eye className="w-3 h-3 mr-1" />
                                 {exam.status === "in_review" ? "Laudar" : "Ver"}
                               </Button>
