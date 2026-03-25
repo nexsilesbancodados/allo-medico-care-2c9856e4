@@ -1,0 +1,38 @@
+-- SECURITY FIX Part 3: Tables R-W
+
+ALTER POLICY "Admins can manage rate limits" ON public.rate_limits TO authenticated;
+ALTER POLICY "Admins can view rate limits" ON public.rate_limits TO authenticated;
+ALTER POLICY "Admins can update referrals" ON public.referrals TO authenticated;
+ALTER POLICY "Affiliates can view own referrals" ON public.referrals TO authenticated;
+ALTER POLICY "Anyone can create referrals" ON public.referrals TO authenticated;
+ALTER POLICY "Admins manage refunds" ON public.refunds TO authenticated;
+ALTER POLICY "Patients view own refunds" ON public.refunds TO authenticated;
+ALTER POLICY "System can insert refunds" ON public.refunds TO authenticated;
+ALTER POLICY "Patients can create own surveys" ON public.satisfaction_surveys TO authenticated;
+ALTER POLICY "Patients can view own surveys" ON public.satisfaction_surveys TO authenticated;
+ALTER POLICY "Only admins can manage subscriptions" ON public.subscriptions TO authenticated;
+ALTER POLICY "Users can view own subscriptions" ON public.subscriptions TO authenticated;
+ALTER POLICY "Support users can insert chat messages" ON public.support_chat_messages TO authenticated;
+ALTER POLICY "Support users can view all chat messages" ON public.support_chat_messages TO authenticated;
+ALTER POLICY "Users can insert own chat messages" ON public.support_chat_messages TO authenticated;
+ALTER POLICY "Users can view own chat messages" ON public.support_chat_messages TO authenticated;
+ALTER POLICY "Participants can mark messages read" ON public.support_messages TO authenticated;
+ALTER POLICY "Ticket participants can send messages" ON public.support_messages TO authenticated;
+ALTER POLICY "Ticket participants can view messages" ON public.support_messages TO authenticated;
+ALTER POLICY "Patients can create tickets" ON public.support_tickets TO authenticated;
+ALTER POLICY "Patients can view own tickets" ON public.support_tickets TO authenticated;
+ALTER POLICY "Support/Admin can update tickets" ON public.support_tickets TO authenticated;
+ALTER POLICY "Admins manage diary" ON public.symptom_diary TO authenticated;
+ALTER POLICY "Patients manage own diary" ON public.symptom_diary TO authenticated;
+ALTER POLICY "System can insert credits" ON public.user_credits TO authenticated;
+ALTER POLICY "Users view own credits" ON public.user_credits TO authenticated;
+ALTER POLICY "Support can view all presence" ON public.user_presence TO authenticated;
+ALTER POLICY "Users can manage own presence" ON public.user_presence TO authenticated;
+ALTER POLICY "Participants can view presence logs" ON public.video_presence_logs TO authenticated;
+ALTER POLICY "Users can insert own presence" ON public.video_presence_logs TO authenticated;
+ALTER POLICY "Users can update own presence" ON public.video_presence_logs TO authenticated;
+ALTER POLICY "Admins can update withdrawal requests" ON public.withdrawal_requests TO authenticated;
+ALTER POLICY "Admins can update withdrawals" ON public.withdrawal_requests TO authenticated;
+ALTER POLICY "Users can create withdrawal requests" ON public.withdrawal_requests TO authenticated;
+ALTER POLICY "Users can view own withdrawal requests" ON public.withdrawal_requests TO authenticated;
+ALTER POLICY "Users can view own withdrawals" ON public.withdrawal_requests TO authenticated;
