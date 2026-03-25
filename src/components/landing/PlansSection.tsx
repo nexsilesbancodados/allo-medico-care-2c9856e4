@@ -1,6 +1,7 @@
 import { forwardRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { ExplodeButton } from "@/components/ui/explode-button";
 import { Check, ShieldCheck, Zap, Award, Heart, Diamond, ArrowRight, Sparkles, Stethoscope, Brain, Eye, Bone, Baby, Activity, Crown, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import specGeneral from "@/assets/spec-general.png";
@@ -264,19 +265,24 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
                     ))}
                   </ul>
 
-                  <Button
-                    className={`w-full h-11 text-sm font-bold rounded-xl transition-all duration-300 active:scale-[0.97] ${
+                  <ExplodeButton
+                    className={`w-full h-11 text-sm font-bold rounded-xl transition-all duration-300 ${
                       plan.highlighted
                         ? "bg-white text-primary hover:bg-white/90 shadow-lg"
                         : "bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:opacity-90 shadow-md shadow-primary/15"
                     }`}
                     onClick={() => navigate("/cartao-beneficios")}
+                    particleColors={
+                      plan.highlighted
+                        ? ["hsl(var(--primary))", "hsl(var(--secondary))", "#fff", "hsl(142,71%,30%)"]
+                        : undefined
+                    }
                   >
                     <span className="flex items-center gap-2">
                       Assinar Cartão
                       <ArrowRight className="w-3.5 h-3.5" />
                     </span>
-                  </Button>
+                  </ExplodeButton>
                 </div>
               </motion.div>
             ))}
