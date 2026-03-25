@@ -99,7 +99,9 @@ const LaudistaReportQueue = () => {
         .order("priority", { ascending: true })
         .order("created_at", { ascending: true });
 
-      if (statusFilter !== "all") {
+      if (statusFilter === "active") {
+        query = query.in("status", ["pending", "in_review"]);
+      } else if (statusFilter !== "all") {
         query = query.eq("status", statusFilter);
       }
 
