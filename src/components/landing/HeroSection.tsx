@@ -45,13 +45,12 @@ const HeroSection = memo(
       <section
         ref={ref}
         aria-label="Início"
-        className="relative flex items-center pt-20 sm:pt-24 lg:pt-28 pb-12 sm:pb-16 lg:pb-20 overflow-hidden"
+        className="relative flex items-center pt-20 sm:pt-24 lg:pt-28 pb-52 sm:pb-56 lg:pb-60 overflow-hidden"
       >
-        {/* Ambient background */}
+        {/* Background — strong primary gradient at bottom for wave contrast */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/30" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background via-50% to-primary/40" />
           <div className="absolute top-[-10%] right-[5%] w-[600px] h-[600px] rounded-full bg-primary/[0.04] blur-[160px]" />
-          <div className="absolute bottom-[-10%] left-[10%] w-[500px] h-[500px] rounded-full bg-secondary/[0.03] blur-[140px]" />
         </div>
 
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
