@@ -222,7 +222,7 @@ const LaudistaMyReports = () => {
                                 size="sm"
                                 variant="outline"
                                 className="h-7 text-xs gap-1 rounded-lg"
-                                onClick={() => navigate(`/dashboard/laudista/report-editor/${report.exam_request_id}?role=doctor`)}
+                                onClick={() => navigate(`/dashboard/laudista/report-editor/${report.exam_request_id}?role=laudista`)}
                               >
                                 <Eye className="w-3 h-3" /> Ver
                               </Button>

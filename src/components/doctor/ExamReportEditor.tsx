@@ -1085,7 +1085,7 @@ const ExamReportEditor = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isLaudista = location.pathname.includes("/laudista/");
-  const backRoute = isLaudista ? "/dashboard/laudista/queue?role=doctor" : "/dashboard/doctor/report-queue?role=doctor";
+  const backRoute = isLaudista ? "/dashboard/laudista/queue?role=laudista" : "/dashboard/doctor/report-queue?role=doctor";
   const queryClient = useQueryClient();
 
   const [content, setContent] = useState("");
