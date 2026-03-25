@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { BannerCTA } from "@/components/ui/banner-cta";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight, Shield, Clock, Star, Check, X, Heart, Zap, Sparkles } from "lucide-react";
@@ -95,15 +96,13 @@ const CTABanner = forwardRef<HTMLElement>((_, ref) => {
                   Criar minha conta
                   <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
                 </Button>
-                <Button
+                <BannerCTA
+                  tone="light"
                   size="lg"
-                  variant="outline"
-                  className="border-white/20 text-primary-foreground hover:bg-white/10 rounded-full px-8 transition-all hover:scale-[1.03] active:scale-[0.97] h-12"
                   onClick={() => navigate("/consulta-avulsa")}
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
                   Consulta avulsa
-                </Button>
+                </BannerCTA>
               </motion.div>
 
               {/* Benefits row */}
