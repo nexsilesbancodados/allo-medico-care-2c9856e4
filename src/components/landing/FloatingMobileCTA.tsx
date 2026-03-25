@@ -50,8 +50,9 @@ const FloatingMobileCTA = forwardRef<HTMLDivElement>((_, ref) => {
           </p>
           <div className="flex gap-2">
             <Button
+              variant="rainbow"
               size="lg"
-              className="flex-1 bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-2xl h-12 text-sm font-bold shadow-elevated gap-1.5"
+              className="flex-1 rounded-2xl h-12 text-sm font-bold gap-1.5"
               onClick={() => navigate("/paciente")}
             >
               <span className="relative z-10 flex items-center gap-1.5">

@@ -87,8 +87,9 @@ const CTABanner = forwardRef<HTMLElement>((_, ref) => {
                 className="flex flex-wrap gap-3 mb-10"
               >
                 <Button
+                  variant="rainbow"
                   size="lg"
-                  className="bg-card text-primary hover:bg-card/90 rounded-full px-8 font-bold shadow-xl shadow-black/10 hover:shadow-2xl transition-all hover:scale-[1.03] active:scale-[0.97] group h-12"
+                  className="rounded-full px-8 font-bold shadow-xl shadow-black/10 hover:shadow-2xl transition-all hover:scale-[1.03] active:scale-[0.97] group h-12"
                   onClick={() => navigate("/paciente")}
                 >
                   Criar minha conta

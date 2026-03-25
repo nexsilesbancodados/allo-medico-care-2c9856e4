@@ -75,8 +75,9 @@ const HeroSection = memo(
 
               <div className="flex flex-col sm:flex-row gap-3 mb-8">
                 <Button
+                  variant="rainbow"
                   size="lg"
-                  className="rounded-full px-7 h-12 text-[15px] font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 hover:brightness-110 active:scale-[0.97] transition-all duration-200"
+                  className="rounded-full px-7 h-12 text-[15px] font-bold"
                   onClick={() => navigate("/paciente")}
                   onMouseEnter={prefetchPaciente}
                 >
