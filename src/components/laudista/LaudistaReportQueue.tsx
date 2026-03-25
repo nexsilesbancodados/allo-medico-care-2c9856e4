@@ -260,6 +260,7 @@ const LaudistaReportQueue = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="active">Ativos</SelectItem>
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="pending">Pendentes</SelectItem>
                   <SelectItem value="in_review">Em Digitação</SelectItem>
