@@ -1273,4 +1273,44 @@ html, body {
       transparent 80%
     );
   }
+
+  /* ── Rainbow Steam Button ── */
+  @keyframes rainbow-steam {
+    0%   { background-position: 0 0; }
+    50%  { background-position: 400% 0; }
+    100% { background-position: 0 0; }
+  }
+
+  .btn-rainbow-wrap {
+    overflow: visible;
+  }
+
+  .btn-rainbow-border,
+  .btn-rainbow-glow {
+    inset: -2px;
+    width: calc(100% + 4px);
+    height: calc(100% + 4px);
+    z-index: -1;
+    background: linear-gradient(
+      45deg,
+      hsl(var(--primary)),
+      hsl(var(--secondary)),
+      hsl(210 90% 60%),
+      hsl(160 70% 55%),
+      hsl(var(--primary)),
+      hsl(var(--secondary))
+    );
+    background-size: 400%;
+    animation: rainbow-steam 12s linear infinite;
+  }
+
+  .btn-rainbow-glow {
+    filter: blur(28px);
+    opacity: 0.6;
+  }
+
+  .btn-rainbow-wrap:hover .btn-rainbow-glow {
+    opacity: 0.85;
+    filter: blur(36px);
+  }
 }
