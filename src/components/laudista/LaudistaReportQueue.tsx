@@ -76,7 +76,7 @@ const LaudistaReportQueue = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [statusFilter, setStatusFilter] = useState("pending");
+  const [statusFilter, setStatusFilter] = useState("active");
   const [searchQuery, setSearchQuery] = useState("");
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [realtimeConnected, setRealtimeConnected] = useState(false);
