@@ -76,7 +76,7 @@ const LaudistaReportQueue = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [statusFilter, setStatusFilter] = useState("pending");
+  const [statusFilter, setStatusFilter] = useState("active");
   const [searchQuery, setSearchQuery] = useState("");
   const [claimingId, setClaimingId] = useState<string | null>(null);
   const [realtimeConnected, setRealtimeConnected] = useState(false);
@@ -99,7 +99,9 @@ const LaudistaReportQueue = () => {
         .order("priority", { ascending: true })
         .order("created_at", { ascending: true });
 
-      if (statusFilter !== "all") {
+      if (statusFilter === "active") {
+        query = query.in("status", ["pending", "in_review"]);
+      } else if (statusFilter !== "all") {
         query = query.eq("status", statusFilter);
       }
 
@@ -258,6 +260,7 @@ const LaudistaReportQueue = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="active">Ativos</SelectItem>
                   <SelectItem value="all">Todos</SelectItem>
                   <SelectItem value="pending">Pendentes</SelectItem>
                   <SelectItem value="in_review">Em Digitação</SelectItem>
