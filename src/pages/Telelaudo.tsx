@@ -237,7 +237,7 @@ const Telelaudo = () => {
                 </h3>
                 <p className="text-sm opacity-70 mt-1">Laudos rápidos, seguros e verificáveis para sua operação.</p>
               </div>
-              <Button size="lg" className="bg-white text-secondary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
+              <Button variant="rainbow" size="lg" className="rounded-full px-8 font-bold shrink-0" asChild>
                 <Link to="/para-empresas/telelaudo">Solicitar Acesso <ChevronRight className="w-4 h-4 ml-1" /></Link>
               </Button>
             </div>
