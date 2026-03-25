@@ -197,7 +197,7 @@ const DiscountCard = () => {
                 Telemedicina 24h, clube de vantagens com até 80% de desconto e assistência funerária. Tudo em um único cartão.
               </p>
               <div className="flex flex-wrap gap-3">
-                <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl" onClick={() => document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })}>
+                <Button variant="rainbow" size="default" className="rounded-2xl px-8 font-bold" onClick={() => document.getElementById("planos")?.scrollIntoView({ behavior: "smooth" })}>
                   Ver Planos <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
                 <Button size="default" variant="outline" className="border-white/30 text-white hover:bg-white/10 rounded-2xl px-6 font-bold backdrop-blur-sm" onClick={() => document.getElementById("como-funciona")?.scrollIntoView({ behavior: "smooth" })}>
