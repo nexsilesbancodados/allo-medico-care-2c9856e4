@@ -68,7 +68,7 @@ const OftalmologiaLanding = () => {
                   Registre exames de refração, emita receitas de óculos e gere laudos com inteligência artificial — tudo integrado ao ecossistema AloClínica com assinatura digital ICP-Brasil.
                 </p>
                 <div className="flex flex-wrap gap-3 mt-8">
-                  <Button asChild size="lg" className="rounded-full gap-2 text-sm font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-all">
+                  <Button asChild variant="rainbow" size="lg" className="rounded-full gap-2 text-sm font-semibold">
                     <Link to="/clinica">Começar agora <ArrowRight className="w-4 h-4" /></Link>
                   </Button>
                   <Button asChild variant="outline" size="lg" className="rounded-full gap-2 text-sm font-semibold">

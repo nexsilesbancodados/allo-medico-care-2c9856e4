@@ -96,7 +96,7 @@ const Teleconsulta = () => {
                 Consulte médicos online de qualquer lugar do Brasil. Agendamento fácil, receitas digitais válidas e atendimento seguro.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-3">
-                <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl shadow-black/20" asChild>
+                <Button variant="rainbow" size="default" className="rounded-2xl px-8 font-bold" asChild>
                   <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-4 h-4 ml-2" /></Link>
                 </Button>
                 <Button size="default" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl px-6 font-semibold" asChild>
@@ -350,7 +350,7 @@ const Teleconsulta = () => {
               <p className="text-muted-foreground max-w-md mx-auto mb-8">
                 Celular, tablet ou computador com webcam. É tudo que você precisa.
               </p>
-              <Button size="lg" className="bg-gradient-to-r from-primary via-primary to-secondary text-primary-foreground rounded-2xl h-14 px-10 text-base font-bold shadow-xl shadow-primary/20 hover:shadow-2xl transition-shadow" asChild>
+              <Button variant="rainbow" size="lg" className="rounded-2xl h-14 px-10 text-base font-bold" asChild>
                 <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" /></Link>
               </Button>
             </motion.div>
