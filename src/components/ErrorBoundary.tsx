@@ -25,6 +25,7 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error("ErrorBoundary caught:", error.message, error.stack, errorInfo.componentStack);
     logError("ErrorBoundary — unhandled render error", error, {
       componentStack: errorInfo.componentStack,
     });
