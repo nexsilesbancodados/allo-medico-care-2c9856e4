@@ -88,7 +88,7 @@ const B2BLanding = () => {
               <p className="text-sm text-white/70 max-w-lg mb-6 leading-relaxed text-left">
                 Cartão de benefícios para colaboradores e serviço de telelaudo para clínicas — tudo em uma única plataforma.
               </p>
-              <Button size="default" className="bg-white text-primary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-2xl shadow-black/20" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
+              <Button variant="rainbow" size="default" className="rounded-2xl px-8 font-bold" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
                 Solicitar Proposta <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
               <div className="flex flex-wrap items-start gap-4 mt-6">

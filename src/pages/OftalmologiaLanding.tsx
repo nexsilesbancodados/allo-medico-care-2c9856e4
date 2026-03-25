@@ -275,7 +275,7 @@ const OftalmologiaLanding = () => {
               <h2 className="text-3xl lg:text-4xl font-extrabold text-foreground">Pronto para digitalizar sua clínica?</h2>
               <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">Comece hoje mesmo a usar o módulo de oftalmologia. Sem instalação, sem burocracia.</p>
               <div className="flex flex-wrap justify-center gap-4 mt-8">
-                <Button asChild size="lg" className="rounded-full gap-2 text-sm font-semibold shadow-lg shadow-primary/20">
+                <Button asChild variant="rainbow" size="lg" className="rounded-full gap-2 text-sm font-semibold">
                   <Link to="/clinica">Cadastrar minha clínica <ArrowRight className="w-4 h-4" /></Link>
                 </Button>
                 <Button asChild variant="outline" size="lg" className="rounded-full text-sm font-semibold">
