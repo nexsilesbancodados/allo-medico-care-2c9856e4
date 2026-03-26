@@ -245,7 +245,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       <Link to={item.href} onClick={onClick}
         className={`nav-item group flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 relative ${
           item.active
-            ? "bg-primary text-primary-foreground font-semibold shadow-[0_2px_8px_rgba(0,0,0,.15)]"
+            ? "bg-primary text-primary-foreground font-semibold shadow-[0_2px_8px_rgba(0,0,0,.15),inset_0_0_0_1px_rgba(255,255,255,.06)]"
             : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
         }`}
       >
