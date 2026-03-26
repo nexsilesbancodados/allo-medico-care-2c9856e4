@@ -167,7 +167,7 @@ const PatientDashboard = () => {
               planName={(activeSub as Record<string, unknown>)?.plans
                 ? ((activeSub as Record<string, unknown>).plans as Record<string, unknown>)?.name as string
                 : "Plano Básico"}
-              onClick={() => navigate("/dashboard/discount-card?role=patient")}
+              
             />
 
             {/* Action Pills */}
