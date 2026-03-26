@@ -176,31 +176,37 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
           </NavigationMenu>
         </div>
 
-        <div className="hidden lg:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-2.5">
           <LanguageSwitcher />
 
           {user ? (
-            <>
+            <div className="flex items-center gap-1.5">
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full gap-2 text-xs font-semibold h-9 px-4 border-border/60"
+                className="rounded-full gap-2.5 text-[13px] font-semibold h-10 pl-3 pr-5 border-border/50 bg-card/80 backdrop-blur-sm shadow-sm shadow-foreground/[0.03] hover:shadow-md hover:border-primary/30 hover:bg-card transition-all duration-200 group"
                 onClick={() => navigate("/dashboard")}
               >
-                <LayoutDashboard className="w-3.5 h-3.5" />
-                {profile?.first_name ? `Olá, ${profile.first_name}` : "Meu Painel"}
+                <span className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-[11px] font-bold text-primary-foreground shadow-sm">
+                  {profile?.first_name?.[0]?.toUpperCase() || "U"}
+                </span>
+                <span className="text-foreground">
+                  {profile?.first_name ? `Olá, ${profile.first_name}` : "Meu Painel"}
+                </span>
+                <LayoutDashboard className="w-3.5 h-3.5 text-muted-foreground/60 group-hover:text-primary transition-colors duration-150" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-full h-9 w-9"
+                className="rounded-full h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
                 onClick={async () => { await signOut(); navigate("/"); }}
+                title="Sair"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-4 h-4" />
               </Button>
-            </>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center gap-2">
               <Button
                 size="sm"
                 className="rounded-full gap-2 text-xs font-bold h-9 px-5 bg-secondary text-secondary-foreground shadow-sm hover:brightness-110 active:scale-[0.97] transition-all"
@@ -217,7 +223,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                 <CreditCard className="w-3.5 h-3.5" />
                 Meu Cartão
               </Button>
-            </>
+            </div>
           )}
         </div>
 
