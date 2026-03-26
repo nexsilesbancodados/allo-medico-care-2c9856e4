@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Sparkles, X, CreditCard } from "lucide-react";
+import { ChevronRight, Sparkles, X, CreditCard, RotateCcw, Phone, Mail, Globe, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface WalletCardProps {
@@ -86,11 +86,13 @@ export function WalletCard({
   onClick,
 }: WalletCardProps) {
   const [open, setOpen] = useState(false);
+  const [flipped, setFlipped] = useState(false);
 
   const handleCardClick = () => {
     if (onClick) {
       onClick();
     } else {
+      setFlipped(false);
       setOpen(true);
     }
   };
@@ -148,7 +150,7 @@ export function WalletCard({
         </div>
       </motion.div>
 
-      {/* Fullscreen card overlay */}
+      {/* Fullscreen card overlay with flip */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -167,23 +169,101 @@ export function WalletCard({
               className="w-full max-w-md"
               onClick={(e) => e.stopPropagation()}
             >
-              <CardFace
-                name={name}
-                cardNumber={cardNumber}
-                validUntil={validUntil}
-                planName={planName}
-                gradient={gradient}
-                orb1={orb1}
-                orb2={orb2}
-                large
-              />
-              <button
-                onClick={() => setOpen(false)}
-                className="mx-auto mt-4 flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[12px] font-semibold text-white/80 backdrop-blur-md transition-all hover:bg-white/20"
-              >
-                <X className="h-3.5 w-3.5" />
-                Fechar
-              </button>
+              {/* 3D Flip container */}
+              <div className="relative" style={{ perspective: "1200px" }}>
+                <motion.div
+                  animate={{ rotateY: flipped ? 180 : 0 }}
+                  transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  {/* FRONT */}
+                  <div style={{ backfaceVisibility: "hidden" }}>
+                    <CardFace
+                      name={name}
+                      cardNumber={cardNumber}
+                      validUntil={validUntil}
+                      planName={planName}
+                      gradient={gradient}
+                      orb1={orb1}
+                      orb2={orb2}
+                      large
+                    />
+                  </div>
+
+                  {/* BACK */}
+                  <div
+                    className="absolute inset-0"
+                    style={{ backfaceVisibility: "hidden", transform: "rotateY(180deg)" }}
+                  >
+                    <div
+                      className={cn("relative overflow-hidden rounded-[28px] bg-gradient-to-br p-7 h-full", gradient)}
+                      style={{ boxShadow: "0 20px 60px rgba(18,85,200,.4), 0 8px 24px rgba(0,0,0,.15), inset 0 1px 0 rgba(255,255,255,.2)" }}
+                    >
+                      {/* Orbs */}
+                      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-40" style={{ background: orb1, filter: "blur(32px)" }} />
+                      <div className="pointer-events-none absolute -bottom-6 -left-4 h-28 w-28 rounded-full opacity-20" style={{ background: orb2, filter: "blur(28px)" }} />
+
+                      <div className="relative z-10">
+                        {/* Magnetic stripe */}
+                        <div className="h-10 -mx-7 bg-black/40 mb-4" />
+
+                        {/* Signature strip */}
+                        <div className="rounded-lg bg-white/90 px-3 py-2 mb-4">
+                          <p className="text-[8px] text-black/40 font-bold uppercase tracking-wider mb-0.5">Assinatura do titular</p>
+                          <p className="text-[13px] font-bold text-black/70 italic tracking-wide">{name}</p>
+                        </div>
+
+                        {/* CVV */}
+                        <div className="flex items-center gap-3 mb-5">
+                          <div className="rounded-md bg-white/90 px-3 py-1.5">
+                            <p className="text-[8px] text-black/40 font-bold uppercase tracking-wider">CVV</p>
+                            <p className="text-[14px] font-black text-black/70 font-mono tracking-widest">• • •</p>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Shield className="h-3.5 w-3.5 text-white/50" />
+                            <p className="text-[9px] text-white/50 leading-tight">Cartão protegido<br/>por criptografia</p>
+                          </div>
+                        </div>
+
+                        {/* Contact info */}
+                        <div className="space-y-2 border-t border-white/15 pt-3">
+                          <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-white/40">Central de Atendimento</p>
+                          <div className="flex items-center gap-2 text-[10px] text-white/60">
+                            <Phone className="h-3 w-3" />
+                            <span>0800 123 4567</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] text-white/60">
+                            <Mail className="h-3 w-3" />
+                            <span>suporte@aloclinica.com.br</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] text-white/60">
+                            <Globe className="h-3 w-3" />
+                            <span>www.aloclinica.com.br</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* Action buttons */}
+              <div className="mx-auto mt-4 flex items-center justify-center gap-3">
+                <button
+                  onClick={() => setFlipped(!flipped)}
+                  className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[12px] font-semibold text-white/80 backdrop-blur-md transition-all hover:bg-white/20"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  {flipped ? "Ver frente" : "Ver verso"}
+                </button>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[12px] font-semibold text-white/80 backdrop-blur-md transition-all hover:bg-white/20"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Fechar
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}
