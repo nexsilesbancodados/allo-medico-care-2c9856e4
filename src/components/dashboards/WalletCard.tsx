@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, X, CreditCard, RotateCcw, Phone, Mail, Globe, Shield } from "lucide-react";
+import { ChevronRight, X, CreditCard, RotateCcw, Phone, Mail, Globe, Shield, QrCode } from "lucide-react";
 import { cn } from "@/lib/utils";
 import pingoLogo from "@/assets/mascot.png";
 
@@ -47,13 +47,9 @@ function CardFace({ name, cardNumber, validUntil, planName, gradient, orb1, orb2
           </div>
         </div>
 
-        {/* Chip EMV */}
-        <div className={cn("flex items-center justify-center overflow-hidden rounded-[5px] border border-white/20 bg-white/15 backdrop-blur-sm", large ? "mt-4 mb-3 h-9 w-14" : "mt-2.5 mb-1.5 h-7 w-10")}>
-          <div className="grid grid-cols-2 gap-px opacity-60">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div key={i} className={cn("rounded-[1px] bg-amber-300/80", large ? "h-2 w-5" : "h-1.5 w-3.5")} />
-            ))}
-          </div>
+        {/* QR Code de validação */}
+        <div className={cn("flex items-center justify-center overflow-hidden rounded-[5px] border border-white/20 bg-white/90", large ? "mt-4 mb-3 h-12 w-12" : "mt-2.5 mb-1.5 h-8 w-8")}>
+          <QrCode className={cn("text-black/70", large ? "h-8 w-8" : "h-5 w-5")} strokeWidth={1.5} />
         </div>
 
         <p className={cn("font-mono tracking-[0.08em] text-white/40", large ? "text-[13px]" : "text-[10px]")}>{cardNumber}</p>
@@ -123,13 +119,9 @@ export function WalletCard({
             </div>
           </div>
 
-          {/* Chip EMV */}
-          <div className="mt-2.5 mb-1.5 flex h-7 w-10 items-center justify-center overflow-hidden rounded-[5px] border border-white/20 bg-white/15 backdrop-blur-sm">
-            <div className="grid grid-cols-2 gap-px opacity-60">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-1.5 w-3.5 rounded-[1px] bg-amber-300/80" />
-              ))}
-            </div>
+          {/* QR Code de validação */}
+          <div className="mt-2.5 mb-1.5 flex h-8 w-8 items-center justify-center overflow-hidden rounded-[5px] border border-white/20 bg-white/90">
+            <QrCode className="h-5 w-5 text-black/70" strokeWidth={1.5} />
           </div>
 
           <p className="font-mono text-[10px] tracking-[0.08em] text-white/40">{cardNumber}</p>
