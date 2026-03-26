@@ -31,7 +31,7 @@ export function DashboardShortcuts({ shortcuts, title = "Acesso Rápido" }: Dash
   } as const;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-border/20 bg-card">
+    <section className="overflow-hidden rounded-2xl border border-border/30 bg-card" style={{ boxShadow: "0 2px 14px rgba(0,0,0,.04)" }}>
       <div className="border-b border-border/10 px-4 py-3">
         <h2 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60">{title}</h2>
       </div>
