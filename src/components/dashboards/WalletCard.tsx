@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, X, CreditCard, RotateCcw, Phone, Mail, Globe, Shield, QrCode } from "lucide-react";
+import { ChevronRight, X, RotateCcw, Phone, Mail, Globe, Shield, QrCode, Heart, Stethoscope, Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
 import pingoLogo from "@/assets/mascot.png";
 
@@ -39,7 +39,7 @@ function CardFace({ name, cardNumber, validUntil, planName, gradient, orb1, orb2
       <div className="relative z-10">
         <div className="flex items-start justify-between">
           <div>
-            <p className={cn("font-bold uppercase tracking-[0.14em] text-white/50", large ? "text-[11px]" : "text-[9px]")}>Cartão de Benefícios</p>
+            <p className={cn("font-bold uppercase tracking-[0.14em] text-white/50", large ? "text-[11px]" : "text-[9px]")}>Cartão Saúde</p>
             <p className={cn("mt-1 font-bold leading-tight text-white tracking-tight", large ? "text-[18px]" : "text-[14px]")}>{name}</p>
           </div>
           <div className={cn("flex items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-md overflow-hidden", large ? "h-11 w-11" : "h-9 w-9")}>
@@ -52,7 +52,7 @@ function CardFace({ name, cardNumber, validUntil, planName, gradient, orb1, orb2
           <QrCode className={cn("text-black/70", large ? "h-8 w-8" : "h-5 w-5")} strokeWidth={1.5} />
         </div>
 
-        <p className={cn("font-mono tracking-[0.08em] text-white/40", large ? "text-[13px]" : "text-[10px]")}>{cardNumber}</p>
+        <p className={cn("font-mono tracking-[0.08em] text-white/40", large ? "text-[13px]" : "text-[10px]")}>Nº {cardNumber}</p>
 
         <div className={cn("flex items-center justify-between", large ? "mt-4" : "mt-2.5")}>
           <div>
@@ -65,7 +65,7 @@ function CardFace({ name, cardNumber, validUntil, planName, gradient, orb1, orb2
           </div>
           {large && (
             <div className="flex items-center gap-1.5 rounded-xl border border-white/20 bg-white/10 px-3 py-1.5 backdrop-blur-md">
-              <CreditCard className="h-3.5 w-3.5 text-white/70" />
+              <Heart className="h-3.5 w-3.5 text-white/70" />
               <span className="text-[10px] font-bold text-white/70">AloClínica</span>
             </div>
           )}
@@ -111,7 +111,7 @@ export function WalletCard({
         <div className="relative z-10">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/50">Cartão de Benefícios</p>
+              <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/50">Cartão Saúde</p>
               <p className="mt-1 text-[14px] font-bold leading-tight text-white tracking-tight">{name}</p>
             </div>
             <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-md overflow-hidden">
@@ -124,7 +124,7 @@ export function WalletCard({
             <QrCode className="h-5 w-5 text-black/70" strokeWidth={1.5} />
           </div>
 
-          <p className="font-mono text-[10px] tracking-[0.08em] text-white/40">{cardNumber}</p>
+          <p className="font-mono text-[10px] tracking-[0.08em] text-white/40">Nº {cardNumber}</p>
 
           <div className="mt-2.5 flex items-center justify-between">
             <div>
@@ -197,25 +197,42 @@ export function WalletCard({
                       <div className="pointer-events-none absolute -bottom-6 -left-4 h-28 w-28 rounded-full opacity-20" style={{ background: orb2, filter: "blur(28px)" }} />
 
                       <div className="relative z-10">
-                        {/* Magnetic stripe */}
-                        <div className="h-10 -mx-7 bg-black/40 mb-4" />
-
-                        {/* Signature strip */}
-                        <div className="rounded-lg bg-white/90 px-3 py-2 mb-4">
-                          <p className="text-[8px] text-black/40 font-bold uppercase tracking-wider mb-0.5">Assinatura do titular</p>
-                          <p className="text-[13px] font-bold text-black/70 italic tracking-wide">{name}</p>
+                        {/* Header verso */}
+                        <div className="flex items-center justify-between mb-5">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-md overflow-hidden">
+                              <img src={pingoLogo} alt="Pingo" className="h-7 w-7 object-contain" />
+                            </div>
+                            <div>
+                              <p className="text-[11px] font-bold text-white/90">AloClínica</p>
+                              <p className="text-[8px] text-white/50 uppercase tracking-wider">Cartão Saúde</p>
+                            </div>
+                          </div>
+                          <Activity className="h-5 w-5 text-white/30" />
                         </div>
 
-                        {/* CVV */}
-                        <div className="flex items-center gap-3 mb-5">
-                          <div className="rounded-md bg-white/90 px-3 py-1.5">
-                            <p className="text-[8px] text-black/40 font-bold uppercase tracking-wider">CVV</p>
-                            <p className="text-[14px] font-black text-black/70 font-mono tracking-widest">• • •</p>
+                        {/* Benefícios inclusos */}
+                        <div className="rounded-xl bg-white/10 border border-white/15 p-3 mb-4 backdrop-blur-sm">
+                          <p className="text-[8px] font-bold uppercase tracking-[0.12em] text-white/40 mb-2">Benefícios inclusos</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            {[
+                              { icon: Stethoscope, label: "Telemedicina 24h" },
+                              { icon: Heart, label: "Clube de Vantagens" },
+                              { icon: Shield, label: "Assist. Funerária" },
+                              { icon: QrCode, label: "Cartão Digital" },
+                            ].map(({ icon: Icon, label }, i) => (
+                              <div key={i} className="flex items-center gap-1.5">
+                                <Icon className="h-3 w-3 text-white/50 shrink-0" />
+                                <span className="text-[9px] text-white/60">{label}</span>
+                              </div>
+                            ))}
                           </div>
-                          <div className="flex items-center gap-1.5">
-                            <Shield className="h-3.5 w-3.5 text-white/50" />
-                            <p className="text-[9px] text-white/50 leading-tight">Cartão protegido<br/>por criptografia</p>
-                          </div>
+                        </div>
+
+                        {/* Titular info */}
+                        <div className="rounded-lg bg-white/90 px-3 py-2 mb-4">
+                          <p className="text-[8px] text-black/40 font-bold uppercase tracking-wider mb-0.5">Titular</p>
+                          <p className="text-[13px] font-bold text-black/70 tracking-wide">{name}</p>
                         </div>
 
                         {/* Contact info */}
