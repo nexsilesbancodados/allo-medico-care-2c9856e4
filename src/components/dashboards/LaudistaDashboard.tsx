@@ -133,10 +133,10 @@ const LaudistaDashboard = () => {
 
   return (
     <DashboardLayout title="Laudista" nav={getLaudistaNav("home")} role="doctor">
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 pb-24 md:pb-8">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 pb-24 md:pb-8">
 
         {/* ── Premium Hero ── */}
-        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
         <HeroBanner
           gradient="from-[#040D24] via-[#0F2B5E] to-[#1e40af]"
           pingoSrc={mascotReading}
@@ -161,7 +161,7 @@ const LaudistaDashboard = () => {
       </div>
 
       {/* ── CONTENT ── */}
-      <div className="mt-4 space-y-4 pb-24 md:pb-8">
+      <div className="mt-5 space-y-5 pb-24 md:pb-8">
 
         {/* ── Bento Stats — full width ── */}
         <StatBento loading={loadingStats} stats={[
@@ -172,10 +172,10 @@ const LaudistaDashboard = () => {
         ]} />
 
         {/* ── Desktop 2-col grid ── */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-start">
 
         {/* LEFT col */}
-        <div className="space-y-4">
+        <div className="space-y-5">
 
         {/* ── Urgent Alert ── */}
         {!loadingExams && urgentCount > 0 && (
@@ -220,7 +220,7 @@ const LaudistaDashboard = () => {
         </div>{/* end LEFT col */}
 
         {/* RIGHT col */}
-        <div className="space-y-4">
+        <div className="space-y-5">
         <PingoBannerCard
           pingImg={mascotReading}
           pingAlt="Pingo"

@@ -249,11 +249,11 @@ const SupportDashboard = () => {
 
   return (
     <DashboardLayout title="Suporte Técnico" nav={getSupportNav(activeNav)}>
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 pb-24 md:pb-8">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 pb-24 md:pb-8">
 
 
         {/* ── Premium Support Hero ── */}
-        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
         <HeroBanner
           gradient="from-[#2D1B00] via-[#854F0B] to-[#B45309]"
           pingoSrc={pingoSupport}
@@ -433,7 +433,7 @@ const SupportDashboard = () => {
               {loading ? (
                 <div className="space-y-2">
                   {[1, 2, 3, 4].map(i => (
-                    <div key={i} className="flex items-center gap-4 p-3 rounded-xl border border-border/40">
+                    <div key={i} className="flex items-center gap-5 p-3 rounded-xl border border-border/40">
                       <Skeleton className="h-3 w-20" />
                       <Skeleton className="h-3 flex-1" />
                       <Skeleton className="h-5 w-16 rounded-full" />
@@ -690,8 +690,8 @@ const SupportDashboard = () => {
                       <Button size="sm" variant="ghost" className="text-xs rounded-xl" onClick={() => setViewAs(null)}>Fechar ×</Button>
                     </div>
                   </CardHeader>
-                  <CardContent className="pt-0 space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                  <CardContent className="pt-0 space-y-5">
+                    <div className="grid grid-cols-2 gap-5">
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">Nome Completo</p>
                         <p className="text-sm font-medium text-foreground">{viewAs.first_name} {viewAs.last_name}</p>

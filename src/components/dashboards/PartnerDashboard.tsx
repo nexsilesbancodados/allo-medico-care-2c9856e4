@@ -48,7 +48,7 @@ const PartnerDashboard = () => {
     <DashboardLayout title="Portal do Parceiro" nav={getPartnerNav(activeNav)}>
       <div className="mx-auto w-full max-w-3xl space-y-5 pb-24">
 
-                <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+                <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
         <HeroBanner
           gradient="from-[#022B1C] via-[#065f46] to-[#059669]"
           pingoSrc={pingoPartner}
@@ -71,8 +71,8 @@ const PartnerDashboard = () => {
         />
       </div>
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-start">
+        <div className="space-y-5">
         <StatBento loading={loading} stats={[
           { label: "Total de validações", value: validations.length, icon: "💊", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: 8, accentClass: "bg-emerald-500" },
           { label: "Dispensados", value: dispensedCount, icon: "✅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", accentClass: "bg-blue-500" },
@@ -94,7 +94,7 @@ const PartnerDashboard = () => {
         />
         </div>{/* end LEFT col */}
 
-        <div className="space-y-4">
+        <div className="space-y-5">
         <Tabs defaultValue="validate">
           <TabsList className="h-11 rounded-xl border border-border/30 bg-muted/40 p-1">
             <TabsTrigger value="validate" className="rounded-lg text-[11.5px] gap-1.5 font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm"><Pill className="w-3.5 h-3.5" /> Validar</TabsTrigger>

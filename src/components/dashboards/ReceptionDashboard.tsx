@@ -170,10 +170,10 @@ const ReceptionDashboard = () => {
 
   return (
     <DashboardLayout title="Recepção" nav={getReceptionNav("overview")}>
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 pb-24 md:pb-8">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 pb-24 md:pb-8">
 
         {/* ── Premium Hero ── */}
-        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
         <HeroBanner
           gradient="from-[#451a03] via-[#b45309] to-[#d97706]"
           pingoSrc={pingoReception}
@@ -198,7 +198,7 @@ const ReceptionDashboard = () => {
       </div>
 
       {/* ── CONTENT ── */}
-      <div className="mt-4 space-y-4 pb-24 md:pb-8">
+      <div className="mt-5 space-y-5 pb-24 md:pb-8">
 
         {/* ── Bento Stats — full width ── */}
         <StatBento loading={loading} stats={[
@@ -209,8 +209,8 @@ const ReceptionDashboard = () => {
         ]} />
 
         {/* Pingo Banner */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-start">
+        <div className="space-y-5">
         <PingoBannerCard
           pingImg={pingoReception}
           pingAlt="Pingo"
@@ -225,7 +225,7 @@ const ReceptionDashboard = () => {
 
         {/* ── Timeline ── */}
         </div>{/* end LEFT col */}
-        <div className="space-y-4">
+        <div className="space-y-5">
         {filteredAppts.length > 0 && (
           <TimelineSchedule
             items={filteredAppts.slice(0, 8).map(a => ({

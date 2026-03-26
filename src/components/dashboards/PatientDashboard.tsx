@@ -119,7 +119,7 @@ const PatientDashboard = () => {
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
       {/* Full-width hero — no padding wrapper */}
-      <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+      <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
         <HeroBanner
           gradient="from-[#1e3a8a] via-[#2563EB] to-[#3b82f6]"
           pingoSrc={mascotWave}
@@ -143,7 +143,7 @@ const PatientDashboard = () => {
       </div>
 
       {/* ── MAIN CONTENT — responsive 1-col mobile / 2-col desktop ── */}
-      <div className="mt-4 md:mt-5 space-y-4 pb-24 md:pb-8">
+      <div className="mt-5 md:mt-5 space-y-5 pb-24 md:pb-8">
 
         {/* Live consultation */}
         {waitingAppt && (
@@ -155,10 +155,10 @@ const PatientDashboard = () => {
         <SectionErrorBoundary fallbackTitle="Erro no banner"><UpsellBanner /></SectionErrorBoundary>
 
         {/* Desktop 2-column layout */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-start">
 
           {/* LEFT COLUMN */}
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* Wallet Card */}
             <WalletCard
               name={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() || "Paciente"}
@@ -239,7 +239,7 @@ const PatientDashboard = () => {
                   transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }} />
                 <p className="text-[13.5px] font-bold text-foreground">Nenhuma consulta agendada</p>
                 <p className="mt-1 text-[11.5px] text-muted-foreground">Agende agora e cuide da sua saúde</p>
-                <Button className="mt-4 rounded-xl bg-gradient-to-br from-[#1e3a8a] to-[#2563EB] text-white shadow-[0_4px_14px_rgba(37,99,235,.3)]"
+                <Button className="mt-5 rounded-xl bg-gradient-to-br from-[#1e3a8a] to-[#2563EB] text-white shadow-[0_4px_14px_rgba(37,99,235,.3)]"
                   onClick={() => navigate("/dashboard/schedule?role=patient")}>
                   <Calendar className="mr-2 h-4 w-4" /> Agendar consulta
                 </Button>
@@ -257,7 +257,7 @@ const PatientDashboard = () => {
           </div>
 
           {/* RIGHT COLUMN */}
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* Bento Stats */}
             <StatBento loading={loading} stats={[
               { label: "Consultas",  value: stats?.total ?? 0,         icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30",    valueClass: "text-[#1e3a8a] dark:text-blue-400",    accentClass: "bg-blue-500",   trend: 12 },
