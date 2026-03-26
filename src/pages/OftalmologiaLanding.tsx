@@ -6,7 +6,7 @@ import { Eye, Glasses, FileText, Shield, Clock, CheckCircle, ArrowRight, Microsc
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import ophthalmologyHero from "@/assets/ophthalmology-hero.jpg";
-import pingoOftalmo from "@/assets/pingo-oftalmo.png";
+import pingoOftalmo from "@/assets/pingo-oftalmo.webp";
 import oticaBanner from "@/assets/otica-online-banner.jpg";
 import oticaDelivery from "@/assets/otica-delivery.jpg";
 import oticaLifestyle from "@/assets/otica-lifestyle.jpg";

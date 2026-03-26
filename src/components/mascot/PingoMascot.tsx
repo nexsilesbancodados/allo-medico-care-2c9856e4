@@ -10,7 +10,7 @@ import pingoReception from "@/assets/pingo-reception.png";
 import pingoPartner   from "@/assets/pingo-partner.png";
 import pingoSupport   from "@/assets/pingo-support.png";
 import pingoCartao    from "@/assets/pingo-cartao.png";
-import pingoSolitario from "@/assets/pingo-solitario.png";
+import pingoSolitario from "@/assets/pingo-solitario.webp";
 import logo           from "@/assets/logo.png";
 
 export type PingoVariant =

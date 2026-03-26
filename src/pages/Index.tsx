@@ -11,12 +11,12 @@ import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
 import { Stethoscope, ShieldCheck, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
 
-// Keep images as static imports but they'll be in separate chunks via asset pipeline
-import bannerBenefits from "@/assets/banner-benefits-card.png";
-import bannerAi from "@/assets/banner-ai-triage.png";
-import bannerConsulta from "@/assets/banner-consulta.png";
-import bannerPlantao from "@/assets/banner-plantao.png";
-import bannerTelelaudo from "@/assets/banner-telelaudo.png";
+// WebP for faster loading; deferred sections handle lazy rendering
+import bannerBenefits from "@/assets/banner-benefits-card.webp";
+import bannerAi from "@/assets/banner-ai-triage.webp";
+import bannerConsulta from "@/assets/banner-consulta.webp";
+import bannerPlantao from "@/assets/banner-plantao.webp";
+import bannerTelelaudo from "@/assets/banner-telelaudo.webp";
 
 // Lazy-load below-the-fold sections for faster initial paint
 const InfoBannerStrip = lazy(() => import("@/components/landing/InfoBannerStrip"));

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Sparkles, Send, Clock, Brain, Zap, Shield, FileText, Stethoscope } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
-import pingoAssistant from "@/assets/pingo-virtual-assistant.png";
+import pingoAssistant from "@/assets/pingo-virtual-assistant.webp";
 import mascotWave from "@/assets/mascot-wave.png";
 
 const chatDemo = [
