@@ -15,11 +15,11 @@ import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 import { translateAuthError } from "@/lib/authErrors";
 import { useAuthRedirect } from "@/hooks/useAuthRedirect";
-import pingoSolitario from "@/assets/pingo-solitario.png";
+import pingoSolitario from "@/assets/pingo-solitario.webp";
 import pingoCartao from "@/assets/pingo-cartao.png";
-import pingoMiniFamilia from "@/assets/pingo-mini-familia.png";
-import pingoKingFamilia from "@/assets/pingo-king-familia.png";
-import pingoPrimeFamilia from "@/assets/pingo-prime-familia.png";
+import pingoMiniFamilia from "@/assets/pingo-mini-familia.webp";
+import pingoKingFamilia from "@/assets/pingo-king-familia.webp";
+import pingoPrimeFamilia from "@/assets/pingo-prime-familia.webp";
 
 const PLAN_IMAGE_MAP: Record<string, string> = {
   "Solitário": pingoSolitario,

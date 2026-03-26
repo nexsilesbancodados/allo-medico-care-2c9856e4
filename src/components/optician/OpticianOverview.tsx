@@ -6,7 +6,7 @@ import { HeroBanner } from "@/components/dashboards/HeroBanner";
 import { StatBento } from "@/components/dashboards/StatBento";
 import { ActionPills } from "@/components/dashboards/ActionPills";
 import { AlertBox } from "@/components/dashboards/AlertBox";
-import pingoOftalmo from "@/assets/pingo-oftalmo.png";
+import pingoOftalmo from "@/assets/pingo-oftalmo.webp";
 
 const OpticianOverview = () => {
   const navigate = useNavigate();
