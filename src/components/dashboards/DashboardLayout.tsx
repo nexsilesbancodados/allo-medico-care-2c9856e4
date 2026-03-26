@@ -367,7 +367,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
       {/* ═══ Mobile Header — app-like blue gradient ═══ */}
       <header ref={headerRef}
-        className="sticky top-0 z-50 md:h-14 md:bg-background/95 md:backdrop-blur-xl md:border-b md:border-border/15 flex items-center gap-3"
+        className="sticky top-0 z-50 md:h-14 md:bg-background/90 md:backdrop-blur-md md:border-b md:border-border/40 supports-[backdrop-filter]:md:bg-background/80 flex items-center gap-3"
         style={{ paddingTop: "env(safe-area-inset-top, 0px)" }}
       >
         {/* Mobile: gradient header */}
@@ -521,7 +521,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       {/* Body */}
       <div className="flex flex-1 min-h-0">
         {nav && nav.length > 0 && (
-          <aside className={`hidden md:flex shrink-0 flex-col bg-background border-r border-border/15 sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto transition-all duration-200 ${
+          <aside className={`hidden md:flex shrink-0 flex-col bg-background border-r border-sidebar-border shadow-[2px_0_12px_rgba(0,0,0,.06)] sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto transition-all duration-200 ${
             sidebarCollapsed ? "w-[52px]" : "w-52 lg:w-60 xl:w-64"
           }`}>
             <SidebarContent collapsed={sidebarCollapsed} />
@@ -541,7 +541,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           </aside>
         )}
         <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto pb-[88px] md:pb-10 scroll-smooth">
-          <div className="px-3 xs:px-4 py-3 xs:py-4 md:px-6 md:py-5 lg:px-8 lg:py-6 min-h-0 max-w-[1400px] mx-auto w-full"
+          <div className="px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-6 min-h-0 max-w-[1400px] mx-auto w-full"
             style={{ paddingLeft: "max(0.75rem, env(safe-area-inset-left, 0px))", paddingRight: "max(0.75rem, env(safe-area-inset-right, 0px))" }}>
             <div className="hidden md:block"><DashboardBreadcrumbs /></div>
             {children}
