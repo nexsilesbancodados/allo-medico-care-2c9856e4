@@ -86,11 +86,13 @@ export function WalletCard({
   onClick,
 }: WalletCardProps) {
   const [open, setOpen] = useState(false);
+  const [flipped, setFlipped] = useState(false);
 
   const handleCardClick = () => {
     if (onClick) {
       onClick();
     } else {
+      setFlipped(false);
       setOpen(true);
     }
   };
