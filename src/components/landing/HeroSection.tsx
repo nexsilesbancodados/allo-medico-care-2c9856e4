@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { memo, forwardRef } from "react";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
 import OptimizedImage from "@/components/ui/optimized-image";
-import WaveDivider from "@/components/ui/wave-divider";
+
 import heroDoctor from "@/assets/hero-doctor.png";
 
 const poseContent = [
@@ -145,7 +145,7 @@ const HeroSection = memo(
           </div>
         </div>
 
-        <WaveDivider />
+        
       </section>
     );
   })

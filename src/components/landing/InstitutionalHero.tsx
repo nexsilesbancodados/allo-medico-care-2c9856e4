@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { ArrowLeft, LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
-import WaveDivider from "@/components/ui/wave-divider";
+
 import bannerLegal from "@/assets/banner-legal-hero.jpg";
 
 interface InstitutionalHeroProps {
@@ -38,7 +38,7 @@ const InstitutionalHero = ({ title, subtitle, icon: Icon, lastUpdate }: Institut
         )}
       </motion.div>
     </div>
-    <WaveDivider />
+    
   </section>
 );
 
