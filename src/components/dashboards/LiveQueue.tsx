@@ -36,7 +36,7 @@ export function LiveQueue({ items, title, linkLabel, onLinkClick }: {
     <div>
       {(title || linkLabel) && (
         <div className="mb-2.5 flex items-center justify-between px-0.5">
-          {title && <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60">{title}</h3>}
+          {title && <h3 className="text-[10.5px] font-bold uppercase tracking-[0.12em] text-muted-foreground/55">{title}</h3>}
           {linkLabel && (
             <button onClick={onLinkClick} className="flex items-center gap-1 text-[11px] font-semibold text-primary hover:opacity-80">
               {linkLabel} →
@@ -44,22 +44,22 @@ export function LiveQueue({ items, title, linkLabel, onLinkClick }: {
           )}
         </div>
       )}
-      <div className="overflow-hidden rounded-2xl border border-border/25 bg-card" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }}>
+      <div className="overflow-hidden rounded-2xl border border-border/30 bg-card" style={{ boxShadow: "0 2px 16px rgba(0,0,0,.05)" }}>
         <motion.div variants={container} initial="hidden" animate="show" className="divide-y divide-border/15">
           {items.map((qi) => {
             const sc = statusConfig[qi.status];
             return (
               <motion.div key={qi.id} variants={item}
-                className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/20"
+                className="flex items-center gap-3.5 px-4 py-3.5 transition-colors hover:bg-muted/25"
               >
-                <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[11px] font-bold", qi.avatarBg, qi.avatarColor)}>
+                <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[12px] font-bold", qi.avatarBg, qi.avatarColor)}>
                   {qi.initials}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[12.5px] font-semibold text-foreground">{qi.name}</p>
+                  <p className="text-[13px] font-semibold text-foreground">{qi.name}</p>
                   <div className="mt-0.5 flex items-center gap-1.5">
-                    <span className={cn("h-[6px] w-[6px] shrink-0 rounded-full", sc.dot, qi.status === "live" && "animate-pulse")} />
-                    <span className="text-[10px] text-muted-foreground">{qi.subtitle}</span>
+                    <span className={cn("h-2 w-2 shrink-0 rounded-full", sc.dot, qi.status === "live" && "animate-pulse")} />
+                    <span className="text-[11px] text-muted-foreground">{qi.subtitle}</span>
                   </div>
                 </div>
                 {qi.action && <div className="shrink-0">{qi.action}</div>}

@@ -173,10 +173,10 @@ const ClinicDashboard = () => {
 
   return (
     <DashboardLayout title="Clínica" nav={getClinicNav(activeNav)} role="clinic">
-      <motion.div variants={container} initial="hidden" animate="show" className="space-y-4 pb-24 md:pb-8">
+      <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 pb-24 md:pb-8">
 
         {/* ── Premium Clinic Hero ── */}
-        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
         <HeroBanner
           gradient="from-[#1e1b6b] via-[#3730a3] to-[#6366f1]"
           pingoSrc={pingoAdmin}
@@ -201,7 +201,7 @@ const ClinicDashboard = () => {
       </div>
 
       {/* ── CONTENT ── */}
-      <div className="mt-4 space-y-4 pb-24 md:pb-8">
+      <div className="mt-5 space-y-5 pb-24 md:pb-8">
 
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
@@ -291,8 +291,8 @@ const ClinicDashboard = () => {
               <TabsTrigger value="finance" className="text-xs rounded-lg flex-1">Financeiro</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="space-y-4 mt-5">
-              <div className="grid md:grid-cols-2 gap-4">
+            <TabsContent value="overview" className="space-y-5 mt-5">
+              <div className="grid md:grid-cols-2 gap-5">
                 <Card className="border-border/50">
                   <CardHeader className="flex flex-row items-center justify-between pb-2">
                     <CardTitle className="text-sm font-semibold flex items-center gap-2"><Clock className="w-4 h-4 text-primary" /> Próximas Consultas</CardTitle>
@@ -372,7 +372,7 @@ const ClinicDashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="performance" className="space-y-4 mt-5">
+            <TabsContent value="performance" className="space-y-5 mt-5">
               <Card className="border-border/50">
                 <CardHeader><CardTitle className="text-sm font-semibold">Consultas por Mês</CardTitle></CardHeader>
                 <CardContent className="h-[300px]">
@@ -411,7 +411,7 @@ const ClinicDashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="finance" className="space-y-4 mt-5">
+            <TabsContent value="finance" className="space-y-5 mt-5">
               <Card className="border-border/50">
                 <CardHeader><CardTitle className="text-sm font-semibold">Receita Mensal</CardTitle></CardHeader>
                 <CardContent className="h-[300px]">

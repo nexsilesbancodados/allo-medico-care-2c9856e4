@@ -25,15 +25,15 @@ export function WalletCard({
 
   return (
     <motion.div
-      whileHover={{ y: -3 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={{ y: -4, scale: 1.005 }}
+      whileTap={{ scale: 0.97 }}
       onClick={handleClick}
-      className={`relative cursor-pointer overflow-hidden rounded-[22px] bg-gradient-to-br ${gradient} p-[18px]`}
-      style={{ boxShadow: "0 12px 40px rgba(18,85,200,.35)" }}
+      className={`relative cursor-pointer overflow-hidden rounded-[24px] bg-gradient-to-br ${gradient} p-5`}
+      style={{ boxShadow: "0 16px 48px rgba(18,85,200,.32), 0 4px 16px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.15)" }}
     >
-      {/* Orbs */}
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full opacity-60" style={{ background: orb1, filter: "blur(32px)" }} />
-      <div className="pointer-events-none absolute -bottom-6 -left-4 h-24 w-24 rounded-full opacity-35" style={{ background: orb2, filter: "blur(28px)" }} />
+      {/* Orbs com blur maior */}
+      <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-55" style={{ background: orb1, filter: "blur(40px)" }} />
+      <div className="pointer-events-none absolute -bottom-8 -left-6 h-32 w-32 rounded-full opacity-30" style={{ background: orb2, filter: "blur(36px)" }} />
       {/* Top shine */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
 
@@ -48,7 +48,16 @@ export function WalletCard({
           </div>
         </div>
 
-        <p className="mt-3 font-mono text-[11px] tracking-[0.08em] text-white/40">{cardNumber}</p>
+        {/* Chip EMV — decorativo */}
+        <div className="mt-3 mb-2 flex h-8 w-12 items-center justify-center overflow-hidden rounded-[6px] border border-white/20 bg-white/15 backdrop-blur-sm">
+          <div className="grid grid-cols-2 gap-px opacity-60">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-2 w-4 rounded-[1px] bg-amber-300/80" />
+            ))}
+          </div>
+        </div>
+
+        <p className="font-mono text-[11px] tracking-[0.08em] text-white/40">{cardNumber}</p>
 
         <div className="mt-3 flex items-center justify-between">
           <div>

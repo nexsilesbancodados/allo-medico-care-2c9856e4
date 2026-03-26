@@ -91,7 +91,7 @@ const DoctorDashboard = () => {
       {!loading && !data?.crm && <DoctorOnboarding />}
 
       {/* Full-width hero */}
-      <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+      <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
         <HeroBanner
           gradient="from-[#042A1C] via-[#065f46] to-[#059669]"
           pingoSrc={mascotWave}
@@ -113,7 +113,7 @@ const DoctorDashboard = () => {
         />
       </div>
 
-      <div className="mt-4 md:mt-5 space-y-4 pb-24 md:pb-8">
+      <div className="mt-5 md:mt-5 space-y-5 pb-24 md:pb-8">
 
         {/* Goal progress */}
         {todayAppts.length > 0 && (
@@ -135,10 +135,10 @@ const DoctorDashboard = () => {
         ]} />
 
         {/* Desktop 2-col */}
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-start">
 
           {/* LEFT */}
-          <div className="space-y-4">
+          <div className="space-y-5">
             {/* Stats bento */}
             <StatBento loading={loading} stats={[
               { label: "Consultas hoje",  value: stats.today,          icon: "🩺", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400",  accentClass: "bg-emerald-500", trend: 8 },
@@ -185,7 +185,7 @@ const DoctorDashboard = () => {
           </div>
 
           {/* RIGHT */}
-          <div className="space-y-4">
+          <div className="space-y-5">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="h-10 w-full rounded-xl border border-border/30 bg-muted/40 p-1">
                 <TabsTrigger value="overview" className="flex-1 rounded-lg text-[11.5px] gap-1.5 font-semibold data-[state=active]:bg-card data-[state=active]:shadow-sm">

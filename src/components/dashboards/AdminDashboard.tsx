@@ -268,7 +268,7 @@ const AdminDashboard = () => {
       <motion.div variants={container} initial="hidden" animate="show" className="space-y-5 pb-24 md:pb-8 pb-24 md:pb-8">
 
         {/* ── Premium Admin Hero ── */}
-        <div className="-mx-4 -mt-4 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+        <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
         <HeroBanner
           gradient="from-[#3B0000] via-[#8B1515] to-[#C41A1A]"
           pingoSrc={pingoAdmin}
@@ -293,7 +293,7 @@ const AdminDashboard = () => {
       </div>
 
       {/* ── CONTENT ── */}
-      <div className="mt-4 space-y-4">
+      <div className="mt-5 space-y-5">
 
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
@@ -317,7 +317,7 @@ const AdminDashboard = () => {
         />
 
         {/* Header actions */}
-        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <motion.div variants={fadeUp} className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
           <div>
             <h2 className="text-lg font-bold text-foreground tracking-tight">Detalhes Operacionais</h2>
           </div>
@@ -490,7 +490,7 @@ const AdminDashboard = () => {
           <AdminAnalyticsCharts />
         </motion.div>
 
-        <motion.div variants={fadeUp} className="grid lg:grid-cols-2 gap-4">
+        <motion.div variants={fadeUp} className="grid lg:grid-cols-2 gap-5">
           {/* Overdue */}
           <Card variant="elevated">
             <CardHeader className="pb-3">
