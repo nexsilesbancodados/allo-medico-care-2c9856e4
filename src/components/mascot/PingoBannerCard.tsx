@@ -2,7 +2,6 @@
  * PingoBannerCard — Banner com imagem real do Pingo
  * Mesmo padrão de renderização do Header.tsx ListItem
  */
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { ReactNode } from "react";
 import { BannerCTA } from "@/components/ui/banner-cta";
@@ -37,13 +36,15 @@ export function PingoBannerCard({
 }: PingoBannerCardProps) {
   return (
     <div className={cn(
-      "relative flex items-center gap-3 overflow-hidden rounded-2xl border p-3.5",
-      bgClass, borderClass, className
-    )}>
+      "relative flex items-center gap-3 overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-br from-card to-muted/30 p-4",
+      borderClass, className
+    )}
+      style={{ boxShadow: "0 4px 20px rgba(0,0,0,.06)" }}
+    >
       {/* Top shine line */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/60 to-transparent" />
 
-      {/* Pingo — real PNG, same as Header.tsx ListItem rendering */}
+      {/* Pingo — real PNG */}
       <div
         className={cn("flex shrink-0 items-end justify-center", animate && "pingo-float-slow")}
         style={{ width: pingSize, height: pingSize }}
@@ -52,7 +53,7 @@ export function PingoBannerCard({
           src={pingImg}
           alt={pingAlt}
           className="w-full h-full object-contain select-none"
-          style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.18))" }}
+          style={{ filter: "drop-shadow(0 8px 20px rgba(0,0,0,.18))" }}
           draggable={false}
         />
       </div>
@@ -72,7 +73,7 @@ export function PingoBannerCard({
             tone="dark"
             size="sm"
             onClick={onCta}
-            className={cn("mt-2.5", ctaBg)}
+            className={cn("mt-2.5 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200", ctaBg)}
           >
             {ctaLabel}
           </BannerCTA>
