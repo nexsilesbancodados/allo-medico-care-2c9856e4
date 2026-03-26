@@ -45,7 +45,7 @@ const HeroSection = memo(
       <section
         ref={ref}
         aria-label="Início"
-        className="relative flex items-center pt-20 sm:pt-24 lg:pt-28 pb-44 sm:pb-48 lg:pb-52 overflow-hidden"
+        className="relative flex items-center pt-24 sm:pt-28 lg:pt-32 pb-44 sm:pb-48 lg:pb-52 overflow-hidden"
       >
         {/* Ambient background */}
         <div className="absolute inset-0 -z-10">
@@ -55,7 +55,7 @@ const HeroSection = memo(
         </div>
 
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-24 items-center">
+          <div className="grid lg:grid-cols-[1fr_1fr] gap-8 lg:gap-12 xl:gap-20 items-center">
             {/* Left content */}
             <motion.div
               className="max-w-2xl"
@@ -132,7 +132,7 @@ const HeroSection = memo(
 
             {/* Right - hero image */}
             <motion.div
-              className="relative hidden md:flex justify-center"
+              className="relative hidden md:flex justify-center items-center"
               initial={{ opacity: 0, scale: 0.92 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
@@ -149,7 +149,7 @@ const HeroSection = memo(
 
                 {/* Floating card — 100% Seguro */}
                 <motion.div
-                  className="absolute top-6 -right-2 xl:right-0 bg-card/95 backdrop-blur-md rounded-2xl shadow-lg shadow-foreground/[0.06] px-4 py-3 border border-border/50 flex items-center gap-3"
+                  className="absolute -top-2 -right-4 xl:-right-2 bg-card/95 backdrop-blur-md rounded-2xl shadow-lg shadow-foreground/[0.06] px-4 py-3 border border-border/50 flex items-center gap-3"
                   variants={floatY}
                   animate="animate"
                 >
@@ -166,7 +166,7 @@ const HeroSection = memo(
 
                 {/* Floating card — Rating */}
                 <motion.div
-                  className="absolute bottom-10 -left-4 xl:left-0 bg-card/95 backdrop-blur-md rounded-2xl shadow-lg shadow-foreground/[0.06] px-4 py-3 border border-border/50 flex items-center gap-3"
+                  className="absolute bottom-8 -left-6 xl:-left-4 bg-card/95 backdrop-blur-md rounded-2xl shadow-lg shadow-foreground/[0.06] px-4 py-3 border border-border/50 flex items-center gap-3"
                   variants={floatYSlow}
                   animate="animate"
                 >
