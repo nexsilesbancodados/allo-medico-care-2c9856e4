@@ -42,29 +42,28 @@ const DoctorPublicProfile = () => {
   }, [doctorId]);
 
   const fetchDoctor = async () => {
-    const { data: doc } = await supabase
-      .from("doctor_profiles")
-      .select("id, bio, consultation_price, crm, crm_state, rating, total_reviews, education, experience_years, user_id")
-      .eq("id", doctorId!)
-      .eq("is_approved", true)
-      .single();
+    // Use secure RPC instead of direct table access
+    const { data: rows } = await supabase.rpc("get_public_doctor_profile", {
+      p_doctor_id: doctorId!,
+    });
 
+    const doc = rows?.[0] as any;
     if (!doc) { setLoading(false); return; }
 
-    const [profileRes, specsRes, surveysRes] = await Promise.all([
-      supabase.from("profiles").select("first_name, last_name, avatar_url").eq("user_id", doc.user_id).single(),
-      supabase.from("doctor_specialties").select("specialties(name)").eq("doctor_id", doc.id),
-      supabase.from("satisfaction_surveys").select("nps_score, quality_score, comment, created_at, patient_id").eq("doctor_id", doc.id).order("created_at", { ascending: false }).limit(10),
-    ]);
-
-    const specialties = (specsRes.data as { specialties?: { name?: string } | null }[])?.map(s => s.specialties?.name).filter((n): n is string => Boolean(n)) ?? [];
+    // Fetch reviews (satisfaction_surveys is authenticated-only, will work if user is logged in)
+    const { data: surveysData } = await supabase
+      .from("satisfaction_surveys")
+      .select("nps_score, quality_score, comment, created_at, patient_id")
+      .eq("doctor_id", doc.id)
+      .order("created_at", { ascending: false })
+      .limit(10);
 
     // Get patient names for reviews
-    const patientIds = [...new Set(surveysRes.data?.map(s => s.patient_id) ?? [])];
+    const patientIds = [...new Set(surveysData?.map((s: any) => s.patient_id) ?? [])];
     const { data: patientProfiles } = patientIds.length > 0
       ? await supabase.from("profiles").select("user_id, first_name").in("user_id", patientIds)
       : { data: [] };
-    const patientMap = new Map<string, string>(patientProfiles?.map(p => [p.user_id, p.first_name] as [string, string]) ?? []);
+    const patientMap = new Map<string, string>(patientProfiles?.map((p: any) => [p.user_id, p.first_name] as [string, string]) ?? []);
 
     setDoctor({
       id: doc.id,
@@ -76,13 +75,13 @@ const DoctorPublicProfile = () => {
       total_reviews: doc.total_reviews,
       education: doc.education,
       experience_years: doc.experience_years,
-      name: profileRes.data ? `${profileRes.data.first_name} ${profileRes.data.last_name}` : "Médico",
-      avatar_url: profileRes.data?.avatar_url ?? null,
-      specialties,
+      name: `${doc.first_name} ${doc.last_name}`,
+      avatar_url: doc.avatar_url ?? null,
+      specialties: doc.specialties ?? [],
     });
 
     setReviews(
-      surveysRes.data?.map(s => ({
+      surveysData?.map((s: any) => ({
         nps_score: s.nps_score,
         quality_score: s.quality_score,
         comment: s.comment,

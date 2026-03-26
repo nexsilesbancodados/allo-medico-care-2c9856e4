@@ -29,13 +29,11 @@ const ValidateDocument = () => {
     setResult(null);
     setSearched(true);
 
-    // First try document_verifications (certificates/attestations)
-    const { data: verification } = await supabase
-      .from("document_verifications")
-      .select("*")
-      .eq("verification_code", docId)
-      .maybeSingle();
+    // First try document_verifications via secure RPC (no direct table access)
+    const { data: verificationRows } = await supabase
+      .rpc("verify_document_public", { p_code: docId });
 
+    const verification = verificationRows?.[0];
     if (verification) {
       setResult({
         type: "certificate",
