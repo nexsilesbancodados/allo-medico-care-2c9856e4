@@ -28,7 +28,7 @@ const SocialProofBar = forwardRef<HTMLElement>((_, ref) => (
     className="py-3.5 border-y border-border/30 bg-muted/10 overflow-hidden select-none"
   >
     <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
-      <div className="flex w-max animate-[marquee_30s_linear_infinite] hover:[animation-play-state:paused]">
+      <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
         {[...badges, ...badges].map((badge, i) => (
           <BadgeItem key={`${badge.text}-${i}`} icon={badge.icon} text={badge.text} />
         ))}
