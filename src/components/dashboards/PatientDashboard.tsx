@@ -133,7 +133,7 @@ const PatientDashboard = () => {
             { label: "Consultas", value: stats?.total ?? 0 },
             { label: "Receitas",  value: stats?.prescriptions ?? 0 },
             { label: "Exames",    value: stats?.documents ?? 0 },
-            { label: "Créditos",  value: `R$${credits}` },
+            
           ]}
           loading={loading}
           onRefresh={handleRefresh}
@@ -263,7 +263,7 @@ const PatientDashboard = () => {
               { label: "Consultas",  value: stats?.total ?? 0,         icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30",    valueClass: "text-[#1e3a8a] dark:text-blue-400",    accentClass: "bg-blue-500",   trend: 12 },
               { label: "Receitas",   value: stats?.prescriptions ?? 0, icon: "💊", iconBg: "bg-amber-50 dark:bg-amber-950/30",  valueClass: "text-amber-600 dark:text-amber-400",    accentClass: "bg-amber-500",  trend: 5 },
               { label: "Documentos", value: stats?.documents ?? 0,     icon: "📂", iconBg: "bg-violet-50 dark:bg-violet-950/30",valueClass: "text-violet-600 dark:text-violet-400",  accentClass: "bg-violet-500" },
-              { label: "Créditos",   value: `R$${credits}`,            icon: "✨", iconBg: "bg-emerald-50 dark:bg-emerald-950/30",valueClass: "text-emerald-600 dark:text-emerald-400",accentClass: "bg-emerald-500" },
+              
             ]} />
 
             {/* Health Metrics 3x2 */}
