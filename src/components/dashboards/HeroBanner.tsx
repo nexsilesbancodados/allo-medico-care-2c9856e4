@@ -45,19 +45,18 @@ export function HeroBanner({
       )}
       style={{ boxShadow: "0 8px 40px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.12)" }}
     >
-      {/* Orbs maiores e mais suaves */}
+      {/* Orbs */}
       <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/[0.07] blur-3xl" />
       <div className="pointer-events-none absolute -left-8 bottom-0 h-40 w-40 rounded-full bg-white/[0.04] blur-2xl" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
-      {/* Textura sutil de noise */}
+      {/* Noise texture */}
       <div className="pointer-events-none absolute inset-0 opacity-[0.025]"
         style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
                 backgroundSize: "200px" }} />
 
       <div className="relative z-10 px-4 pt-5 pb-0 md:px-6 md:pt-6">
         <div className="flex items-start gap-3 md:gap-6">
-
-          {/* LEFT: bubble/name + kpis */}
+          {/* LEFT */}
           <div className="min-w-0 flex-1">
             {bubble ? (
               <motion.div
@@ -93,20 +92,20 @@ export function HeroBanner({
               </div>
             )}
 
-            {/* KPI strip — glassmorphism aprimorado */}
+            {/* KPI strip */}
             {kpis.length > 0 && (
               <div
-                className="flex overflow-x-auto rounded-2xl border border-white/20 bg-white/[0.13] backdrop-blur-md scrollbar-none md:grid md:overflow-visible"
+                className="flex overflow-x-auto rounded-xl border border-white/15 bg-white/10 backdrop-blur-sm scrollbar-none md:grid md:overflow-visible"
                 style={{
                   gridTemplateColumns: kpis.length > 3 ? `repeat(${kpis.length}, 1fr)` : undefined,
-                  boxShadow: "inset 0 1px 0 rgba(255,255,255,.15), 0 2px 12px rgba(0,0,0,.1)"
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,.12)"
                 }}
               >
                 {loading
                   ? Array.from({ length: kpis.length }).map((_, i) => (
-                      <div key={i} className="flex-shrink-0 flex-1 animate-pulse px-3 py-3 min-w-[72px]">
-                        <div className="mx-auto h-5 w-12 rounded-lg bg-white/20" />
-                        <div className="mx-auto mt-1.5 h-2 w-8 rounded bg-white/15" />
+                      <div key={i} className="flex-shrink-0 flex-1 animate-pulse px-3 py-2.5 min-w-[68px]">
+                        <div className="mx-auto h-5 w-10 rounded-lg bg-white/20" />
+                        <div className="mx-auto mt-1 h-2 w-7 rounded bg-white/15" />
                       </div>
                     ))
                   : kpis.map((k, i) => (
@@ -116,19 +115,19 @@ export function HeroBanner({
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.18 + i * 0.07, duration: 0.38 }}
                         className={cn(
-                          "flex flex-1 flex-col items-center px-3 py-3 flex-shrink-0 min-w-[72px] md:min-w-0",
+                          "flex flex-1 flex-col items-center px-3 py-2.5 flex-shrink-0 min-w-[68px] md:min-w-0",
                           i < kpis.length - 1 && "border-r border-white/15"
                         )}
                       >
-                        <p className="text-[19px] font-black leading-none tabular-nums text-white tracking-tight drop-shadow-sm md:text-[22px]">{k.value}</p>
-                        <p className="mt-1 text-[7.5px] font-bold uppercase tracking-widest text-white/55 md:text-[8.5px]">{k.label}</p>
+                        <p className="text-[18px] font-black leading-none tabular-nums text-white tracking-tight drop-shadow-sm md:text-[20px]">{k.value}</p>
+                        <p className="mt-1 text-[7.5px] font-bold uppercase tracking-widest text-white/55 md:text-[8px]">{k.label}</p>
                       </motion.div>
                     ))}
               </div>
             )}
           </div>
 
-          {/* RIGHT: Pingo + botões — Pingo maior no desktop */}
+          {/* RIGHT: Pingo */}
           <div className="flex shrink-0 flex-col items-center gap-2">
             <div className="flex gap-1.5">
               {topRight}
@@ -141,10 +140,10 @@ export function HeroBanner({
             </div>
             <motion.img
               src={pingoSrc} alt={pingoAlt} draggable={false}
-              className="select-none object-contain w-[108px] h-[108px] md:w-[140px] md:h-[140px]"
-              style={{ filter: "drop-shadow(0 12px 28px rgba(0,0,0,.28))" }}
+              className="select-none object-contain w-[100px] h-[100px] md:w-[130px] md:h-[130px]"
+              style={{ filter: "drop-shadow(0 10px 24px rgba(0,0,0,.25))" }}
               initial={{ opacity: 0, scale: 0.65, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: [0, -12, 0] }}
+              animate={{ opacity: 1, scale: 1, y: [0, -10, 0] }}
               transition={{
                 opacity: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
                 scale: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
@@ -153,7 +152,7 @@ export function HeroBanner({
             />
           </div>
         </div>
-        <div className="h-3 md:h-5" />
+        <div className="h-3 md:h-4" />
       </div>
     </section>
   );

@@ -23,9 +23,9 @@ const item = {
 
 export function StatBento({ stats, loading = false }: { stats: BentoItem[]; loading?: boolean }) {
   if (loading) return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4">
       {Array.from({ length: 4 }).map((_, i) => (
-        <div key={i} className="h-[108px] animate-pulse rounded-2xl bg-muted/40" />
+        <div key={i} className="h-[100px] animate-pulse rounded-2xl bg-muted/50" />
       ))}
     </div>
   );
@@ -33,28 +33,29 @@ export function StatBento({ stats, loading = false }: { stats: BentoItem[]; load
   return (
     <motion.div
       variants={container} initial="hidden" animate="show"
-      className="grid grid-cols-2 gap-3 md:grid-cols-4"
+      className="grid grid-cols-2 gap-2.5 md:grid-cols-4"
     >
       {stats.map((s) => (
         <motion.div
           key={s.label}
           variants={item}
           className={cn(
-            "group relative overflow-hidden rounded-2xl border border-border/30 bg-card",
-            "transition-all duration-250 hover:-translate-y-1.5 hover:shadow-[0_8px_24px_rgba(0,0,0,.08)] hover:border-border/50 cursor-default",
+            "group relative overflow-hidden rounded-2xl border border-border/20 bg-card",
+            "transition-all duration-200 hover:-translate-y-1 hover:shadow-lg cursor-default",
             s.wide && "col-span-2"
           )}
+          style={{ boxShadow: "0 2px 10px rgba(0,0,0,.05)" }}
         >
-          {/* Accent background blob — decorativo */}
-          <div className={cn("absolute -right-4 -top-4 h-20 w-20 rounded-full opacity-[0.07] blur-xl transition-all duration-300 group-hover:opacity-[0.12]", s.accentClass)} />
-          <div className="relative p-4">
+          {/* Accent top bar */}
+          <div className={cn("h-[3px] w-full", s.accentClass)} />
+          <div className="p-3 md:p-3.5">
             <div className="flex items-start justify-between">
-              <div className={cn("flex h-10 w-10 items-center justify-center rounded-[12px] text-[18px] md:h-11 md:w-11 md:text-[20px]", s.iconBg)}>
+              <div className={cn("flex h-8 w-8 items-center justify-center rounded-[10px] text-[15px] md:h-9 md:w-9 md:text-[17px]", s.iconBg)}>
                 {s.icon}
               </div>
               {s.trend !== undefined && (
                 <span className={cn(
-                  "rounded-full px-2 py-0.5 text-[9px] font-bold",
+                  "rounded-[7px] px-1.5 py-0.5 text-[8.5px] font-bold",
                   s.trend >= 0
                     ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
                     : "bg-red-50 text-red-600 dark:bg-red-900/30 dark:text-red-400"
@@ -63,11 +64,11 @@ export function StatBento({ stats, loading = false }: { stats: BentoItem[]; load
                 </span>
               )}
             </div>
-            <p className={cn("mt-2.5 text-[22px] font-black leading-none tracking-tight tabular-nums md:text-[24px]", s.valueClass)}>
+            <p className={cn("mt-2 text-[20px] font-black leading-none tracking-tight tabular-nums md:text-[22px]", s.valueClass)}>
               {s.value}
             </p>
-            <p className="mt-1 text-[10.5px] font-semibold text-muted-foreground md:text-[11px]">{s.label}</p>
-            {s.sub && <p className="mt-0.5 text-[9.5px] text-muted-foreground/50">{s.sub}</p>}
+            <p className="mt-1 text-[10px] font-medium text-muted-foreground md:text-[10.5px]">{s.label}</p>
+            {s.sub && <p className="mt-0.5 text-[9px] text-muted-foreground/55">{s.sub}</p>}
             {s.children}
           </div>
         </motion.div>
