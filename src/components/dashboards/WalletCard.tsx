@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Sparkles, X, CreditCard, RotateCcw, Phone, Mail, Globe, Shield } from "lucide-react";
+import { ChevronRight, X, CreditCard, RotateCcw, Phone, Mail, Globe, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
+import pingoLogo from "@/assets/mascot.png";
 
 interface WalletCardProps {
   name: string;
