@@ -16,7 +16,6 @@ const DoctorPublicProfilePage = () => {
   useEffect(() => {
     if (!slug) return;
     const resolve = async () => {
-      // Try to match slug as doctor ID first (backwards compat)
       let doctorProfileId: string | null = null;
 
       // Try UUID match
@@ -30,56 +29,37 @@ const DoctorPublicProfilePage = () => {
           const state = parts[parts.length - 1]?.toUpperCase();
           const crm = parts[parts.length - 2];
           if (crm && state && state.length === 2) {
-            const { data } = await supabase
-              .from("doctor_profiles")
-              .select("id")
-              .eq("crm", crm)
-              .eq("crm_state", state)
-              .eq("is_approved", true)
-              .maybeSingle();
-            if (data) doctorProfileId = data.id;
+            // Use secure RPC instead of direct table query
+            const { data } = await supabase.rpc("resolve_doctor_slug", {
+              p_crm: crm,
+              p_state: state,
+            });
+            if (data) doctorProfileId = data;
           }
         }
 
-        // Fallback: try name-based search
+        // Fallback: try name-based search via secure RPC
         if (!doctorProfileId) {
           const nameParts = slug.replace(/^dr-/, "").split("-").filter(p => p.length > 1);
           if (nameParts.length >= 1) {
-            const { data: profiles } = await supabase
-              .from("profiles")
-              .select("user_id, first_name, last_name")
-              .ilike("first_name", `%${nameParts[0]}%`);
-
-            if (profiles && profiles.length > 0) {
-              for (const p of profiles) {
-                const { data: dp } = await supabase
-                  .from("doctor_profiles")
-                  .select("id")
-                  .eq("user_id", p.user_id)
-                  .eq("is_approved", true)
-                  .maybeSingle();
-                if (dp) { doctorProfileId = dp.id; break; }
-              }
-            }
+            const { data } = await supabase.rpc("search_doctor_by_name", {
+              p_name: nameParts[0],
+            });
+            if (data) doctorProfileId = data;
           }
         }
       }
 
       if (doctorProfileId) {
         setDoctorId(doctorProfileId);
-        // Fetch meta for SEO
-        const { data: doc } = await supabase
-          .from("doctor_profiles")
-          .select("user_id, id")
-          .eq("id", doctorProfileId)
-          .maybeSingle();
+        // Fetch meta for SEO via secure RPC
+        const { data: rows } = await supabase.rpc("get_public_doctor_profile", {
+          p_doctor_id: doctorProfileId,
+        });
+        const doc = rows?.[0] as any;
         if (doc) {
-          const [pRes, sRes] = await Promise.all([
-            supabase.from("profiles").select("first_name, last_name").eq("user_id", doc.user_id).maybeSingle(),
-            supabase.from("doctor_specialties").select("specialties(name)").eq("doctor_id", doc.id).limit(1),
-          ]);
-          const name = pRes.data ? `Dr(a). ${pRes.data.first_name} ${pRes.data.last_name}` : "Médico";
-          const specialty = (sRes.data as { specialties?: { name?: string } | null }[])?.[0]?.specialties?.name ?? "Clínica Geral";
+          const name = `Dr(a). ${doc.first_name} ${doc.last_name}`;
+          const specialty = doc.specialties?.[0] ?? "Clínica Geral";
           setDoctorMeta({ name, specialty });
         }
       }

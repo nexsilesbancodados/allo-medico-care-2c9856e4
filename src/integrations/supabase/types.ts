@@ -3505,6 +3505,25 @@ export type Database = {
       get_doctor_profile_id: { Args: { _user_id: string }; Returns: string }
       get_my_clinic_id: { Args: never; Returns: string }
       get_my_doctor_id: { Args: never; Returns: string }
+      get_public_doctor_profile: {
+        Args: { p_doctor_id: string }
+        Returns: {
+          available_now: boolean
+          avatar_url: string
+          bio: string
+          consultation_price: number
+          crm: string
+          crm_state: string
+          education: string
+          experience_years: number
+          first_name: string
+          id: string
+          last_name: string
+          rating: number
+          specialties: string[]
+          total_reviews: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -3517,6 +3536,23 @@ export type Database = {
       is_receptionist: { Args: never; Returns: boolean }
       is_support: { Args: never; Returns: boolean }
       mark_no_shows: { Args: never; Returns: undefined }
+      resolve_doctor_slug: {
+        Args: { p_crm: string; p_state: string }
+        Returns: string
+      }
+      search_doctor_by_name: { Args: { p_name: string }; Returns: string }
+      verify_document_public: {
+        Args: { p_code: string }
+        Returns: {
+          details: Json
+          doctor_crm: string
+          doctor_name: string
+          document_type: string
+          issued_at: string
+          patient_name: string
+          verification_code: string
+        }[]
+      }
     }
     Enums: {
       app_role:
