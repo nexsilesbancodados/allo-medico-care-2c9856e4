@@ -136,10 +136,10 @@ export function HeroBanner({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-2 -mx-1 flex overflow-x-auto rounded-2xl border border-white/12 bg-white/[0.08] backdrop-blur-md scrollbar-none md:grid md:overflow-visible"
+            className="mt-2 -mx-1 flex overflow-x-auto rounded-2xl border border-black/10 bg-white/90 dark:bg-white/15 backdrop-blur-xl scrollbar-none md:grid md:overflow-visible shadow-lg"
             style={{
               gridTemplateColumns: kpis.length > 3 ? `repeat(${kpis.length}, 1fr)` : undefined,
-              boxShadow: "inset 0 1px 0 rgba(255,255,255,.1), 0 2px 8px rgba(0,0,0,.08)"
+              boxShadow: "0 4px 20px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.6)"
             }}
           >
             {loading
@@ -156,14 +156,14 @@ export function HeroBanner({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 + i * 0.08, duration: 0.4 }}
                     className={cn(
-                      "flex flex-1 flex-col items-center px-4 py-3 flex-shrink-0 min-w-[72px] md:min-w-0",
-                      i < kpis.length - 1 && "border-r border-white/10"
+                      "flex flex-1 flex-col items-center px-4 py-3.5 flex-shrink-0 min-w-[72px] md:min-w-0",
+                      i < kpis.length - 1 && "border-r border-black/8 dark:border-white/10"
                     )}
                   >
-                    <p className="text-[20px] font-black leading-none tabular-nums text-white tracking-tight drop-shadow-sm md:text-[22px]">
+                    <p className="text-[20px] font-black leading-none tabular-nums text-[#1e3a8a] dark:text-white tracking-tight md:text-[22px]">
                       {k.value}
                     </p>
-                    <p className="mt-1.5 text-[7.5px] font-bold uppercase tracking-[0.15em] text-white/50 md:text-[8px]">
+                    <p className="mt-1.5 text-[8px] font-bold uppercase tracking-[0.15em] text-muted-foreground/70 dark:text-white/50 md:text-[8.5px]">
                       {k.label}
                     </p>
                   </motion.div>
