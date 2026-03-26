@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Sparkles, X, CreditCard, RotateCcw, Phone, Mail, Globe, Shield } from "lucide-react";
+import { ChevronRight, X, CreditCard, RotateCcw, Phone, Mail, Globe, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
+import pingoLogo from "@/assets/mascot.png";
 
 interface WalletCardProps {
   name: string;
@@ -41,8 +42,8 @@ function CardFace({ name, cardNumber, validUntil, planName, gradient, orb1, orb2
             <p className={cn("font-bold uppercase tracking-[0.14em] text-white/50", large ? "text-[11px]" : "text-[9px]")}>Cartão de Benefícios</p>
             <p className={cn("mt-1 font-bold leading-tight text-white tracking-tight", large ? "text-[18px]" : "text-[14px]")}>{name}</p>
           </div>
-          <div className={cn("flex items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-md", large ? "h-11 w-11" : "h-9 w-9")}>
-            <Sparkles className={cn("text-white/80", large ? "h-5 w-5" : "h-4 w-4")} />
+          <div className={cn("flex items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-md overflow-hidden", large ? "h-11 w-11" : "h-9 w-9")}>
+            <img src={pingoLogo} alt="Pingo" className={cn("object-contain", large ? "h-9 w-9" : "h-7 w-7")} />
           </div>
         </div>
 
@@ -117,8 +118,8 @@ export function WalletCard({
               <p className="text-[9px] font-bold uppercase tracking-[0.14em] text-white/50">Cartão de Benefícios</p>
               <p className="mt-1 text-[14px] font-bold leading-tight text-white tracking-tight">{name}</p>
             </div>
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-md">
-              <Sparkles className="h-4 w-4 text-white/80" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/20 bg-white/15 backdrop-blur-md overflow-hidden">
+              <img src={pingoLogo} alt="Pingo" className="h-7 w-7 object-contain" />
             </div>
           </div>
 
