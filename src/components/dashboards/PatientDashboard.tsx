@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import MedicalHistoryExport from "@/components/patient/MedicalHistoryExport";
-import CreditsWidget from "@/components/patient/CreditsWidget";
+
 import UpsellBanner from "@/components/patient/UpsellBanner";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
@@ -352,7 +352,7 @@ const PatientDashboard = () => {
               { label: "Perfil",       description: "Dados pessoais",          icon: <User className="w-[17px] h-[17px]" />,          path: "/dashboard/profile?role=patient",          iconBg: "bg-muted",                          iconColor: "text-muted-foreground" },
             ]} />
 
-            <CreditsWidget />
+            
           </div>
         </div>
       </div>
