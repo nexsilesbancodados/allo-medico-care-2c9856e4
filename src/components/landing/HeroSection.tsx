@@ -24,14 +24,14 @@ const trustItems = [
 const floatY = {
   animate: {
     y: [0, -8, 0],
-    transition: { duration: 3.5, repeat: Infinity, ease: "easeInOut" },
+    transition: { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const },
   },
 };
 
 const floatYSlow = {
   animate: {
     y: [0, -6, 0],
-    transition: { duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 },
+    transition: { duration: 4.2, repeat: Infinity, ease: "easeInOut" as const, delay: 0.8 },
   },
 };
 
