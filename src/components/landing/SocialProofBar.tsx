@@ -13,20 +13,24 @@ const badges = [
   { icon: Zap, text: "< 3s de carregamento" },
 ];
 
+const BadgeItem = ({ icon: Icon, text }: { icon: React.ElementType; text: string }) => (
+  <div className="flex items-center gap-2 shrink-0 rounded-full border border-border/50 bg-background/80 px-3.5 py-2 mx-1.5">
+    <Icon className="w-4 h-4 text-muted-foreground/60 shrink-0" />
+    <span className="text-[13px] font-medium text-muted-foreground tracking-tight whitespace-nowrap">
+      {text}
+    </span>
+  </div>
+);
+
 const SocialProofBar = forwardRef<HTMLElement>((_, ref) => (
   <section
     ref={ref}
     className="py-3.5 border-y border-border/30 bg-muted/10 overflow-hidden select-none"
   >
-    <div className="mx-auto max-w-[1800px] px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
-      <div className="flex gap-2 overflow-x-auto py-1 mobile-scroll sm:flex-wrap sm:justify-center sm:overflow-visible">
-        {badges.map((badge) => (
-          <div key={badge.text} className="flex items-center gap-2 shrink-0 rounded-full border border-border/50 bg-background/80 px-3 py-2">
-            <badge.icon className="w-4 h-4 text-muted-foreground/60 shrink-0" />
-            <span className="text-[13px] font-medium text-muted-foreground tracking-tight whitespace-nowrap">
-              {badge.text}
-            </span>
-          </div>
+    <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+      <div className="flex w-max animate-[marquee_30s_linear_infinite] hover:[animation-play-state:paused]">
+        {[...badges, ...badges].map((badge, i) => (
+          <BadgeItem key={`${badge.text}-${i}`} icon={badge.icon} text={badge.text} />
         ))}
       </div>
     </div>
