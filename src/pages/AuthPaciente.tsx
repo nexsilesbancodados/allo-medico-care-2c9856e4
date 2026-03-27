@@ -49,6 +49,7 @@ const AuthPaciente = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [cpf, setCpf] = useState("");
+  const [cpfTouched, setCpfTouched] = useState(false);
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -556,8 +557,33 @@ const AuthPaciente = () => {
                   <Label className="text-[13px] font-semibold text-foreground">CPF</Label>
                   <div className="relative mt-1.5">
                     <IdentificationCard className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/50" weight="fill" />
-                    <Input value={cpf} onChange={e => setCpf(formatMask(e.target.value, 'cpf'))} placeholder="000.000.000-00" className="pl-11 font-mono h-12 rounded-xl bg-muted/40 border-border/50 text-[15px] tracking-wide focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40" maxLength={14} />
+                    <Input
+                      value={cpf}
+                      onChange={e => setCpf(formatMask(e.target.value, 'cpf'))}
+                      onBlur={() => setCpfTouched(true)}
+                      placeholder="000.000.000-00"
+                      className={`pl-11 pr-11 font-mono h-12 rounded-xl bg-muted/40 text-[15px] tracking-wide focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40 ${
+                        cpfTouched && unmask(cpf).length === 11 && !validarCPF(unmask(cpf))
+                          ? "border-destructive focus-visible:border-destructive focus-visible:shadow-[0_0_0_3px_hsl(var(--destructive)/0.15)]"
+                          : cpfTouched && validarCPF(unmask(cpf))
+                            ? "border-green-500/60"
+                            : "border-border/50"
+                      }`}
+                      maxLength={14}
+                    />
+                    {cpfTouched && unmask(cpf).length === 11 && (
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                        {validarCPF(unmask(cpf)) ? (
+                          <CheckCircle className="w-5 h-5 text-green-500" weight="fill" />
+                        ) : (
+                          <ShieldCheck className="w-5 h-5 text-destructive" weight="fill" />
+                        )}
+                      </span>
+                    )}
                   </div>
+                  {cpfTouched && unmask(cpf).length === 11 && !validarCPF(unmask(cpf)) && (
+                    <p className="text-[12px] text-destructive mt-1.5 pl-1 font-medium">CPF inválido. Verifique os dígitos.</p>
+                  )}
                 </div>
 
                 {/* Telefone */}
