@@ -53,10 +53,10 @@ const saveRecentSearch = (term: string) => {
 const SPECIALTY_ICONS: Record<string, React.ReactNode> = {
   "Cardiologia": <Heart className="w-6 h-6 text-destructive" />,
   "Pediatria": <Baby className="w-6 h-6 text-primary" />,
-  "Ortopedia": <Bone className="w-6 h-6 text-amber-600" />,
-  "Ginecologia": <Activity className="w-6 h-6 text-pink-500" />,
-  "Oftalmologia": <EyeIcon className="w-6 h-6 text-cyan-600" />,
-  "Neurologia": <Brain className="w-6 h-6 text-purple-600" />,
+  "Ortopedia": <Bone className="w-6 h-6 text-warning" />,
+  "Ginecologia": <Activity className="w-6 h-6 text-secondary" />,
+  "Oftalmologia": <EyeIcon className="w-6 h-6 text-primary" />,
+  "Neurologia": <Brain className="w-6 h-6 text-secondary" />,
 };
 
 const FREQUENT_SEARCHES = ["Check-up Geral", "Dermatologia", "Nutrição", "Saúde Mental"];
