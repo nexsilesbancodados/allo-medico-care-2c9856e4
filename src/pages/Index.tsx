@@ -9,7 +9,7 @@ import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
-import { Stethoscope, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
+import { Stethoscope, CreditCard, Brain, Heartbeat, FileText } from "@phosphor-icons/react";
 
 // WebP for faster loading; deferred sections handle lazy rendering
 
@@ -94,7 +94,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
               <div className="flex items-center gap-5 text-center sm:text-left">
                 <div className="relative shrink-0 hidden sm:flex">
                   <div className="relative w-14 h-14 rounded-2xl bg-primary-foreground/15 flex items-center justify-center border border-primary-foreground/15 shadow-lg shadow-foreground/10">
-                    <Stethoscope className="w-6 h-6 text-primary-foreground" />
+                    <Stethoscope className="w-6 h-6 text-primary-foreground" weight="fill" />
                   </div>
                 </div>
 
@@ -117,7 +117,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
                 className="bg-background text-primary hover:bg-background/95 rounded-2xl px-8 gap-2.5 shadow-lg shadow-foreground/10 font-extrabold shrink-0 transition-all text-sm sm:text-base"
                 onClick={() => navigate(user ? "/dashboard/urgent-care" : "/paciente")}
               >
-                <Stethoscope className="w-5 h-5" />
+                <Stethoscope className="w-5 h-5" weight="fill" />
                 Acessar Plantão
               </Button>
             </div>
@@ -167,7 +167,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
 
       <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <InfoBannerStrip
-          icon={HeartPulse}
+          icon={Heartbeat}
           label="Plantão 24h"
           title="Precisa de atendimento urgente?"
           highlight="Médicos disponíveis agora"
@@ -207,7 +207,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         <section aria-labelledby="triage-heading" className="py-16 px-4">
           <div className="max-w-2xl mx-auto text-center space-y-5">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
-              <Stethoscope className="w-8 h-8 text-primary" aria-hidden="true" />
+              <Stethoscope className="w-8 h-8 text-primary" weight="fill" aria-hidden="true" />
             </div>
             <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
               Não sabe qual especialidade procurar?
@@ -220,7 +220,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
               className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
               onClick={() => navigate("/paciente")}
             >
-              <Stethoscope className="w-5 h-5" aria-hidden="true" />
+              <Stethoscope className="w-5 h-5" weight="fill" aria-hidden="true" />
               Fazer Triagem Gratuita
             </Button>
           </div>
