@@ -41,9 +41,6 @@ const Accessibility = lazy(() => import("./pages/Accessibility"));
 const GuestCheckout = lazy(() => import("./pages/GuestCheckout"));
 const GuestConsultation = lazy(() => import("./pages/GuestConsultation"));
 const GuestRating = lazy(() => import("./pages/GuestRating"));
-const AuthParceiro = lazy(() => import("./pages/AuthParceiro"));
-const AuthClinica = lazy(() => import("./pages/AuthClinica"));
-const AuthRecepcionista = lazy(() => import("./pages/AuthRecepcionista"));
 const AuthSuporte = lazy(() => import("./pages/AuthSuporte"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const LinkRedirect = lazy(() => import("./pages/LinkRedirect"));
@@ -52,7 +49,7 @@ const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const DoctorPublicProfilePage = lazy(() => import("./pages/DoctorPublicProfilePage"));
 
 const B2BTelelaudo = lazy(() => import("./pages/B2BTelelaudo"));
-const B2BLanding = lazy(() => import("./pages/B2BLanding"));
+
 const Teleconsulta = lazy(() => import("./pages/Teleconsulta"));
 const Telelaudo = lazy(() => import("./pages/Telelaudo"));
 const AuthLaudista = lazy(() => import("./pages/AuthLaudista"));
@@ -116,10 +113,7 @@ const App = () => {
       const cancelSecondaryPrefetch = prefetchOnIdle(
         [
           () => import("./pages/AuthAdmin"),
-          () => import("./pages/AuthClinica"),
-          () => import("./pages/AuthRecepcionista"),
           () => import("./pages/AuthSuporte"),
-          () => import("./pages/AuthParceiro"),
           () => import("./pages/AuthLaudista"),
           () => import("./pages/GuestCheckout"),
           () => import("./pages/ForgotPassword"),
@@ -206,16 +200,13 @@ const App = () => {
                         <Route path="/consulta-avulsa" element={<GuestCheckout />} />
                         <Route path="/consulta" element={<GuestConsultation />} />
                         <Route path="/consulta/avaliacao" element={<GuestRating />} />
-                        <Route path="/parceiro" element={<AuthParceiro />} />
-                        <Route path="/clinica" element={<AuthClinica />} />
-                        <Route path="/recepcionista" element={<AuthRecepcionista />} />
                         <Route path="/suporte" element={<AuthSuporte />} />
                         <Route path="/payment-success" element={<PaymentSuccess />} />
                         <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
                         <Route path="/l/:id" element={<LinkRedirect />} />
                         <Route path="/validar/:id" element={<ValidateDocument />} />
                         <Route path="/validar" element={<ValidateDocument />} />
-                        <Route path="/para-empresas" element={<B2BLanding />} />
+                        
                         <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
                         <Route path="/teleconsulta" element={<Teleconsulta />} />
                         

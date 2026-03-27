@@ -1,6 +1,3 @@
-import { memo } from "react";
-
-/** UpsellBanner removed — only single consultations are sold */
+/** @deprecated Plans removed — stub */
 const UpsellBanner = () => null;
-
-export default memo(UpsellBanner);
+export default UpsellBanner;
