@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import DashboardLayout from "./DashboardLayout";
 import { Button } from "@/components/ui/button";
@@ -55,7 +55,9 @@ const PatientDashboard = () => {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [searchParams] = useSearchParams();
+  const forceOnboarding = searchParams.get("onboarding") === "true";
+  const [showOnboarding, setShowOnboarding] = useState(forceOnboarding);
   const [onboardingDone] = useLocalStorage<boolean>(ONBOARDING_KEY, false);
 
   const { data: stats, isLoading: statsLoading } = usePatientStats();
