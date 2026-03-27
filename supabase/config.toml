@@ -117,3 +117,6 @@ verify_jwt = false
 
 [functions.sugerir-laudo]
 verify_jwt = false
+
+[functions.docuseal-proxy]
+verify_jwt = false
