@@ -1210,6 +1210,25 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
                 label="Exames"
                 onClick={() => window.open(`/dashboard/exam-request?appointment=${appointmentId}`, '_blank')}
               />
+              <div className="w-px h-6 bg-[hsl(220,15%,15%)] mx-1" />
+              <ToolbarBtn
+                active={useJitsi}
+                icon={<Video className="w-3.5 h-3.5" />}
+                label={useJitsi ? "Jitsi" : "P2P"}
+                onClick={() => {
+                  const next = !useJitsi;
+                  setUseJitsi(next);
+                  localStorage.setItem(`jitsi_${appointmentId}`, String(next));
+                  if (next) {
+                    const rid = gerarRoomId(appointmentId ?? '');
+                    setJitsiRoomId(rid);
+                    supabase.from("appointments").update({ jitsi_room_id: rid } as any).eq("id", appointmentId ?? '');
+                  } else {
+                    setJitsiRoomId(null);
+                    supabase.from("appointments").update({ jitsi_room_id: null } as any).eq("id", appointmentId ?? '');
+                  }
+                }}
+              />
             </>
           )}
         </div>
