@@ -164,7 +164,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           label="Consulta Avulsa"
           title="Consulte agora sem mensalidade"
           highlight="A partir de R$89 com receita digital"
-          href="/consulta-avulsa"
+          href="/paciente"
           gradient="from-primary to-violet-600"
           mascotSrc={bannerConsulta}
           variant="diagonal"
@@ -181,7 +181,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           label="Plantão 24h"
           title="Precisa de atendimento urgente?"
           highlight="Médicos disponíveis agora"
-          href="/consulta-avulsa"
+          href="/paciente"
           gradient="from-rose-500 to-primary"
           mascotSrc={bannerPlantao}
           variant="wave"

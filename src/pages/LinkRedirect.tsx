@@ -29,7 +29,7 @@ const LinkRedirect = () => {
 
       // If payment pending, redirect to checkout
       if (appt.payment_status === "pending" && appt.status === "scheduled") {
-        navigate(`/consulta-avulsa?appointment=${appt.id}`, { replace: true });
+        navigate(`/paciente`, { replace: true });
         return;
       }
 

@@ -99,7 +99,7 @@ const CTABanner = forwardRef<HTMLElement>((_, ref) => {
                 <BannerCTA
                   tone="light"
                   size="lg"
-                  onClick={() => navigate("/consulta-avulsa")}
+                  onClick={() => navigate("/paciente")}
                 >
                   Consulta avulsa
                 </BannerCTA>

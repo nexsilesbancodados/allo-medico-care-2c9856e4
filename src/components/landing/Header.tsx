@@ -111,7 +111,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                       <ListItem href="/teleconsulta" title="Teleconsulta" icon={Video} badge="24h">
                         Consultas por vídeo com especialistas, receita digital e acesso rápido.
                       </ListItem>
-                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>
+                      <ListItem href="/paciente" title="Consulta Avulsa" icon={Stethoscope}>
                         Atendimento rápido, seguro e sem burocracia.
                       </ListItem>
                     </ul>

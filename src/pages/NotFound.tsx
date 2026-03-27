@@ -11,7 +11,7 @@ const suggestions = [
   { label: "Página inicial", path: "/" },
   { label: "Área do Paciente", path: "/paciente" },
   { label: "Área do Médico", path: "/medico" },
-  { label: "Consulta Avulsa", path: "/consulta-avulsa" },
+  { label: "Consulta Avulsa", path: "/paciente" },
 ];
 
 const NotFound = () => {
