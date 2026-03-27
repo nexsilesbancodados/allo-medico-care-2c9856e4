@@ -147,6 +147,17 @@ const UserProfile = () => {
     }).eq("user_id", user.id);
 
     if (isDoctor) {
+      // Validate price range
+      if (priceMin !== null && consultationPrice < priceMin) {
+        toast.error(`O preço mínimo para sua especialidade é R$ ${priceMin.toFixed(0)}`);
+        setSaving(false);
+        return;
+      }
+      if (priceMax !== null && consultationPrice > priceMax) {
+        toast.error(`O preço máximo para sua especialidade é R$ ${priceMax.toFixed(0)}`);
+        setSaving(false);
+        return;
+      }
       await supabase.from("doctor_profiles").update({
         bio, education, experience_years: experienceYears, consultation_price: consultationPrice,
       }).eq("user_id", user.id);
