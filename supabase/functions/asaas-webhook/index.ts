@@ -56,169 +56,6 @@ serve(async (req) => {
 
     const newPaymentStatus = statusMap[event];
 
-    // ─── Handle subscription-related events ───
-    const isCardSubscription = externalRef.startsWith("card_");
-    
-    if (isCardSubscription) {
-      console.info(`[Asaas Webhook] Card subscription event: ${event}, ref: ${externalRef}`);
-      
-      // Parse: card_{planType}_{userId}
-      const parts = externalRef.split("_");
-      const planType = parts.slice(1, -1).join("_"); // everything between "card_" and last "_userId"
-      const userId = parts[parts.length - 1];
-      
-      if (newPaymentStatus === "approved") {
-        // Activate discount card
-        const { data: existing } = await supabase
-          .from("discount_cards")
-          .select("id, status")
-          .eq("user_id", userId)
-          .eq("plan_type", planType)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-
-        const validUntil = new Date();
-        validUntil.setMonth(validUntil.getMonth() + 1);
-
-        if (existing) {
-          await supabase.from("discount_cards")
-            .update({
-              status: "active",
-              valid_until: validUntil.toISOString(),
-              payment_id: payment.id,
-            })
-            .eq("id", existing.id);
-          console.info(`[Asaas Webhook] Renewed discount card ${existing.id}`);
-        } else {
-          // Determine price from plan type
-          const priceMap: Record<string, number> = {
-            prata_familiar: 47.9,
-            ouro_individual: 37.9,
-            ouro_familiar: 77.9,
-            diamante_familiar: 157.9,
-          };
-          await supabase.from("discount_cards").insert({
-            user_id: userId,
-            plan_type: planType,
-            price_monthly: priceMap[planType] || payment.value || 0,
-            discount_percent: 30,
-            status: "active",
-            valid_until: validUntil.toISOString(),
-            payment_id: payment.id,
-          });
-          console.info(`[Asaas Webhook] Created new discount card for user ${userId}`);
-        }
-
-        // Notify user (in-app)
-        await supabase.from("notifications").insert({
-          user_id: userId,
-          title: "✅ Cartão de Benefícios Ativado!",
-          message: "Seu pagamento foi confirmado e seu Cartão de Benefícios está ativo.",
-          type: "payment",
-          link: "/dashboard",
-        });
-
-        // Push notification
-        try {
-          const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-          const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-          await fetch(`${SUPABASE_URL}/functions/v1/send-push-notification`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
-            body: JSON.stringify({
-              user_id: userId,
-              title: "✅ Cartão Ativado!",
-              message: "Seu Cartão de Benefícios está ativo. Aproveite os descontos!",
-              link: "/dashboard",
-            }),
-          });
-        } catch (pushErr) {
-          console.warn("Card activation push failed:", pushErr);
-        }
-
-        // WhatsApp notification for card activation
-        try {
-          const { data: profile } = await supabase.from("profiles").select("first_name, phone").eq("user_id", userId).single();
-          if (profile?.phone) {
-            const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-            const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-            const planNames: Record<string, string> = {
-              prata_familiar: "Mini Família",
-              ouro_individual: "Solitário",
-              ouro_familiar: "King Família",
-              diamante_familiar: "Prime Família",
-            };
-            await fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
-              body: JSON.stringify({
-                phone: profile.phone,
-                message: `✅ *Cartão de Benefícios Ativado!*\n\nOlá ${profile.first_name},\nSeu plano *${planNames[planType] || planType}* está ativo!\n\n💳 Desconto de 30% em todas as consultas\n📅 Válido até ${validUntil.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })}\n\nAproveite! 💚`,
-              }),
-            });
-          }
-        } catch (whatsErr) {
-          console.warn("Card activation WhatsApp failed:", whatsErr);
-        }
-
-        // Send card activation email
-        try {
-          const { data: profile } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", userId).single();
-          const { data: authUser } = await supabase.auth.admin.getUserById(userId);
-          const patientName = profile ? `${profile.first_name} ${profile.last_name}` : "Paciente";
-          const validUntilStr = validUntil.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
-          const planNames: Record<string, string> = {
-            prata_familiar: "Mini Família",
-            ouro_individual: "Solitário",
-            ouro_familiar: "King Família",
-            diamante_familiar: "Prime Família",
-          };
-          if (authUser?.user?.email) {
-            const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-            const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-            await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
-              body: JSON.stringify({
-                type: "card_activated",
-                to: authUser.user.email,
-                data: {
-                  patient_name: patientName,
-                  plan_name: planNames[planType] || planType,
-                  valid_until: validUntilStr,
-                  discount_percent: "30",
-                },
-              }),
-            });
-          }
-        } catch (emailErr) {
-          console.warn("Card activation email failed (non-blocking):", emailErr);
-        }
-      }
-
-      if (["cancelled", "refunded", "chargeback"].includes(newPaymentStatus || "")) {
-        // Deactivate discount card
-        const userId = parts[parts.length - 1];
-        const planType = parts.slice(1, -1).join("_");
-        
-        await supabase.from("discount_cards")
-          .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
-          .eq("user_id", userId)
-          .eq("plan_type", planType)
-          .eq("status", "active");
-
-        await supabase.from("notifications").insert({
-          user_id: userId,
-          title: "❌ Cartão de Benefícios Cancelado",
-          message: `Seu Cartão de Benefícios foi cancelado devido a: ${newPaymentStatus}.`,
-          type: "payment",
-          link: "/dashboard/plans",
-        });
-        console.info(`[Asaas Webhook] Cancelled discount card for user ${userId}`);
-      }
-    }
-
     // ─── Handle urgent care queue payments ───
     const isQueuePayment = externalRef.startsWith("queue_");
     if (isQueuePayment && newPaymentStatus === "approved") {
@@ -229,7 +66,6 @@ serve(async (req) => {
         .eq("status", "pending_payment");
       console.info(`[Asaas Webhook] Queue entry ${queueId} activated after payment`);
 
-      // Notify patient
       const { data: queueEntry } = await supabase
         .from("on_demand_queue")
         .select("patient_id")
@@ -256,7 +92,6 @@ serve(async (req) => {
         .eq("id", renewalId);
       console.info(`[Asaas Webhook] Renewal ${renewalId} payment confirmed`);
 
-      // Notify patient about renewal payment
       const { data: renewal } = await supabase
         .from("prescription_renewals")
         .select("patient_id")
@@ -274,8 +109,8 @@ serve(async (req) => {
       }
     }
 
-    // ─── Handle appointment payment events (existing logic) ───
-    const appointmentId = !isCardSubscription && !isRenewal && !isQueuePayment ? externalRef : null;
+    // ─── Handle appointment payment events ───
+    const appointmentId = !isRenewal && !isQueuePayment ? externalRef : null;
 
     if (!newPaymentStatus) {
       console.info(`[Asaas Webhook] Unhandled event: ${event}`);
@@ -328,7 +163,7 @@ serve(async (req) => {
               type: "payment", link: "/dashboard/appointments",
             });
 
-            // Push notification for patient
+            // Push notification
             try {
               const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
               const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -358,7 +193,6 @@ serve(async (req) => {
               type: "payment", link: "/dashboard/appointments",
             });
 
-            // Push for doctor
             try {
               const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
               const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -393,7 +227,7 @@ serve(async (req) => {
             if (patientPhone) {
               const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
               const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-              const whatsappMsg = `✅ *Pagamento Confirmado!*\n\nOlá, ${patientName}!\nSeu pagamento foi aprovado.\n\n📅 Consulta: ${scheduledDate}\n\n_Alô Médico_`;
+              const whatsappMsg = `✅ *Pagamento Confirmado!*\n\nOlá, ${patientName}!\nSeu pagamento foi aprovado.\n\n📅 Consulta: ${scheduledDate}\n\n_AloClínica_`;
               await fetch(`${SUPABASE_URL}/functions/v1/send-whatsapp`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
@@ -404,14 +238,14 @@ serve(async (req) => {
             console.warn("WhatsApp notification failed (non-blocking):", whatsErr);
           }
 
-          // Email notification for all patients (registered + guests)
+          // Email notification
           try {
             const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
             const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-            
+
             let recipientEmail = "";
             let recipientName = "";
-            
+
             if (appointment.patient_id) {
               const { data: authUser } = await supabase.auth.admin.getUserById(appointment.patient_id);
               recipientEmail = authUser?.user?.email ?? "";
@@ -424,7 +258,6 @@ serve(async (req) => {
             }
 
             if (recipientEmail) {
-              // Get doctor name
               const { data: docProf } = await supabase.from("doctor_profiles").select("user_id").eq("id", appointment.doctor_id).single();
               let drName = "Médico";
               if (docProf) {
@@ -432,7 +265,7 @@ serve(async (req) => {
                 if (dp) drName = `Dr(a). ${dp.first_name} ${dp.last_name}`;
               }
               const schedDate = new Date(appointment.scheduled_at);
-              
+
               await fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
@@ -492,7 +325,6 @@ serve(async (req) => {
         asaas_status: payment.status,
         customer_id: payment.customer,
         due_date: payment.dueDate,
-        subscription_id: payment.subscription || null,
       },
     });
 

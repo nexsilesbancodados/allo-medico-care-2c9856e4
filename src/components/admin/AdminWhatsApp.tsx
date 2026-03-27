@@ -241,7 +241,7 @@ const AdminWhatsApp = () => {
         .replace(/\{\{patient_name\}\}/g, "Paciente Teste")
         .replace(/\{\{doctor_name\}\}/g, "Dr. Teste")
         .replace(/\{\{scheduled_date\}\}/g, "28/03/2026 às 14:00")
-        .replace(/\{\{jitsi_link\}\}/g, "https://meet.jit.si/allo-medico-teste")
+        .replace(/\{\{jitsi_link\}\}/g, "https://meet.telemedicinaaloclinica.sbs/consulta-teste")
         .replace(/\{\{cancel_reason\}\}/g, "Motivo de teste")
         .replace(/\{\{appointment_id\}\}/g, "test-123")
         .replace(/\{\{exam_type\}\}/g, "Raio-X Tórax")

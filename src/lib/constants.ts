@@ -49,7 +49,7 @@ export type AppRole = (typeof APP_ROLES)[number];
 
 // ─── Consultation ─────────────────────────────────────────────────────────────
 export const DEFAULT_CONSULTATION_DURATION_MINUTES = 30;
-export const JITSI_DOMAIN = "meet.jit.si";
+export const JITSI_DOMAIN = "meet.telemedicinaaloclinica.sbs";
 export const CONSULTATION_TIMEOUT_MS = 15_000; // 15s
 
 // ─── Cache / Stale times ──────────────────────────────────────────────────────
