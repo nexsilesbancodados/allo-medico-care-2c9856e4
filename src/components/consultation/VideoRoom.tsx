@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation, { type VideoConsultationHandle } from "./VideoConsultation";
+import JitsiRoom from "./JitsiRoom";
+import { gerarRoomId } from "@/lib/jitsi";
 import VideoErrorBoundary from "./VideoErrorBoundary";
 import PreCallCheck from "./PreCallCheck";
 import ConnectionStatus from "./ConnectionStatus";
