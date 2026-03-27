@@ -189,18 +189,18 @@ const Notifications = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.03 }}
                           onClick={() => handleClick(n)}
-                          className={`flex items-start gap-3 p-4 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] ${
+                          className={`flex items-start gap-4 p-5 rounded-2xl transition-all cursor-pointer active:scale-[0.98] ${
                             n.is_read
-                              ? "border-border bg-card hover:bg-muted/30"
-                              : "border-primary/20 bg-primary/5 hover:bg-primary/10"
+                              ? "bg-card hover:bg-muted/30"
+                              : "bg-primary/5 hover:bg-primary/10"
                           }`}
                         >
-                          <div className={`w-10 h-10 rounded-xl ${typeConf.bg} flex items-center justify-center shrink-0`}>
+                          <div className={`w-12 h-12 rounded-full ${typeConf.bg} flex items-center justify-center shrink-0`}>
                             {typeConf.icon}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <p className={`text-sm leading-tight ${n.is_read ? "text-foreground" : "text-foreground font-semibold"}`}>
+                              <h5 className={`text-sm leading-tight font-[Manrope] ${n.is_read ? "text-foreground" : "text-foreground font-bold"}`}>
                                 {n.title}
                               </p>
                               {!n.is_read && <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" />}
