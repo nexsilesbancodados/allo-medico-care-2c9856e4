@@ -14,7 +14,7 @@ import {
   Calendar, Video, Clock, Gift, ChevronRight,
   Heart, Activity, Weight, Thermometer, Droplets, Wind,
   Zap, ClipboardList,
-  ArrowRight, FileText, Upload,
+  ArrowRight, FileText, Upload, Sparkles, Star,
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import { PingoMascot } from "@/components/mascot/PingoMascot";
@@ -152,7 +152,7 @@ const PatientDashboard = () => {
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          <div className="relative z-10 flex items-center px-6 pt-10 pb-9 md:px-8 md:pt-14 md:pb-12">
+          <div className="relative z-10 flex items-end justify-between px-6 pt-10 pb-9 md:px-8 md:pt-14 md:pb-12">
             <div className="flex-1 min-w-0">
               {/* Greeting */}
               <motion.h1
@@ -192,14 +192,14 @@ const PatientDashboard = () => {
               </motion.div>
             </div>
 
-            {/* Pingo mascot */}
+            {/* Pingo mascot — visible on all breakpoints */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.6, x: 20 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.6, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="hidden sm:flex shrink-0 items-end ml-4"
+              className="shrink-0 ml-2 self-end -mb-2"
             >
-              <PingoMascot variant="wave" size={140} animate bounce className="drop-shadow-[0_8px_24px_rgba(0,0,0,0.25)]" />
+              <PingoMascot variant="wave" size={110} animate bounce className="drop-shadow-[0_8px_24px_rgba(0,0,0,0.3)] sm:!w-[140px] sm:!h-[140px]" />
             </motion.div>
           </div>
         </section>
@@ -283,6 +283,51 @@ const PatientDashboard = () => {
 
           </div>
         </div>
+
+        {/* ═══════════ PROMO PINGO BANNER ═══════════ */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="relative overflow-hidden rounded-2xl border border-[hsl(var(--p-primary))]/15 bg-gradient-to-r from-[hsl(var(--p-primary))]/[0.08] via-[hsl(var(--p-primary))]/[0.04] to-secondary/[0.06] p-5"
+        >
+          <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-secondary/10 blur-2xl" />
+          <div className="flex items-center gap-4">
+            <PingoMascot variant="thumbsup" size={72} bounce className="shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Sparkles className="w-3.5 h-3.5 text-warning" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-warning">Novidade</span>
+              </div>
+              <p className="text-[14px] font-bold text-foreground leading-snug">Conheça o Pronto Atendimento Digital</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground leading-relaxed">Consulte com um médico agora, sem agendamento. Atendimento rápido 24h.</p>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => navigate("/dashboard/urgent-care?role=patient")}
+              className="shrink-0 rounded-full bg-[#00347F] text-white text-[12px] font-bold px-5 shadow-md hover:bg-[#00347F]/90 active:scale-95 transition-all"
+            >
+              <Zap className="mr-1.5 h-3.5 w-3.5" /> Ir
+            </Button>
+          </div>
+        </motion.section>
+
+        {/* ═══════════ SATISFACTION STRIP ═══════════ */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="flex items-center justify-center gap-3 rounded-xl bg-muted/30 border border-border/20 px-4 py-3"
+        >
+          <div className="flex -space-x-1">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-3.5 h-3.5 fill-warning text-warning" />
+            ))}
+          </div>
+          <p className="text-[12px] text-muted-foreground font-medium">
+            <span className="font-bold text-foreground">4.9/5</span> — Avaliação dos pacientes
+          </p>
+        </motion.section>
       </div>
     </DashboardLayout>
   );
@@ -390,14 +435,12 @@ const NextAppointmentCard = ({
 
 const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNavigate> }) => (
   <Card className="border-dashed border-border/30 bg-gradient-to-br from-muted/20 to-transparent">
-    <CardContent className="flex flex-col items-center py-10 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50">
-        <Calendar className="h-7 w-7 text-muted-foreground/40" />
-      </div>
-      <p className="font-[Manrope] text-[15px] font-bold text-foreground">Nenhuma consulta agendada</p>
+    <CardContent className="flex flex-col items-center py-8 text-center">
+      <PingoMascot variant="solitario" size={80} bounce animate={false} />
+      <p className="font-[Manrope] text-[15px] font-bold text-foreground mt-3">Nenhuma consulta agendada</p>
       <p className="mt-1 text-[13px] text-muted-foreground max-w-[200px]">Agende agora e cuide da sua saúde com especialistas</p>
       <Button
-        className="mt-6 rounded-full bg-[#00347F] text-white px-8 shadow-[var(--p-shadow-btn)]"
+        className="mt-5 rounded-full bg-[#00347F] text-white px-8 shadow-[var(--p-shadow-btn)]"
         onClick={() => navigate("/dashboard/schedule?role=patient")}
       >
         <Calendar className="mr-2 h-4 w-4" /> Agendar consulta
