@@ -50,7 +50,7 @@ const LinkRedirect = lazy(() => import("./pages/LinkRedirect"));
 const ValidateDocument = lazy(() => import("./pages/ValidateDocument"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const DoctorPublicProfilePage = lazy(() => import("./pages/DoctorPublicProfilePage"));
-const DiscountCard = lazy(() => import("./pages/DiscountCard"));
+
 const B2BCartao = lazy(() => import("./pages/B2BCartao"));
 const B2BTelelaudo = lazy(() => import("./pages/B2BTelelaudo"));
 const B2BLanding = lazy(() => import("./pages/B2BLanding"));
@@ -58,7 +58,7 @@ const Teleconsulta = lazy(() => import("./pages/Teleconsulta"));
 const Telelaudo = lazy(() => import("./pages/Telelaudo"));
 const AuthLaudista = lazy(() => import("./pages/AuthLaudista"));
 const TelelaudoWorkspace = lazy(() => import("./pages/TelelaudoWorkspace"));
-const OftalmologiaLanding = lazy(() => import("./pages/OftalmologiaLanding"));
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -216,13 +216,11 @@ const App = () => {
                         <Route path="/l/:id" element={<LinkRedirect />} />
                         <Route path="/validar/:id" element={<ValidateDocument />} />
                         <Route path="/validar" element={<ValidateDocument />} />
-                        <Route path="/cartao-beneficios" element={<DiscountCard />} />
-                        <Route path="/cartao-desconto" element={<Navigate to="/cartao-beneficios" replace />} />
                         <Route path="/para-empresas" element={<B2BLanding />} />
                         <Route path="/para-empresas/cartao" element={<B2BCartao />} />
                         <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
                         <Route path="/teleconsulta" element={<Teleconsulta />} />
-                        <Route path="/oftalmologia" element={<OftalmologiaLanding />} />
+                        
                         <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
                         <Route path="/laudista" element={<AuthLaudista />} />
                         <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
