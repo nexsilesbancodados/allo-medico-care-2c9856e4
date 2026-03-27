@@ -1,7 +1,7 @@
 import { forwardRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, Zap, ArrowRight, Sparkles, Stethoscope, Brain, Eye, Bone, Baby, Activity, Heart, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, Zap, ArrowRight, Sparkles, Stethoscope, Brain, Bone, Baby, Activity, Heart, ChevronDown, ChevronUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import specGeneral from "@/assets/spec-general.png";
 import specCardiology from "@/assets/spec-cardiology.png";
