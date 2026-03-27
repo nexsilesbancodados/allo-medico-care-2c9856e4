@@ -10,4 +10,4 @@ Disallow: /payment-success
 User-agent: Googlebot
 Allow: /
 
-Sitemap: https://allo-medico-care.lovable.app/sitemap.xml
+Sitemap: https://aloclinica.com.br/sitemap.xml
