@@ -202,7 +202,7 @@ const Notifications = () => {
                             <div className="flex items-start justify-between gap-2">
                               <h5 className={`text-sm leading-tight font-[Manrope] ${n.is_read ? "text-foreground" : "text-foreground font-bold"}`}>
                                 {n.title}
-                              </p>
+                              </h5>
                               {!n.is_read && <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" />}
                             </div>
                             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
