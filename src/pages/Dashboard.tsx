@@ -32,7 +32,6 @@ const PanelCenter = lazy(() => import("@/components/admin/PanelCenter"));
 
 // ── LAZY imports: less-used pages (prefetched on idle) ──
 const BookAppointment = lazy(() => import("@/components/patient/BookAppointment"));
-const PlansCheckout = lazy(() => import("@/components/patient/PlansCheckout"));
 const MedicalHistory = lazy(() => import("@/components/patient/MedicalHistory"));
 const PaymentHistory = lazy(() => import("@/components/patient/PaymentHistory"));
 const PatientExamUpload = lazy(() => import("@/components/patient/PatientExamUpload"));
@@ -81,8 +80,6 @@ const AdminPatients = lazy(() => import("@/components/admin/AdminPatients"));
 const AdminClinics = lazy(() => import("@/components/admin/AdminClinics"));
 const AdminAppointments = lazy(() => import("@/components/admin/AdminAppointments"));
 const AdminSpecialties = lazy(() => import("@/components/admin/AdminSpecialties"));
-const AdminPlans = lazy(() => import("@/components/admin/AdminPlans"));
-const AdminSubscriptions = lazy(() => import("@/components/admin/AdminSubscriptions"));
 const AdminLogs = lazy(() => import("@/components/admin/AdminLogs"));
 const AdminInviteCodes = lazy(() => import("@/components/admin/AdminInviteCodes"));
 const AdminReports = lazy(() => import("@/components/admin/AdminReports"));
@@ -325,8 +322,6 @@ const Dashboard = () => {
       <Route path="admin/clinics" element={<RoleGuard allowed={[]} roles={roles}><AdminClinics /></RoleGuard>} />
       <Route path="admin/appointments" element={<RoleGuard allowed={[]} roles={roles}><AdminAppointments /></RoleGuard>} />
       <Route path="admin/specialties" element={<RoleGuard allowed={[]} roles={roles}><AdminSpecialties /></RoleGuard>} />
-      <Route path="admin/plans" element={<RoleGuard allowed={[]} roles={roles}><AdminPlans /></RoleGuard>} />
-      <Route path="admin/subscriptions" element={<RoleGuard allowed={[]} roles={roles}><AdminSubscriptions /></RoleGuard>} />
       <Route path="admin/logs" element={<RoleGuard allowed={[]} roles={roles}><AdminLogs /></RoleGuard>} />
       <Route path="admin/invite-codes" element={<RoleGuard allowed={[]} roles={roles}><AdminInviteCodes /></RoleGuard>} />
       <Route path="admin/reports" element={<RoleGuard allowed={[]} roles={roles}><AdminReports /></RoleGuard>} />
