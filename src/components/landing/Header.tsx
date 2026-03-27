@@ -1,6 +1,6 @@
 import { useState, memo, forwardRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain } from "lucide-react";
+import { Menu, X, LogOut, LogIn, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain } from "lucide-react";
 import mascot from "@/assets/mascot.png";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -205,8 +205,8 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                 className="rounded-lg gap-1.5 text-xs font-semibold h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
                 onClick={() => navigate("/paciente")}
               >
-                <CreditCard className="w-3.5 h-3.5" />
-                Começar
+                <LogIn className="w-3.5 h-3.5" />
+                Entrar
               </Button>
             </div>
           )}
@@ -259,7 +259,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                     <ShoppingBag className="w-4 h-4" /> Consulta Avulsa
                   </Button>
                   <Button size="sm" className="rounded-lg justify-start gap-2 bg-primary text-primary-foreground font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
-                    <CreditCard className="w-4 h-4" /> Começar
+                    <LogIn className="w-4 h-4" /> Entrar
                   </Button>
                 </>
               )}
