@@ -212,21 +212,22 @@ const PatientDashboard = () => {
         )}
 
         {/* ═══════════ QUICK ACTIONS — 5 col grid ═══════════ */}
-        <section className="grid grid-cols-5 gap-2">
+        <section className="grid grid-cols-5 gap-3">
           {QUICK_ACTIONS.map((action, i) => (
             <motion.button
               key={action.label}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.04, type: "spring", stiffness: 300, damping: 24 }}
-              whileTap={{ scale: 0.93 }}
+              transition={{ delay: 0.12 + i * 0.05, type: "spring", stiffness: 300, damping: 24 }}
+              whileTap={{ scale: 0.9 }}
+              whileHover={{ y: -3 }}
               onClick={() => navigate(action.path)}
-              className="flex flex-col items-center gap-1.5 py-2 cursor-pointer"
+              className="group flex flex-col items-center gap-2 py-3 cursor-pointer"
             >
-              <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${action.iconBg} transition-transform`}>
-                <action.icon className={`h-5 w-5 ${action.iconColor}`} />
+              <div className={`relative flex h-[52px] w-[52px] items-center justify-center rounded-2xl ${action.iconBg} shadow-sm border border-border/10 transition-all duration-200 group-hover:shadow-md group-hover:scale-105`}>
+                <action.icon className={`h-[22px] w-[22px] ${action.iconColor} transition-transform duration-200 group-hover:scale-110`} strokeWidth={1.8} />
               </div>
-              <span className="text-[11px] font-semibold text-foreground leading-tight">{action.label}</span>
+              <span className="text-[11.5px] font-semibold text-muted-foreground group-hover:text-foreground leading-tight transition-colors">{action.label}</span>
             </motion.button>
           ))}
         </section>
