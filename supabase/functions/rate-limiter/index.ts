@@ -77,7 +77,7 @@ async function logAudit(params: {
       consent_reference: params.consentReference ?? null,
     });
   } catch (error) {
-    console.error("Audit log error:", e);
+    console.error("Audit log error:", error);
   }
 }
 
@@ -127,7 +127,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceKey);
     await supabase.rpc("cleanup_rate_limits");
   } catch (error) {
-    console.error("Cleanup error:", e);
+    console.error("Cleanup error:", error);
   }
 
   return new Response(
