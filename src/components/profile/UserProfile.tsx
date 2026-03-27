@@ -174,6 +174,9 @@ const UserProfile = () => {
     return (
       <DashboardLayout title={roleLabels[activeRole] ?? "Perfil"} nav={nav} role={activeRole}>
         <div className="max-w-2xl mx-auto pb-24 md:pb-6">
+          <button onClick={() => navigate(`/dashboard?role=${activeRole}`)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Voltar
+          </button>
           {/* Profile Header Card */}
           <div className="rounded-2xl bg-gradient-to-b from-primary/5 to-transparent p-6 pb-8 text-center mb-6">
             <div className="relative inline-block mb-4">

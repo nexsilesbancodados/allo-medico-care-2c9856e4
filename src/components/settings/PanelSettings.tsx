@@ -138,6 +138,9 @@ const PanelSettings = () => {
   return (
     <DashboardLayout title={roleLabels[activeRole] ?? "Configurações"} nav={nav} role={activeRole}>
       <div className="w-full mx-auto max-w-2xl pb-24 md:pb-6">
+        <button onClick={() => navigate(`/dashboard?role=${activeRole}`)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </button>
         {/* Profile Header */}
         <div className="flex flex-col items-center mb-8">
           <div className="relative mb-4">
