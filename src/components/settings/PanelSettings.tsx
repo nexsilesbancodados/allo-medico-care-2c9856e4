@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Bell, Globe, Shield, Loader2, Pencil, ChevronRight, Info, LogOut, Sparkles } from "lucide-react";
+import { Bell, Globe, Shield, Loader2, Pencil, ChevronRight, Info, LogOut, Sparkles, ArrowLeft } from "lucide-react";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { getAdminNav } from "@/components/admin/adminNav";
