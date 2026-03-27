@@ -172,8 +172,49 @@ const UserProfile = () => {
   const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
   const isPatient = activeRole === "patient";
 
+  const handleKycFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "selfie" | "doc") => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (type === "selfie") { setKycSelfieFile(file); setKycSelfiePreview(ev.target?.result as string); }
+      else { setKycDocFile(file); setKycDocPreview(ev.target?.result as string); }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleKycSubmit = async () => {
+    if (!user || (!kycSelfieFile && !kycDocFile)) { toast.error("Envie pelo menos a selfie e o documento"); return; }
+    setKycSaving(true);
+    try {
+      if (kycSelfieFile) {
+        const ext = kycSelfieFile.name.split(".").pop() || "jpg";
+        await supabase.storage.from("avatars").upload(`${user.id}/kyc-selfie.${ext}`, kycSelfieFile, { upsert: true });
+        if (!profile?.avatar_url) {
+          const path = `${user.id}/avatar.${ext}`;
+          await supabase.storage.from("avatars").upload(path, kycSelfieFile, { upsert: true });
+          const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+          await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
+          setAvatarUrl(publicUrl);
+        }
+      }
+      if (kycDocFile) {
+        const ext = kycDocFile.name.split(".").pop() || "jpg";
+        await supabase.storage.from("avatars").upload(`${user.id}/kyc-document.${ext}`, kycDocFile, { upsert: true });
+      }
+      localStorage.removeItem(KYC_PENDING_KEY);
+      setKycPending(false);
+      setShowKyc(false);
+      toast.success("Verificação enviada! ✅", { description: "Seus documentos serão analisados." });
+    } catch {
+      toast.error("Erro ao enviar documentos");
+    }
+    setKycSaving(false);
+  };
+
   const menuItems = [
     { icon: Pencil, label: "Editar Perfil", desc: "Altere seus dados pessoais e fotos", action: () => setEditMode(true) },
+    ...(isPatient && kycPending ? [{ icon: ShieldCheck, label: "Verificação de Identidade", desc: "⚠️ Pendente — Complete para agendar consultas", action: () => setShowKyc(true) }] : []),
     { icon: Bell, label: "Notificações", desc: "Gerencie alertas de consultas e exames", action: () => navigate(`/dashboard/settings?role=${activeRole}&tab=notifications`) },
     { icon: Shield, label: "Segurança", desc: "Alterar senha e biometria", action: () => navigate(`/dashboard/settings?role=${activeRole}&tab=security`) },
     { icon: HelpCircle, label: "Ajuda", desc: "Central de suporte e FAQ", action: () => navigate("/dashboard/patient/support?role=patient") },
