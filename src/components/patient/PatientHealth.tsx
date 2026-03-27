@@ -466,7 +466,7 @@ const PatientHealth = () => {
                               </div>
                             </div>
                           </div>
-                          <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px] h-5">
+                          <Badge className="bg-success/10 text-success border-success/20 text-[10px] h-5">
                             Concluída
                           </Badge>
                         </div>
