@@ -214,8 +214,12 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
 
         return (
           <BiometricKYC
-            onComplete={() => handleKycStarted()}
+            onComplete={(result) => {
+              if (result.status === "aprovado") setKycCompleted(true);
+              else handleKycStarted();
+            }}
             variant="full"
+            tipo="paciente"
           />
         );
       }

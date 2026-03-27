@@ -215,14 +215,15 @@ const DoctorOnboarding = () => {
       {showKYC && data?.docProfile && (
         <div className="mt-4">
           <BiometricKYC
-            onComplete={() => {
+            onComplete={(result) => {
               setShowKYC(false);
               setData((prev: any) => ({
                 ...prev,
-                docProfile: { ...prev.docProfile, kyc_status: "pending" },
+                docProfile: { ...prev.docProfile, kyc_status: result.status === "aprovado" ? "verified" : "pending" },
               }));
             }}
             variant="full"
+            tipo="medico"
           />
         </div>
       )}
