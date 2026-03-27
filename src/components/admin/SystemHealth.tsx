@@ -5,7 +5,7 @@ import { getAdminNav } from "@/components/admin/adminNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { RefreshCw, CheckCircle2, XCircle, Clock, Database, Bot, Globe, Server, Users, FileText, Calendar, HardDrive } from "lucide-react";
+import { RefreshCw, CheckCircle2, XCircle, Clock, Database, Bot, Globe, Server, Users, FileText, Calendar, HardDrive, Shield, Monitor, Video } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "framer-motion";
 import { SUPABASE_FUNCTIONS_URL, SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-config";
@@ -160,6 +160,27 @@ const SystemHealth = () => {
       });
     } catch (e: unknown) {
       results.push({ name: "Storage (S3)", status: "error", message: e instanceof Error ? e.message : "Erro desconhecido", icon: <HardDrive className="w-5 h-5" /> });
+    }
+
+    // 6–10. VPS Services
+    const vpsServices = [
+      { name: "CompreFace (Biometria)", url: "http://72.62.138.208:8000", icon: <Shield className="w-5 h-5" /> },
+      { name: "Orthanc PACS (DICOM)", url: "http://72.62.138.208:8042", icon: <Server className="w-5 h-5" /> },
+      { name: "OHIF Viewer", url: "http://72.62.138.208:3001", icon: <Monitor className="w-5 h-5" /> },
+      { name: "DocuSeal (Assinaturas)", url: "http://72.62.138.208:3200", icon: <FileText className="w-5 h-5" /> },
+      { name: "Jitsi Meet (Vídeo)", url: "https://meet.telemedicinaaloclinica.sbs", icon: <Video className="w-5 h-5" /> },
+    ];
+
+    for (const svc of vpsServices) {
+      const start = performance.now();
+      try {
+        const res = await fetch(svc.url, { mode: "no-cors", signal: AbortSignal.timeout(5000) });
+        const latency = Math.round(performance.now() - start);
+        results.push({ name: svc.name, status: "ok", latency, message: `Acessível • ${latency}ms`, icon: svc.icon });
+      } catch (e: unknown) {
+        const latency = Math.round(performance.now() - start);
+        results.push({ name: svc.name, status: "error", latency, message: e instanceof Error ? e.message : "Inacessível", icon: svc.icon });
+      }
     }
 
     setChecks(results);

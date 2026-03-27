@@ -50,13 +50,13 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       <SEOHead
         title="Consultas Médicas Online por Vídeo 24h | AloClínica"
         description="Consulte médicos online por vídeo 24h. Agendamento fácil, receitas digitais válidas, 30+ especialidades, plantão clínico 24h. Sua saúde na palma da mão."
-        canonical="https://allo-medico-care.lovable.app/"
+        canonical="https://aloclinica.com.br/"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "MedicalOrganization",
           name: "AloClínica",
-          url: "https://allo-medico-care.lovable.app",
-          logo: "https://allo-medico-care.lovable.app/pwa-512x512.png",
+          url: "https://aloclinica.com.br",
+          logo: "https://aloclinica.com.br/pwa-512x512.png",
           description: "Plataforma de telemedicina com consultas online por vídeo 24h, receitas digitais válidas e mais de 30 especialidades médicas.",
           medicalSpecialty: ["Cardiologia", "Dermatologia", "Endocrinologia", "Neurologia", "Oftalmologia", "Ortopedia", "Pediatria", "Clínica Geral"],
           areaServed: { "@type": "Country", name: "BR" },
@@ -74,7 +74,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
             "@type": "ReserveAction",
             target: {
               "@type": "EntryPoint",
-              urlTemplate: "https://allo-medico-care.lovable.app/paciente",
+              urlTemplate: "https://aloclinica.com.br/paciente",
               actionPlatform: ["http://schema.org/DesktopWebPlatform", "http://schema.org/MobileWebPlatform"],
             },
             result: { "@type": "Reservation", name: "Consulta Médica Online" },
