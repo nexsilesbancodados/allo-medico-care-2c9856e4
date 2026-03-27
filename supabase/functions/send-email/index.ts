@@ -12,6 +12,39 @@ interface EmailRequest {
   data: Record<string, string>;
 }
 
+// ─── URL Constants ─────────────────────────────────────────────────────────────
+const BASE_URL = Deno.env.get("SITE_URL") || "https://aloclinica.com.br";
+
+const URLS = {
+  // Patient routes
+  patientDashboard:    `${BASE_URL}/dashboard?role=patient`,
+  patientSchedule:     `${BASE_URL}/dashboard/schedule?role=patient`,
+  patientAppointments: `${BASE_URL}/dashboard/appointments?role=patient`,
+  patientHealth:       `${BASE_URL}/dashboard/health?role=patient`,
+  patientPlans:        `${BASE_URL}/dashboard/plans?role=patient`,
+  patientPrescriptions:`${BASE_URL}/dashboard/prescriptions?role=patient`,
+  patientSupport:      `${BASE_URL}/dashboard/support?role=patient`,
+  // Doctor routes
+  doctorDashboard:     `${BASE_URL}/dashboard?role=doctor`,
+  doctorAuth:          `${BASE_URL}/medico`,
+  // Clinic routes
+  clinicDashboard:     `${BASE_URL}/dashboard?role=clinic`,
+  clinicAuth:          `${BASE_URL}/clinica`,
+  // Partner routes
+  partnerDashboard:    `${BASE_URL}/dashboard?role=partner`,
+  partnerAuth:         `${BASE_URL}/parceiro`,
+  // Admin
+  adminDashboard:      `${BASE_URL}/dashboard?role=admin`,
+  // Laudista
+  laudistaDashboard:   `${BASE_URL}/dashboard?role=laudista`,
+  // Auth
+  authLogin:           `${BASE_URL}/auth`,
+  // Validation
+  validateDoc: (code: string) => `${BASE_URL}/validar/${code}`,
+  // Discount card
+  discountCard:        `${BASE_URL}/cartao-beneficios`,
+};
+
 // ─── Email wrapper ─────────────────────────────────────────────────────────────
 const BRAND = {
   color: "#1a6fc4",
@@ -60,6 +93,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>🩺 Especialidade:</strong> ${d.specialty || "Clínica Geral"}</p>
       `)}
       <p>Acesse a plataforma <strong>5 minutos antes</strong> para entrar na sala de espera virtual.</p>
+      ${btn(URLS.patientAppointments, "Ver Minha Consulta")}
     `),
   }),
 
@@ -74,6 +108,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>⏰ Horário:</strong> ${d.time}</p>
       `)}
       <p>Prepare-se para acessar a plataforma no horário agendado.</p>
+      ${btn(URLS.patientAppointments, "Acessar Consulta")}
     `),
   }),
 
@@ -90,6 +125,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>Cancelado por:</strong> ${d.cancelled_by || "—"}</p>
       `, BRAND.red)}
       <p>Deseja reagendar? Acesse a plataforma e escolha um novo horário.</p>
+      ${btn(URLS.patientSchedule, "Reagendar Consulta")}
     `),
   }),
 
@@ -114,7 +150,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>O(a) <strong>${d.doctor_name}</strong> emitiu uma nova receita para você.</p>
       ${d.diagnosis ? `<div style="background:#fff8f0;padding:12px;border-radius:8px;margin:12px 0;"><strong>Diagnóstico:</strong> ${d.diagnosis}</div>` : ""}
       ${d.medications ? card(`<strong>Medicamentos:</strong><pre style="white-space:pre-wrap;font-family:sans-serif;font-size:14px;margin-top:8px;">${d.medications}</pre>`) : ""}
-      <p>Acesse a plataforma para visualizar e baixar sua receita completa em PDF.</p>
+      ${btn(URLS.patientPrescriptions, "Ver Minha Receita")}
     `),
   }),
 
@@ -128,7 +164,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         ${d.days ? `<p><strong>📅 Dias de afastamento:</strong> ${d.days}</p>` : ""}
         <p><strong>🔐 Código de verificação:</strong> ${d.verification_code || "—"}</p>
       `)}
-      <p>Acesse a plataforma para baixar o documento em PDF.</p>
+      ${btn(URLS.patientHealth, "Baixar Documento")}
     `),
   }),
 
@@ -143,7 +179,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <li>Agendar consultas online</li>
         <li>Receber receitas e atestados digitais</li>
       </ul>
-      ${btn("https://app.aloclinica.com.br/dashboard", "Acessar Painel")}
+      ${btn(URLS.patientDashboard, "Acessar Painel")}
     `),
   }),
 
@@ -188,7 +224,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
           <li>Emitir receitas e atestados digitais</li>
         </ul>
       `, BRAND.green)}
-      ${btn(d.login_url || "https://app.aloclinica.com.br/medico", "Acessar Painel Médico", BRAND.green)}
+      ${btn(d.login_url || URLS.doctorAuth, "Acessar Painel Médico", BRAND.green)}
     `),
   }),
 
@@ -216,7 +252,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
           <li>Acompanhar financeiro e relatórios</li>
         </ul>
       `, BRAND.green)}
-      ${btn(d.login_url || "https://app.aloclinica.com.br/clinica", "Acessar Painel da Clínica", BRAND.green)}
+      ${btn(d.login_url || URLS.clinicAuth, "Acessar Painel da Clínica", BRAND.green)}
     `),
   }),
 
@@ -241,7 +277,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>🔄 Recorrência:</strong> Assinaturas mensais e consultas avulsas</p>
         <p><strong>💳 Saque:</strong> Solicite pelo painel</p>
       `, BRAND.green)}
-      ${btn(d.login_url || "https://app.aloclinica.com.br/parceiro", "Acessar Painel de Afiliado", BRAND.green)}
+      ${btn(d.login_url || URLS.partnerAuth, "Acessar Painel de Afiliado", BRAND.green)}
     `),
   }),
 
@@ -275,6 +311,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p>📋 Receitas e documentos já estão disponíveis no seu painel.</p>
         <p>⭐ Avalie sua experiência para ajudar outros pacientes!</p>
       `, BRAND.green)}
+      ${btn(URLS.patientHealth, "Ver Documentos")}
     `),
   }),
 
@@ -288,7 +325,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>📄 Arquivo:</strong> ${d.file_name || "Documento"}</p>
         ${d.description ? `<p><strong>📝 Descrição:</strong> ${d.description}</p>` : ""}
       `)}
-      <p>Acesse a plataforma para visualizar e baixar.</p>
+      ${btn(URLS.patientHealth, "Visualizar e Baixar")}
     `),
   }),
 
@@ -314,7 +351,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>Válido até:</strong> ${d.expires_at || "—"}</p>
         <p><strong>Consultas incluídas:</strong> ${d.max_appointments || "Ilimitadas"}</p>
       `, BRAND.green)}
-      ${btn("https://app.aloclinica.com.br/dashboard/schedule", "Agendar Consulta", BRAND.green)}
+      ${btn(URLS.patientSchedule, "Agendar Consulta", BRAND.green)}
     `),
   }),
 
@@ -325,7 +362,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
       <p>Seu plano <strong>${d.plan_name || "atual"}</strong> expira em <strong>${d.days_left || "poucos"} dias</strong>.</p>
       ${card(`<p><strong>📅 Expira em:</strong> ${d.expires_at || "—"}</p>`, BRAND.amber)}
-      ${btn(d.renew_link || "https://app.aloclinica.com.br/dashboard/plans", "Renovar Plano", BRAND.amber)}
+      ${btn(d.renew_link || URLS.patientPlans, "Renovar Plano", BRAND.amber)}
     `),
   }),
 
@@ -341,7 +378,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>⏰ Horário:</strong> ${d.time || "—"}</p>
       `, BRAND.green)}
       <p>Sua consulta está <strong>garantida</strong>. Acesse a plataforma 5 minutos antes.</p>
-      ${btn("https://app.aloclinica.com.br/dashboard/appointments", "Ver Minhas Consultas")}
+      ${btn(URLS.patientAppointments, "Ver Minhas Consultas")}
     `),
   }),
 
@@ -356,7 +393,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>🩺 Laudista:</strong> ${d.doctor_name || "—"}</p>
         ${d.verification_code ? `<p><strong>🔐 Código:</strong> ${d.verification_code}</p>` : ""}
       `)}
-      ${btn(d.download_link || "https://app.aloclinica.com.br/dashboard/health", "Acessar Meu Laudo")}
+      ${btn(d.download_link || URLS.patientHealth, "Acessar Meu Laudo")}
       ${d.validate_link ? `<p style="font-size:12px;color:${BRAND.muted};text-align:center;">Verifique em: <a href="${d.validate_link}" style="color:${BRAND.color};">${d.validate_link}</a></p>` : ""}
     `),
   }),
@@ -380,7 +417,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
           <li>Reagendamentos gratuitos</li>
         </ul>
       </div>
-      ${btn("https://app.aloclinica.com.br/dashboard/schedule", "Agendar Consulta com Desconto", BRAND.green)}
+      ${btn(URLS.patientSchedule, "Agendar Consulta com Desconto", BRAND.green)}
     `),
   }),
 
@@ -394,7 +431,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>📅 Expira em:</strong> ${d.valid_until || "—"}</p>
         <p>Renove para manter seus descontos e benefícios!</p>
       `, BRAND.amber)}
-      ${btn("https://app.aloclinica.com.br/dashboard/plans", "Renovar Meu Cartão", BRAND.amber)}
+      ${btn(URLS.patientPlans, "Renovar Meu Cartão", BRAND.amber)}
     `),
   }),
 
@@ -421,7 +458,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p>📋 A nova receita já está disponível.</p>
         ${d.notes ? `<p><strong>Observações:</strong> ${d.notes}</p>` : ""}
       `, BRAND.green)}
-      ${btn("https://app.aloclinica.com.br/dashboard/prescriptions", "Ver Minha Receita", BRAND.green)}
+      ${btn(URLS.patientPrescriptions, "Ver Minha Receita", BRAND.green)}
     `),
   }),
 
@@ -433,7 +470,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Sua renovação de receita <strong style="color:${BRAND.red};">não foi aprovada</strong>.</p>
       ${d.reason ? `<div style="background:#fef2f2;padding:12px;border-radius:8px;margin:12px 0;"><strong>Motivo:</strong> ${d.reason}</div>` : ""}
       <p>Recomendamos agendar uma nova consulta para reavaliação.</p>
-      ${btn("https://app.aloclinica.com.br/dashboard/schedule", "Agendar Consulta")}
+      ${btn(URLS.patientSchedule, "Agendar Consulta")}
     `, BRAND.red),
   }),
 
@@ -460,7 +497,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <div style="text-align:center;margin:24px 0;">
         <div style="display:inline-block;background:white;border:2px dashed ${BRAND.color};padding:16px 40px;border-radius:12px;font-size:28px;font-weight:bold;color:${BRAND.color};letter-spacing:4px;">${d.invite_code}</div>
       </div>
-      ${btn(d.register_url || "https://app.aloclinica.com.br/medico", "Completar Cadastro")}
+      ${btn(d.register_url || URLS.doctorAuth, "Completar Cadastro")}
       <p style="color:${BRAND.muted};font-size:13px;">Este código é de uso único. Não compartilhe com terceiros.</p>
     `),
   }),
@@ -485,7 +522,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <h2 style="color:${BRAND.color};margin:0 0 16px;">Avalie Sua Experiência</h2>
       <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
       <p>Sua opinião é muito importante! Avalie sua consulta com <strong>${d.doctor_name || "o médico"}</strong>.</p>
-      ${btn(d.survey_url || "https://app.aloclinica.com.br/dashboard", "Avaliar Agora ⭐")}
+      ${btn(d.survey_url || URLS.patientDashboard, "Avaliar Agora ⭐")}
     `),
   }),
 
@@ -496,7 +533,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
       <p>Uma vaga abriu para sua consulta com <strong>${d.doctor_name}</strong> no dia <strong>${d.date}</strong>!</p>
       ${card(`<p>⚡ Reserve rápido — a vaga é por ordem de chegada!</p>`, BRAND.green)}
-      ${btn("https://app.aloclinica.com.br/dashboard/schedule", "Reservar Agora", BRAND.green)}
+      ${btn(URLS.patientSchedule, "Reservar Agora", BRAND.green)}
     `),
   }),
 };
