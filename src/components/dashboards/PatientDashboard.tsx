@@ -283,6 +283,51 @@ const PatientDashboard = () => {
 
           </div>
         </div>
+
+        {/* ═══════════ PROMO PINGO BANNER ═══════════ */}
+        <motion.section
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="relative overflow-hidden rounded-2xl border border-[hsl(var(--p-primary))]/15 bg-gradient-to-r from-[hsl(var(--p-primary))]/[0.08] via-[hsl(var(--p-primary))]/[0.04] to-secondary/[0.06] p-5"
+        >
+          <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-secondary/10 blur-2xl" />
+          <div className="flex items-center gap-4">
+            <PingoMascot variant="thumbsup" size={72} bounce className="shrink-0" />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 mb-1">
+                <Sparkles className="w-3.5 h-3.5 text-warning" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-warning">Novidade</span>
+              </div>
+              <p className="text-[14px] font-bold text-foreground leading-snug">Conheça o Pronto Atendimento Digital</p>
+              <p className="mt-0.5 text-[12px] text-muted-foreground leading-relaxed">Consulte com um médico agora, sem agendamento. Atendimento rápido 24h.</p>
+            </div>
+            <Button
+              size="sm"
+              onClick={() => navigate("/dashboard/urgent-care?role=patient")}
+              className="shrink-0 rounded-full bg-[#00347F] text-white text-[12px] font-bold px-5 shadow-md hover:bg-[#00347F]/90 active:scale-95 transition-all"
+            >
+              <Zap className="mr-1.5 h-3.5 w-3.5" /> Ir
+            </Button>
+          </div>
+        </motion.section>
+
+        {/* ═══════════ SATISFACTION STRIP ═══════════ */}
+        <motion.section
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="flex items-center justify-center gap-3 rounded-xl bg-muted/30 border border-border/20 px-4 py-3"
+        >
+          <div className="flex -space-x-1">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-3.5 h-3.5 fill-warning text-warning" />
+            ))}
+          </div>
+          <p className="text-[12px] text-muted-foreground font-medium">
+            <span className="font-bold text-foreground">4.9/5</span> — Avaliação dos pacientes
+          </p>
+        </motion.section>
       </div>
     </DashboardLayout>
   );
