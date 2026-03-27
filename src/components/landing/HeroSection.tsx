@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Shield, Lock, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { memo, forwardRef } from "react";
 import { motion } from "framer-motion";
