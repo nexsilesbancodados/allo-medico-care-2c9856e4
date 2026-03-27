@@ -28,18 +28,18 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 
 const METRIC_TYPES = [
-  { value: "blood_pressure_sys", label: "Pressão Sistólica", unit: "mmHg", icon: HeartPulse, gradient: "from-rose-500 to-pink-600", bg: "bg-rose-500/10", text: "text-rose-500", normalRange: [90, 120] },
-  { value: "blood_pressure_dia", label: "Pressão Diastólica", unit: "mmHg", icon: HeartPulse, gradient: "from-blue-500 to-indigo-600", bg: "bg-blue-500/10", text: "text-blue-500", normalRange: [60, 80] },
-  { value: "weight", label: "Peso", unit: "kg", icon: Weight, gradient: "from-amber-500 to-orange-600", bg: "bg-amber-500/10", text: "text-amber-500", normalRange: [50, 100] },
-  { value: "glucose", label: "Glicose", unit: "mg/dL", icon: Droplets, gradient: "from-purple-500 to-violet-600", bg: "bg-purple-500/10", text: "text-purple-500", normalRange: [70, 100] },
-  { value: "temperature", label: "Temperatura", unit: "°C", icon: Thermometer, gradient: "from-cyan-500 to-teal-600", bg: "bg-cyan-500/10", text: "text-cyan-500", normalRange: [36.0, 37.5] },
-  { value: "heart_rate", label: "Freq. Cardíaca", unit: "bpm", icon: Activity, gradient: "from-red-500 to-rose-600", bg: "bg-red-500/10", text: "text-red-500", normalRange: [60, 100] },
+  { value: "blood_pressure_sys", label: "Pressão Sistólica", unit: "mmHg", icon: HeartPulse, bg: "bg-destructive/10", text: "text-destructive", normalRange: [90, 120] },
+  { value: "blood_pressure_dia", label: "Pressão Diastólica", unit: "mmHg", icon: HeartPulse, bg: "bg-primary/10", text: "text-primary", normalRange: [60, 80] },
+  { value: "weight", label: "Peso", unit: "kg", icon: Weight, bg: "bg-warning/10", text: "text-warning", normalRange: [50, 100] },
+  { value: "glucose", label: "Glicose", unit: "mg/dL", icon: Droplets, bg: "bg-secondary/10", text: "text-secondary", normalRange: [70, 100] },
+  { value: "temperature", label: "Temperatura", unit: "°C", icon: Thermometer, bg: "bg-primary/10", text: "text-primary", normalRange: [36.0, 37.5] },
+  { value: "heart_rate", label: "Freq. Cardíaca", unit: "bpm", icon: Activity, bg: "bg-destructive/10", text: "text-destructive", normalRange: [60, 100] },
 ];
 
 const getStatusColor = (value: number, range: number[]) => {
-  if (value < range[0]) return "text-blue-500";
-  if (value > range[1]) return "text-rose-500";
-  return "text-emerald-500";
+  if (value < range[0]) return "text-primary";
+  if (value > range[1]) return "text-destructive";
+  return "text-success";
 };
 
 const getTrend = (data: any[], type: string) => {
@@ -182,10 +182,10 @@ const PatientHealth = () => {
   });
 
   const statCards = [
-    { label: "Consultas", value: consultations.length, icon: Stethoscope, gradient: "from-blue-500/15 to-cyan-500/5", iconColor: "text-blue-500" },
-    { label: "Receitas", value: prescriptions.length, icon: Pill, gradient: "from-emerald-500/15 to-green-500/5", iconColor: "text-emerald-500" },
-    { label: "Exames", value: documents.length, icon: FileCheck, gradient: "from-violet-500/15 to-purple-500/5", iconColor: "text-violet-500" },
-    { label: "Métricas", value: metrics.length, icon: BarChart3, gradient: "from-amber-500/15 to-orange-500/5", iconColor: "text-amber-500" },
+    { label: "Consultas", value: consultations.length, icon: Stethoscope, gradient: "from-primary/15 to-primary/5", iconColor: "text-primary" },
+    { label: "Receitas", value: prescriptions.length, icon: Pill, gradient: "from-secondary/15 to-secondary/5", iconColor: "text-secondary" },
+    { label: "Exames", value: documents.length, icon: FileCheck, gradient: "from-primary/10 to-secondary/5", iconColor: "text-primary" },
+    { label: "Métricas", value: metrics.length, icon: BarChart3, gradient: "from-warning/15 to-warning/5", iconColor: "text-warning" },
   ];
 
   return (
