@@ -152,7 +152,7 @@ const PatientDashboard = () => {
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          <div className="relative z-10 flex items-center px-6 pt-10 pb-9 md:px-8 md:pt-14 md:pb-12">
+          <div className="relative z-10 flex items-end justify-between px-6 pt-10 pb-9 md:px-8 md:pt-14 md:pb-12">
             <div className="flex-1 min-w-0">
               {/* Greeting */}
               <motion.h1
@@ -192,14 +192,14 @@ const PatientDashboard = () => {
               </motion.div>
             </div>
 
-            {/* Pingo mascot */}
+            {/* Pingo mascot — visible on all breakpoints */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.6, x: 20 }}
-              animate={{ opacity: 1, scale: 1, x: 0 }}
+              initial={{ opacity: 0, scale: 0.6, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="hidden sm:flex shrink-0 items-end ml-4"
+              className="shrink-0 ml-2 self-end -mb-2"
             >
-              <PingoMascot variant="wave" size={140} animate bounce className="drop-shadow-[0_8px_24px_rgba(0,0,0,0.25)]" />
+              <PingoMascot variant="wave" size={110} animate bounce className="drop-shadow-[0_8px_24px_rgba(0,0,0,0.3)] sm:!w-[140px] sm:!h-[140px]" />
             </motion.div>
           </div>
         </section>
