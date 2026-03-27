@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Search, Upload, FileText, Heart, Video, ArrowRight, ArrowLeft, X, Sparkles, User, Droplets, AlertTriangle, Plus, Stethoscope, Ambulance, ClipboardList, ShieldCheck, Camera, CheckCircle2 } from "lucide-react";
+import { Calendar, Search, Upload, FileText, Heart, Video, ArrowRight, ArrowLeft, X, Sparkles, User, Droplets, AlertTriangle, Plus, Stethoscope, Ambulance, ClipboardList, ShieldCheck, Camera, CheckCircle2, Smartphone, Monitor } from "lucide-react";
 import CpfInput from "@/components/ui/cpf-input";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { QRCodeSVG } from "qrcode.react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -26,6 +28,7 @@ const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [currentStep, setCurrentStep] = useState(0);
   const [saving, setSaving] = useState(false);
 
@@ -223,7 +226,10 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
           </div>
         );
 
-      case "kyc":
+      case "kyc": {
+        const kycMobileUrl = `${window.location.origin}/dashboard?role=patient&onboarding=true&step=kyc`;
+        const showQrOption = !isMobile && !selfiePreview && !docPreview;
+
         return (
           <div className="space-y-5">
             <div className="text-center">
@@ -233,6 +239,27 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
               <h2 className="text-lg font-bold text-foreground">Verificação de Identidade</h2>
               <p className="text-xs text-muted-foreground mt-1">Para sua segurança, envie uma selfie e um documento com foto.</p>
             </div>
+
+            {/* QR Code for desktop users */}
+            {showQrOption && (
+              <div className="rounded-2xl border-2 border-dashed border-primary/30 p-5 bg-primary/5 text-center space-y-3">
+                <div className="flex items-center justify-center gap-2 text-primary">
+                  <Monitor className="w-5 h-5" />
+                  <ArrowRight className="w-4 h-4" />
+                  <Smartphone className="w-5 h-5" />
+                </div>
+                <p className="text-sm font-bold text-foreground">Está no computador?</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  Escaneie o QR Code abaixo com seu celular para tirar as fotos com a câmera do dispositivo.
+                </p>
+                <div className="flex justify-center py-2">
+                  <div className="bg-white p-3 rounded-xl shadow-sm inline-block">
+                    <QRCodeSVG value={kycMobileUrl} size={160} level="M" />
+                  </div>
+                </div>
+                <p className="text-[10px] text-muted-foreground">Ou envie arquivos do computador abaixo ↓</p>
+              </div>
+            )}
 
             {/* Selfie */}
             <div className="rounded-2xl border border-border/50 p-4 bg-card">
@@ -295,6 +322,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
             </p>
           </div>
         );
+      }
 
       case "tour":
         return (

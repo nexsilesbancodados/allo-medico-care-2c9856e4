@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Camera, FileText, User, CheckCircle2, XCircle, Loader2, ArrowRight, ArrowLeft,
-  ShieldCheck, AlertTriangle, Eye, RefreshCw,
+  ShieldCheck, AlertTriangle, Eye, RefreshCw, Smartphone, Monitor,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +16,8 @@ import {
   loadFaceModels, extractTextFromImage, parseCRMFromText, nameSimilarity,
   detectFace, computeFaceDistance, detectBlink,
 } from "@/lib/services/kyc-service";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { QRCodeSVG } from "qrcode.react";
 
 type Step = "document" | "selfie" | "match";
 type Status = "idle" | "loading" | "success" | "error";
@@ -33,6 +35,7 @@ const KYCVerification = ({ doctorProfileId, userName, userCRM, onComplete }: {
   onComplete?: () => void;
 }) => {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [currentStep, setCurrentStep] = useState<Step>("document");
   const [status, setStatus] = useState<Status>("idle");
   const [modelsReady, setModelsReady] = useState(false);
@@ -338,6 +341,27 @@ const KYCVerification = ({ doctorProfileId, userName, userCRM, onComplete }: {
                 <p className="text-sm text-muted-foreground">
                   Tire uma foto do seu CRM ou RG. Certifique-se de que o documento esteja bem iluminado e legível.
                 </p>
+
+                {/* QR Code for desktop */}
+                {!isMobile && !docImage && !streamRef.current && (
+                  <div className="rounded-2xl border-2 border-dashed border-primary/30 p-5 bg-primary/5 text-center space-y-3">
+                    <div className="flex items-center justify-center gap-2 text-primary">
+                      <Monitor className="w-5 h-5" />
+                      <ArrowRight className="w-4 h-4" />
+                      <Smartphone className="w-5 h-5" />
+                    </div>
+                    <p className="text-sm font-bold text-foreground">Está no computador?</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Escaneie o QR Code com seu celular para tirar as fotos com a câmera do dispositivo.
+                    </p>
+                    <div className="flex justify-center py-2">
+                      <div className="bg-white p-3 rounded-xl shadow-sm inline-block">
+                        <QRCodeSVG value={`${window.location.origin}/dashboard?role=doctor&kyc=true`} size={140} level="M" />
+                      </div>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground">Ou use as opções abaixo para capturar/enviar pelo PC ↓</p>
+                  </div>
+                )}
 
                 {/* Camera view or upload */}
                 <div className="relative aspect-[4/3] bg-muted rounded-xl overflow-hidden">
