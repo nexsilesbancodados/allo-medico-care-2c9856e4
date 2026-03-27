@@ -133,8 +133,8 @@ function HorizontalScrollCards() {
             duration={4.5}
           >
             <div className="bg-white/95 dark:bg-card/95 backdrop-blur-xl rounded-2xl px-5 py-4 shadow-xl border border-border/50 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+              <div className="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center">
+                <Star className="w-5 h-5 text-warning fill-current" />
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">4.9 / 5.0</p>
@@ -169,8 +169,8 @@ function HorizontalScrollCards() {
             duration={6}
           >
             <div className="bg-white/95 dark:bg-card/95 backdrop-blur-xl rounded-2xl px-5 py-4 shadow-xl border border-border/50 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5 text-emerald-600" />
+              <div className="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center">
+                <ShieldCheck className="w-5 h-5 text-success" />
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">LGPD & CFM</p>
