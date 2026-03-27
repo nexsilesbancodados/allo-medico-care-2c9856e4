@@ -65,6 +65,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
     { id: "welcome", title: "Bem-vindo(a)!" },
     { id: "personal", title: "Dados Pessoais" },
     { id: "health", title: "Informações de Saúde" },
+    { id: "kyc", title: "Verificação de Identidade" },
     { id: "tour", title: "Como usar" },
     { id: "done", title: "Tudo pronto!" },
   ];
