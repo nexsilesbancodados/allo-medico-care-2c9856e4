@@ -17,10 +17,8 @@ import {
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import MedicalHistoryExport from "@/components/patient/MedicalHistoryExport";
 
-import UpsellBanner from "@/components/patient/UpsellBanner";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
-import CheckoutRecoveryBanner from "@/components/patient/CheckoutRecoveryBanner";
 import {
   usePatientStats, usePatientUpcoming, useReturnAppointments, useRecentHealthMetrics,
 } from "@/hooks/usePatientDashboard";
@@ -151,8 +149,6 @@ const PatientDashboard = () => {
             <PatientWaitingCard appointment={waitingAppt} />
           </SectionErrorBoundary>
         )}
-        <SectionErrorBoundary fallbackTitle="Erro no banner"><CheckoutRecoveryBanner /></SectionErrorBoundary>
-        <SectionErrorBoundary fallbackTitle="Erro no banner"><UpsellBanner /></SectionErrorBoundary>
 
         {/* Desktop 2-column layout */}
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:items-start">
