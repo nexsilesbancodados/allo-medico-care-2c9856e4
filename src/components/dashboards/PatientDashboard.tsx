@@ -144,62 +144,84 @@ const PatientDashboard = () => {
       <div className="space-y-5 pb-24 md:pb-8">
 
         {/* ═══════════ HERO BANNER ═══════════ */}
-        <section className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[28px] bg-gradient-to-br from-[#00347F] via-[#0D3F8C] to-[#2563EB] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6">
-          {/* Decorative elements */}
-          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/[0.06] blur-[60px]" />
-          <div className="pointer-events-none absolute left-0 bottom-0 h-40 w-40 rounded-full bg-[#2563EB]/30 blur-[50px]" />
-          <div className="pointer-events-none absolute right-1/4 top-1/2 h-20 w-20 rounded-full bg-white/[0.04] blur-[25px]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <section className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[32px] bg-gradient-to-br from-[#001d4a] via-[#00347F] to-[#1a5ccc] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6"
+          style={{ boxShadow: "0 16px 56px rgba(0,29,74,.35), inset 0 1px 0 rgba(255,255,255,.12)" }}
+        >
+          {/* Decorative orbs */}
+          <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-[#2563EB]/25 blur-[80px]" />
+          <div className="pointer-events-none absolute -left-8 bottom-4 h-48 w-48 rounded-full bg-[#3b82f6]/20 blur-[60px]" />
+          <div className="pointer-events-none absolute right-1/3 top-1/3 h-24 w-24 rounded-full bg-white/[0.04] blur-[30px]" />
+          {/* Top shine line */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+          {/* Grid texture */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.025]"
+            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "28px 28px" }} />
 
-          <div className="relative z-10 flex items-end justify-between px-6 pt-10 pb-9 md:px-8 md:pt-14 md:pb-12">
-            <div className="flex-1 min-w-0">
-              {/* Greeting */}
-              <motion.h1
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="font-[Manrope] text-[26px] font-extrabold text-white leading-[1.15] md:text-[36px]"
-              >
-                {getGreeting()}, <span className="capitalize">{firstName}</span>
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08, duration: 0.45 }}
-                className="mt-1.5 text-[14px] font-medium text-white/55 leading-relaxed max-w-xs md:text-[15px]"
-              >
-                Cuide da sua saúde com quem entende.
-              </motion.p>
-
-              {/* KPI pills */}
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="flex gap-2.5 mt-5 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] px-3.5 py-2 text-[12px] font-bold text-white/85 shadow-sm">
-                  <Calendar className="w-3.5 h-3.5 opacity-70" /> {stats?.total ?? 0} consultas
-                </span>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] px-3.5 py-2 text-[12px] font-bold text-white/85 shadow-sm">
-                  <Heart className="w-3.5 h-3.5 opacity-70" /> {typedMetrics.length} métricas
-                </span>
-              </motion.div>
-
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
-                <Button
-                  onClick={() => navigate("/dashboard/patient/health?role=patient")}
-                  className="mt-6 rounded-full bg-white px-8 py-3 h-auto text-[14px] font-bold text-[#00347F] shadow-lg shadow-black/10 hover:bg-white/95 hover:shadow-xl hover:shadow-black/15 active:scale-[0.97] transition-all duration-200"
+          <div className="relative z-10 px-6 pt-10 pb-5 md:px-8 md:pt-14 md:pb-8">
+            {/* Top row: greeting + mascot */}
+            <div className="flex items-end gap-3">
+              <div className="flex-1 min-w-0">
+                <motion.h1
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                  className="font-[Manrope] text-[28px] font-extrabold text-white leading-[1.1] tracking-tight md:text-[38px]"
                 >
-                  <Heart className="mr-2 h-4 w-4" /> Minha Saúde
-                </Button>
+                  {getGreeting()},<br />
+                  <span className="capitalize bg-gradient-to-r from-white to-white/80 bg-clip-text text-transparent">{firstName}</span>
+                </motion.h1>
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1, duration: 0.45 }}
+                  className="mt-2 text-[13.5px] font-medium text-white/50 leading-relaxed max-w-[220px] md:text-[15px] md:max-w-xs"
+                >
+                  Cuide da sua saúde com quem entende.
+                </motion.p>
+              </div>
+
+              {/* Pingo mascot */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5, y: 24 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
+                className="shrink-0 -mb-1"
+              >
+                <PingoMascot variant="wave" size={120} animate bounce className="drop-shadow-[0_12px_32px_rgba(0,0,0,0.35)] sm:!w-[150px] sm:!h-[150px]" />
               </motion.div>
             </div>
 
-            {/* Pingo mascot — visible on all breakpoints */}
+            {/* KPI pills row */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.6, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-              className="shrink-0 ml-2 self-end -mb-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.18, duration: 0.45 }}
+              className="flex gap-2 mt-5 flex-wrap"
             >
-              <PingoMascot variant="wave" size={110} animate bounce className="drop-shadow-[0_8px_24px_rgba(0,0,0,0.3)] sm:!w-[140px] sm:!h-[140px]" />
+              {[
+                { icon: Calendar, label: `${stats?.total ?? 0} consultas` },
+                { icon: Heart, label: `${typedMetrics.length} métricas` },
+              ].map((pill, i) => (
+                <motion.span
+                  key={pill.label}
+                  initial={{ opacity: 0, scale: 0.85 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.22 + i * 0.06 }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.1] backdrop-blur-md border border-white/[0.1] px-4 py-2 text-[12px] font-bold text-white/80 shadow-[0_2px_8px_rgba(0,0,0,.15)] hover:bg-white/[0.15] transition-colors cursor-default"
+                >
+                  <pill.icon className="w-3.5 h-3.5 opacity-60" /> {pill.label}
+                </motion.span>
+              ))}
+            </motion.div>
+
+            {/* CTA button */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+              <Button
+                onClick={() => navigate("/dashboard/patient/health?role=patient")}
+                className="mt-5 rounded-full bg-white px-8 py-3 h-auto text-[14px] font-extrabold text-[#00347F] shadow-[0_6px_24px_rgba(0,0,0,.15)] hover:bg-white/95 hover:shadow-[0_8px_32px_rgba(0,0,0,.2)] hover:scale-[1.02] active:scale-[0.97] transition-all duration-200"
+              >
+                <Heart className="mr-2 h-4 w-4" /> Minha Saúde
+              </Button>
             </motion.div>
           </div>
         </section>
