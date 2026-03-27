@@ -1,92 +1,95 @@
 
-# Conexão PACS/DICOM — Como funciona e o que falta
 
-## O que já está pronto na Allo Médico
+# Design Bible — Patient Panel World-Class Redesign
 
-Sua Edge Function `pacs-integration` já implementa um **webhook completo** que recebe exames DICOM de um servidor PACS externo. O fluxo é:
+## Overview
 
-```text
-┌─────────────┐     DICOM C-STORE     ┌──────────────┐     HTTP POST      ┌───────────────────┐
-│  Equipamento │ ──────────────────► │  Orthanc      │ ──────────────► │  Edge Function     │
-│  (CT, RX...) │                     │  (PACS Server)│  (Lua script)    │  pacs-integration  │
-└─────────────┘                     └──────────────┘                  └───────────────────┘
-                                                                            │
-                                                                     Cria exam_request
-                                                                     Upload no bucket
-                                                                     Notifica laudistas
+Apply the uploaded "Design Bible" specifications across 8 patient-facing files + index.css. This is a **visual-only** refactor: all logic, hooks, queries, Supabase channels, handlers, and TypeScript interfaces remain untouched.
+
+## Files to modify (9 total)
+
+1. `src/index.css` — Add patient design tokens
+2. `src/components/patient/patientNav.tsx` — Restructure bottom nav (5 tabs: Inicio, Consultas, Urgencia, Chat, Perfil)
+3. `src/components/dashboards/PatientDashboard.tsx` — Hero, quick actions 5-col grid, stat bento Apple Health style, skeleton loaders, Doctolib-style next appointment card, Pingo health tip
+4. `src/components/patient/AppointmentsList.tsx` — Horizontal filter chips, Wellnest-style appointment cards with status side stripe, skeleton loaders, empty state
+5. `src/components/patient/DoctorSearch.tsx` — MyChart search input, Doctolib specialty chips, Wellnest doctor cards with avatar ring/rating/price/favorite heart, skeleton
+6. `src/components/patient/PaymentHistory.tsx` — Premium gradient active plan card, transaction list with status circles, security footer card
+7. `src/components/patient/PatientHealth.tsx` — Apple Health tabs, metric cards with icon boxes and status badges, Recharts gradient update, new metric button
+8. `src/components/patient/UrgentCareQueue.tsx` — Red gradient urgency banner, queue position card with animated progress bar, symptom form inputs, PIX/payment card
+9. `src/components/patient/PatientExamResults.tsx` — Exam cards with status side stripe, filter chips, download/share buttons, skeleton
+
+## Technical approach
+
+### Step 1: CSS tokens (`index.css`)
+Add to `:root` block (never remove existing vars):
+```css
+--p-primary: 215 80% 28%;
+--p-primary-mid: 215 65% 40%;
+--p-bg: 210 25% 98%;
+--p-surface: 0 0% 100%;
+--p-muted: 215 18% 94%;
+--p-border: 215 18% 88%;
+--p-text: 215 45% 10%;
+--p-text-muted: 215 12% 44%;
+--p-text-hint: 215 8% 46%;
+--p-danger: 0 72% 51%;
+--p-danger-soft: 0 100% 92%;
+--p-success-soft: 145 60% 92%;
+--p-warning-soft: 38 100% 92%;
+--p-shadow-card: 0 2px 8px rgba(0,52,127,0.06);
+--p-shadow-elevated: 0 6px 24px rgba(0,52,127,0.10);
+--p-shadow-btn: 0 4px 14px rgba(0,52,127,0.28);
 ```
 
-A Edge Function já suporta:
-- Receber estudos DICOM via `action: "orthanc_webhook"` com arquivos em base64
-- Deduplicação por `study_uid`
-- Upload automático no bucket `exam-files`
-- Criação de `exam_request` com SLA e prioridade
-- Auto-assign por especialidade (trigger `fn_auto_assign_exam_to_specialist`)
-- Notificações para admins e laudistas
+### Step 2: patientNav.tsx
+Reorder to 5 bottom tabs: Home, Consultas, Urgencia (Zap icon), Chat, Perfil. Move Pagamentos/Agendar/etc to sidebar groups. Keep all hrefs and active logic identical.
 
-## O que o cliente precisa fazer (infraestrutura externa)
+### Step 3: PatientDashboard.tsx
+- **Hero**: Gradient `from-[#00347F] via-[#1A4BA1] to-[#2563EB]`, `rounded-b-[28px]` mobile, avatar + name + plan badge + KPI pills + Pingo mascot
+- **Quick actions**: `grid-cols-5 gap-2` with 44x44px icon boxes (Agendar, Urgencia, Exames, Receitas, Docs)
+- **Skeleton loaders**: Replace loading state with pulse skeletons matching layout
+- **Next appointment**: Doctolib-style with left date column (`bg-[#00347F]`) + right content + "Entrar" button
+- **StatBento**: Apple Health 2x2 grid with icon boxes, accent lines, Manrope typography
+- **Health tip**: Blue tinted card with Pingo mascot
+- **Empty state**: Dashed border + centered CTA
+- All cards wrapped in `motion.div whileTap={{ scale: 0.97 }}`
 
-A Allo Médico **não roda** um servidor PACS — isso é responsabilidade da clínica. O passo a passo para o cliente:
+### Step 4: AppointmentsList.tsx
+- Replace Select filters with horizontal scrolling chips (`rounded-full`, active = `bg-[#00347F] text-white`)
+- Card redesign: 4px left status stripe + content with specialty chip + status badge
+- Skeleton and empty state per bible spec
 
-### 1. Instalar o Orthanc (gratuito e open-source)
-- Docker: `docker run -p 4242:4242 -p 8042:8042 jodogne/orthanc`
-- O equipamento de imagem (CR, CT, RM) envia exames via protocolo DICOM (porta 4242) para o Orthanc
+### Step 5: DoctorSearch.tsx
+- Search input: `rounded-2xl h-12 pl-12` with absolute search icon
+- Specialty chips: horizontal scroll, active `bg-[#00347F] text-white`
+- Doctor card: avatar with `ring-2 ring-[#00347F]/15`, available badge, rating stars, price in Manrope, rounded CTA, heart favorite
+- Skeleton cards
 
-### 2. Configurar o Lua Script no Orthanc
-O Orthanc suporta scripts Lua que disparam automaticamente quando um novo estudo chega. O cliente precisa adicionar um script que faz POST para a Edge Function:
+### Step 6: PaymentHistory.tsx
+- Active plan card: gradient `from-[#00347F] to-[#1A4BA1]`, white text, rounded-3xl
+- Transaction cards: circle status icon + plan name + dates + value right-aligned
+- Security footer card: amber tinted
 
-```lua
-function OnStableStudy(studyId, tags, metadata)
-  local study = RestApiGet('/studies/' .. studyId)
-  local payload = {
-    action = "orthanc_webhook",
-    study_uid = tags["StudyInstanceUID"],
-    patient_name = tags["PatientName"],
-    modality = tags["Modality"],
-    study_description = tags["StudyDescription"],
-    priority = "normal"
-  }
-  HttpPost("https://oaixgmuocuwhsabidpei.supabase.co/functions/v1/pacs-integration", 
-           DumpJson(payload), 
-           { ["Content-Type"] = "application/json" })
-end
-```
+### Step 7: PatientHealth.tsx
+- Tab bar: `rounded-2xl bg-muted/50 p-1` with active tab card style
+- Metric cards: 40px icon box, uppercase label, Manrope 800 28px value, status badge (Normal/Alto/Baixo)
+- Recharts: `stroke="#185FA5"` + linearGradient fill
+- New metric button: rounded-full primary
 
-### 3. (Opcional) Enviar arquivos DICOM junto
-Para incluir os arquivos no webhook, o script Lua precisa serializar as instâncias em base64 e incluir no campo `files[]`. Isso é mais pesado mas permite visualização no DicomViewer da plataforma.
+### Step 8: UrgentCareQueue.tsx
+- Red gradient banner (`from-[#A32D2D] to-[#E24B4A]`) with Zap icon, price in Manrope 800 32px
+- Queue position card: amber tinted, position Manrope 800 48px, animated progress bar
+- Form inputs: `rounded-2xl h-11`
+- Join button: `rounded-full bg-[#A32D2D]` with red shadow
 
-## O que pode ser melhorado no código (plano de implementação)
+### Step 9: PatientExamResults.tsx
+- Filter chips (horizontal scroll, same pattern as AppointmentsList)
+- Exam card: left status stripe + type with emoji icon + date + status badge + action buttons
+- Skeleton loaders
 
-### Passo 1 — Corrigir bug na Edge Function
-Na linha 215 do `pacs-integration/index.ts`, há referência a `err` em vez de `error`. Corrigir para evitar crash.
+## Preservation rules (enforced in every file)
+- All imports, hooks, queries, interfaces, handlers, realtime channels: untouched
+- All `motion.` wrappers preserved (only Tailwind classes updated)
+- All loading/empty states preserved (only visual redesigned)
+- No changes to App.tsx, AuthContext, DashboardLayout, hooks/, or any non-patient components
 
-### Passo 2 — Criar painel de configuração PACS no Admin
-Adicionar uma seção no painel admin onde o administrador pode:
-- Visualizar o URL do webhook (para copiar e colar no Orthanc)
-- Ver os últimos exames recebidos via DICOM router
-- Testar a conectividade enviando um ping
-
-### Passo 3 — Adicionar documentação inline
-Criar um componente de guia rápido ("Como conectar seu PACS") dentro do painel admin com as instruções do Orthanc/Lua script, para que o cliente não dependa de suporte externo.
-
-### Passo 4 — Validação de segurança no webhook
-Adicionar um token secreto (`PACS_WEBHOOK_SECRET`) que o Orthanc envia como header, para que apenas servidores autorizados possam enviar exames.
-
-## Resumo
-
-| Item | Status |
-|------|--------|
-| Edge Function webhook | ✅ Pronto (com bug menor) |
-| Upload e armazenamento DICOM | ✅ Pronto |
-| Auto-assign por especialidade | ✅ Pronto |
-| Visualizador DICOM (DWV) | ✅ Pronto |
-| Servidor PACS (Orthanc) | ⏳ Responsabilidade da clínica |
-| Painel admin de config PACS | 🔨 A implementar |
-| Token de segurança webhook | 🔨 A implementar |
-| Documentação inline | 🔨 A implementar |
-
-## Detalhes técnicos
-
-- **Arquivos a modificar**: `supabase/functions/pacs-integration/index.ts` (fix bug), novo componente `src/components/admin/AdminPACSConfig.tsx`
-- **Nova secret**: `PACS_WEBHOOK_SECRET` para autenticar webhooks
-- **Sem mudanças no banco**: a coluna `orthanc_study_uid` e `source` já existem em `exam_requests`
