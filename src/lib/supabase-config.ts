@@ -11,3 +11,7 @@ export const SUPABASE_FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`;
 export const hasExplicitSupabaseEnv = Boolean(
   import.meta.env.VITE_SUPABASE_URL?.trim() && import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim(),
 );
+
+if (import.meta.env.DEV && !import.meta.env.VITE_SUPABASE_URL) {
+  console.warn('[AloClínica] Usando credenciais Supabase de fallback. Configure VITE_SUPABASE_URL em produção.');
+}
