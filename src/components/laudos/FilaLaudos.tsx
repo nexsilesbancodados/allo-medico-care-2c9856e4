@@ -10,12 +10,13 @@ import {
   buildOhifUrl,
   type AlocExame,
 } from "@/lib/services/laudos-service";
+import { getOHIFUrl } from "@/lib/orthanc";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { FileText, ExternalLink, Play, CheckCircle, Clock, Loader2 } from "lucide-react";
+import { FileText, ExternalLink, Play, CheckCircle, Clock, Loader2, Image } from "lucide-react";
 
 // ─── Kanban Column ────────────────────────────────────────────────────────────
 
@@ -130,6 +131,25 @@ function ExameCard({ exame, userId, onIniciar }: ExameCardProps) {
               <ExternalLink className="h-3 w-3 mr-1" /> Abrir Imagem
             </Button>
           )}
+
+          {/* For exames from clinic upload (arquivo_url without orthanc) */}
+          {(exame as any).arquivo_url && !exame.orthanc_study_uid && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs"
+              onClick={() => window.open((exame as any).arquivo_url, "_blank")}
+            >
+              <Image className="h-3 w-3 mr-1" /> Ver Arquivo
+            </Button>
+          )}
+
+          {/* Origin badge */}
+          {(exame as any).origem && (
+            <Badge variant="outline" className="text-xs">
+              {(exame as any).origem === "dicom" ? "DICOM" : "PDF/Imagem"}
+            </Badge>
+          )}
         </div>
       </CardContent>
     </Card>
@@ -157,12 +177,36 @@ export default function FilaLaudos() {
 
   const loadData = useCallback(async () => {
     try {
+      // Fetch from aloc_exames (legacy)
       const [ativos, feitos] = await Promise.all([
         fetchExamesParaLaudar(),
         fetchExamesConcluidos(),
       ]);
 
-      const all = [...ativos, ...feitos];
+      // Also fetch from exames table (clinic uploads)
+      const { data: clinicExames } = await (supabase as any)
+        .from("exames")
+        .select("id, paciente_nome, tipo_exame, status, orthanc_study_uid, arquivo_url, origem, laudista_id, created_at")
+        .in("status", ["pendente", "em_laudo", "concluido"])
+        .order("created_at", { ascending: true });
+
+      // Map clinic exames to AlocExame-compatible shape
+      const mappedClinic = (clinicExames ?? []).map((e: any) => ({
+        id: e.id,
+        paciente_id: null,
+        medico_solicitante_id: null,
+        laudista_id: e.laudista_id,
+        tipo_exame: e.tipo_exame,
+        status: e.status === "pendente" ? "aguardando" : e.status,
+        orthanc_study_uid: e.orthanc_study_uid,
+        orthanc_study_url: null,
+        created_at: e.created_at,
+        paciente_nome: e.paciente_nome,
+        arquivo_url: e.arquivo_url,
+        origem: e.origem,
+      }));
+
+      const all = [...ativos, ...feitos, ...mappedClinic];
       const enriched = await enrichWithNames(all);
 
       setAguardando(enriched.filter((e) => e.status === "aguardando"));

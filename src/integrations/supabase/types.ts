@@ -1330,40 +1330,61 @@ export type Database = {
         Row: {
           arquivo_url: string | null
           assinado_em: string | null
+          clinica_id: string | null
           created_at: string
           id: string
           laudista_id: string | null
           laudo_texto: string | null
+          lembrete_enviado: boolean | null
+          observacoes: string | null
+          origem: string
+          orthanc_study_uid: string | null
+          paciente_id: string | null
           paciente_nome: string
           pdf_url: string | null
           status: string
           study_uid: string | null
+          tipo_exame: string
           updated_at: string
         }
         Insert: {
           arquivo_url?: string | null
           assinado_em?: string | null
+          clinica_id?: string | null
           created_at?: string
           id?: string
           laudista_id?: string | null
           laudo_texto?: string | null
+          lembrete_enviado?: boolean | null
+          observacoes?: string | null
+          origem?: string
+          orthanc_study_uid?: string | null
+          paciente_id?: string | null
           paciente_nome: string
           pdf_url?: string | null
           status?: string
           study_uid?: string | null
+          tipo_exame?: string
           updated_at?: string
         }
         Update: {
           arquivo_url?: string | null
           assinado_em?: string | null
+          clinica_id?: string | null
           created_at?: string
           id?: string
           laudista_id?: string | null
           laudo_texto?: string | null
+          lembrete_enviado?: boolean | null
+          observacoes?: string | null
+          origem?: string
+          orthanc_study_uid?: string | null
+          paciente_id?: string | null
           paciente_nome?: string
           pdf_url?: string | null
           status?: string
           study_uid?: string | null
+          tipo_exame?: string
           updated_at?: string
         }
         Relationships: []
