@@ -342,138 +342,151 @@ const AuthPaciente = () => {
             transition={{ duration: 0.35 }}
             className="flex-1 flex flex-col"
           >
-            {/* Mini header */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-primary to-secondary px-5 pt-[max(env(safe-area-inset-top,16px),16px)] pb-5">
-              <div className="absolute top-[-30%] right-[-20%] w-[200px] h-[200px] rounded-full bg-white/[0.06] blur-[60px]" />
+            {/* Header with gradient + mascot */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-secondary px-5 pt-[max(env(safe-area-inset-top,16px),16px)] pb-7">
+              <div className="absolute top-[-40%] right-[-15%] w-[260px] h-[260px] rounded-full bg-white/[0.06] blur-[80px]" />
+              <div className="absolute bottom-[-25%] left-[-10%] w-[180px] h-[180px] rounded-full bg-secondary/20 blur-[60px]" />
+
+              {/* Back button */}
+              <button
+                type="button"
+                onClick={() => setMode("welcome")}
+                className="relative z-10 flex items-center gap-1.5 text-white/70 hover:text-white transition-colors text-sm font-medium mb-4"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Voltar ao início
+              </button>
+
+              {/* Brand row */}
               <div className="relative z-10 flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <img src={logo} alt="AloClínica" className="w-9 h-9 rounded-xl shadow-lg ring-2 ring-white/20" />
+                <div className="flex items-center gap-3">
+                  <img src={logo} alt="AloClínica" className="w-11 h-11 rounded-2xl shadow-lg ring-2 ring-white/20" />
                   <div>
-                    <p className="text-lg font-black text-white tracking-tight leading-none">AloClínica</p>
-                    <p className="text-[10px] text-white/60 mt-0.5">Cuidado especializado em cada toque.</p>
+                    <h1 className="text-xl font-black text-white tracking-tight leading-none">AloClínica</h1>
+                    <p className="text-[11px] text-white/60 mt-0.5">Telemedicina de excelência</p>
                   </div>
                 </div>
                 <motion.img
                   src={mascotWave}
                   alt="Pingo"
-                  className="w-16 h-16 object-contain select-none"
-                  style={{ filter: "drop-shadow(0 2px 12px rgba(0,0,50,.2))" }}
-                  initial={{ opacity: 0, scale: 0.6 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                  className="w-[72px] h-[72px] object-contain select-none"
+                  style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,50,.25))" }}
+                  initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 />
+              </div>
+
+              {/* Trust chips */}
+              <div className="relative z-10 flex gap-2 mt-4">
+                {[
+                  { emoji: "🏥", text: "CFM" },
+                  { emoji: "🔒", text: "LGPD" },
+                  { emoji: "⭐", text: "4.9/5" },
+                ].map((chip) => (
+                  <span
+                    key={chip.text}
+                    className="px-2.5 py-1 rounded-full bg-white/15 text-white/90 text-[10px] font-bold border border-white/10 backdrop-blur-sm"
+                  >
+                    {chip.emoji} {chip.text}
+                  </span>
+                ))}
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col px-5 pt-5 pb-8 max-w-md mx-auto w-full">
-              {/* Card */}
-              <div className="bg-card rounded-[1.75rem] p-6 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-border/40">
-                <div className="text-center mb-7">
-                  <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3">
-                    <LockKey className="w-6 h-6 text-primary" weight="fill" />
-                  </div>
-                  <h2 className="text-[26px] font-extrabold text-foreground tracking-tight">Entrar</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Acesse sua conta para gerenciar sua saúde.
-                  </p>
-                </div>
-
-                <form onSubmit={handleLogin} className="space-y-5">
-                  <div>
-                    <Label className="text-sm font-semibold text-foreground">E-mail</Label>
-                    <div className="relative mt-1.5">
-                      <Envelope className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground" weight="fill" />
-                      <Input
-                        type="email"
-                        value={email}
-                        onChange={e => setEmail(e.target.value)}
-                        placeholder="nome@exemplo.com"
-                        className="pl-11 h-12 rounded-2xl bg-muted/30 border-border/60 focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)]"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <Label className="text-sm font-semibold text-foreground">Senha</Label>
-                      <Link to="/forgot-password" className="text-[13px] font-semibold text-primary hover:underline">
-                        Esqueceu a senha?
-                      </Link>
-                    </div>
-                    <div className="relative mt-1.5">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground" weight="fill" />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="pl-11 pr-11 h-12 rounded-2xl bg-muted/30 border-border/60 focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)]"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                       {showPassword ? <EyeSlash className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
-                      </button>
-                    </div>
-                  </div>
-
-                  <Button
-                    type="submit"
-                    className="w-full h-[52px] rounded-full bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all"
-                    size="lg"
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <SpinnerGap className="w-5 h-5 animate-spin" /> Entrando...
-                      </span>
-                    ) : "Entrar na Conta"}
-                  </Button>
-                </form>
-
-                {/* Divider */}
-                <div className="flex items-center gap-3 my-6">
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="text-[11px] text-muted-foreground uppercase tracking-wider font-medium">ou continue com</span>
-                  <div className="flex-1 h-px bg-border" />
-                </div>
-
-                {/* Social buttons */}
-                <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" className="h-12 rounded-2xl gap-2 text-sm font-medium bg-muted/20 border-border/60 hover:bg-muted/40 transition-colors" disabled>
-                    <GoogleLogo className="w-5 h-5" weight="bold" />
-                    Google
-                  </Button>
-                  <Button variant="outline" className="h-12 rounded-2xl gap-2 text-sm font-medium bg-muted/20 border-border/60 hover:bg-muted/40 transition-colors" disabled>
-                    <FacebookLogo className="w-5 h-5" weight="fill" />
-                    Facebook
-                  </Button>
-                </div>
-
-                <p className="text-center text-sm text-muted-foreground mt-6">
-                  Ainda não tem uma conta?{" "}
-                  <button type="button" onClick={() => setMode("signup")} className="text-primary font-bold hover:underline">
-                    Criar conta agora
-                  </button>
+            <div className="flex-1 flex flex-col px-5 pt-6 pb-8 max-w-md mx-auto w-full">
+              {/* Welcome text */}
+              <div className="mb-6">
+                <h2 className="text-[28px] font-extrabold text-foreground tracking-tight leading-tight">
+                  Bem-vindo de volta
+                </h2>
+                <p className="text-[15px] text-muted-foreground mt-1">
+                  Entre na sua conta para continuar
                 </p>
               </div>
 
-              {/* Trust badges */}
-              <div className="flex items-center justify-center gap-5 mt-6">
-                {trustItems.map((item) => (
-                  <div key={item.label} className="flex flex-col items-center gap-1">
-                    <item.icon className="w-5 h-5 text-muted-foreground/50" weight="fill" />
-                    <span className="text-[9px] text-muted-foreground/50 font-medium">{item.label}</span>
+              {/* Login form — no card wrapper, cleaner */}
+              <form onSubmit={handleLogin} className="space-y-5">
+                <div>
+                  <Label className="text-sm font-semibold text-foreground">Email</Label>
+                  <div className="relative mt-1.5">
+                    <Envelope className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/60" weight="fill" />
+                    <Input
+                      type="email"
+                      value={email}
+                      onChange={e => setEmail(e.target.value)}
+                      placeholder="seu@email.com"
+                      className="pl-11 h-[52px] rounded-2xl bg-card border-border/60 shadow-sm focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] focus-visible:border-primary/40 text-[15px]"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-semibold text-foreground">Senha</Label>
+                    <Link to="/forgot-password" className="text-[13px] font-semibold text-primary hover:underline">
+                      Esqueci minha senha
+                    </Link>
+                  </div>
+                  <div className="relative mt-1.5">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/60" weight="fill" />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="pl-11 pr-11 h-[52px] rounded-2xl bg-card border-border/60 shadow-sm focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] focus-visible:border-primary/40 text-[15px]"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeSlash className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-bold text-base shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all"
+                  size="lg"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <SpinnerGap className="w-5 h-5 animate-spin" /> Entrando...
+                    </span>
+                  ) : "Entrar"}
+                </Button>
+              </form>
+
+              {/* Trust row */}
+              <div className="flex items-center justify-center gap-6 mt-8">
+                {[
+                  { icon: LockKey, label: "Dados\ncriptografados" },
+                  { icon: VideoCamera, label: "Vídeo HD\nseguro" },
+                  { icon: Clock, label: "Atendimento\n24h" },
+                ].map((item) => (
+                  <div key={item.label} className="flex flex-col items-center gap-1.5 text-center">
+                    <item.icon className="w-[18px] h-[18px] text-muted-foreground/40" weight="fill" />
+                    <span className="text-[10px] text-muted-foreground/50 font-medium leading-tight whitespace-pre-line">{item.label}</span>
                   </div>
                 ))}
               </div>
 
-              <p className="text-center text-[10px] text-muted-foreground/50 mt-4 pb-6">
-                © {new Date().getFullYear()} AloClínica — Tecnologia em Saúde. Todos os direitos reservados.
+              {/* Register link */}
+              <p className="text-center text-sm text-muted-foreground mt-8">
+                Não tem conta?{" "}
+                <button type="button" onClick={() => setMode("signup")} className="text-primary font-bold hover:underline">
+                  Cadastre-se grátis
+                </button>
+              </p>
+
+              <p className="text-center text-[10px] text-muted-foreground/40 mt-6 pb-4">
+                © {new Date().getFullYear()} AloClínica — Tecnologia em Saúde
               </p>
             </div>
           </motion.div>
