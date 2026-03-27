@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -14,6 +14,8 @@ import {
   type AlocLaudo,
 } from "@/lib/services/laudos-service";
 import { supabase } from "@/integrations/supabase/client";
+import { criarDocumentoParaAssinar, enviarParaAssinatura } from "@/lib/docuseal";
+import DocuSealSigningModal from "@/components/laudos/DocuSealSigningModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
 import {
   Save,
   CheckCircle,
@@ -121,6 +124,10 @@ export default function EditorLaudoCompleto() {
   const [suggesting, setSuggesting] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [showSignDialog, setShowSignDialog] = useState(false);
+  const [docuSealOpen, setDocuSealOpen] = useState(false);
+  const [docuSealUrl, setDocuSealUrl] = useState("");
+  const [docuSealSubId, setDocuSealSubId] = useState(0);
+  const [medicoEmail, setMedicoEmail] = useState("");
 
   const editor = useEditor({
     extensions: [
@@ -140,7 +147,7 @@ export default function EditorLaudoCompleto() {
     },
   });
 
-  // Load data
+  // Load data + fetch medico email
   useEffect(() => {
     if (!exameId || !user) return;
     (async () => {
@@ -154,6 +161,10 @@ export default function EditorLaudoCompleto() {
           const names = await fetchNomesPacientes([e.paciente_id]);
           setPacienteNome(names[e.paciente_id] || "Paciente");
         }
+
+        // Fetch medico email
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        if (authUser?.email) setMedicoEmail(authUser.email);
 
         // Fetch or create laudo
         let l = await fetchLaudoPorExame(exameId);
@@ -177,6 +188,27 @@ export default function EditorLaudoCompleto() {
     }
   }, [laudo, editor]);
 
+  // Generate PDF from laudo HTML
+  const generateLaudoPdf = useCallback((html: string): string => {
+    const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+    doc.setFontSize(16);
+    doc.text("LAUDO MÉDICO", 105, 20, { align: "center" });
+    doc.setFontSize(10);
+    doc.text(`Paciente: ${pacienteNome}`, 20, 35);
+    doc.text(`Exame: ${exame?.tipo_exame || ""}`, 20, 42);
+    doc.text(`Data: ${new Date().toLocaleDateString("pt-BR")}`, 20, 49);
+    doc.line(20, 54, 190, 54);
+
+    // Strip HTML tags for plain text rendering
+    const plainText = html.replace(/<[^>]+>/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
+    const lines = doc.splitTextToSize(plainText, 170);
+    doc.setFontSize(11);
+    doc.text(lines, 20, 62);
+
+    // Return as base64 (without data:... prefix)
+    return doc.output("datauristring").split(",")[1];
+  }, [pacienteNome, exame]);
+
   const handleSave = useCallback(async () => {
     if (!laudo || !editor) return;
     setSaving(true);
@@ -198,18 +230,81 @@ export default function EditorLaudoCompleto() {
       return;
     }
     setSigning(true);
+    setShowSignDialog(false);
     try {
+      // 1. Save draft
       await salvarLaudo(laudo.id, html);
-      await assinarLaudo(laudo.id, exame.id);
-      toast.success("Laudo assinado com sucesso!");
-      navigate("/laudos/fila");
-    } catch {
-      toast.error("Erro ao assinar");
+
+      // 2. Generate PDF
+      const pdfBase64 = generateLaudoPdf(html);
+      const nomeDoc = `Laudo_${exame.tipo_exame}_${new Date().toISOString().slice(0, 10)}`;
+
+      // 3. Create template in DocuSeal
+      toast.info("Preparando documento para assinatura…");
+      const templateId = await criarDocumentoParaAssinar(pdfBase64, nomeDoc);
+
+      // 4. Create submission
+      const { submission_id, signing_url } = await enviarParaAssinatura(
+        templateId,
+        medicoEmail || "medico@allomedico.com",
+        pacienteNome,
+      );
+
+      // 5. Open signing modal
+      setDocuSealSubId(submission_id);
+      setDocuSealUrl(signing_url);
+      setDocuSealOpen(true);
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao preparar assinatura");
     } finally {
       setSigning(false);
-      setShowSignDialog(false);
     }
-  }, [laudo, exame, editor, navigate]);
+  }, [laudo, exame, editor, generateLaudoPdf, medicoEmail, pacienteNome]);
+
+  // DocuSeal signing completed callback
+  const handleDocuSealSigned = useCallback(async (documents: Array<{ url: string; filename: string }>) => {
+    setDocuSealOpen(false);
+    if (!laudo || !exame) return;
+
+    try {
+      toast.info("Salvando documento assinado…");
+
+      // Download signed PDF and upload to Supabase Storage
+      if (documents.length > 0) {
+        const signedPdfUrl = documents[0].url;
+        const response = await fetch(signedPdfUrl);
+        const blob = await response.blob();
+        const filePath = `${exame.id}/${laudo.id}_assinado.pdf`;
+
+        await supabase.storage.from("laudos-assinados").upload(filePath, blob, {
+          contentType: "application/pdf",
+          upsert: true,
+        });
+
+        const { data: publicUrl } = supabase.storage.from("laudos-assinados").getPublicUrl(filePath);
+
+        // Update laudo record
+        await supabase.from("aloc_laudos").update({
+          status: "assinado",
+          pdf_url: publicUrl.publicUrl,
+          assinado_em: new Date().toISOString(),
+        }).eq("id", laudo.id);
+
+        // Update exame status
+        await supabase.from("aloc_exames").update({
+          status: "concluido",
+        }).eq("id", exame.id);
+      } else {
+        // Fallback: use the original sign flow
+        await assinarLaudo(laudo.id, exame.id);
+      }
+
+      toast.success("Laudo assinado com sucesso!");
+      navigate("/laudos/fila");
+    } catch (err: any) {
+      toast.error(err?.message || "Erro ao finalizar assinatura");
+    }
+  }, [laudo, exame, navigate]);
 
   const handleSuggestAI = useCallback(async () => {
     if (!exame || !editor) return;
@@ -432,6 +527,15 @@ export default function EditorLaudoCompleto() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* DocuSeal Signing Modal */}
+      <DocuSealSigningModal
+        open={docuSealOpen}
+        signingUrl={docuSealUrl}
+        submissionId={docuSealSubId}
+        onSigned={handleDocuSealSigned}
+        onCancel={() => setDocuSealOpen(false)}
+      />
     </div>
   );
 }
