@@ -40,6 +40,49 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const [allergyInput, setAllergyInput] = useState("");
   const [chronicConditions, setChronicConditions] = useState<string[]>([]);
   const [conditionInput, setConditionInput] = useState("");
+  const [selfieFile, setSelfieFile] = useState<File | null>(null);
+  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [docPreview, setDocPreview] = useState<string | null>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "selfie" | "doc") => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) { toast.error("Arquivo muito grande", { description: "Máximo 5 MB" }); return; }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (type === "selfie") { setSelfieFile(file); setSelfiePreview(ev.target?.result as string); }
+      else { setDocFile(file); setDocPreview(ev.target?.result as string); }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const uploadKYCFiles = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      if (selfieFile) {
+        const ext = selfieFile.name.split(".").pop() || "jpg";
+        await supabase.storage.from("avatars").upload(`${user.id}/kyc-selfie.${ext}`, selfieFile, { upsert: true });
+      }
+      if (docFile) {
+        const ext = docFile.name.split(".").pop() || "jpg";
+        await supabase.storage.from("avatars").upload(`${user.id}/kyc-document.${ext}`, docFile, { upsert: true });
+      }
+      // Also set selfie as avatar if user doesn't have one
+      if (selfieFile && !profile?.avatar_url) {
+        const ext = selfieFile.name.split(".").pop() || "jpg";
+        const path = `${user.id}/avatar.${ext}`;
+        await supabase.storage.from("avatars").upload(path, selfieFile, { upsert: true });
+        const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+        await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
+      }
+      toast.success("Documentos enviados! ✅");
+    } catch (err) {
+      toast.error("Erro ao enviar", { description: "Tente novamente." });
+    }
+    setSaving(false);
+  };
 
   useEffect(() => {
     if (user) {
