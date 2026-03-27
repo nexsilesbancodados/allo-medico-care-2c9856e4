@@ -11,11 +11,11 @@ import PingoLoader from "@/components/PingoLoader";
 // ── LAZY imports: dashboard shells ──
 const PatientDashboard = lazy(() => import("@/components/dashboards/PatientDashboard"));
 const DoctorDashboard = lazy(() => import("@/components/dashboards/DoctorDashboard"));
-const ClinicDashboard = lazy(() => import("@/components/dashboards/ClinicDashboard"));
+const ClinicDashboard = lazy(() => import("@/components/dashboards/ClinicDashboard")); // kept for admin view-as
 const AdminDashboard = lazy(() => import("@/components/dashboards/AdminDashboard"));
-const ReceptionDashboard = lazy(() => import("@/components/dashboards/ReceptionDashboard"));
+const ReceptionDashboard = lazy(() => import("@/components/dashboards/ReceptionDashboard")); // kept for admin view-as
 const SupportDashboard = lazy(() => import("@/components/dashboards/SupportDashboard"));
-const PartnerDashboard = lazy(() => import("@/components/dashboards/PartnerDashboard"));
+const PartnerDashboard = lazy(() => import("@/components/dashboards/PartnerDashboard")); // kept for admin view-as
 const LaudistaDashboard = lazy(() => import("@/components/dashboards/LaudistaDashboard"));
 
 // ── LAZY imports: sub-pages ──
@@ -70,18 +70,12 @@ const PreConsultationPage = lazy(() => import("@/components/patient/PreConsultat
 const ChatPage = lazy(() => import("@/components/chat/ChatPage"));
 const MedicalRecords = lazy(() => import("@/components/medical/MedicalRecords"));
 const AIAssistantPanel = lazy(() => import("@/components/ai/AIAssistantPanel"));
+// Clinic components (kept minimal for admin view-as)
 const ClinicDoctorsManagement = lazy(() => import("@/components/clinic/ClinicDoctorsManagement"));
 const ClinicMyExams = lazy(() => import("@/components/clinic/ClinicMyExams"));
 const ClinicSchedules = lazy(() => import("@/components/clinic/ClinicSchedules"));
 const ClinicPatients = lazy(() => import("@/components/clinic/ClinicPatients"));
 const ClinicWaitingRoom = lazy(() => import("@/components/clinic/ClinicWaitingRoom"));
-const ReceptionSchedules = lazy(() => import("@/components/reception/ReceptionSchedules"));
-const ReceptionCheckin = lazy(() => import("@/components/reception/ReceptionCheckin"));
-const ReceptionBilling = lazy(() => import("@/components/reception/ReceptionBilling"));
-const ReceptionPatients = lazy(() => import("@/components/reception/ReceptionPatients"));
-const ReceptionCalls = lazy(() => import("@/components/reception/ReceptionCalls"));
-const ReceptionRecords = lazy(() => import("@/components/reception/ReceptionRecords"));
-const ReceptionMessages = lazy(() => import("@/components/reception/ReceptionMessages"));
 const AdminDoctors = lazy(() => import("@/components/admin/AdminDoctors"));
 const AdminPatients = lazy(() => import("@/components/admin/AdminPatients"));
 const AdminClinics = lazy(() => import("@/components/admin/AdminClinics"));
