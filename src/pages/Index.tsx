@@ -9,7 +9,7 @@ import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
-import { Stethoscope, ShieldCheck, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
+import { Stethoscope, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
 
 // WebP for faster loading; deferred sections handle lazy rendering
 
