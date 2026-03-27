@@ -56,6 +56,19 @@ const LaudosEditar = lazy(() => import("./pages/LaudosEditar"));
 const ClinicaEnviarExame = lazy(() => import("./pages/ClinicaEnviarExame"));
 const ClinicaExames = lazy(() => import("./pages/ClinicaExames"));
 
+// Prefetch das rotas mais acessadas após o browser ficar idle
+if (typeof window !== "undefined") {
+  const prefetch = () => {
+    import("./pages/AuthPaciente");
+    import("./pages/AuthMedico");
+    import("./pages/Dashboard");
+  };
+  if ("requestIdleCallback" in window) {
+    (window as any).requestIdleCallback(prefetch, { timeout: 3000 });
+  } else {
+    setTimeout(prefetch, 3000);
+  }
+}
 
 const queryClient = new QueryClient({
   defaultOptions: {

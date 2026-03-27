@@ -12,7 +12,7 @@ const DeferredSection = ({
   children,
   className,
   fallbackClassName,
-  rootMargin = "320px 0px",
+  rootMargin = "600px 0px",
 }: DeferredSectionProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -21,7 +21,11 @@ const DeferredSection = ({
   const fallbackNode = (
     <div
       aria-hidden="true"
-      className={cn("w-full rounded-3xl bg-muted/20", fallbackClassName)}
+      className={cn(
+        "w-full rounded-3xl animate-pulse bg-muted/30",
+        fallbackClassName
+      )}
+      style={{ minHeight: heightRef.current ?? 200 }}
     />
   );
 
