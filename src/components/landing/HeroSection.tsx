@@ -32,7 +32,7 @@ const HeroSection = memo(
   forwardRef<HTMLElement>((_, ref) => {
     const navigate = useNavigate();
     const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
-    const prefetchConsulta = usePrefetchRoute(() => import("@/pages/GuestCheckout"));
+    
 
     return (
       <section
@@ -111,8 +111,8 @@ const HeroSection = memo(
                   size="lg"
                   variant="outline"
                   className="rounded-xl h-[52px] w-full sm:w-auto justify-center text-[14px] font-bold border-2 border-border hover:border-primary/30 hover:bg-primary/[0.04] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] px-8 gap-2"
-                  onClick={() => navigate("/consulta-avulsa")}
-                  onMouseEnter={prefetchConsulta}
+                  onClick={() => navigate("/paciente")}
+                  onMouseEnter={prefetchPaciente}
                 >
                   Consulta avulsa
                   <span className="inline-flex items-center rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-extrabold">R$89</span>

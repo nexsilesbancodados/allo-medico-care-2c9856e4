@@ -121,7 +121,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
               <Button
                 size="lg"
                 className="bg-background text-primary hover:bg-background/95 rounded-2xl px-8 gap-2.5 shadow-lg shadow-foreground/10 font-extrabold shrink-0 transition-all text-sm sm:text-base"
-                onClick={() => navigate(user ? "/dashboard/urgent-care" : "/consulta-avulsa")}
+                onClick={() => navigate(user ? "/dashboard/urgent-care" : "/paciente")}
               >
                 <Stethoscope className="w-5 h-5" />
                 Acessar Plantão
@@ -164,7 +164,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           label="Consulta Avulsa"
           title="Consulte agora sem mensalidade"
           highlight="A partir de R$89 com receita digital"
-          href="/consulta-avulsa"
+          href="/paciente"
           gradient="from-primary to-violet-600"
           mascotSrc={bannerConsulta}
           variant="diagonal"
@@ -181,7 +181,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           label="Plantão 24h"
           title="Precisa de atendimento urgente?"
           highlight="Médicos disponíveis agora"
-          href="/consulta-avulsa"
+          href="/paciente"
           gradient="from-rose-500 to-primary"
           mascotSrc={bannerPlantao}
           variant="wave"

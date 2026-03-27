@@ -111,7 +111,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                       <ListItem href="/teleconsulta" title="Teleconsulta" icon={Video} badge="24h">
                         Consultas por vídeo com especialistas, receita digital e acesso rápido.
                       </ListItem>
-                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>
+                      <ListItem href="/paciente" title="Consulta Avulsa" icon={Stethoscope}>
                         Atendimento rápido, seguro e sem burocracia.
                       </ListItem>
                     </ul>
@@ -195,7 +195,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                 size="sm"
                 variant="outline"
                 className="rounded-lg gap-1.5 text-xs font-semibold h-9 px-4 border-border/60 hover:border-primary/20"
-                onClick={() => navigate("/consulta-avulsa")}
+                onClick={() => navigate("/paciente")}
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
                 Consulta Avulsa
@@ -255,7 +255,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                 </>
               ) : (
                 <>
-                  <Button size="sm" variant="outline" className="rounded-lg justify-start gap-2 font-semibold" onClick={() => { setMobileOpen(false); navigate("/consulta-avulsa"); }}>
+                  <Button size="sm" variant="outline" className="rounded-lg justify-start gap-2 font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
                     <ShoppingBag className="w-4 h-4" /> Consulta Avulsa
                   </Button>
                   <Button size="sm" className="rounded-lg justify-start gap-2 bg-primary text-primary-foreground font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
