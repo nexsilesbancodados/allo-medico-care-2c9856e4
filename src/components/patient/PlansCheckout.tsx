@@ -102,6 +102,8 @@ const PlansCheckout = () => {
   const [checkingCoupon, setCheckingCoupon] = useState(false);
   const cardDiscount = 0;
 
+  const currentPlan = plans.find(p => p.id === selectedPlan);
+
   // PIX countdown
   useEffect(() => {
     if (step !== "checkout" || paymentMethod !== "pix") return;
