@@ -92,6 +92,51 @@
     --p-shadow-elevated: 0 6px 24px rgba(0,52,127,0.10);
     --p-shadow-btn: 0 4px 14px rgba(0,52,127,0.28);
 
+    /* Doctor panel tokens */
+    --d-primary: 152 60% 30%;
+    --d-primary-mid: 152 50% 38%;
+    --d-bg: 150 20% 98%;
+    --d-surface: 0 0% 100%;
+    --d-accent: 152 55% 92%;
+    --d-shadow-card: 0 2px 8px rgba(4,42,28,0.06);
+    --d-shadow-elevated: 0 6px 24px rgba(4,42,28,0.10);
+
+    /* Clinic panel tokens */
+    --c-primary: 245 58% 40%;
+    --c-primary-mid: 245 48% 52%;
+    --c-bg: 240 20% 98%;
+    --c-surface: 0 0% 100%;
+    --c-accent: 245 50% 94%;
+    --c-shadow-card: 0 2px 8px rgba(30,27,107,0.06);
+    --c-shadow-elevated: 0 6px 24px rgba(30,27,107,0.10);
+
+    /* Admin panel tokens */
+    --a-primary: 0 65% 42%;
+    --a-primary-mid: 0 55% 50%;
+    --a-bg: 0 10% 98%;
+    --a-surface: 0 0% 100%;
+    --a-accent: 0 60% 94%;
+    --a-shadow-card: 0 2px 8px rgba(59,0,0,0.06);
+    --a-shadow-elevated: 0 6px 24px rgba(59,0,0,0.10);
+
+    /* Reception panel tokens */
+    --r-primary: 38 80% 40%;
+    --r-primary-mid: 38 65% 48%;
+    --r-bg: 38 20% 98%;
+    --r-accent: 38 70% 94%;
+
+    /* Support panel tokens */
+    --s-primary: 30 70% 38%;
+    --s-primary-mid: 30 55% 46%;
+    --s-bg: 30 15% 98%;
+    --s-accent: 30 60% 94%;
+
+    /* Partner panel tokens */
+    --pr-primary: 160 55% 32%;
+    --pr-primary-mid: 160 45% 42%;
+    --pr-bg: 160 18% 98%;
+    --pr-accent: 160 50% 94%;
+
     /* Continuous background — clean medical white with subtle warmth */
     --landing-bg:
       radial-gradient(ellipse 100% 50% at 0% 80%, hsl(215 30% 94% / 0.35) 0%, transparent 55%),

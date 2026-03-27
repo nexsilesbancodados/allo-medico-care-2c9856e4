@@ -176,85 +176,82 @@ const DoctorEarnings = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("earnings")}>
-      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6">
-        <button onClick={() => navigate("/dashboard")} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
-          Voltar ao painel
-        </button>
-        <h1 className="text-2xl font-bold text-foreground mb-1">Meus Ganhos</h1>
-        <p className="text-muted-foreground mb-6">Resumo financeiro das consultas realizadas</p>
+      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6 space-y-5">
+        {/* Premium hero */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#042A1C] via-[#065f46] to-[#059669] p-5 text-white" style={{ boxShadow: "0 8px 32px rgba(4,42,28,0.25)" }}>
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/8 blur-2xl" />
+          <div className="relative z-10">
+            <button onClick={() => navigate("/dashboard")} className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50 hover:text-white/80 transition-colors mb-2">
+              ← Voltar ao painel
+            </button>
+            <h1 className="text-xl font-black tracking-tight">💰 Meus Ganhos</h1>
+            <p className="text-xs text-white/60 mt-1">Resumo financeiro das consultas realizadas</p>
+          </div>
+        </div>
 
         {/* Clinic affiliation info */}
         {clinicInfo && (
-          <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/20 flex items-center gap-3 text-xs">
-            <Building2 className="w-4 h-4 text-primary shrink-0" />
-            <span className="text-foreground">Vinculado à <strong>{clinicInfo.name}</strong> — seu repasse é de <strong>{clinicInfo.percent}%</strong></span>
+          <div className="p-3.5 rounded-2xl bg-primary/5 border border-primary/20 flex items-center gap-3 text-xs">
+            <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center shrink-0"><Building2 className="w-4 h-4 text-primary" /></div>
+            <span className="text-foreground">Vinculado à <strong>{clinicInfo.name}</strong> — repasse de <strong>{clinicInfo.percent}%</strong></span>
           </div>
         )}
 
         {/* Split info */}
-        <div className="mb-6 p-3 rounded-lg bg-muted/50 border border-border flex items-center gap-3 text-xs text-muted-foreground">
-          <Wallet className="w-4 h-4 shrink-0" />
+        <div className="p-3.5 rounded-2xl bg-muted/40 border border-border/30 flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="w-8 h-8 rounded-xl bg-muted/60 flex items-center justify-center shrink-0"><Wallet className="w-4 h-4" /></div>
           <span>Split automático: <strong className="text-foreground">{clinicInfo?.percent ?? DEFAULT_DOCTOR_PERCENT}% Médico</strong> · {PLATFORM_PERCENT}% Plataforma</span>
         </div>
 
-        <div className="grid sm:grid-cols-4 gap-4 mb-8">
-          <Card variant="kpi" className="bg-gradient-to-br from-primary/5 to-transparent">
-            <CardContent className="pt-6">
-              <p className="text-xs text-muted-foreground">Ganho Confirmado</p>
-              <p className="text-2xl font-bold text-foreground tabular-nums">R$ {stats.total.toFixed(2)}</p>
-            </CardContent>
-          </Card>
-          <Card variant="kpi">
-            <CardContent className="pt-6">
-              <p className="text-xs text-muted-foreground">Este Mês</p>
-              <p className="text-2xl font-bold text-foreground tabular-nums">R$ {stats.thisMonth.toFixed(2)}</p>
-            </CardContent>
-          </Card>
-          <Card variant="kpi">
-            <CardContent className="pt-6">
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
-                Pendente <AlertCircle className="w-3 h-3 text-warning" />
-              </p>
-              <p className="text-2xl font-bold text-warning">R$ {stats.pending.toFixed(2)}</p>
-              <p className="text-[10px] text-muted-foreground">Aguardando confirmação de pagamento</p>
-            </CardContent>
-          </Card>
-          <Card variant="kpi" className="border-secondary/20 bg-secondary/5">
-            <CardContent className="pt-6">
-              <p className="text-xs text-muted-foreground">Saldo Disponível</p>
-              <p className="text-2xl font-bold text-secondary">R$ {stats.available.toFixed(2)}</p>
-              <Dialog open={withdrawOpen} onOpenChange={setWithdrawOpen}>
-                <DialogTrigger asChild>
-                  <Button size="sm" variant="outline" className="mt-2 text-xs gap-1 w-full border-secondary/30 text-secondary hover:bg-secondary/10">
-                    <ArrowUpRight className="w-3 h-3" /> Solicitar Saque
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Solicitar Saque</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <p className="text-sm text-muted-foreground">
-                      Saldo disponível: <strong className="text-foreground">R$ {stats.available.toFixed(2)}</strong>
-                    </p>
-                    <p className="text-xs text-muted-foreground">Valor mínimo: R$ {MIN_WITHDRAWAL.toFixed(2)} · Processamento em 3-5 dias úteis</p>
-                    <div>
-                      <label className="text-xs font-medium text-foreground">Valor do saque (R$) *</label>
-                      <Input type="number" placeholder={`Mín. ${MIN_WITHDRAWAL.toFixed(2)}`} value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} min={MIN_WITHDRAWAL} max={stats.available} />
-                    </div>
-                    <div>
-                      <label className="text-xs font-medium text-foreground">Chave PIX *</label>
-                      <Input placeholder="CPF, e-mail ou telefone" value={pixKey} onChange={e => setPixKey(e.target.value)} />
-                    </div>
-                    <Button className="w-full bg-gradient-hero text-primary-foreground" onClick={requestWithdrawal} disabled={submitting || !withdrawAmount || !pixKey.trim()}>
-                      {submitting ? "Enviando..." : "Confirmar Solicitação"}
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+          {[
+            { label: "Ganho Confirmado", value: `R$ ${stats.total.toFixed(0)}`, icon: "✅", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", accent: "bg-emerald-500" },
+            { label: "Este Mês", value: `R$ ${stats.thisMonth.toFixed(0)}`, icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-blue-700 dark:text-blue-400", accent: "bg-blue-500" },
+            { label: "Pendente", value: `R$ ${stats.pending.toFixed(0)}`, icon: "⏳", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", accent: "bg-amber-500" },
+            { label: "Saldo Disponível", value: `R$ ${stats.available.toFixed(0)}`, icon: "💳", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueClass: "text-violet-600 dark:text-violet-400", accent: "bg-violet-500" },
+          ].map(s => (
+            <div key={s.label} className="overflow-hidden rounded-2xl border border-border/20 bg-card transition-all hover:-translate-y-0.5 hover:shadow-md" style={{ boxShadow: "var(--d-shadow-card)" }}>
+              <div className={`h-[3px] w-full ${s.accent}`} />
+              <div className="p-3.5">
+                <div className={`flex h-9 w-9 items-center justify-center rounded-xl text-[16px] ${s.iconBg}`}>{s.icon}</div>
+                <p className={`mt-2 text-[20px] font-black leading-none tracking-tight tabular-nums ${s.valueClass}`}>{s.value}</p>
+                <p className="mt-1 text-[10px] font-medium text-muted-foreground">{s.label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Withdrawal button */}
+        <div className="flex justify-end">
+          <Dialog open={withdrawOpen} onOpenChange={setWithdrawOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white gap-1.5 shadow-md shadow-emerald-600/20">
+                <ArrowUpRight className="w-3.5 h-3.5" /> Solicitar Saque · R$ {stats.available.toFixed(2)}
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Solicitar Saque</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  Saldo disponível: <strong className="text-foreground">R$ {stats.available.toFixed(2)}</strong>
+                </p>
+                <p className="text-xs text-muted-foreground">Valor mínimo: R$ {MIN_WITHDRAWAL.toFixed(2)} · Processamento em 3-5 dias úteis</p>
+                <div>
+                  <label className="text-xs font-medium text-foreground">Valor do saque (R$) *</label>
+                  <Input type="number" placeholder={`Mín. ${MIN_WITHDRAWAL.toFixed(2)}`} value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)} min={MIN_WITHDRAWAL} max={stats.available} className="rounded-xl" />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-foreground">Chave PIX *</label>
+                  <Input placeholder="CPF, e-mail ou telefone" value={pixKey} onChange={e => setPixKey(e.target.value)} className="rounded-xl" />
+                </div>
+                <Button className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white" onClick={requestWithdrawal} disabled={submitting || !withdrawAmount || !pixKey.trim()}>
+                  {submitting ? "Enviando..." : "Confirmar Solicitação"}
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <Card className="border-border mb-8">
