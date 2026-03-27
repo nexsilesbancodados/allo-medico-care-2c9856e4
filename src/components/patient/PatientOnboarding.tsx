@@ -222,6 +222,79 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
           </div>
         );
 
+      case "kyc":
+        return (
+          <div className="space-y-5">
+            <div className="text-center">
+              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <ShieldCheck className="w-7 h-7 text-primary" />
+              </div>
+              <h2 className="text-lg font-bold text-foreground">Verificação de Identidade</h2>
+              <p className="text-xs text-muted-foreground mt-1">Para sua segurança, envie uma selfie e um documento com foto.</p>
+            </div>
+
+            {/* Selfie */}
+            <div className="rounded-2xl border border-border/50 p-4 bg-card">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Camera className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Selfie</p>
+                  <p className="text-[11px] text-muted-foreground">Foto do seu rosto, bem iluminado</p>
+                </div>
+                {selfiePreview && <CheckCircle2 className="w-5 h-5 text-green-500 ml-auto" />}
+              </div>
+              {selfiePreview ? (
+                <div className="relative">
+                  <img src={selfiePreview} alt="Selfie" className="w-full h-40 object-cover rounded-xl" />
+                  <button onClick={() => { setSelfieFile(null); setSelfiePreview(null); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 flex items-center justify-center">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border/60 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
+                  <Upload className="w-6 h-6 text-muted-foreground/50 mb-2" />
+                  <p className="text-xs text-muted-foreground font-medium">Tirar foto ou enviar</p>
+                  <input type="file" accept="image/*" capture="user" className="hidden" onChange={e => handleFileSelect(e, "selfie")} />
+                </label>
+              )}
+            </div>
+
+            {/* Document */}
+            <div className="rounded-2xl border border-border/50 p-4 bg-card">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+                  <FileText className="w-5 h-5 text-secondary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Documento com foto</p>
+                  <p className="text-[11px] text-muted-foreground">RG, CNH ou passaporte</p>
+                </div>
+                {docPreview && <CheckCircle2 className="w-5 h-5 text-green-500 ml-auto" />}
+              </div>
+              {docPreview ? (
+                <div className="relative">
+                  <img src={docPreview} alt="Documento" className="w-full h-40 object-cover rounded-xl" />
+                  <button onClick={() => { setDocFile(null); setDocPreview(null); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 flex items-center justify-center">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border/60 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
+                  <Upload className="w-6 h-6 text-muted-foreground/50 mb-2" />
+                  <p className="text-xs text-muted-foreground font-medium">Enviar documento</p>
+                  <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFileSelect(e, "doc")} />
+                </label>
+              )}
+            </div>
+
+            <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
+              🔒 Seus documentos são protegidos por criptografia e armazenados em conformidade com a LGPD.
+            </p>
+          </div>
+        );
+
       case "tour":
         return (
           <div className="space-y-4">
