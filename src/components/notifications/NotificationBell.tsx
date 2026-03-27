@@ -207,7 +207,7 @@ const NotificationBell = () => {
           </div>
           {unreadCount > 0 && (
             <Button variant="ghost" size="sm" onClick={markAllRead} className="text-xs h-7 rounded-lg text-primary hover:text-primary hover:bg-primary/10">
-              <Check className="w-3 h-3 mr-1" /> Ler todas
+              <CheckCircle size={12} weight="fill" className="mr-1" /> Ler todas
             </Button>
           )}
         </div>
@@ -215,7 +215,7 @@ const NotificationBell = () => {
         <ScrollArea className="max-h-[360px]">
           {notifications.length === 0 ? (
             <div className="py-12 text-center">
-              <Bell className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
+              <Bell size={28} weight="light" className="mx-auto mb-2 text-muted-foreground/30" />
               <p className="text-sm text-muted-foreground">Nenhuma notificação</p>
               <p className="text-[11px] text-muted-foreground/60 mt-0.5">Você será notificado sobre consultas e atualizações</p>
             </div>
@@ -252,7 +252,7 @@ const NotificationBell = () => {
                     aria-label="Excluir notificação"
                     onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
                   >
-                    <Trash2 className="w-3 h-3 text-muted-foreground" />
+                    <Trash size={12} className="text-muted-foreground" />
                   </Button>
                 </motion.div>
               ))}
