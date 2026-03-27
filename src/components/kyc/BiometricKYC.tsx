@@ -1,18 +1,18 @@
 import { useState, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Camera, RotateCcw, CheckCircle2, XCircle, Loader2, FileImage, User, ShieldCheck } from "lucide-react";
+import { Camera, RotateCcw, CheckCircle2, XCircle, Loader2, FileImage, User, ShieldCheck, Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { verificarFace, detectarFace, dataUrlToFile } from "@/lib/compreface";
 
 type Step = "intro" | "document" | "selfie" | "analyzing" | "result";
 
 interface KYCResult {
   match: boolean;
   score: number;
-  nome: string | null;
-  cpf: string | null;
   status: string;
 }
 
@@ -20,9 +20,11 @@ interface BiometricKYCProps {
   onComplete?: (result: KYCResult) => void;
   variant?: "full" | "compact";
   className?: string;
+  tipo?: "medico" | "paciente";
 }
 
-const BiometricKYC = ({ onComplete, variant = "full", className = "" }: BiometricKYCProps) => {
+const BiometricKYC = ({ onComplete, variant = "full", className = "", tipo = "paciente" }: BiometricKYCProps) => {
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>("intro");
   const [documentImage, setDocumentImage] = useState<string | null>(null);
   const [selfieImage, setSelfieImage] = useState<string | null>(null);
@@ -32,6 +34,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const startCamera = useCallback(async (target: "document" | "selfie") => {
     setCaptureTarget(target);
@@ -76,35 +79,73 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
     stopCamera();
   }, [captureTarget, stopCamera]);
 
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      if (captureTarget === "document") {
+        setDocumentImage(dataUrl);
+        setStep("selfie");
+      } else {
+        setSelfieImage(dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
   const analyzeImages = async () => {
-    if (!documentImage || !selfieImage) return;
+    if (!documentImage || !selfieImage || !user) return;
     setStep("analyzing");
 
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        toast.error("Sessão expirada. Faça login novamente.");
-        setStep("intro");
+      const selfieFile = dataUrlToFile(selfieImage, "selfie.jpg");
+      const docFile = dataUrlToFile(documentImage, "documento.jpg");
+
+      // Step 1: detect face in selfie
+      const detection = await detectarFace(selfieFile);
+      if (!detection.faceDetected) {
+        toast.error("Nenhum rosto detectado na selfie", { description: "Tente novamente com uma foto mais nítida." });
+        setStep("selfie");
         return;
       }
 
-      const { data, error } = await supabase.functions.invoke("didit-kyc", {
-        body: { document_image: documentImage, selfie_image: selfieImage },
+      // Step 2: verify face match
+      const verification = await verificarFace(selfieFile, docFile);
+
+      const status = verification.aprovado ? "aprovado" : "reprovado";
+      const score = Math.round(verification.similarity * 100);
+
+      // Save to Supabase
+      await supabase.from("kyc_verificacoes" as any).insert({
+        user_id: user.id,
+        status,
+        similarity: verification.similarity,
+        tipo,
       });
 
-      if (error) throw error;
+      // Update doctor_profiles kyc_status if doctor
+      if (tipo === "medico" && verification.aprovado) {
+        await supabase
+          .from("doctor_profiles")
+          .update({ kyc_status: "verified" } as any)
+          .eq("user_id", user.id);
+      }
 
-      setResult(data as KYCResult);
+      const kycResult: KYCResult = { match: verification.aprovado, score, status };
+      setResult(kycResult);
       setStep("result");
-      onComplete?.(data as KYCResult);
+      onComplete?.(kycResult);
 
-      if (data.status === "approved") {
-        toast.success("Identidade verificada!", { description: `Score: ${data.score}/100` });
+      if (verification.aprovado) {
+        toast.success("Identidade verificada!", { description: `Similaridade: ${score}%` });
       } else {
-        toast.error("Verificação não aprovada", { description: "Tente novamente com fotos mais nítidas." });
+        toast.error("Verificação não aprovada", { description: `Similaridade: ${score}% (mínimo 85%)` });
       }
     } catch (err: any) {
-      console.error("[BiometricKYC] Error:", err);
+      console.error("[BiometricKYC] CompreFace error:", err);
       toast.error("Erro na verificação", { description: err.message || "Tente novamente." });
       setStep("selfie");
     }
@@ -130,6 +171,13 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
   return (
     <div className={`space-y-4 ${className}`}>
       <canvas ref={canvasRef} className="hidden" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileUpload}
+      />
 
       <AnimatePresence mode="wait">
         {step === "intro" && (
@@ -140,7 +188,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
               </div>
               <h3 className="text-lg font-bold text-foreground">Verificação Biométrica</h3>
               <p className="text-xs text-muted-foreground mt-1 max-w-xs mx-auto">
-                Verificação inteligente com IA — tire uma foto do seu documento e uma selfie em poucos segundos.
+                Verificação facial inteligente — tire uma foto do seu documento e uma selfie em poucos segundos.
               </p>
             </div>
 
@@ -160,7 +208,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-foreground">Selfie ao vivo</p>
-                  <p className="text-xs text-muted-foreground">Comparação facial com IA</p>
+                  <p className="text-xs text-muted-foreground">Comparação facial automática</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -179,7 +227,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
             </Button>
 
             <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
-              🔒 Verificação segura com IA. Seus dados são protegidos por criptografia e conformidade com LGPD.
+              🔒 Verificação segura. Seus dados são protegidos por criptografia e conformidade com LGPD.
             </p>
           </motion.div>
         )}
@@ -193,7 +241,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
               <p className="text-xs text-muted-foreground mt-1">
                 {step === "document"
                   ? "Posicione seu documento de identidade na câmera"
-                  : "Posicione seu rosto centralizado na câmera"}
+                  : "Olhe para a câmera — posicione seu rosto centralizado"}
               </p>
             </div>
 
@@ -220,15 +268,30 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
               </div>
             ) : (
               <div className="space-y-3">
+                {step === "document" && !documentImage && (
+                  <div className="flex flex-col gap-2">
+                    <Button onClick={() => startCamera("document")} className="w-full h-12 rounded-xl gap-2 bg-primary text-primary-foreground font-bold">
+                      <Camera className="w-5 h-5" /> Usar Câmera
+                    </Button>
+                    <Button variant="outline" onClick={() => { setCaptureTarget("document"); fileInputRef.current?.click(); }} className="w-full h-12 rounded-xl gap-2">
+                      <Upload className="w-5 h-5" /> Enviar Arquivo
+                    </Button>
+                  </div>
+                )}
                 {step === "document" && documentImage && (
                   <div className="rounded-2xl overflow-hidden border border-border/50">
                     <img src={documentImage} alt="Documento" className="w-full" />
                   </div>
                 )}
                 {step === "selfie" && !selfieImage && (
-                  <Button onClick={() => startCamera("selfie")} className="w-full h-12 rounded-xl gap-2 bg-primary text-primary-foreground font-bold">
-                    <Camera className="w-5 h-5" /> Abrir Câmera para Selfie
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    <Button onClick={() => startCamera("selfie")} className="w-full h-12 rounded-xl gap-2 bg-primary text-primary-foreground font-bold">
+                      <Camera className="w-5 h-5" /> Abrir Câmera para Selfie
+                    </Button>
+                    <Button variant="outline" onClick={() => { setCaptureTarget("selfie"); fileInputRef.current?.click(); }} className="w-full h-12 rounded-xl gap-2">
+                      <Upload className="w-5 h-5" /> Enviar Arquivo
+                    </Button>
+                  </div>
                 )}
                 {step === "selfie" && selfieImage && (
                   <>
@@ -247,7 +310,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
                         <RotateCcw className="w-3.5 h-3.5" /> Refazer
                       </Button>
                       <Button onClick={analyzeImages} className="flex-1 rounded-xl gap-1 bg-primary text-primary-foreground font-bold">
-                        <ShieldCheck className="w-4 h-4" /> Analisar
+                        <ShieldCheck className="w-4 h-4" /> Verificar
                       </Button>
                     </div>
                   </>
@@ -262,49 +325,40 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
             <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
               <Loader2 className="w-8 h-8 text-primary animate-spin" />
             </div>
-            <h3 className="text-lg font-bold text-foreground">Analisando biometria...</h3>
-            <p className="text-xs text-muted-foreground">Comparação facial e extração de dados em andamento</p>
+            <h3 className="text-lg font-bold text-foreground">Verificando identidade...</h3>
+            <p className="text-xs text-muted-foreground">Comparação facial em andamento</p>
             <Progress value={50} className="h-1.5 max-w-xs mx-auto animate-pulse" />
           </motion.div>
         )}
 
         {step === "result" && result && (
           <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6 space-y-4">
-            <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${result.status === "approved" ? "bg-primary/10" : "bg-destructive/10"}`}>
-              {result.status === "approved"
+            <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${result.status === "aprovado" ? "bg-primary/10" : "bg-destructive/10"}`}>
+              {result.status === "aprovado"
                 ? <CheckCircle2 className="w-8 h-8 text-primary" />
                 : <XCircle className="w-8 h-8 text-destructive" />
               }
             </div>
             <h3 className="text-lg font-bold text-foreground">
-              {result.status === "approved" ? "Identidade Verificada!" : "Verificação Não Aprovada"}
+              {result.status === "aprovado" ? "Identidade Verificada! ✅" : "Não foi possível verificar"}
             </h3>
 
-            {result.status === "approved" && (
+            {result.status === "aprovado" && (
               <div className="rounded-2xl border border-border/50 p-4 bg-card text-left space-y-2 max-w-xs mx-auto">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Score</span>
-                  <span className="font-bold text-foreground">{result.score}/100</span>
+                  <span className="text-muted-foreground">Similaridade</span>
+                  <span className="font-bold text-foreground">{result.score}%</span>
                 </div>
-                {result.nome && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Nome</span>
-                    <span className="font-semibold text-foreground">{result.nome}</span>
-                  </div>
-                )}
-                {result.cpf && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">CPF</span>
-                    <span className="font-mono text-foreground">{result.cpf}</span>
-                  </div>
-                )}
               </div>
             )}
 
-            {result.status !== "approved" && (
-              <Button onClick={reset} variant="outline" className="rounded-xl gap-2">
-                <RotateCcw className="w-4 h-4" /> Tentar novamente
-              </Button>
+            {result.status !== "aprovado" && (
+              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Similaridade: {result.score}% (mínimo 85%)</p>
+                <Button onClick={reset} variant="outline" className="rounded-xl gap-2">
+                  <RotateCcw className="w-4 h-4" /> Tentar novamente
+                </Button>
+              </div>
             )}
           </motion.div>
         )}
