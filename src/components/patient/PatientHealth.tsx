@@ -316,7 +316,7 @@ const PatientHealth = () => {
                   }`}
                 >
                   {/* Gradient accent */}
-                  <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${mt.gradient} ${isSelected ? "opacity-100" : "opacity-0"} transition-opacity`} />
+                  <div className={`absolute top-0 left-0 right-0 h-0.5 bg-primary ${isSelected ? "opacity-100" : "opacity-0"} transition-opacity`} />
 
                   <div className="flex items-center justify-between mb-2">
                     <div className={`w-8 h-8 rounded-lg ${mt.bg} flex items-center justify-center`}>
