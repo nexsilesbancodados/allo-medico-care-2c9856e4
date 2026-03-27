@@ -20,6 +20,7 @@ interface NavIconProps {
   color?: NavIconColor;
   active?: boolean;
   className?: string;
+  size?: number;
 }
 
 export const NavIcon = ({ icon, color = "blue", active, className }: NavIconProps) => {
