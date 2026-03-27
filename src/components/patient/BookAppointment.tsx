@@ -101,9 +101,6 @@ const BookAppointment = () => {
     if (user) {
       supabase.from("dependents").select("id, name, relationship").eq("user_id", user.id)
         .then(({ data }) => setDependents(data ?? []));
-      // Check discount card
-      supabase.from("discount_cards").select("discount_percent").eq("user_id", user.id).eq("status", "active").maybeSingle()
-        .then(({ data }) => { if (data) setCardDiscount(Number(data.discount_percent)); });
     }
     const currentYear = new Date().getFullYear();
     Promise.all([getFeriadosNacionais(currentYear), getFeriadosNacionais(currentYear + 1)])
