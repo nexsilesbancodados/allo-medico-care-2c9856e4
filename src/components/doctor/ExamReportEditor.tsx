@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -34,7 +34,7 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
-import TipTapEditor from "@/components/telelaudo/TipTapEditor";
+const TipTapEditor = lazy(() => import("@/components/telelaudo/TipTapEditor"));
 import jsPDF from "jspdf";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
