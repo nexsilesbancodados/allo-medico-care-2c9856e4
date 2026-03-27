@@ -49,6 +49,9 @@ const Teleconsulta = lazy(() => import("./pages/Teleconsulta"));
 const Telelaudo = lazy(() => import("./pages/Telelaudo"));
 const AuthLaudista = lazy(() => import("./pages/AuthLaudista"));
 const TelelaudoWorkspace = lazy(() => import("./pages/TelelaudoWorkspace"));
+const LaudosFila = lazy(() => import("./pages/LaudosFila"));
+const LaudosEditor = lazy(() => import("./pages/LaudosEditor"));
+const LaudosValidar = lazy(() => import("./pages/LaudosValidar"));
 
 
 const queryClient = new QueryClient({
@@ -205,6 +208,10 @@ const App = () => {
                         <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
                         <Route path="/laudista" element={<AuthLaudista />} />
                         <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
+                        <Route path="/laudos/fila" element={<ProtectedRoute><LaudosFila /></ProtectedRoute>} />
+                        <Route path="/laudos/editor/:exameId" element={<ProtectedRoute><LaudosEditor /></ProtectedRoute>} />
+                        <Route path="/laudos/validar/:token" element={<LaudosValidar />} />
+                        <Route path="/laudos/validar" element={<LaudosValidar />} />
                         <Route
                           path="/dashboard/*"
                           element={
