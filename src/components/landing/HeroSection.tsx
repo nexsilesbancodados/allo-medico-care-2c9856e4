@@ -83,47 +83,50 @@ const HeroSection = memo(
                 </p>
               </div>
 
+              {/* CTA Buttons */}
               <motion.div
-                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8"
+                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.35 }}
               >
                 <Button
                   size="lg"
-                  className="rounded-full h-[52px] w-full sm:w-[240px] justify-center text-[15px] font-bold shadow-lg shadow-primary/25 group bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
+                  className="rounded-2xl h-[56px] w-full sm:w-[260px] justify-center text-[15px] font-bold shadow-lg shadow-primary/25 group bg-gradient-to-r from-primary to-[hsl(var(--primary)/0.85)] hover:brightness-110 text-primary-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
                   onClick={() => navigate("/paciente")}
                   onMouseEnter={prefetchPaciente}
                 >
                   Agendar consulta
                   <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
                 </Button>
-                <span className="hidden sm:block text-muted-foreground/40 text-sm font-medium select-none">ou</span>
                 <Button
                   size="lg"
-                  className="rounded-full h-[52px] w-full sm:w-[240px] justify-center text-[15px] font-bold shadow-lg shadow-success/25 group bg-gradient-to-r from-success to-success/80 hover:from-success/90 hover:to-success/70 text-success-foreground border-0 gap-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
+                  className="rounded-2xl h-[56px] w-full sm:w-[260px] justify-center text-[15px] font-bold shadow-lg shadow-success/25 group bg-gradient-to-r from-success to-[hsl(var(--success)/0.85)] hover:brightness-110 text-success-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
                   onClick={() => navigate("/consulta-avulsa")}
                   onMouseEnter={prefetchConsulta}
                 >
                   Consulta avulsa
-                  <span className="inline-flex items-center rounded-full bg-white/20 text-white px-2.5 py-0.5 text-xs font-bold">R$89</span>
+                  <span className="inline-flex items-center rounded-lg bg-white/25 text-white px-2.5 py-1 text-xs font-extrabold ml-1">R$89</span>
                 </Button>
               </motion.div>
 
+              {/* Trust badges */}
               <motion.div
-                className="flex flex-wrap gap-x-5 gap-y-2.5"
+                className="flex flex-row flex-wrap items-center gap-3"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.5 }}
               >
                 {trustItems.map((item) => (
-                  <span
+                  <div
                     key={item.label}
-                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 text-[13px] text-foreground font-medium shadow-sm"
+                    className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-card border border-border/60 text-sm text-foreground font-medium shadow-sm hover:shadow-md transition-shadow duration-200"
                   >
-                    <item.icon className={`w-4 h-4 ${item.color} shrink-0`} />
+                    <div className={`flex items-center justify-center w-7 h-7 rounded-lg bg-muted/60`}>
+                      <item.icon className={`w-4 h-4 ${item.color} shrink-0`} />
+                    </div>
                     {item.label}
-                  </span>
+                  </div>
                 ))}
               </motion.div>
             </motion.div>
