@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { getSubdomainRole } from "./use-subdomain-redirect";
 
@@ -6,9 +6,11 @@ import { getSubdomainRole } from "./use-subdomain-redirect";
  * Centralized post-login redirect logic.
  * After signInWithPassword succeeds, call redirectAfterLogin(user) 
  * to handle role-based routing.
+ * Supports ?redirect= param for post-login deep linking (e.g. KYC from QR code).
  */
 export function useAuthRedirect() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const redirectAfterLogin = async (userId: string) => {
     const { data: roles } = await supabase
@@ -17,10 +19,13 @@ export function useAuthRedirect() {
       .eq("user_id", userId);
 
     const roleList = roles?.map((r: any) => r.role) ?? [];
-    const isPatient = roleList.includes("patient");
-    const isOtherRole = roleList.some((r: string) =>
-      ["doctor", "admin", "clinic", "receptionist", "support", "partner"].includes(r)
-    );
+
+    // Check for explicit redirect param (e.g. from QR code KYC)
+    const redirectTo = searchParams.get("redirect");
+    if (redirectTo && redirectTo.startsWith("/")) {
+      navigate(redirectTo);
+      return;
+    }
 
     const subRole = getSubdomainRole();
     if (subRole) {
