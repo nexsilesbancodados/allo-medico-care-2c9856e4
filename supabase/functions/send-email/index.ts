@@ -13,36 +13,41 @@ interface EmailRequest {
 }
 
 // ─── URL Constants ─────────────────────────────────────────────────────────────
-const BASE_URL = Deno.env.get("SITE_URL") || "https://allo-medico-care.lovable.app";
+const ROOT_DOMAIN = Deno.env.get("SITE_DOMAIN") || "aloclinica.com";
+const PROTOCOL = "https://";
+const FALLBACK_URL = Deno.env.get("SITE_URL") || "https://allo-medico-care.lovable.app";
+
+// Subdomain-based URLs for each role
+const sub = (subdomain: string, path = "") => `${PROTOCOL}${subdomain}.${ROOT_DOMAIN}${path}`;
 
 const URLS = {
-  // Patient routes
-  patientDashboard:    `${BASE_URL}/dashboard?role=patient`,
-  patientSchedule:     `${BASE_URL}/dashboard/schedule?role=patient`,
-  patientAppointments: `${BASE_URL}/dashboard/appointments?role=patient`,
-  patientHealth:       `${BASE_URL}/dashboard/health?role=patient`,
-  patientPlans:        `${BASE_URL}/dashboard/plans?role=patient`,
-  patientPrescriptions:`${BASE_URL}/dashboard/prescriptions?role=patient`,
-  patientSupport:      `${BASE_URL}/dashboard/support?role=patient`,
-  // Doctor routes
-  doctorDashboard:     `${BASE_URL}/dashboard?role=doctor`,
-  doctorAuth:          `${BASE_URL}/medico`,
-  // Clinic routes
-  clinicDashboard:     `${BASE_URL}/dashboard?role=clinic`,
-  clinicAuth:          `${BASE_URL}/clinica`,
-  // Partner routes
-  partnerDashboard:    `${BASE_URL}/dashboard?role=partner`,
-  partnerAuth:         `${BASE_URL}/parceiro`,
-  // Admin
-  adminDashboard:      `${BASE_URL}/dashboard?role=admin`,
-  // Laudista
-  laudistaDashboard:   `${BASE_URL}/dashboard?role=laudista`,
-  // Auth
-  authLogin:           `${BASE_URL}/auth`,
+  // Patient routes (paciente.aloclinica.com)
+  patientDashboard:    sub("paciente", "/dashboard"),
+  patientSchedule:     sub("paciente", "/dashboard/schedule"),
+  patientAppointments: sub("paciente", "/dashboard/appointments"),
+  patientHealth:       sub("paciente", "/dashboard/health"),
+  patientPlans:        sub("paciente", "/dashboard/plans"),
+  patientPrescriptions:sub("paciente", "/dashboard/prescriptions"),
+  patientSupport:      sub("paciente", "/dashboard/support"),
+  // Doctor routes (medico.aloclinica.com)
+  doctorDashboard:     sub("medico", "/dashboard"),
+  doctorAuth:          sub("medico"),
+  // Clinic routes (clinica.aloclinica.com)
+  clinicDashboard:     sub("clinica", "/dashboard"),
+  clinicAuth:          sub("clinica"),
+  // Partner routes (parceiro.aloclinica.com)
+  partnerDashboard:    sub("parceiro", "/dashboard"),
+  partnerAuth:         sub("parceiro"),
+  // Admin (admin.aloclinica.com)
+  adminDashboard:      sub("admin", "/dashboard"),
+  // Laudista (laudista.aloclinica.com)
+  laudistaDashboard:   sub("laudista", "/dashboard"),
+  // Auth (root)
+  authLogin:           `${PROTOCOL}${ROOT_DOMAIN}/auth`,
   // Validation
-  validateDoc: (code: string) => `${BASE_URL}/validar/${code}`,
+  validateDoc: (code: string) => `${PROTOCOL}${ROOT_DOMAIN}/validar/${code}`,
   // Discount card
-  discountCard:        `${BASE_URL}/cartao-beneficios`,
+  discountCard:        `${PROTOCOL}${ROOT_DOMAIN}/cartao-beneficios`,
 };
 
 // ─── Email wrapper ─────────────────────────────────────────────────────────────
