@@ -23,7 +23,7 @@ interface PatientOnboardingProps {
   onComplete: () => void;
 }
 
-const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Não sei"];
 
 const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const { user, profile } = useAuth();
@@ -213,6 +213,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
                 <Input value={allergyInput} onChange={e => setAllergyInput(e.target.value)} placeholder="Ex: Dipirona" className="h-11 rounded-xl flex-1" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addAllergy())} />
                 <Button size="sm" variant="outline" onClick={addAllergy} className="h-11 w-11 rounded-xl"><Plus className="w-4 h-4" /></Button>
               </div>
+              <button type="button" onClick={() => { if (!allergies.includes("Nenhuma")) setAllergies(["Nenhuma"]); }} className="text-xs text-primary mt-1.5 hover:underline">Não tenho alergias</button>
               {allergies.length > 0 && <div className="flex flex-wrap gap-1.5 mt-2">{allergies.map(a => (<Badge key={a} variant="secondary" className="text-xs gap-1 cursor-pointer" onClick={() => setAllergies(prev => prev.filter(x => x !== a))}>{a} <X className="w-2.5 h-2.5" /></Badge>))}</div>}
             </div>
             <div>
@@ -221,6 +222,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
                 <Input value={conditionInput} onChange={e => setConditionInput(e.target.value)} placeholder="Ex: Diabetes" className="h-11 rounded-xl flex-1" onKeyDown={e => e.key === "Enter" && (e.preventDefault(), addCondition())} />
                 <Button size="sm" variant="outline" onClick={addCondition} className="h-11 w-11 rounded-xl"><Plus className="w-4 h-4" /></Button>
               </div>
+              <button type="button" onClick={() => { if (!chronicConditions.includes("Nenhuma")) setChronicConditions(["Nenhuma"]); }} className="text-xs text-primary mt-1.5 hover:underline">Não tenho condições crônicas</button>
               {chronicConditions.length > 0 && <div className="flex flex-wrap gap-1.5 mt-2">{chronicConditions.map(c => (<Badge key={c} variant="secondary" className="text-xs gap-1 cursor-pointer" onClick={() => setChronicConditions(prev => prev.filter(x => x !== c))}>{c} <X className="w-2.5 h-2.5" /></Badge>))}</div>}
             </div>
           </div>
