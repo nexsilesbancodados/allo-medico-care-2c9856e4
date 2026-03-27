@@ -98,6 +98,44 @@ const UrgentCareQueue = () => {
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
   const [pendingQueueId, setPendingQueueId] = useState<string | null>(null);
+  const [nearbyHospitals, setNearbyHospitals] = useState<NearbyHospital[]>([]);
+  const [hospitalsLoading, setHospitalsLoading] = useState(true);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
+
+  // Fetch nearby hospitals via geolocation + Overpass
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocalização não suportada pelo navegador");
+      setHospitalsLoading(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setUserCoords({ lat: latitude, lon: longitude });
+        try {
+          const hospitals = await fetchNearbyHospitals(latitude, longitude);
+          setNearbyHospitals(hospitals);
+        } catch (err) {
+          logError("Failed to fetch nearby hospitals", err);
+          setLocationError("Não foi possível buscar hospitais próximos");
+        } finally {
+          setHospitalsLoading(false);
+        }
+      },
+      (err) => {
+        setLocationError(err.code === 1 ? "Permita o acesso à localização para ver hospitais próximos" : "Erro ao obter localização");
+        setHospitalsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
+  const openInMaps = (hospital: NearbyHospital) => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lon}`;
+    window.open(url, "_blank");
+  };
 
   useEffect(() => { fetchShiftPrice(); if (user) fetchMyEntry(); }, [user]);
 
