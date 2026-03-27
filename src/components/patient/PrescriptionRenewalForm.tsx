@@ -238,14 +238,7 @@ const PrescriptionRenewalForm = () => {
                 <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-2" />
                 <h2 className="text-lg font-bold text-foreground">Pagamento — Renovação de Receita</h2>
                 <p className="text-muted-foreground text-sm">
-                  {discountPercent > 0 ? (
-                    <>
-                      <span className="line-through text-muted-foreground/60">R$ {RENEWAL_PRICE},00</span>{" "}
-                      <span className="text-secondary font-bold">R$ {finalPrice.toFixed(2).replace(".", ",")} ({discountPercent}% off)</span>
-                    </>
-                  ) : (
-                    <>R$ {RENEWAL_PRICE},00</>
-                  )} • Pagamento via Asaas
+                    R$ {RENEWAL_PRICE},00 • Pagamento via Asaas
                 </p>
               </div>
 

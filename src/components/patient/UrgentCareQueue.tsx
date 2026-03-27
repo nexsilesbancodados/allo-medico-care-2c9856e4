@@ -311,14 +311,7 @@ const UrgentCareQueue = () => {
                   <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-2" />
                   <h2 className="text-lg font-bold text-foreground">Pagamento — Plantão 24h</h2>
                   <p className="text-muted-foreground text-sm">
-                    {discountPercent > 0 ? (
-                      <>
-                        <span className="line-through text-muted-foreground/60">R$ {shiftInfo?.price.toFixed(2)}</span>{" "}
-                        <span className="text-secondary font-bold">R$ {priceWithDiscount.toFixed(2)} ({discountPercent}% off)</span>
-                      </>
-                    ) : (
-                      <>R$ {priceWithDiscount.toFixed(2)}</>
-                    )} • Turno {shiftInfo?.label}
+                    R$ {priceWithDiscount.toFixed(2)} • Turno {shiftInfo?.label}
                   </p>
                 </div>
 
@@ -419,13 +412,7 @@ const UrgentCareQueue = () => {
                     <p className="text-xs text-muted-foreground">Turno atual</p>
                   </div>
                   <div className="text-right shrink-0">
-                    {discountPercent > 0 && (
-                      <p className="text-xs sm:text-sm text-muted-foreground line-through">R$ {shiftInfo?.price.toFixed(2)}</p>
-                    )}
                     <p className="text-xl sm:text-2xl font-bold text-primary">R$ {priceWithDiscount.toFixed(2)}</p>
-                    {discountPercent > 0 && (
-                      <Badge variant="secondary" className="text-[10px] sm:text-xs">-{discountPercent}% Cartão Desconto</Badge>
-                    )}
                   </div>
                 </div>
 

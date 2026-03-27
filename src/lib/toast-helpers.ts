@@ -126,12 +126,7 @@ export const toastDoctorOffDuty = () =>
     description: "Você não receberá mais pacientes da fila.",
   });
 
-// ─── Card / Subscription ────────────────────────────────────────────────────
-
-export const toastCardActivated = () =>
-  toast.success("Cartão de Benefícios ativado! 💳", {
-    description: "Seus descontos já estão valendo.",
-  });
+// ─── Renewals ───────────────────────────────────────────────────────────────
 
 export const toastRenewalApproved = () =>
   toast.success("Renovação aprovada! ✅", {
