@@ -73,7 +73,7 @@ const ROUTE_LABELS: Record<string, string> = {
   "urgent-care": "Pronto Atendimento",
   "prescription-renewal": "Renovação",
   "exam-results": "Resultados",
-  "discount-card": "Cartão Desconto",
+  
   dependents: "Dependentes",
   diary: "Diário",
   timeline: "Linha do Tempo",
