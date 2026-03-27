@@ -37,7 +37,7 @@ interface Appointment {
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   scheduled: { label: "Agendada", color: "bg-primary/10 text-primary", dot: "bg-primary" },
   payment_pending: { label: "Aguardando pagamento", color: "bg-warning/10 text-warning", dot: "bg-warning animate-pulse" },
-  waiting: { label: "Sala de espera", color: "bg-amber-500/10 text-amber-600", dot: "bg-amber-500" },
+  waiting: { label: "Sala de espera", color: "bg-warning/10 text-warning", dot: "bg-warning" },
   in_progress: { label: "Em andamento", color: "bg-secondary/10 text-secondary", dot: "bg-secondary animate-pulse" },
   completed: { label: "Concluída", color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
   cancelled: { label: "Cancelada", color: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
