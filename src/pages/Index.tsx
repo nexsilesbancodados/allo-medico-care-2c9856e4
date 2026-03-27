@@ -27,12 +27,12 @@ const TestimonialsSection = lazy(() => import("@/components/landing/Testimonials
 const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
 const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
 const Footer = lazy(() => import("@/components/landing/Footer"));
-const SpecialtyQuiz = lazy(() => import("@/components/landing/SpecialtyQuiz"));
+
 const HorizontalScrollCards = lazy(() => import("@/components/landing/HorizontalScrollCards"));
 
 const Index = forwardRef<HTMLDivElement>((_, ref) => {
   const { setTheme, theme } = useTheme();
-  const [showQuiz, setShowQuiz] = useState(false);
+  
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -43,11 +43,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
   }, []);
 
 
-  useEffect(() => {
-    const handler = () => setShowQuiz(true);
-    window.addEventListener("open-specialty-quiz", handler);
-    return () => window.removeEventListener("open-specialty-quiz", handler);
-  }, []);
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -223,7 +218,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
             <Button
               size="lg"
               className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
-              onClick={() => setShowQuiz(true)}
+              onClick={() => navigate("/paciente")}
             >
               <Stethoscope className="w-5 h-5" aria-hidden="true" />
               Fazer Triagem Gratuita
@@ -237,11 +232,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       </DeferredSection>
 
       <FloatingMobileCTA />
-      {showQuiz && (
-        <Suspense fallback={null}>
-          <SpecialtyQuiz onClose={() => setShowQuiz(false)} />
-        </Suspense>
-      )}
     </div>
   );
 });
