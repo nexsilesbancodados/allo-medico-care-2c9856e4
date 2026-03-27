@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -14,6 +14,8 @@ import {
   type AlocLaudo,
 } from "@/lib/services/laudos-service";
 import { supabase } from "@/integrations/supabase/client";
+import { criarDocumentoParaAssinar, enviarParaAssinatura } from "@/lib/docuseal";
+import DocuSealSigningModal from "@/components/laudos/DocuSealSigningModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +32,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import jsPDF from "jspdf";
 import {
   Save,
   CheckCircle,
