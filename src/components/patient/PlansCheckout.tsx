@@ -12,11 +12,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Check, Star, CreditCard, Calendar as CalIcon, Clock, FileText,
   Search, ArrowLeft, Shield, User, History, QrCode, FileBarChart, Copy, CheckCircle2, Lock,
-  Crown, Diamond, Building2, ArrowRight, Loader2
+  ArrowRight, Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
@@ -70,12 +69,7 @@ const PlansCheckout = () => {
 
   const [step, setStep] = useState<Step>("specialty");
   const [selectedPlan, setSelectedPlan] = useState<string | null>("avulsa");
-  const [activeTab, setActiveTab] = useState("consulta");
-  const [subscribingCard, setSubscribingCard] = useState<string | null>(null);
-  const [cardSubPaymentMethod, setCardSubPaymentMethod] = useState<PaymentMethod>("pix");
-  const [cardSubPixQr, setCardSubPixQr] = useState<string | null>(null);
-  const [cardSubPixCode, setCardSubPixCode] = useState<string | null>(null);
-  const [cardSubBoletoUrl, setCardSubBoletoUrl] = useState<string | null>(null);
+  
 
   // Avulsa flow state
   const [specialties, setSpecialties] = useState<{ id: string; name: string }[]>([]);
@@ -550,37 +544,8 @@ const PlansCheckout = () => {
   const stepIndex = { specialty: 0, doctor: 1, datetime: 2, checkout: 3, success: 4 }[step] ?? 0;
 
   return (
-    <DashboardLayout title="Paciente" nav={patientNav}>
+    <DashboardLayout title="Comprar Consulta" nav={patientNav}>
       <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
-        {/* Tab selector */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="consulta" className="text-xs sm:text-sm">
-              <CreditCard className="w-4 h-4 mr-1.5" /> Consulta Avulsa
-            </TabsTrigger>
-            <TabsTrigger value="empresarial" className="text-xs sm:text-sm">
-              <Building2 className="w-4 h-4 mr-1.5" /> Empresarial
-            </TabsTrigger>
-          </TabsList>
-
-          {/* ===== TAB: EMPRESARIAL ===== */}
-          <TabsContent value="empresarial" className="mt-6">
-            <div className="text-center py-12">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mx-auto mb-4 shadow-lg">
-                <Building2 className="w-8 h-8 text-primary-foreground" />
-              </div>
-              <h2 className="text-2xl font-bold text-foreground mb-2">Plano Empresarial</h2>
-              <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-                Ofereça saúde e bem-estar para seus colaboradores com condições especiais para empresas.
-              </p>
-              <Button size="lg" className="rounded-xl" onClick={() => navigate("/empresas")}>
-                Conhecer Plano Empresarial <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </div>
-          </TabsContent>
-
-          {/* ===== TAB: CONSULTA AVULSA ===== */}
-          <TabsContent value="consulta" className="mt-6">
       <div className={step === "checkout" ? "max-w-4xl" : "max-w-3xl"}>
 
         {/* Step indicator */}
@@ -1117,8 +1082,6 @@ const PlansCheckout = () => {
           </motion.div>
         )}
       </div>
-          </TabsContent>
-        </Tabs>
       </div>
     </DashboardLayout>
   );
