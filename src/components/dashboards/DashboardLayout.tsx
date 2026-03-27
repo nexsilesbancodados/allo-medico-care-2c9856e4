@@ -243,7 +243,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
 
     return (
       <Link to={item.href} onClick={onClick}
-        className={`nav-item group flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] transition-all duration-200 relative ${
+        className={`nav-item group flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all duration-200 relative ${
           item.active
             ? "bg-primary text-primary-foreground font-semibold shadow-[0_2px_8px_rgba(0,0,0,.15),inset_0_0_0_1px_rgba(255,255,255,.06)]"
             : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -263,9 +263,9 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   };
 
   const SidebarContent = ({ onItemClick, collapsed = false }: { onItemClick?: () => void; collapsed?: boolean }) => (
-    <div ref={sidebarRef} className="flex flex-col h-full">
+    <div ref={sidebarRef} className="flex flex-col h-full min-h-0">
       {/* Spacer top */}
-      <div className="h-3 shrink-0" />
+      <div className="h-4 shrink-0" />
 
       {/* Role badge */}
       {!collapsed && (
@@ -292,7 +292,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       )}
 
       {nav && nav.length > 0 && (
-        <nav className={`flex-1 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-border/50 ${collapsed ? "px-1.5" : "px-2.5"}`}>
+        <nav className={`flex-1 min-h-0 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-border/50 ${collapsed ? "px-1.5" : "px-3"}`}>
           {navGroups.map((group, gi) => (
             <div key={gi}>
               {group.label && !collapsed && (
@@ -380,7 +380,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                   <Menu className="w-5 h-5" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-[280px] border-border/20 bg-background">
+              <SheetContent side="left" className="p-0 w-[85vw] max-w-[340px] border-border/20 bg-background flex flex-col h-full">
                 <SidebarContent onItemClick={() => setSidebarOpen(false)} />
               </SheetContent>
             </Sheet>
@@ -441,7 +441,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                   <Menu className="w-4.5 h-4.5" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-[260px] border-border/20 bg-background">
+              <SheetContent side="left" className="p-0 w-[280px] border-border/20 bg-background flex flex-col h-full">
                 <SidebarContent onItemClick={() => setSidebarOpen(false)} />
               </SheetContent>
             </Sheet>
