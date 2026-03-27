@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
-import { CreditCard, CheckCircle2, Clock, XCircle, Shield, Wifi, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
+import { CreditCard, CheckCircle2, Clock, XCircle, Shield, Wifi, Sparkles, ArrowRight } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -31,8 +31,8 @@ interface SubscriptionEntry {
 }
 
 const statusConfig: Record<string, { label: string; icon: React.ReactNode; className: string }> = {
-  active: { label: "Ativa", icon: <CheckCircle2 className="w-3.5 h-3.5" />, className: "bg-success/10 text-success border-success/20" },
-  cancelled: { label: "Cancelada", icon: <XCircle className="w-3.5 h-3.5" />, className: "bg-destructive/10 text-destructive border-destructive/20" },
+  active: { label: "Ativa", icon: <CheckCircle2 className="w-3.5 h-3.5" />, className: "bg-[hsl(var(--p-success-soft))] text-success border-success/20" },
+  cancelled: { label: "Cancelada", icon: <XCircle className="w-3.5 h-3.5" />, className: "bg-[hsl(var(--p-danger-soft))] text-destructive border-destructive/20" },
   expired: { label: "Vencida", icon: <Clock className="w-3.5 h-3.5" />, className: "bg-muted text-muted-foreground border-border" },
 };
 
@@ -101,35 +101,37 @@ const PaymentHistory = () => {
     <DashboardLayout title="Paciente" nav={getPatientNav("payments")} role="patient">
       <div className="w-full mx-auto max-w-2xl pb-24 md:pb-6 space-y-5">
 
-        {/* ═══ BANNER — Open Invoice ═══ */}
+        {/* ═══ ACTIVE PLAN — Gradient Card ═══ */}
         {!loading && activeSub && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary via-[hsl(215_70%_38%)] to-[hsl(215_55%_48%)] p-6 text-primary-foreground"
+            className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#00347F] to-[#1A4BA1] p-6 text-white"
           >
             <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/[0.06] blur-[40px]" />
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 
             <div className="relative z-10">
-              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary-foreground/60">
-                Fatura em aberto
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/60">
+                Plano Ativo
               </p>
               <p className="font-[Manrope] text-[34px] font-extrabold mt-1 tabular-nums">
                 R$ {Number(activeSub.plan_price).toFixed(2)}
               </p>
-              <p className="text-[13px] text-primary-foreground/60 mt-1">
-                {activeSub.expires_at
-                  ? `Vencimento: ${format(new Date(activeSub.expires_at), "dd/MM/yyyy", { locale: ptBR })}`
-                  : "Plano ativo"
-                }
+              <p className="text-[13px] text-white/60 mt-1">
+                {activeSub.plan_name} · {activeSub.plan_interval === "monthly" ? "Mensal" : activeSub.plan_interval}
               </p>
+              {activeSub.expires_at && (
+                <p className="text-[12px] text-white/50 mt-0.5">
+                  Vencimento: {format(new Date(activeSub.expires_at), "dd/MM/yyyy", { locale: ptBR })}
+                </p>
+              )}
               <div className="flex justify-end mt-4">
                 <Button
-                  className="rounded-full bg-primary-foreground text-primary gap-2 font-bold text-sm shadow-lg hover:bg-primary-foreground/90"
+                  className="rounded-full bg-white text-[#00347F] gap-2 font-bold text-sm shadow-[var(--p-shadow-btn)] hover:bg-white/90"
                   onClick={() => navigate("/dashboard/plans")}
                 >
-                  <CreditCard className="w-4 h-4" /> Pagar Agora
+                  <CreditCard className="w-4 h-4" /> Gerenciar
                 </Button>
               </div>
             </div>
@@ -141,15 +143,14 @@ const PaymentHistory = () => {
           <div>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <CreditCard className="w-3.5 h-3.5 text-primary" />
+                <div className="w-7 h-7 rounded-lg bg-[hsl(var(--p-primary))]/10 flex items-center justify-center">
+                  <CreditCard className="w-3.5 h-3.5 text-[hsl(var(--p-primary))]" />
                 </div>
-                <h2 className="text-base font-bold text-foreground">Meus Cartões</h2>
+                <h2 className="text-base font-bold text-foreground font-[Manrope]">Meus Cartões</h2>
               </div>
-              <button className="text-sm font-semibold text-primary">+ Novo</button>
+              <button className="text-sm font-semibold text-[hsl(var(--p-primary))]">+ Novo</button>
             </div>
-            {/* Physical card */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(240,30%,12%)] to-[hsl(240,25%,20%)] p-5 text-white shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(240,30%,12%)] to-[hsl(240,25%,20%)] p-5 text-white shadow-[var(--p-shadow-elevated)]">
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent" />
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-8">
@@ -172,54 +173,58 @@ const PaymentHistory = () => {
         {!loading && subs.length > 0 && (
           <div>
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-[hsl(var(--p-success-soft))] flex items-center justify-center">
                 <CheckCircle2 className="w-3.5 h-3.5 text-success" />
               </div>
-              <h2 className="text-base font-bold text-foreground">Histórico de Pagamentos</h2>
+              <h2 className="text-base font-bold text-foreground font-[Manrope]">Histórico de Pagamentos</h2>
             </div>
             <div className="space-y-2.5">
-              {subs.map((s, i) => (
-                <motion.div
-                  key={s.id}
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  className="relative overflow-hidden flex items-center gap-4 p-4 bg-card rounded-2xl border border-border/20 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-shadow"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
-                    <CheckCircle2 className="w-5 h-5 text-success" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[14px] font-semibold text-foreground">{s.plan_name}</p>
-                    <p className="text-[12px] text-muted-foreground mt-0.5">
-                      {format(new Date(s.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                      {s.payment_method && ` · ${s.payment_method === "credit_card" ? "Cartão" : s.payment_method === "pix" ? "PIX" : s.payment_method}`}
-                    </p>
-                  </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-[15px] font-bold text-foreground tabular-nums">R$ {Number(s.plan_price).toFixed(2)}</p>
-                    <button
-                      className="text-[12px] font-semibold text-primary flex items-center gap-0.5 ml-auto"
-                      onClick={() => generateReceipt(s)}
-                    >
-                      Recibo <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
+              {subs.map((s, i) => {
+                const cfg = statusConfig[s.status] ?? statusConfig.expired;
+                return (
+                  <motion.div
+                    key={s.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    whileTap={{ scale: 0.97 }}
+                    className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border/20 shadow-[var(--p-shadow-card)] hover:shadow-[var(--p-shadow-elevated)] transition-shadow"
+                  >
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${cfg.className}`}>
+                      {cfg.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[14px] font-semibold text-foreground">{s.plan_name}</p>
+                      <p className="text-[12px] text-muted-foreground mt-0.5">
+                        {format(new Date(s.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                        {s.payment_method && ` · ${s.payment_method === "credit_card" ? "Cartão" : s.payment_method === "pix" ? "PIX" : s.payment_method}`}
+                      </p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[15px] font-bold text-foreground tabular-nums font-[Manrope]">R$ {Number(s.plan_price).toFixed(2)}</p>
+                      <button
+                        className="text-[12px] font-semibold text-[hsl(var(--p-primary))] flex items-center gap-0.5 ml-auto"
+                        onClick={() => generateReceipt(s)}
+                      >
+                        Recibo <ArrowRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* ═══ EMPTY STATE ═══ */}
         {!loading && subs.length === 0 && (
-          <div className="text-center py-16">
+          <div className="text-center py-16 rounded-2xl border border-dashed border-border/40 bg-muted/10">
             <div className="w-16 h-16 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
               <CreditCard className="w-7 h-7 text-muted-foreground/40" />
             </div>
-            <p className="font-bold text-foreground mb-1">Nenhum pagamento</p>
+            <p className="font-bold text-foreground mb-1 font-[Manrope]">Nenhum pagamento</p>
             <p className="text-[13px] text-muted-foreground mb-5">Seus pagamentos aparecerão aqui</p>
-            <Button className="rounded-full shadow-lg" onClick={() => navigate("/dashboard/plans")}>
+            <Button className="rounded-full shadow-[var(--p-shadow-btn)] bg-[#00347F] text-white" onClick={() => navigate("/dashboard/plans")}>
               Ver planos disponíveis
             </Button>
           </div>
@@ -231,7 +236,7 @@ const PaymentHistory = () => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="rounded-2xl p-5 flex items-center gap-4 bg-gradient-to-br from-warning/[0.06] to-warning/[0.02] border border-warning/15"
+            className="rounded-2xl p-5 flex items-center gap-4 bg-[hsl(var(--p-warning-soft))] border border-warning/15"
           >
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1.5">
@@ -249,7 +254,7 @@ const PaymentHistory = () => {
         {/* ═══ LOADING ═══ */}
         {loading && (
           <div className="space-y-4">
-            <Skeleton className="h-44 rounded-2xl" />
+            <Skeleton className="h-44 rounded-3xl" />
             <Skeleton className="h-36 rounded-2xl" />
             <Skeleton className="h-20 rounded-2xl" />
             <Skeleton className="h-20 rounded-2xl" />
