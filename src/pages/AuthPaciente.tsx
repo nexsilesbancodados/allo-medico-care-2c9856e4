@@ -205,117 +205,128 @@ const AuthPaciente = () => {
             transition={{ duration: 0.35 }}
             className="flex-1 flex flex-col"
           >
-            {/* Hero gradient header */}
-            <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-secondary px-5 pt-[max(env(safe-area-inset-top,20px),20px)] pb-8">
-              <div className="absolute top-[-30%] right-[-15%] w-[280px] h-[280px] rounded-full bg-white/[0.06] blur-[80px]" />
-              <div className="absolute bottom-[-20%] left-[-10%] w-[200px] h-[200px] rounded-full bg-secondary/20 blur-[60px]" />
+            {/* Hero gradient header — taller, more immersive */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-secondary px-6 pt-[max(env(safe-area-inset-top,24px),24px)] pb-10">
+              {/* Ambient blurs */}
+              <div className="absolute top-[-25%] right-[-10%] w-[320px] h-[320px] rounded-full bg-white/[0.07] blur-[100px]" />
+              <div className="absolute bottom-[-15%] left-[-8%] w-[220px] h-[220px] rounded-full bg-secondary/25 blur-[70px]" />
+              <div className="absolute top-[40%] left-[30%] w-[120px] h-[120px] rounded-full bg-white/[0.04] blur-[50px]" />
 
               {/* Brand */}
-              <div className="relative z-10 flex items-center gap-2.5 mb-6">
+              <div className="relative z-10 flex items-center gap-2.5 mb-8">
                 <img src={logo} alt="AloClínica" className="w-10 h-10 rounded-2xl shadow-lg ring-2 ring-white/20" />
                 <div>
                   <h1 className="text-xl font-black text-white tracking-tight leading-none">AloClínica</h1>
-                  <p className="text-[10px] text-white/60 mt-0.5">Telemedicina de excelência</p>
+                  <p className="text-[10px] text-white/55 mt-0.5 tracking-wide">Telemedicina de excelência</p>
                 </div>
               </div>
 
               {/* Mascot + headline */}
               <div className="relative z-10 flex items-end justify-between">
-                <div className="flex-1 pb-2">
-                  <h2 className="text-[28px] font-extrabold text-white leading-[1.15] tracking-tight">
+                <div className="flex-1 pb-3">
+                  <h2 className="text-[32px] font-extrabold text-white leading-[1.1] tracking-tight">
                     Sua saúde em{" "}
-                    <span className="text-secondary-foreground bg-white/15 px-2 py-0.5 rounded-lg">boas mãos.</span>
+                    <span className="relative inline-block">
+                      <span className="relative z-10 text-white">boas mãos.</span>
+                      <span className="absolute inset-0 bg-white/15 rounded-xl -skew-x-2 scale-x-105 scale-y-110" />
+                    </span>
                   </h2>
-                  <p className="text-sm text-white/70 mt-3 max-w-[240px] leading-relaxed">
-                    O santuário digital para cuidar de você e de quem você ama.
+                  <p className="text-[14px] text-white/65 mt-3 max-w-[260px] leading-relaxed">
+                    Consultas online com especialistas verificados, do conforto da sua casa.
                   </p>
                 </div>
                 <motion.img
                   src={mascotWave}
                   alt="Pingo"
-                  className="w-[120px] h-[120px] object-contain select-none shrink-0"
-                  style={{ filter: "drop-shadow(0 4px 20px rgba(0,0,50,.25))" }}
-                  initial={{ opacity: 0, scale: 0.6, y: 20 }}
+                  className="w-[110px] h-[110px] object-contain select-none shrink-0 -mr-1"
+                  style={{ filter: "drop-shadow(0 6px 24px rgba(0,0,50,.3))" }}
+                  initial={{ opacity: 0, scale: 0.5, y: 30 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                 />
               </div>
 
               {/* Trust chips */}
-              <div className="relative z-10 flex gap-2 mt-4">
+              <div className="relative z-10 flex gap-2 mt-5">
                 {[
                   { emoji: "🏥", text: "CFM" },
                   { emoji: "🔒", text: "LGPD" },
                   { emoji: "⭐", text: "4.9/5" },
-                ].map((chip) => (
-                  <span
+                ].map((chip, i) => (
+                  <motion.span
                     key={chip.text}
-                    className="px-2.5 py-1 rounded-full bg-white/15 text-white/90 text-[10px] font-bold border border-white/10 backdrop-blur-sm"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 + i * 0.08 }}
+                    className="px-3 py-1.5 rounded-full bg-white/[0.12] text-white/90 text-[11px] font-bold border border-white/[0.08] backdrop-blur-md"
                   >
                     {chip.emoji} {chip.text}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 px-5 pt-6 pb-8 max-w-md mx-auto w-full">
-              {/* Feature Cards */}
+            <div className="flex-1 px-5 pt-7 pb-8 max-w-md mx-auto w-full">
+              {/* Section label */}
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 mb-4 pl-1">
+                Por que escolher a AloClínica
+              </p>
+
+              {/* Feature Cards — refined with subtle left accent */}
               <div className="space-y-3">
                 {featureCards.map((card, i) => (
                   <motion.div
                     key={card.title}
-                    initial={{ opacity: 0, y: 14 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 + i * 0.08 }}
-                    className="bg-card rounded-2xl p-4 flex items-center gap-4 shadow-sm border border-border/50"
+                    initial={{ opacity: 0, x: -12 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.15 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                    className="bg-card rounded-2xl p-4 flex items-center gap-4 shadow-[0_2px_12px_rgba(0,0,0,0.04)] border border-border/40 relative overflow-hidden group hover:shadow-md transition-shadow"
                   >
-                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${
+                    <div className={`absolute left-0 top-3 bottom-3 w-[3px] rounded-full ${
+                      card.accent ? "bg-destructive/60" : "bg-primary/40"
+                    }`} />
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ml-2 ${
                       card.accent ? "bg-destructive/10" : "bg-primary/10"
                     }`}>
-                      <card.icon className={`w-5 h-5 ${card.accent ? "text-destructive" : "text-primary"}`} weight="fill" />
+                      <card.icon className={`w-[22px] h-[22px] ${card.accent ? "text-destructive" : "text-primary"}`} weight="fill" />
                     </div>
                     <div>
-                      <p className="text-[15px] font-semibold text-foreground">{card.title}</p>
-                      <p className="text-[13px] text-muted-foreground">{card.desc}</p>
+                      <p className="text-[15px] font-bold text-foreground leading-tight">{card.title}</p>
+                      <p className="text-[13px] text-muted-foreground mt-0.5">{card.desc}</p>
                     </div>
                   </motion.div>
                 ))}
               </div>
 
-              {/* Highlight Banner */}
+              {/* Stats row */}
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="mt-5 rounded-2xl bg-gradient-to-br from-primary to-primary/85 p-5 relative overflow-hidden"
+                transition={{ delay: 0.5 }}
+                className="mt-6 grid grid-cols-3 gap-3"
               >
-                <div className="absolute top-0 right-0 w-24 h-24 rounded-full bg-white/[0.06] blur-[30px]" />
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-primary-foreground/60 relative z-10">
-                  Destaque do mês
-                </p>
-                <h3 className="text-lg font-bold text-primary-foreground mt-1 relative z-10">
-                  Check-up Preventivo
-                </h3>
-                <p className="text-[13px] text-primary-foreground/70 mt-0.5 relative z-10">
-                  Incluso no seu plano AloClínica.
-                </p>
-                <div className="flex justify-end mt-3 relative z-10">
-                  <button className="px-4 py-2 rounded-full bg-primary-foreground text-primary text-[13px] font-semibold hover:bg-primary-foreground/90 transition-colors active:scale-[0.97]">
-                    Saber Mais
-                  </button>
-                </div>
+                {[
+                  { value: "50k+", label: "Pacientes" },
+                  { value: "200+", label: "Médicos" },
+                  { value: "24/7", label: "Disponível" },
+                ].map((stat) => (
+                  <div key={stat.label} className="bg-card rounded-2xl p-3 text-center border border-border/30 shadow-sm">
+                    <p className="text-lg font-extrabold text-primary">{stat.value}</p>
+                    <p className="text-[11px] text-muted-foreground font-medium">{stat.label}</p>
+                  </div>
+                ))}
               </motion.div>
 
               {/* CTA */}
               <div className="mt-8 space-y-4">
                 <Button
                   onClick={() => setMode("signup")}
-                  className="w-full h-[52px] rounded-full bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all"
+                  className="w-full h-[54px] rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-bold text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all"
                   size="lg"
                 >
                   <UserPlus className="w-5 h-5 mr-2" weight="fill" />
-                  Começar Agora
+                  Começar Agora — É Grátis
                 </Button>
                 <p className="text-center text-sm text-muted-foreground">
                   Já tem uma conta?{" "}
