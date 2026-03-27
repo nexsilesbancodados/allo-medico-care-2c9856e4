@@ -1,6 +1,6 @@
 import { useState, memo, forwardRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain, Eye } from "lucide-react";
+import { Menu, X, LogOut, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain } from "lucide-react";
 import mascot from "@/assets/mascot.png";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -71,8 +71,6 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
 
   const mobileLinks = [
     { label: "Teleconsulta", href: "/teleconsulta" },
-    { label: "Cartão de Benefícios", href: "/cartao-beneficios" },
-    { label: "Oftalmologia", href: "/oftalmologia" },
     { label: "Sou Médico", href: "/medico" },
     { label: "Sou Laudista", href: "/laudista" },
     { label: "Sou Clínica", href: "/clinica" },
@@ -113,14 +111,8 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                       <ListItem href="/teleconsulta" title="Teleconsulta" icon={Video} badge="24h">
                         Consultas por vídeo com especialistas, receita digital e acesso rápido.
                       </ListItem>
-                      <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} badge="Popular">
-                        Descontos em consultas e exames para toda a família.
-                      </ListItem>
                       <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>
                         Atendimento rápido, seguro e sem burocracia.
-                      </ListItem>
-                      <ListItem href="/oftalmologia" title="Oftalmologia" icon={Eye} badge="Novo">
-                        Exames, receitas de óculos e laudos oftalmológicos.
                       </ListItem>
                     </ul>
                   </div>

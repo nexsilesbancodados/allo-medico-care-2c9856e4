@@ -1,4 +1,4 @@
-import { Calendar, FileText, Users, DollarSign, Settings, User, FileBadge, Clock, History, CalendarDays, Upload, MessageCircle, SlidersHorizontal, Zap, RefreshCw, CreditCard, Pill, Eye } from "lucide-react";
+import { Calendar, FileText, Users, DollarSign, Settings, User, FileBadge, Clock, History, CalendarDays, Upload, MessageCircle, SlidersHorizontal, Zap, RefreshCw, CreditCard, Pill } from "lucide-react";
 import { NavIcon } from "@/components/ui/nav-icon";
 
 export const getDoctorNav = (active: string) => [
@@ -14,7 +14,7 @@ export const getDoctorNav = (active: string) => [
   { label: "Receitas", href: "/dashboard/prescriptions?role=doctor", icon: <NavIcon icon={<FileText className="w-3.5 h-3.5" />} color="emerald" />, active: active === "prescriptions", group: "Documentos" },
   { label: "Receituário", href: "/dashboard/doctor/simple-prescription?role=doctor", icon: <NavIcon icon={<Pill className="w-3.5 h-3.5" />} color="rose" />, active: active === "simple-prescription", group: "Documentos" },
   { label: "Atestados", href: "/dashboard/certificates?role=doctor", icon: <NavIcon icon={<FileBadge className="w-3.5 h-3.5" />} color="blue" />, active: active === "certificates", group: "Documentos" },
-  { label: "Oftalmologia", href: "/dashboard/doctor/ophthalmology?role=doctor", icon: <NavIcon icon={<Eye className="w-3.5 h-3.5" />} color="cyan" />, active: active === "ophthalmology", group: "Documentos" },
+  
 
   { label: "Ganhos", href: "/dashboard/earnings?role=doctor", icon: <NavIcon icon={<DollarSign className="w-3.5 h-3.5" />} color="green" />, active: active === "earnings", group: "Financeiro" },
   { label: "Carteira", href: "/dashboard/doctor/wallet?role=doctor", icon: <NavIcon icon={<CreditCard className="w-3.5 h-3.5" />} color="emerald" />, active: active === "wallet", group: "Financeiro" },

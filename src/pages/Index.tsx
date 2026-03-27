@@ -9,10 +9,10 @@ import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
-import { Stethoscope, ShieldCheck, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
+import { Stethoscope, CreditCard, Brain, HeartPulse, FileText } from "lucide-react";
 
 // WebP for faster loading; deferred sections handle lazy rendering
-import bannerBenefits from "@/assets/banner-benefits-card.webp";
+
 import bannerAi from "@/assets/banner-ai-triage.webp";
 import bannerConsulta from "@/assets/banner-consulta.webp";
 import bannerPlantao from "@/assets/banner-plantao.webp";
@@ -140,18 +140,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         <StatsSection />
       </DeferredSection>
 
-      <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-        <InfoBannerStrip
-          icon={ShieldCheck}
-          label="Cartão de Benefícios"
-          title="Economize até 30% em todas as consultas"
-          highlight="A partir de R$37,90/mês"
-          href="/cartao-beneficios"
-          gradient="from-secondary to-emerald-600"
-          mascotSrc={bannerBenefits}
-          variant="angular"
-        />
-      </DeferredSection>
 
       <DeferredSection fallbackClassName="h-[520px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <HowItWorksSection />
