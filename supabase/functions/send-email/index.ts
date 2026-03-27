@@ -93,6 +93,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>🩺 Especialidade:</strong> ${d.specialty || "Clínica Geral"}</p>
       `)}
       <p>Acesse a plataforma <strong>5 minutos antes</strong> para entrar na sala de espera virtual.</p>
+      ${btn(URLS.patientAppointments, "Ver Minha Consulta")}
     `),
   }),
 
@@ -107,6 +108,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>⏰ Horário:</strong> ${d.time}</p>
       `)}
       <p>Prepare-se para acessar a plataforma no horário agendado.</p>
+      ${btn(URLS.patientAppointments, "Acessar Consulta")}
     `),
   }),
 
@@ -123,6 +125,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>Cancelado por:</strong> ${d.cancelled_by || "—"}</p>
       `, BRAND.red)}
       <p>Deseja reagendar? Acesse a plataforma e escolha um novo horário.</p>
+      ${btn(URLS.patientSchedule, "Reagendar Consulta")}
     `),
   }),
 
@@ -147,7 +150,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>O(a) <strong>${d.doctor_name}</strong> emitiu uma nova receita para você.</p>
       ${d.diagnosis ? `<div style="background:#fff8f0;padding:12px;border-radius:8px;margin:12px 0;"><strong>Diagnóstico:</strong> ${d.diagnosis}</div>` : ""}
       ${d.medications ? card(`<strong>Medicamentos:</strong><pre style="white-space:pre-wrap;font-family:sans-serif;font-size:14px;margin-top:8px;">${d.medications}</pre>`) : ""}
-      <p>Acesse a plataforma para visualizar e baixar sua receita completa em PDF.</p>
+      ${btn(URLS.patientPrescriptions, "Ver Minha Receita")}
     `),
   }),
 
@@ -161,7 +164,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         ${d.days ? `<p><strong>📅 Dias de afastamento:</strong> ${d.days}</p>` : ""}
         <p><strong>🔐 Código de verificação:</strong> ${d.verification_code || "—"}</p>
       `)}
-      <p>Acesse a plataforma para baixar o documento em PDF.</p>
+      ${btn(URLS.patientHealth, "Baixar Documento")}
     `),
   }),
 
@@ -176,7 +179,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <li>Agendar consultas online</li>
         <li>Receber receitas e atestados digitais</li>
       </ul>
-      ${btn("https://app.aloclinica.com.br/dashboard", "Acessar Painel")}
+      ${btn(URLS.patientDashboard, "Acessar Painel")}
     `),
   }),
 
@@ -221,7 +224,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
           <li>Emitir receitas e atestados digitais</li>
         </ul>
       `, BRAND.green)}
-      ${btn(d.login_url || "https://app.aloclinica.com.br/medico", "Acessar Painel Médico", BRAND.green)}
+      ${btn(d.login_url || URLS.doctorAuth, "Acessar Painel Médico", BRAND.green)}
     `),
   }),
 
@@ -249,7 +252,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
           <li>Acompanhar financeiro e relatórios</li>
         </ul>
       `, BRAND.green)}
-      ${btn(d.login_url || "https://app.aloclinica.com.br/clinica", "Acessar Painel da Clínica", BRAND.green)}
+      ${btn(d.login_url || URLS.clinicAuth, "Acessar Painel da Clínica", BRAND.green)}
     `),
   }),
 
@@ -274,7 +277,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>🔄 Recorrência:</strong> Assinaturas mensais e consultas avulsas</p>
         <p><strong>💳 Saque:</strong> Solicite pelo painel</p>
       `, BRAND.green)}
-      ${btn(d.login_url || "https://app.aloclinica.com.br/parceiro", "Acessar Painel de Afiliado", BRAND.green)}
+      ${btn(d.login_url || URLS.partnerAuth, "Acessar Painel de Afiliado", BRAND.green)}
     `),
   }),
 
