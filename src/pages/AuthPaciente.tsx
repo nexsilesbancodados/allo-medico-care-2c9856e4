@@ -523,108 +523,115 @@ const AuthPaciente = () => {
             </div>
 
             <div className="flex-1 px-5 pt-5 pb-8 max-w-md mx-auto w-full overflow-y-auto">
-              <div className="bg-card rounded-[1.75rem] p-6 sm:p-7 shadow-[0_4px_24px_rgba(0,0,0,0.07)] border border-border/40">
-                {/* Header */}
-                <div className="text-center mb-6">
-                  <motion.img
-                    src={mascotThumbsup}
-                    alt="Pingo"
-                    className="w-16 h-16 object-contain mx-auto mb-3 select-none"
-                    initial={{ opacity: 0, scale: 0.6 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  />
-                  <h2 className="text-[24px] font-extrabold text-foreground tracking-tight">Cadastre-se grátis</h2>
-                  <p className="text-sm text-muted-foreground mt-1">Preencha seus dados para começar</p>
-                </div>
-
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <Label className="text-xs font-semibold">Nome</Label>
-                      <Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" required className="mt-1 h-11 rounded-2xl bg-muted/30 border-border/60" />
-                    </div>
-                    <div>
-                      <Label className="text-xs font-semibold">Sobrenome</Label>
-                      <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" required className="mt-1 h-11 rounded-2xl bg-muted/30 border-border/60" />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs font-semibold">CPF</Label>
-                    <div className="relative mt-1">
-                      <IdentificationCard className="absolute left-3 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground" weight="fill" />
-                      <Input value={cpf} onChange={e => setCpf(formatMask(e.target.value, 'cpf'))} placeholder="000.000.000-00" className="pl-10 font-mono h-11 rounded-2xl bg-muted/30 border-border/60" maxLength={14} />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs font-semibold">Telefone</Label>
-                    <div className="relative mt-1">
-                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground" weight="fill" />
-                      <Input value={phone} onChange={e => setPhone(formatMask(e.target.value, 'phone'))} placeholder="(00) 00000-0000" className="pl-10 font-mono h-11 rounded-2xl bg-muted/30 border-border/60" maxLength={15} />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs font-semibold">Email</Label>
-                    <div className="relative mt-1">
-                      <Envelope className="absolute left-3 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground" weight="fill" />
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-10 h-11 rounded-2xl bg-muted/30 border-border/60" required />
-                    </div>
-                  </div>
-                  <div>
-                    <Label className="text-xs font-semibold">Crie uma senha</Label>
-                    <div className="relative mt-1">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground" weight="fill" />
-                      <Input
-                        type={showPassword ? "text" : "password"}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="Mínimo 6 caracteres"
-                        className="pl-10 pr-10 h-11 rounded-2xl bg-muted/30 border-border/60"
-                        required
-                        minLength={6}
-                      />
-                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                        {showPassword ? <EyeSlash className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
-                      </button>
-                    </div>
-                    {password && <PasswordStrength password={password} />}
-                  </div>
-
-                  <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
-
-                  <Button
-                    type="submit"
-                    className="w-full h-[52px] rounded-full bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20 hover:brightness-110 active:scale-[0.98] transition-all"
-                    size="lg"
-                    disabled={loading || !termsAccepted}
-                  >
-                    {loading ? (
-                      <span className="flex items-center gap-2">
-                        <SpinnerGap className="w-5 h-5 animate-spin" /> Criando conta...
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-2">
-                        <CheckCircle className="w-5 h-5" weight="fill" />
-                        Criar minha conta
-                      </span>
-                    )}
-                  </Button>
-
-                  <p className="text-center text-sm text-muted-foreground">
-                    Já tem conta?{" "}
-                    <button type="button" onClick={() => setMode("login")} className="text-primary font-semibold hover:underline">
-                      Entrar
-                    </button>
-                  </p>
-                </form>
+              {/* Header */}
+              <div className="text-center mb-5">
+                <motion.div
+                  className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-3"
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <UserPlus className="w-7 h-7 text-primary" weight="fill" />
+                </motion.div>
+                <h2 className="text-[22px] font-extrabold text-foreground tracking-tight">Crie sua conta grátis</h2>
+                <p className="text-[13px] text-muted-foreground mt-1">Leva menos de 1 minuto</p>
               </div>
 
-              {/* Trust */}
-              <div className="flex items-center justify-center gap-5 mt-5">
+              <form onSubmit={handleSignup} className="space-y-4">
+                {/* Nome + Sobrenome */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-[13px] font-semibold text-foreground">Nome</Label>
+                    <Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="João" required className="mt-1.5 h-12 rounded-xl bg-muted/40 border-border/50 text-[15px] focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40" />
+                  </div>
+                  <div>
+                    <Label className="text-[13px] font-semibold text-foreground">Sobrenome</Label>
+                    <Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Silva" required className="mt-1.5 h-12 rounded-xl bg-muted/40 border-border/50 text-[15px] focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40" />
+                  </div>
+                </div>
+
+                {/* CPF */}
+                <div>
+                  <Label className="text-[13px] font-semibold text-foreground">CPF</Label>
+                  <div className="relative mt-1.5">
+                    <IdentificationCard className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/50" weight="fill" />
+                    <Input value={cpf} onChange={e => setCpf(formatMask(e.target.value, 'cpf'))} placeholder="000.000.000-00" className="pl-11 font-mono h-12 rounded-xl bg-muted/40 border-border/50 text-[15px] tracking-wide focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40" maxLength={14} />
+                  </div>
+                </div>
+
+                {/* Telefone */}
+                <div>
+                  <Label className="text-[13px] font-semibold text-foreground">Telefone</Label>
+                  <div className="relative mt-1.5">
+                    <Phone className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/50" weight="fill" />
+                    <Input value={phone} onChange={e => setPhone(formatMask(e.target.value, 'phone'))} placeholder="(00) 00000-0000" className="pl-11 font-mono h-12 rounded-xl bg-muted/40 border-border/50 text-[15px] tracking-wide focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40" maxLength={15} />
+                  </div>
+                </div>
+
+                {/* Email */}
+                <div>
+                  <Label className="text-[13px] font-semibold text-foreground">Email</Label>
+                  <div className="relative mt-1.5">
+                    <Envelope className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/50" weight="fill" />
+                    <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com" className="pl-11 h-12 rounded-xl bg-muted/40 border-border/50 text-[15px] focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40" required />
+                  </div>
+                </div>
+
+                {/* Senha */}
+                <div>
+                  <Label className="text-[13px] font-semibold text-foreground">Crie uma senha</Label>
+                  <div className="relative mt-1.5">
+                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/50" weight="fill" />
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      value={password}
+                      onChange={e => setPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className="pl-11 pr-11 h-12 rounded-xl bg-muted/40 border-border/50 text-[15px] focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40"
+                      required
+                      minLength={6}
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors">
+                      {showPassword ? <EyeSlash className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
+                    </button>
+                  </div>
+                  {password && <PasswordStrength password={password} />}
+                </div>
+
+                <TermsConsentCheckbox checked={termsAccepted} onCheckedChange={setTermsAccepted} />
+
+                <Button
+                  type="submit"
+                  className="w-full h-[54px] rounded-2xl bg-gradient-to-r from-primary to-primary/85 text-primary-foreground font-bold text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all"
+                  size="lg"
+                  disabled={loading || !termsAccepted}
+                >
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <SpinnerGap className="w-5 h-5 animate-spin" /> Criando conta...
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5" weight="fill" />
+                      Criar minha conta
+                    </span>
+                  )}
+                </Button>
+
+                <p className="text-center text-sm text-muted-foreground">
+                  Já tem conta?{" "}
+                  <button type="button" onClick={() => setMode("login")} className="text-primary font-bold hover:underline">
+                    Entrar
+                  </button>
+                </p>
+              </form>
+
+              {/* Trust footer */}
+              <div className="flex items-center justify-center gap-6 mt-6 pb-2">
                 {trustItems.map((item) => (
-                  <div key={item.label} className="flex flex-col items-center gap-1">
-                    <item.icon className="w-5 h-5 text-muted-foreground/50" weight="fill" />
-                    <span className="text-[9px] text-muted-foreground/50 font-medium">{item.label}</span>
+                  <div key={item.label} className="flex flex-col items-center gap-1.5">
+                    <item.icon className="w-[18px] h-[18px] text-primary/40" weight="fill" />
+                    <span className="text-[10px] text-muted-foreground/50 font-medium">{item.label}</span>
                   </div>
                 ))}
               </div>
