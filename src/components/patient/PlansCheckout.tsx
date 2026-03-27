@@ -69,7 +69,7 @@ const PlansCheckout = () => {
 
   const [step, setStep] = useState<Step>("specialty");
   const [selectedPlan, setSelectedPlan] = useState<string | null>("avulsa");
-  const [activeTab] = useState("consulta");
+  
 
   // Avulsa flow state
   const [specialties, setSpecialties] = useState<{ id: string; name: string }[]>([]);
