@@ -245,6 +245,7 @@ export type Database = {
           id: string
           jitsi_link: string | null
           jitsi_room_id: string | null
+          lembrete_enviado: boolean | null
           notes: string | null
           original_appointment_id: string | null
           patient_id: string | null
@@ -270,6 +271,7 @@ export type Database = {
           id?: string
           jitsi_link?: string | null
           jitsi_room_id?: string | null
+          lembrete_enviado?: boolean | null
           notes?: string | null
           original_appointment_id?: string | null
           patient_id?: string | null
@@ -295,6 +297,7 @@ export type Database = {
           id?: string
           jitsi_link?: string | null
           jitsi_room_id?: string | null
+          lembrete_enviado?: boolean | null
           notes?: string | null
           original_appointment_id?: string | null
           patient_id?: string | null
@@ -1691,6 +1694,36 @@ export type Database = {
           source?: string | null
           subscribed_at?: string
           unsubscribed_at?: string | null
+        }
+        Relationships: []
+      }
+      notification_logs: {
+        Row: {
+          canal: string | null
+          created_at: string | null
+          id: string
+          mensagem: string | null
+          status: string
+          tipo: string
+          user_id: string | null
+        }
+        Insert: {
+          canal?: string | null
+          created_at?: string | null
+          id?: string
+          mensagem?: string | null
+          status: string
+          tipo: string
+          user_id?: string | null
+        }
+        Update: {
+          canal?: string | null
+          created_at?: string | null
+          id?: string
+          mensagem?: string | null
+          status?: string
+          tipo?: string
+          user_id?: string | null
         }
         Relationships: []
       }
