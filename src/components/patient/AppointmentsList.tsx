@@ -226,9 +226,9 @@ const AppointmentsList = () => {
         initial="hidden"
         animate="show"
         className={cn(
-          "p-4 rounded-2xl border transition-all active:scale-[0.98]",
+          "card-interactive p-4 rounded-2xl border",
           appt.status === "in_progress" ? "border-secondary/40 bg-secondary/5" :
-          appt.status === "waiting" ? "border-amber-500/30 bg-amber-500/5" :
+          appt.status === "waiting" ? "border-warning/30 bg-warning/5" :
           "border-border bg-card"
         )}
       >
