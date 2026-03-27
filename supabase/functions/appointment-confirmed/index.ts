@@ -67,7 +67,7 @@ serve(async (req) => {
 
     const results: string[] = [];
 
-    // 1. Send email via Resend
+    // 1. Send email via send-email edge function (Resend)
     if (patientEmail) {
       try {
         const emailRes = await fetch(`${supabaseUrl}/functions/v1/send-email`, {
@@ -82,7 +82,8 @@ serve(async (req) => {
             data: { patient_name: patientName, doctor_name: drName, date: dateStr, time: timeStr },
           }),
         });
-        results.push(`email: ${emailRes.ok ? "sent" : "failed"}`);
+        const emailBody = await emailRes.text();
+        results.push(`email: ${emailRes.ok ? "sent" : "failed"} ${emailBody}`);
       } catch (error) {
         results.push(`email: error - ${(error instanceof Error ? error.message : String(error))}`);
       }
