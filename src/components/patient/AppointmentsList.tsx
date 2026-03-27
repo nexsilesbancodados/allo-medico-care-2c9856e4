@@ -454,7 +454,7 @@ const AppointmentsList = () => {
               <img src={mascotWelcome} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" loading="lazy" decoding="async" width={80} height={80} />
               <p className="text-[13px] font-semibold text-foreground mb-1">Nenhuma consulta próxima</p>
               <p className="text-[11px] text-muted-foreground mb-3">Agende agora e cuide da sua saúde</p>
-              <Button size="sm" className="rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-[0_3px_12px_rgba(37,99,235,.3)]" onClick={() => navigate("/dashboard/schedule")}>
+              <Button size="sm" className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-md" onClick={() => navigate("/dashboard/schedule")}>
                 Agendar consulta
               </Button>
             </div>
