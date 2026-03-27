@@ -10,9 +10,9 @@ import { getPatientNav } from "@/components/patient/patientNav";
 import { format, differenceInDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-  Calendar, FileText, Heart, Video, Clock, Flame,
+  Calendar, Video, Clock, Flame,
   Gift, ClipboardList, ChevronRight,
-  Pill, User, CreditCard, ArrowRight, CalendarPlus, MessageCircle, Upload,
+  User, ArrowRight, MessageCircle, Heart, CreditCard,
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import MedicalHistoryExport from "@/components/patient/MedicalHistoryExport";
@@ -22,16 +22,13 @@ import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import {
   usePatientStats, usePatientUpcoming, useReturnAppointments, useRecentHealthMetrics,
 } from "@/hooks/usePatientDashboard";
-import { useActiveSubscription, useUserCredits } from "@/hooks/useProfile";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { HeroBanner } from "./HeroBanner";
 import { ActionPills } from "./ActionPills";
 import { StatBento } from "./StatBento";
-import { WalletCard } from "./WalletCard";
 import { PingoBannerCard } from "@/components/mascot/PingoBannerCard";
 import { DashboardShortcuts } from "./DashboardShortcuts";
-import { AlertBox } from "./AlertBox";
 import mascotWave from "@/assets/mascot-wave.png";
 import mascotReading from "@/assets/mascot-reading.png";
 import mascotWelcome from "@/assets/mascot-welcome.png";
@@ -67,8 +64,6 @@ const PatientDashboard = () => {
   const { data: upcoming = [], isLoading: upcomingLoading } = usePatientUpcoming();
   const { data: returnAppts = [] } = useReturnAppointments();
   const { data: healthMetrics = [] } = useRecentHealthMetrics();
-  const { data: activeSub } = useActiveSubscription();
-  const { data: credits = 0 } = useUserCredits();
   const loading = statsLoading || upcomingLoading;
   const waitingAppt = upcoming.find((a: { status: string }) =>
     a.status === "waiting" || a.status === "in_progress"
@@ -116,7 +111,7 @@ const PatientDashboard = () => {
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
-      {/* Full-width hero — no padding wrapper */}
+      {/* Full-width hero */}
       <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
         <HeroBanner
           gradient="from-[#1e3a8a] via-[#2563EB] to-[#3b82f6]"
@@ -125,13 +120,12 @@ const PatientDashboard = () => {
           bubble={{
             greeting: `${greeting()} · ${format(now, "EEE, dd/MM", { locale: ptBR })}`,
             name: profile?.first_name ? `${profile.first_name}!` : "Paciente!",
-            sub: activeSub ? "Plano Ativo ✓" : "Bem-vindo(a)",
+            sub: "Bem-vindo(a)",
           }}
           kpis={[
             { label: "Consultas", value: stats?.total ?? 0 },
             { label: "Receitas",  value: stats?.prescriptions ?? 0 },
             { label: "Exames",    value: stats?.documents ?? 0 },
-            
           ]}
           loading={loading}
           onRefresh={handleRefresh}
@@ -140,7 +134,7 @@ const PatientDashboard = () => {
         />
       </div>
 
-      {/* ── MAIN CONTENT — responsive 1-col mobile / 2-col desktop ── */}
+      {/* ── MAIN CONTENT ── */}
       <div className="mt-5 md:mt-5 space-y-5 pb-24 md:pb-8">
 
         {/* Live consultation */}
@@ -155,26 +149,16 @@ const PatientDashboard = () => {
 
           {/* LEFT COLUMN */}
           <div className="space-y-5">
-            {/* Wallet Card */}
-            <WalletCard
-              name={`${profile?.first_name ?? ""} ${profile?.last_name ?? ""}`.trim() || "Paciente"}
-              cardNumber="ALO · XXXX · XXXX · 0001"
-              validUntil="12/2027"
-              planName={(activeSub as Record<string, unknown>)?.plans
-                ? ((activeSub as Record<string, unknown>).plans as Record<string, unknown>)?.name as string
-                : "Plano Básico"}
-              
-            />
 
             {/* Action Pills */}
             <ActionPills
               title="Ações rápidas"
               actions={[
-                { label: "Agendar",    icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30",     path: "/dashboard/schedule?role=patient" },
-                { label: "Urgência",   icon: "⚡", iconBg: "bg-red-50 dark:bg-red-950/30",       path: "/dashboard/urgent-care?role=patient", badge: waitingAppt ? 1 : 0 },
+                { label: "Agendar",    icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30",       path: "/dashboard/schedule?role=patient" },
+                { label: "Urgência",   icon: "⚡", iconBg: "bg-red-50 dark:bg-red-950/30",         path: "/dashboard/urgent-care?role=patient", badge: waitingAppt ? 1 : 0 },
                 { label: "Exames",     icon: "🧪", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", path: "/dashboard/patient/exam-results?role=patient" },
-                { label: "Documentos", icon: "🔒", iconBg: "bg-violet-50 dark:bg-violet-950/30",   path: "/dashboard/patient/documents?role=patient" },
-                { label: "Receitas",   icon: "💊", iconBg: "bg-amber-50 dark:bg-amber-950/30",    path: "/dashboard/prescription-renewal?role=patient" },
+                { label: "Receitas",   icon: "💊", iconBg: "bg-amber-50 dark:bg-amber-950/30",     path: "/dashboard/prescription-renewal?role=patient" },
+                { label: "Documentos", icon: "📄", iconBg: "bg-violet-50 dark:bg-violet-950/30",   path: "/dashboard/patient/documents?role=patient" },
               ]}
             />
 
@@ -241,15 +225,6 @@ const PatientDashboard = () => {
                 </Button>
               </div>
             )}
-
-            {/* Alerts */}
-            {!activeSub && (
-              <AlertBox variant="info" icon={<span className="text-[20px]">💳</span>}
-                title="Assine um plano e economize até 30%"
-                subtitle="Acesso ilimitado + benefícios exclusivos"
-                actionLabel="Ver planos"
-                onAction={() => navigate("/dashboard/plans?role=patient")} />
-            )}
           </div>
 
           {/* RIGHT COLUMN */}
@@ -259,10 +234,9 @@ const PatientDashboard = () => {
               { label: "Consultas",  value: stats?.total ?? 0,         icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30",    valueClass: "text-[#1e3a8a] dark:text-blue-400",    accentClass: "bg-blue-500",   trend: 12 },
               { label: "Receitas",   value: stats?.prescriptions ?? 0, icon: "💊", iconBg: "bg-amber-50 dark:bg-amber-950/30",  valueClass: "text-amber-600 dark:text-amber-400",    accentClass: "bg-amber-500",  trend: 5 },
               { label: "Documentos", value: stats?.documents ?? 0,     icon: "📂", iconBg: "bg-violet-50 dark:bg-violet-950/30",valueClass: "text-violet-600 dark:text-violet-400",  accentClass: "bg-violet-500" },
-              
             ]} />
 
-            {/* Health Metrics 3x2 */}
+            {/* Health Metrics */}
             {(healthMetrics as { type: string; value: number; unit: string }[]).length > 0 && (
               <div>
                 <div className="mb-2 flex items-center justify-between">
@@ -341,14 +315,12 @@ const PatientDashboard = () => {
 
             {/* Shortcuts */}
             <DashboardShortcuts shortcuts={[
-              { label: "Prontuário",    description: "Histórico médico",        icon: <ClipboardList className="w-[17px] h-[17px]" />, path: "/dashboard/medical-records?role=patient",  iconBg: "bg-blue-50 dark:bg-blue-950/30",    iconColor: "text-blue-600 dark:text-blue-400" },
-              { label: "Minha Saúde",  description: "Métricas e bem-estar",    icon: <Heart className="w-[17px] h-[17px]" />,         path: "/dashboard/patient/health?role=patient",   iconBg: "bg-red-50 dark:bg-red-950/30",      iconColor: "text-red-500" },
-              { label: "Pagamentos",   description: "Histórico financeiro",    icon: <CreditCard className="w-[17px] h-[17px]" />,    path: "/dashboard/payment-history?role=patient",  iconBg: "bg-amber-50 dark:bg-amber-950/30",  iconColor: "text-amber-600 dark:text-amber-400" },
-              { label: "Chat Suporte", description: "Fale com a equipe",       icon: <MessageCircle className="w-[17px] h-[17px]" />, path: "/dashboard/chat?role=patient",             iconBg: "bg-blue-50 dark:bg-blue-950/30",    iconColor: "text-blue-600 dark:text-blue-400" },
-              { label: "Perfil",       description: "Dados pessoais",          icon: <User className="w-[17px] h-[17px]" />,          path: "/dashboard/profile?role=patient",          iconBg: "bg-muted",                          iconColor: "text-muted-foreground" },
+              { label: "Prontuário",    description: "Histórico médico",     icon: <ClipboardList className="w-[17px] h-[17px]" />, path: "/dashboard/medical-records?role=patient",  iconBg: "bg-blue-50 dark:bg-blue-950/30",    iconColor: "text-blue-600 dark:text-blue-400" },
+              { label: "Minha Saúde",  description: "Métricas e bem-estar", icon: <Heart className="w-[17px] h-[17px]" />,         path: "/dashboard/patient/health?role=patient",   iconBg: "bg-red-50 dark:bg-red-950/30",      iconColor: "text-red-500" },
+              { label: "Pagamentos",   description: "Histórico financeiro", icon: <CreditCard className="w-[17px] h-[17px]" />,    path: "/dashboard/payment-history?role=patient",  iconBg: "bg-amber-50 dark:bg-amber-950/30",  iconColor: "text-amber-600 dark:text-amber-400" },
+              { label: "Chat Suporte", description: "Fale com a equipe",    icon: <MessageCircle className="w-[17px] h-[17px]" />, path: "/dashboard/chat?role=patient",             iconBg: "bg-blue-50 dark:bg-blue-950/30",    iconColor: "text-blue-600 dark:text-blue-400" },
+              { label: "Perfil",       description: "Dados pessoais",       icon: <User className="w-[17px] h-[17px]" />,          path: "/dashboard/profile?role=patient",          iconBg: "bg-muted",                          iconColor: "text-muted-foreground" },
             ]} />
-
-            
           </div>
         </div>
       </div>
