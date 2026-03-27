@@ -57,7 +57,7 @@ const PatientDashboard = () => {
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const forceOnboarding = searchParams.get("onboarding") === "true";
-  const [showOnboarding, setShowOnboarding] = useState(forceOnboarding);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingDone] = useLocalStorage<boolean>(ONBOARDING_KEY, false);
 
   const { data: stats, isLoading: statsLoading } = usePatientStats();
@@ -79,8 +79,12 @@ const PatientDashboard = () => {
   const typedMetrics = healthMetrics as { type: string; value: number; unit: string }[];
 
   useEffect(() => {
-    if (!loading && (stats?.total ?? 0) === 0 && !onboardingDone) setShowOnboarding(true);
-  }, [loading, stats?.total, onboardingDone]);
+    if (forceOnboarding) {
+      setShowOnboarding(true);
+    } else if (!loading && (stats?.total ?? 0) === 0 && !onboardingDone) {
+      setShowOnboarding(true);
+    }
+  }, [loading, stats?.total, onboardingDone, forceOnboarding]);
 
   useEffect(() => {
     if (!user) return;
