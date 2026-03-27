@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { ArrowLeft, Camera, Save, Trash2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, Camera, Save, Trash2, AlertTriangle, ChevronRight, User, Clock, Bell, HelpCircle, LogOut, Shield, Heart, Pencil } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { getAdminNav } from "@/components/admin/adminNav";
 import { getReceptionNav } from "@/components/reception/receptionNav";
+import { motion } from "framer-motion";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger
@@ -21,8 +22,7 @@ import {
 
 const roleLabels: Record<string, string> = {
   patient: "Paciente", doctor: "Médico", admin: "Administração",
-  receptionist: "Recepção", support: "Suporte", clinic: "Clínica",
-  partner: "Parceiro",
+  receptionist: "Recepção", support: "Suporte", clinic: "Clínica", partner: "Parceiro",
 };
 
 function getNavForRole(role: string) {
@@ -39,7 +39,6 @@ const UserProfile = () => {
   const { user, profile, roles } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
 
   const forceRole = searchParams.get("role");
   const isAdmin = roles.includes("admin");
@@ -51,6 +50,7 @@ const UserProfile = () => {
     : roles.includes("partner") ? "partner"
     : "patient";
   const nav = getNavForRole(activeRole);
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -63,6 +63,7 @@ const UserProfile = () => {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   // Doctor fields
   const [bio, setBio] = useState("");
@@ -91,23 +92,13 @@ const UserProfile = () => {
   const fetchDoctorProfile = async () => {
     const { data } = await supabase.from("doctor_profiles").select("id, bio, education, experience_years, consultation_price").eq("user_id", user!.id).single();
     if (data) {
-      setBio(data.bio || "");
-      setEducation(data.education || "");
-      setExperienceYears(data.experience_years || 0);
-      setConsultationPrice(Number(data.consultation_price) || 89);
-
-      // Fetch specialty price range
-      const { data: specData } = await supabase
-        .from("doctor_specialties")
-        .select("specialty_id")
-        .eq("doctor_id", data.id);
-      if (specData && specData.length > 0) {
+      setBio(data.bio || ""); setEducation(data.education || "");
+      setExperienceYears(data.experience_years || 0); setConsultationPrice(Number(data.consultation_price) || 89);
+      const { data: specData } = await supabase.from("doctor_specialties").select("specialty_id").eq("doctor_id", data.id);
+      if (specData?.length) {
         const specIds = specData.map((s: any) => s.specialty_id);
-        const { data: specs } = await supabase
-          .from("specialties")
-          .select("price_min, price_max")
-          .in("id", specIds);
-        if (specs && specs.length > 0) {
+        const { data: specs } = await supabase.from("specialties").select("price_min, price_max").in("id", specIds);
+        if (specs?.length) {
           const mins = (specs as any[]).map(s => s.price_min).filter((v: any) => v != null);
           const maxs = (specs as any[]).map(s => s.price_max).filter((v: any) => v != null);
           setPriceMin(mins.length > 0 ? Math.min(...mins) : null);
@@ -124,16 +115,11 @@ const UserProfile = () => {
     const ext = file.name.split(".").pop();
     const path = `${user.id}/avatar.${ext}`;
     const { error } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (error) {
-      toast.error("Erro no upload", { description: error.message });
-      setUploading(false);
-      return;
-    }
+    if (error) { toast.error("Erro no upload", { description: error.message }); setUploading(false); return; }
     const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
     setAvatarUrl(publicUrl);
     await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
-    toast.success("Foto atualizada!");
-    setUploading(false);
+    toast.success("Foto atualizada!"); setUploading(false);
   };
 
   const handleSave = async () => {
@@ -145,222 +131,222 @@ const UserProfile = () => {
       first_name: firstName, last_name: lastName, phone, cpf, date_of_birth: dateOfBirth || null,
       allergies: allergyArr, blood_type: bloodType || null, chronic_conditions: conditionArr,
     }).eq("user_id", user.id);
-
     if (isDoctor) {
-      // Validate price range
-      if (priceMin !== null && consultationPrice < priceMin) {
-        toast.error(`O preço mínimo para sua especialidade é R$ ${priceMin.toFixed(0)}`);
-        setSaving(false);
-        return;
-      }
-      if (priceMax !== null && consultationPrice > priceMax) {
-        toast.error(`O preço máximo para sua especialidade é R$ ${priceMax.toFixed(0)}`);
-        setSaving(false);
-        return;
-      }
-      await supabase.from("doctor_profiles").update({
-        bio, education, experience_years: experienceYears, consultation_price: consultationPrice,
-      }).eq("user_id", user.id);
+      if (priceMin !== null && consultationPrice < priceMin) { toast.error(`Preço mínimo: R$ ${priceMin.toFixed(0)}`); setSaving(false); return; }
+      if (priceMax !== null && consultationPrice > priceMax) { toast.error(`Preço máximo: R$ ${priceMax.toFixed(0)}`); setSaving(false); return; }
+      await supabase.from("doctor_profiles").update({ bio, education, experience_years: experienceYears, consultation_price: consultationPrice }).eq("user_id", user.id);
     }
-
     setSaving(false);
-    if (error) {
-      toast.error("Erro ao salvar", { description: error.message });
-    } else {
-      toast.success("Perfil atualizado!");
-    }
+    if (error) toast.error("Erro ao salvar", { description: error.message });
+    else { toast.success("Perfil atualizado!"); setEditMode(false); }
   };
 
   const handleDeleteAccount = async () => {
     if (!user) return;
     setDeleting(true);
     try {
-      // Log the deletion request for LGPD compliance
-      await supabase.from("activity_logs").insert({
-        action: "account_deletion_request",
-        entity_type: "user",
-        entity_id: user.id,
-        user_id: user.id,
-        details: { email: user.email, requested_at: new Date().toISOString() },
-      });
-
-      // Anonymize profile data
-      await supabase.from("profiles").update({
-        first_name: "Usuário",
-        last_name: "Removido",
-        phone: null,
-        cpf: null,
-        date_of_birth: null,
-        avatar_url: null,
-        allergies: null,
-        blood_type: null,
-        chronic_conditions: null,
-      }).eq("user_id", user.id);
-
-
-      // Sign out
+      await supabase.from("activity_logs").insert({ action: "account_deletion_request", entity_type: "user", entity_id: user.id, user_id: user.id, details: { email: user.email, requested_at: new Date().toISOString() } });
+      await supabase.from("profiles").update({ first_name: "Usuário", last_name: "Removido", phone: null, cpf: null, date_of_birth: null, avatar_url: null, allergies: null, blood_type: null, chronic_conditions: null }).eq("user_id", user.id);
       await supabase.auth.signOut();
-      
       toast.success("Conta excluída", { description: "Seus dados foram anonimizados conforme a LGPD." });
       navigate("/");
-    } catch (err: unknown) {
-      toast.error("Erro", { description: err instanceof Error ? err.message : "Erro desconhecido" });
-    } finally {
-      setDeleting(false);
-    }
+    } catch (err: unknown) { toast.error("Erro", { description: err instanceof Error ? err.message : "Erro desconhecido" }); }
+    finally { setDeleting(false); }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
   };
 
   const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
+  const isPatient = activeRole === "patient";
 
-  return (
-    <DashboardLayout title={roleLabels[activeRole] ?? "Perfil"} nav={nav} role={activeRole}>
-      <div className="max-w-2xl mx-auto pb-24 md:pb-6">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
-          <ArrowLeft className="w-4 h-4" /> Voltar
-        </button>
-        <h1 className="text-2xl font-bold text-foreground mb-6">Meu Perfil</h1>
+  const menuItems = [
+    { icon: Pencil, label: "Editar Perfil", desc: "Altere seus dados pessoais e fotos", action: () => setEditMode(true) },
+    { icon: Bell, label: "Notificações", desc: "Gerencie alertas de consultas e exames", action: () => navigate(`/dashboard/settings?role=${activeRole}&tab=notifications`) },
+    { icon: Shield, label: "Segurança", desc: "Alterar senha e biometria", action: () => navigate(`/dashboard/settings?role=${activeRole}&tab=security`) },
+    { icon: HelpCircle, label: "Ajuda", desc: "Central de suporte e FAQ", action: () => navigate("/dashboard/patient/support?role=patient") },
+  ];
 
-        {/* Avatar */}
-        <Card variant="elevated" className="mb-6">
-          <CardContent className="pt-6 flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
-            <div className="relative shrink-0">
-              <Avatar className="w-20 h-20">
+  // Profile view (not editing)
+  if (!editMode) {
+    return (
+      <DashboardLayout title={roleLabels[activeRole] ?? "Perfil"} nav={nav} role={activeRole}>
+        <div className="max-w-2xl mx-auto pb-24 md:pb-6">
+          {/* Profile Header Card */}
+          <div className="rounded-2xl bg-gradient-to-b from-primary/5 to-transparent p-6 pb-8 text-center mb-6">
+            <div className="relative inline-block mb-4">
+              <Avatar className="w-24 h-24 border-4 border-background shadow-lg">
                 <AvatarImage src={avatarUrl ?? undefined} />
-                <AvatarFallback className="bg-primary text-primary-foreground text-xl">{initials}</AvatarFallback>
+                <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">{initials}</AvatarFallback>
               </Avatar>
-              <label className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer hover:opacity-90 transition active:scale-95">
-                <Camera className="w-4 h-4" />
+              <label className="absolute -bottom-1 -right-1 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer hover:opacity-90 transition active:scale-95 shadow-md">
+                <Camera className="w-3.5 h-3.5" />
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploading} />
               </label>
             </div>
-            <div className="text-center sm:text-left">
-              <p className="font-semibold text-foreground">{firstName} {lastName}</p>
-              <p className="text-sm text-muted-foreground break-all">{user?.email}</p>
-              {uploading && <p className="text-xs text-primary mt-1">Enviando foto...</p>}
-            </div>
-          </CardContent>
-        </Card>
+            <h2 className="text-xl font-extrabold text-foreground font-[Manrope]">{firstName} {lastName}</h2>
+            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            {isPatient && (
+              <div className="flex justify-center gap-3 mt-4">
+                {bloodType && (
+                  <div className="px-4 py-2 rounded-xl bg-card border border-border/30 text-center">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tipo Sanguíneo</p>
+                    <p className="text-lg font-extrabold text-foreground">{bloodType}</p>
+                  </div>
+                )}
+                <div className="px-4 py-2 rounded-xl bg-card border border-border/30 text-center">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Próxima Consulta</p>
+                  <p className="text-lg font-extrabold text-foreground">—</p>
+                </div>
+              </div>
+            )}
+          </div>
 
-        {/* Personal info */}
-        <Card variant="elevated" className="mb-6">
-          <CardHeader><CardTitle className="text-lg">Dados Pessoais</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><Label>Nome</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} className="mt-1 h-11" /></div>
-              <div><Label>Sobrenome</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} className="mt-1 h-11" /></div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div><Label>Telefone</Label><Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" className="mt-1 h-11" /></div>
-              <div><Label>CPF</Label><Input value={cpf} onChange={e => setCpf(e.target.value)} placeholder="000.000.000-00" className="mt-1 h-11" /></div>
+          {/* Menu Items */}
+          <div className="rounded-2xl bg-card border border-border/30 overflow-hidden mb-6">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-5 pt-4 pb-2">
+              {isPatient ? "Configurações e Segurança" : "Minha Conta"}
+            </h3>
+            {menuItems.map((item, i) => (
+              <motion.button
+                key={item.label}
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.04 }}
+                onClick={item.action}
+                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-muted/30 transition-colors text-left"
+              >
+                <div className="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
+                  <item.icon className="w-5 h-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">{item.label}</p>
+                  <p className="text-xs text-muted-foreground">{item.desc}</p>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground/30 shrink-0" />
+              </motion.button>
+            ))}
+          </div>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-4 px-5 py-4 rounded-2xl bg-destructive/5 border border-destructive/10 hover:bg-destructive/10 transition-colors text-left mb-6"
+          >
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
+              <LogOut className="w-5 h-5 text-destructive" />
             </div>
             <div>
-              <Label>Data de Nascimento</Label>
-              <Input type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} className="mt-1" />
+              <p className="text-sm font-semibold text-destructive">Sair</p>
+              <p className="text-xs text-destructive/60">Encerrar sessão no dispositivo</p>
             </div>
-          </CardContent>
-        </Card>
+          </button>
 
-        {/* Health info */}
-        <Card variant="elevated" className="mb-6">
-          <CardHeader><CardTitle className="text-lg">Dados de Saúde</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label>Tipo Sanguíneo</Label>
-                <select value={bloodType} onChange={e => setBloodType(e.target.value)} className="mt-1 w-full h-11 rounded-md border border-input bg-background px-3 py-2 text-sm">
-                  <option value="">Selecione</option>
-                  {["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-              </div>
-              <div>
-                <Label>Alergias</Label>
-                <Input value={allergies} onChange={e => setAllergies(e.target.value)} placeholder="Ex: Dipirona, Penicilina" className="mt-1 h-11" />
-                <p className="text-[10px] text-muted-foreground mt-0.5">Separe por vírgula</p>
-              </div>
-            </div>
-            <div>
-              <Label>Condições Crônicas</Label>
-              <Input value={chronicConditions} onChange={e => setChronicConditions(e.target.value)} placeholder="Ex: Diabetes, Hipertensão" className="mt-1" />
-              <p className="text-[10px] text-muted-foreground mt-0.5">Separe por vírgula</p>
-            </div>
-          </CardContent>
-        </Card>
+          {/* Tip Card */}
+          <div className="rounded-2xl bg-muted/30 p-5">
+            <h4 className="font-bold text-foreground text-sm mb-1">Tudo certo por aqui!</h4>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Mantenha seus dados de saúde sempre atualizados para um atendimento mais ágil e preciso em nossas unidades parceiras.
+            </p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
-        {/* Doctor-specific */}
+  // Edit mode
+  return (
+    <DashboardLayout title={roleLabels[activeRole] ?? "Perfil"} nav={nav} role={activeRole}>
+      <div className="max-w-2xl mx-auto pb-24 md:pb-6">
+        <button onClick={() => setEditMode(false)} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-4">
+          <ArrowLeft className="w-4 h-4" /> Voltar
+        </button>
+        <h1 className="text-2xl font-extrabold text-primary font-[Manrope] mb-1">Editar Perfil</h1>
+        <p className="text-sm text-muted-foreground mb-6">Mantenha suas informações de saúde atualizadas.</p>
+
+        {/* Avatar */}
+        <div className="flex flex-col items-center mb-8">
+          <div className="relative">
+            <Avatar className="w-28 h-28 border-4 border-background shadow-lg">
+              <AvatarImage src={avatarUrl ?? undefined} />
+              <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-bold">{initials}</AvatarFallback>
+            </Avatar>
+            <label className="absolute bottom-0 right-0 w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center cursor-pointer hover:opacity-90 transition active:scale-95 shadow-lg">
+              <Camera className="w-4 h-4" />
+              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploading} />
+            </label>
+          </div>
+          <p className="text-sm text-primary font-medium mt-2">Alterar foto de perfil</p>
+        </div>
+
+        {/* Form */}
+        <div className="space-y-4 mb-6">
+          <div>
+            <Label className="text-sm">Nome completo</Label>
+            <div className="relative mt-1">
+              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40" />
+              <Input value={`${firstName} ${lastName}`} onChange={e => { const parts = e.target.value.split(" "); setFirstName(parts[0] || ""); setLastName(parts.slice(1).join(" ") || ""); }} className="pl-11 h-12 rounded-xl bg-muted/30 border-transparent" />
+            </div>
+          </div>
+          <div>
+            <Label className="text-sm">E-mail</Label>
+            <Input value={user?.email ?? ""} disabled className="h-12 rounded-xl bg-muted/30 border-transparent mt-1" />
+          </div>
+          <div>
+            <Label className="text-sm">Telefone</Label>
+            <Input value={phone} onChange={e => setPhone(e.target.value)} placeholder="(11) 99999-9999" className="h-12 rounded-xl bg-muted/30 border-transparent mt-1" />
+          </div>
+          <div>
+            <Label className="text-sm">Senha</Label>
+            <Input type="password" value="••••••••" disabled className="h-12 rounded-xl bg-muted/30 border-transparent mt-1" />
+          </div>
+        </div>
+
+        {/* Doctor fields */}
         {isDoctor && (
-          <Card variant="elevated" className="mb-6">
+          <Card className="mb-6">
             <CardHeader><CardTitle className="text-lg">Perfil Profissional</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div><Label>Bio / Descrição</Label><textarea value={bio} onChange={e => setBio(e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" rows={3} placeholder="Conte sobre sua experiência..." /></div>
-              <div><Label>Formação</Label><Input value={education} onChange={e => setEducation(e.target.value)} placeholder="Ex: USP, Residência em Cardiologia" className="mt-1" /></div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div><Label>Anos de Experiência</Label><Input type="number" value={experienceYears} onChange={e => setExperienceYears(Number(e.target.value))} className="mt-1 h-11" min={0} /></div>
+              <div><Label>Bio</Label><textarea value={bio} onChange={e => setBio(e.target.value)} className="mt-1 w-full rounded-xl border border-input bg-muted/30 px-3 py-2 text-sm" rows={3} /></div>
+              <div><Label>Formação</Label><Input value={education} onChange={e => setEducation(e.target.value)} className="mt-1 h-11 rounded-xl" /></div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><Label>Anos de Experiência</Label><Input type="number" value={experienceYears} onChange={e => setExperienceYears(Number(e.target.value))} className="mt-1 h-11 rounded-xl" min={0} /></div>
                 <div>
-                  <Label>Preço da Consulta (R$)</Label>
-                  <Input
-                    type="number"
-                    value={consultationPrice}
-                    onChange={e => setConsultationPrice(Number(e.target.value))}
-                    className="mt-1 h-11"
-                    min={priceMin ?? 0}
-                    max={priceMax ?? undefined}
-                    step={1}
-                  />
-                  {(priceMin !== null || priceMax !== null) && (
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Faixa permitida para sua especialidade:{" "}
-                      <span className="font-medium text-foreground">
-                        R$ {priceMin?.toFixed(0) ?? "—"} ~ R$ {priceMax?.toFixed(0) ?? "—"}
-                      </span>
-                    </p>
-                  )}
+                  <Label>Preço (R$)</Label>
+                  <Input type="number" value={consultationPrice} onChange={e => setConsultationPrice(Number(e.target.value))} className="mt-1 h-11 rounded-xl" min={priceMin ?? 0} max={priceMax ?? undefined} />
+                  {(priceMin !== null || priceMax !== null) && <p className="text-xs text-muted-foreground mt-1">R$ {priceMin?.toFixed(0) ?? "—"} ~ R$ {priceMax?.toFixed(0) ?? "—"}</p>}
                 </div>
               </div>
             </CardContent>
           </Card>
         )}
 
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <Button onClick={handleSave} disabled={saving} className="bg-gradient-hero text-primary-foreground sm:w-auto h-12 rounded-xl flex-1" size="lg">
-            <Save className="w-4 h-4 mr-2" />
-            {saving ? "Salvando..." : "Salvar Alterações"}
-          </Button>
-        </div>
+        {/* Save */}
+        <Button onClick={handleSave} disabled={saving} className="w-full h-12 rounded-full bg-gradient-to-r from-primary to-[hsl(215,75%,40%)] text-primary-foreground font-bold shadow-lg" size="lg">
+          <Save className="w-4 h-4 mr-2" />
+          {saving ? "Salvando..." : "Salvar Alterações"}
+        </Button>
+        <button onClick={() => setEditMode(false)} className="w-full text-center text-sm text-primary font-semibold mt-3 hover:underline">Cancelar</button>
 
-        {/* Delete Account - LGPD */}
-        <Card className="border-destructive/30 mb-8">
-          <CardHeader>
-            <CardTitle className="text-lg text-destructive flex items-center gap-2">
-              <AlertTriangle className="w-5 h-5" /> Zona de Perigo
-            </CardTitle>
-          </CardHeader>
+        {/* Delete Account */}
+        <Card className="border-destructive/30 mt-8">
+          <CardHeader><CardTitle className="text-lg text-destructive flex items-center gap-2"><AlertTriangle className="w-5 h-5" /> Zona de Perigo</CardTitle></CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Conforme a LGPD (Lei nº 13.709/2018), você tem o direito de solicitar a exclusão dos seus dados pessoais. 
-              Esta ação irá anonimizar seus dados e encerrar sua conta.
-            </p>
+            <p className="text-sm text-muted-foreground mb-4">Conforme a LGPD, você pode solicitar a exclusão dos seus dados pessoais.</p>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm" className="rounded-xl">
-                  <Trash2 className="w-4 h-4 mr-2" /> Excluir minha conta
-                </Button>
+                <Button variant="destructive" size="sm" className="rounded-xl"><Trash2 className="w-4 h-4 mr-2" /> Excluir minha conta</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Tem certeza que deseja excluir sua conta?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Esta ação é irreversível. Seus dados pessoais serão anonimizados conforme a LGPD. 
-                    Histórico médico será mantido de forma anônima para fins legais.
-                    Cartões de desconto e assinaturas ativas serão cancelados.
-                  </AlertDialogDescription>
+                  <AlertDialogTitle>Tem certeza?</AlertDialogTitle>
+                  <AlertDialogDescription>Esta ação é irreversível. Seus dados serão anonimizados conforme a LGPD.</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={handleDeleteAccount}
-                    disabled={deleting}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
+                  <AlertDialogAction onClick={handleDeleteAccount} disabled={deleting} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                     {deleting ? "Excluindo..." : "Sim, excluir minha conta"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
