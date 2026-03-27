@@ -14,7 +14,7 @@ import {
   Calendar, Video, Clock, Gift, ChevronRight,
   Heart, Activity, Weight, Thermometer, Droplets, Wind,
   Zap, ClipboardList,
-  ArrowRight, FileText, Upload,
+  ArrowRight, FileText, Upload, Sparkles, Star,
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import { PingoMascot } from "@/components/mascot/PingoMascot";
