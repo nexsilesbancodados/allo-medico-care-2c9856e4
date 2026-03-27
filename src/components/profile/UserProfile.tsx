@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { ArrowLeft, Camera, Save, Trash2, AlertTriangle, ChevronRight, User, Clock, Bell, HelpCircle, LogOut, Shield, Heart, Pencil, ShieldCheck, Upload } from "lucide-react";
-import PatientKYCCapture from "@/components/patient/PatientKYCCapture";
+import DiditKYCButton from "@/components/kyc/DiditKYCButton";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
