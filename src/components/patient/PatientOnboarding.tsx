@@ -51,7 +51,9 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "selfie" | "doc") => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("Arquivo muito grande", { description: "Máximo 5 MB" }); return; }
+    // Only allow photos taken now (camera capture) — reject non-image or pre-existing files
+    if (!file.type.startsWith("image/")) { toast.error("Apenas fotos são aceitas"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande", { description: "Máximo 10 MB" }); return; }
     const reader = new FileReader();
     reader.onload = (ev) => {
       if (type === "selfie") { setSelfieFile(file); setSelfiePreview(ev.target?.result as string); }
