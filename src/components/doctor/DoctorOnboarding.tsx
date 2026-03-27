@@ -12,10 +12,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import type { SpecialtyRow } from "@/types/domain";
-import { lazy, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
-const KYCVerification = lazy(() => import("@/components/doctor/KYCVerification"));
+import DiditKYCButton from "@/components/kyc/DiditKYCButton";
 
 interface OnboardingStep {
   id: string;
@@ -212,25 +211,20 @@ const DoctorOnboarding = () => {
         </CardContent>
       </Card>
 
-      {/* KYC Verification Panel */}
+      {/* KYC Verification via Didit */}
       {showKYC && data?.docProfile && (
-        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl mt-4" />}>
-          <div className="mt-4">
-            <KYCVerification
-              doctorProfileId={data.docProfile.id}
-              userName={user?.user_metadata?.full_name || ""}
-              userCRM={data.docProfile.crm || ""}
-              onComplete={() => {
-                setShowKYC(false);
-                // Refresh data
-                setData((prev: any) => ({
-                  ...prev,
-                  docProfile: { ...prev.docProfile, kyc_status: "verified" },
-                }));
-              }}
-            />
-          </div>
-        </Suspense>
+        <div className="mt-4">
+          <DiditKYCButton
+            onSessionCreated={() => {
+              setShowKYC(false);
+              setData((prev: any) => ({
+                ...prev,
+                docProfile: { ...prev.docProfile, kyc_status: "pending" },
+              }));
+            }}
+            variant="full"
+          />
+        </div>
       )}
     </motion.div>
   );
