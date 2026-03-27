@@ -1,6 +1,7 @@
 import { useState, memo, forwardRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Menu, X, LogOut, LogIn, LayoutDashboard, ShoppingBag, Video, FileText, Building2, CreditCard, Stethoscope, Brain } from "lucide-react";
+import { Menu, X } from "lucide-react";
+import { Stethoscope, VideoCamera, Buildings, Brain, FileText, SignIn, ShoppingBag, SignOut, SquaresFour, GlobeSimple, CaretRight } from "@phosphor-icons/react";
 import mascot from "@/assets/mascot.png";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,30 +24,28 @@ const ListItem = forwardRef<HTMLLIElement, React.ComponentPropsWithoutRef<"a"> &
       <Link
         to={href || "#"}
         className={cn(
-          "flex items-center gap-3 select-none rounded-lg p-3 no-underline outline-none transition-all duration-150",
-          "hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-primary/30 group relative",
+          "flex items-center gap-3 select-none rounded-xl p-3 no-underline outline-none transition-all duration-150",
+          "hover:bg-primary/[0.04] focus-visible:ring-2 focus-visible:ring-primary/30 group relative",
           "active:scale-[0.98]",
           className
         )}
         {...props}
       >
         {Icon ? (
-          <div className="w-9 h-9 rounded-lg bg-primary/[0.06] flex items-center justify-center shrink-0 group-hover:bg-primary/[0.12] transition-colors duration-150">
-            <Icon className="w-4 h-4 text-primary/70 group-hover:text-primary transition-colors duration-150" />
+          <div className="w-9 h-9 rounded-xl bg-primary/[0.07] flex items-center justify-center shrink-0 group-hover:bg-primary/[0.12] transition-colors duration-150">
+            <Icon className="w-[18px] h-[18px] text-primary/70 group-hover:text-primary transition-colors duration-150" weight="fill" />
           </div>
         ) : null}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="text-[13px] font-semibold leading-none text-foreground">{title}</span>
             {badge && (
-              <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/8 text-primary/70">{badge}</span>
+              <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-primary/8 text-primary/70">{badge}</span>
             )}
           </div>
           <p className="line-clamp-2 text-[11px] leading-relaxed text-muted-foreground mt-1">{children}</p>
         </div>
-        <div className="w-4 opacity-0 group-hover:opacity-50 -translate-x-1 group-hover:translate-x-0 transition-all duration-150 text-foreground">
-          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L7 5L3.5 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
-        </div>
+        <CaretRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-40 -translate-x-1 group-hover:translate-x-0 transition-all duration-150 text-foreground" weight="bold" />
       </Link>
     </NavigationMenuLink>
   </li>
@@ -77,17 +76,20 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
     { label: "Para Empresas", href: "/para-empresas" },
   ];
 
+  const triggerCls = "group/trigger text-[13px] font-medium text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-muted/40 px-3.5 h-9 rounded-full transition-colors duration-150 gap-1.5";
+  const triggerIconCls = "w-[15px] h-[15px] text-muted-foreground/60 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150";
+
   return (
     <header
       ref={ref}
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-200",
+        "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300",
         scrolled
-          ? "bg-background/95 backdrop-blur-md shadow-sm shadow-foreground/[0.02] border-border/50"
+          ? "bg-background/95 backdrop-blur-xl shadow-[0_1px_3px_0_hsl(var(--foreground)/0.04)] border-border/40"
           : "bg-background/80 backdrop-blur-sm border-transparent"
       )}
     >
-      <div className="max-w-[1800px] mx-auto flex items-center justify-between h-14 lg:h-[60px] px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
+      <div className="max-w-[1800px] mx-auto flex items-center justify-between h-14 lg:h-[56px] px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
           <img src={mascot} alt="Pingo" className="w-8 h-8 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105" width={32} height={32} />
@@ -101,14 +103,14 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
           <NavigationMenu>
             <NavigationMenuList className="gap-0.5">
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="group/trigger text-[13px] font-medium text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-muted/50 px-3.5 h-9 rounded-lg transition-colors duration-150 gap-1.5">
-                  <Video className="w-3.5 h-3.5 text-primary/50 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150" />
+                <NavigationMenuTrigger className={triggerCls}>
+                  <VideoCamera className={triggerIconCls} weight="fill" />
                   Serviços
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <div className="p-2 w-[340px]">
                     <ul className="grid gap-0.5">
-                      <ListItem href="/teleconsulta" title="Teleconsulta" icon={Video} badge="24h">
+                      <ListItem href="/teleconsulta" title="Teleconsulta" icon={VideoCamera} badge="24h">
                         Consultas por vídeo com especialistas, receita digital e acesso rápido.
                       </ListItem>
                       <ListItem href="/paciente" title="Consulta Avulsa" icon={Stethoscope}>
@@ -120,8 +122,8 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="group/trigger text-[13px] font-medium text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-muted/50 px-3.5 h-9 rounded-lg transition-colors duration-150 gap-1.5">
-                  <Stethoscope className="w-3.5 h-3.5 text-primary/50 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150" />
+                <NavigationMenuTrigger className={triggerCls}>
+                  <Stethoscope className={triggerIconCls} weight="fill" />
                   Profissionais
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -133,7 +135,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                       <ListItem href="/laudista" title="Sou Laudista" icon={FileText} badge="IA">
                         Emita laudos à distância com IA e assinatura digital.
                       </ListItem>
-                      <ListItem href="/clinica" title="Sou Clínica" icon={Building2}>
+                      <ListItem href="/clinica" title="Sou Clínica" icon={Buildings}>
                         Gerencie agendamento, prontuário e equipe.
                       </ListItem>
                     </ul>
@@ -142,8 +144,8 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="group/trigger text-[13px] font-medium text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-muted/50 px-3.5 h-9 rounded-lg transition-colors duration-150 gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-primary/50 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150" />
+                <NavigationMenuTrigger className={triggerCls}>
+                  <Buildings className={triggerIconCls} weight="fill" />
                   Para Empresas
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
@@ -161,7 +163,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
         </div>
 
         {/* Right actions */}
-        <div className="hidden lg:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-2.5">
           <LanguageSwitcher />
 
           {user ? (
@@ -169,10 +171,10 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-lg gap-2 text-[13px] font-medium h-9 pl-2.5 pr-4 border-border/60 bg-card/80 shadow-sm hover:shadow hover:border-primary/20 transition-all duration-150 group"
+                className="rounded-full gap-2 text-[13px] font-medium h-9 pl-2.5 pr-4 border-border/60 bg-card/80 shadow-sm hover:shadow hover:border-primary/20 transition-all duration-150 group"
                 onClick={() => navigate("/dashboard")}
               >
-                <span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground">
+                <span className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground">
                   {profile?.first_name?.[0]?.toUpperCase() || "U"}
                 </span>
                 <span className="text-foreground">
@@ -182,11 +184,11 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-lg h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors duration-150"
+                className="rounded-full h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors duration-150"
                 onClick={async () => { await signOut(); navigate("/"); }}
                 title="Sair"
               >
-                <LogOut className="w-4 h-4" />
+                <SignOut className="w-4 h-4" weight="bold" />
               </Button>
             </div>
           ) : (
@@ -194,18 +196,18 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               <Button
                 size="sm"
                 variant="outline"
-                className="rounded-lg gap-1.5 text-xs font-semibold h-9 px-4 border-border/60 hover:border-primary/20"
+                className="rounded-full gap-1.5 text-[13px] font-semibold h-9 px-4 border-border/50 hover:border-primary/25 hover:bg-primary/[0.03] transition-all duration-150"
                 onClick={() => navigate("/paciente")}
               >
-                <ShoppingBag className="w-3.5 h-3.5" />
+                <Stethoscope className="w-3.5 h-3.5" weight="fill" />
                 Consulta Avulsa
               </Button>
               <Button
                 size="sm"
-                className="rounded-lg gap-1.5 text-xs font-semibold h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
+                className="rounded-full gap-1.5 text-[13px] font-semibold h-9 px-5 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 transition-all duration-150"
                 onClick={() => navigate("/paciente")}
               >
-                <LogIn className="w-3.5 h-3.5" />
+                <SignIn className="w-3.5 h-3.5" weight="bold" />
                 Entrar
               </Button>
             </div>
@@ -214,7 +216,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
 
         {/* Mobile toggle */}
         <button
-          className="lg:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-muted/50 transition-colors"
+          className="lg:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl hover:bg-muted/50 transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
           aria-expanded={mobileOpen}
@@ -235,7 +237,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               <button
                 key={link.href}
                 onClick={() => { setMobileOpen(false); navigate(link.href); }}
-                className="text-sm font-medium py-3 px-3 rounded-lg transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/40 active:bg-muted active:scale-[0.98]"
+                className="text-sm font-medium py-3 px-3 rounded-xl transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/40 active:bg-muted active:scale-[0.98]"
               >
                 {link.label}
               </button>
@@ -245,21 +247,21 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
               {user ? (
                 <>
-                  <Button variant="outline" size="sm" className="rounded-lg justify-start gap-2" onClick={() => { setMobileOpen(false); navigate("/dashboard"); }}>
-                    <LayoutDashboard className="w-4 h-4" />
+                  <Button variant="outline" size="sm" className="rounded-full justify-start gap-2" onClick={() => { setMobileOpen(false); navigate("/dashboard"); }}>
+                    <SquaresFour className="w-4 h-4" weight="fill" />
                     {profile?.first_name ? `Olá, ${profile.first_name}` : "Meu Painel"}
                   </Button>
-                  <Button variant="ghost" size="sm" className="rounded-lg justify-start gap-2" onClick={async () => { setMobileOpen(false); await signOut(); navigate("/"); }}>
-                    <LogOut className="w-4 h-4" /> Sair
+                  <Button variant="ghost" size="sm" className="rounded-full justify-start gap-2" onClick={async () => { setMobileOpen(false); await signOut(); navigate("/"); }}>
+                    <SignOut className="w-4 h-4" weight="bold" /> Sair
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button size="sm" variant="outline" className="rounded-lg justify-start gap-2 font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
-                    <ShoppingBag className="w-4 h-4" /> Consulta Avulsa
+                  <Button size="sm" variant="outline" className="rounded-full justify-start gap-2 font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
+                    <Stethoscope className="w-4 h-4" weight="fill" /> Consulta Avulsa
                   </Button>
-                  <Button size="sm" className="rounded-lg justify-start gap-2 bg-primary text-primary-foreground font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
-                    <LogIn className="w-4 h-4" /> Entrar
+                  <Button size="sm" className="rounded-full justify-start gap-2 bg-primary text-primary-foreground font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
+                    <SignIn className="w-4 h-4" weight="bold" /> Entrar
                   </Button>
                 </>
               )}
