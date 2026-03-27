@@ -6,7 +6,6 @@ import { getPatientNav } from "./patientNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Upload, FileText, Trash2, Eye, Plus, Search, FolderLock } from "lucide-react";
@@ -194,58 +193,36 @@ const PatientExamUpload = () => {
         </div>
 
         {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
-          <div className="rounded-lg border border-border overflow-hidden">
-            <div className="overflow-x-auto rounded-xl">
-
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Documento</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Tamanho</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-              {filteredDocs.map(d => (
-                  <TableRow key={d.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <span className="text-lg">{categoryIcon(d.category || "exam")}</span>
-                        <div>
-                          <p className="text-sm font-medium text-foreground">{d.description || d.file_name}</p>
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs text-muted-foreground">{d.file_name}</p>
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0">{categoryLabel(d.category || "exam")}</Badge>
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">
-                      {format(new Date(d.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground text-sm">{formatSize(d.file_size || 0)}</TableCell>
-                    <TableCell className="text-right space-x-1">
-                      <Button size="sm" variant="outline" onClick={() => viewDocument(d)}>
-                        <Eye className="w-3 h-3 mr-1" /> Ver
-                      </Button>
-                      <Button size="sm" variant="ghost" className="text-destructive" onClick={() => deleteDocument(d)}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {filteredDocs.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center text-muted-foreground py-8">
-                      <FileText className="w-8 h-8 mx-auto text-muted-foreground/20 mb-2" />
-                      Nenhum exame enviado ainda. Envie seus exames acima.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-            </div>
+          <div className="space-y-3">
+            {filteredDocs.length === 0 ? (
+              <div className="text-center py-12 rounded-2xl border border-dashed border-border/40 bg-muted/10">
+                <FileText className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                <p className="text-sm font-semibold text-foreground mb-1">Nenhum exame enviado ainda</p>
+                <p className="text-xs text-muted-foreground">Envie seus exames usando o botão acima.</p>
+              </div>
+            ) : filteredDocs.map(d => (
+              <div key={d.id} className="card-interactive flex items-center gap-4 rounded-2xl border border-border/30 bg-card p-4">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center text-xl shrink-0">
+                  {categoryIcon(d.category || "exam")}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{d.description || d.file_name}</p>
+                  <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">{categoryLabel(d.category || "exam")}</Badge>
+                    <span className="text-[10px] text-muted-foreground">{format(new Date(d.created_at), "dd/MM/yyyy", { locale: ptBR })}</span>
+                    <span className="text-[10px] text-muted-foreground">{formatSize(d.file_size || 0)}</span>
+                  </div>
+                </div>
+                <div className="flex gap-1 shrink-0">
+                  <Button size="sm" variant="outline" className="h-8 rounded-xl text-xs" onClick={() => viewDocument(d)}>
+                    <Eye className="w-3 h-3 mr-1" /> Ver
+                  </Button>
+                  <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive" onClick={() => deleteDocument(d)}>
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

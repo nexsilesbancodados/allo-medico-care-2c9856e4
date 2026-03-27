@@ -28,18 +28,18 @@ import { toast } from "sonner";
 import { motion } from "framer-motion";
 
 const METRIC_TYPES = [
-  { value: "blood_pressure_sys", label: "Pressão Sistólica", unit: "mmHg", icon: HeartPulse, gradient: "from-rose-500 to-pink-600", bg: "bg-rose-500/10", text: "text-rose-500", normalRange: [90, 120] },
-  { value: "blood_pressure_dia", label: "Pressão Diastólica", unit: "mmHg", icon: HeartPulse, gradient: "from-blue-500 to-indigo-600", bg: "bg-blue-500/10", text: "text-blue-500", normalRange: [60, 80] },
-  { value: "weight", label: "Peso", unit: "kg", icon: Weight, gradient: "from-amber-500 to-orange-600", bg: "bg-amber-500/10", text: "text-amber-500", normalRange: [50, 100] },
-  { value: "glucose", label: "Glicose", unit: "mg/dL", icon: Droplets, gradient: "from-purple-500 to-violet-600", bg: "bg-purple-500/10", text: "text-purple-500", normalRange: [70, 100] },
-  { value: "temperature", label: "Temperatura", unit: "°C", icon: Thermometer, gradient: "from-cyan-500 to-teal-600", bg: "bg-cyan-500/10", text: "text-cyan-500", normalRange: [36.0, 37.5] },
-  { value: "heart_rate", label: "Freq. Cardíaca", unit: "bpm", icon: Activity, gradient: "from-red-500 to-rose-600", bg: "bg-red-500/10", text: "text-red-500", normalRange: [60, 100] },
+  { value: "blood_pressure_sys", label: "Pressão Sistólica", unit: "mmHg", icon: HeartPulse, bg: "bg-destructive/10", text: "text-destructive", normalRange: [90, 120] },
+  { value: "blood_pressure_dia", label: "Pressão Diastólica", unit: "mmHg", icon: HeartPulse, bg: "bg-primary/10", text: "text-primary", normalRange: [60, 80] },
+  { value: "weight", label: "Peso", unit: "kg", icon: Weight, bg: "bg-warning/10", text: "text-warning", normalRange: [50, 100] },
+  { value: "glucose", label: "Glicose", unit: "mg/dL", icon: Droplets, bg: "bg-secondary/10", text: "text-secondary", normalRange: [70, 100] },
+  { value: "temperature", label: "Temperatura", unit: "°C", icon: Thermometer, bg: "bg-primary/10", text: "text-primary", normalRange: [36.0, 37.5] },
+  { value: "heart_rate", label: "Freq. Cardíaca", unit: "bpm", icon: Activity, bg: "bg-destructive/10", text: "text-destructive", normalRange: [60, 100] },
 ];
 
 const getStatusColor = (value: number, range: number[]) => {
-  if (value < range[0]) return "text-blue-500";
-  if (value > range[1]) return "text-rose-500";
-  return "text-emerald-500";
+  if (value < range[0]) return "text-primary";
+  if (value > range[1]) return "text-destructive";
+  return "text-success";
 };
 
 const getTrend = (data: any[], type: string) => {
@@ -182,10 +182,10 @@ const PatientHealth = () => {
   });
 
   const statCards = [
-    { label: "Consultas", value: consultations.length, icon: Stethoscope, gradient: "from-blue-500/15 to-cyan-500/5", iconColor: "text-blue-500" },
-    { label: "Receitas", value: prescriptions.length, icon: Pill, gradient: "from-emerald-500/15 to-green-500/5", iconColor: "text-emerald-500" },
-    { label: "Exames", value: documents.length, icon: FileCheck, gradient: "from-violet-500/15 to-purple-500/5", iconColor: "text-violet-500" },
-    { label: "Métricas", value: metrics.length, icon: BarChart3, gradient: "from-amber-500/15 to-orange-500/5", iconColor: "text-amber-500" },
+    { label: "Consultas", value: consultations.length, icon: Stethoscope, gradient: "from-primary/15 to-primary/5", iconColor: "text-primary" },
+    { label: "Receitas", value: prescriptions.length, icon: Pill, gradient: "from-secondary/15 to-secondary/5", iconColor: "text-secondary" },
+    { label: "Exames", value: documents.length, icon: FileCheck, gradient: "from-primary/10 to-secondary/5", iconColor: "text-primary" },
+    { label: "Métricas", value: metrics.length, icon: BarChart3, gradient: "from-warning/15 to-warning/5", iconColor: "text-warning" },
   ];
 
   return (
@@ -316,7 +316,7 @@ const PatientHealth = () => {
                   }`}
                 >
                   {/* Gradient accent */}
-                  <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${mt.gradient} ${isSelected ? "opacity-100" : "opacity-0"} transition-opacity`} />
+                  <div className={`absolute top-0 left-0 right-0 h-0.5 bg-primary ${isSelected ? "opacity-100" : "opacity-0"} transition-opacity`} />
 
                   <div className="flex items-center justify-between mb-2">
                     <div className={`w-8 h-8 rounded-lg ${mt.bg} flex items-center justify-center`}>
@@ -324,7 +324,7 @@ const PatientHealth = () => {
                     </div>
                     {mt.trend && (
                       <div className={`flex items-center gap-0.5 text-[10px] font-medium ${
-                        mt.trend.direction === "up" ? "text-rose-500" : mt.trend.direction === "down" ? "text-blue-500" : "text-muted-foreground"
+                        mt.trend.direction === "up" ? "text-destructive" : mt.trend.direction === "down" ? "text-primary" : "text-muted-foreground"
                       }`}>
                         {mt.trend.direction === "up" ? <TrendingUp className="w-3 h-3" /> :
                          mt.trend.direction === "down" ? <TrendingDown className="w-3 h-3" /> :
@@ -342,8 +342,8 @@ const PatientHealth = () => {
 
                   {mt.latest && (
                     <div className="flex items-center gap-1 mt-1.5">
-                      <div className={`w-1.5 h-1.5 rounded-full ${isNormal ? "bg-emerald-500" : "bg-rose-500"}`} />
-                      <span className={`text-[9px] font-medium ${isNormal ? "text-emerald-600" : "text-rose-500"}`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${isNormal ? "bg-success" : "bg-destructive"}`} />
+                      <span className={`text-[9px] font-medium ${isNormal ? "text-success" : "text-destructive"}`}>
                         {isNormal ? "Normal" : "Atenção"}
                       </span>
                     </div>
@@ -359,7 +359,7 @@ const PatientHealth = () => {
               <CardHeader className="pb-1 pt-4 px-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xs font-semibold text-foreground flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentMetricConfig?.gradient}`} />
+                    <div className="w-2 h-2 rounded-full bg-primary" />
                     {currentMetricConfig?.label}
                   </CardTitle>
                   <Badge variant="secondary" className="text-[9px] h-5">
@@ -466,7 +466,7 @@ const PatientHealth = () => {
                               </div>
                             </div>
                           </div>
-                          <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 text-[10px] h-5">
+                          <Badge className="bg-success/10 text-success border-success/20 text-[10px] h-5">
                             Concluída
                           </Badge>
                         </div>
@@ -492,12 +492,12 @@ const PatientHealth = () => {
               <Card key={p.id} className="border-border/50 shadow-sm overflow-hidden">
                 <CardContent className="p-0">
                   <div className="flex items-stretch">
-                    <div className="w-1 bg-gradient-to-b from-emerald-500 to-emerald-500/30 shrink-0" />
+                    <div className="w-1 bg-gradient-to-b from-secondary to-secondary/30 shrink-0" />
                     <div className="flex-1 p-3.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                            <Pill className="w-4 h-4 text-emerald-500" />
+                          <div className="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                            <Pill className="w-4 h-4 text-secondary" />
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-foreground leading-tight">{p.diagnosis || "Receita médica"}</p>
@@ -528,12 +528,12 @@ const PatientHealth = () => {
               <Card key={d.id} className="border-border/50 shadow-sm overflow-hidden">
                 <CardContent className="p-0">
                   <div className="flex items-stretch">
-                    <div className="w-1 bg-gradient-to-b from-violet-500 to-violet-500/30 shrink-0" />
+                    <div className="w-1 bg-gradient-to-b from-primary to-primary/30 shrink-0" />
                     <div className="flex-1 p-3.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
-                            <FileText className="w-4 h-4 text-violet-500" />
+                          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <FileText className="w-4 h-4 text-primary" />
                           </div>
                           <div>
                             <p className="text-sm font-medium text-foreground">{d.description || d.file_name}</p>
@@ -573,7 +573,7 @@ const PatientHealth = () => {
                       return (
                         <div key={m.id} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 border border-border/20">
                           <div className="flex items-center gap-2.5">
-                            <div className={`w-2 h-2 rounded-full ${isNormal ? "bg-emerald-500" : "bg-rose-500"}`} />
+                            <div className={`w-2 h-2 rounded-full ${isNormal ? "bg-success" : "bg-destructive"}`} />
                             <div>
                               <span className="text-sm font-semibold text-foreground">{m.value} <span className="text-[10px] font-normal text-muted-foreground">{m.unit}</span></span>
                               {m.notes && <p className="text-[10px] text-muted-foreground leading-tight">{m.notes}</p>}

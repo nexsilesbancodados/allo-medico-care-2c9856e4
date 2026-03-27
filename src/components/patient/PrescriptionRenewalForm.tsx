@@ -188,8 +188,8 @@ const PrescriptionRenewalForm = () => {
     switch (status) {
       case "pending_payment": return <Badge variant="outline"><Clock className="w-3 h-3 mr-1" />Aguardando pagamento</Badge>;
       case "pending": case "pending_review": return <Badge variant="outline"><Clock className="w-3 h-3 mr-1" />Em análise</Badge>;
-      case "in_review": return <Badge className="bg-amber-500"><AlertCircle className="w-3 h-3 mr-1" />Em análise</Badge>;
-      case "approved": return <Badge className="bg-emerald-500"><CheckCircle2 className="w-3 h-3 mr-1" />Aprovada</Badge>;
+      case "in_review": return <Badge className="bg-warning text-warning-foreground"><AlertCircle className="w-3 h-3 mr-1" />Em análise</Badge>;
+      case "approved": return <Badge className="bg-success text-success-foreground"><CheckCircle2 className="w-3 h-3 mr-1" />Aprovada</Badge>;
       case "rejected": return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Rejeitada</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
     }

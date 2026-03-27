@@ -191,7 +191,7 @@ const DependentsManager = () => {
         ) : (
           <div className="grid gap-3">
             {dependents.map(dep => (
-              <Card key={dep.id} className="border-border/50 hover:shadow-sm transition-shadow">
+              <Card key={dep.id} className="card-interactive border-border/50">
                 <CardContent className="p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
