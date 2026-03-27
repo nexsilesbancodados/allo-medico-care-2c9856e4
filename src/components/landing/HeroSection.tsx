@@ -53,14 +53,14 @@ const HeroSection = memo(
               className="max-w-2xl"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
               {/* Status badge */}
               <motion.div
                 className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-success/20 bg-success/[0.06] text-success text-xs font-semibold mb-6"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.15 }}
+                transition={{ duration: 0.25, delay: 0.1 }}
               >
                 <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success shadow-sm shadow-success/40 animate-pulse" />
                 Médicos disponíveis agora
@@ -95,7 +95,7 @@ const HeroSection = memo(
                 className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+                transition={{ duration: 0.25, delay: 0 }}
               >
                 <Button
                   size="lg"
@@ -123,7 +123,7 @@ const HeroSection = memo(
                 className="flex flex-row flex-wrap items-center gap-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.45 }}
+                transition={{ duration: 0.25, delay: 0.15 }}
               >
                 {trustItems.map((item) => (
                   <div
@@ -142,7 +142,7 @@ const HeroSection = memo(
               className="relative hidden md:flex justify-center items-center"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              transition={{ duration: 0.5, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="relative w-full max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl">
                 {/* Soft gradient behind image */}
