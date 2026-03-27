@@ -359,12 +359,9 @@ const AuthPaciente = () => {
 
               {/* Brand row */}
               <div className="relative z-10 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <img src={logo} alt="AloClínica" className="w-11 h-11 rounded-2xl shadow-lg ring-2 ring-white/20" />
-                  <div>
-                    <h1 className="text-xl font-black text-white tracking-tight leading-none">AloClínica</h1>
-                    <p className="text-[11px] text-white/60 mt-0.5">Telemedicina de excelência</p>
-                  </div>
+                <div>
+                  <h1 className="text-xl font-black text-white tracking-tight leading-none">AloClínica</h1>
+                  <p className="text-[11px] text-white/60 mt-0.5">Telemedicina de excelência</p>
                 </div>
                 <motion.img
                   src={mascotWave}
