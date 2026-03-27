@@ -86,6 +86,89 @@ export type Database = {
         }
         Relationships: []
       }
+      aloc_exames: {
+        Row: {
+          created_at: string
+          id: string
+          laudista_id: string | null
+          medico_solicitante_id: string | null
+          orthanc_study_uid: string | null
+          orthanc_study_url: string | null
+          paciente_id: string | null
+          status: string
+          tipo_exame: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          laudista_id?: string | null
+          medico_solicitante_id?: string | null
+          orthanc_study_uid?: string | null
+          orthanc_study_url?: string | null
+          paciente_id?: string | null
+          status?: string
+          tipo_exame?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          laudista_id?: string | null
+          medico_solicitante_id?: string | null
+          orthanc_study_uid?: string | null
+          orthanc_study_url?: string | null
+          paciente_id?: string | null
+          status?: string
+          tipo_exame?: string
+        }
+        Relationships: []
+      }
+      aloc_laudos: {
+        Row: {
+          assinado_em: string | null
+          conteudo_html: string
+          conteudo_ia: string | null
+          created_at: string
+          exame_id: string
+          id: string
+          medico_id: string
+          pdf_url: string | null
+          qr_token: string | null
+          status: string
+        }
+        Insert: {
+          assinado_em?: string | null
+          conteudo_html?: string
+          conteudo_ia?: string | null
+          created_at?: string
+          exame_id: string
+          id?: string
+          medico_id: string
+          pdf_url?: string | null
+          qr_token?: string | null
+          status?: string
+        }
+        Update: {
+          assinado_em?: string | null
+          conteudo_html?: string
+          conteudo_ia?: string | null
+          created_at?: string
+          exame_id?: string
+          id?: string
+          medico_id?: string
+          pdf_url?: string | null
+          qr_token?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "aloc_laudos_exame_id_fkey"
+            columns: ["exame_id"]
+            isOneToOne: false
+            referencedRelation: "aloc_exames"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_settings: {
         Row: {
           key: string
@@ -3574,6 +3657,17 @@ export type Database = {
         Returns: string
       }
       search_doctor_by_name: { Args: { p_name: string }; Returns: string }
+      validar_laudo_publico: {
+        Args: { p_token: string }
+        Returns: {
+          assinado_em: string
+          medico_nome: string
+          paciente_nome: string
+          qr_token: string
+          status: string
+          tipo_exame: string
+        }[]
+      }
       verify_document_public: {
         Args: { p_code: string }
         Returns: {
