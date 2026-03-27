@@ -573,7 +573,7 @@ const PatientHealth = () => {
                       return (
                         <div key={m.id} className="flex items-center justify-between p-2.5 rounded-xl bg-muted/30 border border-border/20">
                           <div className="flex items-center gap-2.5">
-                            <div className={`w-2 h-2 rounded-full ${isNormal ? "bg-emerald-500" : "bg-rose-500"}`} />
+                            <div className={`w-2 h-2 rounded-full ${isNormal ? "bg-success" : "bg-destructive"}`} />
                             <div>
                               <span className="text-sm font-semibold text-foreground">{m.value} <span className="text-[10px] font-normal text-muted-foreground">{m.unit}</span></span>
                               {m.notes && <p className="text-[10px] text-muted-foreground leading-tight">{m.notes}</p>}
