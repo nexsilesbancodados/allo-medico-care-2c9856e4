@@ -294,6 +294,20 @@ export default function EditorLaudoCompleto() {
         await supabase.from("aloc_exames").update({
           status: "concluido",
         }).eq("id", exame.id);
+
+        // WhatsApp: notify patient that laudo is available
+        if (exame.paciente_id) {
+          supabase.functions.invoke("whatsapp-notify", {
+            body: {
+              tipo: "laudo_disponivel",
+              user_id: exame.paciente_id,
+              dados: {
+                nome_medico: medicoEmail,
+                laudo_url: publicUrl.publicUrl,
+              },
+            },
+          }).catch(() => {});
+        }
       } else {
         // Fallback: use the original sign flow
         await assinarLaudo(laudo.id, exame.id);
