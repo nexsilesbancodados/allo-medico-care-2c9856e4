@@ -12,7 +12,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import type { SpecialtyRow } from "@/types/domain";
-import { lazy, Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import DiditKYCButton from "@/components/kyc/DiditKYCButton";
