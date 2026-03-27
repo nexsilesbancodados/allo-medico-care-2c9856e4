@@ -1,3 +1,7 @@
+// ⚠️ PRODUÇÃO: Adicionar aloclinica.com.br nos redirect URLs do Supabase Dashboard
+// Authentication → URL Configuration → Redirect URLs
+// Adicionar: https://aloclinica.com.br/**
+// Adicionar: https://www.aloclinica.com.br/**
 const FALLBACK_SUPABASE_URL = "https://oaixgmuocuwhsabidpei.supabase.co";
 const FALLBACK_SUPABASE_PUBLISHABLE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9haXhnbXVvY3V3aHNhYmlkcGVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExODUyNjksImV4cCI6MjA4Njc2MTI2OX0.J9KUdJRNxSFdhI4hNu4V9CDQw4rl7wHPvRy3WU8mqrc";
