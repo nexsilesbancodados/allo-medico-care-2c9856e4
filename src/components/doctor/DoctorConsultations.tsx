@@ -190,163 +190,167 @@ const DoctorConsultations = () => {
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("consultations")}>
       <div className="w-full mx-auto max-w-5xl space-y-5 pb-24 md:pb-6">
-        {/* Back button */}
-        <button
-          onClick={() => navigate("/dashboard")}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors group"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-0.5 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
-          Voltar ao painel
-        </button>
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tabular-nums">Minhas Consultas</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              {scheduledCount} agendada(s) · {completedCount} concluída(s) · {appointments.length} total
-            </p>
-          </div>
-          <div className="flex gap-2 shrink-0">
-            <Button size="sm" variant="outline" onClick={exportCSV} disabled={filtered.length === 0}>
-              <Download className="w-4 h-4 mr-1" /> CSV
-            </Button>
-            <Button size="sm" variant="outline" onClick={exportPDF} disabled={filtered.length === 0}>
-              <FileText className="w-4 h-4 mr-1" /> PDF
-            </Button>
+        {/* Premium header */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#042A1C] via-[#065f46] to-[#059669] p-5 text-white" style={{ boxShadow: "0 8px 32px rgba(4,42,28,0.25)" }}>
+          <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-white/8 blur-2xl" />
+          <div className="relative z-10">
+            <button onClick={() => navigate("/dashboard")} className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.15em] text-white/50 hover:text-white/80 transition-colors mb-2">
+              ← Voltar ao painel
+            </button>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h1 className="text-xl font-black tracking-tight">📋 Minhas Consultas</h1>
+                <div className="flex items-center gap-3 mt-2">
+                  {[
+                    { label: "Agendadas", value: scheduledCount, bg: "bg-white/15" },
+                    { label: "Concluídas", value: completedCount, bg: "bg-emerald-400/20" },
+                    { label: "Total", value: appointments.length, bg: "bg-white/10" },
+                  ].map(k => (
+                    <div key={k.label} className={`${k.bg} rounded-lg px-2.5 py-1 backdrop-blur-sm`}>
+                      <span className="text-sm font-black tabular-nums">{k.value}</span>
+                      <span className="text-[9px] ml-1 opacity-70">{k.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <Button size="sm" variant="ghost" onClick={exportCSV} disabled={filtered.length === 0} className="text-white/70 hover:text-white hover:bg-white/10 rounded-xl text-xs h-8 gap-1">
+                  <Download className="w-3.5 h-3.5" /> CSV
+                </Button>
+                <Button size="sm" variant="ghost" onClick={exportPDF} disabled={filtered.length === 0} className="text-white/70 hover:text-white hover:bg-white/10 rounded-xl text-xs h-8 gap-1">
+                  <FileText className="w-3.5 h-3.5" /> PDF
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
 
         {/* Filters */}
-        <Card variant="elevated">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
-              <div className="relative flex-1 min-w-[160px]">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar paciente..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="pl-8 h-9 text-sm"
-                />
-              </div>
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full sm:w-40 h-9">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos status</SelectItem>
-                  <SelectItem value="scheduled">Agendada</SelectItem>
-                  <SelectItem value="waiting">Esperando</SelectItem>
-                  <SelectItem value="in_progress">Em andamento</SelectItem>
-                  <SelectItem value="completed">Concluída</SelectItem>
-                  <SelectItem value="cancelled">Cancelada</SelectItem>
-                  <SelectItem value="no_show">Ausente</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={period} onValueChange={v => { setPeriod(v); if (v === "custom") setCalendarOpen(true); }}>
-                <SelectTrigger className="w-full sm:w-44 h-9">
-                  <Filter className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
-                  <SelectValue placeholder="Período" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              {period === "custom" && (
-                <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="h-9 text-xs">
-                      <CalendarIcon className="w-3.5 h-3.5 mr-1.5" />
-                      {customFrom && customTo
-                        ? `${format(customFrom, "dd/MM")} → ${format(customTo, "dd/MM")}`
-                        : calendarStep === "from" ? "Início" : "Fim"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <p className="text-xs text-muted-foreground px-3 pt-3 pb-1">
-                      {calendarStep === "from" ? "Data inicial" : "Data final"}
-                    </p>
-                    <Calendar
-                      mode="single"
-                      selected={calendarStep === "from" ? customFrom : customTo}
-                      onSelect={handleCalendarSelect}
-                      initialFocus
-                      className={cn("p-3 pointer-events-auto")}
-                    />
-                  </PopoverContent>
-                </Popover>
-              )}
+        <div className="rounded-2xl border border-border/25 bg-card p-4" style={{ boxShadow: "var(--d-shadow-card)" }}>
+          <div className="flex flex-col sm:flex-row gap-3 flex-wrap">
+            <div className="relative flex-1 min-w-[160px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar paciente..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="pl-10 h-10 text-sm rounded-xl border-border/40"
+              />
             </div>
-            {filtered.length !== appointments.length && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Mostrando {filtered.length} de {appointments.length} consultas
-              </p>
+            <Select value={filterStatus} onValueChange={setFilterStatus}>
+              <SelectTrigger className="w-full sm:w-40 h-10 rounded-xl border-border/40">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos status</SelectItem>
+                <SelectItem value="scheduled">Agendada</SelectItem>
+                <SelectItem value="waiting">Esperando</SelectItem>
+                <SelectItem value="in_progress">Em andamento</SelectItem>
+                <SelectItem value="completed">Concluída</SelectItem>
+                <SelectItem value="cancelled">Cancelada</SelectItem>
+                <SelectItem value="no_show">Ausente</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={period} onValueChange={v => { setPeriod(v); if (v === "custom") setCalendarOpen(true); }}>
+              <SelectTrigger className="w-full sm:w-44 h-10 rounded-xl border-border/40">
+                <Filter className="w-3.5 h-3.5 mr-1.5 text-muted-foreground" />
+                <SelectValue placeholder="Período" />
+              </SelectTrigger>
+              <SelectContent>
+                {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            {period === "custom" && (
+              <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="h-10 text-xs rounded-xl">
+                    <CalendarIcon className="w-3.5 h-3.5 mr-1.5" />
+                    {customFrom && customTo
+                      ? `${format(customFrom, "dd/MM")} → ${format(customTo, "dd/MM")}`
+                      : calendarStep === "from" ? "Início" : "Fim"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <p className="text-xs text-muted-foreground px-3 pt-3 pb-1">
+                    {calendarStep === "from" ? "Data inicial" : "Data final"}
+                  </p>
+                  <Calendar
+                    mode="single"
+                    selected={calendarStep === "from" ? customFrom : customTo}
+                    onSelect={handleCalendarSelect}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
             )}
-          </CardContent>
-        </Card>
+          </div>
+          {filtered.length !== appointments.length && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Mostrando {filtered.length} de {appointments.length} consultas
+            </p>
+          )}
+        </div>
 
         {/* List — mobile-friendly cards */}
         {loading ? (
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {[1, 2, 3, 4].map(i => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-border">
-                <div className="flex items-center gap-3 flex-1">
-                  <Skeleton className="w-10 h-10 rounded-xl" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                </div>
+              <div key={i} className="flex items-center gap-3 p-4 rounded-2xl border border-border/20 bg-card">
+                <Skeleton className="w-11 h-11 rounded-xl" />
+                <div className="space-y-2 flex-1"><Skeleton className="h-4 w-36" /><Skeleton className="h-3 w-24" /></div>
                 <Skeleton className="h-7 w-20 rounded-full" />
               </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-8 rounded-2xl border border-dashed border-border/40">
-          <img src={mascotWave} alt="Pingo" className="w-20 h-20 object-contain mx-auto mb-3 select-none" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }} loading="lazy" decoding="async" width={80} height={80} />
-            <Users className="w-10 h-10 mx-auto text-muted-foreground/30 mb-3" />
-            <p className="text-sm font-medium text-foreground mb-1">Nenhuma consulta encontrada</p>
+          <div className="text-center py-10 rounded-2xl border-2 border-dashed border-border/30">
+            <img src={mascotWave} alt="Pingo" className="w-20 h-20 object-contain mx-auto mb-3 select-none" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }} loading="lazy" decoding="async" width={80} height={80} />
+            <p className="text-sm font-bold text-foreground mb-1">Nenhuma consulta encontrada</p>
             <p className="text-xs text-muted-foreground">Tente ajustar os filtros</p>
           </div>
         ) : (
-          <div className="space-y-2">
-            {filtered.map(a => (
-              <div
-                key={a.id}
-                className={`flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl border gap-3 transition-colors ${
-                  a.status === "in_progress" ? "border-success/30 bg-success/5"
-                  : a.status === "waiting" ? "border-warning/30 bg-warning/5"
-                  : "border-border hover:bg-muted/30"
-                }`}
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 rounded-xl bg-muted/60 flex items-center justify-center shrink-0">
-                    <Users className="w-5 h-5 text-muted-foreground" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{a.patient_name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {format(new Date(a.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} · {a.duration_minutes || 30}min
-                    </p>
+          <div className="space-y-2.5">
+            {filtered.map(a => {
+              const stripeColor = a.status === "in_progress" ? "bg-emerald-500"
+                : a.status === "waiting" ? "bg-amber-500"
+                : a.status === "completed" ? "bg-muted-foreground/30"
+                : a.status === "cancelled" || a.status === "no_show" ? "bg-destructive/60"
+                : "bg-primary/40";
+              return (
+                <div key={a.id} className="flex overflow-hidden rounded-2xl border border-border/20 bg-card transition-all hover:shadow-md hover:-translate-y-0.5" style={{ boxShadow: "var(--d-shadow-card)" }}>
+                  <div className={`w-1 shrink-0 ${stripeColor}`} />
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 gap-3 flex-1 min-w-0">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center shrink-0 text-[15px]">
+                        👤
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-bold text-foreground truncate">{a.patient_name}</p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {format(new Date(a.scheduled_at), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })} · {a.duration_minutes || 30}min
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className={`text-[10px] font-bold px-2.5 py-1 rounded-lg border ${statusColor[a.status] ?? "bg-muted text-muted-foreground border-border"}`}>
+                        {statusLabel[a.status] ?? a.status}
+                      </span>
+                      {(a.status === "scheduled" || a.status === "waiting") && (
+                        <Button size="sm" className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8 gap-1 shadow-md shadow-emerald-600/20" onClick={() => navigate(`/dashboard/consultation/${a.id}`)}>
+                          <Video className="w-3 h-3" /> Iniciar
+                        </Button>
+                      )}
+                      {a.status === "completed" && (
+                        <Button size="sm" variant="outline" className="text-xs h-8 rounded-xl gap-1" onClick={() => navigate(`/dashboard/prescribe/${a.id}`)}>
+                          <FileText className="w-3 h-3" /> Receita
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${statusColor[a.status] ?? "bg-muted text-muted-foreground border-border"}`}>
-                    {statusLabel[a.status] ?? a.status}
-                  </span>
-                  {(a.status === "scheduled" || a.status === "waiting") && (
-                    <Button size="sm" className="bg-gradient-hero text-primary-foreground text-xs h-7" onClick={() => navigate(`/dashboard/consultation/${a.id}`)}>
-                      <Video className="w-3 h-3 mr-1" /> Iniciar
-                    </Button>
-                  )}
-                  {a.status === "completed" && (
-                    <Button size="sm" variant="outline" className="text-xs h-7" onClick={() => navigate(`/dashboard/prescribe/${a.id}`)}>
-                      <FileText className="w-3 h-3 mr-1" /> Receita
-                    </Button>
-                  )}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

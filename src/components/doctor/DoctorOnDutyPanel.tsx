@@ -91,67 +91,58 @@ const DoctorOnDutyPanel = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("on-duty")}>
-      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground mb-1">🏥 Plantão 24h</h1>
-            <p className="text-muted-foreground text-sm">Fila de pronto-atendimento digital</p>
+      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6 space-y-5">
+        {/* Hero header */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-600 via-amber-500 to-yellow-500 p-5 text-white" style={{ boxShadow: "0 8px 32px rgba(180,100,0,0.25)" }}>
+          <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+          <div className="relative z-10 flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/60">Pronto-Atendimento</p>
+              <h1 className="text-xl font-black tracking-tight mt-1">⚡ Plantão 24h</h1>
+              <p className="text-xs text-white/70 mt-1">Fila de atendimento digital em tempo real</p>
+            </div>
+            <div className="flex items-center gap-2 rounded-2xl bg-white/15 backdrop-blur-sm border border-white/20 px-4 py-2.5">
+              <Users className="w-4 h-4" />
+              <span className="text-2xl font-black tabular-nums">{queue.length}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">na fila</span>
+            </div>
           </div>
-          <Badge variant="outline" className="text-lg px-4 py-2">
-            <Users className="w-4 h-4 mr-2" /> {queue.length} na fila
-          </Badge>
         </div>
 
         {loading ? (
-          <p className="text-muted-foreground">Carregando fila...</p>
+          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 animate-pulse rounded-2xl bg-muted/50" />)}</div>
         ) : queue.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Zap className="w-12 h-12 mx-auto text-muted-foreground/30 mb-4" />
-              <h3 className="font-semibold text-foreground mb-1">Nenhum paciente na fila</h3>
-              <p className="text-sm text-muted-foreground">Novos pacientes aparecerão aqui em tempo real.</p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="rounded-lg border border-border overflow-hidden">
-            <div className="overflow-x-auto -mx-0.5 rounded-xl">
-
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Posição</TableHead>
-                  <TableHead>Turno</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead>Esperando</TableHead>
-                  <TableHead className="text-right">Ação</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {queue.map((entry, i) => (
-                  <TableRow key={entry.id} className={i === 0 ? "bg-primary/5" : ""}>
-                    <TableCell data-label="Posição">
-                      <Badge variant={i === 0 ? "default" : "outline"}>{i + 1}º</Badge>
-                    </TableCell>
-                    <TableCell data-label="Turno" className="text-sm">
-                      {entry.shift === "day" ? "☀️ Diurno" : entry.shift === "night" ? "🌙 Noturno" : "🌃 Madrugada"}
-                    </TableCell>
-                    <TableCell data-label="Preço" className="text-sm font-medium">R$ {Number(entry.price).toFixed(2)}</TableCell>
-                    <TableCell data-label="Espera">
-                      <div className="flex items-center gap-1 text-sm">
-                        <Clock className="w-3 h-3" />
-                        {waitTime(entry.created_at)}
-                      </div>
-                    </TableCell>
-                    <TableCell data-label="">
-                      <Button size="sm" disabled={accepting} onClick={() => handleAcceptPatient(entry)}>
-                        <UserCheck className="w-4 h-4 mr-1" /> Atender
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+          <div className="rounded-2xl border-2 border-dashed border-border/40 p-12 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-amber-50 dark:bg-amber-950/30">
+              <Zap className="w-8 h-8 text-amber-500" />
             </div>
+            <h3 className="font-bold text-foreground mb-1">Nenhum paciente na fila</h3>
+            <p className="text-sm text-muted-foreground">Novos pacientes aparecerão aqui em tempo real</p>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {queue.map((entry, i) => (
+              <div key={entry.id} className={`flex items-center gap-4 rounded-2xl border p-4 transition-all hover:shadow-md hover:-translate-y-0.5 ${i === 0 ? "border-amber-300/50 bg-amber-50/50 dark:bg-amber-950/20 dark:border-amber-800/30" : "border-border/30 bg-card"}`} style={{ boxShadow: "var(--d-shadow-card)" }}>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl font-black text-lg ${i === 0 ? "bg-amber-500 text-white" : "bg-muted/60 text-muted-foreground"}`}>
+                  {i + 1}º
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-foreground">
+                      {entry.shift === "day" ? "☀️ Diurno" : entry.shift === "night" ? "🌙 Noturno" : "🌃 Madrugada"}
+                    </span>
+                    {i === 0 && <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400">Próximo</span>}
+                  </div>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground tabular-nums">R$ {Number(entry.price).toFixed(2)}</span>
+                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> {waitTime(entry.created_at)}</span>
+                  </div>
+                </div>
+                <Button size="sm" disabled={accepting} onClick={() => handleAcceptPatient(entry)} className="rounded-xl h-10 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs gap-1.5 shadow-md shadow-emerald-600/20">
+                  <UserCheck className="w-4 h-4" /> Atender
+                </Button>
+              </div>
+            ))}
           </div>
         )}
       </div>
