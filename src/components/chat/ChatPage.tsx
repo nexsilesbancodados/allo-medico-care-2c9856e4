@@ -1,16 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MessageCircle, ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Send, Paperclip, ArrowLeft, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
+import { motion, AnimatePresence } from "framer-motion";
+import mascotWave from "@/assets/mascot-wave.png";
 import AppointmentChat from "./AppointmentChat";
 
 interface ChatConversation {
@@ -22,6 +24,12 @@ interface ChatConversation {
   unreadCount: number;
 }
 
+const QUICK_REPLIES = [
+  "Sim, agendar agora",
+  "Falar com atendente",
+  "Ver meus exames",
+];
+
 const ChatPage = () => {
   const { user, roles } = useAuth();
   const navigate = useNavigate();
@@ -29,6 +37,7 @@ const ChatPage = () => {
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [selected, setSelected] = useState<ChatConversation | null>(null);
   const [loading, setLoading] = useState(true);
+  const [message, setMessage] = useState("");
 
   const isDoctor = roles.includes("doctor");
   const forceRole = searchParams.get("role");
@@ -39,7 +48,6 @@ const ChatPage = () => {
   useEffect(() => { if (user) fetchConversations(); }, [user]);
 
   const fetchConversations = async () => {
-    // Get appointments involving this user
     let query = supabase.from("appointments").select("id, scheduled_at, status, patient_id, doctor_id")
       .in("status", ["scheduled", "waiting", "in_progress", "completed"])
       .order("scheduled_at", { ascending: false })
@@ -56,7 +64,6 @@ const ChatPage = () => {
     const { data: appts } = await query;
     if (!appts || appts.length === 0) { setLoading(false); return; }
 
-    // Get other user names
     const otherIds = isDoctor
       ? [...new Set(appts.map(a => a.patient_id).filter(Boolean))]
       : [...new Set(appts.map(a => a.doctor_id))];
@@ -77,7 +84,6 @@ const ChatPage = () => {
       docs?.forEach(d => nameMap.set(d.id, pMap.get(d.user_id) ?? "Médico"));
     }
 
-    // Get unread counts
     const apptIds = appts.map(a => a.id);
     const { data: unreadMsgs } = await supabase
       .from("messages")
@@ -109,63 +115,159 @@ const ChatPage = () => {
     scheduled: "Agendada", waiting: "Aguardando", in_progress: "Em andamento", completed: "Concluída",
   };
 
+  // Mobile: show chat if selected, list if not
+  const showChat = !!selected;
+
   return (
     <DashboardLayout title={activeRole === "doctor" ? "Médico" : "Paciente"} nav={nav} role={activeRole}>
       <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6">
-        <Button variant="ghost" size="sm" onClick={() => navigate(backHref)} className="mb-4 gap-2">
-          <ArrowLeft className="w-4 h-4" /> Voltar ao Painel
-        </Button>
-        <h1 className="text-2xl font-bold text-foreground mb-1">Mensagens</h1>
-        <p className="text-muted-foreground mb-6">Converse com {activeRole === "doctor" ? "seus pacientes" : "seus médicos"}</p>
 
-        <div className="grid grid-cols-1 md:grid-cols-[300px_1fr] gap-4">
-          {/* Conversations list */}
-          <div className="space-y-2 max-h-[40vh] md:max-h-[60vh] overflow-y-auto">
-            {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : conversations.length === 0 ? (
-              <Card className="border-border">
-                <CardContent className="py-8 text-center">
-                  <MessageCircle className="w-8 h-8 mx-auto text-muted-foreground/30 mb-2" />
-                  <p className="text-sm text-muted-foreground">Nenhuma conversa disponível.</p>
-                </CardContent>
-              </Card>
-            ) : conversations.map(c => (
-              <Card
-                key={c.appointmentId}
-                className={`border-border cursor-pointer hover:bg-muted/50 transition-colors ${
-                  selected?.appointmentId === c.appointmentId ? "ring-2 ring-primary" : ""
-                }`}
-                onClick={() => setSelected(c)}
-              >
-                <CardContent className="p-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-foreground truncate">{c.otherName}</p>
-                    {c.unreadCount > 0 && (
-                      <Badge className="bg-destructive text-destructive-foreground text-[10px] px-1.5">{c.unreadCount}</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {format(new Date(c.scheduledAt), "dd/MM/yyyy HH:mm", { locale: ptBR })}
-                  </p>
-                  <Badge variant="outline" className="text-[10px] mt-1">{statusLabel[c.status] ?? c.status}</Badge>
-                </CardContent>
-              </Card>
-            ))}
+        {/* Desktop: side-by-side | Mobile: toggle */}
+        <div className="hidden md:grid md:grid-cols-[300px_1fr] gap-4 h-[calc(100vh-200px)]">
+          {/* Conversation list — desktop */}
+          <div className="flex flex-col">
+            <h2 className="font-[Manrope] text-lg font-bold text-foreground mb-3">Mensagens</h2>
+            <div className="space-y-2 flex-1 overflow-y-auto">
+              {renderConversationList()}
+            </div>
           </div>
-
-          {/* Chat area */}
-          <div className="min-h-[300px] sm:min-h-[400px]">
+          {/* Chat area — desktop */}
+          <div className="flex flex-col rounded-2xl border border-border overflow-hidden bg-card">
             {selected ? (
               <AppointmentChat appointmentId={selected.appointmentId} otherUserName={selected.otherName} />
             ) : (
-              <div className="flex items-center justify-center h-full border border-border rounded-lg bg-card">
-                <p className="text-sm text-muted-foreground">Selecione uma conversa para começar</p>
+              <div className="flex-1 flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">Selecione uma conversa</p>
               </div>
             )}
           </div>
         </div>
+
+        {/* Mobile view */}
+        <div className="md:hidden">
+          {!showChat ? (
+            <div>
+              {/* Header with Pingo avatar */}
+              <div className="flex items-center gap-3 mb-6">
+                <img src={mascotWave} alt="Pingo" className="w-10 h-10 rounded-full object-cover" />
+                <div>
+                  <h1 className="font-[Manrope] text-xl font-bold text-foreground">AloClínica</h1>
+                  <p className="text-xs text-muted-foreground">Suas conversas</p>
+                </div>
+              </div>
+
+              {/* Quick replies */}
+              <div className="flex gap-2 overflow-x-auto pb-3 mb-4 -mx-1 px-1 scrollbar-hide">
+                {QUICK_REPLIES.map(text => (
+                  <button
+                    key={text}
+                    className="shrink-0 px-4 py-2 rounded-full border border-primary text-primary text-[13px] font-semibold whitespace-nowrap"
+                  >
+                    {text}
+                  </button>
+                ))}
+              </div>
+
+              {/* Conversation list */}
+              <div className="space-y-2">
+                {renderConversationList()}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col h-[calc(100vh-180px)]">
+              {/* Chat header */}
+              <div className="flex items-center gap-3 pb-3 border-b border-border mb-3">
+                <button onClick={() => setSelected(null)} className="text-muted-foreground">
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
+                <img src={mascotWave} alt="Pingo" className="w-8 h-8 rounded-full object-cover" />
+                <div>
+                  <p className="text-sm font-bold text-foreground">{selected.otherName}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {statusLabel[selected.status] ?? selected.status}
+                  </p>
+                </div>
+              </div>
+              {/* Chat content */}
+              <div className="flex-1 overflow-hidden">
+                <AppointmentChat appointmentId={selected.appointmentId} otherUserName={selected.otherName} />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );
+
+  function renderConversationList() {
+    if (loading) {
+      return (
+        <>
+          {[1, 2, 3].map(i => (
+            <div key={i} className="flex gap-3 p-4 rounded-2xl">
+              <Skeleton className="w-10 h-10 rounded-full shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-3 w-20" />
+              </div>
+            </div>
+          ))}
+        </>
+      );
+    }
+
+    if (conversations.length === 0) {
+      return (
+        <div className="text-center py-12">
+          <img src={mascotWave} alt="Pingo" className="w-20 h-20 mx-auto mb-3 opacity-60" />
+          <p className="text-sm font-semibold text-foreground">Nenhuma conversa</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Suas conversas com médicos aparecerão aqui após agendar uma consulta.
+          </p>
+        </div>
+      );
+    }
+
+    return conversations.map((c, i) => (
+      <motion.button
+        key={c.appointmentId}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: i * 0.03 }}
+        onClick={() => setSelected(c)}
+        className={`w-full flex items-center gap-3 p-4 rounded-2xl text-left transition-all active:scale-[0.98] ${
+          selected?.appointmentId === c.appointmentId
+            ? "bg-primary/5 ring-2 ring-primary"
+            : "bg-card hover:bg-muted/30"
+        }`}
+      >
+        {/* Avatar */}
+        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <span className="text-sm font-bold text-primary">
+            {c.otherName.charAt(0)}
+          </span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-foreground truncate">{c.otherName}</p>
+            <span className="text-[11px] text-muted-foreground shrink-0">
+              {format(new Date(c.scheduledAt), "dd/MM", { locale: ptBR })}
+            </span>
+          </div>
+          <div className="flex items-center justify-between mt-0.5">
+            <p className="text-xs text-muted-foreground truncate">
+              {statusLabel[c.status] ?? c.status}
+            </p>
+            {c.unreadCount > 0 && (
+              <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center shrink-0">
+                {c.unreadCount}
+              </span>
+            )}
+          </div>
+        </div>
+      </motion.button>
+    ));
+  }
 };
 
 export default ChatPage;

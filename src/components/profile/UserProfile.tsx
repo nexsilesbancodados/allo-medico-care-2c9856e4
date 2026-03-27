@@ -244,13 +244,25 @@ const UserProfile = () => {
             </div>
           </button>
 
-          {/* Tip Card */}
-          <div className="rounded-2xl bg-muted/30 p-5">
-            <h4 className="font-bold text-foreground text-sm mb-1">Tudo certo por aqui!</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              Mantenha seus dados de saúde sempre atualizados para um atendimento mais ágil e preciso em nossas unidades parceiras.
-            </p>
+          {/* Saúde em Foco Card */}
+          <div className="rounded-2xl bg-primary p-5 text-primary-foreground mb-6">
+            <h4 className="font-[Manrope] font-bold text-lg">Saúde em Foco</h4>
+            <p className="text-sm text-primary-foreground/70 mt-0.5">Acompanhe sua jornada de bem-estar</p>
+            <div className="flex items-center justify-between mt-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-primary-foreground/50">Score Vital</p>
+              </div>
+              <p className="font-[Manrope] text-[28px] font-extrabold">9.2</p>
+            </div>
+            <div className="mt-2 h-1.5 rounded-full bg-primary-foreground/30 overflow-hidden">
+              <div className="h-full rounded-full bg-primary-foreground w-[92%]" />
+            </div>
           </div>
+
+          {/* Version footer */}
+          <p className="text-center text-[11px] font-medium text-muted-foreground/40 tracking-widest uppercase">
+            AloClínica v2.4.0 · Clinical Sanctuary
+          </p>
         </div>
       </DashboardLayout>
     );
