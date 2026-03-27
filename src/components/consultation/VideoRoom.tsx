@@ -55,6 +55,7 @@ const VideoRoom = () => {
   const [deviceChecked, setDeviceChecked] = useState(true);
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [doctorBusy, setDoctorBusy] = useState(false);
+  const [jitsiRoomId, setJitsiRoomId] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
 
   const [elapsed, setElapsed] = useState(0);
