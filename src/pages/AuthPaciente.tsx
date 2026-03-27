@@ -34,7 +34,7 @@ const AuthPaciente = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-he    if (Date.now() < lockoutUntil.current) {
+if (Date.now() < lockoutUntil.current) {
       const secs = Math.ceil((lockoutUntil.current - Date.now()) / 1000);
       toast.error("Aguarde", { description: `Tente novamente em ${secs}s` });
       return;
