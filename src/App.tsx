@@ -208,6 +208,10 @@ const App = () => {
                         <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
                         <Route path="/laudista" element={<AuthLaudista />} />
                         <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
+                        <Route path="/laudos/fila" element={<ProtectedRoute><LaudosFila /></ProtectedRoute>} />
+                        <Route path="/laudos/editor/:exameId" element={<ProtectedRoute><LaudosEditor /></ProtectedRoute>} />
+                        <Route path="/laudos/validar/:token" element={<LaudosValidar />} />
+                        <Route path="/laudos/validar" element={<LaudosValidar />} />
                         <Route
                           path="/dashboard/*"
                           element={

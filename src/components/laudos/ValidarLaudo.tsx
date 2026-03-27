@@ -78,9 +78,9 @@ export default function ValidarLaudo() {
             <div className="space-y-3">
               <div className="flex justify-center">
                 {isValid ? (
-                  <CheckCircle className="h-14 w-14 text-green-600" />
+                  <CheckCircle className="h-14 w-14 text-primary" />
                 ) : (
-                  <XCircle className="h-14 w-14 text-yellow-600" />
+                  <XCircle className="h-14 w-14 text-destructive" />
                 )}
               </div>
 
