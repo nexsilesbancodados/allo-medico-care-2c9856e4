@@ -33,6 +33,7 @@ import {
 import TermsConsentCheckbox from "@/components/auth/TermsConsentCheckbox";
 import { registerConsent } from "@/lib/consent";
 import { formatMask, unmask } from "@/hooks/use-mask";
+import { validarCPF } from "@/lib/cpf";
 import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 import { translateAuthError } from "@/lib/authErrors";
@@ -91,8 +92,8 @@ const AuthPaciente = () => {
       return;
     }
     const cleanCpf = unmask(cpf);
-    if (cleanCpf.length !== 11) {
-      toast.error("CPF inválido", { description: "Digite um CPF válido com 11 dígitos." });
+    if (!validarCPF(cleanCpf)) {
+      toast.error("CPF inválido", { description: "O CPF informado não é válido. Verifique os dígitos e tente novamente." });
       return;
     }
     const cleanPhone = unmask(phone);
