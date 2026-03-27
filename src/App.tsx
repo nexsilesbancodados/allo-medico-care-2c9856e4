@@ -49,6 +49,9 @@ const Teleconsulta = lazy(() => import("./pages/Teleconsulta"));
 const Telelaudo = lazy(() => import("./pages/Telelaudo"));
 const AuthLaudista = lazy(() => import("./pages/AuthLaudista"));
 const TelelaudoWorkspace = lazy(() => import("./pages/TelelaudoWorkspace"));
+const LaudosFila = lazy(() => import("./pages/LaudosFila"));
+const LaudosEditor = lazy(() => import("./pages/LaudosEditor"));
+const LaudosValidar = lazy(() => import("./pages/LaudosValidar"));
 
 
 const queryClient = new QueryClient({
