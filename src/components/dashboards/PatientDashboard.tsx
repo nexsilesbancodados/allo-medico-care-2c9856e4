@@ -14,7 +14,7 @@ import {
   Calendar, Video, Clock, Gift, ChevronRight,
   Heart, Activity, Weight, Thermometer, Droplets, Wind,
   Zap, ClipboardList,
-  Sparkles, ArrowRight, FileText, Upload,
+  ArrowRight, FileText, Upload,
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
