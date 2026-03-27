@@ -282,7 +282,7 @@ const AppointmentsList = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 px-3 rounded-xl text-xs font-medium gap-1 border-amber-500/30 text-amber-600 hover:bg-amber-500/10"
+                    className="h-8 px-3 rounded-xl text-xs font-medium gap-1 border-warning/30 text-warning hover:bg-warning/10"
                     onClick={() => navigate(`/dashboard/schedule/${appt.doctor_id}?resume=${appt.id}`)}
                   >
                     <CreditCard className="w-3.5 h-3.5" /> Pagar
