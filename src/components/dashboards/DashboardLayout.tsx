@@ -552,87 +552,80 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
       <GlobalCommand role={role} />
       <PWABanner role={role} />
 
-      {/* ═══ Mobile bottom nav — floating glass bar with round animated buttons ═══ */}
+      {/* ═══ Mobile bottom nav ═══ */}
       {nav && nav.length > 0 && (
         <nav
           className="md:hidden fixed bottom-0 left-0 right-0 z-50"
           style={{
-            paddingBottom: "max(6px, env(safe-area-inset-bottom, 6px))",
-            paddingLeft: "calc(env(safe-area-inset-left, 0px) + 8px)",
-            paddingRight: "calc(env(safe-area-inset-right, 0px) + 8px)",
+            paddingBottom: "max(4px, env(safe-area-inset-bottom, 4px))",
+            paddingLeft: "calc(env(safe-area-inset-left, 0px) + 6px)",
+            paddingRight: "calc(env(safe-area-inset-right, 0px) + 6px)",
           }}
           aria-label="Navegação principal"
         >
           <div
-            className="dark:bg-background/90 rounded-[28px] border border-white/15 dark:border-white/10 mx-auto max-w-md"
+            className="dark:bg-background/92 rounded-[22px] border border-border/10 dark:border-white/8 mx-auto max-w-[420px]"
             style={{
-              background: "linear-gradient(180deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.96) 100%)",
-              backdropFilter: "saturate(180%) blur(24px)",
-              WebkitBackdropFilter: "saturate(180%) blur(24px)",
-              boxShadow: "0 -2px 24px -4px rgba(0,0,0,0.10), 0 4px 16px -2px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.4)",
+              background: "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.98) 100%)",
+              backdropFilter: "saturate(200%) blur(28px)",
+              WebkitBackdropFilter: "saturate(200%) blur(28px)",
+              boxShadow: "0 -4px 32px -6px rgba(0,0,0,0.08), 0 2px 12px -2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5)",
             }}
           >
-          <div className="flex items-center justify-around h-[68px] px-1">
-            {bottomNav.map(item => {
-              const activeColor = ROLE_ACTIVE_COLOR[role] ?? ROLE_ACTIVE_COLOR.patient;
-              const activeBg = ROLE_ACTIVE_BG[role] ?? ROLE_ACTIVE_BG.patient;
-              return (
-                <Link key={item.href} to={item.href}
-                  className={`relative flex flex-col items-center justify-center gap-1 flex-1 select-none group ${
-                    item.active ? activeColor : "text-muted-foreground/60"
-                  }`}
-                >
-                  {/* Animated round icon container */}
-                  <motion.span
-                    className={`relative flex items-center justify-center rounded-full transition-colors duration-300 ${
-                      item.active
-                        ? `${activeBg} w-12 h-12 shadow-lg`
-                        : "w-10 h-10 group-hover:bg-muted/40 group-active:bg-muted/60"
+            <div className="flex items-end justify-around h-[64px] px-1 pb-1.5">
+              {bottomNav.map(item => {
+                const activeColor = ROLE_ACTIVE_COLOR[role] ?? ROLE_ACTIVE_COLOR.patient;
+                const activeBg = ROLE_ACTIVE_BG[role] ?? ROLE_ACTIVE_BG.patient;
+                return (
+                  <Link key={item.href} to={item.href}
+                    className={`relative flex flex-col items-center justify-end gap-0.5 flex-1 select-none group py-1 ${
+                      item.active ? activeColor : "text-muted-foreground/50"
                     }`}
-                    animate={item.active ? { scale: 1, y: -6 } : { scale: 1, y: 0 }}
-                    whileTap={{ scale: 0.82 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 22 }}
                   >
-                    {/* Glow ring behind active icon */}
+                    {/* Active pill indicator at top */}
                     {item.active && (
                       <motion.span
-                        className="absolute inset-0 rounded-full"
-                        initial={{ scale: 0.8, opacity: 0 }}
-                        animate={{ scale: 1.35, opacity: 0 }}
-                        transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
-                        style={{ background: "currentColor", opacity: 0.15 }}
+                        layoutId="bottomNavPill"
+                        className="absolute -top-0.5 w-8 h-[3px] rounded-full bg-current"
+                        transition={{ type: "spring", stiffness: 500, damping: 32 }}
                       />
                     )}
-                    <span className={`relative z-10 transition-transform duration-200 ${item.active ? "[&>svg]:w-5 [&>svg]:h-5" : "[&>svg]:w-[18px] [&>svg]:h-[18px]"}`}>
-                      {item.icon}
-                    </span>
-                    {(item.badge ?? 0) > 0 && (
-                      <span className="absolute -top-0.5 -right-0.5 text-[8px] font-bold min-w-[16px] h-4 px-1 rounded-full bg-destructive text-white flex items-center justify-center tabular-nums shadow-md ring-2 ring-background">
-                        {(item.badge ?? 0) > 9 ? "9+" : item.badge}
-                      </span>
-                    )}
-                  </motion.span>
-                  {/* Label with animated visibility */}
-                  <motion.span
-                    className={`text-[10px] truncate max-w-[56px] leading-none ${
-                      item.active ? "font-bold" : "font-medium"
-                    }`}
-                    animate={item.active ? { opacity: 1, y: -4 } : { opacity: 0.7, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >{item.label}</motion.span>
-                  {/* Active dot indicator */}
-                  {item.active && (
-                    <motion.span
-                      layoutId="bottomNavDot"
-                      className="absolute -bottom-0.5 w-1 h-1 rounded-full bg-current"
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    />
-                  )}
-                </Link>
-              );
-            })}
 
-          </div>
+                    {/* Icon */}
+                    <motion.span
+                      className={`relative flex items-center justify-center rounded-2xl transition-all duration-250 ${
+                        item.active
+                          ? `${activeBg} w-11 h-11`
+                          : "w-10 h-10 group-active:bg-muted/40"
+                      }`}
+                      animate={item.active ? { scale: 1, y: -2 } : { scale: 1, y: 0 }}
+                      whileTap={{ scale: 0.85 }}
+                      transition={{ type: "spring", stiffness: 420, damping: 24 }}
+                    >
+                      <span className={`relative z-10 transition-all duration-200 ${
+                        item.active
+                          ? "[&>span]:!bg-transparent [&_svg]:w-[22px] [&_svg]:h-[22px]"
+                          : "[&_svg]:w-[20px] [&_svg]:h-[20px] opacity-60 group-active:opacity-80"
+                      }`}>
+                        {item.icon}
+                      </span>
+                      {(item.badge ?? 0) > 0 && (
+                        <span className="absolute -top-1 -right-1 text-[7px] font-bold min-w-[15px] h-[15px] px-1 rounded-full bg-destructive text-white flex items-center justify-center tabular-nums shadow ring-2 ring-white dark:ring-background">
+                          {(item.badge ?? 0) > 9 ? "9+" : item.badge}
+                        </span>
+                      )}
+                    </motion.span>
+
+                    {/* Label */}
+                    <span className={`text-[10px] truncate max-w-[52px] leading-none mt-0.5 ${
+                      item.active ? "font-bold" : "font-medium opacity-70"
+                    }`}>
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         </nav>
       )}
