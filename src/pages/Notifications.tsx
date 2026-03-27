@@ -149,15 +149,8 @@ const Notifications = () => {
           </div>
         )}
 
-        {/* Filter tabs */}
-        <div className="flex gap-2 mb-4">
-          <Button variant={filter === "all" ? "default" : "outline"} size="sm" className="rounded-full text-xs h-8 px-4" onClick={() => setFilter("all")}>
-            Todas
-          </Button>
-          <Button variant={filter === "unread" ? "default" : "outline"} size="sm" className="rounded-full text-xs h-8 px-4 gap-1" onClick={() => setFilter("unread")}>
-            Não lidas {unreadCount > 0 && <span className="text-[10px]">({unreadCount})</span>}
-          </Button>
-        </div>
+        {/* Section label */}
+        <h4 className="font-[Manrope] font-bold text-muted-foreground text-xs uppercase tracking-[0.2em] px-2 mb-4">Recentes</h4>
 
         {/* Notifications list */}
         {loading ? (
