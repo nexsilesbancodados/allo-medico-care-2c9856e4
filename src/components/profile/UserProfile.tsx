@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { ArrowLeft, Camera, Save, Trash2, AlertTriangle, ChevronRight, User, Clock, Bell, HelpCircle, LogOut, Shield, Heart, Pencil } from "lucide-react";
+import { ArrowLeft, Camera, Save, Trash2, AlertTriangle, ChevronRight, User, Clock, Bell, HelpCircle, LogOut, Shield, Heart, Pencil, ShieldCheck, Upload } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
@@ -35,12 +35,15 @@ function getNavForRole(role: string) {
   }
 }
 
+const KYC_PENDING_KEY = "aloclinica_kyc_pending";
+
 const UserProfile = () => {
   const { user, profile, roles } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const forceRole = searchParams.get("role");
+  const openKyc = searchParams.get("kyc") === "open";
   const isAdmin = roles.includes("admin");
   const activeRole = isAdmin && forceRole ? forceRole
     : roles.includes("doctor") ? "doctor"
@@ -64,6 +67,13 @@ const UserProfile = () => {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [showKyc, setShowKyc] = useState(openKyc);
+  const [kycPending, setKycPending] = useState(localStorage.getItem(KYC_PENDING_KEY) === "true");
+  const [kycSelfieFile, setKycSelfieFile] = useState<File | null>(null);
+  const [kycSelfiePreview, setKycSelfiePreview] = useState<string | null>(null);
+  const [kycDocFile, setKycDocFile] = useState<File | null>(null);
+  const [kycDocPreview, setKycDocPreview] = useState<string | null>(null);
+  const [kycSaving, setKycSaving] = useState(false);
 
   // Doctor fields
   const [bio, setBio] = useState("");
@@ -162,8 +172,49 @@ const UserProfile = () => {
   const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
   const isPatient = activeRole === "patient";
 
+  const handleKycFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "selfie" | "doc") => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      if (type === "selfie") { setKycSelfieFile(file); setKycSelfiePreview(ev.target?.result as string); }
+      else { setKycDocFile(file); setKycDocPreview(ev.target?.result as string); }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleKycSubmit = async () => {
+    if (!user || (!kycSelfieFile && !kycDocFile)) { toast.error("Envie pelo menos a selfie e o documento"); return; }
+    setKycSaving(true);
+    try {
+      if (kycSelfieFile) {
+        const ext = kycSelfieFile.name.split(".").pop() || "jpg";
+        await supabase.storage.from("avatars").upload(`${user.id}/kyc-selfie.${ext}`, kycSelfieFile, { upsert: true });
+        if (!profile?.avatar_url) {
+          const path = `${user.id}/avatar.${ext}`;
+          await supabase.storage.from("avatars").upload(path, kycSelfieFile, { upsert: true });
+          const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
+          await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
+          setAvatarUrl(publicUrl);
+        }
+      }
+      if (kycDocFile) {
+        const ext = kycDocFile.name.split(".").pop() || "jpg";
+        await supabase.storage.from("avatars").upload(`${user.id}/kyc-document.${ext}`, kycDocFile, { upsert: true });
+      }
+      localStorage.removeItem(KYC_PENDING_KEY);
+      setKycPending(false);
+      setShowKyc(false);
+      toast.success("Verificação enviada! ✅", { description: "Seus documentos serão analisados." });
+    } catch {
+      toast.error("Erro ao enviar documentos");
+    }
+    setKycSaving(false);
+  };
+
   const menuItems = [
     { icon: Pencil, label: "Editar Perfil", desc: "Altere seus dados pessoais e fotos", action: () => setEditMode(true) },
+    ...(isPatient && kycPending ? [{ icon: ShieldCheck, label: "Verificação de Identidade", desc: "⚠️ Pendente — Complete para agendar consultas", action: () => setShowKyc(true) }] : []),
     { icon: Bell, label: "Notificações", desc: "Gerencie alertas de consultas e exames", action: () => navigate(`/dashboard/settings?role=${activeRole}&tab=notifications`) },
     { icon: Shield, label: "Segurança", desc: "Alterar senha e biometria", action: () => navigate(`/dashboard/settings?role=${activeRole}&tab=security`) },
     { icon: HelpCircle, label: "Ajuda", desc: "Central de suporte e FAQ", action: () => navigate("/dashboard/patient/support?role=patient") },
@@ -206,6 +257,57 @@ const UserProfile = () => {
               </div>
             )}
           </div>
+
+          {/* KYC Inline Section */}
+          {showKyc && isPatient && (
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-primary/20 bg-card p-5 mb-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Verificação de Identidade (KYC)</p>
+                  <p className="text-xs text-muted-foreground">Tire uma selfie e fotografe seu documento</p>
+                </div>
+              </div>
+              <div className="rounded-xl border border-border/50 p-3">
+                <p className="text-xs font-bold text-foreground mb-2 flex items-center gap-1.5"><Camera className="w-3.5 h-3.5 text-primary" /> Selfie</p>
+                {kycSelfiePreview ? (
+                  <div className="relative">
+                    <img src={kycSelfiePreview} alt="Selfie" className="w-full h-32 object-cover rounded-lg" />
+                    <button onClick={() => { setKycSelfieFile(null); setKycSelfiePreview(null); }} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center text-xs">✕</button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center h-24 rounded-lg border-2 border-dashed border-border/50 cursor-pointer hover:border-primary/40 transition-colors">
+                    <Camera className="w-5 h-5 text-muted-foreground/40 mb-1" />
+                    <p className="text-[11px] text-muted-foreground">Tirar selfie agora</p>
+                    <input type="file" accept="image/*" capture="user" className="hidden" onChange={e => handleKycFileSelect(e, "selfie")} />
+                  </label>
+                )}
+              </div>
+              <div className="rounded-xl border border-border/50 p-3">
+                <p className="text-xs font-bold text-foreground mb-2 flex items-center gap-1.5"><Upload className="w-3.5 h-3.5 text-secondary" /> Documento com foto</p>
+                {kycDocPreview ? (
+                  <div className="relative">
+                    <img src={kycDocPreview} alt="Doc" className="w-full h-32 object-cover rounded-lg" />
+                    <button onClick={() => { setKycDocFile(null); setKycDocPreview(null); }} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center text-xs">✕</button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center h-24 rounded-lg border-2 border-dashed border-border/50 cursor-pointer hover:border-primary/40 transition-colors">
+                    <Camera className="w-5 h-5 text-muted-foreground/40 mb-1" />
+                    <p className="text-[11px] text-muted-foreground">Fotografar documento</p>
+                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleKycFileSelect(e, "doc")} />
+                  </label>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleKycSubmit} disabled={kycSaving || (!kycSelfieFile && !kycDocFile)} className="flex-1 rounded-xl">
+                  {kycSaving ? "Enviando..." : "Enviar verificação"}
+                </Button>
+                <Button variant="outline" onClick={() => setShowKyc(false)} className="rounded-xl">Cancelar</Button>
+              </div>
+            </motion.div>
+          )}
 
           {/* Menu Items */}
           <div className="rounded-2xl bg-card border border-border/30 overflow-hidden mb-6">

@@ -62,10 +62,13 @@ const RECURRENCE_OPTIONS = [
 
 const RECURRENCE_WEEKS: Record<string, number> = { weekly: 1, biweekly: 2, monthly: 4 };
 
+const KYC_PENDING_KEY = "aloclinica_kyc_pending";
+
 const BookAppointment = () => {
   const { doctorId } = useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const kycPending = localStorage.getItem(KYC_PENDING_KEY) === "true";
 
   const [doctor, setDoctor] = useState<DoctorInfo | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
@@ -440,6 +443,25 @@ const BookAppointment = () => {
       </div>
     </DashboardLayout>
   );
+
+  if (kycPending) {
+    return (
+      <DashboardLayout title="Paciente" nav={patientNav}>
+        <div className="w-full max-w-lg mx-auto text-center py-20 space-y-4">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-destructive/10 flex items-center justify-center">
+            <Lock className="w-8 h-8 text-destructive" />
+          </div>
+          <h2 className="text-xl font-bold text-foreground">Verificação necessária</h2>
+          <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+            Para sua segurança, você precisa concluir a verificação de identidade (KYC) antes de agendar consultas.
+          </p>
+          <Button onClick={() => navigate("/dashboard/profile?role=patient&kyc=open")} className="rounded-xl">
+            <Shield className="w-4 h-4 mr-2" /> Completar verificação
+          </Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Paciente" nav={patientNav}>
