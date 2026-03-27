@@ -100,17 +100,7 @@ const PlansCheckout = () => {
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [couponValid, setCouponValid] = useState<boolean | null>(null);
   const [checkingCoupon, setCheckingCoupon] = useState(false);
-  const [cardDiscount, setCardDiscount] = useState(0);
-
-  const currentPlan = plans.find(p => p.id === selectedPlan);
-
-  // Check if user has active discount card
-  useEffect(() => {
-    if (!user) return;
-    supabase.from("discount_cards").select("discount_percent").eq("user_id", user.id).eq("status", "active").maybeSingle().then(({ data }) => {
-      if (data) setCardDiscount(Number(data.discount_percent));
-    });
-  }, [user]);
+  const cardDiscount = 0;
 
   // PIX countdown
   useEffect(() => {
