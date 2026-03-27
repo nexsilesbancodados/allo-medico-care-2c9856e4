@@ -22,12 +22,12 @@ const ForgotPassword = () => {
       redirectTo: `${window.location.origin}/reset-password`,
     });
     setLoading(false);
+    // Sempre mostra a mesma mensagem — proteção contra enumeração de usuários
     if (error) {
-      toast.error("Erro", { description: error.message });
-    } else {
-      setSent(true);
-      toast.success("Email enviado!", { description: "Verifique sua caixa de entrada." });
+      console.warn("[ForgotPassword] reset error (hidden from user)");
     }
+    setSent(true);
+    toast.success("Se esse email estiver cadastrado, você receberá um link em breve.");
   };
 
   return (

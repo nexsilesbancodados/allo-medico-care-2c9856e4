@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { securityMonitor } from "@/lib/security-monitor";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -178,14 +179,20 @@ const AuthMedico = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (securityMonitor.isLoginBlocked(email)) {
+      toast.error("Conta temporariamente bloqueada", { description: "Muitas tentativas. Aguarde 15 minutos." });
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
 
     if (error) {
+      securityMonitor.trackFailedLogin(email);
       toast.error("Erro ao entrar", { description: translateAuthError(error.message) });
       return;
     }
+    securityMonitor.clearFailedLogins(email);
 
     if (data.user) {
       const { data: doctorProfile } = await supabase

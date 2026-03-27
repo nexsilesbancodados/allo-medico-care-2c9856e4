@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -33,6 +34,21 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting: 20 req/min por IP
+    const identifier = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anonymous";
+    try {
+      const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+      const since = new Date(Date.now() - 60000).toISOString();
+      const { count } = await sb.from("rate_limits").select("id", { count: "exact", head: true })
+        .eq("identifier", identifier).eq("endpoint", "send-whatsapp").gte("window_start", since);
+      if ((count ?? 0) >= 20) {
+        return new Response(JSON.stringify({ error: "Muitas requisições. Aguarde um momento." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+        });
+      }
+      await sb.from("rate_limits").insert({ identifier, endpoint: "send-whatsapp", window_start: new Date().toISOString() });
+    } catch { /* rate limit check failure is non-blocking */ }
+
     const EVOLUTION_API_URL = Deno.env.get("EVOLUTION_API_URL");
     const EVOLUTION_API_KEY = Deno.env.get("EVOLUTION_API_KEY");
 

@@ -1,5 +1,6 @@
 import { logError } from "@/lib/logger";
 import { useState, useRef } from "react";
+import { securityMonitor } from "@/lib/security-monitor";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -66,10 +67,15 @@ const AuthPaciente = () => {
       toast.error("Aguarde", { description: `Tente novamente em ${secs}s` });
       return;
     }
+    if (securityMonitor.isLoginBlocked(email)) {
+      toast.error("Conta temporariamente bloqueada", { description: "Muitas tentativas. Aguarde 15 minutos." });
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setLoading(false);
+      securityMonitor.trackFailedLogin(email);
       const newAttempts = attempts + 1;
       setAttempts(newAttempts);
       if (newAttempts >= 5) {
@@ -81,6 +87,7 @@ const AuthPaciente = () => {
       }
     } else if (data.user) {
       setAttempts(0);
+      securityMonitor.clearFailedLogins(email);
       setLoading(false);
       await redirectAfterLogin(data.user.id);
     }
