@@ -124,6 +124,10 @@ export default function EditorLaudoCompleto() {
   const [suggesting, setSuggesting] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
   const [showSignDialog, setShowSignDialog] = useState(false);
+  const [docuSealOpen, setDocuSealOpen] = useState(false);
+  const [docuSealUrl, setDocuSealUrl] = useState("");
+  const [docuSealSubId, setDocuSealSubId] = useState(0);
+  const [medicoEmail, setMedicoEmail] = useState("");
 
   const editor = useEditor({
     extensions: [
