@@ -169,27 +169,11 @@ const UserProfile = () => {
   const initials = `${firstName?.[0] ?? ""}${lastName?.[0] ?? ""}`.toUpperCase();
   const isPatient = activeRole === "patient";
 
-  const handleKycComplete = async (selfieBlob: Blob, docBlob: Blob) => {
-    if (!user) return;
-    setKycSaving(true);
-    try {
-      await supabase.storage.from("avatars").upload(`${user.id}/kyc-selfie.jpg`, selfieBlob, { upsert: true, contentType: "image/jpeg" });
-      await supabase.storage.from("avatars").upload(`${user.id}/kyc-document.jpg`, docBlob, { upsert: true, contentType: "image/jpeg" });
-      if (!profile?.avatar_url) {
-        const path = `${user.id}/avatar.jpg`;
-        await supabase.storage.from("avatars").upload(path, selfieBlob, { upsert: true, contentType: "image/jpeg" });
-        const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
-        await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
-        setAvatarUrl(publicUrl);
-      }
-      localStorage.removeItem(KYC_PENDING_KEY);
-      setKycPending(false);
-      setShowKyc(false);
-      toast.success("Verificação enviada! ✅", { description: "Seus documentos serão analisados." });
-    } catch {
-      toast.error("Erro ao enviar documentos");
-    }
-    setKycSaving(false);
+  const handleKycSessionCreated = () => {
+    localStorage.removeItem(KYC_PENDING_KEY);
+    setKycPending(false);
+    setShowKyc(false);
+    toast.success("Verificação iniciada!", { description: "Complete o processo na aba aberta." });
   };
 
   const menuItems = [
@@ -238,21 +222,16 @@ const UserProfile = () => {
             )}
           </div>
 
-          {/* KYC Inline Section — real camera capture */}
+          {/* KYC via Didit */}
           {showKyc && isPatient && (
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-primary/20 bg-card p-5 mb-6">
-              {kycSaving ? (
-                <div className="flex flex-col items-center justify-center py-8 gap-3">
-                  <div className="w-10 h-10 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                  <p className="text-sm text-muted-foreground">Enviando verificação...</p>
-                </div>
-              ) : (
-                <PatientKYCCapture
-                  onComplete={handleKycComplete}
-                  onCancel={() => setShowKyc(false)}
-                  compact
-                />
-              )}
+              <DiditKYCButton
+                onSessionCreated={handleKycSessionCreated}
+                variant="full"
+              />
+              <button onClick={() => setShowKyc(false)} className="w-full text-center text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
+                Cancelar
+              </button>
             </motion.div>
           )}
 
