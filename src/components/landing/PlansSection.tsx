@@ -127,6 +127,7 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
             </div>
           </motion.div>
         </div>
+      </section>
     </>
   );
 });
