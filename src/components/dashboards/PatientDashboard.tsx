@@ -15,7 +15,7 @@ import {
   Heart, Lightning, ClipboardText, FileText, UploadSimple,
   Sparkle, Stethoscope, MagnifyingGlass, Star, Plus,
 } from "@phosphor-icons/react";
-import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
+import PatientOnboarding, { ONBOARDING_KEY, KYC_PENDING_KEY } from "@/components/patient/PatientOnboarding";
 import { PingoMascot } from "@/components/mascot/PingoMascot";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
@@ -123,6 +123,26 @@ const PatientDashboard = () => {
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
       <div className="space-y-6 pb-24 md:pb-8">
+
+        {/* KYC Pending Warning */}
+        {localStorage.getItem(KYC_PENDING_KEY) === "true" && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 flex items-center gap-3"
+          >
+            <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
+              <AlertTriangle className="w-5 h-5 text-destructive" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-foreground">Verificação pendente</p>
+              <p className="text-xs text-muted-foreground">Complete o KYC para agendar consultas e usar o app.</p>
+            </div>
+            <Button size="sm" variant="destructive" className="rounded-xl shrink-0" onClick={() => navigate("/dashboard/profile?role=patient&kyc=open")}>
+              Verificar
+            </Button>
+          </motion.div>
+        )}
 
         {/* ═══════════ HERO BANNER ═══════════ */}
         <section className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[32px] bg-gradient-to-br from-[#001d4a] via-[#00347F] to-[#1a5ccc] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6"
