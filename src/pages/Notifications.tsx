@@ -117,46 +117,40 @@ const Notifications = () => {
         </button>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-              Notificações
-              {unreadCount > 0 && (
-                <Badge className="bg-destructive text-destructive-foreground text-[10px] px-1.5 h-5">{unreadCount}</Badge>
-              )}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Fique por dentro de tudo</p>
+        <div className="mb-8">
+          <h1 className="font-[Manrope] text-3xl font-extrabold tracking-tight text-primary mb-2">
+            Suas Notificações
+            {unreadCount > 0 && (
+              <Badge className="bg-destructive text-destructive-foreground text-[10px] px-1.5 h-5 ml-2 align-middle">{unreadCount}</Badge>
+            )}
+          </h1>
+          <p className="text-sm text-muted-foreground">Fique por dentro das suas atualizações de saúde e consultas.</p>
+        </div>
+
+        {/* Pingo health tip hero — dark gradient banner */}
+        <div className="relative rounded-2xl bg-gradient-to-br from-primary to-[hsl(215,60%,38%)] p-6 overflow-hidden shadow-xl mb-6">
+          <div className="relative z-10 pr-20">
+            <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white text-[10px] font-bold tracking-widest uppercase mb-3">
+              <Sparkles className="w-3 h-3 inline mr-1" />Dica de Saúde
+            </span>
+            <h3 className="font-[Manrope] text-xl font-bold text-white mb-2">"Beba água agora!"</h3>
+            <p className="text-sm text-white/80 leading-relaxed">
+              Pingu avisou: Manter a hidratação é essencial para sua concentração hoje. Que tal uma pausa para um copo d'água?
+            </p>
           </div>
-          {unreadCount > 0 && (
+          <img src={mascotWave} alt="Pingo" className="absolute -right-4 -bottom-4 w-36 h-36 object-contain opacity-90 -rotate-12 drop-shadow-xl" loading="lazy" decoding="async" />
+        </div>
+
+        {unreadCount > 0 && (
+          <div className="flex justify-end mb-4">
             <Button variant="ghost" size="sm" className="text-xs gap-1.5" onClick={markAllRead}>
               <CheckCheck className="w-4 h-4" /> Marcar tudo como lido
             </Button>
-          )}
-        </div>
-
-        {/* Health tip hero */}
-        <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-secondary/5 to-primary/5 border border-primary/20 p-5 mb-5">
-          <div className="flex items-start gap-3">
-            <img src={mascotWave} alt="Pingo" className="w-14 h-14 rounded-2xl object-cover shrink-0" loading="lazy" decoding="async" width={56} height={56} />
-            <div>
-              <p className="text-[10px] font-bold text-primary uppercase tracking-wider flex items-center gap-1">
-                <Sparkles className="w-3 h-3" /> Dica de Saúde
-              </p>
-              <p className="text-sm font-bold text-foreground mt-1">{HEALTH_TIPS[0].title}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{HEALTH_TIPS[0].desc}</p>
-            </div>
           </div>
-        </div>
+        )}
 
-        {/* Filter tabs */}
-        <div className="flex gap-2 mb-4">
-          <Button variant={filter === "all" ? "default" : "outline"} size="sm" className="rounded-full text-xs h-8 px-4" onClick={() => setFilter("all")}>
-            Todas
-          </Button>
-          <Button variant={filter === "unread" ? "default" : "outline"} size="sm" className="rounded-full text-xs h-8 px-4 gap-1" onClick={() => setFilter("unread")}>
-            Não lidas {unreadCount > 0 && <span className="text-[10px]">({unreadCount})</span>}
-          </Button>
-        </div>
+        {/* Section label */}
+        <h4 className="font-[Manrope] font-bold text-muted-foreground text-xs uppercase tracking-[0.2em] px-2 mb-4">Recentes</h4>
 
         {/* Notifications list */}
         {loading ? (
@@ -195,20 +189,20 @@ const Notifications = () => {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.03 }}
                           onClick={() => handleClick(n)}
-                          className={`flex items-start gap-3 p-4 rounded-2xl border transition-all cursor-pointer active:scale-[0.98] ${
+                          className={`flex items-start gap-4 p-5 rounded-2xl transition-all cursor-pointer active:scale-[0.98] ${
                             n.is_read
-                              ? "border-border bg-card hover:bg-muted/30"
-                              : "border-primary/20 bg-primary/5 hover:bg-primary/10"
+                              ? "bg-card hover:bg-muted/30"
+                              : "bg-primary/5 hover:bg-primary/10"
                           }`}
                         >
-                          <div className={`w-10 h-10 rounded-xl ${typeConf.bg} flex items-center justify-center shrink-0`}>
+                          <div className={`w-12 h-12 rounded-full ${typeConf.bg} flex items-center justify-center shrink-0`}>
                             {typeConf.icon}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-start justify-between gap-2">
-                              <p className={`text-sm leading-tight ${n.is_read ? "text-foreground" : "text-foreground font-semibold"}`}>
+                              <h5 className={`text-sm leading-tight font-[Manrope] ${n.is_read ? "text-foreground" : "text-foreground font-bold"}`}>
                                 {n.title}
-                              </p>
+                              </h5>
                               {!n.is_read && <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" />}
                             </div>
                             <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{n.message}</p>
