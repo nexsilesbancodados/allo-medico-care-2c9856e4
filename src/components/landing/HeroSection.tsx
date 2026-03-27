@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, Shield, Lock, Star } from "lucide-react";
+import { ArrowRight, Shield, Lock, Star, Play, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { memo, forwardRef } from "react";
 import { motion } from "framer-motion";
@@ -9,31 +9,24 @@ import OptimizedImage from "@/components/ui/optimized-image";
 import heroDoctor from "@/assets/hero-doctor.png";
 
 const heroContent = {
-  title: "Sua saúde a um",
-  highlight: "clique de distância",
+  title: "Cuidado médico",
+  highlight: "de excelência",
+  subtitle: "ao seu alcance",
   description:
-    "Conecte-se com médicos especialistas de qualquer lugar. Consultas por vídeo, receitas digitais e acompanhamento completo.",
+    "Conecte-se a médicos especialistas verificados pelo CFM. Consultas por vídeo em HD, receitas digitais válidas e prontuário eletrônico completo.",
 };
 
 const trustItems = [
-  { label: "Regulamentado pelo CFM", icon: Shield, color: "text-primary" },
-  { label: "Criptografia end-to-end", icon: Lock, color: "text-success" },
-  { label: "Nota 4.9 no Google", icon: Star, color: "text-warning" },
+  { label: "Regulamentado CFM", icon: Shield },
+  { label: "Criptografia E2E", icon: Lock },
+  { label: "4.9★ — 12k avaliações", icon: Star },
 ];
 
-const floatY = {
-  animate: {
-    y: [0, -8, 0],
-    transition: { duration: 3.5, repeat: Infinity, ease: "easeInOut" as const },
-  },
-};
-
-const floatYSlow = {
-  animate: {
-    y: [0, -6, 0],
-    transition: { duration: 4.2, repeat: Infinity, ease: "easeInOut" as const, delay: 0.8 },
-  },
-};
+const highlights = [
+  "Receita digital válida em todo o Brasil",
+  "Atendimento 24h — inclusive feriados",
+  "30+ especialidades médicas",
+];
 
 const HeroSection = memo(
   forwardRef<HTMLElement>((_, ref) => {
@@ -45,86 +38,100 @@ const HeroSection = memo(
       <section
         ref={ref}
         aria-label="Início"
-        className="relative flex items-center pt-24 sm:pt-28 lg:pt-32 pb-44 sm:pb-48 lg:pb-52 overflow-hidden"
+        className="relative flex items-center pt-24 sm:pt-28 lg:pt-36 pb-20 sm:pb-24 lg:pb-32 overflow-hidden"
       >
-        {/* Ambient background */}
+        {/* Subtle ambient background */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/30" />
-          <div className="absolute top-[-10%] right-[5%] w-[600px] h-[600px] rounded-full bg-primary/[0.04] blur-[160px]" />
-          <div className="absolute bottom-[-20%] left-[-5%] w-[500px] h-[500px] rounded-full bg-secondary/[0.04] blur-[140px]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/20" />
+          <div className="absolute top-[-15%] right-[10%] w-[500px] h-[500px] rounded-full bg-primary/[0.03] blur-[180px]" />
+          <div className="absolute bottom-[-25%] left-[-8%] w-[400px] h-[400px] rounded-full bg-secondary/[0.03] blur-[160px]" />
         </div>
 
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
-          <div className="grid lg:grid-cols-[1fr_1fr] gap-8 lg:gap-12 xl:gap-20 items-center">
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 xl:gap-24 items-center">
             {/* Left content */}
             <motion.div
               className="max-w-2xl"
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
+              {/* Status badge */}
               <motion.div
-                className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-primary/20 bg-primary/[0.06] text-primary text-sm font-semibold mb-8 select-none backdrop-blur-sm"
-                initial={{ opacity: 0, scale: 0.9 }}
+                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-success/20 bg-success/[0.06] text-success text-xs font-semibold mb-6"
+                initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4, delay: 0.2 }}
+                transition={{ duration: 0.4, delay: 0.15 }}
               >
-                <span className="inline-flex h-2 w-2 rounded-full bg-success shadow-sm shadow-success/40 animate-pulse" />
+                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success shadow-sm shadow-success/40 animate-pulse" />
                 Médicos disponíveis agora
               </motion.div>
 
-              <div>
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.4rem] font-extrabold leading-[1.08] tracking-tight text-foreground mb-5">
+              {/* Headline */}
+              <div className="mb-6">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.2rem] font-extrabold leading-[1.1] tracking-tight text-foreground">
                   {heroContent.title}{" "}
                   <span className="text-gradient">{heroContent.highlight}</span>
+                  <br className="hidden sm:block" />
+                  <span className="text-foreground">{heroContent.subtitle}</span>
                 </h1>
-                <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-md mb-8">
-                  {heroContent.description}
-                </p>
+              </div>
+
+              <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mb-6">
+                {heroContent.description}
+              </p>
+
+              {/* Highlights */}
+              <div className="flex flex-col gap-2 mb-8">
+                {highlights.map((h) => (
+                  <div key={h} className="flex items-center gap-2 text-sm text-foreground/80">
+                    <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                    {h}
+                  </div>
+                ))}
               </div>
 
               {/* CTA Buttons */}
               <motion.div
-                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-10"
-                initial={{ opacity: 0, y: 12 }}
+                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8"
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.35 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
               >
                 <Button
                   size="lg"
-                  className="rounded-2xl h-[56px] w-full sm:w-[260px] justify-center text-[15px] font-bold shadow-lg shadow-primary/25 group bg-gradient-to-r from-primary to-[hsl(var(--primary)/0.85)] hover:brightness-110 text-primary-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
+                  className="rounded-xl h-[52px] w-full sm:w-auto justify-center text-[14px] font-bold shadow-lg shadow-primary/20 group bg-primary hover:bg-primary/90 text-primary-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] px-8"
                   onClick={() => navigate("/paciente")}
                   onMouseEnter={prefetchPaciente}
                 >
                   Agendar consulta
-                  <ArrowRight className="w-4 h-4 ml-2 transition-transform duration-200 group-hover:translate-x-1" />
+                  <ArrowRight className="w-4 h-4 ml-1.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                 </Button>
                 <Button
                   size="lg"
-                  className="rounded-2xl h-[56px] w-full sm:w-[260px] justify-center text-[15px] font-bold shadow-lg shadow-success/25 group bg-gradient-to-r from-success to-[hsl(var(--success)/0.85)] hover:brightness-110 text-success-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
+                  variant="outline"
+                  className="rounded-xl h-[52px] w-full sm:w-auto justify-center text-[14px] font-bold border-2 border-border hover:border-primary/30 hover:bg-primary/[0.04] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] px-8 gap-2"
                   onClick={() => navigate("/consulta-avulsa")}
                   onMouseEnter={prefetchConsulta}
                 >
                   Consulta avulsa
-                  <span className="inline-flex items-center rounded-lg bg-white/25 text-white px-2.5 py-1 text-xs font-extrabold ml-1">R$89</span>
+                  <span className="inline-flex items-center rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-extrabold">R$89</span>
                 </Button>
               </motion.div>
 
               {/* Trust badges */}
               <motion.div
-                className="flex flex-row flex-wrap items-center gap-3"
+                className="flex flex-row flex-wrap items-center gap-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
+                transition={{ duration: 0.5, delay: 0.45 }}
               >
                 {trustItems.map((item) => (
                   <div
                     key={item.label}
-                    className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-card border border-border/60 text-sm text-foreground font-medium shadow-sm hover:shadow-md transition-shadow duration-200"
+                    className="flex items-center gap-2 text-xs text-muted-foreground font-medium"
                   >
-                    <div className={`flex items-center justify-center w-7 h-7 rounded-lg bg-muted/60`}>
-                      <item.icon className={`w-4 h-4 ${item.color} shrink-0`} />
-                    </div>
+                    <item.icon className="w-3.5 h-3.5 text-primary/60 shrink-0" />
                     {item.label}
                   </div>
                 ))}
@@ -134,49 +141,48 @@ const HeroSection = memo(
             {/* Right - hero image */}
             <motion.div
               className="relative hidden md:flex justify-center items-center"
-              initial={{ opacity: 0, scale: 0.92 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7, delay: 0.15, ease: "easeOut" }}
+              transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="relative w-full max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl">
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.08] to-secondary/[0.06] blur-[100px] rounded-full scale-75 -z-10" />
+                {/* Soft gradient behind image */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.04] blur-[80px] rounded-full scale-90 -z-10" />
 
                 <OptimizedImage
                   src={heroDoctor}
-                  alt="Ilustração do atendimento online da AloClinica"
-                  className="w-full h-auto drop-shadow-2xl"
+                  alt="Médico realizando teleconsulta pela AloClinica"
+                  className="w-full h-auto drop-shadow-xl"
                   priority
                 />
 
-                {/* Floating card — 100% Seguro */}
+                {/* Floating card — Seguro */}
                 <motion.div
-                  className="absolute -top-2 -right-4 xl:-right-2 bg-card/95 backdrop-blur-md rounded-2xl shadow-lg shadow-foreground/[0.06] px-4 py-3 border border-border/50 flex items-center gap-3"
-                  variants={floatY}
-                  animate="animate"
+                  className="absolute -top-1 -right-2 xl:right-0 bg-card/95 backdrop-blur-md rounded-xl shadow-md shadow-foreground/[0.04] px-3.5 py-2.5 border border-border/50 flex items-center gap-2.5"
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <div className="w-9 h-9 rounded-xl bg-success/10 flex items-center justify-center">
-                    <svg className="w-[18px] h-[18px] text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
+                  <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-success" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-foreground leading-none mb-0.5">100% Seguro</p>
-                    <p className="text-[11px] text-muted-foreground leading-none">Criptografia end-to-end</p>
+                    <p className="text-[13px] font-bold text-foreground leading-none mb-0.5">100% Seguro</p>
+                    <p className="text-[10px] text-muted-foreground leading-none">Criptografia E2E</p>
                   </div>
                 </motion.div>
 
                 {/* Floating card — Rating */}
                 <motion.div
-                  className="absolute bottom-8 -left-6 xl:-left-4 bg-card/95 backdrop-blur-md rounded-2xl shadow-lg shadow-foreground/[0.06] px-4 py-3 border border-border/50 flex items-center gap-3"
-                  variants={floatYSlow}
-                  animate="animate"
+                  className="absolute bottom-10 -left-4 xl:-left-2 bg-card/95 backdrop-blur-md rounded-xl shadow-md shadow-foreground/[0.04] px-3.5 py-2.5 border border-border/50 flex items-center gap-2.5"
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
                 >
-                  <div className="w-9 h-9 rounded-xl bg-warning/10 flex items-center justify-center">
-                    <span className="text-base">⭐</span>
+                  <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center">
+                    <Star className="w-4 h-4 text-warning fill-warning" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-foreground leading-none mb-0.5">4.9/5</p>
-                    <p className="text-[11px] text-muted-foreground leading-none">12k+ avaliações</p>
+                    <p className="text-[13px] font-bold text-foreground leading-none mb-0.5">4.9/5</p>
+                    <p className="text-[10px] text-muted-foreground leading-none">12k+ avaliações</p>
                   </div>
                 </motion.div>
               </div>

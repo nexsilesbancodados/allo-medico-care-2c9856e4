@@ -16,41 +16,35 @@ import {
 import { cn } from "@/lib/utils";
 
 const ListItem = forwardRef<HTMLLIElement, React.ComponentPropsWithoutRef<"a"> & { icon?: React.ElementType; badge?: string }>(({ 
-  className,
-  title,
-  children,
-  href,
-  icon: Icon,
-  badge,
-  ...props
+  className, title, children, href, icon: Icon, badge, ...props
 }, ref) => (
   <li ref={ref}>
     <NavigationMenuLink asChild>
       <Link
         to={href || "#"}
         className={cn(
-          "flex items-center gap-3.5 select-none rounded-xl p-3.5 no-underline outline-none transition-all duration-200 ease-out",
-          "hover:bg-accent/60 focus-visible:ring-2 focus-visible:ring-primary/30 group relative",
+          "flex items-center gap-3 select-none rounded-lg p-3 no-underline outline-none transition-all duration-150",
+          "hover:bg-muted/60 focus-visible:ring-2 focus-visible:ring-primary/30 group relative",
           "active:scale-[0.98]",
           className
         )}
         {...props}
       >
         {Icon ? (
-          <div className="w-10 h-10 rounded-lg bg-primary/[0.07] flex items-center justify-center shrink-0 group-hover:bg-primary/[0.14] transition-all duration-200">
-            <Icon className="w-[18px] h-[18px] text-primary/70 group-hover:text-primary transition-colors duration-150" />
+          <div className="w-9 h-9 rounded-lg bg-primary/[0.06] flex items-center justify-center shrink-0 group-hover:bg-primary/[0.12] transition-colors duration-150">
+            <Icon className="w-4 h-4 text-primary/70 group-hover:text-primary transition-colors duration-150" />
           </div>
         ) : null}
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            <span className="text-[13px] font-semibold leading-none text-foreground group-hover:text-primary transition-colors duration-150">{title}</span>
+            <span className="text-[13px] font-semibold leading-none text-foreground">{title}</span>
             {badge && (
-              <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded-md bg-primary/10 text-primary/80">{badge}</span>
+              <span className="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded bg-primary/8 text-primary/70">{badge}</span>
             )}
           </div>
           <p className="line-clamp-2 text-[11px] leading-relaxed text-muted-foreground mt-1">{children}</p>
         </div>
-        <div className="w-4 opacity-0 group-hover:opacity-60 -translate-x-1 group-hover:translate-x-0 transition-all duration-150 text-foreground">
+        <div className="w-4 opacity-0 group-hover:opacity-50 -translate-x-1 group-hover:translate-x-0 transition-all duration-150 text-foreground">
           <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M3.5 2L7 5L3.5 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
         </div>
       </Link>
@@ -70,7 +64,6 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
       const nextScrolled = window.scrollY > 20;
       setScrolled((prev) => (prev === nextScrolled ? prev : nextScrolled));
     };
-
     handleScroll();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
@@ -90,30 +83,32 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
     <header
       ref={ref}
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 border-b transition-[background-color,box-shadow,border-color] duration-200",
+        "fixed top-0 left-0 right-0 z-50 border-b transition-all duration-200",
         scrolled
-          ? "bg-background shadow-sm shadow-foreground/[0.03] border-border/40"
-          : "bg-background/92 border-transparent"
+          ? "bg-background/95 backdrop-blur-md shadow-sm shadow-foreground/[0.02] border-border/50"
+          : "bg-background/80 backdrop-blur-sm border-transparent"
       )}
     >
       <div className="max-w-[1800px] mx-auto flex items-center justify-between h-14 lg:h-[60px] px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
+        {/* Logo */}
         <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-          <img src={mascot} alt="Pingo" className="w-9 h-9 rounded-2xl object-contain transition-transform duration-200 group-hover:scale-105" width={36} height={36} />
+          <img src={mascot} alt="Pingo" className="w-8 h-8 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105" width={32} height={32} />
           <span className="text-lg font-extrabold text-foreground tracking-tight">
             Alo<span className="text-primary">Clinica</span>
           </span>
         </Link>
 
+        {/* Desktop nav */}
         <div className="hidden lg:flex items-center">
           <NavigationMenu>
-            <NavigationMenuList className="gap-1">
+            <NavigationMenuList className="gap-0.5">
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="group/trigger text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-primary/[0.06] px-4 h-10 rounded-xl transition-all duration-200 gap-1.5">
+                <NavigationMenuTrigger className="group/trigger text-[13px] font-medium text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-muted/50 px-3.5 h-9 rounded-lg transition-colors duration-150 gap-1.5">
                   <Video className="w-3.5 h-3.5 text-primary/50 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150" />
                   Serviços
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="p-2.5 w-[360px]">
+                  <div className="p-2 w-[340px]">
                     <ul className="grid gap-0.5">
                       <ListItem href="/teleconsulta" title="Teleconsulta" icon={Video} badge="24h">
                         Consultas por vídeo com especialistas, receita digital e acesso rápido.
@@ -121,7 +116,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                       <ListItem href="/cartao-beneficios" title="Cartão de Benefícios" icon={CreditCard} badge="Popular">
                         Descontos em consultas e exames para toda a família.
                       </ListItem>
-                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope} badge="Rápido">
+                      <ListItem href="/consulta-avulsa" title="Consulta Avulsa" icon={Stethoscope}>
                         Atendimento rápido, seguro e sem burocracia.
                       </ListItem>
                       <ListItem href="/oftalmologia" title="Oftalmologia" icon={Eye} badge="Novo">
@@ -133,12 +128,12 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="group/trigger text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-primary/[0.06] px-4 h-10 rounded-xl transition-all duration-200 gap-1.5">
+                <NavigationMenuTrigger className="group/trigger text-[13px] font-medium text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-muted/50 px-3.5 h-9 rounded-lg transition-colors duration-150 gap-1.5">
                   <Stethoscope className="w-3.5 h-3.5 text-primary/50 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150" />
                   Profissionais
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="p-2.5 w-[320px]">
+                  <div className="p-2 w-[300px]">
                     <ul className="grid gap-0.5">
                       <ListItem href="/medico" title="Sou Médico" icon={Stethoscope}>
                         Atenda pacientes online e aumente sua renda.
@@ -155,12 +150,12 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               </NavigationMenuItem>
 
               <NavigationMenuItem>
-                <NavigationMenuTrigger className="group/trigger text-[13px] font-semibold text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-primary/[0.06] px-4 h-10 rounded-xl transition-all duration-200 gap-1.5">
+                <NavigationMenuTrigger className="group/trigger text-[13px] font-medium text-muted-foreground hover:text-foreground bg-transparent data-[state=open]:text-foreground data-[state=open]:bg-muted/50 px-3.5 h-9 rounded-lg transition-colors duration-150 gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-primary/50 group-hover/trigger:text-primary group-data-[state=open]/trigger:text-primary transition-colors duration-150" />
                   Para Empresas
                 </NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <div className="p-2.5 w-[320px]">
+                  <div className="p-2 w-[300px]">
                     <ul className="grid gap-0.5">
                       <ListItem href="/para-empresas/cartao" title="Cartão Corporativo" icon={CreditCard} badge="B2B">
                         Telemedicina 24h e descontos para colaboradores.
@@ -176,7 +171,8 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
           </NavigationMenu>
         </div>
 
-        <div className="hidden lg:flex items-center gap-2.5">
+        {/* Right actions */}
+        <div className="hidden lg:flex items-center gap-2">
           <LanguageSwitcher />
 
           {user ? (
@@ -184,21 +180,20 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full gap-2.5 text-[13px] font-semibold h-10 pl-3 pr-5 border-border/50 bg-card/80 backdrop-blur-sm shadow-sm shadow-foreground/[0.03] hover:shadow-md hover:border-primary/30 hover:bg-card transition-all duration-200 group"
+                className="rounded-lg gap-2 text-[13px] font-medium h-9 pl-2.5 pr-4 border-border/60 bg-card/80 shadow-sm hover:shadow hover:border-primary/20 transition-all duration-150 group"
                 onClick={() => navigate("/dashboard")}
               >
-                <span className="w-7 h-7 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-[11px] font-bold text-primary-foreground shadow-sm">
+                <span className="w-6 h-6 rounded-md bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground">
                   {profile?.first_name?.[0]?.toUpperCase() || "U"}
                 </span>
                 <span className="text-foreground">
                   {profile?.first_name ? `Olá, ${profile.first_name}` : "Meu Painel"}
                 </span>
-                <LayoutDashboard className="w-3.5 h-3.5 text-muted-foreground/60 group-hover:text-primary transition-colors duration-150" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="rounded-full h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
+                className="rounded-lg h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/8 transition-colors duration-150"
                 onClick={async () => { await signOut(); navigate("/"); }}
                 title="Sair"
               >
@@ -209,26 +204,28 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
             <div className="flex items-center gap-2">
               <Button
                 size="sm"
-                className="rounded-full gap-2 text-xs font-bold h-9 px-5 bg-secondary text-secondary-foreground shadow-sm hover:brightness-110 active:scale-[0.97] transition-all"
+                variant="outline"
+                className="rounded-lg gap-1.5 text-xs font-semibold h-9 px-4 border-border/60 hover:border-primary/20"
                 onClick={() => navigate("/consulta-avulsa")}
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
-                Comprar Consulta
+                Consulta Avulsa
               </Button>
               <Button
                 size="sm"
-                className="rounded-full gap-2 text-xs font-bold h-9 px-5 bg-primary text-primary-foreground shadow-sm hover:brightness-110 active:scale-[0.97] transition-all"
+                className="rounded-lg gap-1.5 text-xs font-semibold h-9 px-4 bg-primary text-primary-foreground shadow-sm hover:bg-primary/90"
                 onClick={() => navigate("/paciente")}
               >
                 <CreditCard className="w-3.5 h-3.5" />
-                Meu Cartão
+                Começar
               </Button>
             </div>
           )}
         </div>
 
+        {/* Mobile toggle */}
         <button
-          className="lg:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl hover:bg-muted/60 transition-colors"
+          className="lg:hidden p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg hover:bg-muted/50 transition-colors"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
           aria-expanded={mobileOpen}
@@ -237,18 +234,19 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
         </button>
       </div>
 
+      {/* Mobile menu */}
       {mobileOpen && (
         <div
           role="dialog"
           aria-label="Menu de navegação"
-          className="lg:hidden bg-background/98 border-t border-border/40 overflow-hidden"
+          className="lg:hidden bg-background/98 backdrop-blur-sm border-t border-border/40 overflow-hidden"
         >
-          <nav className="flex flex-col px-4 py-4 gap-0.5">
+          <nav className="flex flex-col px-4 py-3 gap-0.5">
             {mobileLinks.map((link) => (
               <button
                 key={link.href}
                 onClick={() => { setMobileOpen(false); navigate(link.href); }}
-                className="text-sm font-medium py-3 px-4 rounded-xl transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/50 active:bg-muted active:scale-[0.98]"
+                className="text-sm font-medium py-3 px-3 rounded-lg transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/40 active:bg-muted active:scale-[0.98]"
               >
                 {link.label}
               </button>
@@ -258,21 +256,21 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
               {user ? (
                 <>
-                  <Button variant="outline" size="sm" className="rounded-xl justify-start gap-2" onClick={() => { setMobileOpen(false); navigate("/dashboard"); }}>
+                  <Button variant="outline" size="sm" className="rounded-lg justify-start gap-2" onClick={() => { setMobileOpen(false); navigate("/dashboard"); }}>
                     <LayoutDashboard className="w-4 h-4" />
                     {profile?.first_name ? `Olá, ${profile.first_name}` : "Meu Painel"}
                   </Button>
-                  <Button variant="ghost" size="sm" className="rounded-xl justify-start gap-2" onClick={async () => { setMobileOpen(false); await signOut(); navigate("/"); }}>
+                  <Button variant="ghost" size="sm" className="rounded-lg justify-start gap-2" onClick={async () => { setMobileOpen(false); await signOut(); navigate("/"); }}>
                     <LogOut className="w-4 h-4" /> Sair
                   </Button>
                 </>
               ) : (
                 <>
-                  <Button size="sm" className="rounded-xl justify-start gap-2 bg-secondary text-secondary-foreground font-bold" onClick={() => { setMobileOpen(false); navigate("/consulta-avulsa"); }}>
-                    <ShoppingBag className="w-4 h-4" /> Comprar Consulta
+                  <Button size="sm" variant="outline" className="rounded-lg justify-start gap-2 font-semibold" onClick={() => { setMobileOpen(false); navigate("/consulta-avulsa"); }}>
+                    <ShoppingBag className="w-4 h-4" /> Consulta Avulsa
                   </Button>
-                  <Button size="sm" className="rounded-xl justify-start gap-2 bg-primary text-primary-foreground font-bold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
-                    <CreditCard className="w-4 h-4" /> Meu Cartão
+                  <Button size="sm" className="rounded-lg justify-start gap-2 bg-primary text-primary-foreground font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
+                    <CreditCard className="w-4 h-4" /> Começar
                   </Button>
                 </>
               )}
