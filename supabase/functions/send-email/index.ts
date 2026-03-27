@@ -311,6 +311,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p>📋 Receitas e documentos já estão disponíveis no seu painel.</p>
         <p>⭐ Avalie sua experiência para ajudar outros pacientes!</p>
       `, BRAND.green)}
+      ${btn(URLS.patientHealth, "Ver Documentos")}
     `),
   }),
 
@@ -324,7 +325,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>📄 Arquivo:</strong> ${d.file_name || "Documento"}</p>
         ${d.description ? `<p><strong>📝 Descrição:</strong> ${d.description}</p>` : ""}
       `)}
-      <p>Acesse a plataforma para visualizar e baixar.</p>
+      ${btn(URLS.patientHealth, "Visualizar e Baixar")}
     `),
   }),
 
