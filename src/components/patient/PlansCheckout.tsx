@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import {
-import {
   Check, Star, CreditCard, Calendar as CalIcon, Clock, FileText,
   Search, ArrowLeft, Shield, User, History, QrCode, FileBarChart, Copy, CheckCircle2, Lock,
   ArrowRight, Loader2
