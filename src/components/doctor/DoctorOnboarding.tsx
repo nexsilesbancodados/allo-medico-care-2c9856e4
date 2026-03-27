@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import type { SpecialtyRow } from "@/types/domain";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import DiditKYCButton from "@/components/kyc/DiditKYCButton";
+import BiometricKYC from "@/components/kyc/BiometricKYC";
 
 interface OnboardingStep {
   id: string;
@@ -214,8 +214,8 @@ const DoctorOnboarding = () => {
       {/* KYC Verification via Didit */}
       {showKYC && data?.docProfile && (
         <div className="mt-4">
-          <DiditKYCButton
-            onSessionCreated={() => {
+          <BiometricKYC
+            onComplete={() => {
               setShowKYC(false);
               setData((prev: any) => ({
                 ...prev,

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Search, Upload, FileText, Heart, Video, ArrowRight, ArrowLeft, X, Sparkles, User, Droplets, AlertTriangle, Plus, Stethoscope, Ambulance, ClipboardList, ShieldCheck, Camera, CheckCircle2, Smartphone, Monitor } from "lucide-react";
-import DiditKYCButton from "@/components/kyc/DiditKYCButton";
+import BiometricKYC from "@/components/kyc/BiometricKYC";
 import CpfInput from "@/components/ui/cpf-input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { QRCodeSVG } from "qrcode.react";
@@ -213,8 +213,8 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         }
 
         return (
-          <DiditKYCButton
-            onSessionCreated={handleKycStarted}
+          <BiometricKYC
+            onComplete={() => handleKycStarted("")}
             variant="full"
           />
         );

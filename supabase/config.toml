@@ -114,6 +114,3 @@ verify_jwt = false
 
 [functions.didit-kyc]
 verify_jwt = false
-
-[functions.didit-webhook]
-verify_jwt = false

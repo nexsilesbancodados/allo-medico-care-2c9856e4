@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import { ArrowLeft, Camera, Save, Trash2, AlertTriangle, ChevronRight, User, Clock, Bell, HelpCircle, LogOut, Shield, Heart, Pencil, ShieldCheck, Upload } from "lucide-react";
-import DiditKYCButton from "@/components/kyc/DiditKYCButton";
+import BiometricKYC from "@/components/kyc/BiometricKYC";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
@@ -225,8 +225,8 @@ const UserProfile = () => {
           {/* KYC via Didit */}
           {showKyc && isPatient && (
             <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-primary/20 bg-card p-5 mb-6">
-              <DiditKYCButton
-                onSessionCreated={handleKycSessionCreated}
+              <BiometricKYC
+                onComplete={() => setShowKyc(false)}
                 variant="full"
               />
               <button onClick={() => setShowKyc(false)} className="w-full text-center text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
