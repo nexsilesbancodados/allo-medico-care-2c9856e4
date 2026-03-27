@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import CpfInput from "@/components/ui/cpf-input";
 import { getDoctorNav } from "./doctorNav";
 import { FileBadge, Download, History } from "lucide-react";
 import jsPDF from "jspdf";
@@ -231,7 +232,7 @@ const MedicalCertificate = () => {
                   </div>
                   <div>
                     <Label>CPF (opcional)</Label>
-                    <Input value={patientCpf} onChange={e => setPatientCpf(e.target.value)} placeholder="000.000.000-00" className="mt-1" />
+                    <CpfInput value={patientCpf} onChange={v => setPatientCpf(v)} optional className="mt-1" />
                   </div>
                 </div>
 

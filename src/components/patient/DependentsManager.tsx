@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CpfInput from "@/components/ui/cpf-input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -155,7 +156,7 @@ const DependentsManager = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <Label>CPF (opcional)</Label>
-                    <Input value={cpfMasked} onChange={e => setCpf(e.target.value.replace(/\D/g, ""))} placeholder="000.000.000-00" className="mt-1" maxLength={14} />
+                    <CpfInput value={cpf} onChange={setCpf} optional className="mt-1" />
                   </div>
                   <div>
                     <Label>Data de nascimento</Label>

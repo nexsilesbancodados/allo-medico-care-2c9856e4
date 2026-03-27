@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Search, Upload, FileText, Heart, Video, ArrowRight, ArrowLeft, X, Sparkles, User, Droplets, AlertTriangle, Plus, Stethoscope, Ambulance, ClipboardList } from "lucide-react";
+import CpfInput from "@/components/ui/cpf-input";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -136,8 +137,8 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
               <div><Label className="text-xs">Nome *</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" className="mt-1 h-11 rounded-xl" /></div>
               <div><Label className="text-xs">Sobrenome *</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" className="mt-1 h-11 rounded-xl" /></div>
             </div>
-            <div><Label className="text-xs">CPF</Label><Input value={cpfMasked} onChange={e => setCpf(e.target.value.replace(/\D/g, ""))} placeholder="000.000.000-00" className="mt-1 h-11 rounded-xl font-mono" maxLength={14} />
-              {cpf.replace(/\D/g, "").length === 11 && !validarCPF(cpf) && <p className="text-[10px] text-destructive mt-0.5">CPF inválido</p>}
+            <div><Label className="text-xs">CPF</Label>
+              <CpfInput value={cpf} onChange={setCpf} optional className="mt-1" inputClassName="h-11 rounded-xl" />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-xs">Telefone</Label><Input value={phoneMasked} onChange={e => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="(00) 00000-0000" className="mt-1 h-11 rounded-xl font-mono" maxLength={15} /></div>
