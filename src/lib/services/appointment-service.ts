@@ -147,11 +147,37 @@ export const confirmPaymentInstant = async (
     // Fire all notifications in parallel
     const dateStr = format(scheduledDate, "dd/MM/yyyy", { locale: ptBR });
 
+    // Get doctor name for WhatsApp
+    let doctorDisplayName = "Médico";
+    try {
+      const { data: docProfile } = await supabase.from("doctor_profiles").select("user_id").eq("id", doctorProfileId).single();
+      if (docProfile) {
+        const { data: docP } = await supabase.from("profiles").select("first_name, last_name").eq("user_id", docProfile.user_id).single();
+        if (docP) doctorDisplayName = `${docP.first_name} ${docP.last_name}`;
+      }
+    } catch {}
+
     await Promise.allSettled([
       triggerAppointmentConfirmed(appointmentId),
       notifyNewAppointment(appointmentId, doctorProfileId, patientName, dateStr, selectedTime),
       notifyPaymentConfirmed(patientId, "Médico", dateStr),
       sendPaymentConfirmationEmail(appointmentId),
+      // WhatsApp: notify patient
+      supabase.functions.invoke("whatsapp-notify", {
+        body: {
+          tipo: "consulta_agendada",
+          user_id: patientId,
+          dados: { nome_paciente: patientName, nome_medico: doctorDisplayName, data: dateStr, hora: selectedTime },
+        },
+      }),
+      // WhatsApp: notify doctor
+      supabase.functions.invoke("whatsapp-notify", {
+        body: {
+          tipo: "nova_consulta",
+          user_id: (await supabase.from("doctor_profiles").select("user_id").eq("id", doctorProfileId).single()).data?.user_id || "",
+          dados: { nome_paciente: patientName, data: dateStr, hora: selectedTime },
+        },
+      }),
     ]);
   } catch (err) {
     logError("confirmPaymentInstant failed", err, { appointmentId });
