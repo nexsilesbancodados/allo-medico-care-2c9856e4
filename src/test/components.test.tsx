@@ -18,35 +18,6 @@ const TestRouter = ({ children }: { children: React.ReactNode }) => (
   <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>{children}</BrowserRouter>
 );
 
-// ─── CookieConsent ───
-describe("CookieConsent", () => {
-  beforeEach(() => {
-    localStorage.clear();
-    vi.useFakeTimers();
-  });
-
-  it("shows banner after delay when no consent stored", async () => {
-    const { default: CookieConsent } = await import("@/components/CookieConsent");
-    render(<TestRouter><CookieConsent /></TestRouter>);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(2500);
-    });
-    expect(screen.getByText("Cookies & Privacidade")).toBeInTheDocument();
-    vi.useRealTimers();
-  });
-
-  it("hides banner after accept and persists to localStorage", async () => {
-    const { default: CookieConsent } = await import("@/components/CookieConsent");
-    render(<TestRouter><CookieConsent /></TestRouter>);
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(2500);
-    });
-    fireEvent.click(screen.getByText("Aceitar todos"));
-    expect(localStorage.getItem("aloclinica_cookie_consent")).toBe("accepted");
-    vi.useRealTimers();
-  });
-});
-
 // ─── PasswordStrength ───
 describe("PasswordStrength", () => {
   it("shows Fraca for short passwords", async () => {

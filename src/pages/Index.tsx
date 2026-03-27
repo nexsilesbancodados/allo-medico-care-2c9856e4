@@ -27,7 +27,7 @@ const TestimonialsSection = lazy(() => import("@/components/landing/Testimonials
 const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
 const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
 const Footer = lazy(() => import("@/components/landing/Footer"));
-const SpecialtyQuiz = lazy(() => import("@/components/landing/SpecialtyQuiz"));
+
 const HorizontalScrollCards = lazy(() => import("@/components/landing/HorizontalScrollCards"));
 
 const Index = forwardRef<HTMLDivElement>((_, ref) => {
@@ -237,11 +237,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       </DeferredSection>
 
       <FloatingMobileCTA />
-      {showQuiz && (
-        <Suspense fallback={null}>
-          <SpecialtyQuiz onClose={() => setShowQuiz(false)} />
-        </Suspense>
-      )}
     </div>
   );
 });
