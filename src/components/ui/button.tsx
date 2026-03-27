@@ -47,14 +47,47 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, children, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     const isRainbow = variant === "rainbow";
+    const rainbowClasses = cn(
+      "btn-rainbow-wrap btn-irish-glint relative z-0 rounded-xl font-black text-white uppercase tracking-wider cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+      buttonVariants({ variant: undefined, size, className }),
+    );
+
+    if (isRainbow && asChild) {
+      const child = React.Children.only(children);
+
+      if (!React.isValidElement(child)) {
+        return null;
+      }
+
+      const childProps = child.props as {
+        className?: string;
+        style?: React.CSSProperties;
+        children?: React.ReactNode;
+      };
+
+      return React.cloneElement(child, {
+        ...props,
+        className: cn(rainbowClasses, childProps.className),
+        style: {
+          background: "linear-gradient(0deg, #000, #272727)",
+          border: "none",
+          ...childProps.style,
+        },
+        "data-variant": "rainbow",
+        children: (
+          <>
+            <span className="btn-rainbow-border pointer-events-none absolute rounded-xl" aria-hidden="true" />
+            <span className="btn-rainbow-glow pointer-events-none absolute rounded-xl" aria-hidden="true" />
+            <span className="relative z-30 inline-flex items-center">{childProps.children}</span>
+          </>
+        ),
+      });
+    }
 
     if (isRainbow) {
       return (
         <Comp
-          className={cn(
-            "btn-rainbow-wrap btn-irish-glint relative z-0 rounded-xl font-black text-white uppercase tracking-wider cursor-pointer transition-transform duration-200 hover:-translate-y-0.5 active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
-            buttonVariants({ variant: undefined, size, className }),
-          )}
+          className={rainbowClasses}
           data-variant="rainbow"
           ref={ref}
           style={{
@@ -63,11 +96,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           }}
           {...props}
         >
-          {/* Animated rainbow border */}
           <span className="btn-rainbow-border pointer-events-none absolute rounded-xl" aria-hidden="true" />
-          {/* Blurred glow */}
           <span className="btn-rainbow-glow pointer-events-none absolute rounded-xl" aria-hidden="true" />
-          <span className="relative z-30">{children}</span>
+          <span className="relative z-30 inline-flex items-center">{children}</span>
         </Comp>
       );
     }
