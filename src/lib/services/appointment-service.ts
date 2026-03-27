@@ -254,7 +254,7 @@ export const completeAppointment = async (appointmentId: string, doctorName: str
 };
 
 /**
- * Check discount card and calculate effective price.
+ * Calculate effective price with optional coupon.
  */
 export const calculatePrice = async (
   basePrice: number,
@@ -263,18 +263,6 @@ export const calculatePrice = async (
 ): Promise<{ totalPrice: number; cardDiscount: number; couponDiscount: number }> => {
   let cardDiscount = 0;
   let couponDiscount = 0;
-
-  // Check active discount card
-  const { data: card } = await supabase
-    .from("discount_cards")
-    .select("discount_percent")
-    .eq("user_id", userId)
-    .eq("status", "active")
-    .maybeSingle();
-
-  if (card) {
-    cardDiscount = Number(card.discount_percent);
-  }
 
   // Check coupon
   if (couponCode) {

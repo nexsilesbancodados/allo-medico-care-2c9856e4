@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, CheckCircle2, ArrowRight, Shield, Users, Heart, Clock, Star, Building2, Phone, FileText, Brain, Fingerprint, Zap, Upload, TrendingUp } from "lucide-react";
+import { CheckCircle2, ArrowRight, Shield, Users, Heart, Clock, Star, Building2, Phone, FileText, Brain, Fingerprint, Zap, Upload, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import bannerCorporate from "@/assets/banner-b2b-corporate.jpg";
 import bannerTelelaudoWorkflow from "@/assets/banner-telelaudo-workflow.jpg";
@@ -67,7 +67,7 @@ const B2BLanding = () => {
 
   return (
     <>
-      <SEOHead title="Cartão de Benefícios & Telelaudo para Empresas | AloClinica" description="Cartão de benefícios corporativo com telemedicina 24h e serviço de telelaudo para clínicas. Saúde para colaboradores e laudos médicos a distância." />
+      <SEOHead title="Telelaudo para Empresas e Clínicas | AloClinica" description="Serviço de telelaudo para clínicas com IA de triagem, assinatura digital e SLA de até 2 horas. Laudos médicos a distância." />
       <div className="min-h-screen relative">
         <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(215,55%,96%)] via-[hsl(225,45%,91%)] to-[hsl(235,40%,85%)] dark:from-[hsl(215,28%,8%)] dark:via-[hsl(225,22%,10%)] dark:to-[hsl(235,18%,13%)]" />
         <Header />
@@ -80,23 +80,22 @@ const B2BLanding = () => {
           <div className="container mx-auto px-4 relative z-20 flex items-end pb-12" style={{ minHeight: "55vh" }}>
             <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-xl">
               <Badge className="mb-3 text-xs px-4 py-1 bg-white/15 text-white border-white/20 backdrop-blur-sm">
-                <CreditCard className="w-3 h-3 mr-1" /> Para Empresas
+                <FileText className="w-3 h-3 mr-1" /> Para Empresas
               </Badge>
               <h1 className="text-3xl md:text-5xl font-black text-white mb-3 tracking-tight leading-tight text-left">
-                Soluções em Saúde<br /><span className="text-white/80">para sua Empresa</span>
+                Telelaudo Profissional<br /><span className="text-white/80">para sua Clínica</span>
               </h1>
               <p className="text-sm text-white/70 max-w-lg mb-6 leading-relaxed text-left">
-                Cartão de benefícios para colaboradores e serviço de telelaudo para clínicas — tudo em uma única plataforma.
+                Terceirize laudos médicos com IA de triagem, assinatura digital ICP-Brasil e SLA de até 2 horas.
               </p>
               <Button variant="rainbow" size="default" className="rounded-2xl px-8 font-bold" onClick={() => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" })}>
                 Solicitar Proposta <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
               <div className="flex flex-wrap items-start gap-4 mt-6">
                 {[
-                  { icon: <Heart className="w-3.5 h-3.5" />, label: "Telemedicina 24h" },
-                  { icon: <Users className="w-3.5 h-3.5" />, label: "Planos Família" },
-                  { icon: <Shield className="w-3.5 h-3.5" />, label: "30% Desconto" },
-                  { icon: <Star className="w-3.5 h-3.5" />, label: "Clube de Vantagens" },
+                  { icon: <FileText className="w-3.5 h-3.5" />, label: "Laudos em 2h" },
+                  { icon: <Shield className="w-3.5 h-3.5" />, label: "Assinatura Digital" },
+                  { icon: <Star className="w-3.5 h-3.5" />, label: "IA de Triagem" },
                 ].map((item, i) => (
                   <span key={i} className="flex items-center gap-1.5 text-white/50 text-xs font-medium">{item.icon} {item.label}</span>
                 ))}
@@ -105,37 +104,6 @@ const B2BLanding = () => {
           </div>
         </section>
 
-        {/* Cartão de Benefícios */}
-        <section id="cartao" className="py-20 scroll-mt-24">
-          <div className="container mx-auto px-4">
-            <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
-              <motion.div variants={fadeUp} className="text-center mb-12">
-                <h2 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">Por que oferecer o Cartão AloClinica?</h2>
-                <p className="text-muted-foreground mt-2 max-w-lg mx-auto">Benefícios reais para seus colaboradores e sua empresa</p>
-              </motion.div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
-                {[
-                  { mascot: benefitTelemedicine, title: "Telemedicina 24h", desc: "Consultas médicas por vídeo a qualquer hora, 30+ especialidades" },
-                  { mascot: benefitDiscount, title: "30% de Desconto", desc: "Economia em todas as consultas e serviços para o titular e dependentes" },
-                  { mascot: benefitClub, title: "Clube de Vantagens", desc: "Descontos em farmácias, academias e serviços parceiros" },
-                  { mascot: benefitFuneral, title: "Assistência Funeral", desc: "Cobertura nacional incluída nos planos Pro e Diamante" },
-                ].map((s, i) => (
-                  <motion.div key={i} variants={fadeUp}>
-                    <Card className="h-full border-border/50 hover:shadow-xl hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 group overflow-hidden">
-                      <CardContent className="p-6 flex flex-col items-start">
-                        <div className="w-20 h-20 mb-4 group-hover:scale-110 transition-transform duration-300">
-                          <img src={s.mascot} alt={s.title} className="w-full h-full object-contain" loading="lazy" decoding="async" />
-                        </div>
-                        <h3 className="font-bold text-foreground text-lg mb-2">{s.title}</h3>
-                        <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-          </motion.div>
-          </div>
-        </section>
 
         {/* ==================== BANNER CORPORATIVO ==================== */}
         <section className="relative overflow-hidden" style={{ minHeight: "320px" }}>

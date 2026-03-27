@@ -51,7 +51,6 @@ const ValidateDocument = lazy(() => import("./pages/ValidateDocument"));
 const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const DoctorPublicProfilePage = lazy(() => import("./pages/DoctorPublicProfilePage"));
 
-const B2BCartao = lazy(() => import("./pages/B2BCartao"));
 const B2BTelelaudo = lazy(() => import("./pages/B2BTelelaudo"));
 const B2BLanding = lazy(() => import("./pages/B2BLanding"));
 const Teleconsulta = lazy(() => import("./pages/Teleconsulta"));
@@ -217,7 +216,6 @@ const App = () => {
                         <Route path="/validar/:id" element={<ValidateDocument />} />
                         <Route path="/validar" element={<ValidateDocument />} />
                         <Route path="/para-empresas" element={<B2BLanding />} />
-                        <Route path="/para-empresas/cartao" element={<B2BCartao />} />
                         <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
                         <Route path="/teleconsulta" element={<Teleconsulta />} />
                         

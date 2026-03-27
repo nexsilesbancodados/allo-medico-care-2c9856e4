@@ -38,7 +38,7 @@ const ROUTE_LABELS: Record<string, string> = {
   schedules: "Agendas",
   reception: "Recepção",
   clinic: "Clínica",
-  ophthalmology: "Oftalmologia",
+  
   "simple-prescription": "Receituário",
   certificates: "Atestados",
   "on-duty": "Plantão 24h",

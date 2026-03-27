@@ -9,19 +9,19 @@ import pingoAdmin     from "@/assets/pingo-admin.png";
 import pingoReception from "@/assets/pingo-reception.png";
 import pingoPartner   from "@/assets/pingo-partner.png";
 import pingoSupport   from "@/assets/pingo-support.png";
-import pingoCartao    from "@/assets/pingo-cartao.png";
+
 import pingoSolitario from "@/assets/pingo-solitario.webp";
 import logo           from "@/assets/logo.png";
 
 export type PingoVariant =
   | "wave" | "welcome" | "thumbsup" | "reading"
   | "admin" | "reception" | "partner" | "support"
-  | "cartao" | "solitario" | "logo" | "default";
+  | "solitario" | "logo" | "default";
 
 const SOURCES: Record<PingoVariant, string> = {
   wave: mascotWave, welcome: mascotWelcome, thumbsup: mascotThumbsup,
   reading: mascotReading, admin: pingoAdmin, reception: pingoReception,
-  partner: pingoPartner, support: pingoSupport, cartao: pingoCartao,
+  partner: pingoPartner, support: pingoSupport,
   solitario: pingoSolitario, logo, default: mascotDefault,
 };
 
