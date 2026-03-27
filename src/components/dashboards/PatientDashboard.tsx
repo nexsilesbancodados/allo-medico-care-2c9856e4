@@ -13,8 +13,9 @@ import { ptBR } from "date-fns/locale";
 import {
   CalendarCheck, VideoCamera, Clock, Gift, ArrowRight,
   Heart, Lightning, ClipboardText, FileText, UploadSimple,
-  Sparkle, Stethoscope, MagnifyingGlass, Star, Plus,
+  Sparkle, Stethoscope, MagnifyingGlass, Star, Plus, Warning,
 } from "@phosphor-icons/react";
+import { AlertTriangle } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY, KYC_PENDING_KEY } from "@/components/patient/PatientOnboarding";
 import { PingoMascot } from "@/components/mascot/PingoMascot";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
