@@ -44,12 +44,12 @@ const HEALTH_TIPS = [
   { title: "Monitore sua pressão!", body: "Acompanhar a pressão arterial regularmente é essencial para prevenção.", metric: "12/8", metricLabel: "Ideal" },
 ];
 
-const QUICK_ACTIONS = [
+const QUICK_ACTIONS: { label: string; icon: string | typeof Zap; path: string; urgent?: boolean }[] = [
   { label: "Início",    icon: "🏠", path: "/dashboard?role=patient" },
   { label: "Agendar",   icon: "📅", path: "/dashboard/schedule?role=patient" },
   { label: "Urgência",  icon: Zap,  path: "/dashboard/urgent-care?role=patient", urgent: true },
   { label: "Consultas", icon: "📋", path: "/dashboard/appointments?role=patient" },
-] as const;
+];
 
 const SUPPORT_LINKS = [
   { icon: MessageCircle, label: "Chat com Suporte", path: "/dashboard/chat?role=patient" },
