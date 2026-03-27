@@ -195,7 +195,7 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                 size="sm"
                 variant="outline"
                 className="rounded-lg gap-1.5 text-xs font-semibold h-9 px-4 border-border/60 hover:border-primary/20"
-                onClick={() => navigate("/consulta-avulsa")}
+                onClick={() => navigate("/paciente")}
               >
                 <ShoppingBag className="w-3.5 h-3.5" />
                 Consulta Avulsa
