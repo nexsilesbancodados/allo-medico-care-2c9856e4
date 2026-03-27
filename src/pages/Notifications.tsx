@@ -26,7 +26,7 @@ interface Notification {
 const TYPE_ICONS: Record<string, { icon: React.ReactNode; bg: string }> = {
   appointment: { icon: <Calendar className="w-5 h-5 text-primary" />, bg: "bg-primary/10" },
   payment: { icon: <CreditCard className="w-5 h-5 text-secondary" />, bg: "bg-secondary/10" },
-  document: { icon: <FileText className="w-5 h-5 text-amber-600" />, bg: "bg-amber-100 dark:bg-amber-900/20" },
+  document: { icon: <FileText className="w-5 h-5 text-warning" />, bg: "bg-warning/10" },
   message: { icon: <MessageSquare className="w-5 h-5 text-primary" />, bg: "bg-primary/10" },
   health: { icon: <Heart className="w-5 h-5 text-destructive" />, bg: "bg-destructive/10" },
   system: { icon: <Bell className="w-5 h-5 text-muted-foreground" />, bg: "bg-muted" },
