@@ -206,20 +206,27 @@ const DoctorWaitingRoom = () => {
 
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("waiting-room")}>
-      <div className="w-full mx-auto max-w-3xl pb-24 md:pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tabular-nums">Sala de Espera Virtual</h1>
-          <p className="text-sm text-muted-foreground">
-              {waitingCount} aguardando · {inProgressCount} em atendimento · ~{avgDuration}min/consulta
+      <div className="w-full mx-auto max-w-3xl pb-24 md:pb-6 space-y-5">
+        {/* Premium header */}
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-500 p-5 text-white" style={{ boxShadow: "0 8px 32px rgba(180,100,0,0.25)" }}>
+          <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
+          <div className="relative z-10 flex items-start justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/60">Atendimento virtual</p>
+              <h1 className="text-xl font-black tracking-tight mt-1">🏥 Sala de Espera</h1>
+              <p className="text-xs text-white/70 mt-1.5">
+                {waitingCount} aguardando · {inProgressCount} em atendimento · ~{avgDuration}min/consulta
+              </p>
               {criticalCount > 0 && (
-                <span className="text-destructive font-semibold ml-2">· {criticalCount} alerta(s) crítico(s)</span>
+                <p className="text-xs font-bold text-red-200 mt-1 flex items-center gap-1">
+                  <HeartPulse className="w-3.5 h-3.5" /> {criticalCount} alerta(s) crítico(s)
+                </p>
               )}
-            </p>
+            </div>
+            <Button size="sm" variant="ghost" onClick={() => doctorId && fetchWaitingPatients(doctorId)} className="text-white/70 hover:text-white hover:bg-white/15 rounded-xl h-9">
+              <RefreshCw className="w-4 h-4" />
+            </Button>
           </div>
-          <Button size="sm" variant="outline" onClick={() => doctorId && fetchWaitingPatients(doctorId)}>
-            <RefreshCw className="w-4 h-4 mr-1" /> Atualizar
-          </Button>
         </div>
 
         {/* Critical alerts banner */}
