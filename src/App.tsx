@@ -15,13 +15,11 @@ import { logError } from "@/lib/logger";
 import { prefetchOnIdle } from "./hooks/use-prefetch-route";
 import ScrollToTop from "./components/ScrollToTop";
 
-const AnalyticsScripts = lazy(() => import("./components/analytics/AnalyticsScripts"));
+
 const Auth = lazy(() => import("./pages/Auth"));
 
 // Lazy-loaded overlay components (not needed on initial render)
-const PingoChatbot = lazy(() => import("./components/PingoChatbot"));
 const OfflineIndicator = lazy(() => import("./components/OfflineIndicator"));
-const CookieConsent = lazy(() => import("./components/CookieConsent"));
 const TermsReconsentDialog = lazy(() => import("./components/auth/TermsReconsentDialog"));
 const PWAUpdateBanner = lazy(() => import("./components/PWAUpdateBanner"));
 
@@ -223,9 +221,6 @@ const App = () => {
                   {showDeferredFeatures && (
                     <ErrorBoundary fallback={null}>
                       <Suspense fallback={null}>
-                        <AnalyticsScripts />
-                        <PingoChatbot />
-                        <CookieConsent />
                         <TermsReconsentDialog />
                         <OfflineIndicator />
                         <PWAUpdateBanner />
