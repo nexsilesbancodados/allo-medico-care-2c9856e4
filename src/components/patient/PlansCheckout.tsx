@@ -22,7 +22,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
 import { saveCheckoutDraft, clearCheckoutDraft } from "./CheckoutRecoveryBanner";
 import { ptBR } from "date-fns/locale";
-import CardSubscriptionCheckout from "./CardSubscriptionCheckout";
+
 
 type PaymentMethod = "pix" | "card" | "boleto";
 
@@ -43,53 +43,6 @@ const plans = [
     description: "Ideal para quem precisa de atendimento pontual.",
     features: ["1 consulta por videochamada", "Receita digital inclusa", "Chat pós-consulta (48h)", "Escolha de especialidade"],
     highlighted: false,
-  },
-];
-
-const cardPlans = [
-  {
-    id: "prata_familiar",
-    name: "Mini Família",
-    price: 47.9,
-    people: "Titular + até 4 dependentes",
-    icon: <Shield className="w-6 h-6 text-white" />,
-    highlighted: false,
-    gradient: "from-[hsl(210,15%,60%)] to-[hsl(210,15%,45%)]",
-    benefits: ["Telemedicina 24h/7", "Clube de Vantagens (até 80% off)"],
-    tag: null,
-  },
-  {
-    id: "ouro_individual",
-    name: "Solitário",
-    price: 37.9,
-    people: "Apenas o titular",
-    icon: <Star className="w-6 h-6 text-white" />,
-    highlighted: false,
-    gradient: "from-[hsl(45,80%,50%)] to-[hsl(35,80%,42%)]",
-    benefits: ["Telemedicina 24h/7", "Clube de Vantagens", "Assistência Funeral"],
-    tag: null,
-  },
-  {
-    id: "ouro_familiar",
-    name: "King Família",
-    price: 77.9,
-    people: "Titular + até 4 dependentes",
-    icon: <Crown className="w-6 h-6 text-white" />,
-    highlighted: true,
-    gradient: "from-primary via-primary to-secondary",
-    benefits: ["Telemedicina 24h/7 (todos)", "Clube de Vantagens (todos)"],
-    tag: "⭐ MAIS POPULAR",
-  },
-  {
-    id: "diamante_familiar",
-    name: "Prime Família",
-    price: 157.9,
-    people: "Titular + até 4 dependentes",
-    icon: <Diamond className="w-6 h-6 text-white" />,
-    highlighted: false,
-    gradient: "from-[hsl(260,60%,55%)] to-[hsl(280,60%,45%)]",
-    benefits: ["Telemedicina 24h/7 (todos)", "Clube de Vantagens (todos)", "Assistência Funeral (todos)"],
-    tag: "💎 COMPLETO",
   },
 ];
 
@@ -609,86 +562,14 @@ const PlansCheckout = () => {
       <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
         {/* Tab selector */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="consulta" className="text-xs sm:text-sm">
               <CreditCard className="w-4 h-4 mr-1.5" /> Consulta Avulsa
-            </TabsTrigger>
-            <TabsTrigger value="cartao" className="text-xs sm:text-sm">
-              <Shield className="w-4 h-4 mr-1.5" /> Cartão de Benefícios
             </TabsTrigger>
             <TabsTrigger value="empresarial" className="text-xs sm:text-sm">
               <Building2 className="w-4 h-4 mr-1.5" /> Empresarial
             </TabsTrigger>
           </TabsList>
-
-          {/* ===== TAB: CARTÃO DE BENEFÍCIOS ===== */}
-          <TabsContent value="cartao" className="mt-6">
-            {!subscribingCard ? (
-              <>
-                <h2 className="text-2xl font-bold text-foreground mb-1">Cartão de Benefícios</h2>
-                <p className="text-muted-foreground mb-6">Telemedicina 24h, clube de vantagens e assistência funerária.</p>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {cardPlans.map((plan) => (
-                    <Card key={plan.id} className={`relative overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl h-full ${plan.highlighted ? "border-primary shadow-lg shadow-primary/15 ring-2 ring-primary/20" : "border-border/50"}`}>
-                      {plan.tag && (
-                        <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-primary to-secondary text-primary-foreground text-center text-[10px] py-1 font-bold tracking-wide">{plan.tag}</div>
-                      )}
-                      <CardContent className={`p-5 text-center flex flex-col h-full ${plan.tag ? "pt-8" : ""}`}>
-                        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${plan.gradient} flex items-center justify-center mx-auto mb-3 shadow-lg`}>{plan.icon}</div>
-                        <h3 className="text-base font-bold text-foreground">{plan.name}</h3>
-                        <p className="text-[11px] text-muted-foreground mb-3">{plan.people}</p>
-                        <div className="mb-2">
-                          <span className="text-3xl font-black text-foreground">R$ {plan.price.toFixed(2).replace(".", ",")}</span>
-                          <span className="text-muted-foreground text-xs">/mês</span>
-                        </div>
-                        <ul className="text-left space-y-1.5 my-3 flex-1">
-                          {plan.benefits.map((b, j) => (
-                            <li key={j} className="flex items-start gap-2 text-xs text-muted-foreground">
-                              <Check className="w-3.5 h-3.5 text-secondary mt-0.5 shrink-0" />
-                              <span>{b}</span>
-                            </li>
-                          ))}
-                        </ul>
-                        <Button
-                          className={`w-full h-10 rounded-xl font-bold text-sm ${plan.highlighted ? "bg-gradient-to-r from-primary to-secondary text-primary-foreground" : ""}`}
-                          variant={plan.highlighted ? "default" : "outline"}
-                          onClick={async () => {
-                            if (!user) { navigate("/paciente"); return; }
-                            const { data: existing } = await supabase.from("discount_cards").select("id").eq("user_id", user.id).eq("status", "active").maybeSingle();
-                            if (existing) { toast.info("Você já possui um cartão ativo!"); return; }
-                            setSubscribingCard(plan.id);
-                            setCardSubPaymentMethod("pix");
-                            setCardSubPixQr(null);
-                            setCardSubPixCode(null);
-                            setCardSubBoletoUrl(null);
-                          }}
-                        >
-                          Assinar <ArrowRight className="w-4 h-4 ml-1" />
-                        </Button>
-                        <p className="text-[10px] text-muted-foreground mt-2">Sem carência • Cancele quando quiser</p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <CardSubscriptionCheckout
-                plan={cardPlans.find(p => p.id === subscribingCard)!}
-                user={user}
-                paymentMethod={cardSubPaymentMethod}
-                setPaymentMethod={setCardSubPaymentMethod}
-                cardName={cardName} setCardName={setCardName}
-                cardNumber={cardNumber} setCardNumber={(v) => setCardNumber(formatCardNumber(v))}
-                cardExpiry={cardExpiry} setCardExpiry={(v) => setCardExpiry(formatExpiry(v))}
-                cardCvv={cardCvv} setCardCvv={(v) => setCardCvv(v.replace(/\D/g, "").slice(0, 4))}
-                pixQrCode={cardSubPixQr} pixCopyPaste={cardSubPixCode} boletoUrl={cardSubBoletoUrl}
-                onBack={() => { setSubscribingCard(null); setCardSubPixQr(null); setCardSubPixCode(null); setCardSubBoletoUrl(null); }}
-                onSuccess={() => { setSubscribingCard(null); toast.success("Assinatura criada! 🎉", { description: "Assim que o pagamento for confirmado, seu cartão será ativado automaticamente." }); navigate("/dashboard"); }}
-                onPixGenerated={(qr, code) => { setCardSubPixQr(qr); setCardSubPixCode(code); }}
-                onBoletoGenerated={(url) => { setCardSubBoletoUrl(url); }}
-              />
-            )}
-          </TabsContent>
 
           {/* ===== TAB: EMPRESARIAL ===== */}
           <TabsContent value="empresarial" className="mt-6">
