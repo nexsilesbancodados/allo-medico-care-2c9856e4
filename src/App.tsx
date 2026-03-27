@@ -53,6 +53,8 @@ const LaudosFila = lazy(() => import("./pages/LaudosFila"));
 const LaudosEditor = lazy(() => import("./pages/LaudosEditor"));
 const LaudosValidar = lazy(() => import("./pages/LaudosValidar"));
 const LaudosEditar = lazy(() => import("./pages/LaudosEditar"));
+const ClinicaEnviarExame = lazy(() => import("./pages/ClinicaEnviarExame"));
+const ClinicaExames = lazy(() => import("./pages/ClinicaExames"));
 
 
 const queryClient = new QueryClient({
@@ -214,6 +216,8 @@ const App = () => {
                         <Route path="/laudos/validar/:token" element={<LaudosValidar />} />
                         <Route path="/laudos/validar" element={<LaudosValidar />} />
                         <Route path="/laudos/:exameId/editar" element={<ProtectedRoute><LaudosEditar /></ProtectedRoute>} />
+                        <Route path="/clinica/enviar-exame" element={<ProtectedRoute><ClinicaEnviarExame /></ProtectedRoute>} />
+                        <Route path="/clinica/exames" element={<ProtectedRoute><ClinicaExames /></ProtectedRoute>} />
                         <Route
                           path="/dashboard/*"
                           element={

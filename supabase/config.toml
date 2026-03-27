@@ -121,6 +121,9 @@ verify_jwt = false
 [functions.docuseal-proxy]
 verify_jwt = false
 
+[functions.orthanc-proxy]
+verify_jwt = false
+
 [functions.whatsapp-notify]
 verify_jwt = false
 
