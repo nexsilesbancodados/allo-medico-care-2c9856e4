@@ -17,6 +17,7 @@ import {
   ArrowRight, FileText, Upload,
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
+import { PingoMascot } from "@/components/mascot/PingoMascot";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import {
