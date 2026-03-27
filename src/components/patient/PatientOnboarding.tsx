@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Search, Upload, FileText, Heart, Video, ArrowRight, ArrowLeft, X, Sparkles, User, Droplets, AlertTriangle, Plus, Stethoscope, Ambulance, ClipboardList, ShieldCheck, Camera, CheckCircle2, Smartphone, Monitor } from "lucide-react";
+import PatientKYCCapture from "@/components/patient/PatientKYCCapture";
 import CpfInput from "@/components/ui/cpf-input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { QRCodeSVG } from "qrcode.react";
@@ -44,51 +45,30 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const [allergyInput, setAllergyInput] = useState("");
   const [chronicConditions, setChronicConditions] = useState<string[]>([]);
   const [conditionInput, setConditionInput] = useState("");
-  const [selfieFile, setSelfieFile] = useState<File | null>(null);
-  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
-  const [docFile, setDocFile] = useState<File | null>(null);
-  const [docPreview, setDocPreview] = useState<string | null>(null);
+  const [kycCompleted, setKycCompleted] = useState(false);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "selfie" | "doc") => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    // Only allow photos taken now (camera capture) — reject non-image or pre-existing files
-    if (!file.type.startsWith("image/")) { toast.error("Apenas fotos são aceitas"); return; }
-    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande", { description: "Máximo 10 MB" }); return; }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (type === "selfie") { setSelfieFile(file); setSelfiePreview(ev.target?.result as string); }
-      else { setDocFile(file); setDocPreview(ev.target?.result as string); }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const uploadKYCFiles = async () => {
+  const handleKycCameraComplete = async (selfieBlob: Blob, docBlob: Blob) => {
     if (!user) return;
     setSaving(true);
     try {
-      if (selfieFile) {
-        const ext = selfieFile.name.split(".").pop() || "jpg";
-        await supabase.storage.from("avatars").upload(`${user.id}/kyc-selfie.${ext}`, selfieFile, { upsert: true });
-      }
-      if (docFile) {
-        const ext = docFile.name.split(".").pop() || "jpg";
-        await supabase.storage.from("avatars").upload(`${user.id}/kyc-document.${ext}`, docFile, { upsert: true });
-      }
-      // Also set selfie as avatar if user doesn't have one
-      if (selfieFile && !profile?.avatar_url) {
-        const ext = selfieFile.name.split(".").pop() || "jpg";
-        const path = `${user.id}/avatar.${ext}`;
-        await supabase.storage.from("avatars").upload(path, selfieFile, { upsert: true });
+      await supabase.storage.from("avatars").upload(`${user.id}/kyc-selfie.jpg`, selfieBlob, { upsert: true, contentType: "image/jpeg" });
+      await supabase.storage.from("avatars").upload(`${user.id}/kyc-document.jpg`, docBlob, { upsert: true, contentType: "image/jpeg" });
+      if (!profile?.avatar_url) {
+        const path = `${user.id}/avatar.jpg`;
+        await supabase.storage.from("avatars").upload(path, selfieBlob, { upsert: true, contentType: "image/jpeg" });
         const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
         await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
       }
-      toast.success("Documentos enviados! ✅");
-    } catch (err) {
+      localStorage.removeItem(KYC_PENDING_KEY);
+      setKycCompleted(true);
+      toast.success("Verificação enviada! ✅");
+    } catch {
       toast.error("Erro ao enviar", { description: "Tente novamente." });
     }
     setSaving(false);
   };
+
+  // uploadKYCFiles no longer needed — handled by handleKycCameraComplete
 
   useEffect(() => {
     if (user) {
@@ -145,10 +125,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
 
   const handleNext = async () => {
     if (step.id === "personal" || step.id === "health") await saveProfile();
-    if (step.id === "kyc" && (selfieFile || docFile)) {
-      await uploadKYCFiles();
-      localStorage.removeItem(KYC_PENDING_KEY);
-    }
+    // KYC is handled by the camera component callback — just advance
     if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); onComplete(); }
     else setCurrentStep(prev => prev + 1);
   };
