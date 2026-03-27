@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Search, Upload, FileText, Heart, Video, ArrowRight, ArrowLeft, X, Sparkles, User, Droplets, AlertTriangle, Plus, Stethoscope, Ambulance, ClipboardList, ShieldCheck, Camera, CheckCircle2, Smartphone, Monitor } from "lucide-react";
+import PatientKYCCapture from "@/components/patient/PatientKYCCapture";
 import CpfInput from "@/components/ui/cpf-input";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { QRCodeSVG } from "qrcode.react";
@@ -44,51 +45,30 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const [allergyInput, setAllergyInput] = useState("");
   const [chronicConditions, setChronicConditions] = useState<string[]>([]);
   const [conditionInput, setConditionInput] = useState("");
-  const [selfieFile, setSelfieFile] = useState<File | null>(null);
-  const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
-  const [docFile, setDocFile] = useState<File | null>(null);
-  const [docPreview, setDocPreview] = useState<string | null>(null);
+  const [kycCompleted, setKycCompleted] = useState(false);
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "selfie" | "doc") => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    // Only allow photos taken now (camera capture) — reject non-image or pre-existing files
-    if (!file.type.startsWith("image/")) { toast.error("Apenas fotos são aceitas"); return; }
-    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande", { description: "Máximo 10 MB" }); return; }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      if (type === "selfie") { setSelfieFile(file); setSelfiePreview(ev.target?.result as string); }
-      else { setDocFile(file); setDocPreview(ev.target?.result as string); }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const uploadKYCFiles = async () => {
+  const handleKycCameraComplete = async (selfieBlob: Blob, docBlob: Blob) => {
     if (!user) return;
     setSaving(true);
     try {
-      if (selfieFile) {
-        const ext = selfieFile.name.split(".").pop() || "jpg";
-        await supabase.storage.from("avatars").upload(`${user.id}/kyc-selfie.${ext}`, selfieFile, { upsert: true });
-      }
-      if (docFile) {
-        const ext = docFile.name.split(".").pop() || "jpg";
-        await supabase.storage.from("avatars").upload(`${user.id}/kyc-document.${ext}`, docFile, { upsert: true });
-      }
-      // Also set selfie as avatar if user doesn't have one
-      if (selfieFile && !profile?.avatar_url) {
-        const ext = selfieFile.name.split(".").pop() || "jpg";
-        const path = `${user.id}/avatar.${ext}`;
-        await supabase.storage.from("avatars").upload(path, selfieFile, { upsert: true });
+      await supabase.storage.from("avatars").upload(`${user.id}/kyc-selfie.jpg`, selfieBlob, { upsert: true, contentType: "image/jpeg" });
+      await supabase.storage.from("avatars").upload(`${user.id}/kyc-document.jpg`, docBlob, { upsert: true, contentType: "image/jpeg" });
+      if (!profile?.avatar_url) {
+        const path = `${user.id}/avatar.jpg`;
+        await supabase.storage.from("avatars").upload(path, selfieBlob, { upsert: true, contentType: "image/jpeg" });
         const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
         await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
       }
-      toast.success("Documentos enviados! ✅");
-    } catch (err) {
+      localStorage.removeItem(KYC_PENDING_KEY);
+      setKycCompleted(true);
+      toast.success("Verificação enviada! ✅");
+    } catch {
       toast.error("Erro ao enviar", { description: "Tente novamente." });
     }
     setSaving(false);
   };
+
+  // uploadKYCFiles no longer needed — handled by handleKycCameraComplete
 
   useEffect(() => {
     if (user) {
@@ -145,10 +125,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
 
   const handleNext = async () => {
     if (step.id === "personal" || step.id === "health") await saveProfile();
-    if (step.id === "kyc" && (selfieFile || docFile)) {
-      await uploadKYCFiles();
-      localStorage.removeItem(KYC_PENDING_KEY);
-    }
+    // KYC is handled by the camera component callback — just advance
     if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); onComplete(); }
     else setCurrentStep(prev => prev + 1);
   };
@@ -240,102 +217,23 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         );
 
       case "kyc": {
-        const kycMobileUrl = `${window.location.origin}/paciente?redirect=${encodeURIComponent("/dashboard?role=patient&onboarding=true&step=kyc")}`;
-        const showQrOption = !isMobile && !selfiePreview && !docPreview;
+        if (kycCompleted) {
+          return (
+            <div className="text-center py-8 space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8 text-primary" />
+              </div>
+              <h2 className="text-lg font-bold text-foreground">Verificação Concluída!</h2>
+              <p className="text-xs text-muted-foreground">Seus documentos foram enviados com sucesso.</p>
+            </div>
+          );
+        }
 
         return (
-          <div className="space-y-5">
-            <div className="text-center">
-              <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <ShieldCheck className="w-7 h-7 text-primary" />
-              </div>
-              <h2 className="text-lg font-bold text-foreground">Verificação de Identidade</h2>
-              <p className="text-xs text-muted-foreground mt-1">Para sua segurança, envie uma selfie e um documento com foto.</p>
-            </div>
-
-            {/* QR Code for desktop users */}
-            {showQrOption && (
-              <div className="rounded-2xl border-2 border-dashed border-primary/30 p-5 bg-primary/5 text-center space-y-3">
-                <div className="flex items-center justify-center gap-2 text-primary">
-                  <Monitor className="w-5 h-5" />
-                  <ArrowRight className="w-4 h-4" />
-                  <Smartphone className="w-5 h-5" />
-                </div>
-                <p className="text-sm font-bold text-foreground">Está no computador?</p>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Escaneie o QR Code abaixo com seu celular para tirar as fotos com a câmera do dispositivo.
-                </p>
-                <div className="flex justify-center py-2">
-                  <div className="bg-white p-3 rounded-xl shadow-sm inline-block">
-                    <QRCodeSVG value={kycMobileUrl} size={160} level="M" />
-                  </div>
-                </div>
-                <p className="text-[10px] text-muted-foreground">Ou envie arquivos do computador abaixo ↓</p>
-              </div>
-            )}
-
-            {/* Selfie */}
-            <div className="rounded-2xl border border-border/50 p-4 bg-card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Camera className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">Selfie</p>
-                  <p className="text-[11px] text-muted-foreground">Foto do seu rosto, bem iluminado</p>
-                </div>
-                {selfiePreview && <CheckCircle2 className="w-5 h-5 text-green-500 ml-auto" />}
-              </div>
-              {selfiePreview ? (
-                <div className="relative">
-                  <img src={selfiePreview} alt="Selfie" className="w-full h-40 object-cover rounded-xl" />
-                  <button onClick={() => { setSelfieFile(null); setSelfiePreview(null); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 flex items-center justify-center">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border/60 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
-                  <Camera className="w-6 h-6 text-muted-foreground/50 mb-2" />
-                  <p className="text-xs text-muted-foreground font-medium">Tirar selfie agora</p>
-                  <p className="text-[10px] text-muted-foreground/60">Câmera frontal obrigatória</p>
-                  <input type="file" accept="image/*" capture="user" className="hidden" onChange={e => handleFileSelect(e, "selfie")} />
-                </label>
-              )}
-            </div>
-
-            {/* Document */}
-            <div className="rounded-2xl border border-border/50 p-4 bg-card">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-secondary" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-foreground">Documento com foto</p>
-                  <p className="text-[11px] text-muted-foreground">RG, CNH ou passaporte</p>
-                </div>
-                {docPreview && <CheckCircle2 className="w-5 h-5 text-green-500 ml-auto" />}
-              </div>
-              {docPreview ? (
-                <div className="relative">
-                  <img src={docPreview} alt="Documento" className="w-full h-40 object-cover rounded-xl" />
-                  <button onClick={() => { setDocFile(null); setDocPreview(null); }} className="absolute top-2 right-2 w-7 h-7 rounded-full bg-background/80 flex items-center justify-center">
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border/60 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
-                  <Camera className="w-6 h-6 text-muted-foreground/50 mb-2" />
-                  <p className="text-xs text-muted-foreground font-medium">Fotografar documento</p>
-                  <p className="text-[10px] text-muted-foreground/60">Câmera traseira obrigatória</p>
-                  <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFileSelect(e, "doc")} />
-                </label>
-              )}
-            </div>
-
-            <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
-              🔒 Seus documentos são protegidos por criptografia e armazenados em conformidade com a LGPD.
-            </p>
-          </div>
+          <PatientKYCCapture
+            onComplete={handleKycCameraComplete}
+            compact
+          />
         );
       }
 
