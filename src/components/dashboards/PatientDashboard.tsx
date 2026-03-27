@@ -122,12 +122,9 @@ const PatientDashboard = () => {
         <section className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[32px] bg-gradient-to-br from-[#001d4a] via-[#00347F] to-[#1a5ccc] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6"
           style={{ boxShadow: "0 16px 56px rgba(0,29,74,.35), inset 0 1px 0 rgba(255,255,255,.12)" }}
         >
-          <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-[#2563EB]/25 blur-[80px]" />
-          <div className="pointer-events-none absolute -left-8 bottom-4 h-48 w-48 rounded-full bg-[#3b82f6]/20 blur-[60px]" />
-          <div className="pointer-events-none absolute right-1/3 top-1/3 h-24 w-24 rounded-full bg-white/[0.04] blur-[30px]" />
+          <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-[#2563EB]/25 blur-[80px] hidden md:block" />
+          <div className="pointer-events-none absolute -left-8 bottom-4 h-48 w-48 rounded-full bg-[#3b82f6]/20 blur-[60px] hidden md:block" />
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
-          <div className="pointer-events-none absolute inset-0 opacity-[0.025]"
-            style={{ backgroundImage: "radial-gradient(circle at 1px 1px, white 1px, transparent 0)", backgroundSize: "28px 28px" }} />
 
           <div className="relative z-10 px-5 pt-10 pb-6 md:px-8 md:pt-14 md:pb-8">
             <div className="flex items-start gap-3">
