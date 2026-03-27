@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Clock, Zap, Phone, RefreshCw, AlertTriangle, QrCode, CreditCard, FileBarChart, Lock, Copy, CheckCircle2, Shield, MapPin, Ambulance, ChevronRight, Building2 } from "lucide-react";
+import { Clock, Zap, Phone, RefreshCw, AlertTriangle, QrCode, CreditCard, FileBarChart, Lock, Copy, CheckCircle2, Shield, MapPin, Ambulance, ChevronRight, Building2, Navigation, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { notifyDoctorsNewQueueEntry } from "@/lib/notifications-queue";
@@ -18,10 +18,58 @@ import mascotWave from "@/assets/mascot-wave.png";
 
 type PaymentMethod = "pix" | "card" | "boleto";
 
-const NEARBY_HOSPITALS = [
-  { name: "Hospital Santa Catarina", distance: "0.8 km", waitTime: 12, driveMin: 5 },
-  { name: "Hospital Oswaldo Cruz", distance: "1.5 km", waitTime: 28, driveMin: 8 },
-];
+interface NearbyHospital {
+  name: string;
+  distance: string;
+  distanceMeters: number;
+  driveMin: number;
+  lat: number;
+  lon: number;
+}
+
+/** Calculate distance between two lat/lon points in meters (Haversine) */
+const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const formatDistance = (meters: number) => {
+  if (meters < 1000) return `${Math.round(meters)} m`;
+  return `${(meters / 1000).toFixed(1)} km`;
+};
+
+/** Fetch hospitals near coords using OpenStreetMap Overpass API (free, no key needed) */
+const fetchNearbyHospitals = async (lat: number, lon: number): Promise<NearbyHospital[]> => {
+  const radius = 10000; // 10 km
+  const query = `[out:json][timeout:10];(node["amenity"="hospital"](around:${radius},${lat},${lon});way["amenity"="hospital"](around:${radius},${lat},${lon}););out center 20;`;
+  const res = await fetch("https://overpass-api.de/api/interpreter", {
+    method: "POST",
+    body: `data=${encodeURIComponent(query)}`,
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  });
+  if (!res.ok) throw new Error("Overpass API error");
+  const data = await res.json();
+  
+  const hospitals: NearbyHospital[] = (data.elements || [])
+    .map((el: any) => {
+      const hLat = el.lat ?? el.center?.lat;
+      const hLon = el.lon ?? el.center?.lon;
+      const name = el.tags?.name;
+      if (!name || !hLat || !hLon) return null;
+      const dist = haversine(lat, lon, hLat, hLon);
+      const driveMin = Math.max(1, Math.round(dist / 500)); // rough estimate ~30km/h city
+      return { name, distance: formatDistance(dist), distanceMeters: dist, driveMin, lat: hLat, lon: hLon };
+    })
+    .filter(Boolean)
+    .sort((a: NearbyHospital, b: NearbyHospital) => a.distanceMeters - b.distanceMeters)
+    .slice(0, 6);
+  
+  return hospitals;
+};
 
 const FIRST_AID_TIPS = [
   "Permaneça no local e tente monitorar a respiração do paciente continuamente até a ajuda chegar.",
@@ -50,6 +98,44 @@ const UrgentCareQueue = () => {
   const [cardExpiry, setCardExpiry] = useState("");
   const [cardCvv, setCardCvv] = useState("");
   const [pendingQueueId, setPendingQueueId] = useState<string | null>(null);
+  const [nearbyHospitals, setNearbyHospitals] = useState<NearbyHospital[]>([]);
+  const [hospitalsLoading, setHospitalsLoading] = useState(true);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
+
+  // Fetch nearby hospitals via geolocation + Overpass
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      setLocationError("Geolocalização não suportada pelo navegador");
+      setHospitalsLoading(false);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setUserCoords({ lat: latitude, lon: longitude });
+        try {
+          const hospitals = await fetchNearbyHospitals(latitude, longitude);
+          setNearbyHospitals(hospitals);
+        } catch (err) {
+          logError("Failed to fetch nearby hospitals", err);
+          setLocationError("Não foi possível buscar hospitais próximos");
+        } finally {
+          setHospitalsLoading(false);
+        }
+      },
+      (err) => {
+        setLocationError(err.code === 1 ? "Permita o acesso à localização para ver hospitais próximos" : "Erro ao obter localização");
+        setHospitalsLoading(false);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
+  const openInMaps = (hospital: NearbyHospital) => {
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${hospital.lat},${hospital.lon}`;
+    window.open(url, "_blank");
+  };
 
   useEffect(() => { fetchShiftPrice(); if (user) fetchMyEntry(); }, [user]);
 
@@ -250,10 +336,12 @@ const UrgentCareQueue = () => {
               <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/[0.06] blur-[40px]" />
             </div>
 
-            {/* Nearby clinics */}
+            {/* Nearby clinics count */}
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse" />
-              <span className="text-sm font-medium text-foreground">{NEARBY_HOSPITALS.length} Clínicas Próximas</span>
+              <span className="text-sm font-medium text-foreground">
+                {hospitalsLoading ? "Buscando hospitais..." : `${nearbyHospitals.length} Hospitais Próximos`}
+              </span>
             </div>
 
             {/* Emergency triage */}
@@ -268,24 +356,49 @@ const UrgentCareQueue = () => {
               </Button>
             </div>
 
-            {/* Hospitals with wait time */}
+            {/* Hospitals - real data from geolocation */}
             <div>
-              <h2 className="text-lg font-bold text-foreground mb-1 font-[Manrope]">Hospitais com Menor Espera</h2>
-              <p className="text-xs text-muted-foreground mb-3">Tempo estimado para triagem</p>
+              <h2 className="text-lg font-bold text-foreground mb-1 font-[Manrope]">Hospitais Próximos</h2>
+              <p className="text-xs text-muted-foreground mb-3">
+                {hospitalsLoading ? "Obtendo sua localização..." : "Baseado na sua localização atual"}
+              </p>
+
+              {hospitalsLoading && (
+                <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Buscando hospitais próximos...</span>
+                </div>
+              )}
+
+              {locationError && !hospitalsLoading && (
+                <div className="rounded-2xl border border-warning/20 bg-warning/5 p-4 text-center">
+                  <MapPin className="w-6 h-6 text-warning mx-auto mb-2" />
+                  <p className="text-sm text-foreground font-medium mb-1">Localização indisponível</p>
+                  <p className="text-xs text-muted-foreground">{locationError}</p>
+                </div>
+              )}
+
+              {!hospitalsLoading && !locationError && nearbyHospitals.length === 0 && (
+                <div className="rounded-2xl border border-border/20 bg-muted/30 p-4 text-center">
+                  <Building2 className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Nenhum hospital encontrado nas proximidades</p>
+                </div>
+              )}
+
               <div className="space-y-3">
-                {NEARBY_HOSPITALS.map((h, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+                {nearbyHospitals.map((h, i) => (
+                  <motion.div key={`${h.lat}-${h.lon}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                     whileTap={{ scale: 0.97 }}
-                    className="p-4 rounded-2xl border border-border/20 bg-card flex items-center gap-4 shadow-[var(--p-shadow-card)] hover:shadow-[var(--p-shadow-elevated)] transition-shadow">
+                    onClick={() => openInMaps(h)}
+                    className="p-4 rounded-2xl border border-border/20 bg-card flex items-center gap-4 shadow-[var(--p-shadow-card)] hover:shadow-[var(--p-shadow-elevated)] transition-shadow cursor-pointer">
                     <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center shrink-0">
                       <Building2 className="w-6 h-6 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] text-secondary font-bold uppercase tracking-wider">{h.distance} de distância</p>
-                      <p className="font-semibold text-foreground text-sm">{h.name}</p>
+                      <p className="font-semibold text-foreground text-sm truncate">{h.name}</p>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-warning" /> {h.waitTime} min espera</span>
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {h.driveMin} min</span>
+                        <span className="flex items-center gap-1"><Navigation className="w-3 h-3 text-primary" /> ~{h.driveMin} min de carro</span>
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-muted-foreground/40 shrink-0" />
