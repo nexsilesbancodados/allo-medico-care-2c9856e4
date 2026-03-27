@@ -13,8 +13,8 @@ import { ptBR } from "date-fns/locale";
 import {
   Calendar, Video, Clock, Gift, ChevronRight,
   Heart, Activity, Weight, Thermometer, Droplets, Wind,
-  MessageCircle, CreditCard, Settings, Zap, Search, ClipboardList,
-  Sparkles, ArrowRight, Star, TrendingUp, FileText, Upload,
+  Zap, ClipboardList,
+  Sparkles, ArrowRight, FileText, Upload,
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
@@ -61,11 +61,6 @@ const QUICK_ACTIONS: QuickAction[] = [
   { label: "Docs", icon: Upload, path: "/dashboard/patient/documents?role=patient", iconBg: "bg-warning/10", iconColor: "text-warning" },
 ];
 
-const SUPPORT_LINKS = [
-  { icon: MessageCircle, label: "Chat com Suporte", desc: "Fale com nossa equipe", path: "/dashboard/chat?role=patient", color: "text-primary" },
-  { icon: CreditCard, label: "Pagamentos", desc: "Faturas e histórico", path: "/dashboard/payment-history?role=patient", color: "text-success" },
-  { icon: Settings, label: "Configurações", desc: "Preferências do app", path: "/dashboard/settings?role=patient", color: "text-muted-foreground" },
-] as const;
 
 const getGreeting = () => {
   const h = new Date().getHours();
@@ -386,32 +381,6 @@ const PatientDashboard = () => {
               <ReturnAppointments items={returnAppts as ReturnAppt[]} navigate={navigate} />
             )}
 
-            {/* Quick Support Access */}
-            <div className="space-y-2">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 px-1">Acesso Rápido</p>
-              {SUPPORT_LINKS.map((item, i) => (
-                <motion.button
-                  key={item.label}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 + i * 0.04 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate(item.path)}
-                  className="flex w-full items-center justify-between rounded-2xl border border-border/20 bg-card p-4 shadow-[var(--p-shadow-card)] transition-all hover:shadow-[var(--p-shadow-elevated)] active:scale-[0.98] group"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/60 group-hover:bg-[hsl(var(--p-primary))]/8 transition-colors">
-                      <item.icon className="h-4.5 w-4.5 text-muted-foreground group-hover:text-[hsl(var(--p-primary))] transition-colors" />
-                    </div>
-                    <div className="text-left">
-                      <span className="text-[14px] font-semibold text-foreground block">{item.label}</span>
-                      <span className="text-[11px] text-muted-foreground">{item.desc}</span>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" />
-                </motion.button>
-              ))}
-            </div>
           </div>
         </div>
       </div>
