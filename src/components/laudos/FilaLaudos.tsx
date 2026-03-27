@@ -177,12 +177,36 @@ export default function FilaLaudos() {
 
   const loadData = useCallback(async () => {
     try {
+      // Fetch from aloc_exames (legacy)
       const [ativos, feitos] = await Promise.all([
         fetchExamesParaLaudar(),
         fetchExamesConcluidos(),
       ]);
 
-      const all = [...ativos, ...feitos];
+      // Also fetch from exames table (clinic uploads)
+      const { data: clinicExames } = await (supabase as any)
+        .from("exames")
+        .select("id, paciente_nome, tipo_exame, status, orthanc_study_uid, arquivo_url, origem, laudista_id, created_at")
+        .in("status", ["pendente", "em_laudo", "concluido"])
+        .order("created_at", { ascending: true });
+
+      // Map clinic exames to AlocExame-compatible shape
+      const mappedClinic = (clinicExames ?? []).map((e: any) => ({
+        id: e.id,
+        paciente_id: null,
+        medico_solicitante_id: null,
+        laudista_id: e.laudista_id,
+        tipo_exame: e.tipo_exame,
+        status: e.status === "pendente" ? "aguardando" : e.status,
+        orthanc_study_uid: e.orthanc_study_uid,
+        orthanc_study_url: null,
+        created_at: e.created_at,
+        paciente_nome: e.paciente_nome,
+        arquivo_url: e.arquivo_url,
+        origem: e.origem,
+      }));
+
+      const all = [...ativos, ...feitos, ...mappedClinic];
       const enriched = await enrichWithNames(all);
 
       setAguardando(enriched.filter((e) => e.status === "aguardando"));
