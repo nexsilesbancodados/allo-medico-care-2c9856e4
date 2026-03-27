@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, Shield, Lock, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { memo, forwardRef } from "react";
 import { motion } from "framer-motion";
@@ -16,9 +16,9 @@ const heroContent = {
 };
 
 const trustItems = [
-  "Regulamentado pelo CFM",
-  "Criptografia end-to-end",
-  "Nota 4.9 no Google",
+  { label: "Regulamentado pelo CFM", icon: Shield, color: "text-primary" },
+  { label: "Criptografia end-to-end", icon: Lock, color: "text-success" },
+  { label: "Nota 4.9 no Google", icon: Star, color: "text-warning" },
 ];
 
 const floatY = {
@@ -118,11 +118,11 @@ const HeroSection = memo(
               >
                 {trustItems.map((item) => (
                   <span
-                    key={item}
-                    className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground font-medium"
+                    key={item.label}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 text-[13px] text-foreground font-medium shadow-sm"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
-                    {item}
+                    <item.icon className={`w-4 h-4 ${item.color} shrink-0`} />
+                    {item.label}
                   </span>
                 ))}
               </motion.div>
