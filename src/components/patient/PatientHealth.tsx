@@ -359,7 +359,7 @@ const PatientHealth = () => {
               <CardHeader className="pb-1 pt-4 px-4">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xs font-semibold text-foreground flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${currentMetricConfig?.gradient}`} />
+                    <div className="w-2 h-2 rounded-full bg-primary" />
                     {currentMetricConfig?.label}
                   </CardTitle>
                   <Badge variant="secondary" className="text-[9px] h-5">
