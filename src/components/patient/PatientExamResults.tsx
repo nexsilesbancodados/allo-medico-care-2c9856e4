@@ -115,7 +115,7 @@ const PatientExamResults = () => {
         </div>
 
         {/* Hero Banner */}
-        <div className="relative rounded-2xl bg-gradient-to-br from-primary to-[hsl(215,75%,40%)] p-6 mb-6 overflow-hidden">
+        <div className="relative rounded-2xl bg-gradient-to-br from-primary to-primary/70 p-6 mb-6 overflow-hidden">
           <div className="relative z-10 max-w-[65%]">
             <p className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">Fique tranquilo!</p>
             <p className="text-sm text-white/80 leading-relaxed">
@@ -170,7 +170,7 @@ const PatientExamResults = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04 }}
-                  className="rounded-2xl bg-card border border-border/20 p-5 hover:shadow-md transition-shadow"
+                  className="card-interactive rounded-2xl bg-card border border-border/20 p-5"
                 >
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center text-2xl shrink-0">
@@ -192,7 +192,7 @@ const PatientExamResults = () => {
                           {format(new Date(exam.created_at), "dd MMM yyyy", { locale: ptBR })}
                         </span>
                         {report?.verification_code && (
-                          <span className="flex items-center gap-1 text-[hsl(152,60%,35%)]">
+                          <span className="flex items-center gap-1 text-success">
                             <ShieldCheck className="w-3 h-3" />
                             {report.verification_code}
                           </span>

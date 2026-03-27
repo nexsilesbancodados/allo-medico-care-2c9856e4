@@ -37,7 +37,7 @@ interface Appointment {
 const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
   scheduled: { label: "Agendada", color: "bg-primary/10 text-primary", dot: "bg-primary" },
   payment_pending: { label: "Aguardando pagamento", color: "bg-warning/10 text-warning", dot: "bg-warning animate-pulse" },
-  waiting: { label: "Sala de espera", color: "bg-amber-500/10 text-amber-600", dot: "bg-amber-500" },
+  waiting: { label: "Sala de espera", color: "bg-warning/10 text-warning", dot: "bg-warning" },
   in_progress: { label: "Em andamento", color: "bg-secondary/10 text-secondary", dot: "bg-secondary animate-pulse" },
   completed: { label: "Concluída", color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
   cancelled: { label: "Cancelada", color: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
@@ -226,9 +226,9 @@ const AppointmentsList = () => {
         initial="hidden"
         animate="show"
         className={cn(
-          "p-4 rounded-2xl border transition-all active:scale-[0.98]",
+          "card-interactive p-4 rounded-2xl border",
           appt.status === "in_progress" ? "border-secondary/40 bg-secondary/5" :
-          appt.status === "waiting" ? "border-amber-500/30 bg-amber-500/5" :
+          appt.status === "waiting" ? "border-warning/30 bg-warning/5" :
           "border-border bg-card"
         )}
       >
@@ -282,7 +282,7 @@ const AppointmentsList = () => {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="h-8 px-3 rounded-xl text-xs font-medium gap-1 border-amber-500/30 text-amber-600 hover:bg-amber-500/10"
+                    className="h-8 px-3 rounded-xl text-xs font-medium gap-1 border-warning/30 text-warning hover:bg-warning/10"
                     onClick={() => navigate(`/dashboard/schedule/${appt.doctor_id}?resume=${appt.id}`)}
                   >
                     <CreditCard className="w-3.5 h-3.5" /> Pagar
@@ -454,7 +454,7 @@ const AppointmentsList = () => {
               <img src={mascotWelcome} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" loading="lazy" decoding="async" width={80} height={80} />
               <p className="text-[13px] font-semibold text-foreground mb-1">Nenhuma consulta próxima</p>
               <p className="text-[11px] text-muted-foreground mb-3">Agende agora e cuide da sua saúde</p>
-              <Button size="sm" className="rounded-xl bg-[#2563EB] text-white hover:bg-[#1D4ED8] shadow-[0_3px_12px_rgba(37,99,235,.3)]" onClick={() => navigate("/dashboard/schedule")}>
+              <Button size="sm" className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-md" onClick={() => navigate("/dashboard/schedule")}>
                 Agendar consulta
               </Button>
             </div>
