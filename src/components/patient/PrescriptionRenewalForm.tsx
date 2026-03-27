@@ -56,9 +56,7 @@ const PrescriptionRenewalForm = () => {
   }, [user]);
 
   const checkDiscountCard = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("discount_cards").select("discount_percent").eq("user_id", user.id).eq("status", "active").maybeSingle();
-    if (data) setDiscountPercent(Number(data.discount_percent));
+    // Discount cards removed — no-op
   };
 
   const fetchRenewals = async () => {
