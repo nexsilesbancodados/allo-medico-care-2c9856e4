@@ -2945,6 +2945,8 @@ export type Database = {
           icon: string | null
           id: string
           name: string
+          price_max: number | null
+          price_min: number | null
         }
         Insert: {
           consultation_price?: number | null
@@ -2953,6 +2955,8 @@ export type Database = {
           icon?: string | null
           id?: string
           name: string
+          price_max?: number | null
+          price_min?: number | null
         }
         Update: {
           consultation_price?: number | null
@@ -2961,6 +2965,8 @@ export type Database = {
           icon?: string | null
           id?: string
           name?: string
+          price_max?: number | null
+          price_min?: number | null
         }
         Relationships: []
       }
