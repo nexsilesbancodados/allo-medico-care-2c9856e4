@@ -342,8 +342,8 @@ const PatientHealth = () => {
 
                   {mt.latest && (
                     <div className="flex items-center gap-1 mt-1.5">
-                      <div className={`w-1.5 h-1.5 rounded-full ${isNormal ? "bg-emerald-500" : "bg-rose-500"}`} />
-                      <span className={`text-[9px] font-medium ${isNormal ? "text-emerald-600" : "text-rose-500"}`}>
+                      <div className={`w-1.5 h-1.5 rounded-full ${isNormal ? "bg-success" : "bg-destructive"}`} />
+                      <span className={`text-[9px] font-medium ${isNormal ? "text-success" : "text-destructive"}`}>
                         {isNormal ? "Normal" : "Atenção"}
                       </span>
                     </div>
