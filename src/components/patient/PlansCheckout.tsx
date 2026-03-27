@@ -12,11 +12,11 @@ import { Calendar } from "@/components/ui/calendar";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import {
 import {
   Check, Star, CreditCard, Calendar as CalIcon, Clock, FileText,
   Search, ArrowLeft, Shield, User, History, QrCode, FileBarChart, Copy, CheckCircle2, Lock,
-  Crown, Diamond, Building2, ArrowRight, Loader2
+  ArrowRight, Loader2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { format, addDays, setHours, setMinutes, isBefore } from "date-fns";
