@@ -46,7 +46,7 @@ const JitsiRoom = ({ roomId, displayName, onEnd }: JitsiRoomProps) => {
 
     const domain = JITSI_BASE_URL.replace("https://", "").replace("http://", "");
 
-    apiRef.current = new window.JitsiMeetExternalAPI(domain, {
+    const api = new window.JitsiMeetExternalAPI(domain, {
       roomName: roomId,
       parentNode: containerRef.current,
       userInfo: { displayName },
@@ -62,8 +62,9 @@ const JitsiRoom = ({ roomId, displayName, onEnd }: JitsiRoomProps) => {
       },
     });
 
-    apiRef.current.addListener("readyToClose", onEnd);
-    apiRef.current.addListener("videoConferenceJoined", () => setLoading(false));
+    apiRef.current = api as JitsiApi;
+    api.addEventListener("readyToClose", onEnd);
+    api.addEventListener("videoConferenceJoined", () => setLoading(false));
 
     // Fallback timeout
     setTimeout(() => setLoading(false), 5000);
