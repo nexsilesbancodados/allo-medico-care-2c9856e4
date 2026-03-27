@@ -550,7 +550,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       ${d.reason ? `<div style="background:#fef2f2;padding:12px;border-radius:8px;margin:12px 0;"><strong>Motivo:</strong> ${d.reason}</div>` : ""}
       <p>Recomendamos agendar uma nova consulta para reavaliação.</p>
       ${btn(URLS.patientSchedule, "Agendar Consulta")}
-    `, BRAND.red),
+    `, "renewal_rejected"),
   }),
 
   no_show_fee: (d) => ({
