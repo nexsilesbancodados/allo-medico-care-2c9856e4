@@ -1,16 +1,22 @@
 import {
-  Home, Search, Clock, Zap, User, SlidersHorizontal,
-  CreditCard, MessageCircle, Headphones, Heart, FileText,
-  Upload, ClipboardList, Users, Shield, BookOpen
+  Home, Clock, MessageCircle, CreditCard, User, Search, Zap,
+  SlidersHorizontal, Shield, Heart, FileText, Upload,
+  ClipboardList, Users, BookOpen, Headphones, Bell
 } from "lucide-react";
 import { NavIcon } from "@/components/ui/nav-icon";
 
 export const getPatientNav = (active: string) => [
   // ── Bottom bar (first 5 = bottom nav) ──
   { label: "Início", href: "/dashboard?role=patient", icon: <NavIcon icon={<Home className="w-3.5 h-3.5" />} color="blue" />, active: active === "home", group: "Principal" },
-  { label: "Agendar", href: "/dashboard/schedule?role=patient", icon: <NavIcon icon={<Search className="w-3.5 h-3.5" />} color="cyan" />, active: active === "schedule" || active === "doctors", group: "Principal" },
-  { label: "Urgência", href: "/dashboard/urgent-care?role=patient", icon: <NavIcon icon={<Zap className="w-3.5 h-3.5" />} color="amber" />, active: active === "urgent-care", group: "Principal" },
   { label: "Consultas", href: "/dashboard/appointments?role=patient", icon: <NavIcon icon={<Clock className="w-3.5 h-3.5" />} color="blue" />, active: active === "appointments", group: "Principal" },
+  { label: "Chat", href: "/dashboard/chat?role=patient", icon: <NavIcon icon={<MessageCircle className="w-3.5 h-3.5" />} color="blue" />, active: active === "chat", group: "Principal" },
+  { label: "Pagamentos", href: "/dashboard/payment-history?role=patient", icon: <NavIcon icon={<CreditCard className="w-3.5 h-3.5" />} color="green" />, active: active === "payments", group: "Principal" },
+  { label: "Perfil", href: "/dashboard/profile?role=patient", icon: <NavIcon icon={<User className="w-3.5 h-3.5" />} color="blue" />, active: active === "profile", group: "Principal" },
+
+  // ── Agendar ──
+  { label: "Agendar", href: "/dashboard/schedule?role=patient", icon: <NavIcon icon={<Search className="w-3.5 h-3.5" />} color="cyan" />, active: active === "schedule" || active === "doctors", group: "Consultas" },
+  { label: "Urgência", href: "/dashboard/urgent-care?role=patient", icon: <NavIcon icon={<Zap className="w-3.5 h-3.5" />} color="amber" />, active: active === "urgent-care", group: "Consultas" },
+  { label: "Notificações", href: "/dashboard/notifications?role=patient", icon: <NavIcon icon={<Bell className="w-3.5 h-3.5" />} color="blue" />, active: active === "notifications", group: "Consultas" },
 
   // ── Saúde Digital ──
   { label: "Minha Saúde", href: "/dashboard/patient/health?role=patient", icon: <NavIcon icon={<Heart className="w-3.5 h-3.5" />} color="rose" />, active: active === "health", group: "Saúde Digital" },
@@ -20,13 +26,10 @@ export const getPatientNav = (active: string) => [
   { label: "Renovar Receita", href: "/dashboard/prescription-renewal?role=patient", icon: <NavIcon icon={<BookOpen className="w-3.5 h-3.5" />} color="emerald" />, active: active === "renewal", group: "Saúde Digital" },
 
   // ── Perfil Clínico ──
-  { label: "Meu Perfil", href: "/dashboard/profile?role=patient", icon: <NavIcon icon={<User className="w-3.5 h-3.5" />} color="blue" />, active: active === "profile", group: "Perfil Clínico" },
   { label: "Dependentes", href: "/dashboard/patient/dependents?role=patient", icon: <NavIcon icon={<Users className="w-3.5 h-3.5" />} color="blue" />, active: active === "dependents", group: "Perfil Clínico" },
 
-  // ── Financeiro & Suporte ──
-  { label: "Pagamentos", href: "/dashboard/payment-history?role=patient", icon: <NavIcon icon={<CreditCard className="w-3.5 h-3.5" />} color="green" />, active: active === "payments", group: "Financeiro" },
-  { label: "Chat", href: "/dashboard/chat?role=patient", icon: <NavIcon icon={<MessageCircle className="w-3.5 h-3.5" />} color="blue" />, active: active === "chat", group: "Financeiro" },
-  { label: "Suporte", href: "/dashboard/patient/support?role=patient", icon: <NavIcon icon={<Headphones className="w-3.5 h-3.5" />} color="emerald" />, active: active === "support", group: "Financeiro" },
+  // ── Suporte ──
+  { label: "Suporte", href: "/dashboard/patient/support?role=patient", icon: <NavIcon icon={<Headphones className="w-3.5 h-3.5" />} color="emerald" />, active: active === "support", group: "Suporte" },
 
   // ── Segurança ──
   { label: "Configurações", href: "/dashboard/settings?role=patient", icon: <NavIcon icon={<SlidersHorizontal className="w-3.5 h-3.5" />} color="slate" />, active: active === "settings", group: "Segurança" },
