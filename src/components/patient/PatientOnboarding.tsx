@@ -51,7 +51,9 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: "selfie" | "doc") => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) { toast.error("Arquivo muito grande", { description: "Máximo 5 MB" }); return; }
+    // Only allow photos taken now (camera capture) — reject non-image or pre-existing files
+    if (!file.type.startsWith("image/")) { toast.error("Apenas fotos são aceitas"); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande", { description: "Máximo 10 MB" }); return; }
     const reader = new FileReader();
     reader.onload = (ev) => {
       if (type === "selfie") { setSelfieFile(file); setSelfiePreview(ev.target?.result as string); }
@@ -284,8 +286,9 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border/60 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
-                  <Upload className="w-6 h-6 text-muted-foreground/50 mb-2" />
-                  <p className="text-xs text-muted-foreground font-medium">Tirar foto ou enviar</p>
+                  <Camera className="w-6 h-6 text-muted-foreground/50 mb-2" />
+                  <p className="text-xs text-muted-foreground font-medium">Tirar selfie agora</p>
+                  <p className="text-[10px] text-muted-foreground/60">Câmera frontal obrigatória</p>
                   <input type="file" accept="image/*" capture="user" className="hidden" onChange={e => handleFileSelect(e, "selfie")} />
                 </label>
               )}
@@ -312,8 +315,9 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border/60 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
-                  <Upload className="w-6 h-6 text-muted-foreground/50 mb-2" />
-                  <p className="text-xs text-muted-foreground font-medium">Enviar documento</p>
+                  <Camera className="w-6 h-6 text-muted-foreground/50 mb-2" />
+                  <p className="text-xs text-muted-foreground font-medium">Fotografar documento</p>
+                  <p className="text-[10px] text-muted-foreground/60">Câmera traseira obrigatória</p>
                   <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFileSelect(e, "doc")} />
                 </label>
               )}
