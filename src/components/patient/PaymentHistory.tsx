@@ -1,19 +1,17 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CreditCard, CheckCircle2, Clock, XCircle, Download, Shield, Wifi, ChevronRight } from "lucide-react";
+import { CreditCard, CheckCircle2, Clock, XCircle, Shield, Wifi, ChevronRight, Sparkles, ArrowRight } from "lucide-react";
 import { jsPDF } from "jspdf";
-import { format, differenceInDays } from "date-fns";
+import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { getPatientNav } from "./patientNav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import mascotWave from "@/assets/mascot-wave.png";
-
 import type { Json } from "@/integrations/supabase/types";
 
 interface SubscriptionEntry {
@@ -74,8 +72,6 @@ const PaymentHistory = () => {
   };
 
   const activeSub = subs.find((s) => s.status === "active");
-  const totalSpent = subs.filter((s) => s.status !== "cancelled").reduce((acc, s) => acc + Number(s.plan_price), 0);
-  const daysLeft = activeSub?.expires_at ? differenceInDays(new Date(activeSub.expires_at), new Date()) : null;
 
   const generateReceipt = (s: SubscriptionEntry) => {
     const doc = new jsPDF();
@@ -103,99 +99,114 @@ const PaymentHistory = () => {
 
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("payments")} role="patient">
-      <div className="w-full mx-auto max-w-2xl pb-24 md:pb-6 space-y-6">
+      <div className="w-full mx-auto max-w-2xl pb-24 md:pb-6 space-y-5">
 
-        {/* ═══ BANNER — Fatura em aberto ═══ */}
+        {/* ═══ BANNER — Open Invoice ═══ */}
         {!loading && activeSub && (
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl bg-primary p-6 text-primary-foreground"
+            className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-primary via-[hsl(215_70%_38%)] to-[hsl(215_55%_48%)] p-6 text-primary-foreground"
           >
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-primary-foreground/70">
-              Fatura em aberto
-            </p>
-            <p className="font-[Manrope] text-[32px] font-extrabold mt-1">
-              R$ {Number(activeSub.plan_price).toFixed(2)}
-            </p>
-            <p className="text-sm text-primary-foreground/70 mt-0.5">
-              {activeSub.expires_at
-                ? `Vencimento: ${format(new Date(activeSub.expires_at), "dd/MM/yyyy", { locale: ptBR })}`
-                : "Plano ativo"
-              }
-            </p>
-            <div className="flex justify-end mt-4">
-              <Button
-                className="rounded-full bg-primary-foreground text-primary gap-2 font-bold text-sm"
-                onClick={() => navigate("/dashboard/plans")}
-              >
-                <CreditCard className="w-4 h-4" /> Pagar Agora
-              </Button>
+            <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/[0.06] blur-[40px]" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+
+            <div className="relative z-10">
+              <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary-foreground/60">
+                Fatura em aberto
+              </p>
+              <p className="font-[Manrope] text-[34px] font-extrabold mt-1 tabular-nums">
+                R$ {Number(activeSub.plan_price).toFixed(2)}
+              </p>
+              <p className="text-[13px] text-primary-foreground/60 mt-1">
+                {activeSub.expires_at
+                  ? `Vencimento: ${format(new Date(activeSub.expires_at), "dd/MM/yyyy", { locale: ptBR })}`
+                  : "Plano ativo"
+                }
+              </p>
+              <div className="flex justify-end mt-4">
+                <Button
+                  className="rounded-full bg-primary-foreground text-primary gap-2 font-bold text-sm shadow-lg hover:bg-primary-foreground/90"
+                  onClick={() => navigate("/dashboard/plans")}
+                >
+                  <CreditCard className="w-4 h-4" /> Pagar Agora
+                </Button>
+              </div>
             </div>
           </motion.div>
         )}
 
-        {/* ═══ CARTÃO ═══ */}
+        {/* ═══ CARD VISUAL ═══ */}
         {!loading && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-bold text-foreground">Meus Cartões</h2>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <CreditCard className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <h2 className="text-base font-bold text-foreground">Meus Cartões</h2>
+              </div>
               <button className="text-sm font-semibold text-primary">+ Novo</button>
             </div>
             {/* Physical card */}
-            <div className="rounded-2xl bg-gradient-to-br from-[hsl(240,30%,12%)] to-[hsl(240,25%,18%)] p-5 text-white mb-3">
-              <div className="flex items-center justify-between mb-8">
-                <Wifi className="w-6 h-6 text-white/60 rotate-90" />
-                <CreditCard className="w-6 h-6 text-white/60" />
-              </div>
-              <p className="text-lg font-semibold tracking-[0.2em] font-mono">
-                •••• •••• •••• 8821
-              </p>
-              <div className="flex items-center justify-between mt-4">
-                <p className="text-xs text-white/70 uppercase tracking-wider">Titular</p>
-                <p className="text-xs text-white/70">12/28</p>
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(240,30%,12%)] to-[hsl(240,25%,20%)] p-5 text-white shadow-[0_8px_32px_rgba(0,0,0,0.2)]">
+              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent" />
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-8">
+                  <Wifi className="w-6 h-6 text-white/50 rotate-90" />
+                  <Sparkles className="w-5 h-5 text-white/30" />
+                </div>
+                <p className="text-lg font-semibold tracking-[0.25em] font-mono">
+                  •••• •••• •••• 8821
+                </p>
+                <div className="flex items-center justify-between mt-4">
+                  <p className="text-xs text-white/50 uppercase tracking-wider">Titular</p>
+                  <p className="text-xs text-white/50">12/28</p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* ═══ HISTÓRICO DE PAGAMENTOS ═══ */}
+        {/* ═══ PAYMENT HISTORY ═══ */}
         {!loading && subs.length > 0 && (
           <div>
-            <h2 className="text-lg font-bold text-foreground mb-3">Histórico de Pagamentos</h2>
-            <div className="space-y-3">
-              {subs.map((s, i) => {
-                const cfg = statusConfig[s.status] ?? statusConfig.expired;
-                return (
-                  <motion.div
-                    key={s.id}
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.04 }}
-                    className="flex items-center gap-4 p-4 bg-card rounded-2xl border border-border/30"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-success/10 flex items-center justify-center shrink-0">
-                      <CheckCircle2 className="w-5 h-5 text-success" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[15px] font-semibold text-foreground">{s.plan_name}</p>
-                      <p className="text-[13px] text-muted-foreground">
-                        {format(new Date(s.created_at), "dd/MM/yyyy", { locale: ptBR })}
-                        {s.payment_method && ` · ${s.payment_method === "credit_card" ? "Cartão" : s.payment_method === "pix" ? "PIX" : s.payment_method}`}
-                      </p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-base font-bold text-foreground">R$ {Number(s.plan_price).toFixed(2)}</p>
-                      <button
-                        className="text-[13px] font-semibold text-primary"
-                        onClick={() => generateReceipt(s)}
-                      >
-                        Ver Recibo
-                      </button>
-                    </div>
-                  </motion.div>
-                );
-              })}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-7 h-7 rounded-lg bg-success/10 flex items-center justify-center">
+                <CheckCircle2 className="w-3.5 h-3.5 text-success" />
+              </div>
+              <h2 className="text-base font-bold text-foreground">Histórico de Pagamentos</h2>
+            </div>
+            <div className="space-y-2.5">
+              {subs.map((s, i) => (
+                <motion.div
+                  key={s.id}
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  className="relative overflow-hidden flex items-center gap-4 p-4 bg-card rounded-2xl border border-border/20 shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-[0_2px_8px_rgba(0,0,0,0.06)] transition-shadow"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-5 h-5 text-success" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[14px] font-semibold text-foreground">{s.plan_name}</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">
+                      {format(new Date(s.created_at), "dd/MM/yyyy", { locale: ptBR })}
+                      {s.payment_method && ` · ${s.payment_method === "credit_card" ? "Cartão" : s.payment_method === "pix" ? "PIX" : s.payment_method}`}
+                    </p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-[15px] font-bold text-foreground tabular-nums">R$ {Number(s.plan_price).toFixed(2)}</p>
+                    <button
+                      className="text-[12px] font-semibold text-primary flex items-center gap-0.5 ml-auto"
+                      onClick={() => generateReceipt(s)}
+                    >
+                      Recibo <ArrowRight className="w-3 h-3" />
+                    </button>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         )}
@@ -203,12 +214,12 @@ const PaymentHistory = () => {
         {/* ═══ EMPTY STATE ═══ */}
         {!loading && subs.length === 0 && (
           <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto rounded-full bg-muted/50 flex items-center justify-center mb-3">
-              <CreditCard className="w-8 h-8 text-muted-foreground/40" />
+            <div className="w-16 h-16 mx-auto rounded-2xl bg-muted/50 flex items-center justify-center mb-4">
+              <CreditCard className="w-7 h-7 text-muted-foreground/40" />
             </div>
             <p className="font-bold text-foreground mb-1">Nenhum pagamento</p>
-            <p className="text-sm text-muted-foreground mb-4">Seus pagamentos aparecerão aqui</p>
-            <Button className="rounded-full" onClick={() => navigate("/dashboard/plans")}>
+            <p className="text-[13px] text-muted-foreground mb-5">Seus pagamentos aparecerão aqui</p>
+            <Button className="rounded-full shadow-lg" onClick={() => navigate("/dashboard/plans")}>
               Ver planos disponíveis
             </Button>
           </div>
@@ -216,22 +227,30 @@ const PaymentHistory = () => {
 
         {/* ═══ SECURITY CARD ═══ */}
         {!loading && subs.length > 0 && (
-          <div className="rounded-2xl p-4 flex items-center gap-4" style={{ backgroundColor: "hsl(30, 100%, 97%)" }}>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="rounded-2xl p-5 flex items-center gap-4 bg-gradient-to-br from-warning/[0.06] to-warning/[0.02] border border-warning/15"
+          >
             <div className="flex-1">
-              <p className="text-[15px] font-bold text-foreground">Segurança em primeiro lugar</p>
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Todos os seus pagamentos são protegidos com criptografia de ponta a ponta.
+              <div className="flex items-center gap-2 mb-1.5">
+                <Shield className="w-4 h-4 text-warning" />
+                <p className="text-[14px] font-bold text-foreground">Segurança em primeiro lugar</p>
+              </div>
+              <p className="text-[13px] text-muted-foreground leading-relaxed">
+                Todos os pagamentos são protegidos com criptografia de ponta a ponta.
               </p>
             </div>
             <img src={mascotWave} alt="Pingo" className="w-20 h-20 object-contain shrink-0" loading="lazy" />
-          </div>
+          </motion.div>
         )}
 
         {/* ═══ LOADING ═══ */}
         {loading && (
           <div className="space-y-4">
-            <Skeleton className="h-40 rounded-2xl" />
-            <Skeleton className="h-32 rounded-2xl" />
+            <Skeleton className="h-44 rounded-2xl" />
+            <Skeleton className="h-36 rounded-2xl" />
             <Skeleton className="h-20 rounded-2xl" />
             <Skeleton className="h-20 rounded-2xl" />
           </div>
