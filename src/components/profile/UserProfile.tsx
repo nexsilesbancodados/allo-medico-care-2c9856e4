@@ -69,6 +69,8 @@ const UserProfile = () => {
   const [education, setEducation] = useState("");
   const [experienceYears, setExperienceYears] = useState(0);
   const [consultationPrice, setConsultationPrice] = useState(89);
+  const [priceMin, setPriceMin] = useState<number | null>(null);
+  const [priceMax, setPriceMax] = useState<number | null>(null);
   const isDoctor = roles.includes("doctor");
 
   useEffect(() => {
@@ -87,12 +89,31 @@ const UserProfile = () => {
   }, [profile, user]);
 
   const fetchDoctorProfile = async () => {
-    const { data } = await supabase.from("doctor_profiles").select("bio, education, experience_years, consultation_price").eq("user_id", user!.id).single();
+    const { data } = await supabase.from("doctor_profiles").select("id, bio, education, experience_years, consultation_price").eq("user_id", user!.id).single();
     if (data) {
       setBio(data.bio || "");
       setEducation(data.education || "");
       setExperienceYears(data.experience_years || 0);
       setConsultationPrice(Number(data.consultation_price) || 89);
+
+      // Fetch specialty price range
+      const { data: specData } = await supabase
+        .from("doctor_specialties")
+        .select("specialty_id")
+        .eq("doctor_id", data.id);
+      if (specData && specData.length > 0) {
+        const specIds = specData.map((s: any) => s.specialty_id);
+        const { data: specs } = await supabase
+          .from("specialties")
+          .select("price_min, price_max")
+          .in("id", specIds);
+        if (specs && specs.length > 0) {
+          const mins = (specs as any[]).map(s => s.price_min).filter((v: any) => v != null);
+          const maxs = (specs as any[]).map(s => s.price_max).filter((v: any) => v != null);
+          setPriceMin(mins.length > 0 ? Math.min(...mins) : null);
+          setPriceMax(maxs.length > 0 ? Math.max(...maxs) : null);
+        }
+      }
     }
   };
 
