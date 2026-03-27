@@ -48,20 +48,96 @@ const URLS = {
 // ─── Email wrapper ─────────────────────────────────────────────────────────────
 const BRAND = {
   color: "#1a6fc4",
+  colorDark: "#0f4c8a",
   green: "#22c55e",
+  greenDark: "#15803d",
   red: "#ef4444",
+  redDark: "#b91c1c",
   amber: "#f59e0b",
+  amberDark: "#d97706",
   bg: "#f8fafc",
   muted: "#666",
   border: "#e2e8f0",
 };
 
-const wrap = (body: string) => `
+const LOGO_URL = `https://oaixgmuocuwhsabidpei.supabase.co/storage/v1/object/public/email-assets/logo.png`;
+
+// Banner configs per email category
+const BANNERS: Record<string, { emoji: string; title: string; gradient: [string, string]; accent: string }> = {
+  appointment:    { emoji: "📅", title: "Consultas",        gradient: [BRAND.color, BRAND.colorDark],   accent: BRAND.color },
+  welcome:        { emoji: "🎉", title: "Bem-vindo(a)!",    gradient: [BRAND.color, "#2563eb"],          accent: BRAND.color },
+  welcome_doctor: { emoji: "🩺", title: "Portal Médico",    gradient: [BRAND.color, BRAND.colorDark],   accent: BRAND.color },
+  welcome_clinic: { emoji: "🏥", title: "Clínica",          gradient: [BRAND.color, BRAND.colorDark],   accent: BRAND.color },
+  approved:       { emoji: "✅", title: "Aprovado!",         gradient: [BRAND.green, BRAND.greenDark],   accent: BRAND.green },
+  rejected:       { emoji: "❌", title: "Atualização",       gradient: [BRAND.red, BRAND.redDark],       accent: BRAND.red },
+  prescription:   { emoji: "💊", title: "Receita Médica",    gradient: [BRAND.color, "#7c3aed"],         accent: BRAND.color },
+  certificate:    { emoji: "📋", title: "Documento Médico",  gradient: [BRAND.color, BRAND.colorDark],   accent: BRAND.color },
+  payment:        { emoji: "💳", title: "Financeiro",        gradient: [BRAND.green, "#059669"],         accent: BRAND.green },
+  consultation:   { emoji: "📹", title: "Teleconsulta",      gradient: [BRAND.color, "#6366f1"],         accent: BRAND.color },
+  alert:          { emoji: "⚠️", title: "Atenção",          gradient: [BRAND.amber, BRAND.amberDark],   accent: BRAND.amber },
+  card:           { emoji: "💳", title: "Cartão Benefícios", gradient: [BRAND.green, "#10b981"],         accent: BRAND.green },
+  exam:           { emoji: "🔬", title: "Resultados",        gradient: [BRAND.color, "#0ea5e9"],         accent: BRAND.color },
+  invite:         { emoji: "🔑", title: "Convite",           gradient: [BRAND.green, BRAND.color],       accent: BRAND.color },
+  survey:         { emoji: "⭐", title: "Avaliação",          gradient: [BRAND.amber, "#f97316"],         accent: BRAND.amber },
+  default:        { emoji: "💙", title: "AloClínica",        gradient: [BRAND.color, BRAND.colorDark],   accent: BRAND.color },
+};
+
+const banner = (category: string) => {
+  const b = BANNERS[category] || BANNERS.default;
+  return `
+    <div style="background:linear-gradient(135deg,${b.gradient[0]},${b.gradient[1]});border-radius:16px 16px 0 0;padding:28px 32px 24px;text-align:center;margin:-32px -32px 24px -32px;">
+      <img src="${LOGO_URL}" alt="AloClínica" width="140" height="auto" style="display:block;margin:0 auto 12px;max-width:140px;" />
+      <div style="font-size:36px;margin-bottom:4px;">${b.emoji}</div>
+      <h1 style="color:white;font-size:20px;font-weight:700;margin:0;letter-spacing:0.5px;">${b.title}</h1>
+    </div>`;
+};
+
+// Map template type → banner category
+const TEMPLATE_BANNER: Record<string, string> = {
+  appointment_confirmation: "appointment",
+  appointment_reminder: "appointment",
+  appointment_cancelled: "alert",
+  appointment_rescheduled: "alert",
+  prescription_sent: "prescription",
+  certificate_sent: "certificate",
+  welcome: "welcome",
+  welcome_doctor: "welcome_doctor",
+  welcome_clinic: "welcome_clinic",
+  doctor_approved: "approved",
+  doctor_rejected: "rejected",
+  clinic_approved: "approved",
+  clinic_rejected: "rejected",
+  affiliate_approved: "approved",
+  affiliate_rejected: "rejected",
+  consultation_started: "consultation",
+  consultation_completed: "consultation",
+  document_uploaded: "certificate",
+  password_reset: "default",
+  subscription_activated: "payment",
+  subscription_expiring: "alert",
+  payment_confirmed: "payment",
+  exam_report_ready: "exam",
+  card_activated: "card",
+  card_expiring: "alert",
+  refund_processed: "payment",
+  renewal_approved: "approved",
+  renewal_rejected: "rejected",
+  no_show_fee: "alert",
+  doctor_invite_code: "invite",
+  b2b_lead_received: "default",
+  nps_survey: "survey",
+  waitlist_slot_available: "approved",
+};
+
+const wrap = (body: string, templateType = "default") => {
+  const bannerHtml = banner(TEMPLATE_BANNER[templateType] || "default");
+  return `
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f1f5f9;">
-  <div style="font-family:'Segoe UI',Roboto,Arial,sans-serif;max-width:600px;margin:24px auto;padding:32px;background:${BRAND.bg};border-radius:16px;border:1px solid ${BRAND.border};">
+  <div style="font-family:'Segoe UI',Roboto,Arial,sans-serif;max-width:600px;margin:24px auto;padding:32px;background:${BRAND.bg};border-radius:16px;border:1px solid ${BRAND.border};overflow:hidden;">
+    ${bannerHtml}
     ${body}
     <hr style="border:none;border-top:1px solid ${BRAND.border};margin:32px 0 16px;" />
     <p style="color:${BRAND.muted};font-size:11px;text-align:center;margin:0;">
@@ -71,6 +147,7 @@ const wrap = (body: string) => `
   </div>
 </body>
 </html>`;
+};
 
 const btn = (url: string, label: string, color = BRAND.color) =>
   `<div style="text-align:center;margin:24px 0;"><a href="${url}" style="display:inline-block;background:${color};color:white;padding:14px 32px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;">${label}</a></div>`;
