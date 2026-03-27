@@ -295,7 +295,26 @@ const UserProfile = () => {
               <div><Label>Formação</Label><Input value={education} onChange={e => setEducation(e.target.value)} placeholder="Ex: USP, Residência em Cardiologia" className="mt-1" /></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Anos de Experiência</Label><Input type="number" value={experienceYears} onChange={e => setExperienceYears(Number(e.target.value))} className="mt-1 h-11" min={0} /></div>
-                <div><Label>Preço da Consulta (R$)</Label><Input type="number" value={consultationPrice} onChange={e => setConsultationPrice(Number(e.target.value))} className="mt-1 h-11" min={0} step={0.01} /></div>
+                <div>
+                  <Label>Preço da Consulta (R$)</Label>
+                  <Input
+                    type="number"
+                    value={consultationPrice}
+                    onChange={e => setConsultationPrice(Number(e.target.value))}
+                    className="mt-1 h-11"
+                    min={priceMin ?? 0}
+                    max={priceMax ?? undefined}
+                    step={1}
+                  />
+                  {(priceMin !== null || priceMax !== null) && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Faixa permitida para sua especialidade:{" "}
+                      <span className="font-medium text-foreground">
+                        R$ {priceMin?.toFixed(0) ?? "—"} ~ R$ {priceMax?.toFixed(0) ?? "—"}
+                      </span>
+                    </p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>
