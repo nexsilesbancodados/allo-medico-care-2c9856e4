@@ -2,12 +2,15 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
 
+type AppRole = "patient" | "doctor" | "admin" | "support" | "laudista" | "clinic" | "receptionist";
+
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: "patient" | "doctor" | "admin" | "support" | "laudista";
+  requiredRole?: AppRole;
+  requiredRoles?: AppRole[];
 }
 
-const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, requiredRole, requiredRoles }: ProtectedRouteProps) => {
   const { user, roles, loading } = useAuth();
 
   if (loading) {
@@ -26,7 +29,16 @@ const ProtectedRoute = ({ children, requiredRole }: ProtectedRouteProps) => {
     return <Navigate to="/auth" replace />;
   }
 
-  if (requiredRole && !roles.includes(requiredRole) && !roles.includes("admin")) {
+  // Admin sempre passa
+  if (roles.includes("admin")) return <>{children}</>;
+
+  // Verificar role único
+  if (requiredRole && !roles.includes(requiredRole)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  // Verificar múltiplos roles (usuário precisa ter pelo menos um)
+  if (requiredRoles && !requiredRoles.some(r => roles.includes(r))) {
     return <Navigate to="/dashboard" replace />;
   }
 
