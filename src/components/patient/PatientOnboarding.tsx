@@ -139,6 +139,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
 
   const handleNext = async () => {
     if (step.id === "personal" || step.id === "health") await saveProfile();
+    if (step.id === "kyc" && (selfieFile || docFile)) await uploadKYCFiles();
     if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); onComplete(); }
     else setCurrentStep(prev => prev + 1);
   };
