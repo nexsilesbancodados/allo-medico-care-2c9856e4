@@ -86,7 +86,9 @@ const banner = (category: string) => {
   const b = BANNERS[category] || BANNERS.default;
   return `
     <div style="background:linear-gradient(135deg,${b.gradient[0]},${b.gradient[1]});border-radius:16px 16px 0 0;padding:28px 32px 24px;text-align:center;margin:-32px -32px 24px -32px;">
-      <img src="${LOGO_URL}" alt="AloClínica" width="140" height="auto" style="display:block;margin:0 auto 12px;max-width:140px;" />
+      <div style="margin-bottom:10px;">
+        <span style="color:white;font-size:24px;font-weight:800;letter-spacing:1px;">Alo</span><span style="color:#a5d6ff;font-size:24px;font-weight:800;letter-spacing:1px;">Clínica</span>
+      </div>
       <div style="font-size:36px;margin-bottom:4px;">${b.emoji}</div>
       <h1 style="color:white;font-size:20px;font-weight:700;margin:0;letter-spacing:0.5px;">${b.title}</h1>
     </div>`;
