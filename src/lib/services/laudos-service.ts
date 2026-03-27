@@ -13,6 +13,8 @@ export interface AlocExame {
   orthanc_study_uid: string | null;
   orthanc_study_url: string | null;
   created_at: string;
+  // joined
+  paciente_nome?: string;
 }
 
 export interface AlocLaudo {
@@ -41,6 +43,31 @@ export async function fetchExamesParaLaudar() {
     .order("created_at", { ascending: true });
   if (error) { logError("fetchExamesParaLaudar", error); throw error; }
   return data as AlocExame[];
+}
+
+export async function fetchExamesConcluidos(dias = 7) {
+  const since = new Date(Date.now() - dias * 86400000).toISOString();
+  const { data, error } = await (supabase as any)
+    .from("aloc_exames")
+    .select("*")
+    .eq("status", "concluido")
+    .gte("created_at", since)
+    .order("created_at", { ascending: false });
+  if (error) { logError("fetchExamesConcluidos", error); throw error; }
+  return data as AlocExame[];
+}
+
+export async function fetchNomesPacientes(ids: string[]): Promise<Record<string, string>> {
+  if (!ids.length) return {};
+  const { data } = await supabase
+    .from("profiles")
+    .select("user_id, first_name, last_name")
+    .in("user_id", ids);
+  const map: Record<string, string> = {};
+  (data ?? []).forEach((p: any) => {
+    map[p.user_id] = `${p.first_name ?? ""} ${p.last_name ?? ""}`.trim() || "Paciente";
+  });
+  return map;
 }
 
 export async function fetchExamePorId(id: string) {
