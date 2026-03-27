@@ -169,8 +169,8 @@ const AuthPaciente = () => {
           });
         } catch {}
 
-        toast.success("Conta criada! ✅", { description: "Redirecionando..." });
-        setTimeout(() => navigate("/dashboard"), 1500);
+        toast.success("Conta criada! ✅", { description: "Vamos completar seu perfil..." });
+        setTimeout(() => navigate("/dashboard?role=patient&onboarding=true"), 1500);
       }
     } catch (err) {
       logError("handleSignup error", err);
