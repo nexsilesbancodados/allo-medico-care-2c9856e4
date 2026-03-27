@@ -13,7 +13,7 @@ interface EmailRequest {
 }
 
 // ─── URL Constants ─────────────────────────────────────────────────────────────
-const BASE_URL = Deno.env.get("SITE_URL") || "https://aloclinica.com.br";
+const BASE_URL = Deno.env.get("SITE_URL") || "https://allo-medico-care.lovable.app";
 
 const URLS = {
   // Patient routes
