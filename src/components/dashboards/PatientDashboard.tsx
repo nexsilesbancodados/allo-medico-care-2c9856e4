@@ -55,7 +55,9 @@ const PatientDashboard = () => {
   const { profile, user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [searchParams] = useSearchParams();
+  const forceOnboarding = searchParams.get("onboarding") === "true";
+  const [showOnboarding, setShowOnboarding] = useState(forceOnboarding);
   const [onboardingDone] = useLocalStorage<boolean>(ONBOARDING_KEY, false);
 
   const { data: stats, isLoading: statsLoading } = usePatientStats();
