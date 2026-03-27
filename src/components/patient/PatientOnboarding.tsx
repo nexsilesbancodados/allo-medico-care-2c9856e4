@@ -313,8 +313,9 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
                 </div>
               ) : (
                 <label className="flex flex-col items-center justify-center h-32 rounded-xl border-2 border-dashed border-border/60 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-colors">
-                  <Upload className="w-6 h-6 text-muted-foreground/50 mb-2" />
-                  <p className="text-xs text-muted-foreground font-medium">Enviar documento</p>
+                  <Camera className="w-6 h-6 text-muted-foreground/50 mb-2" />
+                  <p className="text-xs text-muted-foreground font-medium">Fotografar documento</p>
+                  <p className="text-[10px] text-muted-foreground/60">Câmera traseira obrigatória</p>
                   <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleFileSelect(e, "doc")} />
                 </label>
               )}
