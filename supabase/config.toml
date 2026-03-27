@@ -49,6 +49,9 @@ verify_jwt = false
 [functions.medical-autocomplete]
 verify_jwt = false
 
+[functions.docuseal-webhook]
+verify_jwt = false
+
 [functions.symptom-triage]
 verify_jwt = false
 
