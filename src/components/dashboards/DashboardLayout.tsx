@@ -9,7 +9,10 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, User, Settings, MoreHorizontal, Search, Menu, ShieldCheck, ChevronDown, Download, X, Smartphone, PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import {
+  SignOut, User, GearSix, List, MagnifyingGlass, ShieldCheck as ShieldCheckIcon,
+  CaretDown, DownloadSimple, X as XIcon, DeviceMobile, SidebarSimple, ArrowLineLeft,
+} from "@phosphor-icons/react";
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
 import GlobalCommand from "@/components/GlobalCommand";
@@ -141,7 +144,7 @@ const PWABanner = ({ role }: { role: string }) => {
             <div className="relative bg-card/96 backdrop-blur-2xl m-[1px] rounded-[15px] p-4">
               <div className="flex items-center gap-3">
                 <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${grad} flex items-center justify-center shrink-0 shadow-lg`}>
-                  <Smartphone className="w-5 h-5 text-white" aria-hidden="true" />
+                  <DeviceMobile className="w-5 h-5 text-white" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-bold text-foreground">Instalar AloClínica</p>
@@ -153,14 +156,14 @@ const PWABanner = ({ role }: { role: string }) => {
                   {!isIOS && (
                     <Button size="sm" onClick={install}
                       className="h-8 px-3 rounded-xl text-xs font-bold gap-1.5 bg-gradient-to-r from-primary to-secondary text-white border-0 shadow-md">
-                      <Download className="w-3.5 h-3.5" aria-hidden="true" />
+                      <DownloadSimple className="w-3.5 h-3.5" aria-hidden="true" />
                       Instalar
                     </Button>
                   )}
                   <button onClick={dismiss}
                     className="w-7 h-7 rounded-full flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors"
                     aria-label="Dispensar">
-                    <X className="w-3.5 h-3.5" aria-hidden="true" />
+                    <XIcon className="w-3.5 h-3.5" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -214,25 +217,22 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const bottomNav = nav?.slice(0, BOTTOM_COUNT) ?? [];
   const moreNav  = nav && nav.length > BOTTOM_COUNT ? nav.slice(BOTTOM_COUNT) : [];
 
-  // GSAP sidebar entrance — only on first mount (no dep on nav to avoid flicker)
-  const sidebarAnimated = useRef(false);
+  // CSS-only entrance — no GSAP import needed, saves ~30KB dynamic load
   useEffect(() => {
-    if (sidebarAnimated.current || !sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    sidebarAnimated.current = true;
+    if (!sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const items = sidebarRef.current.querySelectorAll(".nav-item");
-    import("gsap").then(({ default: gsap }) => {
-      gsap.fromTo(items, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.035, ease: "power2.out", clearProps: "transform,opacity" });
-    }).catch(() => {});
+    items.forEach((el, i) => {
+      (el as HTMLElement).style.opacity = "0";
+      (el as HTMLElement).style.transform = "translateX(-8px)";
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          (el as HTMLElement).style.transition = "opacity 0.25s ease-out, transform 0.25s ease-out";
+          (el as HTMLElement).style.opacity = "1";
+          (el as HTMLElement).style.transform = "translateX(0)";
+        }, i * 30);
+      });
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // GSAP header entrance
-  useEffect(() => {
-    if (!headerRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const el = headerRef.current;
-    import("gsap").then(({ default: gsap }) => {
-      gsap.fromTo(el, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", clearProps: "transform,opacity" });
-    }).catch(() => {});
   }, []);
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => {
@@ -286,7 +286,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         <div className="px-3 pb-1 shrink-0">
           <button onClick={() => { navigate("/dashboard"); onItemClick?.(); }}
             className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-destructive bg-destructive/8 hover:bg-destructive/15 transition-all duration-200">
-            <ShieldCheck className="w-3 h-3" /> Voltar ao Admin
+            <ShieldCheckIcon className="w-3 h-3" /> Voltar ao Admin
           </button>
         </div>
       )}
@@ -377,7 +377,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-white/90 hover:bg-white/15" aria-label="Abrir menu">
-                  <Menu className="w-5 h-5" aria-hidden="true" />
+                  <List className="w-5 h-5" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-[85vw] max-w-[340px] border-border/20 bg-background flex flex-col h-full">
@@ -421,11 +421,11 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                   <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                  <Settings className="h-4 w-4 text-muted-foreground" /> Configurações
+                  <GearSix className="h-4 w-4 text-muted-foreground" /> Configurações
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-border/15" />
                 <DropdownMenuItem onClick={handleSignOut} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2 text-destructive focus:text-destructive focus:bg-destructive/8">
-                  <LogOut className="h-4 w-4" /> Sair
+                  <SignOut className="h-4 w-4" /> Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -438,7 +438,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="lg:hidden h-9 w-9 rounded-xl" aria-label="Abrir menu">
-                  <Menu className="w-4.5 h-4.5" aria-hidden="true" />
+                  <List className="w-4.5 h-4.5" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="p-0 w-[280px] border-border/20 bg-background flex flex-col h-full">
@@ -457,7 +457,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true }))}
             className="flex flex-1 max-w-xs items-center gap-2 px-3 py-1.5 rounded-xl bg-muted/50 hover:bg-muted/80 text-xs text-muted-foreground transition-all group"
             aria-label="Buscar">
-            <Search className="w-3.5 h-3.5 group-hover:text-foreground transition-colors shrink-0" aria-hidden="true" />
+            <MagnifyingGlass className="w-3.5 h-3.5 group-hover:text-foreground transition-colors shrink-0" aria-hidden="true" />
             <span className="flex-1 text-left">Buscar...</span>
             <kbd className="font-mono text-[10px] bg-background border border-border/40 rounded px-1.5 py-0.5 leading-none">⌘K</kbd>
           </button>
@@ -468,7 +468,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
             <Button variant="outline" size="sm"
               className="h-7 text-xs gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/8 rounded-xl"
               onClick={() => navigate("/dashboard")}>
-              <ShieldCheck className="w-3.5 h-3.5" aria-hidden="true" /> Admin
+              <ShieldCheckIcon className="w-3.5 h-3.5" aria-hidden="true" /> Admin
             </Button>
           )}
 
@@ -487,7 +487,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                     <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-[hsl(var(--success))] border-[1.5px] border-background" aria-hidden="true" />
                   </div>
                   <span className="text-xs font-medium text-foreground max-w-[90px] truncate">{profile?.first_name ?? "Usuário"}</span>
-                  <ChevronDown className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
+                  <CaretDown className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-2xl border-border/30 shadow-xl p-1.5">
@@ -506,11 +506,11 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                   <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                  <Settings className="h-4 w-4 text-muted-foreground" /> Configurações
+                  <GearSix className="h-4 w-4 text-muted-foreground" /> Configurações
                 </DropdownMenuItem>
                 <DropdownMenuSeparator className="bg-border/15" />
                 <DropdownMenuItem onClick={handleSignOut} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2 text-destructive focus:text-destructive focus:bg-destructive/8">
-                  <LogOut className="h-4 w-4" /> Sair
+                  <SignOut className="h-4 w-4" /> Sair
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -533,8 +533,8 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                 className="w-full flex items-center justify-center gap-2 px-2 py-1.5 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all duration-200 text-[11px]"
               >
                 {sidebarCollapsed
-                  ? <PanelLeftOpen className="w-4 h-4 shrink-0" />
-                  : <><PanelLeftClose className="w-4 h-4 shrink-0" /><span>Encolher</span></>
+                  ? <SidebarSimple className="w-4 h-4 shrink-0" />
+                  : <><ArrowLineLeft className="w-4 h-4 shrink-0" /><span>Encolher</span></>
                 }
               </button>
             </div>
