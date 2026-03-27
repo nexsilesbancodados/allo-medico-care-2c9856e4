@@ -1220,7 +1220,7 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
         {/* Video area */}
         <div className={splitMode && isDoctor && !isMobile ? "w-1/2" : "flex-1"} style={{ minHeight: 0 }}>
           <VideoErrorBoundary onEndCall={endCall}>
-            {jitsiRoomId ? (
+            {useJitsi && jitsiRoomId ? (
               <JitsiRoom
                 roomId={jitsiRoomId}
                 displayName={currentUserName}
