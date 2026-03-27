@@ -47,28 +47,11 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const [conditionInput, setConditionInput] = useState("");
   const [kycCompleted, setKycCompleted] = useState(false);
 
-  const handleKycCameraComplete = async (selfieBlob: Blob, docBlob: Blob) => {
-    if (!user) return;
-    setSaving(true);
-    try {
-      await supabase.storage.from("avatars").upload(`${user.id}/kyc-selfie.jpg`, selfieBlob, { upsert: true, contentType: "image/jpeg" });
-      await supabase.storage.from("avatars").upload(`${user.id}/kyc-document.jpg`, docBlob, { upsert: true, contentType: "image/jpeg" });
-      if (!profile?.avatar_url) {
-        const path = `${user.id}/avatar.jpg`;
-        await supabase.storage.from("avatars").upload(path, selfieBlob, { upsert: true, contentType: "image/jpeg" });
-        const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(path);
-        await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("user_id", user.id);
-      }
-      localStorage.removeItem(KYC_PENDING_KEY);
-      setKycCompleted(true);
-      toast.success("Verificação enviada! ✅");
-    } catch {
-      toast.error("Erro ao enviar", { description: "Tente novamente." });
-    }
-    setSaving(false);
+  const handleKycStarted = () => {
+    // Didit opens in new tab — mark as started
+    setKycCompleted(true);
+    localStorage.removeItem(KYC_PENDING_KEY);
   };
-
-  // uploadKYCFiles no longer needed — handled by handleKycCameraComplete
 
   useEffect(() => {
     if (user) {
@@ -223,16 +206,16 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
               <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-lg font-bold text-foreground">Verificação Concluída!</h2>
-              <p className="text-xs text-muted-foreground">Seus documentos foram enviados com sucesso.</p>
+              <h2 className="text-lg font-bold text-foreground">Verificação Iniciada!</h2>
+              <p className="text-xs text-muted-foreground">Complete o processo na aba que foi aberta. Você pode continuar o cadastro.</p>
             </div>
           );
         }
 
         return (
-          <PatientKYCCapture
-            onComplete={handleKycCameraComplete}
-            compact
+          <DiditKYCButton
+            onSessionCreated={handleKycStarted}
+            variant="full"
           />
         );
       }
