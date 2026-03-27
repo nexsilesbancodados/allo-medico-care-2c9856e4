@@ -324,7 +324,7 @@ const PatientHealth = () => {
                     </div>
                     {mt.trend && (
                       <div className={`flex items-center gap-0.5 text-[10px] font-medium ${
-                        mt.trend.direction === "up" ? "text-rose-500" : mt.trend.direction === "down" ? "text-blue-500" : "text-muted-foreground"
+                        mt.trend.direction === "up" ? "text-destructive" : mt.trend.direction === "down" ? "text-primary" : "text-muted-foreground"
                       }`}>
                         {mt.trend.direction === "up" ? <TrendingUp className="w-3 h-3" /> :
                          mt.trend.direction === "down" ? <TrendingDown className="w-3 h-3" /> :
