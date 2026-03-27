@@ -257,7 +257,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <li>Receber receitas e atestados digitais</li>
       </ul>
       ${btn(URLS.patientDashboard, "Acessar Painel")}
-    `),
+    `, "welcome"),
   }),
 
   welcome_doctor: (d) => ({
@@ -375,7 +375,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Olá <strong>${d.patient_name}</strong>,</p>
       <p><strong>${d.doctor_name}</strong> já está na sala de consulta virtual.</p>
       ${btn(d.consultation_url || "#", "Entrar na Consulta 📹")}
-    `),
+    `, "consultation_started"),
   }),
 
   consultation_completed: (d) => ({
@@ -576,7 +576,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       </div>
       ${btn(d.register_url || URLS.doctorAuth, "Completar Cadastro")}
       <p style="color:${BRAND.muted};font-size:13px;">Este código é de uso único. Não compartilhe com terceiros.</p>
-    `),
+    `, "doctor_invite_code"),
   }),
 
   b2b_lead_received: (d) => ({
@@ -600,7 +600,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Olá <strong>${d.patient_name || "Paciente"}</strong>,</p>
       <p>Sua opinião é muito importante! Avalie sua consulta com <strong>${d.doctor_name || "o médico"}</strong>.</p>
       ${btn(d.survey_url || URLS.patientDashboard, "Avaliar Agora ⭐")}
-    `),
+    `, "nps_survey"),
   }),
 
   waitlist_slot_available: (d) => ({
