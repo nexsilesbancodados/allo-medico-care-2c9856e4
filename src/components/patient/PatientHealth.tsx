@@ -492,12 +492,12 @@ const PatientHealth = () => {
               <Card key={p.id} className="border-border/50 shadow-sm overflow-hidden">
                 <CardContent className="p-0">
                   <div className="flex items-stretch">
-                    <div className="w-1 bg-gradient-to-b from-emerald-500 to-emerald-500/30 shrink-0" />
+                    <div className="w-1 bg-gradient-to-b from-secondary to-secondary/30 shrink-0" />
                     <div className="flex-1 p-3.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
-                            <Pill className="w-4 h-4 text-emerald-500" />
+                          <div className="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center shrink-0">
+                            <Pill className="w-4 h-4 text-secondary" />
                           </div>
                           <div>
                             <p className="text-sm font-semibold text-foreground leading-tight">{p.diagnosis || "Receita médica"}</p>
@@ -528,12 +528,12 @@ const PatientHealth = () => {
               <Card key={d.id} className="border-border/50 shadow-sm overflow-hidden">
                 <CardContent className="p-0">
                   <div className="flex items-stretch">
-                    <div className="w-1 bg-gradient-to-b from-violet-500 to-violet-500/30 shrink-0" />
+                    <div className="w-1 bg-gradient-to-b from-primary to-primary/30 shrink-0" />
                     <div className="flex-1 p-3.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
-                            <FileText className="w-4 h-4 text-violet-500" />
+                          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <FileText className="w-4 h-4 text-primary" />
                           </div>
                           <div>
                             <p className="text-sm font-medium text-foreground">{d.description || d.file_name}</p>
