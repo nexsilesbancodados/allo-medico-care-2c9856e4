@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { STALE } from "@/lib/constants";
-import type { AdminAppointmentRow, ApprovalItem, SubscriptionRow } from "@/types/domain";
+import type { AdminAppointmentRow, ApprovalItem } from "@/types/domain";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -10,7 +10,7 @@ export interface AdminKpiData {
   total_doctors: number;
   total_appointments: number;
   total_revenue: number;
-  active_subscriptions: number;
+  
   pending_approvals: number;
   today_appointments: number;
   waiting_queue: number;
@@ -23,12 +23,11 @@ export function useAdminKpis() {
   return useQuery({
     queryKey: ["admin-kpis"],
     queryFn: async (): Promise<AdminKpiData> => {
-      const [patients, doctors, appts, subs, pendingDocs, todayAppts, queue] =
+      const [patients, doctors, appts, pendingDocs, todayAppts, queue] =
         await Promise.all([
           supabase.from("user_roles").select("id", { count: "exact", head: true }).eq("role", "patient"),
           supabase.from("doctor_profiles").select("id", { count: "exact", head: true }).eq("is_approved", true),
           supabase.from("appointments").select("id", { count: "exact", head: true }),
-          supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
           supabase.from("doctor_profiles").select("id", { count: "exact", head: true }).is("is_approved", null),
           supabase.from("appointments").select("id", { count: "exact", head: true })
             .gte("scheduled_at", new Date().toISOString().split("T")[0])
@@ -52,7 +51,7 @@ export function useAdminKpis() {
         total_doctors: doctors.count ?? 0,
         total_appointments: appts.count ?? 0,
         total_revenue,
-        active_subscriptions: subs.count ?? 0,
+        
         pending_approvals: pendingDocs.count ?? 0,
         today_appointments: todayAppts.count ?? 0,
         waiting_queue: queue.count ?? 0,
@@ -98,21 +97,3 @@ export function useAdminLiveAppointments() {
   });
 }
 
-/** Fetch expiring subscriptions */
-export function useAdminExpiringSubscriptions() {
-  return useQuery({
-    queryKey: ["admin-expiring-subs"],
-    queryFn: async (): Promise<SubscriptionRow[]> => {
-      const sevenDays = new Date(Date.now() + 7 * 86400000).toISOString();
-      const { data } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("status", "active")
-        .lt("ends_at", sevenDays)
-        .order("ends_at", { ascending: true })
-        .limit(10);
-      return (data ?? []) as SubscriptionRow[];
-    },
-    staleTime: STALE.LONG,
-  });
-}

@@ -23,7 +23,6 @@ const InfoBannerStrip = lazy(() => import("@/components/landing/InfoBannerStrip"
 const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
 const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection"));
 
-const PlansSection = lazy(() => import("@/components/landing/PlansSection"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
 const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
 const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
@@ -169,10 +168,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           mascotSrc={bannerConsulta}
           variant="diagonal"
         />
-      </DeferredSection>
-
-      <DeferredSection fallbackClassName="h-[720px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-        <PlansSection />
       </DeferredSection>
 
       <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">

@@ -1,4 +1,4 @@
-import { Users, Stethoscope, Building2, Calendar, Shield, CreditCard, FileText, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet, Tag, ClipboardList, Server } from "lucide-react";
+import { Users, Stethoscope, Building2, Calendar, Shield, History, KeyRound, TrendingUp, UserCog, UserCheck, Star, MessageCircle, SlidersHorizontal, Video, LayoutGrid, Wallet, Tag, ClipboardList, Server } from "lucide-react";
 import { NavIcon } from "@/components/ui/nav-icon";
 
 export const getAdminNav = (active: string) => [
@@ -14,8 +14,6 @@ export const getAdminNav = (active: string) => [
   { label: "Médicos", href: "/dashboard/admin/doctors?role=admin", icon: <NavIcon icon={<Stethoscope className="w-3.5 h-3.5" />} color="emerald" />, active: active === "doctors", group: "Gestão" },
   { label: "Clínicas", href: "/dashboard/admin/clinics?role=admin", icon: <NavIcon icon={<Building2 className="w-3.5 h-3.5" />} color="orange" />, active: active === "clinics", group: "Gestão" },
   { label: "Consultas", href: "/dashboard/admin/appointments?role=admin", icon: <NavIcon icon={<Calendar className="w-3.5 h-3.5" />} color="blue" />, active: active === "appointments", group: "Operações" },
-  { label: "Planos", href: "/dashboard/admin/plans?role=admin", icon: <NavIcon icon={<CreditCard className="w-3.5 h-3.5" />} color="green" />, active: active === "plans", group: "Operações" },
-  { label: "Assinaturas", href: "/dashboard/admin/subscriptions?role=admin", icon: <NavIcon icon={<FileText className="w-3.5 h-3.5" />} color="purple" />, active: active === "subscriptions", group: "Operações" },
   { label: "Especialidades", href: "/dashboard/admin/specialties?role=admin", icon: <NavIcon icon={<Shield className="w-3.5 h-3.5" />} color="cyan" />, active: active === "specialties", group: "Operações" },
   { label: "Códigos de Convite", href: "/dashboard/admin/invite-codes?role=admin", icon: <NavIcon icon={<KeyRound className="w-3.5 h-3.5" />} color="amber" />, active: active === "invite-codes", group: "Sistema" },
   { label: "Cupons", href: "/dashboard/admin/coupons?role=admin", icon: <NavIcon icon={<Tag className="w-3.5 h-3.5" />} color="orange" />, active: active === "coupons", group: "Operações" },
