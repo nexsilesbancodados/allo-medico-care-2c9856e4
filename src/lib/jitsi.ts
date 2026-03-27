@@ -5,7 +5,7 @@
 export const JITSI_BASE_URL = "https://meet.telemedicinaaloclinica.sbs";
 
 export function gerarRoomId(appointmentId: string): string {
-  return `consulta-${appointmentId}-${Date.now()}`;
+  return `consulta-${appointmentId}`;
 }
 
 export function getJitsiUrl(roomId: string, displayName: string): string {
@@ -15,8 +15,11 @@ export function getJitsiUrl(roomId: string, displayName: string): string {
     "config.startWithVideoMuted=false",
     "config.prejoinPageEnabled=false",
     "config.disableDeepLinking=true",
+    "config.enableWelcomePage=false",
+    "config.enableClosePage=false",
     "interfaceConfig.SHOW_JITSI_WATERMARK=false",
-    'interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","hangup","chat","tileview"]',
+    "interfaceConfig.SHOW_BRAND_WATERMARK=false",
+    'interfaceConfig.TOOLBAR_BUTTONS=["microphone","camera","hangup","chat","tileview","fullscreen"]',
   ].join("&");
 
   return `${JITSI_BASE_URL}/${roomId}?userInfo.displayName=${encodedName}#${configParams}`;

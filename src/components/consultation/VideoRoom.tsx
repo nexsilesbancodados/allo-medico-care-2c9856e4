@@ -55,6 +55,7 @@ const VideoRoom = () => {
   const [deviceChecked, setDeviceChecked] = useState(true);
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [doctorBusy, setDoctorBusy] = useState(false);
+  const [useJitsi, setUseJitsi] = useState(false);
   const [jitsiRoomId, setJitsiRoomId] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
 
@@ -362,15 +363,23 @@ const VideoRoom = () => {
     setAppointment(data);
 
     if (isDoctor) {
-      // Generate Jitsi room ID and save to appointment
-      const newRoomId = gerarRoomId(appointmentId ?? '');
-      setJitsiRoomId(newRoomId);
-      await supabase.from("appointments").update({ status: "in_progress", jitsi_room_id: newRoomId } as any).eq("id", appointmentId ?? '');
+      // Check if doctor previously opted into Jitsi for this appointment
+      const savedJitsi = localStorage.getItem(`jitsi_${appointmentId}`);
+      if (savedJitsi === 'true') {
+        setUseJitsi(true);
+        const newRoomId = gerarRoomId(appointmentId ?? '');
+        setJitsiRoomId(newRoomId);
+      }
+      await supabase.from("appointments").update({ status: "in_progress" } as any).eq("id", appointmentId ?? '');
       const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
       notifyConsultationStarted(appointmentId ?? '', docName).catch(err => logError("notifyConsultationStarted failed", err));
     } else {
-      // Patient: fetch existing jitsi_room_id
-      setJitsiRoomId((data as any).jitsi_room_id || null);
+      // Patient: check if doctor enabled Jitsi for this consultation
+      const existingRoomId = (data as any).jitsi_room_id;
+      if (existingRoomId) {
+        setUseJitsi(true);
+        setJitsiRoomId(existingRoomId);
+      }
     }
 
     const otherUserId = isDoctor ? data.patient_id : null;
@@ -1201,6 +1210,25 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
                 label="Exames"
                 onClick={() => window.open(`/dashboard/exam-request?appointment=${appointmentId}`, '_blank')}
               />
+              <div className="w-px h-6 bg-[hsl(220,15%,15%)] mx-1" />
+              <ToolbarBtn
+                active={useJitsi}
+                icon={<Video className="w-3.5 h-3.5" />}
+                label={useJitsi ? "Jitsi" : "P2P"}
+                onClick={() => {
+                  const next = !useJitsi;
+                  setUseJitsi(next);
+                  localStorage.setItem(`jitsi_${appointmentId}`, String(next));
+                  if (next) {
+                    const rid = gerarRoomId(appointmentId ?? '');
+                    setJitsiRoomId(rid);
+                    supabase.from("appointments").update({ jitsi_room_id: rid } as any).eq("id", appointmentId ?? '');
+                  } else {
+                    setJitsiRoomId(null);
+                    supabase.from("appointments").update({ jitsi_room_id: null } as any).eq("id", appointmentId ?? '');
+                  }
+                }}
+              />
             </>
           )}
         </div>
@@ -1211,7 +1239,7 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
         {/* Video area */}
         <div className={splitMode && isDoctor && !isMobile ? "w-1/2" : "flex-1"} style={{ minHeight: 0 }}>
           <VideoErrorBoundary onEndCall={endCall}>
-            {jitsiRoomId ? (
+            {useJitsi && jitsiRoomId ? (
               <JitsiRoom
                 roomId={jitsiRoomId}
                 displayName={currentUserName}
