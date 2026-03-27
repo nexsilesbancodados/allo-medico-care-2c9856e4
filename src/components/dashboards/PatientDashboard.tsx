@@ -17,6 +17,7 @@ import {
   ArrowRight, FileText, Upload,
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
+import { PingoMascot } from "@/components/mascot/PingoMascot";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
 import SectionErrorBoundary from "@/components/ui/section-error-boundary";
 import {
@@ -151,42 +152,54 @@ const PatientDashboard = () => {
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          <div className="relative z-10 px-6 pt-10 pb-9 md:px-8 md:pt-14 md:pb-12">
-            {/* Greeting */}
-            <motion.h1
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="font-[Manrope] text-[26px] font-extrabold text-white leading-[1.15] md:text-[36px]"
-            >
-              {getGreeting()}, <span className="capitalize">{firstName}</span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.08, duration: 0.45 }}
-              className="mt-1.5 text-[14px] font-medium text-white/55 leading-relaxed max-w-xs md:text-[15px]"
-            >
-              Cuide da sua saúde com quem entende.
-            </motion.p>
-
-            {/* KPI pills */}
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="flex gap-2.5 mt-5 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] px-3.5 py-2 text-[12px] font-bold text-white/85 shadow-sm">
-                <Calendar className="w-3.5 h-3.5 opacity-70" /> {stats?.total ?? 0} consultas
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] px-3.5 py-2 text-[12px] font-bold text-white/85 shadow-sm">
-                <Heart className="w-3.5 h-3.5 opacity-70" /> {typedMetrics.length} métricas
-              </span>
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
-              <Button
-                onClick={() => navigate("/dashboard/patient/health?role=patient")}
-                className="mt-6 rounded-full bg-white px-8 py-3 h-auto text-[14px] font-bold text-[#00347F] shadow-lg shadow-black/10 hover:bg-white/95 hover:shadow-xl hover:shadow-black/15 active:scale-[0.97] transition-all duration-200"
+          <div className="relative z-10 flex items-center px-6 pt-10 pb-9 md:px-8 md:pt-14 md:pb-12">
+            <div className="flex-1 min-w-0">
+              {/* Greeting */}
+              <motion.h1
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="font-[Manrope] text-[26px] font-extrabold text-white leading-[1.15] md:text-[36px]"
               >
-                <Heart className="mr-2 h-4 w-4" /> Minha Saúde
-              </Button>
+                {getGreeting()}, <span className="capitalize">{firstName}</span>
+              </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.08, duration: 0.45 }}
+                className="mt-1.5 text-[14px] font-medium text-white/55 leading-relaxed max-w-xs md:text-[15px]"
+              >
+                Cuide da sua saúde com quem entende.
+              </motion.p>
+
+              {/* KPI pills */}
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="flex gap-2.5 mt-5 flex-wrap">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] px-3.5 py-2 text-[12px] font-bold text-white/85 shadow-sm">
+                  <Calendar className="w-3.5 h-3.5 opacity-70" /> {stats?.total ?? 0} consultas
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] px-3.5 py-2 text-[12px] font-bold text-white/85 shadow-sm">
+                  <Heart className="w-3.5 h-3.5 opacity-70" /> {typedMetrics.length} métricas
+                </span>
+              </motion.div>
+
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
+                <Button
+                  onClick={() => navigate("/dashboard/patient/health?role=patient")}
+                  className="mt-6 rounded-full bg-white px-8 py-3 h-auto text-[14px] font-bold text-[#00347F] shadow-lg shadow-black/10 hover:bg-white/95 hover:shadow-xl hover:shadow-black/15 active:scale-[0.97] transition-all duration-200"
+                >
+                  <Heart className="mr-2 h-4 w-4" /> Minha Saúde
+                </Button>
+              </motion.div>
+            </div>
+
+            {/* Pingo mascot */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.6, x: 20 }}
+              animate={{ opacity: 1, scale: 1, x: 0 }}
+              transition={{ delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="hidden sm:flex shrink-0 items-end ml-4"
+            >
+              <PingoMascot variant="wave" size={140} animate bounce className="drop-shadow-[0_8px_24px_rgba(0,0,0,0.25)]" />
             </motion.div>
           </div>
         </section>
