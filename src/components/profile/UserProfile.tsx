@@ -197,17 +197,6 @@ const UserProfile = () => {
         chronic_conditions: null,
       }).eq("user_id", user.id);
 
-      // Cancel active discount cards
-      await supabase.from("discount_cards")
-        .update({ status: "cancelled", cancelled_at: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .eq("status", "active");
-
-      // Cancel active subscriptions
-      await supabase.from("subscriptions")
-        .update({ status: "cancelled", cancelled_at: new Date().toISOString(), updated_at: new Date().toISOString() })
-        .eq("user_id", user.id)
-        .eq("status", "active");
 
       // Sign out
       await supabase.auth.signOut();

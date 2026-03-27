@@ -24,7 +24,7 @@ const UrgentCareQueue = () => {
   const [myEntry, setMyEntry] = useState<{ id: string; status: string; position?: number; created_at: string } | null>(null);
   const [queuePosition, setQueuePosition] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const [discountPercent, setDiscountPercent] = useState(0);
+  
 
   // Payment state
   const [showPayment, setShowPayment] = useState(false);
@@ -44,7 +44,6 @@ const UrgentCareQueue = () => {
     fetchShiftPrice();
     if (user) {
       fetchMyEntry();
-      checkDiscountCard();
     }
   }, [user]);
 
@@ -102,11 +101,6 @@ const UrgentCareQueue = () => {
     setLoading(false);
   };
 
-  const checkDiscountCard = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("discount_cards").select("discount_percent").eq("user_id", user.id).eq("status", "active").maybeSingle();
-    if (data) setDiscountPercent(Number(data.discount_percent));
-  };
 
   const fetchMyEntry = async () => {
     if (!user) return;
@@ -132,7 +126,7 @@ const UrgentCareQueue = () => {
     }
   };
 
-  const priceWithDiscount = shiftInfo ? (discountPercent > 0 ? shiftInfo.price * (1 - discountPercent / 100) : shiftInfo.price) : 0;
+  const priceWithDiscount = shiftInfo ? shiftInfo.price : 0;
 
   // Step 1: Show payment UI
   const handleStartPayment = () => {
