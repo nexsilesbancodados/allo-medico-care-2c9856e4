@@ -229,7 +229,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         );
 
       case "kyc": {
-        const kycMobileUrl = `${window.location.origin}/dashboard?role=patient&onboarding=true&step=kyc`;
+        const kycMobileUrl = `${window.location.origin}/paciente?redirect=${encodeURIComponent("/dashboard?role=patient&onboarding=true&step=kyc")}`;
         const showQrOption = !isMobile && !selfiePreview && !docPreview;
 
         return (

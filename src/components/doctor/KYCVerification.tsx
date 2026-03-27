@@ -356,7 +356,7 @@ const KYCVerification = ({ doctorProfileId, userName, userCRM, onComplete }: {
                     </p>
                     <div className="flex justify-center py-2">
                       <div className="bg-white p-3 rounded-xl shadow-sm inline-block">
-                        <QRCodeSVG value={`${window.location.origin}/dashboard?role=doctor&kyc=true`} size={140} level="M" />
+                        <QRCodeSVG value={`${window.location.origin}/medico?acesso=entrar&redirect=${encodeURIComponent("/dashboard?role=doctor&kyc=true")}`} size={140} level="M" />
                       </div>
                     </div>
                     <p className="text-[10px] text-muted-foreground">Ou use as opções abaixo para capturar/enviar pelo PC ↓</p>
