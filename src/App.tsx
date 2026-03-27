@@ -113,10 +113,7 @@ const App = () => {
       const cancelSecondaryPrefetch = prefetchOnIdle(
         [
           () => import("./pages/AuthAdmin"),
-          () => import("./pages/AuthClinica"),
-          () => import("./pages/AuthRecepcionista"),
           () => import("./pages/AuthSuporte"),
-          () => import("./pages/AuthParceiro"),
           () => import("./pages/AuthLaudista"),
           () => import("./pages/GuestCheckout"),
           () => import("./pages/ForgotPassword"),
@@ -203,9 +200,6 @@ const App = () => {
                         <Route path="/consulta-avulsa" element={<GuestCheckout />} />
                         <Route path="/consulta" element={<GuestConsultation />} />
                         <Route path="/consulta/avaliacao" element={<GuestRating />} />
-                        <Route path="/parceiro" element={<AuthParceiro />} />
-                        <Route path="/clinica" element={<AuthClinica />} />
-                        <Route path="/recepcionista" element={<AuthRecepcionista />} />
                         <Route path="/suporte" element={<AuthSuporte />} />
                         <Route path="/payment-success" element={<PaymentSuccess />} />
                         <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
