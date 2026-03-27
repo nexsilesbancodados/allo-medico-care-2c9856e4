@@ -214,7 +214,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
 
         return (
           <BiometricKYC
-            onComplete={() => handleKycStarted("")}
+            onComplete={() => handleKycStarted()}
             variant="full"
           />
         );
