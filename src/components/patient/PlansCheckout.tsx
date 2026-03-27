@@ -69,12 +69,7 @@ const PlansCheckout = () => {
 
   const [step, setStep] = useState<Step>("specialty");
   const [selectedPlan, setSelectedPlan] = useState<string | null>("avulsa");
-  const [activeTab, setActiveTab] = useState("consulta");
-  const [subscribingCard, setSubscribingCard] = useState<string | null>(null);
-  const [cardSubPaymentMethod, setCardSubPaymentMethod] = useState<PaymentMethod>("pix");
-  const [cardSubPixQr, setCardSubPixQr] = useState<string | null>(null);
-  const [cardSubPixCode, setCardSubPixCode] = useState<string | null>(null);
-  const [cardSubBoletoUrl, setCardSubBoletoUrl] = useState<string | null>(null);
+  const [activeTab] = useState("consulta");
 
   // Avulsa flow state
   const [specialties, setSpecialties] = useState<{ id: string; name: string }[]>([]);
