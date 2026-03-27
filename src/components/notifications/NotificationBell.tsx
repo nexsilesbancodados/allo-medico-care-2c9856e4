@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Check, Trash2 } from "lucide-react";
+import { Bell, CheckCircle, Trash } from "@phosphor-icons/react";
 import { formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
@@ -171,24 +171,24 @@ const NotificationBell = () => {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" aria-label="Notificações" className="relative h-9 w-9 rounded-xl">
-          <Bell className="w-4.5 h-4.5" />
+          <Bell size={18} weight={unreadCount > 0 ? "fill" : "regular"} />
           <AnimatePresence>
             {unreadCount > 0 && (
               <motion.span
                 key="badge"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{
-                  scale: hasNewPulse ? [1, 1.4, 1] : 1,
+                  scale: hasNewPulse ? [1, 1.3, 1] : 1,
                   opacity: 1,
                 }}
                 exit={{ scale: 0, opacity: 0 }}
                 transition={hasNewPulse
-                  ? { scale: { duration: 0.6, repeat: 3, ease: "easeInOut" } }
+                  ? { scale: { duration: 0.5, repeat: 2, ease: "easeInOut" } }
                   : { duration: 0.2 }
                 }
-                className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full bg-destructive text-destructive-foreground text-[10px] flex items-center justify-center font-bold shadow-sm"
+                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] flex items-center justify-center font-bold shadow-md ring-2 ring-background tabular-nums"
               >
-                {unreadCount > 9 ? "9+" : unreadCount}
+                {unreadCount > 99 ? "99+" : unreadCount}
               </motion.span>
             )}
           </AnimatePresence>
