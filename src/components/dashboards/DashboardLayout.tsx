@@ -189,6 +189,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const sidebarRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
   useNotificationTitle();
+  useSessionSecurity();
 
   const isAdmin = roles.includes("admin");
   const forceRole = searchParams.get("role");
