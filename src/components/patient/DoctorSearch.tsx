@@ -15,6 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getPatientNav } from "./patientNav";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 
 interface DoctorResult {
   id: string;
@@ -52,10 +53,10 @@ const saveRecentSearch = (term: string) => {
 
 const SPECIALTY_ICONS: Record<string, React.ReactNode> = {
   "Cardiologia": <Heart className="w-6 h-6 text-destructive" />,
-  "Pediatria": <Baby className="w-6 h-6 text-primary" />,
+  "Pediatria": <Baby className="w-6 h-6 text-[hsl(var(--p-primary))]" />,
   "Ortopedia": <Bone className="w-6 h-6 text-warning" />,
   "Ginecologia": <Activity className="w-6 h-6 text-secondary" />,
-  "Oftalmologia": <EyeIcon className="w-6 h-6 text-primary" />,
+  "Oftalmologia": <EyeIcon className="w-6 h-6 text-[hsl(var(--p-primary))]" />,
   "Neurologia": <Brain className="w-6 h-6 text-secondary" />,
 };
 
@@ -77,7 +78,6 @@ const DoctorSearch = () => {
   const [showRecent, setShowRecent] = useState(false);
   const [viewMode, setViewMode] = useState<"specialties" | "results">("specialties");
 
-  // Advanced filters
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
   const [minRating, setMinRating] = useState(0);
   const [availabilityFilter, setAvailabilityFilter] = useState<string>("all");
@@ -90,7 +90,6 @@ const DoctorSearch = () => {
     if (user) fetchFavorites();
   }, [user]);
 
-  // Switch to results view when search or specialty is active
   useEffect(() => {
     if (search || selectedSpecialty || isUrgency) {
       setViewMode("results");
@@ -218,7 +217,7 @@ const DoctorSearch = () => {
         <p className="text-sm font-medium text-foreground mb-3">⭐ Avaliação mínima</p>
         <div className="flex gap-2 flex-wrap">
           {[0, 3, 3.5, 4, 4.5].map(r => (
-            <Button key={r} variant={minRating === r ? "default" : "outline"} size="sm" className="h-10 min-w-[52px] text-sm gap-1" onClick={() => setMinRating(r)}>
+            <Button key={r} variant={minRating === r ? "default" : "outline"} size="sm" className="h-10 min-w-[52px] text-sm gap-1 rounded-full" onClick={() => setMinRating(r)}>
               {r === 0 ? "Todas" : <><Star className="w-3.5 h-3.5 fill-current" /> {r}+</>}
             </Button>
           ))}
@@ -227,7 +226,7 @@ const DoctorSearch = () => {
       <div>
         <p className="text-sm font-medium text-foreground mb-3">📅 Disponibilidade</p>
         <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
-          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-11 rounded-2xl"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Qualquer horário</SelectItem>
             <SelectItem value="today">Atende hoje</SelectItem>
@@ -238,7 +237,7 @@ const DoctorSearch = () => {
       <div>
         <p className="text-sm font-medium text-foreground mb-3">🔄 Ordenar por</p>
         <Select value={sortBy} onValueChange={setSortBy}>
-          <SelectTrigger className="h-11"><SelectValue /></SelectTrigger>
+          <SelectTrigger className="h-11 rounded-2xl"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="rating">Melhor avaliação</SelectItem>
             <SelectItem value="price_asc">Menor preço</SelectItem>
@@ -248,8 +247,8 @@ const DoctorSearch = () => {
         </Select>
       </div>
       <div className="flex gap-3 pt-2">
-        <Button variant="outline" className="flex-1 h-11" onClick={clearFilters}><X className="w-4 h-4 mr-1" /> Limpar</Button>
-        <Button className="flex-1 h-11 bg-primary text-primary-foreground" onClick={() => setFiltersOpen(false)}>
+        <Button variant="outline" className="flex-1 h-11 rounded-full" onClick={clearFilters}><X className="w-4 h-4 mr-1" /> Limpar</Button>
+        <Button className="flex-1 h-11 bg-[#00347F] text-white rounded-full" onClick={() => setFiltersOpen(false)}>
           Ver {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
         </Button>
       </div>
@@ -270,10 +269,10 @@ const DoctorSearch = () => {
               onFocus={() => { if (!search && recentSearches.length > 0) setShowRecent(true); }}
               onBlur={() => setTimeout(() => setShowRecent(false), 200)}
               onKeyDown={e => { if (e.key === "Enter" && search.trim()) { saveRecentSearch(search.trim()); setRecentSearches(getRecentSearches()); } }}
-              className="pl-10 h-12 rounded-2xl text-base bg-muted/50 border-transparent focus:border-primary/30"
+              className="pl-12 h-12 rounded-2xl text-base bg-muted/50 border-transparent focus:border-[hsl(var(--p-primary))]/30"
             />
             {showRecent && recentSearches.length > 0 && (
-              <div className="absolute top-14 left-0 right-0 bg-card border border-border rounded-2xl shadow-elevated z-20 overflow-hidden">
+              <div className="absolute top-14 left-0 right-0 bg-card border border-border rounded-2xl shadow-[var(--p-shadow-elevated)] z-20 overflow-hidden">
                 <p className="text-[11px] text-muted-foreground/60 uppercase tracking-wider font-semibold px-4 pt-3 pb-1">Buscas recentes</p>
                 {recentSearches.map((term, i) => (
                   <button key={i} className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-muted/50 flex items-center gap-2 transition-colors" onMouseDown={() => { setSearch(term); setShowRecent(false); }}>
@@ -288,7 +287,7 @@ const DoctorSearch = () => {
               <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl shrink-0 relative" aria-label="Filtros">
                 <SlidersHorizontal className="w-5 h-5" />
                 {activeFilters > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">{activeFilters}</span>
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#00347F] text-white text-[10px] flex items-center justify-center font-bold">{activeFilters}</span>
                 )}
               </Button>
             </SheetTrigger>
@@ -303,7 +302,7 @@ const DoctorSearch = () => {
         {viewMode === "specialties" && !loading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             {/* Pingo speech bubble */}
-            <div className="flex items-start gap-3 mb-6 p-4 rounded-2xl bg-primary/10 border border-primary/20">
+            <div className="flex items-start gap-3 mb-6 p-4 rounded-2xl bg-[hsl(var(--p-primary))]/10 border border-[hsl(var(--p-primary))]/20">
               <img src={mascotWave} alt="Pingo" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" decoding="async" width={48} height={48} />
               <p className="text-sm text-foreground leading-relaxed">
                 "Olá! Eu posso te ajudar a encontrar o melhor especialista para você hoje."
@@ -312,24 +311,23 @@ const DoctorSearch = () => {
 
             {/* Frequent searches */}
             <div className="mb-6">
-              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">Buscas frequentes</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-[0.12em] font-bold mb-2">Buscas frequentes</p>
               <div className="flex gap-2 flex-wrap">
                 {FREQUENT_SEARCHES.map(term => (
-                  <Badge
+                  <button
                     key={term}
-                    variant="outline"
-                    className="cursor-pointer h-9 px-4 text-sm rounded-full hover:bg-primary/10 hover:border-primary/30 transition-colors"
+                    className="h-9 px-4 text-sm rounded-full border border-border/50 hover:bg-[hsl(var(--p-primary))]/10 hover:border-[hsl(var(--p-primary))]/30 transition-colors font-medium text-foreground active:scale-95"
                     onClick={() => { setSearch(term); setViewMode("results"); }}
                   >
                     {term}
-                  </Badge>
+                  </button>
                 ))}
               </div>
             </div>
 
             {/* Specialty grid */}
             <div className="mb-6">
-              <h2 className="text-lg font-bold text-foreground mb-4">Navegar por Especialidades</h2>
+              <h2 className="text-lg font-extrabold text-foreground mb-4 font-[Manrope]">Navegar por Especialidades</h2>
               <div className="grid grid-cols-2 gap-3">
                 {specialties.slice(0, 6).map((spec, i) => (
                   <motion.button
@@ -337,30 +335,31 @@ const DoctorSearch = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => { setSelectedSpecialty(spec.name); setViewMode("results"); }}
-                    className="flex flex-col items-center gap-3 p-5 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-md transition-all active:scale-[0.97]"
+                    className="flex flex-col items-center gap-3 p-5 rounded-2xl bg-card border border-border/30 hover:border-[hsl(var(--p-primary))]/30 hover:shadow-[var(--p-shadow-elevated)] transition-all shadow-[var(--p-shadow-card)]"
                   >
                     <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center">
-                      {SPECIALTY_ICONS[spec.name] || <Stethoscope className="w-6 h-6 text-primary" />}
+                      {SPECIALTY_ICONS[spec.name] || <Stethoscope className="w-6 h-6 text-[hsl(var(--p-primary))]" />}
                     </div>
                     <span className="text-sm font-semibold text-foreground">{spec.name}</span>
                   </motion.button>
                 ))}
               </div>
               {specialties.length > 6 && (
-                <Button variant="ghost" className="w-full mt-3 text-sm text-primary" onClick={() => setViewMode("results")}>
+                <Button variant="ghost" className="w-full mt-3 text-sm text-[hsl(var(--p-primary))] font-semibold" onClick={() => setViewMode("results")}>
                   Ver todas as especialidades
                 </Button>
               )}
             </div>
 
             {/* CTA banner */}
-            <div className="rounded-2xl bg-primary p-6 text-primary-foreground">
-              <h3 className="text-lg font-bold mb-1">Não encontrou o que precisava?</h3>
-              <p className="text-sm text-primary-foreground/70 mb-4">
+            <div className="rounded-2xl bg-[#00347F] p-6 text-white">
+              <h3 className="text-lg font-bold mb-1 font-[Manrope]">Não encontrou o que precisava?</h3>
+              <p className="text-sm text-white/70 mb-4">
                 Nossa equipe de suporte está disponível para te ajudar a encontrar o especialista ideal.
               </p>
-              <Button variant="secondary" className="rounded-xl" onClick={() => navigate("/dashboard/support")}>
+              <Button className="rounded-full bg-white text-[#00347F] font-bold shadow-[var(--p-shadow-btn)]" onClick={() => navigate("/dashboard/support")}>
                 Falar com Atendente
               </Button>
             </div>
@@ -372,7 +371,7 @@ const DoctorSearch = () => {
           <>
             {/* Urgency banner */}
             {isUrgency && (
-              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-4 p-3.5 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center gap-3">
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-4 p-3.5 rounded-2xl bg-[hsl(var(--p-danger-soft))] border border-destructive/20 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center shrink-0"><AlertTriangle className="w-5 h-5 text-destructive" /></div>
                 <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-foreground">Modo Urgência</p><p className="text-xs text-muted-foreground">Médicos disponíveis agora</p></div>
               </motion.div>
@@ -382,7 +381,7 @@ const DoctorSearch = () => {
             {!isUrgency && (
               <button
                 onClick={() => { setViewMode("specialties"); setSearch(""); setSelectedSpecialty(null); }}
-                className="text-sm text-muted-foreground hover:text-foreground mb-3 flex items-center gap-1"
+                className="text-sm text-muted-foreground hover:text-foreground mb-3 flex items-center gap-1 active:scale-95"
               >
                 ← Voltar às especialidades
               </button>
@@ -390,9 +389,26 @@ const DoctorSearch = () => {
 
             {/* Specialty chips */}
             <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide snap-x -mx-1 px-1">
-              <Badge variant={selectedSpecialty === null ? "default" : "outline"} className="cursor-pointer shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-transform" onClick={() => setSelectedSpecialty(null)}>Todas</Badge>
+              <button
+                className={cn(
+                  "shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-all font-semibold",
+                  selectedSpecialty === null ? "bg-[#00347F] text-white" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                )}
+                onClick={() => setSelectedSpecialty(null)}
+              >
+                Todas
+              </button>
               {specialties.map(s => (
-                <Badge key={s.id} variant={selectedSpecialty === s.name ? "default" : "outline"} className="cursor-pointer shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-transform" onClick={() => setSelectedSpecialty(selectedSpecialty === s.name ? null : s.name)}>{s.name}</Badge>
+                <button
+                  key={s.id}
+                  className={cn(
+                    "shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-all font-semibold",
+                    selectedSpecialty === s.name ? "bg-[#00347F] text-white" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                  )}
+                  onClick={() => setSelectedSpecialty(selectedSpecialty === s.name ? null : s.name)}
+                >
+                  {s.name}
+                </button>
               ))}
             </div>
 
@@ -403,17 +419,17 @@ const DoctorSearch = () => {
             {loading ? (
               <div className="space-y-3">
                 {[1, 2, 3, 4].map(i => (
-                  <div key={i} className="p-4 rounded-2xl border border-border bg-card">
+                  <div key={i} className="p-4 rounded-2xl border border-border/20 bg-card">
                     <div className="flex items-center gap-3">
                       <Skeleton className="w-14 h-14 rounded-2xl shrink-0" />
                       <div className="flex-1 space-y-2"><Skeleton className="h-4 w-36" /><Skeleton className="h-3 w-24" /></div>
-                      <Skeleton className="h-8 w-16" />
+                      <Skeleton className="h-8 w-16 rounded-full" />
                     </div>
                   </div>
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-16">
+              <div className="text-center py-16 rounded-2xl border border-dashed border-border/40 bg-muted/10">
                 <img src={mascotWave} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" loading="lazy" decoding="async" width={80} height={80} />
                 <p className="text-[13px] font-semibold text-foreground">Nenhum médico encontrado</p>
                 <p className="text-sm text-muted-foreground mt-1">Ajuste os filtros de busca</p>
@@ -423,26 +439,30 @@ const DoctorSearch = () => {
                 <AnimatePresence>
                   {filtered.map((doctor, i) => (
                     <motion.div key={doctor.id} custom={i} variants={fadeUp} initial="hidden" animate="show"
-                      className={`card-interactive relative p-4 rounded-2xl border bg-card cursor-pointer group ${doctor.available_now ? "border-secondary/40 shadow-md shadow-secondary/10" : "border-border/50 hover:border-border"}`}
+                      whileTap={{ scale: 0.97 }}
+                      className={cn(
+                        "relative p-4 rounded-2xl border bg-card cursor-pointer group shadow-[var(--p-shadow-card)] hover:shadow-[var(--p-shadow-elevated)] transition-shadow",
+                        doctor.available_now ? "border-secondary/40" : "border-border/30"
+                      )}
                       onClick={() => navigate(`/dashboard/schedule/${doctor.id}`)}
                     >
                       <button onClick={(e) => toggleFavorite(doctor.id, e)} className="absolute top-3 right-3 p-2 rounded-full hover:bg-muted/50 transition-colors z-10">
                         <Heart className={`w-5 h-5 transition-colors ${favoriteIds.has(doctor.id) ? "fill-destructive text-destructive" : "text-muted-foreground/40"}`} />
                       </button>
                       <div className="flex items-start gap-3">
-                        <Avatar className="w-14 h-14 rounded-2xl shrink-0">
+                        <Avatar className="w-14 h-14 rounded-2xl shrink-0 ring-2 ring-[hsl(var(--p-primary))]/15">
                           {doctor.profile?.avatar_url && <AvatarImage src={doctor.profile.avatar_url} alt={`Dr(a). ${doctor.profile?.first_name}`} className="rounded-2xl object-cover" />}
-                          <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-secondary text-white font-bold text-base">{doctor.profile?.first_name?.[0]}{doctor.profile?.last_name?.[0]}</AvatarFallback>
+                          <AvatarFallback className="rounded-2xl bg-gradient-to-br from-[#00347F] to-[#2563EB] text-white font-bold text-base">{doctor.profile?.first_name?.[0]}{doctor.profile?.last_name?.[0]}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0 pr-8">
-                          <h3 className="font-bold text-foreground text-[15px] leading-tight truncate">Dr(a). {doctor.profile?.first_name} {doctor.profile?.last_name}</h3>
+                          <h3 className="font-bold text-foreground text-[15px] leading-tight truncate font-[Manrope]">Dr(a). {doctor.profile?.first_name} {doctor.profile?.last_name}</h3>
                           <p className="text-xs text-muted-foreground mt-0.5">CRM {doctor.crm}/{doctor.crm_state}{(doctor.experience_years ?? 0) > 0 && ` · ${doctor.experience_years}a exp.`}</p>
                           {doctor.specialties.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-2">{doctor.specialties.slice(0, 2).map(s => (<span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">{s}</span>))}</div>
+                            <div className="flex flex-wrap gap-1 mt-2">{doctor.specialties.slice(0, 2).map(s => (<span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-[hsl(var(--p-primary))]/10 text-[hsl(var(--p-primary))] font-semibold">{s}</span>))}</div>
                           )}
                           <div className="flex items-center gap-2 mt-2 flex-wrap">
                             {doctor.available_now && (
-                              <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/15 text-secondary font-semibold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />Plantão</span>
+                              <span className="text-[11px] px-2.5 py-1 rounded-full bg-[hsl(var(--p-success-soft))] text-success font-semibold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />Plantão</span>
                             )}
                             {availableNowIds.has(doctor.id) && !doctor.available_now && (
                               <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/10 text-secondary font-medium flex items-center gap-1"><Zap className="w-3 h-3" /> Disponível</span>
@@ -453,9 +473,12 @@ const DoctorSearch = () => {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/40">
-                        <div><span className="text-xl font-black text-foreground">R${doctor.consultation_price}</span><span className="text-xs text-muted-foreground ml-1">/consulta</span></div>
-                        <Button size="sm" className="h-10 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-bold gap-1.5 shadow-lg shadow-primary/20"
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/30">
+                        <div>
+                          <span className="text-xl font-extrabold text-foreground font-[Manrope]">R${doctor.consultation_price}</span>
+                          <span className="text-xs text-muted-foreground ml-1">/consulta</span>
+                        </div>
+                        <Button size="sm" className="h-10 px-5 rounded-full bg-[#00347F] text-white text-sm font-bold gap-1.5 shadow-[var(--p-shadow-btn)]"
                           onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/schedule/${doctor.id}`); }}>
                           <Calendar className="w-4 h-4" /> Agendar <ChevronRight className="w-4 h-4 -mr-1" />
                         </Button>
