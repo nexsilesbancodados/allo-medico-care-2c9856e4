@@ -405,28 +405,35 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                   <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-[hsl(var(--success))] border-2 border-[hsl(var(--primary))]" aria-hidden="true" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-2xl border-border/30 shadow-xl p-1.5">
-                <div className="flex items-center gap-2.5 p-2.5 mb-1">
-                  <Avatar className="h-9 w-9">
+              <DropdownMenuContent align="end" sideOffset={8} className="w-64 rounded-2xl border-border/20 shadow-elevated p-2 backdrop-blur-xl bg-popover/95">
+                <div className="flex items-center gap-3 px-2 py-3 mb-1">
+                  <Avatar className="h-11 w-11 ring-2 ring-primary/15 shadow-sm">
                     {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                    <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-xs font-bold`}>{initials}</AvatarFallback>
+                    <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-sm font-bold`}>{initials}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{fullName}</p>
-                    <p className="text-[11px] text-muted-foreground">{ROLE_LABELS[role] ?? title}</p>
+                    <p className="text-[14px] font-bold text-foreground truncate leading-tight">{fullName}</p>
+                    <p className="text-[11px] text-muted-foreground/80 mt-0.5">{ROLE_LABELS[role] ?? title}</p>
                   </div>
                 </div>
-                <DropdownMenuSeparator className="bg-border/15" />
-                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                  <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                  <GearSix className="h-4 w-4 text-muted-foreground" /> Configurações
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border/15" />
-                <DropdownMenuItem onClick={handleSignOut} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2 text-destructive focus:text-destructive focus:bg-destructive/8">
-                  <SignOut className="h-4 w-4" /> Sair
-                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border/10 -mx-2" />
+                <div className="py-1 space-y-0.5">
+                  <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-xl gap-3 cursor-pointer text-[13px] py-2.5 px-2.5 focus:bg-primary/8">
+                    <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10"><User className="h-3.5 w-3.5 text-primary" /></span>
+                    <span className="font-medium">Meu Perfil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-xl gap-3 cursor-pointer text-[13px] py-2.5 px-2.5 focus:bg-muted">
+                    <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-muted"><GearSix className="h-3.5 w-3.5 text-muted-foreground" /></span>
+                    <span className="font-medium">Configurações</span>
+                  </DropdownMenuItem>
+                </div>
+                <DropdownMenuSeparator className="bg-border/10 -mx-2" />
+                <div className="pt-1">
+                  <DropdownMenuItem onClick={handleSignOut} className="rounded-xl gap-3 cursor-pointer text-[13px] py-2.5 px-2.5 text-destructive focus:text-destructive focus:bg-destructive/8">
+                    <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-destructive/10"><SignOut className="h-3.5 w-3.5" /></span>
+                    <span className="font-medium">Sair</span>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -490,28 +497,35 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                   <CaretDown className="w-3 h-3 text-muted-foreground" aria-hidden="true" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" sideOffset={8} className="w-56 rounded-2xl border-border/30 shadow-xl p-1.5">
-                <div className="flex items-center gap-2.5 p-2.5 mb-1">
-                  <Avatar className="h-9 w-9">
+              <DropdownMenuContent align="end" sideOffset={8} className="w-64 rounded-2xl border-border/20 shadow-elevated p-2 backdrop-blur-xl bg-popover/95">
+                <div className="flex items-center gap-3 px-2 py-3 mb-1">
+                  <Avatar className="h-11 w-11 ring-2 ring-primary/15 shadow-sm">
                     {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
-                    <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-xs font-bold`}>{initials}</AvatarFallback>
+                    <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-sm font-bold`}>{initials}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate">{fullName}</p>
-                    <p className="text-[11px] text-muted-foreground">{ROLE_LABELS[role] ?? title}</p>
+                    <p className="text-[14px] font-bold text-foreground truncate leading-tight">{fullName}</p>
+                    <p className="text-[11px] text-muted-foreground/80 mt-0.5">{ROLE_LABELS[role] ?? title}</p>
                   </div>
                 </div>
-                <DropdownMenuSeparator className="bg-border/15" />
-                <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                  <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                  <GearSix className="h-4 w-4 text-muted-foreground" /> Configurações
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border/15" />
-                <DropdownMenuItem onClick={handleSignOut} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2 text-destructive focus:text-destructive focus:bg-destructive/8">
-                  <SignOut className="h-4 w-4" /> Sair
-                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border/10 -mx-2" />
+                <div className="py-1 space-y-0.5">
+                  <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-xl gap-3 cursor-pointer text-[13px] py-2.5 px-2.5 focus:bg-primary/8">
+                    <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-primary/10"><User className="h-3.5 w-3.5 text-primary" /></span>
+                    <span className="font-medium">Meu Perfil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-xl gap-3 cursor-pointer text-[13px] py-2.5 px-2.5 focus:bg-muted">
+                    <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-muted"><GearSix className="h-3.5 w-3.5 text-muted-foreground" /></span>
+                    <span className="font-medium">Configurações</span>
+                  </DropdownMenuItem>
+                </div>
+                <DropdownMenuSeparator className="bg-border/10 -mx-2" />
+                <div className="pt-1">
+                  <DropdownMenuItem onClick={handleSignOut} className="rounded-xl gap-3 cursor-pointer text-[13px] py-2.5 px-2.5 text-destructive focus:text-destructive focus:bg-destructive/8">
+                    <span className="flex items-center justify-center h-7 w-7 rounded-lg bg-destructive/10"><SignOut className="h-3.5 w-3.5" /></span>
+                    <span className="font-medium">Sair</span>
+                  </DropdownMenuItem>
+                </div>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
