@@ -32,6 +32,8 @@ const PanelCenter = lazy(() => import("@/components/admin/PanelCenter"));
 
 // ── LAZY imports: less-used pages (prefetched on idle) ──
 const BookAppointment = lazy(() => import("@/components/patient/BookAppointment"));
+const AppointmentDetail = lazy(() => import("@/components/patient/AppointmentDetail"));
+const AppointmentConfirmed = lazy(() => import("@/components/patient/AppointmentConfirmed"));
 const MedicalHistory = lazy(() => import("@/components/patient/MedicalHistory"));
 const PaymentHistory = lazy(() => import("@/components/patient/PaymentHistory"));
 const PatientExamUpload = lazy(() => import("@/components/patient/PatientExamUpload"));
@@ -229,6 +231,8 @@ const Dashboard = () => {
       {/* Patient routes */}
       <Route path="doctors" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><DoctorSearch /></ContextGuard></RoleGuard>} />
       <Route path="appointments" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><AppointmentsList /></ContextGuard></RoleGuard>} />
+      <Route path="appointments/:appointmentId" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><AppointmentDetail /></ContextGuard></RoleGuard>} />
+      <Route path="appointments/:appointmentId/confirmed" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><AppointmentConfirmed /></ContextGuard></RoleGuard>} />
       <Route path="schedule" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><DoctorSearch /></ContextGuard></RoleGuard>} />
       <Route path="schedule/:doctorId" element={<RoleGuard allowed={["patient"]} roles={roles}><ContextGuard panel="patient" forceRole={forceRole} roles={roles}><BookAppointment /></ContextGuard></RoleGuard>} />
       
