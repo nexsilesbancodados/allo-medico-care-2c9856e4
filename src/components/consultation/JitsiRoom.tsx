@@ -9,11 +9,7 @@ interface JitsiRoomProps {
   onEnd: () => void;
 }
 
-declare global {
-  interface Window {
-    JitsiMeetExternalAPI: any;
-  }
-}
+// JitsiMeetExternalAPI is declared in src/types/globals.d.ts
 
 const JitsiRoom = ({ roomId, displayName, onEnd }: JitsiRoomProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
