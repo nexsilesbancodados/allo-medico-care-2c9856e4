@@ -2,7 +2,7 @@ import { forwardRef } from "react";
 import { BannerCTA } from "@/components/ui/banner-cta";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import { ArrowRight, Shield, Clock, Star, Check, X, Heart, Zap, Sparkles } from "lucide-react";
+import { ArrowRight, ShieldCheck, Clock, Star, Check, X, Heart, Lightning, Sparkle } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
 
@@ -15,8 +15,8 @@ const comparisonRows = [
 ];
 
 const benefits = [
-  { icon: Zap, text: "Consulta em minutos" },
-  { icon: Shield, text: "Dados criptografados" },
+  { icon: Lightning, text: "Consulta em minutos" },
+  { icon: ShieldCheck, text: "Dados criptografados" },
   { icon: Clock, text: "Disponível 24/7" },
   { icon: Star, text: "4.9★ de avaliação" },
   { icon: Heart, text: "50+ especialidades" },
@@ -94,7 +94,7 @@ const CTABanner = forwardRef<HTMLElement>((_, ref) => {
                   onClick={() => navigate("/paciente")}
                 >
                   Criar minha conta
-                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover:translate-x-1" weight="bold" />
                 </Button>
                 <BannerCTA
                   tone="light"
@@ -115,7 +115,7 @@ const CTABanner = forwardRef<HTMLElement>((_, ref) => {
               >
                 {benefits.map((b, i) => (
                   <div key={i} className="flex items-center gap-1.5 text-primary-foreground/60 text-[11px] font-medium">
-                    <b.icon className="w-3.5 h-3.5" />
+                    <b.icon className="w-3.5 h-3.5" weight="fill" />
                     {b.text}
                   </div>
                 ))}
@@ -161,10 +161,10 @@ const CTABanner = forwardRef<HTMLElement>((_, ref) => {
                       {typeof row.us === "boolean" ? (
                         row.us ? (
                           <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-medical-green/25 mx-auto">
-                            <Check className="w-3.5 h-3.5 text-medical-green" />
+                            <Check className="w-3.5 h-3.5 text-medical-green" weight="bold" />
                           </span>
                         ) : (
-                          <X className="w-3.5 h-3.5 opacity-40 mx-auto" />
+                          <X className="w-3.5 h-3.5 opacity-40 mx-auto" weight="bold" />
                         )
                       ) : (
                         <span className="font-extrabold">{row.us}</span>
@@ -173,10 +173,10 @@ const CTABanner = forwardRef<HTMLElement>((_, ref) => {
                     <span className="text-center text-primary-foreground/30">
                       {typeof row.them === "boolean" ? (
                         row.them ? (
-                          <Check className="w-3.5 h-3.5 mx-auto" />
+                          <Check className="w-3.5 h-3.5 mx-auto" weight="bold" />
                         ) : (
                           <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-white/[0.08] mx-auto">
-                            <X className="w-3 h-3 opacity-50" />
+                            <X className="w-3 h-3 opacity-50" weight="bold" />
                           </span>
                         )
                       ) : (

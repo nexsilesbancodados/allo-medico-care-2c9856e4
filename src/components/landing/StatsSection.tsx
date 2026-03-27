@@ -1,5 +1,5 @@
 import { forwardRef, useEffect, useState } from "react";
-import { Users, Stethoscope, Star, Clock } from "lucide-react";
+import { UsersThree, Stethoscope, Star, Clock } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
@@ -20,7 +20,7 @@ const iconStyles = [
 ];
 
 const fallbackStats = [
-  { icon: Users, target: 12500, suffix: "+", label: "Pacientes atendidos", decimals: 0, mascot: mascotWave },
+  { icon: UsersThree, target: 12500, suffix: "+", label: "Pacientes atendidos", decimals: 0, mascot: mascotWave },
   { icon: Stethoscope, target: 200, suffix: "+", label: "Médicos especialistas", decimals: 0, mascot: mascotReading },
   { icon: Star, target: 4.9, suffix: "", label: "Nota média", decimals: 1, mascot: mascotThumbsup },
   { icon: Clock, target: 15, suffix: "min", label: "Espera média", decimals: 0, mascot: mascotWelcome },
@@ -43,7 +43,7 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
 
         if (patients > 10 || appointments > 5) {
           setStats([
-            { icon: Users, target: patients, suffix: "+", label: "Pacientes atendidos", decimals: 0, mascot: mascotWave },
+            { icon: UsersThree, target: patients, suffix: "+", label: "Pacientes atendidos", decimals: 0, mascot: mascotWave },
             { icon: Stethoscope, target: specialties, suffix: "+", label: "Especialidades", decimals: 0, mascot: mascotReading },
             { icon: Star, target: 4.9, suffix: "", label: "Nota média", decimals: 1, mascot: mascotThumbsup },
             { icon: Clock, target: appointments, suffix: "+", label: "Consultas realizadas", decimals: 0, mascot: mascotWelcome },
@@ -72,7 +72,7 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
               <div className="relative flex flex-col gap-3">
                 {/* Icon with glow */}
                 <div className={`w-10 h-10 rounded-xl ${iconStyles[i].bg} flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:${iconStyles[i].glow} group-hover:scale-110 transition-all duration-300`}>
-                  <stat.icon className="w-[18px] h-[18px] text-white" aria-hidden="true" />
+                  <stat.icon className="w-[18px] h-[18px] text-white" weight="fill" aria-hidden="true" />
                 </div>
 
                 {/* Number */}

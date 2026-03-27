@@ -1,9 +1,6 @@
 import { useState, forwardRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Mail, Phone, Instagram, Linkedin, Youtube, ArrowRight,
-  Heart, Shield, Lock, Verified, Send
-} from "lucide-react";
+import { Envelope, Phone, InstagramLogo, LinkedinLogo, YoutubeLogo, Heart, ShieldCheck, Lock, SealCheck, PaperPlaneTilt } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,17 +41,17 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
             placeholder="Receba novidades — seu@email.com"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            className="bg-white/[0.06] border-white/8 text-white placeholder:text-white/30 rounded-lg h-10 text-sm focus:border-primary/40"
+            className="bg-white/[0.06] border-white/8 text-white placeholder:text-white/30 rounded-xl h-10 text-sm focus:border-primary/40"
             required
           />
-          <Button type="submit" disabled={submitting} size="sm" className="rounded-lg h-10 px-4 shrink-0 bg-primary hover:bg-primary/90">
-            {submitting ? "..." : <Send className="w-4 h-4" />}
+          <Button type="submit" disabled={submitting} size="sm" className="rounded-xl h-10 px-4 shrink-0 bg-primary hover:bg-primary/90">
+            {submitting ? "..." : <PaperPlaneTilt className="w-4 h-4" weight="fill" />}
           </Button>
         </form>
         <div className="flex items-center gap-5 text-[11px] text-white/35 font-medium">
-          <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-primary/70" /> CFM</span>
-          <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-primary/70" /> LGPD</span>
-          <span className="flex items-center gap-1.5"><Verified className="w-3.5 h-3.5 text-primary/70" /> SSL</span>
+          <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-primary/70" weight="fill" /> CFM</span>
+          <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 text-primary/70" weight="fill" /> LGPD</span>
+          <span className="flex items-center gap-1.5"><SealCheck className="w-3.5 h-3.5 text-primary/70" weight="fill" /> SSL</span>
           <span className="flex items-center gap-2">
             <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-50" /><span className="relative inline-flex rounded-full h-2 w-2 bg-success" /></span>
             Online
@@ -76,13 +73,13 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
             </p>
             <div className="flex gap-2">
               {[
-                { icon: Instagram, href: "https://instagram.com/aloclinica", label: "Instagram" },
-                { icon: Linkedin, href: "https://linkedin.com/company/aloclinica", label: "LinkedIn" },
-                { icon: Youtube, href: "https://youtube.com/@aloclinica", label: "YouTube" },
+                { icon: InstagramLogo, href: "https://instagram.com/aloclinica", label: "Instagram" },
+                { icon: LinkedinLogo, href: "https://linkedin.com/company/aloclinica", label: "LinkedIn" },
+                { icon: YoutubeLogo, href: "https://youtube.com/@aloclinica", label: "YouTube" },
               ].map(s => (
                 <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}
-                  className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.06] flex items-center justify-center hover:bg-primary/80 hover:border-primary/60 transition-all duration-150 text-white/50 hover:text-white">
-                  <s.icon className="w-3.5 h-3.5" />
+                  className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center hover:bg-primary/80 hover:border-primary/60 transition-all duration-150 text-white/50 hover:text-white">
+                  <s.icon className="w-4 h-4" weight="fill" />
                 </a>
               ))}
             </div>
@@ -108,8 +105,8 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
               <h4 className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/35 mb-3">{col.title}</h4>
               {col.contact ? (
                 <ul className="space-y-2.5 text-xs text-white/35">
-                  <li className="flex items-center gap-2 hover:text-white/55 transition-colors"><Mail className="w-3.5 h-3.5 text-primary/60" /> contato@aloclinica.com.br</li>
-                  <li className="flex items-center gap-2 hover:text-white/55 transition-colors"><Phone className="w-3.5 h-3.5 text-primary/60" /> 0800 123 4567</li>
+                  <li className="flex items-center gap-2 hover:text-white/55 transition-colors"><Envelope className="w-3.5 h-3.5 text-primary/60" weight="fill" /> contato@aloclinica.com.br</li>
+                  <li className="flex items-center gap-2 hover:text-white/55 transition-colors"><Phone className="w-3.5 h-3.5 text-primary/60" weight="fill" /> 0800 123 4567</li>
                 </ul>
               ) : (
                 <ul className="space-y-1.5 text-xs">
@@ -133,7 +130,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
       <div className="border-t border-white/[0.05]">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-[11px] text-white/20 flex items-center gap-1">
-            © {new Date().getFullYear()} AloClinica — Feito com <Heart className="w-3 h-3 fill-current text-destructive/60" /> no Brasil
+            © {new Date().getFullYear()} AloClinica — Feito com <Heart className="w-3 h-3 text-destructive/60" weight="fill" /> no Brasil
           </p>
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px]">
             {[

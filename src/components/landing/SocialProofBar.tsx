@@ -1,21 +1,21 @@
 import { forwardRef } from "react";
-import { Shield, Award, Heart, Verified, Star, Users, Clock, Zap, Lock } from "lucide-react";
+import { ShieldCheck, Medal, Heart, Lock, SealCheck, Star, UsersThree, Clock, Lightning } from "@phosphor-icons/react";
 
 const badges = [
-  { icon: Shield, text: "Regulamentado pelo CFM" },
-  { icon: Award, text: "Nota 4.9 no Google" },
+  { icon: ShieldCheck, text: "Regulamentado pelo CFM" },
+  { icon: Medal, text: "Nota 4.9 no Google" },
   { icon: Heart, text: "+12.500 pacientes" },
   { icon: Lock, text: "LGPD Compliant" },
-  { icon: Verified, text: "CRM Verificado" },
+  { icon: SealCheck, text: "CRM Verificado" },
   { icon: Star, text: "4.8★ Satisfação" },
-  { icon: Users, text: "+500 médicos" },
+  { icon: UsersThree, text: "+500 médicos" },
   { icon: Clock, text: "Atendimento 24h" },
-  { icon: Zap, text: "< 3s de carregamento" },
+  { icon: Lightning, text: "< 3s de carregamento" },
 ];
 
 const BadgeItem = ({ icon: Icon, text }: { icon: React.ElementType; text: string }) => (
-  <div className="flex items-center gap-2 shrink-0 rounded-lg border border-border/30 bg-card/80 px-3.5 py-2 mx-1.5">
-    <Icon className="w-3.5 h-3.5 text-primary/50 shrink-0" />
+  <div className="flex items-center gap-2 shrink-0 rounded-full border border-border/30 bg-card/80 px-4 py-2 mx-1.5">
+    <Icon className="w-3.5 h-3.5 text-primary/50 shrink-0" weight="fill" />
     <span className="text-[12px] font-medium text-muted-foreground whitespace-nowrap">
       {text}
     </span>

@@ -3,7 +3,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 import { motion } from "framer-motion";
-import { UserPlus, Search, Video, FileText, Clock } from "lucide-react";
+import { UserPlus, MagnifyingGlass, VideoCamera, FileText, Clock } from "@phosphor-icons/react";
 import stepSignup from "@/assets/step-signup.png";
 import stepSearch from "@/assets/step-search.png";
 import stepVideocall from "@/assets/step-videocall.png";
@@ -11,8 +11,8 @@ import stepPrescription from "@/assets/step-prescription.png";
 
 const steps = [
   { icon: UserPlus, title: "Cadastre-se", description: "Crie sua conta em menos de 2 minutos.", image: stepSignup, time: "2 min", accent: "from-primary/20 to-secondary/10" },
-  { icon: Search, title: "Encontre seu médico", description: "Busque por especialidade ou disponibilidade.", image: stepSearch, time: "1 min", accent: "from-secondary/20 to-success/10" },
-  { icon: Video, title: "Consulta por vídeo", description: "Videochamada segura e em HD.", image: stepVideocall, time: "15-30 min", accent: "from-blue-500/15 to-primary/10" },
+  { icon: MagnifyingGlass, title: "Encontre seu médico", description: "Busque por especialidade ou disponibilidade.", image: stepSearch, time: "1 min", accent: "from-secondary/20 to-success/10" },
+  { icon: VideoCamera, title: "Consulta por vídeo", description: "Videochamada segura e em HD.", image: stepVideocall, time: "15-30 min", accent: "from-blue-500/15 to-primary/10" },
   { icon: FileText, title: "Receba sua receita", description: "Receita digital válida na hora.", image: stepPrescription, time: "Instantâneo", accent: "from-success/20 to-emerald-400/10" },
 ];
 
@@ -45,7 +45,7 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
           className="text-center mb-12 md:mb-16"
         >
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/[0.06] border border-primary/10 text-primary text-sm font-semibold mb-4">
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-3.5 h-3.5" weight="fill" />
             Menos de 5 minutos
           </span>
           <h2 className="text-2xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight">
@@ -85,12 +85,12 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
                     {/* Shimmer overlay on hover */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
                     {/* Step number badge */}
-                    <div className="absolute top-3 left-3 w-8 h-8 rounded-lg bg-primary/90 flex items-center justify-center shadow-lg">
+                    <div className="absolute top-3 left-3 w-8 h-8 rounded-xl bg-primary/90 flex items-center justify-center shadow-lg">
                       <span className="text-xs font-extrabold text-primary-foreground">{String(i + 1).padStart(2, '0')}</span>
                     </div>
                     {/* Time badge */}
                     <span className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-medium text-foreground bg-card/90 backdrop-blur-sm px-2.5 py-1 rounded-full shadow-sm">
-                      <Clock className="w-2.5 h-2.5" />
+                      <Clock className="w-2.5 h-2.5" weight="fill" />
                       {step.time}
                     </span>
                   </div>
@@ -98,7 +98,7 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
                   <div className="p-5">
                     {/* Icon */}
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center mb-3 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 group-hover:shadow-lg group-hover:shadow-primary/20">
-                      <step.icon className="w-4.5 h-4.5 text-primary group-hover:text-primary-foreground transition-colors" />
+                      <step.icon className="w-[18px] h-[18px] text-primary group-hover:text-primary-foreground transition-colors" weight="fill" />
                     </div>
                     <h3 className="text-base font-bold text-foreground mb-1.5">{step.title}</h3>
                     <p className="text-sm text-muted-foreground leading-relaxed">{step.description}</p>
@@ -150,12 +150,12 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-2">
                         <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <step.icon className="w-3.5 h-3.5 text-primary" />
+                          <step.icon className="w-3.5 h-3.5 text-primary" weight="fill" />
                         </div>
                         <h3 className="text-sm font-bold text-foreground">{step.title}</h3>
                       </div>
                       <span className="flex items-center gap-1 text-[10px] text-muted-foreground bg-muted/50 px-2 py-0.5 rounded-full">
-                        <Clock className="w-2.5 h-2.5" />
+                        <Clock className="w-2.5 h-2.5" weight="fill" />
                         {step.time}
                       </span>
                     </div>
@@ -176,7 +176,7 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
           className="flex flex-wrap items-center justify-center gap-4 mt-12 text-sm text-muted-foreground"
         >
           <span className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4 text-primary" />
+            <Clock className="w-4 h-4 text-primary" weight="fill" />
             <strong className="text-foreground">~18 min</strong> do cadastro à receita
           </span>
           <span className="hidden sm:inline text-border">•</span>

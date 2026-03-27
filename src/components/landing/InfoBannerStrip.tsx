@@ -1,9 +1,9 @@
-import { LucideIcon } from "lucide-react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import { type Icon as PhosphorIcon } from "@phosphor-icons/react";
 
 interface InfoBannerStripProps {
-  icon: LucideIcon;
+  icon: React.ElementType;
   label: string;
   title: string;
   highlight?: string;
@@ -52,7 +52,7 @@ const InfoBannerStrip = ({
         <div className="relative z-10 flex flex-col md:flex-row items-center gap-6">
           <div className="flex-1 space-y-2">
             <div className="flex items-center gap-2">
-              <Icon className="h-4 w-4 text-white/80" />
+              <Icon className="h-4 w-4 text-white/80" weight="fill" />
               <span className="text-[10.5px] font-bold uppercase tracking-wider text-white/80">{label}</span>
             </div>
             <h3 className="text-lg md:text-xl font-bold text-white leading-tight">{title}</h3>

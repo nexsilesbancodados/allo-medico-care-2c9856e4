@@ -1,15 +1,15 @@
 import { useEffect, useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, MessageCircle, HelpCircle, ArrowRight, ChevronDown, Stethoscope, FileText, CreditCard, Shield, UserCog } from "lucide-react";
+import { MagnifyingGlass, ChatCircleDots, Question, ArrowRight, CaretDown, Stethoscope, FileText, CreditCard, ShieldCheck, UserGear } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-const categoryConfig: Record<string, { icon: typeof HelpCircle; color: string }> = {
+const categoryConfig: Record<string, { icon: typeof Question; color: string }> = {
   consulta: { icon: Stethoscope, color: "text-blue-500" },
   receita: { icon: FileText, color: "text-emerald-500" },
   plano: { icon: CreditCard, color: "text-violet-500" },
-  segurança: { icon: Shield, color: "text-amber-500" },
-  médico: { icon: UserCog, color: "text-rose-500" },
+  segurança: { icon: ShieldCheck, color: "text-amber-500" },
+  médico: { icon: UserGear, color: "text-rose-500" },
 };
 
 const faqs = [
@@ -80,7 +80,7 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
           className="text-center mb-12 md:mb-16"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/8 border border-primary/15 text-primary text-xs font-bold tracking-wide uppercase mb-5">
-            <HelpCircle className="w-3.5 h-3.5" />
+            <Question className="w-3.5 h-3.5" weight="fill" />
             Central de ajuda
           </div>
           <h2 id="faq-heading" className="text-3xl md:text-5xl font-extrabold text-foreground mb-4" style={{ lineHeight: "1.1" }}>
@@ -101,7 +101,7 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
             className="relative mb-8"
           >
             <div className="relative group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/60 transition-colors group-focus-within:text-primary" />
+              <MagnifyingGlass className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/60 transition-colors group-focus-within:text-primary" weight="bold" />
               <input
                 type="text"
                 placeholder="Pesquisar dúvida..."
@@ -140,7 +140,7 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
                   viewport={{ once: true }}
                   transition={{ delay: 0.15 + i * 0.04 }}
                   onClick={() => setActiveCategory(cat.key)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all duration-300 flex items-center gap-2 active:scale-95 ${
+                  className={`px-4 py-2 rounded-full text-xs font-bold transition-all duration-300 flex items-center gap-2 active:scale-95 ${
                     isActive
                       ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
                       : "bg-card text-muted-foreground border border-border/60 hover:border-primary/30 hover:text-foreground hover:shadow-sm"
@@ -177,7 +177,7 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
               {filtered.map((faq, i) => {
                 const isOpen = openItem === faq.q;
                 const catConfig = categoryConfig[faq.category];
-                const CatIcon = catConfig?.icon || HelpCircle;
+                const CatIcon = catConfig?.icon || Question;
 
                 return (
                   <motion.div
@@ -203,9 +203,9 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-300 ${
                           isOpen ? "bg-primary/10" : "bg-muted/60"
                         }`}>
-                          <CatIcon className={`w-4.5 h-4.5 transition-colors duration-300 ${
+                          <CatIcon className={`transition-colors duration-300 ${
                             isOpen ? "text-primary" : (catConfig?.color || "text-muted-foreground")
-                          }`} style={{ width: "18px", height: "18px" }} />
+                          }`} weight="fill" style={{ width: "18px", height: "18px" }} />
                         </div>
 
                         {/* Question text */}
@@ -221,9 +221,9 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
                           transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                           className="shrink-0"
                         >
-                          <ChevronDown className={`w-5 h-5 transition-colors duration-300 ${
+                          <CaretDown className={`w-5 h-5 transition-colors duration-300 ${
                             isOpen ? "text-primary" : "text-muted-foreground/40"
-                          }`} />
+                          }`} weight="bold" />
                         </motion.div>
                       </button>
 
@@ -258,7 +258,7 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
                 className="text-center py-14"
               >
                 <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                  <Search className="w-7 h-7 text-muted-foreground/40" />
+                  <MagnifyingGlass className="w-7 h-7 text-muted-foreground/40" weight="bold" />
                 </div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">Nenhuma pergunta encontrada</p>
                 <p className="text-xs text-muted-foreground/60 mb-3">Tente buscar com outros termos</p>
@@ -283,7 +283,7 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
             <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-primary/[0.04] blur-3xl pointer-events-none" />
             <div className="relative z-10">
               <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                <MessageCircle className="w-7 h-7 text-primary" />
+                <ChatCircleDots className="w-7 h-7 text-primary" weight="fill" />
               </div>
               <h3 className="text-xl font-extrabold text-foreground mb-2">Ainda tem dúvidas?</h3>
               <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
@@ -291,14 +291,14 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-3">
                 <Button
-                  className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground rounded-xl px-7 font-bold shadow-lg shadow-primary/20"
+                  className="bg-gradient-to-r from-primary to-secondary hover:opacity-90 text-primary-foreground rounded-2xl px-7 font-bold shadow-lg shadow-primary/20"
                   onClick={() => navigate("/suporte")}
                 >
-                  Falar com suporte <ArrowRight className="w-4 h-4 ml-1" />
+                  Falar com suporte <ArrowRight className="w-4 h-4 ml-1" weight="bold" />
                 </Button>
                 <Button
                   variant="outline"
-                  className="rounded-xl px-7 font-bold border-2"
+                  className="rounded-2xl px-7 font-bold border-2"
                   onClick={() => window.open("https://wa.me/5511999999999", "_blank")}
                 >
                   WhatsApp

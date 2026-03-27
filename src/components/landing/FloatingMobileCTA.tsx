@@ -1,5 +1,5 @@
 import { useState, useEffect, forwardRef, useRef } from "react";
-import { ArrowRight, Stethoscope } from "lucide-react";
+import { ArrowRight, Stethoscope } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -56,7 +56,7 @@ const FloatingMobileCTA = forwardRef<HTMLDivElement>((_, ref) => {
               onClick={() => navigate("/paciente")}
             >
               <span className="relative z-10 flex items-center gap-1.5">
-                Agendar Consulta <ArrowRight className="w-4 h-4" />
+                Agendar Consulta <ArrowRight className="w-4 h-4" weight="bold" />
               </span>
             </Button>
             <Button
@@ -66,7 +66,7 @@ const FloatingMobileCTA = forwardRef<HTMLDivElement>((_, ref) => {
               onClick={openQuiz}
               aria-label="Triagem de especialidade"
             >
-              <Stethoscope className="w-5 h-5 text-primary" />
+              <Stethoscope className="w-5 h-5 text-primary" weight="fill" />
             </Button>
           </div>
       </div>

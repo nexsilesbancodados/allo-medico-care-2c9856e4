@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Shield, Lock, Star, Play, CheckCircle2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { memo, forwardRef } from "react";
 import { motion } from "framer-motion";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
 import OptimizedImage from "@/components/ui/optimized-image";
+import { ArrowRight, ShieldCheck, Lock, Star, CheckCircle } from "@phosphor-icons/react";
 
 import heroDoctor from "@/assets/hero-doctor.png";
 
@@ -17,7 +17,7 @@ const heroContent = {
 };
 
 const trustItems = [
-  { label: "Regulamentado CFM", icon: Shield },
+  { label: "Regulamentado CFM", icon: ShieldCheck },
   { label: "Criptografia E2E", icon: Lock },
   { label: "4.9★ — 12k avaliações", icon: Star },
 ];
@@ -32,7 +32,6 @@ const HeroSection = memo(
   forwardRef<HTMLElement>((_, ref) => {
     const navigate = useNavigate();
     const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
-    
 
     return (
       <section
@@ -82,10 +81,10 @@ const HeroSection = memo(
               </p>
 
               {/* Highlights */}
-              <div className="flex flex-col gap-2 mb-8">
+              <div className="flex flex-col gap-2.5 mb-8">
                 {highlights.map((h) => (
-                  <div key={h} className="flex items-center gap-2 text-sm text-foreground/80">
-                    <CheckCircle2 className="w-4 h-4 text-success shrink-0" />
+                  <div key={h} className="flex items-center gap-2.5 text-sm text-foreground/80">
+                    <CheckCircle className="w-[18px] h-[18px] text-success shrink-0" weight="fill" />
                     {h}
                   </div>
                 ))}
@@ -100,22 +99,22 @@ const HeroSection = memo(
               >
                 <Button
                   size="lg"
-                  className="rounded-xl h-[52px] w-full sm:w-auto justify-center text-[14px] font-bold shadow-lg shadow-primary/20 group bg-primary hover:bg-primary/90 text-primary-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] px-8"
+                  className="rounded-2xl h-[52px] w-full sm:w-auto justify-center text-[14px] font-bold shadow-lg shadow-primary/20 group bg-primary hover:bg-primary/90 text-primary-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] px-8"
                   onClick={() => navigate("/paciente")}
                   onMouseEnter={prefetchPaciente}
                 >
                   Agendar consulta
-                  <ArrowRight className="w-4 h-4 ml-1.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  <ArrowRight className="w-4 h-4 ml-1.5 transition-transform duration-200 group-hover:translate-x-0.5" weight="bold" />
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="rounded-xl h-[52px] w-full sm:w-auto justify-center text-[14px] font-bold border-2 border-border hover:border-primary/30 hover:bg-primary/[0.04] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] px-8 gap-2"
+                  className="rounded-2xl h-[52px] w-full sm:w-auto justify-center text-[14px] font-bold border-2 border-border hover:border-primary/30 hover:bg-primary/[0.04] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] px-8 gap-2"
                   onClick={() => navigate("/paciente")}
                   onMouseEnter={prefetchPaciente}
                 >
                   Consulta avulsa
-                  <span className="inline-flex items-center rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-extrabold">R$89</span>
+                  <span className="inline-flex items-center rounded-lg bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-extrabold">R$89</span>
                 </Button>
               </motion.div>
 
@@ -131,7 +130,7 @@ const HeroSection = memo(
                     key={item.label}
                     className="flex items-center gap-2 text-xs text-muted-foreground font-medium"
                   >
-                    <item.icon className="w-3.5 h-3.5 text-primary/60 shrink-0" />
+                    <item.icon className="w-3.5 h-3.5 text-primary/60 shrink-0" weight="fill" />
                     {item.label}
                   </div>
                 ))}
@@ -158,12 +157,12 @@ const HeroSection = memo(
 
                 {/* Floating card — Seguro */}
                 <motion.div
-                  className="absolute -top-1 -right-2 xl:right-0 bg-card/95 backdrop-blur-md rounded-xl shadow-md shadow-foreground/[0.04] px-3.5 py-2.5 border border-border/50 flex items-center gap-2.5"
+                  className="absolute -top-1 -right-2 xl:right-0 bg-card/95 backdrop-blur-md rounded-2xl shadow-md shadow-foreground/[0.04] px-3.5 py-2.5 border border-border/50 flex items-center gap-2.5"
                   animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-success/10 flex items-center justify-center">
-                    <Shield className="w-4 h-4 text-success" />
+                  <div className="w-8 h-8 rounded-xl bg-success/10 flex items-center justify-center">
+                    <ShieldCheck className="w-[18px] h-[18px] text-success" weight="fill" />
                   </div>
                   <div>
                     <p className="text-[13px] font-bold text-foreground leading-none mb-0.5">100% Seguro</p>
@@ -173,12 +172,12 @@ const HeroSection = memo(
 
                 {/* Floating card — Rating */}
                 <motion.div
-                  className="absolute bottom-10 -left-4 xl:-left-2 bg-card/95 backdrop-blur-md rounded-xl shadow-md shadow-foreground/[0.04] px-3.5 py-2.5 border border-border/50 flex items-center gap-2.5"
+                  className="absolute bottom-10 -left-4 xl:-left-2 bg-card/95 backdrop-blur-md rounded-2xl shadow-md shadow-foreground/[0.04] px-3.5 py-2.5 border border-border/50 flex items-center gap-2.5"
                   animate={{ y: [0, -5, 0] }}
                   transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-warning/10 flex items-center justify-center">
-                    <Star className="w-4 h-4 text-warning fill-warning" />
+                  <div className="w-8 h-8 rounded-xl bg-warning/10 flex items-center justify-center">
+                    <Star className="w-[18px] h-[18px] text-warning" weight="fill" />
                   </div>
                   <div>
                     <p className="text-[13px] font-bold text-foreground leading-none mb-0.5">4.9/5</p>

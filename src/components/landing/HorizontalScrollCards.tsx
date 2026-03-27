@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { Video, Brain, CreditCard, ShieldCheck, Star, Clock, Stethoscope, FileText } from "lucide-react";
+import { VideoCamera, Brain, CreditCard, ShieldCheck, Star, Clock, Stethoscope, FileText } from "@phosphor-icons/react";
 
 import heroServices from "@/assets/hero-services.jpg";
 
@@ -107,7 +107,7 @@ function HorizontalScrollCards() {
               </p>
               <div className="flex flex-wrap gap-3">
                 {[
-                  { icon: Video, text: "Teleconsulta" },
+                  { icon: VideoCamera, text: "Teleconsulta" },
                   { icon: FileText, text: "Telelaudo" },
                   { icon: CreditCard, text: "Cartão Saúde" },
                 ].map(({ icon: I, text }) => (
@@ -115,7 +115,7 @@ function HorizontalScrollCards() {
                     key={text}
                     className="inline-flex items-center gap-2 rounded-full bg-white/10 border border-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm"
                   >
-                    <I className="w-3.5 h-3.5" />
+                    <I className="w-3.5 h-3.5" weight="fill" />
                     {text}
                   </span>
                 ))}
@@ -134,7 +134,7 @@ function HorizontalScrollCards() {
           >
             <div className="bg-white/95 dark:bg-card/95 backdrop-blur-xl rounded-2xl px-5 py-4 shadow-xl border border-border/50 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-warning/20 flex items-center justify-center">
-                <Star className="w-5 h-5 text-warning fill-current" />
+                <Star className="w-5 h-5 text-warning" weight="fill" />
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">4.9 / 5.0</p>
@@ -152,7 +152,7 @@ function HorizontalScrollCards() {
           >
             <div className="bg-primary/95 backdrop-blur-xl rounded-2xl px-5 py-4 shadow-xl flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
-                <Clock className="w-5 h-5 text-white" />
+                <Clock className="w-5 h-5 text-white" weight="fill" />
               </div>
               <div>
                 <p className="text-sm font-bold text-white">Plantão 24h</p>
@@ -170,7 +170,7 @@ function HorizontalScrollCards() {
           >
             <div className="bg-white/95 dark:bg-card/95 backdrop-blur-xl rounded-2xl px-5 py-4 shadow-xl border border-border/50 flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-success/20 flex items-center justify-center">
-                <ShieldCheck className="w-5 h-5 text-success" />
+                <ShieldCheck className="w-5 h-5 text-success" weight="fill" />
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">LGPD & CFM</p>
@@ -188,7 +188,7 @@ function HorizontalScrollCards() {
           >
             <div className="bg-secondary/95 backdrop-blur-xl rounded-2xl px-5 py-4 shadow-xl flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
-                <Brain className="w-5 h-5 text-white" />
+                <Brain className="w-5 h-5 text-white" weight="fill" />
               </div>
               <div>
                 <p className="text-sm font-bold text-white">IA Integrada</p>
@@ -205,7 +205,7 @@ function HorizontalScrollCards() {
             duration={4}
           >
             <div className="bg-white/90 backdrop-blur-xl rounded-full px-4 py-2.5 shadow-lg border border-border/40 flex items-center gap-2">
-              <Stethoscope className="w-4 h-4 text-primary" />
+              <Stethoscope className="w-4 h-4 text-primary" weight="fill" />
               <span className="text-xs font-bold text-foreground">+30 especialidades</span>
             </div>
           </FloatingBadge>
@@ -230,7 +230,7 @@ function HorizontalScrollCards() {
               className="bg-card border border-border/50 rounded-2xl p-5 flex items-center gap-4 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <StatIcon className="w-5 h-5 text-primary" />
+                <StatIcon className="w-5 h-5 text-primary" weight="fill" />
               </div>
               <div>
                 <p className="text-lg font-extrabold text-foreground leading-none">{value}</p>

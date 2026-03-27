@@ -1,6 +1,6 @@
 import { forwardRef, useRef, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Star, ShieldCheck, Heart, Quote, X } from "lucide-react";
+import { Star, ShieldCheck, Heart, Quotes, X } from "@phosphor-icons/react";
 import avatarMaria from "@/assets/avatar-maria.png";
 import avatarCarlos from "@/assets/avatar-carlos.png";
 import avatarAna from "@/assets/avatar-ana.png";
@@ -135,7 +135,7 @@ const TestimonialsSection = forwardRef<HTMLElement>((_, ref) => {
                         className="w-full h-full rounded-full object-cover border-2 border-card" loading="lazy" decoding="async" />
                     </div>
                     {t.verified && (
-                      <ShieldCheck className="w-4 h-4 text-primary absolute -bottom-0.5 -right-0.5 bg-card rounded-full" />
+                      <ShieldCheck className="w-4 h-4 text-primary absolute -bottom-0.5 -right-0.5 bg-card rounded-full" weight="fill" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -147,13 +147,13 @@ const TestimonialsSection = forwardRef<HTMLElement>((_, ref) => {
                     onClick={() => setOpenIndex(null)}
                     className="p-1.5 rounded-full hover:bg-muted/50 transition-colors text-muted-foreground"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-4 h-4" weight="bold" />
                   </button>
                 </div>
 
                 {/* Body */}
                 <div className="px-5 pb-4">
-                  <Quote className="w-6 h-6 text-primary/15 mb-2" />
+                  <Quotes className="w-6 h-6 text-primary/15 mb-2" weight="fill" />
                   <p className="text-[15px] text-foreground leading-relaxed">{t.text}</p>
                 </div>
 
@@ -161,11 +161,11 @@ const TestimonialsSection = forwardRef<HTMLElement>((_, ref) => {
                 <div className="flex items-center justify-between px-5 pb-5">
                   <div className="flex gap-0.5">
                     {Array.from({ length: t.rating }).map((_, j) => (
-                      <Star key={j} className="w-3.5 h-3.5 fill-medical-green text-medical-green" />
+                      <Star key={j} className="w-3.5 h-3.5 text-warning" weight="fill" />
                     ))}
                   </div>
                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                    <Heart className="w-3.5 h-3.5" />
+                    <Heart className="w-3.5 h-3.5" weight="bold" />
                     <span className="text-xs">{t.likes}</span>
                   </div>
                 </div>
