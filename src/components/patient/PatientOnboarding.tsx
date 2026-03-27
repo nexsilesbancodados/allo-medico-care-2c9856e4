@@ -18,6 +18,7 @@ import { formatMask } from "@/hooks/use-mask";
 import { validarCPF } from "@/lib/cpf";
 
 const ONBOARDING_KEY = "aloclinica_onboarding_completed";
+const KYC_PENDING_KEY = "aloclinica_kyc_pending";
 
 interface PatientOnboardingProps {
   onComplete: () => void;
@@ -144,9 +145,17 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
 
   const handleNext = async () => {
     if (step.id === "personal" || step.id === "health") await saveProfile();
-    if (step.id === "kyc" && (selfieFile || docFile)) await uploadKYCFiles();
+    if (step.id === "kyc" && (selfieFile || docFile)) {
+      await uploadKYCFiles();
+      localStorage.removeItem(KYC_PENDING_KEY);
+    }
     if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); onComplete(); }
     else setCurrentStep(prev => prev + 1);
+  };
+
+  const handleSkipKyc = () => {
+    localStorage.setItem(KYC_PENDING_KEY, "true");
+    setCurrentStep(prev => prev + 1);
   };
 
   const handleSkip = () => { localStorage.setItem(ONBOARDING_KEY, "true"); onComplete(); };
@@ -414,6 +423,11 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
             )}
           </Button>
         </div>
+        {step.id === "kyc" && (
+          <button onClick={handleSkipKyc} className="w-full text-center text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
+            Fazer depois · <span className="text-destructive/70">Necessário para agendar consultas</span>
+          </button>
+        )}
         {isLast && (
           <p className="text-center text-xs text-muted-foreground mt-3">
             Já tem uma conta? <button onClick={handleSkip} className="text-primary font-semibold underline">Entrar</button>
@@ -424,5 +438,5 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   );
 };
 
-export { ONBOARDING_KEY };
+export { ONBOARDING_KEY, KYC_PENDING_KEY };
 export default PatientOnboarding;
