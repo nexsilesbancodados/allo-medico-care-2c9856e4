@@ -171,7 +171,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       `)}
       <p>Acesse a plataforma <strong>5 minutos antes</strong> para entrar na sala de espera virtual.</p>
       ${btn(URLS.patientAppointments, "Ver Minha Consulta")}
-    `),
+    `, "appointment_confirmation"),
   }),
 
   appointment_reminder: (d) => ({
@@ -186,7 +186,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       `)}
       <p>Prepare-se para acessar a plataforma no horário agendado.</p>
       ${btn(URLS.patientAppointments, "Acessar Consulta")}
-    `),
+    `, "appointment_reminder"),
   }),
 
   appointment_cancelled: (d) => ({
