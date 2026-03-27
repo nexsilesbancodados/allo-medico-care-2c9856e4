@@ -143,7 +143,7 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime"],
+    dedupe: ["react", "react-dom", "react/jsx-runtime", "@tiptap/react"],
   },
   build: {
     target: "es2020",
@@ -165,62 +165,45 @@ export default defineConfig(({ mode }) => ({
     },
     rollupOptions: {
       output: {
-        manualChunks: {
-          // React core
-          "vendor-react": ["react", "react-dom", "react/jsx-runtime"],
+        manualChunks(id) {
+          // React core — ALWAYS loaded first
+          if (
+            id.includes("node_modules/react/") ||
+            id.includes("node_modules/react-dom/") ||
+            id.includes("node_modules/react/jsx-runtime")
+          ) {
+            return "vendor-react";
+          }
           // Router
-          "vendor-router": ["react-router-dom"],
+          if (id.includes("node_modules/react-router-dom/")) return "vendor-router";
           // Supabase
-          "vendor-supabase": ["@supabase/supabase-js"],
+          if (id.includes("node_modules/@supabase/")) return "vendor-supabase";
           // TanStack Query
-          "vendor-query": ["@tanstack/react-query"],
-          // UI primitives (Radix)
-          "vendor-radix": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-select",
-            "@radix-ui/react-tabs",
-            "@radix-ui/react-tooltip",
-            "@radix-ui/react-popover",
-            "@radix-ui/react-accordion",
-            "@radix-ui/react-avatar",
-            "@radix-ui/react-checkbox",
-            "@radix-ui/react-label",
-            "@radix-ui/react-progress",
-            "@radix-ui/react-radio-group",
-            "@radix-ui/react-scroll-area",
-            "@radix-ui/react-separator",
-            "@radix-ui/react-slider",
-            "@radix-ui/react-switch",
-            "@radix-ui/react-toggle",
-          ],
+          if (id.includes("node_modules/@tanstack/react-query")) return "vendor-query";
+          // Radix UI primitives
+          if (id.includes("node_modules/@radix-ui/")) return "vendor-radix";
           // Charts
-          "vendor-charts": ["recharts"],
+          if (id.includes("node_modules/recharts/")) return "vendor-charts";
           // Animations
-          "vendor-motion": ["framer-motion"],
-          // GSAP (heavy)
-          "vendor-gsap": ["gsap", "@gsap/react"],
-          // Rich text editor (heavy)
-          "vendor-tiptap": [
-            "@tiptap/react",
-            "@tiptap/starter-kit",
-            "@tiptap/extension-highlight",
-            "@tiptap/extension-placeholder",
-            "@tiptap/extension-table",
-            "@tiptap/extension-table-cell",
-            "@tiptap/extension-table-header",
-            "@tiptap/extension-table-row",
-            "@tiptap/extension-text-align",
-            "@tiptap/extension-typography",
-            "@tiptap/extension-underline",
-            "@tiptap/extension-character-count",
-          ],
+          if (id.includes("node_modules/framer-motion/")) return "vendor-motion";
+          // GSAP
+          if (id.includes("node_modules/gsap/") || id.includes("node_modules/@gsap/")) return "vendor-gsap";
+          // TipTap (depends on React — must load after vendor-react)
+          if (id.includes("node_modules/@tiptap/")) return "vendor-tiptap";
           // Forms
-          "vendor-forms": ["react-hook-form", "@hookform/resolvers", "zod"],
+          if (
+            id.includes("node_modules/react-hook-form/") ||
+            id.includes("node_modules/@hookform/") ||
+            id.includes("node_modules/zod/")
+          ) {
+            return "vendor-forms";
+          }
           // Date utilities
-          "vendor-dates": ["date-fns", "react-day-picker"],
+          if (id.includes("node_modules/date-fns/") || id.includes("node_modules/react-day-picker/")) {
+            return "vendor-dates";
+          }
           // PDF generation
-          "vendor-pdf": ["jspdf"],
+          if (id.includes("node_modules/jspdf/")) return "vendor-pdf";
         },
       },
     },

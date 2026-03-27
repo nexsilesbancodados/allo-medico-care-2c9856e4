@@ -34,7 +34,8 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { gerarHashDocumento, gerarCodigoVerificacao } from "@/lib/signature";
 import { REPORT_MACROS, findMacro, applyMacro } from "@/lib/report-macros";
-import TipTapEditor from "@/components/telelaudo/TipTapEditor";
+import { lazy, Suspense } from "react";
+const TipTapEditor = lazy(() => import("@/components/telelaudo/TipTapEditor"));
 import jsPDF from "jspdf";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { motion } from "framer-motion";
