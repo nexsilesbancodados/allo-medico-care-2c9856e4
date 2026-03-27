@@ -97,7 +97,7 @@ const Teleconsulta = () => {
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-3">
                   <Button variant="rainbow" size="default" className="rounded-2xl px-8 font-bold" asChild>
-                    <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-4 h-4 ml-2" /></Link>
+                    <Link to="/dashboard/schedule?role=patient">Marcar Teleconsulta <ArrowRight className="w-4 h-4 ml-2" /></Link>
                   </Button>
                 <Button size="default" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl px-6 font-semibold" asChild>
                   <Link to="/medico">Sou Médico</Link>
@@ -208,7 +208,7 @@ const Teleconsulta = () => {
                 <p className="text-sm opacity-70 mt-1">Atendimento rápido, seguro e sem sair de casa.</p>
               </div>
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
-                <Link to="/paciente">Agendar <ArrowRight className="w-4 h-4 ml-1.5" /></Link>
+                <Link to="/dashboard/schedule?role=patient">Agendar <ArrowRight className="w-4 h-4 ml-1.5" /></Link>
               </Button>
             </div>
           </div>
@@ -286,7 +286,7 @@ const Teleconsulta = () => {
                 Celular, tablet ou computador — é tudo que você precisa. Receitas digitais válidas em todo o Brasil, sem enfrentar trânsito ou filas.
               </p>
               <Button className="bg-white text-secondary hover:bg-white/90 rounded-2xl px-8 font-bold shadow-lg" asChild>
-                <Link to="/paciente">Marcar Consulta <ArrowRight className="w-4 h-4 ml-2" /></Link>
+                <Link to="/dashboard/schedule?role=patient">Marcar Consulta <ArrowRight className="w-4 h-4 ml-2" /></Link>
               </Button>
             </motion.div>
           </div>
@@ -301,7 +301,7 @@ const Teleconsulta = () => {
                 <p className="text-sm opacity-70 mt-1">Médicos disponíveis agora. Agende em menos de 2 minutos.</p>
               </div>
               <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-full px-8 font-bold shadow-lg shrink-0" asChild>
-                <Link to="/paciente">Marcar Agora <ChevronRight className="w-4 h-4 ml-1" /></Link>
+                <Link to="/dashboard/schedule?role=patient">Marcar Agora <ChevronRight className="w-4 h-4 ml-1" /></Link>
               </Button>
             </div>
           </div>
@@ -351,7 +351,7 @@ const Teleconsulta = () => {
                 Celular, tablet ou computador com webcam. É tudo que você precisa.
               </p>
               <Button variant="rainbow" size="lg" className="rounded-2xl h-14 px-10 text-base font-bold" asChild>
-                <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" /></Link>
+                <Link to="/dashboard/schedule?role=patient">Marcar Teleconsulta <ArrowRight className="w-5 h-5 ml-2" /></Link>
               </Button>
             </motion.div>
           </div>
