@@ -143,54 +143,49 @@ const PatientDashboard = () => {
       <div className="space-y-5 pb-24 md:pb-8">
 
         {/* ═══════════ HERO BANNER ═══════════ */}
-        <section className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[28px] bg-gradient-to-br from-[#00347F] via-[#1A4BA1] to-[#2563EB] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6">
-          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/[0.07] blur-[50px]" />
-          <div className="pointer-events-none absolute left-1/3 bottom-0 h-32 w-32 rounded-full bg-white/[0.04] blur-[30px]" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+        <section className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[28px] bg-gradient-to-br from-[#00347F] via-[#0D3F8C] to-[#2563EB] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6">
+          {/* Decorative elements */}
+          <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-white/[0.06] blur-[60px]" />
+          <div className="pointer-events-none absolute left-0 bottom-0 h-40 w-40 rounded-full bg-[#2563EB]/30 blur-[50px]" />
+          <div className="pointer-events-none absolute right-1/4 top-1/2 h-20 w-20 rounded-full bg-white/[0.04] blur-[25px]" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-          <div className="relative z-10 px-6 pt-10 pb-8 md:px-8 md:pt-12 md:pb-10">
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-sm px-3 py-1 mb-3"
-            >
-              <Sparkles className="w-3 h-3 text-white/70" />
-              <span className="text-[11px] font-semibold text-white/70 tracking-wide">Clinical Sanctuary</span>
-            </motion.div>
-
+          <div className="relative z-10 px-6 pt-10 pb-9 md:px-8 md:pt-14 md:pb-12">
+            {/* Greeting */}
             <motion.h1
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.45, delay: 0.05 }}
-              className="font-[Manrope] text-[28px] font-extrabold text-white leading-[1.15] md:text-4xl"
+              transition={{ duration: 0.5 }}
+              className="font-[Manrope] text-[26px] font-extrabold text-white leading-[1.15] md:text-[36px]"
             >
-              {getGreeting()}, {firstName}!
+              {getGreeting()}, <span className="capitalize">{firstName}</span>
             </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.12, duration: 0.45 }}
-              className="mt-2 text-[15px] font-medium text-white/60 leading-relaxed max-w-sm"
+              transition={{ delay: 0.08, duration: 0.45 }}
+              className="mt-1.5 text-[14px] font-medium text-white/55 leading-relaxed max-w-xs md:text-[15px]"
             >
-              Sua jornada de saúde está em boas mãos hoje.
+              Cuide da sua saúde com quem entende.
             </motion.p>
 
             {/* KPI pills */}
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-2 mt-4 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1.5 text-[12px] font-bold text-white/80">
-                <Calendar className="w-3 h-3" /> {stats?.total ?? 0} consultas
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="flex gap-2.5 mt-5 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] px-3.5 py-2 text-[12px] font-bold text-white/85 shadow-sm">
+                <Calendar className="w-3.5 h-3.5 opacity-70" /> {stats?.total ?? 0} consultas
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1.5 text-[12px] font-bold text-white/80">
-                <Heart className="w-3 h-3" /> {typedMetrics.length} métricas
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-sm border border-white/[0.08] px-3.5 py-2 text-[12px] font-bold text-white/85 shadow-sm">
+                <Heart className="w-3.5 h-3.5 opacity-70" /> {typedMetrics.length} métricas
               </span>
             </motion.div>
 
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.24 }}>
               <Button
                 onClick={() => navigate("/dashboard/patient/health?role=patient")}
-                className="mt-5 rounded-full bg-white px-7 py-3 text-[14px] font-bold text-[#00347F] shadow-[var(--p-shadow-btn)] hover:bg-white/90 active:scale-[0.97] transition-all"
+                className="mt-6 rounded-full bg-white px-8 py-3 h-auto text-[14px] font-bold text-[#00347F] shadow-lg shadow-black/10 hover:bg-white/95 hover:shadow-xl hover:shadow-black/15 active:scale-[0.97] transition-all duration-200"
               >
-                Ver check-up diário
+                <Heart className="mr-2 h-4 w-4" /> Minha Saúde
               </Button>
             </motion.div>
           </div>
