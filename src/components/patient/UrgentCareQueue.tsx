@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { Clock, Zap, Phone, RefreshCw, AlertTriangle, QrCode, CreditCard, FileBarChart, Lock, Copy, CheckCircle2, Shield, MapPin, Ambulance, ChevronRight, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,7 +38,6 @@ const UrgentCareQueue = () => {
   const [queuePosition, setQueuePosition] = useState(0);
   const [elapsed, setElapsed] = useState(0);
 
-  // Payment state
   const [showPayment, setShowPayment] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("pix");
   const [processing, setProcessing] = useState(false);
@@ -148,46 +148,49 @@ const UrgentCareQueue = () => {
       <div className="max-w-2xl mx-auto pb-24 md:pb-6">
         {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : myEntry ? (
           /* ═══ IN QUEUE ═══ */
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="border-primary/30 bg-primary/5">
-              <CardContent className="p-8 text-center">
-                {myEntry.status === "waiting" && (
-                  <>
-                    <Clock className="w-12 h-12 mx-auto text-primary mb-4 animate-pulse" />
-                    <h2 className="text-xl font-bold mb-2">Você está na fila</h2>
-                    <p className="text-4xl font-bold text-primary mb-1">{queuePosition}º</p>
-                    <p className="text-sm text-muted-foreground mb-4">posição na fila</p>
-                    <Badge variant="outline" className="text-lg px-4 py-1 mb-4">{formatTime(elapsed)}</Badge>
-                    <p className="text-xs text-muted-foreground mb-6">Tempo de espera</p>
-                    {elapsed > 900 && (
-                      <div className="mb-4">
-                        <div className="flex items-center justify-center gap-2 text-destructive mb-2"><AlertTriangle className="w-4 h-4" /><span className="text-sm font-medium">Espera acima de 15 minutos</span></div>
-                        <Button variant="destructive" onClick={handleRequestRefund}>Solicitar Reembolso</Button>
-                      </div>
-                    )}
-                    <Button variant="outline" onClick={() => fetchMyEntry()} className="mt-2"><RefreshCw className="w-4 h-4 mr-1" /> Atualizar</Button>
-                  </>
-                )}
-                {myEntry.status === "assigned" && (<><Phone className="w-12 h-12 mx-auto text-primary mb-4" /><h2 className="text-xl font-bold mb-2">Médico encontrado!</h2><p className="text-muted-foreground mb-4">Aguarde, a consulta começará em instantes...</p></>)}
-              </CardContent>
-            </Card>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
+            {/* Queue position card - amber tinted */}
+            <div className="rounded-2xl bg-[hsl(var(--p-warning-soft))] border border-warning/20 p-6 text-center">
+              {myEntry.status === "waiting" && (
+                <>
+                  <Clock className="w-10 h-10 mx-auto text-warning mb-3 animate-pulse" />
+                  <h2 className="text-lg font-bold text-foreground font-[Manrope] mb-1">Você está na fila</h2>
+                  <p className="font-[Manrope] text-[48px] font-extrabold text-[hsl(var(--p-primary))] leading-none mb-1 tabular-nums">{queuePosition}º</p>
+                  <p className="text-sm text-muted-foreground mb-4">posição na fila</p>
+                  {/* Animated progress bar */}
+                  <div className="w-full max-w-xs mx-auto mb-4">
+                    <Progress value={Math.min((elapsed / 900) * 100, 100)} className="h-2" />
+                  </div>
+                  <Badge variant="outline" className="text-lg px-4 py-1 mb-4 font-[Manrope] font-bold tabular-nums">{formatTime(elapsed)}</Badge>
+                  <p className="text-xs text-muted-foreground mb-5">Tempo de espera</p>
+                  {elapsed > 900 && (
+                    <div className="mb-4">
+                      <div className="flex items-center justify-center gap-2 text-destructive mb-2"><AlertTriangle className="w-4 h-4" /><span className="text-sm font-medium">Espera acima de 15 minutos</span></div>
+                      <Button variant="destructive" className="rounded-full" onClick={handleRequestRefund}>Solicitar Reembolso</Button>
+                    </div>
+                  )}
+                  <Button variant="outline" onClick={() => fetchMyEntry()} className="mt-2 rounded-full"><RefreshCw className="w-4 h-4 mr-1" /> Atualizar</Button>
+                </>
+              )}
+              {myEntry.status === "assigned" && (<><Phone className="w-12 h-12 mx-auto text-[hsl(var(--p-primary))] mb-4" /><h2 className="text-xl font-bold mb-2 font-[Manrope]">Médico encontrado!</h2><p className="text-muted-foreground mb-4">Aguarde, a consulta começará em instantes...</p></>)}
+            </div>
           </motion.div>
         ) : showPayment ? (
           /* ═══ PAYMENT ═══ */
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="mb-6">
+            <Card className="mb-6 rounded-2xl border-border/20 shadow-[var(--p-shadow-elevated)]">
               <CardContent className="p-6">
                 <div className="text-center mb-6">
                   <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-2" />
-                  <h2 className="text-lg font-bold text-foreground">Pagamento — Plantão 24h</h2>
+                  <h2 className="text-lg font-bold text-foreground font-[Manrope]">Pagamento — Plantão 24h</h2>
                   <p className="text-muted-foreground text-sm">R$ {priceWithDiscount.toFixed(2)} • Turno {shiftInfo?.label}</p>
                 </div>
                 <div className="grid grid-cols-3 gap-2 mb-5">
                   {([{ id: "pix" as PaymentMethod, label: "PIX", icon: QrCode, badge: "Instantâneo" }, { id: "card" as PaymentMethod, label: "Cartão", icon: CreditCard, badge: null }, { id: "boleto" as PaymentMethod, label: "Boleto", icon: FileBarChart, badge: null }]).map(method => (
                     <motion.button key={method.id} whileTap={{ scale: 0.97 }} onClick={() => setPaymentMethod(method.id)}
-                      className={`relative flex flex-col items-center gap-1.5 p-3 rounded-xl border-2 transition-all ${paymentMethod === method.id ? "border-primary bg-primary/5" : "border-border bg-card hover:border-primary/30"}`}>
-                      <method.icon className={`w-5 h-5 ${paymentMethod === method.id ? "text-primary" : "text-muted-foreground"}`} />
-                      <span className={`text-xs font-semibold ${paymentMethod === method.id ? "text-primary" : "text-foreground"}`}>{method.label}</span>
+                      className={`relative flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all ${paymentMethod === method.id ? "border-[hsl(var(--p-primary))] bg-[hsl(var(--p-primary))]/5" : "border-border bg-card hover:border-[hsl(var(--p-primary))]/30"}`}>
+                      <method.icon className={`w-5 h-5 ${paymentMethod === method.id ? "text-[hsl(var(--p-primary))]" : "text-muted-foreground"}`} />
+                      <span className={`text-xs font-semibold ${paymentMethod === method.id ? "text-[hsl(var(--p-primary))]" : "text-foreground"}`}>{method.label}</span>
                       {method.badge && <Badge className="absolute -top-2 -right-2 text-[10px] px-1.5 py-0 bg-secondary text-secondary-foreground border-0">{method.badge}</Badge>}
                     </motion.button>
                   ))}
@@ -195,44 +198,56 @@ const UrgentCareQueue = () => {
                 <AnimatePresence mode="wait">
                   {paymentMethod === "pix" && (
                     <motion.div key="pix" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
-                      {pixQrCode ? (<><div className="w-48 h-48 mx-auto rounded-2xl bg-card border-2 border-border p-2 mb-4"><img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-full h-full object-contain rounded-xl" /></div><Button variant="outline" className="w-full mb-4 text-xs" onClick={() => { navigator.clipboard.writeText(pixCopyPaste || ""); setPixCopied(true); toast.success("Copiado!"); setTimeout(() => setPixCopied(false), 3000); }}>{pixCopied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-secondary" /> Copiado!</> : <><Copy className="w-4 h-4 mr-2" /> Copiar código PIX</>}</Button><p className="text-xs text-muted-foreground">Após o pagamento, você entrará na fila automaticamente.</p></>) : (<><QrCode className="w-12 h-12 mx-auto text-primary/60 mb-4" /><Button className="w-full bg-primary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>{processing ? "Gerando PIX..." : `Gerar PIX • R$ ${priceWithDiscount.toFixed(2)}`}</Button></>)}
+                      {pixQrCode ? (<><div className="w-48 h-48 mx-auto rounded-2xl bg-card border-2 border-border p-2 mb-4"><img src={`data:image/png;base64,${pixQrCode}`} alt="QR Code PIX" className="w-full h-full object-contain rounded-xl" /></div><Button variant="outline" className="w-full mb-4 text-xs rounded-2xl" onClick={() => { navigator.clipboard.writeText(pixCopyPaste || ""); setPixCopied(true); toast.success("Copiado!"); setTimeout(() => setPixCopied(false), 3000); }}>{pixCopied ? <><CheckCircle2 className="w-4 h-4 mr-2 text-secondary" /> Copiado!</> : <><Copy className="w-4 h-4 mr-2" /> Copiar código PIX</>}</Button><p className="text-xs text-muted-foreground">Após o pagamento, você entrará na fila automaticamente.</p></>) : (<><QrCode className="w-12 h-12 mx-auto text-[hsl(var(--p-primary))]/60 mb-4" /><Button className="w-full bg-[hsl(var(--p-primary))] text-white h-12 rounded-2xl" onClick={handlePayment} disabled={processing}>{processing ? "Gerando PIX..." : `Gerar PIX • R$ ${priceWithDiscount.toFixed(2)}`}</Button></>)}
                     </motion.div>
                   )}
                   {paymentMethod === "card" && (
                     <motion.div key="card" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-                      <div><Label className="text-xs">Nome no cartão</Label><Input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Nome no cartão" className="mt-1" /></div>
-                      <div><Label className="text-xs">Número</Label><Input value={cardNumber} onChange={e => setCardNumber(formatCardNum(e.target.value))} placeholder="0000 0000 0000 0000" className="mt-1 font-mono" maxLength={19} /></div>
+                      <div><Label className="text-xs">Nome no cartão</Label><Input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Nome no cartão" className="mt-1 rounded-2xl h-11" /></div>
+                      <div><Label className="text-xs">Número</Label><Input value={cardNumber} onChange={e => setCardNumber(formatCardNum(e.target.value))} placeholder="0000 0000 0000 0000" className="mt-1 font-mono rounded-2xl h-11" maxLength={19} /></div>
                       <div className="grid grid-cols-2 gap-3">
-                        <div><Label className="text-xs">Validade</Label><Input value={cardExpiry} onChange={e => setCardExpiry(formatExp(e.target.value))} placeholder="MM/AA" className="mt-1 font-mono" maxLength={5} /></div>
-                        <div><Label className="text-xs">CVV</Label><Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="•••" className="mt-1 font-mono" maxLength={4} type="password" /></div>
+                        <div><Label className="text-xs">Validade</Label><Input value={cardExpiry} onChange={e => setCardExpiry(formatExp(e.target.value))} placeholder="MM/AA" className="mt-1 font-mono rounded-2xl h-11" maxLength={5} /></div>
+                        <div><Label className="text-xs">CVV</Label><Input value={cardCvv} onChange={e => setCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="•••" className="mt-1 font-mono rounded-2xl h-11" maxLength={4} type="password" /></div>
                       </div>
-                      <Button className="w-full bg-primary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>{processing ? "Processando..." : <><Lock className="w-4 h-4 mr-2" /> Pagar R$ {priceWithDiscount.toFixed(2)}</>}</Button>
+                      <Button className="w-full bg-[hsl(var(--p-primary))] text-white h-12 rounded-2xl" onClick={handlePayment} disabled={processing}>{processing ? "Processando..." : <><Lock className="w-4 h-4 mr-2" /> Pagar R$ {priceWithDiscount.toFixed(2)}</>}</Button>
                     </motion.div>
                   )}
                   {paymentMethod === "boleto" && (
                     <motion.div key="boleto" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center">
-                      {boletoUrl ? (<><CheckCircle2 className="w-12 h-12 mx-auto text-secondary mb-4" /><a href={boletoUrl} target="_blank" rel="noopener noreferrer"><Button className="w-full">📄 Abrir Boleto</Button></a><p className="text-xs text-muted-foreground mt-3">Após compensação, você entrará na fila automaticamente.</p></>) : (<><FileBarChart className="w-12 h-12 mx-auto text-primary/60 mb-4" /><Button className="w-full bg-primary text-primary-foreground h-12" onClick={handlePayment} disabled={processing}>{processing ? "Gerando..." : `Gerar Boleto • R$ ${priceWithDiscount.toFixed(2)}`}</Button></>)}
+                      {boletoUrl ? (<><CheckCircle2 className="w-12 h-12 mx-auto text-secondary mb-4" /><a href={boletoUrl} target="_blank" rel="noopener noreferrer"><Button className="w-full rounded-2xl">📄 Abrir Boleto</Button></a><p className="text-xs text-muted-foreground mt-3">Após compensação, você entrará na fila automaticamente.</p></>) : (<><FileBarChart className="w-12 h-12 mx-auto text-[hsl(var(--p-primary))]/60 mb-4" /><Button className="w-full bg-[hsl(var(--p-primary))] text-white h-12 rounded-2xl" onClick={handlePayment} disabled={processing}>{processing ? "Gerando..." : `Gerar Boleto • R$ ${priceWithDiscount.toFixed(2)}`}</Button></>)}
                     </motion.div>
                   )}
                 </AnimatePresence>
                 <div className="flex items-center justify-center gap-2 mt-5 text-xs text-muted-foreground"><Shield className="w-3 h-3" /> Pagamento seguro via Asaas</div>
-                <Button variant="ghost" onClick={() => setShowPayment(false)} className="w-full mt-3 text-sm text-muted-foreground">Voltar</Button>
+                <Button variant="ghost" onClick={() => setShowPayment(false)} className="w-full mt-3 text-sm text-muted-foreground rounded-2xl">Voltar</Button>
               </CardContent>
             </Card>
           </motion.div>
         ) : (
-          /* ═══ MAIN VIEW — New Clinical Sanctuary Design ═══ */
+          /* ═══ MAIN VIEW ═══ */
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-5">
-            {/* Hero banner with mascot */}
-            <div className="relative rounded-2xl bg-gradient-to-br from-primary via-primary to-primary/80 p-6 overflow-hidden">
+            {/* Red gradient urgency banner */}
+            <div className="relative rounded-2xl bg-gradient-to-br from-[#A32D2D] to-[#E24B4A] p-6 overflow-hidden">
               <div className="relative z-10">
-                <h1 className="text-2xl font-bold text-primary-foreground mb-1">Urgência e Emergência</h1>
-                <p className="text-sm text-primary-foreground/70 mb-4">Mantenha a calma. Estamos aqui para ajudar você agora.</p>
-                <Button variant="secondary" className="rounded-xl gap-2 font-bold shadow-lg" onClick={handleStartPayment}>
-                  <Ambulance className="w-4 h-4" /> Chamar Ambulância
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1 mb-3">
+                  <Zap className="w-3 h-3 text-white" />
+                  <span className="text-[11px] font-bold text-white/80 tracking-wide">Urgência 24h</span>
+                </div>
+                <h1 className="text-2xl font-extrabold text-white mb-1 font-[Manrope]">Urgência e Emergência</h1>
+                <p className="text-sm text-white/70 mb-2">Consulta com médico plantonista em minutos.</p>
+                <p className="font-[Manrope] text-[32px] font-extrabold text-white leading-none tabular-nums mb-4">
+                  R$ {priceWithDiscount.toFixed(2)}
+                  <span className="text-sm font-medium text-white/60 ml-2">Turno {shiftInfo?.label}</span>
+                </p>
+                <Button
+                  className="rounded-full bg-white text-[#A32D2D] font-bold shadow-[0_4px_14px_rgba(163,45,45,0.4)] hover:bg-white/90 gap-2"
+                  onClick={handleStartPayment}
+                >
+                  <Zap className="w-4 h-4" /> Entrar na Fila
                 </Button>
               </div>
               <img src={mascotWave} alt="Pingo" className="absolute right-2 bottom-0 w-28 h-28 object-contain opacity-90" loading="lazy" decoding="async" width={112} height={112} />
+              <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/[0.06] blur-[40px]" />
             </div>
 
             {/* Nearby clinics */}
@@ -241,40 +256,32 @@ const UrgentCareQueue = () => {
               <span className="text-sm font-medium text-foreground">{NEARBY_HOSPITALS.length} Clínicas Próximas</span>
             </div>
 
-            {/* Map placeholder */}
-            <div className="rounded-2xl bg-secondary/10 border border-secondary/20 p-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-foreground">Hospitais na região</p>
-                <p className="text-xs text-muted-foreground">Localização em tempo real</p>
-              </div>
-              <Button variant="ghost" size="sm" className="text-secondary text-xs">Ver todos</Button>
-            </div>
-
             {/* Emergency triage */}
-            <div className="rounded-2xl bg-warning/10 border border-warning/20 p-5">
+            <div className="rounded-2xl bg-[hsl(var(--p-warning-soft))] border border-warning/20 p-5">
               <div className="flex items-center gap-2 mb-2">
                 <AlertTriangle className="w-5 h-5 text-warning" />
-                <h3 className="font-bold text-foreground">Relatar Emergência</h3>
+                <h3 className="font-bold text-foreground font-[Manrope]">Relatar Emergência</h3>
               </div>
               <p className="text-sm text-muted-foreground mb-3">Responda 3 perguntas rápidas para triagem imediata.</p>
-              <Button className="rounded-xl bg-primary text-primary-foreground w-full" onClick={handleStartPayment}>
+              <Button className="rounded-full bg-[#A32D2D] text-white w-full shadow-[0_4px_14px_rgba(163,45,45,0.28)]" onClick={handleStartPayment}>
                 Iniciar Triagem
               </Button>
             </div>
 
             {/* Hospitals with wait time */}
             <div>
-              <h2 className="text-lg font-bold text-foreground mb-1">Hospitais com Menor Espera</h2>
+              <h2 className="text-lg font-bold text-foreground mb-1 font-[Manrope]">Hospitais com Menor Espera</h2>
               <p className="text-xs text-muted-foreground mb-3">Tempo estimado para triagem</p>
               <div className="space-y-3">
                 {NEARBY_HOSPITALS.map((h, i) => (
                   <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
-                    className="p-4 rounded-2xl border border-border bg-card flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-muted/50 flex items-center justify-center shrink-0">
+                    whileTap={{ scale: 0.97 }}
+                    className="p-4 rounded-2xl border border-border/20 bg-card flex items-center gap-4 shadow-[var(--p-shadow-card)] hover:shadow-[var(--p-shadow-elevated)] transition-shadow">
+                    <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center shrink-0">
                       <Building2 className="w-6 h-6 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[10px] text-secondary font-bold uppercase">{h.distance} de distância</p>
+                      <p className="text-[10px] text-secondary font-bold uppercase tracking-wider">{h.distance} de distância</p>
                       <p className="font-semibold text-foreground text-sm">{h.name}</p>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
                         <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-warning" /> {h.waitTime} min espera</span>
@@ -288,12 +295,12 @@ const UrgentCareQueue = () => {
             </div>
 
             {/* First aid tips */}
-            <div className="rounded-2xl bg-muted/30 border border-border p-5">
-              <h3 className="font-bold text-foreground mb-3 flex items-center gap-2">🩹 O que fazer agora?</h3>
+            <div className="rounded-2xl bg-muted/30 border border-border/20 p-5">
+              <h3 className="font-bold text-foreground mb-3 flex items-center gap-2 font-[Manrope]">🩹 O que fazer agora?</h3>
               <div className="space-y-3">
                 {FIRST_AID_TIPS.map((tip, i) => (
                   <div key={i} className="flex gap-3">
-                    <span className="text-sm font-bold text-primary shrink-0">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="text-sm font-bold text-[hsl(var(--p-primary))] shrink-0 font-[Manrope]">{String(i + 1).padStart(2, "0")}</span>
                     <p className="text-sm text-muted-foreground leading-relaxed">{tip}</p>
                   </div>
                 ))}

@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import DashboardLayout from "./DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { getPatientNav } from "@/components/patient/patientNav";
@@ -13,7 +14,7 @@ import {
   Calendar, Video, Clock, Gift, ChevronRight,
   Heart, Activity, Weight, Thermometer, Droplets, Wind,
   MessageCircle, CreditCard, Settings, Zap, Search, ClipboardList,
-  Sparkles, ArrowRight, Star, TrendingUp,
+  Sparkles, ArrowRight, Star, TrendingUp, FileText, Upload,
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
@@ -26,7 +27,7 @@ import { useLocalStorage } from "@/hooks/use-local-storage";
 
 /* ── Metric display configs ── */
 const METRIC_CONFIGS: Record<string, { icon: typeof Heart; label: string; unit: string; gradient: string; iconBg: string }> = {
-  pressao_arterial:    { icon: Activity,     label: "Pressão",    unit: "mmHg",  gradient: "from-primary/12 to-primary/4", iconBg: "bg-primary/15" },
+  pressao_arterial:    { icon: Activity,     label: "Pressão",    unit: "mmHg",  gradient: "from-[hsl(var(--p-primary))]/12 to-[hsl(var(--p-primary))]/4", iconBg: "bg-[hsl(var(--p-primary))]/15" },
   peso:                { icon: Weight,        label: "Peso",       unit: "kg",    gradient: "from-warning/12 to-warning/4", iconBg: "bg-warning/15" },
   glicemia:            { icon: Droplets,      label: "Glicemia",   unit: "mg/dL", gradient: "from-secondary/12 to-secondary/4", iconBg: "bg-secondary/15" },
   frequencia_cardiaca: { icon: Heart,         label: "Batimentos", unit: "bpm",   gradient: "from-destructive/12 to-destructive/4", iconBg: "bg-destructive/15" },
@@ -46,18 +47,18 @@ const HEALTH_TIPS = [
 
 interface QuickAction {
   label: string;
-  emoji: string;
-  icon?: typeof Zap;
+  icon: typeof Zap;
   path: string;
-  accent?: boolean;
-  accentColor?: string;
+  iconBg: string;
+  iconColor: string;
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
-  { label: "Início", emoji: "🏠", path: "/dashboard?role=patient" },
-  { label: "Agendar", emoji: "📅", path: "/dashboard/schedule?role=patient" },
-  { label: "Urgência", emoji: "", icon: Zap, path: "/dashboard/urgent-care?role=patient", accent: true, accentColor: "destructive" },
-  { label: "Consultas", emoji: "📋", path: "/dashboard/appointments?role=patient" },
+  { label: "Agendar", icon: Calendar, path: "/dashboard/schedule?role=patient", iconBg: "bg-[hsl(var(--p-primary))]/10", iconColor: "text-[hsl(var(--p-primary))]" },
+  { label: "Urgência", icon: Zap, path: "/dashboard/urgent-care?role=patient", iconBg: "bg-destructive/10", iconColor: "text-destructive" },
+  { label: "Exames", icon: ClipboardList, path: "/dashboard/patient/exam-results?role=patient", iconBg: "bg-secondary/10", iconColor: "text-secondary" },
+  { label: "Receitas", icon: FileText, path: "/dashboard/history?role=patient", iconBg: "bg-[hsl(var(--p-primary-mid))]/10", iconColor: "text-[hsl(var(--p-primary-mid))]" },
+  { label: "Docs", icon: Upload, path: "/dashboard/patient/documents?role=patient", iconBg: "bg-warning/10", iconColor: "text-warning" },
 ];
 
 const SUPPORT_LINKS = [
@@ -73,8 +74,6 @@ const getGreeting = () => {
   if (h < 18) return "Boa tarde";
   return "Boa noite";
 };
-
-const stagger = { delay: 0.05 };
 
 const PatientDashboard = () => {
   const { profile, user } = useAuth();
@@ -115,15 +114,41 @@ const PatientDashboard = () => {
 
   const typedMetrics = healthMetrics as { type: string; value: number; unit: string }[];
 
+  if (loading) {
+    return (
+      <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
+        <div className="space-y-5 pb-24 md:pb-8">
+          {/* Hero skeleton */}
+          <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+            <Skeleton className="h-52 rounded-b-[2rem] md:rounded-[2rem]" />
+          </div>
+          {/* Quick actions skeleton */}
+          <div className="grid grid-cols-5 gap-2">
+            {[0,1,2,3,4].map(i => (
+              <div key={i} className="flex flex-col items-center gap-2">
+                <Skeleton className="w-11 h-11 rounded-2xl" />
+                <Skeleton className="h-3 w-10" />
+              </div>
+            ))}
+          </div>
+          {/* Cards skeleton */}
+          <div className="grid grid-cols-2 gap-3">
+            {[0,1,2,3].map(i => <Skeleton key={i} className="h-32 rounded-2xl" />)}
+          </div>
+          <Skeleton className="h-40 rounded-2xl" />
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
-      <div className="space-y-6 pb-24 md:pb-8">
+      <div className="space-y-5 pb-24 md:pb-8">
 
         {/* ═══════════ HERO BANNER ═══════════ */}
-        <section className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[2rem] bg-gradient-to-br from-primary via-[hsl(215_70%_38%)] to-[hsl(215_55%_48%)] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6">
-          {/* Decorative elements */}
+        <section className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[28px] bg-gradient-to-br from-[#00347F] via-[#1A4BA1] to-[#2563EB] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6">
           <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/[0.07] blur-[50px]" />
           <div className="pointer-events-none absolute left-1/3 bottom-0 h-32 w-32 rounded-full bg-white/[0.04] blur-[30px]" />
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
@@ -135,14 +160,14 @@ const PatientDashboard = () => {
               className="inline-flex items-center gap-1.5 rounded-full bg-white/10 backdrop-blur-sm px-3 py-1 mb-3"
             >
               <Sparkles className="w-3 h-3 text-white/70" />
-              <span className="text-[11px] font-semibold text-white/70">Clinical Sanctuary</span>
+              <span className="text-[11px] font-semibold text-white/70 tracking-wide">Clinical Sanctuary</span>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, delay: 0.05 }}
-              className="font-[Manrope] text-[28px] font-extrabold text-primary-foreground leading-[1.15] md:text-4xl"
+              className="font-[Manrope] text-[28px] font-extrabold text-white leading-[1.15] md:text-4xl"
             >
               {getGreeting()}, {firstName}!
             </motion.h1>
@@ -150,14 +175,25 @@ const PatientDashboard = () => {
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.12, duration: 0.45 }}
-              className="mt-2 text-[15px] font-medium text-primary-foreground/60 leading-relaxed max-w-sm"
+              className="mt-2 text-[15px] font-medium text-white/60 leading-relaxed max-w-sm"
             >
               Sua jornada de saúde está em boas mãos hoje.
             </motion.p>
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }}>
+
+            {/* KPI pills */}
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="flex gap-2 mt-4 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1.5 text-[12px] font-bold text-white/80">
+                <Calendar className="w-3 h-3" /> {stats?.total ?? 0} consultas
+              </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 backdrop-blur-sm px-3 py-1.5 text-[12px] font-bold text-white/80">
+                <Heart className="w-3 h-3" /> {typedMetrics.length} métricas
+              </span>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.28 }}>
               <Button
                 onClick={() => navigate("/dashboard/patient/health?role=patient")}
-                className="mt-6 rounded-full bg-primary-foreground px-7 py-3 text-[14px] font-bold text-primary shadow-[0_8px_24px_rgba(0,0,0,0.15)] hover:bg-primary-foreground/90 active:scale-[0.97] transition-all"
+                className="mt-5 rounded-full bg-white px-7 py-3 text-[14px] font-bold text-[#00347F] shadow-[var(--p-shadow-btn)] hover:bg-white/90 active:scale-[0.97] transition-all"
               >
                 Ver check-up diário
               </Button>
@@ -172,51 +208,35 @@ const PatientDashboard = () => {
           </SectionErrorBoundary>
         )}
 
-        {/* ═══════════ QUICK ACTIONS — App-like Grid ═══════════ */}
-        <section className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        {/* ═══════════ QUICK ACTIONS — 5 col grid ═══════════ */}
+        <section className="grid grid-cols-5 gap-2">
           {QUICK_ACTIONS.map((action, i) => (
             <motion.button
               key={action.label}
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * stagger.delay, type: "spring", stiffness: 300, damping: 24 }}
-              whileTap={{ scale: 0.95 }}
+              transition={{ delay: i * 0.04, type: "spring", stiffness: 300, damping: 24 }}
+              whileTap={{ scale: 0.93 }}
               onClick={() => navigate(action.path)}
-              className={`group relative flex flex-col items-start gap-3 rounded-[1.25rem] border p-5 cursor-pointer transition-all duration-200
-                ${action.accent
-                  ? "border-destructive/15 bg-destructive/[0.04] hover:bg-destructive/[0.08] hover:border-destructive/25"
-                  : "border-border/25 bg-card hover:bg-muted/40 hover:border-border/40 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
-                }`}
+              className="flex flex-col items-center gap-1.5 py-2 cursor-pointer"
             >
-              {/* Hover glow */}
-              <div className={`absolute inset-0 rounded-[1.25rem] opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                ${action.accent ? "bg-gradient-to-br from-destructive/5 to-transparent" : "bg-gradient-to-br from-primary/5 to-transparent"}`}
-              />
-
-              <div className={`relative flex h-12 w-12 items-center justify-center rounded-2xl transition-transform group-hover:scale-105
-                ${action.accent ? "bg-destructive/10" : "bg-primary/8"}`}
-              >
-                {action.icon
-                  ? <action.icon className={`h-6 w-6 ${action.accent ? "text-destructive" : "text-primary"}`} />
-                  : <span className="text-2xl leading-none">{action.emoji}</span>
-                }
+              <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${action.iconBg} transition-transform`}>
+                <action.icon className={`h-5 w-5 ${action.iconColor}`} />
               </div>
-              <span className={`relative text-[14px] font-semibold ${action.accent ? "text-destructive" : "text-foreground"}`}>
-                {action.label}
-              </span>
+              <span className="text-[11px] font-semibold text-foreground leading-tight">{action.label}</span>
             </motion.button>
           ))}
         </section>
 
         {/* ═══════════ HEALTH METRICS + SIDEBAR ═══════════ */}
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3 lg:gap-8">
 
           {/* LEFT: Health Metrics */}
           <div className="lg:col-span-2 space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Activity className="w-3.5 h-3.5 text-primary" />
+                <div className="w-7 h-7 rounded-lg bg-[hsl(var(--p-primary))]/10 flex items-center justify-center">
+                  <Activity className="w-3.5 h-3.5 text-[hsl(var(--p-primary))]" />
                 </div>
                 <h2 className="font-[Manrope] text-lg font-bold text-foreground">Métricas de Saúde</h2>
               </div>
@@ -226,23 +246,25 @@ const PatientDashboard = () => {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-              {/* Heart Rate Card — Featured */}
+            {/* Apple Health style 2x2 grid */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Heart Rate */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.1 }}
-                className="relative overflow-hidden rounded-2xl border border-border/20 bg-card p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                whileTap={{ scale: 0.97 }}
+                className="relative overflow-hidden rounded-2xl border border-border/20 bg-card p-5 shadow-[var(--p-shadow-card)]"
               >
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-destructive/60 to-destructive/20" />
+                <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-destructive/60 to-destructive/20 rounded-t-2xl" />
                 <div className="mb-3 flex items-start justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Batimentos</span>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-destructive/10">
-                    <Heart className="h-4 w-4 text-destructive" fill="currentColor" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Batimentos</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-destructive/10">
+                    <Heart className="h-5 w-5 text-destructive" fill="currentColor" />
                   </div>
                 </div>
                 <div className="mb-3 flex items-baseline gap-1.5">
-                  <span className="font-[Manrope] text-[32px] font-extrabold text-foreground leading-none tabular-nums">
+                  <span className="font-[Manrope] text-[28px] font-extrabold text-foreground leading-none tabular-nums">
                     {typedMetrics.find(m => m.type === "frequencia_cardiaca")?.value ?? 72}
                   </span>
                   <span className="text-xs font-medium text-muted-foreground">bpm</span>
@@ -260,27 +282,28 @@ const PatientDashboard = () => {
                 </div>
               </motion.div>
 
-              {/* Blood Pressure Card — Featured */}
+              {/* Blood Pressure */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.15 }}
-                className="relative overflow-hidden rounded-2xl border border-border/20 bg-card p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                whileTap={{ scale: 0.97 }}
+                className="relative overflow-hidden rounded-2xl border border-border/20 bg-card p-5 shadow-[var(--p-shadow-card)]"
               >
-                <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary/60 to-primary/20" />
+                <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[hsl(var(--p-primary))]/60 to-[hsl(var(--p-primary))]/20 rounded-t-2xl" />
                 <div className="mb-3 flex items-start justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Pressão</span>
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-                    <Activity className="h-4 w-4 text-primary" />
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Pressão</span>
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[hsl(var(--p-primary))]/10">
+                    <Activity className="h-5 w-5 text-[hsl(var(--p-primary))]" />
                   </div>
                 </div>
                 <div className="mb-3 flex items-baseline gap-1.5">
-                  <span className="font-[Manrope] text-[32px] font-extrabold text-foreground leading-none tabular-nums">
+                  <span className="font-[Manrope] text-[28px] font-extrabold text-foreground leading-none tabular-nums">
                     {typedMetrics.find(m => m.type === "pressao_arterial")?.value ?? "12/8"}
                   </span>
                   <span className="text-xs font-medium text-muted-foreground">mmHg</span>
                 </div>
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1.5">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--p-success-soft))] px-3 py-1.5">
                   <div className="h-2 w-2 rounded-full bg-success animate-pulse" />
                   <span className="text-[11px] font-bold text-success">Normal</span>
                 </div>
@@ -299,17 +322,18 @@ const PatientDashboard = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 + i * 0.05 }}
-                      className="relative overflow-hidden rounded-2xl border border-border/20 bg-card p-5 shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+                      whileTap={{ scale: 0.97 }}
+                      className="relative overflow-hidden rounded-2xl border border-border/20 bg-card p-5 shadow-[var(--p-shadow-card)]"
                     >
-                      <div className={`absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r ${cfg?.gradient ?? "from-muted to-transparent"}`} />
+                      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-primary/40 to-primary/10 rounded-t-2xl" />
                       <div className="mb-3 flex items-start justify-between">
-                        <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">{cfg?.label ?? m.type}</span>
-                        <div className={`flex h-8 w-8 items-center justify-center rounded-xl ${cfg?.iconBg ?? "bg-muted"}`}>
-                          <Icon className="h-4 w-4 text-inherit" />
+                        <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{cfg?.label ?? m.type}</span>
+                        <div className={`flex h-10 w-10 items-center justify-center rounded-2xl ${cfg?.iconBg ?? "bg-muted"}`}>
+                          <Icon className="h-5 w-5 text-inherit" />
                         </div>
                       </div>
                       <div className="flex items-baseline gap-1.5">
-                        <span className="font-[Manrope] text-[32px] font-extrabold text-foreground leading-none tabular-nums">{m.value}</span>
+                        <span className="font-[Manrope] text-[28px] font-extrabold text-foreground leading-none tabular-nums">{m.value}</span>
                         <span className="text-xs font-medium text-muted-foreground">{m.unit}</span>
                       </div>
                     </motion.div>
@@ -317,25 +341,26 @@ const PatientDashboard = () => {
                 })}
             </div>
 
-            {/* Health Tip — Glass-style */}
+            {/* Health Tip — Blue tinted */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="relative overflow-hidden rounded-2xl border border-primary/10 bg-gradient-to-br from-primary/[0.06] to-secondary/[0.04] p-5 sm:p-6"
+              whileTap={{ scale: 0.97 }}
+              className="relative overflow-hidden rounded-2xl border border-[hsl(var(--p-primary))]/10 bg-gradient-to-br from-[hsl(var(--p-primary))]/[0.06] to-[hsl(var(--p-primary))]/[0.02] p-5 sm:p-6"
             >
-              <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-primary/5 blur-xl" />
+              <div className="pointer-events-none absolute -right-8 -top-8 h-24 w-24 rounded-full bg-[hsl(var(--p-primary))]/5 blur-xl" />
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xl">{todayTip.emoji}</span>
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-primary/60">Dica de Saúde</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[hsl(var(--p-primary))]/60">Dica de Saúde</p>
                   </div>
                   <h3 className="font-[Manrope] text-base font-bold text-foreground leading-snug">{todayTip.title}</h3>
                   <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{todayTip.body}</p>
                 </div>
-                <div className="flex min-w-[100px] flex-col items-center justify-center rounded-2xl bg-card/80 backdrop-blur-sm border border-border/20 p-4 shadow-sm">
-                  <span className="text-xl font-extrabold text-primary font-[Manrope]">{todayTip.metric}</span>
+                <div className="flex min-w-[100px] flex-col items-center justify-center rounded-2xl bg-card/80 backdrop-blur-sm border border-border/20 p-4 shadow-[var(--p-shadow-card)]">
+                  <span className="text-xl font-extrabold text-[hsl(var(--p-primary))] font-[Manrope]">{todayTip.metric}</span>
                   <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5">{todayTip.metricLabel}</span>
                 </div>
               </div>
@@ -345,15 +370,15 @@ const PatientDashboard = () => {
           {/* RIGHT: Next Appointment + Support */}
           <div className="space-y-5">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Calendar className="w-3.5 h-3.5 text-primary" />
+              <div className="w-7 h-7 rounded-lg bg-[hsl(var(--p-primary))]/10 flex items-center justify-center">
+                <Calendar className="w-3.5 h-3.5 text-[hsl(var(--p-primary))]" />
               </div>
               <h2 className="font-[Manrope] text-lg font-bold text-foreground">Próxima Consulta</h2>
             </div>
 
-            {!loading && nextAppt ? (
+            {nextAppt ? (
               <NextAppointmentCard appt={nextAppt} daysUntilNext={daysUntilNext} navigate={navigate} />
-            ) : !loading && (
+            ) : (
               <EmptyAppointmentCard navigate={navigate} />
             )}
 
@@ -363,19 +388,20 @@ const PatientDashboard = () => {
 
             {/* Quick Support Access */}
             <div className="space-y-2">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 px-1">Acesso Rápido</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground/60 px-1">Acesso Rápido</p>
               {SUPPORT_LINKS.map((item, i) => (
                 <motion.button
                   key={item.label}
                   initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.3 + i * 0.04 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => navigate(item.path)}
-                  className="flex w-full items-center justify-between rounded-2xl border border-border/20 bg-card p-4 shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition-all hover:bg-muted/30 hover:border-border/30 active:scale-[0.98] group"
+                  className="flex w-full items-center justify-between rounded-2xl border border-border/20 bg-card p-4 shadow-[var(--p-shadow-card)] transition-all hover:shadow-[var(--p-shadow-elevated)] active:scale-[0.98] group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/60 group-hover:bg-primary/8 transition-colors">
-                      <item.icon className="h-4.5 w-4.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-muted/60 group-hover:bg-[hsl(var(--p-primary))]/8 transition-colors">
+                      <item.icon className="h-4.5 w-4.5 text-muted-foreground group-hover:text-[hsl(var(--p-primary))] transition-colors" />
                     </div>
                     <div className="text-left">
                       <span className="text-[14px] font-semibold text-foreground block">{item.label}</span>
@@ -403,7 +429,7 @@ interface ReturnAppt {
 }
 
 const ReturnAppointments = ({ items, navigate }: { items: ReturnAppt[]; navigate: ReturnType<typeof useNavigate> }) => (
-  <div className="overflow-hidden rounded-2xl border border-warning/20 bg-gradient-to-br from-warning/[0.06] to-warning/[0.02] p-4">
+  <div className="overflow-hidden rounded-2xl border border-warning/20 bg-[hsl(var(--p-warning-soft))] p-4">
     <div className="mb-3 flex items-center gap-2">
       <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-warning/15">
         <Gift className="h-4 w-4 text-warning" />
@@ -413,7 +439,7 @@ const ReturnAppointments = ({ items, navigate }: { items: ReturnAppt[]; navigate
     {items.map(ra => {
       const daysR = differenceInDays(new Date(ra.return_deadline), new Date());
       return (
-        <div key={ra.id} className="mb-2 flex items-center justify-between rounded-xl border border-border/20 bg-card p-3 last:mb-0 shadow-sm">
+        <div key={ra.id} className="mb-2 flex items-center justify-between rounded-xl border border-border/20 bg-card p-3 last:mb-0 shadow-[var(--p-shadow-card)]">
           <div className="text-xs">
             <p className="font-semibold text-foreground">{ra.doctor_name}</p>
             <p className="mt-0.5 text-muted-foreground">
@@ -441,58 +467,53 @@ const NextAppointmentCard = ({
 }) => {
   const scheduledAt = new Date(appt.scheduled_at as string);
   return (
-    <Card className="relative overflow-hidden border-border/20 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary to-secondary" />
-      <CardContent className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-3 py-1">
-            <Clock className="w-3 h-3 text-primary" />
-            <span className="text-[12px] font-bold text-primary">
-              {daysUntilNext === 0
-                ? `Hoje, ${format(scheduledAt, "HH:mm")}`
-                : daysUntilNext === 1
-                  ? `Amanhã, ${format(scheduledAt, "HH:mm")}`
-                  : format(scheduledAt, "dd/MM, HH:mm", { locale: ptBR })}
-            </span>
+    <Card className="relative overflow-hidden border-border/20 shadow-[var(--p-shadow-elevated)]">
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#00347F] to-[#2563EB]" />
+      <CardContent className="p-0">
+        <div className="flex">
+          {/* Left date column */}
+          <div className="flex flex-col items-center justify-center px-4 py-5 bg-[#00347F] text-white min-w-[72px]">
+            <span className="text-[10px] font-bold uppercase tracking-wider opacity-70">{format(scheduledAt, "MMM", { locale: ptBR })}</span>
+            <span className="font-[Manrope] text-[28px] font-extrabold leading-none mt-0.5">{format(scheduledAt, "dd")}</span>
+            <span className="text-[11px] font-semibold mt-1 opacity-80">{format(scheduledAt, "HH:mm")}</span>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/8">
-            <Video className="h-5 w-5 text-primary" />
+          {/* Right content */}
+          <div className="flex-1 p-4">
+            <div className="flex items-center justify-between mb-1">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--p-primary))]/8 px-2.5 py-1 text-[11px] font-bold text-[hsl(var(--p-primary))]">
+                <Clock className="w-3 h-3" />
+                {daysUntilNext === 0 ? "Hoje" : daysUntilNext === 1 ? "Amanhã" : `${daysUntilNext}d`}
+              </span>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[hsl(var(--p-primary))]/8">
+                <Video className="h-4 w-4 text-[hsl(var(--p-primary))]" />
+              </div>
+            </div>
+
+            <h3 className="font-[Manrope] text-[15px] font-extrabold text-foreground leading-tight mt-1">
+              {appt.doctor_name as string}
+            </h3>
+            <p className="mt-0.5 text-[12px] text-muted-foreground">
+              {(appt.specialty as string) ?? "Consulta Geral"} · {(appt.duration_minutes as number) || 30}min
+            </p>
+
+            {daysUntilNext === 0 ? (
+              <Button
+                className="mt-3 w-full rounded-full bg-[#00347F] text-white py-2.5 font-bold text-[13px] shadow-[var(--p-shadow-btn)] hover:bg-[#00347F]/90"
+                onClick={() => navigate(`/dashboard/consultation/${appt.id}`)}
+              >
+                <Video className="mr-2 h-4 w-4" /> Entrar na Sala
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                className="mt-3 w-full rounded-full py-2.5 font-bold text-[13px] border-[hsl(var(--p-primary))]/20 text-[hsl(var(--p-primary))] hover:bg-[hsl(var(--p-primary))]/5"
+                onClick={() => navigate("/dashboard/appointments?role=patient")}
+              >
+                Ver Detalhes <ArrowRight className="ml-2 h-3.5 w-3.5" />
+              </Button>
+            )}
           </div>
         </div>
-
-        <h3 className="font-[Manrope] text-lg font-extrabold text-foreground leading-tight">
-          {appt.doctor_name as string}
-        </h3>
-        <p className="mt-1 text-[13px] text-muted-foreground">
-          {(appt.specialty as string) ?? "Consulta Geral"}
-        </p>
-
-        <div className="mt-4 flex items-center gap-4 text-[12px] text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <Video className="w-3.5 h-3.5" /> Telemedicina
-          </span>
-          <span className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5" /> {(appt.duration_minutes as number) || 30}min
-          </span>
-        </div>
-
-        {daysUntilNext === 0 ? (
-          <Button
-            className="mt-5 w-full rounded-full bg-primary text-primary-foreground py-3 font-bold shadow-[0_4px_16px_hsl(215_75%_32%/0.3)]"
-            onClick={() => navigate(`/dashboard/consultation/${appt.id}`)}
-          >
-            <Video className="mr-2 h-4 w-4" /> Entrar na Sala
-          </Button>
-        ) : (
-          <Button
-            variant="outline"
-            className="mt-5 w-full rounded-full py-3 font-bold border-primary/20 text-primary hover:bg-primary/5"
-            onClick={() => navigate("/dashboard/appointments?role=patient")}
-          >
-            Ver Detalhes <ArrowRight className="ml-2 h-3.5 w-3.5" />
-          </Button>
-        )}
       </CardContent>
     </Card>
   );
@@ -507,7 +528,7 @@ const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNav
       <p className="font-[Manrope] text-[15px] font-bold text-foreground">Nenhuma consulta agendada</p>
       <p className="mt-1 text-[13px] text-muted-foreground max-w-[200px]">Agende agora e cuide da sua saúde com especialistas</p>
       <Button
-        className="mt-6 rounded-full bg-primary text-primary-foreground px-8 shadow-[0_4px_16px_hsl(215_75%_32%/0.25)]"
+        className="mt-6 rounded-full bg-[#00347F] text-white px-8 shadow-[var(--p-shadow-btn)]"
         onClick={() => navigate("/dashboard/schedule?role=patient")}
       >
         <Calendar className="mr-2 h-4 w-4" /> Agendar consulta

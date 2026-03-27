@@ -74,6 +74,24 @@
     --laudo-success: 152 60% 44%;
     --laudo-dicom-bg: 0 0% 3%;
 
+    /* Patient panel tokens */
+    --p-primary: 215 80% 28%;
+    --p-primary-mid: 215 65% 40%;
+    --p-bg: 210 25% 98%;
+    --p-surface: 0 0% 100%;
+    --p-muted: 215 18% 94%;
+    --p-border: 215 18% 88%;
+    --p-text: 215 45% 10%;
+    --p-text-muted: 215 12% 44%;
+    --p-text-hint: 215 8% 46%;
+    --p-danger: 0 72% 51%;
+    --p-danger-soft: 0 100% 92%;
+    --p-success-soft: 145 60% 92%;
+    --p-warning-soft: 38 100% 92%;
+    --p-shadow-card: 0 2px 8px rgba(0,52,127,0.06);
+    --p-shadow-elevated: 0 6px 24px rgba(0,52,127,0.10);
+    --p-shadow-btn: 0 4px 14px rgba(0,52,127,0.28);
+
     /* Continuous background — clean medical white with subtle warmth */
     --landing-bg:
       radial-gradient(ellipse 100% 50% at 0% 80%, hsl(215 30% 94% / 0.35) 0%, transparent 55%),

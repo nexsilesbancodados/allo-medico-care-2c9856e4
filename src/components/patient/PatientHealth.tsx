@@ -29,15 +29,15 @@ import { motion } from "framer-motion";
 
 const METRIC_TYPES = [
   { value: "blood_pressure_sys", label: "Pressão Sistólica", unit: "mmHg", icon: HeartPulse, bg: "bg-destructive/10", text: "text-destructive", normalRange: [90, 120] },
-  { value: "blood_pressure_dia", label: "Pressão Diastólica", unit: "mmHg", icon: HeartPulse, bg: "bg-primary/10", text: "text-primary", normalRange: [60, 80] },
+  { value: "blood_pressure_dia", label: "Pressão Diastólica", unit: "mmHg", icon: HeartPulse, bg: "bg-[hsl(var(--p-primary))]/10", text: "text-[hsl(var(--p-primary))]", normalRange: [60, 80] },
   { value: "weight", label: "Peso", unit: "kg", icon: Weight, bg: "bg-warning/10", text: "text-warning", normalRange: [50, 100] },
   { value: "glucose", label: "Glicose", unit: "mg/dL", icon: Droplets, bg: "bg-secondary/10", text: "text-secondary", normalRange: [70, 100] },
-  { value: "temperature", label: "Temperatura", unit: "°C", icon: Thermometer, bg: "bg-primary/10", text: "text-primary", normalRange: [36.0, 37.5] },
+  { value: "temperature", label: "Temperatura", unit: "°C", icon: Thermometer, bg: "bg-[hsl(var(--p-primary))]/10", text: "text-[hsl(var(--p-primary))]", normalRange: [36.0, 37.5] },
   { value: "heart_rate", label: "Freq. Cardíaca", unit: "bpm", icon: Activity, bg: "bg-destructive/10", text: "text-destructive", normalRange: [60, 100] },
 ];
 
 const getStatusColor = (value: number, range: number[]) => {
-  if (value < range[0]) return "text-primary";
+  if (value < range[0]) return "text-[hsl(var(--p-primary))]";
   if (value > range[1]) return "text-destructive";
   return "text-success";
 };
@@ -182,9 +182,9 @@ const PatientHealth = () => {
   });
 
   const statCards = [
-    { label: "Consultas", value: consultations.length, icon: Stethoscope, gradient: "from-primary/15 to-primary/5", iconColor: "text-primary" },
+    { label: "Consultas", value: consultations.length, icon: Stethoscope, gradient: "from-[hsl(var(--p-primary))]/15 to-[hsl(var(--p-primary))]/5", iconColor: "text-[hsl(var(--p-primary))]" },
     { label: "Receitas", value: prescriptions.length, icon: Pill, gradient: "from-secondary/15 to-secondary/5", iconColor: "text-secondary" },
-    { label: "Exames", value: documents.length, icon: FileCheck, gradient: "from-primary/10 to-secondary/5", iconColor: "text-primary" },
+    { label: "Exames", value: documents.length, icon: FileCheck, gradient: "from-[hsl(var(--p-primary))]/10 to-secondary/5", iconColor: "text-[hsl(var(--p-primary))]" },
     { label: "Métricas", value: metrics.length, icon: BarChart3, gradient: "from-warning/15 to-warning/5", iconColor: "text-warning" },
   ];
 
@@ -197,16 +197,15 @@ const PatientHealth = () => {
           animate={{ opacity: 1, y: 0 }}
           className="mb-6"
         >
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-secondary/5 border border-primary/10 p-5">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-secondary/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[hsl(var(--p-primary))]/10 via-[hsl(var(--p-primary))]/5 to-secondary/5 border border-[hsl(var(--p-primary))]/10 p-5">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[hsl(var(--p-primary))]/5 rounded-full -translate-y-1/2 translate-x-1/2" />
             <div className="relative z-10">
               <div className="flex items-center gap-3 mb-1">
-                <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
-                  <Heart className="w-5 h-5 text-primary" />
+                <div className="w-10 h-10 rounded-xl bg-[hsl(var(--p-primary))]/15 flex items-center justify-center">
+                  <Heart className="w-5 h-5 text-[hsl(var(--p-primary))]" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-foreground">Minha Saúde</h1>
+                  <h1 className="text-xl font-extrabold text-foreground font-[Manrope]">Minha Saúde</h1>
                   <p className="text-xs text-muted-foreground">Seu painel de monitoramento completo</p>
                 </div>
               </div>
@@ -217,7 +216,7 @@ const PatientHealth = () => {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
           {loading ? (
-            [0,1,2,3].map(i => <Skeleton key={i} className="h-20 rounded-xl" />)
+            [0,1,2,3].map(i => <Skeleton key={i} className="h-20 rounded-2xl" />)
           ) : (
             statCards.map((stat, i) => {
               const Icon = stat.icon;
@@ -227,12 +226,13 @@ const PatientHealth = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.05 }}
+                  whileTap={{ scale: 0.97 }}
                 >
-                  <Card className={`border-0 shadow-sm bg-gradient-to-br ${stat.gradient} overflow-hidden`}>
+                  <Card className={`border-0 shadow-[var(--p-shadow-card)] bg-gradient-to-br ${stat.gradient} overflow-hidden rounded-2xl`}>
                     <CardContent className="p-3 text-center">
                       <Icon className={`w-5 h-5 ${stat.iconColor} mx-auto mb-1.5`} />
-                      <p className="text-2xl font-bold text-foreground leading-none">{stat.value}</p>
-                      <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{stat.label}</p>
+                      <p className="text-2xl font-extrabold text-foreground leading-none font-[Manrope] tabular-nums">{stat.value}</p>
+                      <p className="text-[10px] text-muted-foreground mt-1 leading-tight uppercase tracking-wider font-semibold">{stat.label}</p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -245,12 +245,12 @@ const PatientHealth = () => {
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.15 }}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-primary" />
-              <h2 className="text-sm font-bold text-foreground">Sinais Vitais</h2>
+              <Activity className="w-4 h-4 text-[hsl(var(--p-primary))]" />
+              <h2 className="text-sm font-bold text-foreground font-[Manrope]">Sinais Vitais</h2>
             </div>
             <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button size="sm" variant="outline" className="h-7 text-xs gap-1 rounded-full">
+                <Button size="sm" className="h-8 text-xs gap-1 rounded-full bg-[hsl(var(--p-primary))] text-white">
                   <Plus className="w-3.5 h-3.5" /> Registrar
                 </Button>
               </DialogTrigger>
@@ -260,7 +260,7 @@ const PatientHealth = () => {
                   <div>
                     <Label>Tipo</Label>
                     <Select value={newMetric.type} onValueChange={v => setNewMetric(p => ({ ...p, type: v }))}>
-                      <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="mt-1 rounded-2xl"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {METRIC_TYPES.map(mt => (
                           <SelectItem key={mt.value} value={mt.value}>{mt.label} ({mt.unit})</SelectItem>
@@ -276,7 +276,7 @@ const PatientHealth = () => {
                       value={newMetric.value}
                       onChange={e => setNewMetric(p => ({ ...p, value: e.target.value }))}
                       placeholder={METRIC_TYPES.find(m => m.value === newMetric.type)?.unit}
-                      className="mt-1"
+                      className="mt-1 rounded-2xl h-11"
                     />
                   </div>
                   <div>
@@ -285,10 +285,10 @@ const PatientHealth = () => {
                       value={newMetric.notes}
                       onChange={e => setNewMetric(p => ({ ...p, notes: e.target.value }))}
                       placeholder="Ex: após exercício..."
-                      className="mt-1"
+                      className="mt-1 rounded-2xl h-11"
                     />
                   </div>
-                  <Button onClick={saveMetric} disabled={saving || !newMetric.value} className="w-full">
+                  <Button onClick={saveMetric} disabled={saving || !newMetric.value} className="w-full rounded-full bg-[hsl(var(--p-primary))] text-white">
                     {saving ? "Salvando..." : "Salvar Métrica"}
                   </Button>
                 </div>
@@ -308,23 +308,23 @@ const PatientHealth = () => {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.04 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedMetricType(mt.value)}
-                  className={`relative p-3 rounded-xl border text-left transition-all overflow-hidden ${
+                  className={`relative p-3 rounded-2xl border text-left transition-all overflow-hidden ${
                     isSelected
-                      ? "border-primary/40 bg-primary/5 shadow-sm shadow-primary/10 ring-1 ring-primary/20"
-                      : "border-border/60 bg-card hover:border-primary/20 hover:shadow-sm"
+                      ? "border-[hsl(var(--p-primary))]/40 bg-[hsl(var(--p-primary))]/5 shadow-[var(--p-shadow-card)] ring-1 ring-[hsl(var(--p-primary))]/20"
+                      : "border-border/40 bg-card hover:border-[hsl(var(--p-primary))]/20 hover:shadow-[var(--p-shadow-card)]"
                   }`}
                 >
-                  {/* Gradient accent */}
-                  <div className={`absolute top-0 left-0 right-0 h-0.5 bg-primary ${isSelected ? "opacity-100" : "opacity-0"} transition-opacity`} />
+                  <div className={`absolute top-0 left-0 right-0 h-[3px] bg-[hsl(var(--p-primary))] rounded-t-2xl ${isSelected ? "opacity-100" : "opacity-0"} transition-opacity`} />
 
                   <div className="flex items-center justify-between mb-2">
-                    <div className={`w-8 h-8 rounded-lg ${mt.bg} flex items-center justify-center`}>
-                      <IconComp className={`w-4 h-4 ${mt.text}`} />
+                    <div className={`w-10 h-10 rounded-2xl ${mt.bg} flex items-center justify-center`}>
+                      <IconComp className={`w-5 h-5 ${mt.text}`} />
                     </div>
                     {mt.trend && (
                       <div className={`flex items-center gap-0.5 text-[10px] font-medium ${
-                        mt.trend.direction === "up" ? "text-destructive" : mt.trend.direction === "down" ? "text-primary" : "text-muted-foreground"
+                        mt.trend.direction === "up" ? "text-destructive" : mt.trend.direction === "down" ? "text-[hsl(var(--p-primary))]" : "text-muted-foreground"
                       }`}>
                         {mt.trend.direction === "up" ? <TrendingUp className="w-3 h-3" /> :
                          mt.trend.direction === "down" ? <TrendingDown className="w-3 h-3" /> :
@@ -334,18 +334,17 @@ const PatientHealth = () => {
                     )}
                   </div>
 
-                  <p className="text-lg font-bold text-foreground leading-none">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground mb-1">{mt.label}</p>
+                  <p className="font-[Manrope] text-[28px] font-extrabold text-foreground leading-none tabular-nums">
                     {mt.latest ? mt.latest.value : "—"}
                     <span className="text-[10px] font-normal text-muted-foreground ml-1">{mt.unit}</span>
                   </p>
-                  <p className="text-[10px] text-muted-foreground mt-1 leading-tight">{mt.label}</p>
 
                   {mt.latest && (
                     <div className="flex items-center gap-1 mt-1.5">
-                      <div className={`w-1.5 h-1.5 rounded-full ${isNormal ? "bg-success" : "bg-destructive"}`} />
-                      <span className={`text-[9px] font-medium ${isNormal ? "text-success" : "text-destructive"}`}>
+                      <Badge className={`text-[9px] px-2 py-0 h-4 ${isNormal ? "bg-[hsl(var(--p-success-soft))] text-success border-success/20" : "bg-[hsl(var(--p-danger-soft))] text-destructive border-destructive/20"}`} variant="outline">
                         {isNormal ? "Normal" : "Atenção"}
-                      </span>
+                      </Badge>
                     </div>
                   )}
                 </motion.button>
@@ -355,11 +354,11 @@ const PatientHealth = () => {
 
           {/* Chart */}
           {chartData.length > 1 ? (
-            <Card className="border-border/60 shadow-sm mb-6 overflow-hidden">
+            <Card className="border-border/40 shadow-[var(--p-shadow-card)] mb-6 overflow-hidden rounded-2xl">
               <CardHeader className="pb-1 pt-4 px-4">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-xs font-semibold text-foreground flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-primary" />
+                  <CardTitle className="text-xs font-bold text-foreground flex items-center gap-2 font-[Manrope]">
+                    <div className="w-2 h-2 rounded-full bg-[hsl(var(--p-primary))]" />
                     {currentMetricConfig?.label}
                   </CardTitle>
                   <Badge variant="secondary" className="text-[9px] h-5">
@@ -372,8 +371,8 @@ const PatientHealth = () => {
                   <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -15, bottom: 0 }}>
                     <defs>
                       <linearGradient id="metricGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                        <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0.02} />
+                        <stop offset="0%" stopColor="#185FA5" stopOpacity={0.3} />
+                        <stop offset="100%" stopColor="#185FA5" stopOpacity={0.02} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" strokeOpacity={0.5} vertical={false} />
@@ -385,30 +384,30 @@ const PatientHealth = () => {
                         border: "1px solid hsl(var(--border))",
                         borderRadius: "12px",
                         fontSize: "12px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        boxShadow: "var(--p-shadow-elevated)",
                       }}
                       formatter={(v: number) => [`${v} ${currentMetricConfig?.unit}`, currentMetricConfig?.label]}
                     />
                     <Area
                       type="monotone"
                       dataKey="value"
-                      stroke="hsl(var(--primary))"
+                      stroke="#185FA5"
                       strokeWidth={2.5}
                       fill="url(#metricGradient)"
-                      dot={{ r: 3, fill: "hsl(var(--primary))", strokeWidth: 0 }}
-                      activeDot={{ r: 5, fill: "hsl(var(--primary))", stroke: "hsl(var(--background))", strokeWidth: 2 }}
+                      dot={{ r: 3, fill: "#185FA5", strokeWidth: 0 }}
+                      activeDot={{ r: 5, fill: "#185FA5", stroke: "hsl(var(--background))", strokeWidth: 2 }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-dashed border-border/60 mb-6">
+            <Card className="border-dashed border-border/40 mb-6 rounded-2xl">
               <CardContent className="py-8 text-center">
-                <div className="w-12 h-12 rounded-xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-3">
                   <Activity className="w-6 h-6 text-muted-foreground/40" />
                 </div>
-                <p className="text-sm font-medium text-foreground">Gráfico de evolução</p>
+                <p className="text-sm font-medium text-foreground font-[Manrope]">Gráfico de evolução</p>
                 <p className="text-xs text-muted-foreground mt-1">Registre pelo menos 2 medições para visualizar</p>
               </CardContent>
             </Card>
@@ -417,23 +416,23 @@ const PatientHealth = () => {
 
         {/* Search */}
         <div className="relative mb-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Buscar por médico..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 h-9 rounded-xl bg-muted/30 border-border/50" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input placeholder="Buscar por médico..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10 h-11 rounded-2xl bg-muted/30 border-border/40" />
         </div>
 
         {/* Tabs for history */}
         <Tabs defaultValue="consultations">
-          <TabsList className="grid w-full grid-cols-4 h-9 rounded-xl bg-muted/50">
-            <TabsTrigger value="consultations" className="text-[11px] rounded-lg data-[state=active]:shadow-sm">
+          <TabsList className="grid w-full grid-cols-4 h-10 rounded-2xl bg-muted/50 p-1">
+            <TabsTrigger value="consultations" className="text-[11px] rounded-xl data-[state=active]:shadow-[var(--p-shadow-card)] data-[state=active]:bg-card font-semibold">
               Consultas
             </TabsTrigger>
-            <TabsTrigger value="prescriptions" className="text-[11px] rounded-lg data-[state=active]:shadow-sm">
+            <TabsTrigger value="prescriptions" className="text-[11px] rounded-xl data-[state=active]:shadow-[var(--p-shadow-card)] data-[state=active]:bg-card font-semibold">
               Receitas
             </TabsTrigger>
-            <TabsTrigger value="documents" className="text-[11px] rounded-lg data-[state=active]:shadow-sm">
+            <TabsTrigger value="documents" className="text-[11px] rounded-xl data-[state=active]:shadow-[var(--p-shadow-card)] data-[state=active]:bg-card font-semibold">
               Exames
             </TabsTrigger>
-            <TabsTrigger value="history" className="text-[11px] rounded-lg data-[state=active]:shadow-sm">
+            <TabsTrigger value="history" className="text-[11px] rounded-xl data-[state=active]:shadow-[var(--p-shadow-card)] data-[state=active]:bg-card font-semibold">
               Histórico
             </TabsTrigger>
           </TabsList>
@@ -441,20 +440,20 @@ const PatientHealth = () => {
           {/* Consultations */}
           <TabsContent value="consultations" className="mt-3 space-y-2">
             {loading ? (
-              [0,1,2].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)
+              [0,1,2].map(i => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)
             ) : filteredConsultations.length === 0 ? (
               <EmptyState img={mascotWave} text="Nenhuma consulta realizada" />
             ) : filteredConsultations.map(a => (
-              <motion.div key={a.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+              <motion.div key={a.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} whileTap={{ scale: 0.97 }}>
+                <Card className="border-border/30 shadow-[var(--p-shadow-card)] hover:shadow-[var(--p-shadow-elevated)] transition-shadow overflow-hidden rounded-2xl">
                   <CardContent className="p-0">
                     <div className="flex items-stretch">
-                      <div className="w-1 bg-gradient-to-b from-primary to-primary/30 shrink-0" />
+                      <div className="w-1 bg-gradient-to-b from-[hsl(var(--p-primary))] to-[hsl(var(--p-primary))]/30 shrink-0" />
                       <div className="flex-1 p-3.5">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2.5">
-                            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                              <Stethoscope className="w-4 h-4 text-primary" />
+                            <div className="w-9 h-9 rounded-xl bg-[hsl(var(--p-primary))]/10 flex items-center justify-center shrink-0">
+                              <Stethoscope className="w-4 h-4 text-[hsl(var(--p-primary))]" />
                             </div>
                             <div>
                               <p className="text-sm font-semibold text-foreground leading-tight">{a.doctor_name}</p>
@@ -466,12 +465,12 @@ const PatientHealth = () => {
                               </div>
                             </div>
                           </div>
-                          <Badge className="bg-success/10 text-success border-success/20 text-[10px] h-5">
+                          <Badge className="bg-[hsl(var(--p-success-soft))] text-success border-success/20 text-[10px] h-5">
                             Concluída
                           </Badge>
                         </div>
                         {a.consultation_notes && (
-                          <div className="p-2.5 bg-muted/40 rounded-lg mt-2.5 border border-border/30">
+                          <div className="p-2.5 bg-muted/40 rounded-xl mt-2.5 border border-border/30">
                             <p className="text-[10px] font-medium text-muted-foreground mb-0.5">Anotações do médico</p>
                             <p className="text-xs text-foreground leading-relaxed">{a.consultation_notes}</p>
                           </div>
@@ -489,7 +488,7 @@ const PatientHealth = () => {
             {prescriptions.length === 0 ? (
               <EmptyState img={mascotThumbsup} text="Nenhuma receita emitida" />
             ) : prescriptions.map(p => (
-              <Card key={p.id} className="border-border/50 shadow-sm overflow-hidden">
+              <Card key={p.id} className="border-border/30 shadow-[var(--p-shadow-card)] overflow-hidden rounded-2xl">
                 <CardContent className="p-0">
                   <div className="flex items-stretch">
                     <div className="w-1 bg-gradient-to-b from-secondary to-secondary/30 shrink-0" />
@@ -509,7 +508,7 @@ const PatientHealth = () => {
                             )}
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost" className="h-8 text-xs gap-1" onClick={() => downloadPrescription(p)}>
+                        <Button size="sm" variant="ghost" className="h-8 text-xs gap-1 rounded-full" onClick={() => downloadPrescription(p)}>
                           <Download className="w-3.5 h-3.5" /> PDF
                         </Button>
                       </div>
@@ -525,22 +524,22 @@ const PatientHealth = () => {
             {documents.length === 0 ? (
               <EmptyState img={mascotReading} text="Nenhum exame enviado" />
             ) : documents.map(d => (
-              <Card key={d.id} className="border-border/50 shadow-sm overflow-hidden">
+              <Card key={d.id} className="border-border/30 shadow-[var(--p-shadow-card)] overflow-hidden rounded-2xl">
                 <CardContent className="p-0">
                   <div className="flex items-stretch">
-                    <div className="w-1 bg-gradient-to-b from-primary to-primary/30 shrink-0" />
+                    <div className="w-1 bg-gradient-to-b from-[hsl(var(--p-primary))] to-[hsl(var(--p-primary))]/30 shrink-0" />
                     <div className="flex-1 p-3.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                            <FileText className="w-4 h-4 text-primary" />
+                          <div className="w-9 h-9 rounded-xl bg-[hsl(var(--p-primary))]/10 flex items-center justify-center shrink-0">
+                            <FileText className="w-4 h-4 text-[hsl(var(--p-primary))]" />
                           </div>
                           <div>
                             <p className="text-sm font-medium text-foreground">{d.description || d.file_name}</p>
                             <p className="text-[11px] text-muted-foreground">{format(new Date(d.created_at), "dd/MM/yyyy", { locale: ptBR })}</p>
                           </div>
                         </div>
-                        <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => viewDocument(d)}>Ver</Button>
+                        <Button size="sm" variant="ghost" className="h-8 text-xs rounded-full" onClick={() => viewDocument(d)}>Ver</Button>
                       </div>
                     </div>
                   </div>
@@ -552,17 +551,17 @@ const PatientHealth = () => {
           {/* Metrics History */}
           <TabsContent value="history" className="mt-3 space-y-2">
             {filteredMetrics.length === 0 ? (
-              <Card className="border-dashed border-border/50">
+              <Card className="border-dashed border-border/40 rounded-2xl">
                 <CardContent className="py-8 text-center">
                   <BarChart3 className="w-8 h-8 mx-auto mb-2 text-muted-foreground/30" />
                   <p className="text-sm text-muted-foreground">Sem registros de {currentMetricConfig?.label}</p>
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-border/50 shadow-sm">
+              <Card className="border-border/30 shadow-[var(--p-shadow-card)] rounded-2xl">
                 <CardHeader className="pb-2 pt-3 px-4">
                   <div className="flex items-center justify-between">
-                    <CardTitle className="text-xs font-semibold">Histórico — {currentMetricConfig?.label}</CardTitle>
+                    <CardTitle className="text-xs font-bold font-[Manrope]">Histórico — {currentMetricConfig?.label}</CardTitle>
                     <Badge variant="secondary" className="text-[9px] h-5">{filteredMetrics.length}</Badge>
                   </div>
                 </CardHeader>
@@ -575,7 +574,7 @@ const PatientHealth = () => {
                           <div className="flex items-center gap-2.5">
                             <div className={`w-2 h-2 rounded-full ${isNormal ? "bg-success" : "bg-destructive"}`} />
                             <div>
-                              <span className="text-sm font-semibold text-foreground">{m.value} <span className="text-[10px] font-normal text-muted-foreground">{m.unit}</span></span>
+                              <span className="text-sm font-semibold text-foreground tabular-nums">{m.value} <span className="text-[10px] font-normal text-muted-foreground">{m.unit}</span></span>
                               {m.notes && <p className="text-[10px] text-muted-foreground leading-tight">{m.notes}</p>}
                             </div>
                           </div>

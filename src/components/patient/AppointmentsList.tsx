@@ -34,14 +34,14 @@ interface Appointment {
   specialties: string[];
 }
 
-const statusConfig: Record<string, { label: string; color: string; dot: string }> = {
-  scheduled: { label: "Agendada", color: "bg-primary/10 text-primary", dot: "bg-primary" },
-  payment_pending: { label: "Aguardando pagamento", color: "bg-warning/10 text-warning", dot: "bg-warning animate-pulse" },
-  waiting: { label: "Sala de espera", color: "bg-warning/10 text-warning", dot: "bg-warning" },
-  in_progress: { label: "Em andamento", color: "bg-secondary/10 text-secondary", dot: "bg-secondary animate-pulse" },
-  completed: { label: "Concluída", color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" },
-  cancelled: { label: "Cancelada", color: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
-  no_show: { label: "Não compareceu", color: "bg-destructive/10 text-destructive", dot: "bg-destructive" },
+const statusConfig: Record<string, { label: string; color: string; dot: string; stripe: string }> = {
+  scheduled: { label: "Agendada", color: "bg-[hsl(var(--p-primary))]/10 text-[hsl(var(--p-primary))]", dot: "bg-[hsl(var(--p-primary))]", stripe: "bg-[hsl(var(--p-primary))]" },
+  payment_pending: { label: "Aguardando pagamento", color: "bg-[hsl(var(--p-warning-soft))] text-warning", dot: "bg-warning animate-pulse", stripe: "bg-warning" },
+  waiting: { label: "Sala de espera", color: "bg-[hsl(var(--p-warning-soft))] text-warning", dot: "bg-warning", stripe: "bg-warning" },
+  in_progress: { label: "Em andamento", color: "bg-secondary/10 text-secondary", dot: "bg-secondary animate-pulse", stripe: "bg-secondary" },
+  completed: { label: "Concluída", color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground", stripe: "bg-muted-foreground" },
+  cancelled: { label: "Cancelada", color: "bg-[hsl(var(--p-danger-soft))] text-destructive", dot: "bg-destructive", stripe: "bg-destructive" },
+  no_show: { label: "Não compareceu", color: "bg-[hsl(var(--p-danger-soft))] text-destructive", dot: "bg-destructive", stripe: "bg-destructive" },
 };
 
 const PERIOD_OPTIONS = [
@@ -53,6 +53,15 @@ const PERIOD_OPTIONS = [
   { value: "custom", label: "Personalizado" },
 ];
 
+const STATUS_CHIPS = [
+  { value: "all", label: "Todas" },
+  { value: "scheduled", label: "Agendadas" },
+  { value: "waiting", label: "Na espera" },
+  { value: "in_progress", label: "Em andamento" },
+  { value: "completed", label: "Concluídas" },
+  { value: "cancelled", label: "Canceladas" },
+];
+
 const fadeUp = {
   hidden: { opacity: 0, y: 10 },
   show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.04, duration: 0.3 } }),
@@ -60,7 +69,6 @@ const fadeUp = {
 
 const AppointmentsList = () => {
   const { user } = useAuth();
-  
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -118,7 +126,6 @@ const AppointmentsList = () => {
     setAppointments(data.map(a => {
       const doc = doctorMap.get(a.doctor_id);
       const profile = doc ? profileMap.get(doc.user_id) : null;
-      // Show payment_pending as visual status if payment not confirmed (issue #12)
       const displayStatus = (a.status === "scheduled" && a.payment_status === "pending") ? "payment_pending" : a.status;
       return {
         id: a.id,
@@ -208,13 +215,13 @@ const AppointmentsList = () => {
     }
   };
 
-  const upcoming = filtered.filter(a => ["scheduled", "waiting", "in_progress"].includes(a.status));
+  const upcoming = filtered.filter(a => ["scheduled", "waiting", "in_progress", "payment_pending"].includes(a.status));
   const past = filtered.filter(a => ["completed", "cancelled", "no_show"].includes(a.status));
 
   const activeFilterCount = (filterStatus !== "all" ? 1 : 0) + (period !== "all" ? 1 : 0) + (search ? 1 : 0);
 
   const renderAppointment = (appt: Appointment, i: number) => {
-    const config = statusConfig[appt.status] ?? { label: appt.status, color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground" };
+    const config = statusConfig[appt.status] ?? { label: appt.status, color: "bg-muted text-muted-foreground", dot: "bg-muted-foreground", stripe: "bg-muted-foreground" };
     const isActive = ["waiting", "in_progress", "scheduled"].includes(appt.status);
     const scheduledDate = new Date(appt.scheduled_at);
 
@@ -225,79 +232,82 @@ const AppointmentsList = () => {
         variants={fadeUp}
         initial="hidden"
         animate="show"
-        className={cn(
-          "card-interactive p-4 rounded-2xl border",
-          appt.status === "in_progress" ? "border-secondary/40 bg-secondary/5" :
-          appt.status === "waiting" ? "border-warning/30 bg-warning/5" :
-          "border-border bg-card"
-        )}
+        whileTap={{ scale: 0.97 }}
+        className="overflow-hidden rounded-2xl border border-border/20 bg-card shadow-[var(--p-shadow-card)] hover:shadow-[var(--p-shadow-elevated)] transition-shadow"
       >
-        <div className="flex items-start gap-3">
-          {/* Date pill */}
-          <div className="w-14 shrink-0 text-center">
-            <div className="bg-primary/10 rounded-xl py-2">
-              <p className="text-[11px] text-primary font-medium uppercase">
-                {format(scheduledDate, "MMM", { locale: ptBR })}
-              </p>
-              <p className="text-xl font-bold text-primary leading-none mt-0.5">
-                {format(scheduledDate, "dd")}
-              </p>
-            </div>
-            <p className="text-[11px] text-muted-foreground mt-1">{format(scheduledDate, "HH:mm")}h</p>
-          </div>
+        <div className="flex">
+          {/* Status stripe */}
+          <div className={cn("w-1 shrink-0", config.stripe)} />
 
-          {/* Info */}
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-foreground text-[15px] leading-tight truncate">{appt.doctor_name}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">CRM {appt.doctor_crm} · {appt.duration_minutes || 30}min</p>
-
-            {appt.specialties.length > 0 && (
-              <div className="flex gap-1 mt-1.5 flex-wrap">
-                {appt.specialties.slice(0, 2).map(s => (
-                  <span key={s} className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/8 text-primary font-medium">{s}</span>
-                ))}
+          <div className="flex-1 p-4">
+            <div className="flex items-start gap-3">
+              {/* Date pill */}
+              <div className="w-14 shrink-0 text-center">
+                <div className="bg-[hsl(var(--p-primary))]/8 rounded-xl py-2">
+                  <p className="text-[10px] text-[hsl(var(--p-primary))] font-bold uppercase tracking-wider">
+                    {format(scheduledDate, "MMM", { locale: ptBR })}
+                  </p>
+                  <p className="text-xl font-extrabold text-[hsl(var(--p-primary))] leading-none mt-0.5 font-[Manrope]">
+                    {format(scheduledDate, "dd")}
+                  </p>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-1 font-medium">{format(scheduledDate, "HH:mm")}h</p>
               </div>
-            )}
 
-            {/* Status + actions */}
-            <div className="flex items-center gap-2 mt-2.5 flex-wrap">
-              <span className={cn("flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full", config.color)}>
-                <span className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
-                {config.label}
-              </span>
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-foreground text-[15px] leading-tight truncate">{appt.doctor_name}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">CRM {appt.doctor_crm} · {appt.duration_minutes || 30}min</p>
 
-              {isActive && (
-                <Button
-                  size="sm"
-                  className="h-8 px-3 rounded-xl bg-gradient-hero text-primary-foreground text-xs font-medium gap-1"
-                  onClick={() => navigate(`/dashboard/consultation/${appt.id}`)}
-                >
-                  <Video className="w-3.5 h-3.5" /> Entrar
-                </Button>
-              )}
-
-              {(appt.status === "scheduled" || appt.status === "payment_pending") && (
-                <>
-                {appt.status === "payment_pending" && (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="h-8 px-3 rounded-xl text-xs font-medium gap-1 border-warning/30 text-warning hover:bg-warning/10"
-                    onClick={() => navigate(`/dashboard/schedule/${appt.doctor_id}?resume=${appt.id}`)}
-                  >
-                    <CreditCard className="w-3.5 h-3.5" /> Pagar
-                  </Button>
+                {appt.specialties.length > 0 && (
+                  <div className="flex gap-1 mt-1.5 flex-wrap">
+                    {appt.specialties.slice(0, 2).map(s => (
+                      <span key={s} className="text-[10px] px-2 py-0.5 rounded-full bg-[hsl(var(--p-primary))]/8 text-[hsl(var(--p-primary))] font-semibold">{s}</span>
+                    ))}
+                  </div>
                 )}
-                <CancelRescheduleDialog
-                  appointmentId={appt.id}
-                  doctorId={appt.doctor_id}
-                  scheduledAt={appt.scheduled_at}
-                  currentDate={format(scheduledDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                  doctorName={appt.doctor_name}
-                  onSuccess={fetchAppointments}
-                />
-                </>
-              )}
+
+                {/* Status + actions */}
+                <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+                  <span className={cn("flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full", config.color)}>
+                    <span className={cn("w-1.5 h-1.5 rounded-full", config.dot)} />
+                    {config.label}
+                  </span>
+
+                  {isActive && (
+                    <Button
+                      size="sm"
+                      className="h-8 px-3 rounded-full bg-[#00347F] text-white text-xs font-bold gap-1 shadow-[var(--p-shadow-btn)]"
+                      onClick={() => navigate(`/dashboard/consultation/${appt.id}`)}
+                    >
+                      <Video className="w-3.5 h-3.5" /> Entrar
+                    </Button>
+                  )}
+
+                  {(appt.status === "scheduled" || appt.status === "payment_pending") && (
+                    <>
+                    {appt.status === "payment_pending" && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-8 px-3 rounded-full text-xs font-semibold gap-1 border-warning/30 text-warning hover:bg-warning/10"
+                        onClick={() => navigate(`/dashboard/schedule/${appt.doctor_id}?resume=${appt.id}`)}
+                      >
+                        <CreditCard className="w-3.5 h-3.5" /> Pagar
+                      </Button>
+                    )}
+                    <CancelRescheduleDialog
+                      appointmentId={appt.id}
+                      doctorId={appt.doctor_id}
+                      scheduledAt={appt.scheduled_at}
+                      currentDate={format(scheduledDate, "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                      doctorName={appt.doctor_name}
+                      onSuccess={fetchAppointments}
+                    />
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -319,7 +329,7 @@ const AppointmentsList = () => {
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-5">
           <div>
-            <h1 className="text-xl font-bold text-foreground">Minhas Consultas</h1>
+            <h1 className="text-xl font-extrabold text-foreground font-[Manrope]">Minhas Consultas</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               {filtered.length} consulta{filtered.length !== 1 ? "s" : ""} · {upcoming.length} próxima{upcoming.length !== 1 ? "s" : ""}
             </p>
@@ -328,17 +338,17 @@ const AppointmentsList = () => {
           {/* Export menu */}
           <Sheet>
             <SheetTrigger asChild>
-              <Button size="icon" variant="outline" className="rounded-xl h-10 w-10 shrink-0" aria-label="Mais opções">
+              <Button size="icon" variant="outline" className="rounded-2xl h-10 w-10 shrink-0" aria-label="Mais opções">
                 <MoreHorizontal className="w-5 h-5" />
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-3xl">
               <SheetHeader><SheetTitle>Exportar consultas</SheetTitle></SheetHeader>
               <div className="space-y-3 py-4">
-                <Button variant="outline" className="w-full h-12 rounded-xl justify-start gap-3" onClick={exportCSV} disabled={filtered.length === 0}>
+                <Button variant="outline" className="w-full h-12 rounded-2xl justify-start gap-3" onClick={exportCSV} disabled={filtered.length === 0}>
                   <Download className="w-5 h-5" /> Exportar CSV
                 </Button>
-                <Button variant="outline" className="w-full h-12 rounded-xl justify-start gap-3" onClick={exportPDF} disabled={filtered.length === 0}>
+                <Button variant="outline" className="w-full h-12 rounded-2xl justify-start gap-3" onClick={exportPDF} disabled={filtered.length === 0}>
                   <FileText className="w-5 h-5" /> Exportar PDF
                 </Button>
               </div>
@@ -346,7 +356,7 @@ const AppointmentsList = () => {
           </Sheet>
         </div>
 
-        {/* Search + Filters */}
+        {/* Search */}
         <div className="flex gap-2 mb-4">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -354,7 +364,7 @@ const AppointmentsList = () => {
               placeholder="Buscar médico..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="pl-10 h-11 rounded-2xl text-sm bg-muted/50 border-transparent focus:border-primary/30"
+              className="pl-10 h-11 rounded-2xl text-sm bg-muted/50 border-transparent focus:border-[hsl(var(--p-primary))]/30"
             />
           </div>
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
@@ -362,7 +372,7 @@ const AppointmentsList = () => {
               <Button variant="outline" size="icon" className="h-11 w-11 rounded-2xl shrink-0 relative" aria-label="Filtrar">
                 <Filter className="w-4.5 h-4.5" />
                 {activeFilterCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#00347F] text-white text-[10px] flex items-center justify-center font-bold">
                     {activeFilterCount}
                   </span>
                 )}
@@ -372,23 +382,9 @@ const AppointmentsList = () => {
               <SheetHeader><SheetTitle>Filtros</SheetTitle></SheetHeader>
               <div className="space-y-5 py-3">
                 <div>
-                  <p className="text-sm font-medium text-foreground mb-2">Status</p>
-                  <Select value={filterStatus} onValueChange={setFilterStatus}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Status" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos</SelectItem>
-                      <SelectItem value="scheduled">Agendada</SelectItem>
-                      <SelectItem value="waiting">Na espera</SelectItem>
-                      <SelectItem value="in_progress">Em andamento</SelectItem>
-                      <SelectItem value="completed">Concluída</SelectItem>
-                      <SelectItem value="cancelled">Cancelada</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
                   <p className="text-sm font-medium text-foreground mb-2">Período</p>
                   <Select value={period} onValueChange={v => { setPeriod(v); if (v === "custom") setCalendarOpen(true); }}>
-                    <SelectTrigger className="h-11 rounded-xl"><SelectValue placeholder="Período" /></SelectTrigger>
+                    <SelectTrigger className="h-11 rounded-2xl"><SelectValue placeholder="Período" /></SelectTrigger>
                     <SelectContent>
                       {PERIOD_OPTIONS.map(o => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
                     </SelectContent>
@@ -396,7 +392,7 @@ const AppointmentsList = () => {
                   {period === "custom" && (
                     <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
                       <PopoverTrigger asChild>
-                        <Button variant="outline" className="h-11 rounded-xl mt-2 w-full text-sm">
+                        <Button variant="outline" className="h-11 rounded-2xl mt-2 w-full text-sm">
                           <CalendarIcon className="w-4 h-4 mr-2" />
                           {customFrom && customTo
                             ? `${format(customFrom, "dd/MM")} → ${format(customTo, "dd/MM")}`
@@ -419,10 +415,10 @@ const AppointmentsList = () => {
                   )}
                 </div>
                 <div className="flex gap-3 pt-2">
-                  <Button variant="outline" className="flex-1 h-11 rounded-xl" onClick={() => { setFilterStatus("all"); setPeriod("all"); setSearch(""); }}>
+                  <Button variant="outline" className="flex-1 h-11 rounded-2xl" onClick={() => { setFilterStatus("all"); setPeriod("all"); setSearch(""); }}>
                     Limpar
                   </Button>
-                  <Button className="flex-1 h-11 rounded-xl bg-gradient-hero text-primary-foreground" onClick={() => setFiltersOpen(false)}>
+                  <Button className="flex-1 h-11 rounded-2xl bg-[#00347F] text-white" onClick={() => setFiltersOpen(false)}>
                     Aplicar
                   </Button>
                 </div>
@@ -431,15 +427,33 @@ const AppointmentsList = () => {
           </Sheet>
         </div>
 
+        {/* Status filter chips */}
+        <div className="flex gap-2 overflow-x-auto pb-3 mb-5 scrollbar-hide -mx-1 px-1">
+          {STATUS_CHIPS.map(chip => (
+            <button
+              key={chip.value}
+              onClick={() => setFilterStatus(chip.value)}
+              className={cn(
+                "shrink-0 px-4 py-2 rounded-full text-sm font-semibold transition-all active:scale-95",
+                filterStatus === chip.value
+                  ? "bg-[#00347F] text-white shadow-sm"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
+              )}
+            >
+              {chip.label}
+            </button>
+          ))}
+        </div>
+
         {/* Upcoming */}
         <div className="mb-6">
-          <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-            <Clock className="w-4 h-4 text-primary" /> Próximas ({upcoming.length})
+          <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2 font-[Manrope]">
+            <Clock className="w-4 h-4 text-[hsl(var(--p-primary))]" /> Próximas ({upcoming.length})
           </h2>
           {loading ? (
             <div className="space-y-3">
               {[1, 2].map(i => (
-                <div key={i} className="flex items-start gap-3 p-4 rounded-2xl border border-border">
+                <div key={i} className="flex items-start gap-3 p-4 rounded-2xl border border-border/20">
                   <Skeleton className="w-14 h-16 rounded-xl shrink-0" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-40" />
@@ -454,7 +468,7 @@ const AppointmentsList = () => {
               <img src={mascotWelcome} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" loading="lazy" decoding="async" width={80} height={80} />
               <p className="text-[13px] font-semibold text-foreground mb-1">Nenhuma consulta próxima</p>
               <p className="text-[11px] text-muted-foreground mb-3">Agende agora e cuide da sua saúde</p>
-              <Button size="sm" className="rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 shadow-md" onClick={() => navigate("/dashboard/schedule")}>
+              <Button size="sm" className="rounded-full bg-[#00347F] text-white shadow-[var(--p-shadow-btn)]" onClick={() => navigate("/dashboard/schedule")}>
                 Agendar consulta
               </Button>
             </div>
@@ -465,13 +479,13 @@ const AppointmentsList = () => {
 
         {/* History */}
         <div>
-          <h2 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+          <h2 className="text-sm font-bold text-foreground mb-3 flex items-center gap-2 font-[Manrope]">
             <FileText className="w-4 h-4 text-muted-foreground" /> Histórico ({past.length})
           </h2>
           {loading ? (
             <div className="space-y-3">
               {[1, 2].map(i => (
-                <div key={i} className="flex items-start gap-3 p-4 rounded-2xl border border-border">
+                <div key={i} className="flex items-start gap-3 p-4 rounded-2xl border border-border/20">
                   <Skeleton className="w-14 h-16 rounded-xl shrink-0" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-36" />
