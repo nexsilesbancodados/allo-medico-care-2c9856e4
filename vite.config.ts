@@ -211,8 +211,6 @@ export default defineConfig(({ mode }) => ({
           "vendor-dates": ["date-fns", "react-day-picker"],
           // PDF generation
           "vendor-pdf": ["jspdf"],
-          // Medical imaging (very heavy)
-          "vendor-medical": ["dwv"],
         },
       },
     },
