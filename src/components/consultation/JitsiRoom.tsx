@@ -11,7 +11,11 @@ interface JitsiRoomProps {
 
 // JitsiMeetExternalAPI is declared in src/types/globals.d.ts
 
-type JitsiApi = NonNullable<ReturnType<NonNullable<Window["JitsiMeetExternalAPI"]>>>;
+interface JitsiApi {
+  addEventListener: (event: string, callback: () => void) => void;
+  addListener: (event: string, callback: () => void) => void;
+  dispose: () => void;
+}
 
 const JitsiRoom = ({ roomId, displayName, onEnd }: JitsiRoomProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
