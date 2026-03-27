@@ -12,7 +12,7 @@ import { ptBR } from "date-fns/locale";
 import {
   Calendar, Video, Clock, Gift, ChevronRight,
   Heart, Activity, Weight, Thermometer, Droplets, Wind,
-  MessageCircle, CreditCard, Settings, Zap,
+  MessageCircle, CreditCard, Settings, Zap, Search, ClipboardList,
 } from "lucide-react";
 import PatientOnboarding, { ONBOARDING_KEY } from "@/components/patient/PatientOnboarding";
 import PatientWaitingCard from "@/components/patient/PatientWaitingCard";
@@ -22,7 +22,6 @@ import {
 } from "@/hooks/usePatientDashboard";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocalStorage } from "@/hooks/use-local-storage";
-import mascotWave from "@/assets/mascot-wave.png";
 
 /* ── Metric display configs ── */
 const METRIC_CONFIGS: Record<string, { icon: typeof Heart; label: string; unit: string; colorClass: string }> = {
@@ -36,19 +35,53 @@ const METRIC_CONFIGS: Record<string, { icon: typeof Heart; label: string; unit: 
 
 const HEALTH_TIPS = [
   { title: "Mantenha-se hidratada hoje!", body: "Sua atividade física foi 15% maior ontem. O consumo de água é essencial para sua recuperação.", metric: "2.4L", metricLabel: "Meta Diária" },
-  { title: "30 min de caminhada fazem diferença!", body: "Caminhar regularmente reduz a ansiedade em até 40% e melhora a saúde cardiovascular.", metric: "30min", metricLabel: "Ideal/dia" },
-  { title: "Durma bem esta noite!", body: "Dormir 7-8h fortalece o sistema imunológico e melhora a concentração.", metric: "8h", metricLabel: "Ideal" },
-  { title: "Frutas e vegetais no prato!", body: "5 porções de frutas e vegetais por dia fortalecem a imunidade.", metric: "5", metricLabel: "Porções/dia" },
-  { title: "Respire fundo por 5 minutos!", body: "A respiração profunda reduz os níveis de cortisol e combate o estresse.", metric: "5min", metricLabel: "Diário" },
-  { title: "Tome um pouco de sol!", body: "15 minutos de sol diário ajudam na produção de vitamina D.", metric: "15min", metricLabel: "Sol/dia" },
-  { title: "Monitore sua pressão!", body: "Acompanhar a pressão arterial regularmente é essencial para prevenção.", metric: "12/8", metricLabel: "Ideal" },
+  { title: "30 min de caminhada fazem diferença!", body: "Caminhar regularmente reduz a ansiedade em até 40%.", metric: "30min", metricLabel: "Ideal/dia" },
+  { title: "Durma bem esta noite!", body: "Dormir 7-8h fortalece o sistema imunológico.", metric: "8h", metricLabel: "Ideal" },
+  { title: "Frutas e vegetais no prato!", body: "5 porções de frutas e vegetais por dia.", metric: "5", metricLabel: "Porções/dia" },
+  { title: "Respire fundo por 5 minutos!", body: "A respiração profunda reduz o cortisol.", metric: "5min", metricLabel: "Diário" },
+  { title: "Tome um pouco de sol!", body: "15 minutos de sol diário ajudam na vitamina D.", metric: "15min", metricLabel: "Sol/dia" },
+  { title: "Monitore sua pressão!", body: "Acompanhar a pressão regularmente é essencial.", metric: "12/8", metricLabel: "Ideal" },
 ];
 
-const QUICK_ACTIONS: { label: string; icon: string | typeof Zap; path: string; urgent?: boolean }[] = [
-  { label: "Início",    icon: "🏠", path: "/dashboard?role=patient" },
-  { label: "Agendar",   icon: "📅", path: "/dashboard/schedule?role=patient" },
-  { label: "Urgência",  icon: Zap,  path: "/dashboard/urgent-care?role=patient", urgent: true },
-  { label: "Consultas", icon: "📋", path: "/dashboard/appointments?role=patient" },
+interface QuickAction {
+  label: string;
+  icon: React.ReactNode;
+  path: string;
+  bg: string;
+  iconBg: string;
+  accent?: boolean;
+}
+
+const QUICK_ACTIONS: QuickAction[] = [
+  {
+    label: "Início",
+    icon: <span className="text-2xl">🏠</span>,
+    path: "/dashboard?role=patient",
+    bg: "bg-card",
+    iconBg: "bg-primary/10",
+  },
+  {
+    label: "Agendar",
+    icon: <Search className="h-6 w-6 text-primary" />,
+    path: "/dashboard/schedule?role=patient",
+    bg: "bg-card",
+    iconBg: "bg-primary/10",
+  },
+  {
+    label: "Urgência",
+    icon: <Zap className="h-6 w-6 text-destructive" />,
+    path: "/dashboard/urgent-care?role=patient",
+    bg: "bg-destructive/8",
+    iconBg: "bg-destructive/15",
+    accent: true,
+  },
+  {
+    label: "Consultas",
+    icon: <ClipboardList className="h-6 w-6 text-primary" />,
+    path: "/dashboard/appointments?role=patient",
+    bg: "bg-card",
+    iconBg: "bg-primary/10",
+  },
 ];
 
 const SUPPORT_LINKS = [
@@ -66,7 +99,6 @@ const getGreeting = () => {
   return "Boa noite";
 };
 
-/* ── Stagger animation ── */
 const stagger = { delay: 0.06, type: "spring" as const, stiffness: 240, damping: 22 };
 
 const PatientDashboard = () => {
@@ -92,12 +124,10 @@ const PatientDashboard = () => {
   const todayTip = HEALTH_TIPS[new Date().getDay() % HEALTH_TIPS.length];
   const firstName = profile?.first_name || "Paciente";
 
-  // Show onboarding for new users
   useEffect(() => {
     if (!loading && (stats?.total ?? 0) === 0 && !onboardingDone) setShowOnboarding(true);
   }, [loading, stats?.total, onboardingDone]);
 
-  // Realtime subscription for appointments
   useEffect(() => {
     if (!user) return;
     const ch = supabase.channel("patient-live")
@@ -114,50 +144,34 @@ const PatientDashboard = () => {
     <DashboardLayout title="Paciente" nav={getPatientNav("home")} role="patient">
       {showOnboarding && <PatientOnboarding onComplete={() => setShowOnboarding(false)} />}
 
-      <div className="space-y-8 pb-24 md:pb-8">
+      <div className="space-y-6 pb-24 md:pb-8">
 
         {/* ═══════════ HERO BANNER ═══════════ */}
-        <section
-          className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[28px] bg-gradient-to-br from-primary to-primary/70 md:-mx-6 md:-mt-5 md:rounded-[28px] lg:-mx-8 lg:-mt-6"
-          style={{ boxShadow: "var(--shadow-elevated)" }}
-        >
-          <div className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full bg-white/[0.06] blur-[60px]" />
-          <div className="pointer-events-none absolute left-1/4 -bottom-10 h-48 w-48 rounded-full bg-white/[0.04] blur-[40px]" />
+        <section className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[2rem] bg-gradient-to-r from-primary via-primary to-[hsl(215_60%_45%)] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/[0.07] blur-[50px]" />
 
-          <div className="relative z-10 flex items-end gap-4 px-6 pt-8 pb-8 md:px-8 md:pt-10 md:pb-10">
-            <div className="min-w-0 flex-1">
-              <motion.h1
-                initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="font-[Manrope] text-3xl font-extrabold text-primary-foreground leading-tight md:text-4xl"
+          <div className="relative z-10 px-6 pt-10 pb-8 md:px-8 md:pt-12 md:pb-10">
+            <motion.h1
+              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45 }}
+              className="font-[Manrope] text-[28px] font-extrabold text-primary-foreground leading-[1.15] md:text-4xl"
+            >
+              {getGreeting()}, {firstName}!
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.12, duration: 0.45 }}
+              className="mt-2 text-[15px] font-medium text-primary-foreground/65 leading-relaxed"
+            >
+              Sua jornada de saúde está em boas mãos hoje.
+            </motion.p>
+            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }}>
+              <Button
+                onClick={() => navigate("/dashboard/patient/health?role=patient")}
+                className="mt-6 rounded-full bg-primary-foreground px-7 py-3 text-[15px] font-bold text-primary shadow-lg hover:bg-primary-foreground/90 active:scale-[0.97] transition-all"
               >
-                {getGreeting()}, {firstName}!
-              </motion.h1>
-              <motion.p
-                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15, duration: 0.5 }}
-                className="mt-2 text-lg font-medium text-primary-foreground/70 leading-relaxed"
-              >
-                Sua jornada de saúde está em boas mãos hoje.
-              </motion.p>
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
-                <Button
-                  onClick={() => navigate("/dashboard/patient/health?role=patient")}
-                  className="mt-6 rounded-full bg-primary-foreground px-6 py-3 font-bold text-primary shadow-xl hover:bg-primary-foreground/90 active:scale-95 transition-transform"
-                >
-                  Ver check-up diário
-                </Button>
-              </motion.div>
-            </div>
-
-            <motion.div className="shrink-0 -mb-2 hidden sm:block">
-              <motion.img
-                src={mascotWave} alt="Mascote Pinguim Médico" draggable={false}
-                className="select-none object-contain w-[130px] h-[130px] md:w-[160px] md:h-[160px]"
-                style={{ filter: "drop-shadow(0 20px 40px rgba(0,0,0,.3))" }}
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3.6, repeat: Infinity, ease: "easeInOut" }}
-              />
+                Ver check-up diário
+              </Button>
             </motion.div>
           </div>
         </section>
@@ -170,30 +184,25 @@ const PatientDashboard = () => {
         )}
 
         {/* ═══════════ QUICK ACTIONS ═══════════ */}
-        <section className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <section className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
           {QUICK_ACTIONS.map((action, i) => (
             <motion.button
               key={action.label}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * stagger.delay, type: stagger.type, stiffness: stagger.stiffness, damping: stagger.damping }}
-              whileTap={{ scale: 0.95 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => navigate(action.path)}
-              className={`card-interactive flex flex-col items-start gap-4 rounded-2xl p-6 cursor-pointer group ${
-                action.urgent
-                  ? "bg-destructive/10 border border-destructive/20"
-                  : "bg-card border border-border/20"
-              }`}
+              className={`flex flex-col items-start gap-3 rounded-2xl border p-5 cursor-pointer transition-all active:shadow-none
+                ${action.accent
+                  ? "border-destructive/15 bg-destructive/[0.06] hover:bg-destructive/10"
+                  : "border-border/30 bg-card hover:bg-muted/50 shadow-[var(--shadow-card)]"
+                }`}
             >
-              <div className={`flex h-12 w-12 items-center justify-center rounded-full group-hover:scale-110 transition-transform text-2xl ${
-                action.urgent ? "bg-destructive" : "bg-muted"
-              }`}>
-                {typeof action.icon === "string"
-                  ? action.icon
-                  : <action.icon className="h-6 w-6 text-primary-foreground" />
-                }
+              <div className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-transform ${action.iconBg}`}>
+                {action.icon}
               </div>
-              <span className={`font-[Manrope] font-bold ${action.urgent ? "text-destructive" : "text-foreground"}`}>
+              <span className={`text-[14px] font-semibold ${action.accent ? "text-destructive" : "text-foreground"}`}>
                 {action.label}
               </span>
             </motion.button>
@@ -201,56 +210,60 @@ const PatientDashboard = () => {
         </section>
 
         {/* ═══════════ TWO COLUMNS ═══════════ */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 lg:gap-8">
 
           {/* LEFT: Health Metrics */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-5">
             <div className="flex items-center justify-between">
-              <h2 className="font-[Manrope] text-xl font-bold text-foreground">Métricas de Saúde</h2>
-              <Button variant="link" className="p-0 text-sm font-bold text-primary"
+              <h2 className="font-[Manrope] text-lg font-bold text-foreground">Métricas de Saúde</h2>
+              <Button variant="link" className="p-0 text-sm font-bold text-primary h-auto"
                 onClick={() => navigate("/dashboard/patient/health?role=patient")}>
                 Ver histórico
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4">
               {/* Heart Rate Card */}
-              <Card className="kpi-card overflow-hidden border-border/15">
-                <CardContent className="p-6">
-                  <div className="mb-4 flex items-start justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Batimentos</span>
-                    <Heart className="h-5 w-5 text-destructive" fill="currentColor" />
+              <Card className="overflow-hidden border-border/20 shadow-[var(--shadow-card)]">
+                <CardContent className="p-5">
+                  <div className="mb-3 flex items-start justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground">Batimentos</span>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-destructive/10">
+                      <Heart className="h-4 w-4 text-destructive" fill="currentColor" />
+                    </div>
                   </div>
-                  <div className="mb-2 flex items-baseline gap-2">
-                    <span className="font-[Manrope] text-4xl font-extrabold text-foreground">
+                  <div className="mb-3 flex items-baseline gap-1.5">
+                    <span className="font-[Manrope] text-3xl font-extrabold text-foreground">
                       {typedMetrics.find(m => m.type === "frequencia_cardiaca")?.value ?? 72}
                     </span>
-                    <span className="text-sm font-medium text-muted-foreground">bpm</span>
+                    <span className="text-xs font-medium text-muted-foreground">bpm</span>
                   </div>
-                  <div className="flex h-12 w-full items-end gap-1 rounded-lg bg-muted/30 px-2 py-1">
-                    {[40, 60, 55, 80, 70, 45].map((h, i) => (
-                      <div key={i} className="w-full rounded-t-sm bg-destructive transition-all" style={{ height: `${h}%`, opacity: 0.5 + (i * 0.1) }} />
+                  <div className="flex h-10 w-full items-end gap-[3px] rounded-lg bg-muted/40 px-2 py-1.5">
+                    {[40, 65, 50, 80, 70, 55, 75].map((h, i) => (
+                      <div key={i} className="w-full rounded-t bg-destructive/60 transition-all" style={{ height: `${h}%` }} />
                     ))}
                   </div>
                 </CardContent>
               </Card>
 
               {/* Blood Pressure Card */}
-              <Card className="kpi-card overflow-hidden border-border/15">
-                <CardContent className="p-6">
-                  <div className="mb-4 flex items-start justify-between">
-                    <span className="text-sm font-medium text-muted-foreground">Pressão Arterial</span>
-                    <Activity className="h-5 w-5 text-primary" />
+              <Card className="overflow-hidden border-border/20 shadow-[var(--shadow-card)]">
+                <CardContent className="p-5">
+                  <div className="mb-3 flex items-start justify-between">
+                    <span className="text-xs font-semibold text-muted-foreground">Pressão Arterial</span>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
+                      <Activity className="h-4 w-4 text-primary" />
+                    </div>
                   </div>
-                  <div className="mb-2 flex items-baseline gap-2">
-                    <span className="font-[Manrope] text-4xl font-extrabold text-foreground">
+                  <div className="mb-3 flex items-baseline gap-1.5">
+                    <span className="font-[Manrope] text-3xl font-extrabold text-foreground">
                       {typedMetrics.find(m => m.type === "pressao_arterial")?.value ?? "12/8"}
                     </span>
-                    <span className="text-sm font-medium text-muted-foreground">mmHg</span>
+                    <span className="text-xs font-medium text-muted-foreground">mmHg</span>
                   </div>
-                  <div className="inline-flex items-center gap-2 rounded-full bg-success/10 px-3 py-1">
-                    <div className="h-2 w-2 rounded-full bg-success" />
-                    <span className="text-xs font-bold text-success">Normal</span>
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-success/10 px-3 py-1">
+                    <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+                    <span className="text-[11px] font-bold text-success">Normal</span>
                   </div>
                 </CardContent>
               </Card>
@@ -263,68 +276,67 @@ const PatientDashboard = () => {
                   const cfg = METRIC_CONFIGS[m.type];
                   const Icon = cfg?.icon ?? Heart;
                   return (
-                    <Card key={m.type} className="kpi-card overflow-hidden border-border/15">
-                      <CardContent className="p-6">
-                        <div className="mb-4 flex items-start justify-between">
-                          <span className="text-sm font-medium text-muted-foreground">{cfg?.label ?? m.type}</span>
-                          <Icon className={`h-5 w-5 ${cfg?.colorClass ?? "text-muted-foreground"}`} />
+                    <Card key={m.type} className="overflow-hidden border-border/20 shadow-[var(--shadow-card)]">
+                      <CardContent className="p-5">
+                        <div className="mb-3 flex items-start justify-between">
+                          <span className="text-xs font-semibold text-muted-foreground">{cfg?.label ?? m.type}</span>
+                          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted">
+                            <Icon className={`h-4 w-4 ${cfg?.colorClass ?? "text-muted-foreground"}`} />
+                          </div>
                         </div>
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-[Manrope] text-4xl font-extrabold text-foreground">{m.value}</span>
-                          <span className="text-sm font-medium text-muted-foreground">{m.unit}</span>
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="font-[Manrope] text-3xl font-extrabold text-foreground">{m.value}</span>
+                          <span className="text-xs font-medium text-muted-foreground">{m.unit}</span>
                         </div>
                       </CardContent>
                     </Card>
                   );
                 })}
+            </div>
 
-              {/* Health Tip */}
-              <div className="sm:col-span-2 flex flex-col gap-6 rounded-2xl bg-accent p-6 md:flex-row md:items-center">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-muted-foreground">Dica de Saúde</p>
-                  <h3 className="mt-1 font-[Manrope] text-lg font-bold text-foreground">{todayTip.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{todayTip.body}</p>
-                </div>
-                <div className="flex min-w-[120px] flex-col items-center justify-center rounded-2xl bg-card/60 p-4 backdrop-blur-md">
-                  <span className="text-2xl font-bold text-primary">{todayTip.metric}</span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{todayTip.metricLabel}</span>
-                </div>
+            {/* Health Tip */}
+            <div className="flex flex-col gap-4 rounded-2xl border border-border/20 bg-card p-5 shadow-[var(--shadow-card)] sm:flex-row sm:items-center">
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Dica de Saúde</p>
+                <h3 className="mt-1.5 font-[Manrope] text-base font-bold text-foreground leading-snug">{todayTip.title}</h3>
+                <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">{todayTip.body}</p>
+              </div>
+              <div className="flex min-w-[100px] flex-col items-center justify-center rounded-2xl bg-primary/8 p-4">
+                <span className="text-xl font-extrabold text-primary">{todayTip.metric}</span>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{todayTip.metricLabel}</span>
               </div>
             </div>
           </div>
 
           {/* RIGHT: Next Appointment + Support */}
-          <div className="space-y-6">
-            <h2 className="font-[Manrope] text-xl font-bold text-foreground">Próxima Consulta</h2>
+          <div className="space-y-5">
+            <h2 className="font-[Manrope] text-lg font-bold text-foreground">Próxima Consulta</h2>
 
             {!loading && nextAppt ? (
-              <NextAppointmentCard
-                appt={nextAppt}
-                daysUntilNext={daysUntilNext}
-                navigate={navigate}
-              />
+              <NextAppointmentCard appt={nextAppt} daysUntilNext={daysUntilNext} navigate={navigate} />
             ) : !loading && (
               <EmptyAppointmentCard navigate={navigate} />
             )}
 
-            {/* Return appointments */}
             {returnAppts.length > 0 && (
               <ReturnAppointments items={returnAppts as ReturnAppt[]} navigate={navigate} />
             )}
 
             {/* Quick Support Access */}
-            <div className="rounded-2xl bg-muted/30 p-4 space-y-1">
+            <div className="space-y-1.5">
               {SUPPORT_LINKS.map(item => (
                 <button
                   key={item.label}
                   onClick={() => navigate(item.path)}
-                  className="card-interactive flex w-full items-center justify-between rounded-xl p-3 group"
+                  className="flex w-full items-center justify-between rounded-2xl border border-border/20 bg-card p-4 shadow-[var(--shadow-card)] transition-all hover:bg-muted/40 active:scale-[0.98] group"
                 >
                   <div className="flex items-center gap-3">
-                    <item.icon className="h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span className="text-sm font-medium">{item.label}</span>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted">
+                      <item.icon className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    </div>
+                    <span className="text-[14px] font-semibold text-foreground">{item.label}</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground/50" />
                 </button>
               ))}
             </div>
@@ -347,7 +359,7 @@ interface ReturnAppt {
 const ReturnAppointments = ({ items, navigate }: { items: ReturnAppt[]; navigate: ReturnType<typeof useNavigate> }) => (
   <div className="overflow-hidden rounded-2xl border border-warning/20 bg-warning/5 p-4">
     <div className="mb-3 flex items-center gap-2">
-      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-warning/15">
+      <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-warning/15">
         <Gift className="h-4 w-4 text-warning" />
       </div>
       <p className="text-xs font-bold text-warning">Retorno Grátis Disponível</p>
@@ -364,7 +376,7 @@ const ReturnAppointments = ({ items, navigate }: { items: ReturnAppt[]; navigate
                 : `Até ${format(new Date(ra.return_deadline), "dd/MM")} (${daysR}d)`}
             </p>
           </div>
-          <Button size="sm" className="h-8 rounded-xl bg-warning text-warning-foreground hover:bg-warning/90 text-[10.5px] font-bold"
+          <Button size="sm" className="h-8 rounded-full bg-warning text-warning-foreground hover:bg-warning/90 text-[11px] font-bold"
             onClick={() => navigate(`/dashboard/schedule/${ra.doctor_id}?return=true&original=${ra.id}`)}>
             Agendar
           </Button>
@@ -383,12 +395,14 @@ const NextAppointmentCard = ({
 }) => {
   const scheduledAt = new Date(appt.scheduled_at as string);
   return (
-    <Card className="relative overflow-hidden border-border/10 shadow-sm">
-      <CardContent className="p-6">
-        <div className="absolute right-6 top-6">
-          <Video className="h-7 w-7 text-primary" />
+    <Card className="relative overflow-hidden border-border/20 shadow-[var(--shadow-card)]">
+      <CardContent className="p-5">
+        <div className="absolute right-5 top-5">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10">
+            <Video className="h-5 w-5 text-primary" />
+          </div>
         </div>
-        <p className="mb-4 text-sm font-bold text-primary">
+        <p className="mb-3 text-[13px] font-bold text-primary">
           {daysUntilNext === 0
             ? `Hoje, ${format(scheduledAt, "HH:mm")}`
             : daysUntilNext === 1
@@ -398,22 +412,22 @@ const NextAppointmentCard = ({
         <h3 className="font-[Manrope] text-xl font-extrabold text-foreground">
           {appt.doctor_name as string}
         </h3>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-[13px] text-muted-foreground">
           {(appt.specialty as string) ?? "Consulta Geral"}
         </p>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-5 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-              <Video className="h-4 w-4 text-muted-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted">
+              <Video className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
-            <span className="text-sm font-medium text-foreground">Disponível via Telemedicina</span>
+            <span className="text-[13px] font-medium text-foreground">Telemedicina</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-              <Clock className="h-4 w-4 text-muted-foreground" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted">
+              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
-            <span className="text-sm font-medium text-foreground">
+            <span className="text-[13px] font-medium text-foreground">
               {(appt.duration_minutes as number) || 30} minutos
             </span>
           </div>
@@ -421,7 +435,7 @@ const NextAppointmentCard = ({
 
         {daysUntilNext === 0 ? (
           <Button
-            className="mt-8 w-full rounded-full bg-gradient-hero text-primary-foreground py-3 font-bold shadow-lg"
+            className="mt-6 w-full rounded-full bg-primary text-primary-foreground py-3 font-bold shadow-lg"
             onClick={() => navigate(`/dashboard/consultation/${appt.id}`)}
           >
             <Video className="mr-2 h-4 w-4" /> Entrar na Sala
@@ -429,7 +443,7 @@ const NextAppointmentCard = ({
         ) : (
           <Button
             variant="secondary"
-            className="mt-8 w-full rounded-full py-3 font-bold"
+            className="mt-6 w-full rounded-full py-3 font-bold"
             onClick={() => navigate("/dashboard/appointments?role=patient")}
           >
             Ver Detalhes
@@ -441,13 +455,15 @@ const NextAppointmentCard = ({
 };
 
 const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNavigate> }) => (
-  <Card className="border-dashed border-border/40">
+  <Card className="border-dashed border-border/30">
     <CardContent className="flex flex-col items-center py-8 text-center">
-      <Calendar className="mb-3 h-10 w-10 text-muted-foreground/40" />
-      <p className="font-[Manrope] text-sm font-bold text-foreground">Nenhuma consulta agendada</p>
-      <p className="mt-1 text-xs text-muted-foreground">Agende agora e cuide da sua saúde</p>
+      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
+        <Calendar className="h-6 w-6 text-muted-foreground/50" />
+      </div>
+      <p className="font-[Manrope] text-[15px] font-bold text-foreground">Nenhuma consulta agendada</p>
+      <p className="mt-1 text-[13px] text-muted-foreground">Agende agora e cuide da sua saúde</p>
       <Button
-        className="mt-5 rounded-full bg-gradient-hero text-primary-foreground shadow-lg"
+        className="mt-5 rounded-full bg-primary text-primary-foreground px-8 shadow-lg"
         onClick={() => navigate("/dashboard/schedule?role=patient")}
       >
         <Calendar className="mr-2 h-4 w-4" /> Agendar consulta
