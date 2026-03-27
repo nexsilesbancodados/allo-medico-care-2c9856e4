@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ArrowRight, Shield, Heart, Clock, Star, Building2, Phone, FileText, Brain, Fingerprint, Zap, Upload, TrendingUp } from "lucide-react";
+import { CheckCircle2, ArrowRight, Shield, Users, Heart, Clock, Star, Building2, Phone, FileText, Brain, Fingerprint, Zap, Upload, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import bannerCorporate from "@/assets/banner-b2b-corporate.jpg";
 import bannerTelelaudoWorkflow from "@/assets/banner-telelaudo-workflow.jpg";
