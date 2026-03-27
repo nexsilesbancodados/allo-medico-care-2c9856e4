@@ -363,15 +363,23 @@ const VideoRoom = () => {
     setAppointment(data);
 
     if (isDoctor) {
-      // Generate Jitsi room ID and save to appointment
-      const newRoomId = gerarRoomId(appointmentId ?? '');
-      setJitsiRoomId(newRoomId);
-      await supabase.from("appointments").update({ status: "in_progress", jitsi_room_id: newRoomId } as any).eq("id", appointmentId ?? '');
+      // Check if doctor previously opted into Jitsi for this appointment
+      const savedJitsi = localStorage.getItem(`jitsi_${appointmentId}`);
+      if (savedJitsi === 'true') {
+        setUseJitsi(true);
+        const newRoomId = gerarRoomId(appointmentId ?? '');
+        setJitsiRoomId(newRoomId);
+      }
+      await supabase.from("appointments").update({ status: "in_progress" } as any).eq("id", appointmentId ?? '');
       const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
       notifyConsultationStarted(appointmentId ?? '', docName).catch(err => logError("notifyConsultationStarted failed", err));
     } else {
-      // Patient: fetch existing jitsi_room_id
-      setJitsiRoomId((data as any).jitsi_room_id || null);
+      // Patient: check if doctor enabled Jitsi for this consultation
+      const existingRoomId = (data as any).jitsi_room_id;
+      if (existingRoomId) {
+        setUseJitsi(true);
+        setJitsiRoomId(existingRoomId);
+      }
     }
 
     const otherUserId = isDoctor ? data.patient_id : null;
