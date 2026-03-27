@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Clock, Zap, Phone, RefreshCw, AlertTriangle, QrCode, CreditCard, FileBarChart, Lock, Copy, CheckCircle2, Shield, MapPin, Ambulance, ChevronRight, Building2 } from "lucide-react";
+import { Clock, Zap, Phone, RefreshCw, AlertTriangle, QrCode, CreditCard, FileBarChart, Lock, Copy, CheckCircle2, Shield, MapPin, Ambulance, ChevronRight, Building2, Navigation, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { notifyDoctorsNewQueueEntry } from "@/lib/notifications-queue";
@@ -18,10 +18,58 @@ import mascotWave from "@/assets/mascot-wave.png";
 
 type PaymentMethod = "pix" | "card" | "boleto";
 
-const NEARBY_HOSPITALS = [
-  { name: "Hospital Santa Catarina", distance: "0.8 km", waitTime: 12, driveMin: 5 },
-  { name: "Hospital Oswaldo Cruz", distance: "1.5 km", waitTime: 28, driveMin: 8 },
-];
+interface NearbyHospital {
+  name: string;
+  distance: string;
+  distanceMeters: number;
+  driveMin: number;
+  lat: number;
+  lon: number;
+}
+
+/** Calculate distance between two lat/lon points in meters (Haversine) */
+const haversine = (lat1: number, lon1: number, lat2: number, lon2: number) => {
+  const R = 6371000;
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
+const formatDistance = (meters: number) => {
+  if (meters < 1000) return `${Math.round(meters)} m`;
+  return `${(meters / 1000).toFixed(1)} km`;
+};
+
+/** Fetch hospitals near coords using OpenStreetMap Overpass API (free, no key needed) */
+const fetchNearbyHospitals = async (lat: number, lon: number): Promise<NearbyHospital[]> => {
+  const radius = 10000; // 10 km
+  const query = `[out:json][timeout:10];(node["amenity"="hospital"](around:${radius},${lat},${lon});way["amenity"="hospital"](around:${radius},${lat},${lon}););out center 20;`;
+  const res = await fetch("https://overpass-api.de/api/interpreter", {
+    method: "POST",
+    body: `data=${encodeURIComponent(query)}`,
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+  });
+  if (!res.ok) throw new Error("Overpass API error");
+  const data = await res.json();
+  
+  const hospitals: NearbyHospital[] = (data.elements || [])
+    .map((el: any) => {
+      const hLat = el.lat ?? el.center?.lat;
+      const hLon = el.lon ?? el.center?.lon;
+      const name = el.tags?.name;
+      if (!name || !hLat || !hLon) return null;
+      const dist = haversine(lat, lon, hLat, hLon);
+      const driveMin = Math.max(1, Math.round(dist / 500)); // rough estimate ~30km/h city
+      return { name, distance: formatDistance(dist), distanceMeters: dist, driveMin, lat: hLat, lon: hLon };
+    })
+    .filter(Boolean)
+    .sort((a: NearbyHospital, b: NearbyHospital) => a.distanceMeters - b.distanceMeters)
+    .slice(0, 6);
+  
+  return hospitals;
+};
 
 const FIRST_AID_TIPS = [
   "Permaneça no local e tente monitorar a respiração do paciente continuamente até a ajuda chegar.",
