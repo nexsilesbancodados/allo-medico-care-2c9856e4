@@ -258,6 +258,57 @@ const UserProfile = () => {
             )}
           </div>
 
+          {/* KYC Inline Section */}
+          {showKyc && isPatient && (
+            <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-primary/20 bg-card p-5 mb-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <ShieldCheck className="w-5 h-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-foreground">Verificação de Identidade (KYC)</p>
+                  <p className="text-xs text-muted-foreground">Tire uma selfie e fotografe seu documento</p>
+                </div>
+              </div>
+              <div className="rounded-xl border border-border/50 p-3">
+                <p className="text-xs font-bold text-foreground mb-2 flex items-center gap-1.5"><Camera className="w-3.5 h-3.5 text-primary" /> Selfie</p>
+                {kycSelfiePreview ? (
+                  <div className="relative">
+                    <img src={kycSelfiePreview} alt="Selfie" className="w-full h-32 object-cover rounded-lg" />
+                    <button onClick={() => { setKycSelfieFile(null); setKycSelfiePreview(null); }} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center text-xs">✕</button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center h-24 rounded-lg border-2 border-dashed border-border/50 cursor-pointer hover:border-primary/40 transition-colors">
+                    <Camera className="w-5 h-5 text-muted-foreground/40 mb-1" />
+                    <p className="text-[11px] text-muted-foreground">Tirar selfie agora</p>
+                    <input type="file" accept="image/*" capture="user" className="hidden" onChange={e => handleKycFileSelect(e, "selfie")} />
+                  </label>
+                )}
+              </div>
+              <div className="rounded-xl border border-border/50 p-3">
+                <p className="text-xs font-bold text-foreground mb-2 flex items-center gap-1.5"><Upload className="w-3.5 h-3.5 text-secondary" /> Documento com foto</p>
+                {kycDocPreview ? (
+                  <div className="relative">
+                    <img src={kycDocPreview} alt="Doc" className="w-full h-32 object-cover rounded-lg" />
+                    <button onClick={() => { setKycDocFile(null); setKycDocPreview(null); }} className="absolute top-1 right-1 w-6 h-6 rounded-full bg-background/80 flex items-center justify-center text-xs">✕</button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center h-24 rounded-lg border-2 border-dashed border-border/50 cursor-pointer hover:border-primary/40 transition-colors">
+                    <Camera className="w-5 h-5 text-muted-foreground/40 mb-1" />
+                    <p className="text-[11px] text-muted-foreground">Fotografar documento</p>
+                    <input type="file" accept="image/*" capture="environment" className="hidden" onChange={e => handleKycFileSelect(e, "doc")} />
+                  </label>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleKycSubmit} disabled={kycSaving || (!kycSelfieFile && !kycDocFile)} className="flex-1 rounded-xl">
+                  {kycSaving ? "Enviando..." : "Enviar verificação"}
+                </Button>
+                <Button variant="outline" onClick={() => setShowKyc(false)} className="rounded-xl">Cancelar</Button>
+              </div>
+            </motion.div>
+          )}
+
           {/* Menu Items */}
           <div className="rounded-2xl bg-card border border-border/30 overflow-hidden mb-6">
             <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 px-5 pt-4 pb-2">
