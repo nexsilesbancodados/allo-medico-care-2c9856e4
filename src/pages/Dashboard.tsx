@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, Routes, Route, useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { usePresence } from "@/hooks/use-presence";
 import { prefetchOnIdle } from "@/hooks/use-prefetch-route";
-import { lazy, Suspense, ReactNode, useEffect, useState } from "react";
+import { lazy, Suspense, ReactNode, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { warn } from "@/lib/logger";
 
