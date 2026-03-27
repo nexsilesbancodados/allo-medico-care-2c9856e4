@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Slider } from "@/components/ui/slider";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart, ChevronRight, Clock } from "lucide-react";
+import { Search, Star, Calendar, Zap, AlertTriangle, SlidersHorizontal, X, Heart, ChevronRight, Clock, Stethoscope, Brain, Eye as EyeIcon, Bone, Baby, Activity } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,6 +50,17 @@ const saveRecentSearch = (term: string) => {
   localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(recent.slice(0, MAX_RECENT)));
 };
 
+const SPECIALTY_ICONS: Record<string, React.ReactNode> = {
+  "Cardiologia": <Heart className="w-6 h-6 text-destructive" />,
+  "Pediatria": <Baby className="w-6 h-6 text-primary" />,
+  "Ortopedia": <Bone className="w-6 h-6 text-amber-600" />,
+  "Ginecologia": <Activity className="w-6 h-6 text-pink-500" />,
+  "Oftalmologia": <EyeIcon className="w-6 h-6 text-cyan-600" />,
+  "Neurologia": <Brain className="w-6 h-6 text-purple-600" />,
+};
+
+const FREQUENT_SEARCHES = ["Check-up Geral", "Dermatologia", "Nutrição", "Saúde Mental"];
+
 const DoctorSearch = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
@@ -64,6 +75,7 @@ const DoctorSearch = () => {
   const navigate = useNavigate();
   const [recentSearches, setRecentSearches] = useState<string[]>(getRecentSearches());
   const [showRecent, setShowRecent] = useState(false);
+  const [viewMode, setViewMode] = useState<"specialties" | "results">("specialties");
 
   // Advanced filters
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
@@ -77,6 +89,13 @@ const DoctorSearch = () => {
     fetchDoctors();
     if (user) fetchFavorites();
   }, [user]);
+
+  // Switch to results view when search or specialty is active
+  useEffect(() => {
+    if (search || selectedSpecialty || isUrgency) {
+      setViewMode("results");
+    }
+  }, [search, selectedSpecialty, isUrgency]);
 
   const fetchFavorites = async () => {
     if (!user) return;
@@ -191,33 +210,20 @@ const DoctorSearch = () => {
 
   const FiltersContent = () => (
     <div className="space-y-5 py-2 pb-24 md:pb-6">
-      {/* Price */}
       <div>
-        <p className="text-sm font-medium text-foreground mb-3">
-          💰 Preço: R${priceRange[0]} – R${priceRange[1]}
-        </p>
+        <p className="text-sm font-medium text-foreground mb-3">💰 Preço: R${priceRange[0]} – R${priceRange[1]}</p>
         <Slider min={0} max={500} step={10} value={priceRange} onValueChange={(v) => setPriceRange(v as [number, number])} />
       </div>
-
-      {/* Rating */}
       <div>
         <p className="text-sm font-medium text-foreground mb-3">⭐ Avaliação mínima</p>
         <div className="flex gap-2 flex-wrap">
           {[0, 3, 3.5, 4, 4.5].map(r => (
-            <Button
-              key={r}
-              variant={minRating === r ? "default" : "outline"}
-              size="sm"
-              className="h-10 min-w-[52px] text-sm gap-1"
-              onClick={() => setMinRating(r)}
-            >
+            <Button key={r} variant={minRating === r ? "default" : "outline"} size="sm" className="h-10 min-w-[52px] text-sm gap-1" onClick={() => setMinRating(r)}>
               {r === 0 ? "Todas" : <><Star className="w-3.5 h-3.5 fill-current" /> {r}+</>}
             </Button>
           ))}
         </div>
       </div>
-
-      {/* Availability */}
       <div>
         <p className="text-sm font-medium text-foreground mb-3">📅 Disponibilidade</p>
         <Select value={availabilityFilter} onValueChange={setAvailabilityFilter}>
@@ -229,8 +235,6 @@ const DoctorSearch = () => {
           </SelectContent>
         </Select>
       </div>
-
-      {/* Sort */}
       <div>
         <p className="text-sm font-medium text-foreground mb-3">🔄 Ordenar por</p>
         <Select value={sortBy} onValueChange={setSortBy}>
@@ -243,12 +247,9 @@ const DoctorSearch = () => {
           </SelectContent>
         </Select>
       </div>
-
       <div className="flex gap-3 pt-2">
-        <Button variant="outline" className="flex-1 h-11" onClick={clearFilters}>
-          <X className="w-4 h-4 mr-1" /> Limpar
-        </Button>
-        <Button className="flex-1 h-11 bg-gradient-hero text-primary-foreground" onClick={() => setFiltersOpen(false)}>
+        <Button variant="outline" className="flex-1 h-11" onClick={clearFilters}><X className="w-4 h-4 mr-1" /> Limpar</Button>
+        <Button className="flex-1 h-11 bg-primary text-primary-foreground" onClick={() => setFiltersOpen(false)}>
           Ver {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
         </Button>
       </div>
@@ -258,42 +259,12 @@ const DoctorSearch = () => {
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("doctors")}>
       <div className="w-full max-w-2xl mx-auto pb-24 md:pb-6">
-        {/* Urgency banner */}
-        {isUrgency && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-4 p-3.5 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center gap-3"
-          >
-            <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center shrink-0">
-              <AlertTriangle className="w-5 h-5 text-destructive" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-foreground">Modo Urgência</p>
-              <p className="text-xs text-muted-foreground">Médicos disponíveis agora</p>
-            </div>
-            <Button size="sm" variant="outline" className="shrink-0 h-9 rounded-xl" onClick={() => navigate("/dashboard/schedule")}>
-              Ver todos
-            </Button>
-          </motion.div>
-        )}
-
-        {/* Header */}
-        <div className="mb-5">
-          <h1 className="text-xl font-bold text-foreground">
-            {isUrgency ? "⚡ Consulta Urgente" : "Encontre seu médico"}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-0.5">
-            {isUrgency ? "Atendimento imediato" : "Especialistas prontos para te atender"}
-          </p>
-        </div>
-
-        {/* Search bar + filter button */}
-        <div className="flex gap-2 mb-4">
+        {/* Search bar */}
+        <div className="flex gap-2 mb-5">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Nome ou CRM..."
+              placeholder="Qual especialidade você procura?"
               value={search}
               onChange={e => { setSearch(e.target.value); setShowRecent(false); }}
               onFocus={() => { if (!search && recentSearches.length > 0) setShowRecent(true); }}
@@ -301,18 +272,12 @@ const DoctorSearch = () => {
               onKeyDown={e => { if (e.key === "Enter" && search.trim()) { saveRecentSearch(search.trim()); setRecentSearches(getRecentSearches()); } }}
               className="pl-10 h-12 rounded-2xl text-base bg-muted/50 border-transparent focus:border-primary/30"
             />
-            {/* Recent searches dropdown */}
             {showRecent && recentSearches.length > 0 && (
               <div className="absolute top-14 left-0 right-0 bg-card border border-border rounded-2xl shadow-elevated z-20 overflow-hidden">
                 <p className="text-[11px] text-muted-foreground/60 uppercase tracking-wider font-semibold px-4 pt-3 pb-1">Buscas recentes</p>
                 {recentSearches.map((term, i) => (
-                  <button
-                    key={i}
-                    className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-muted/50 flex items-center gap-2 transition-colors"
-                    onMouseDown={() => { setSearch(term); setShowRecent(false); }}
-                  >
-                    <Clock className="w-3.5 h-3.5 text-muted-foreground/50" />
-                    {term}
+                  <button key={i} className="w-full text-left px-4 py-2.5 text-sm text-foreground hover:bg-muted/50 flex items-center gap-2 transition-colors" onMouseDown={() => { setSearch(term); setShowRecent(false); }}>
+                    <Clock className="w-3.5 h-3.5 text-muted-foreground/50" /> {term}
                   </button>
                 ))}
               </div>
@@ -320,179 +285,187 @@ const DoctorSearch = () => {
           </div>
           <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline"
-                size="icon"
-                className="h-12 w-12 rounded-2xl shrink-0 relative" aria-label="Ação"
-              >
+              <Button variant="outline" size="icon" className="h-12 w-12 rounded-2xl shrink-0 relative" aria-label="Filtros">
                 <SlidersHorizontal className="w-5 h-5" />
                 {activeFilters > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">
-                    {activeFilters}
-                  </span>
+                  <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-primary text-primary-foreground text-[10px] flex items-center justify-center font-bold">{activeFilters}</span>
                 )}
               </Button>
             </SheetTrigger>
             <SheetContent side="bottom" className="rounded-t-3xl max-h-[85vh] overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>Filtros</SheetTitle>
-              </SheetHeader>
+              <SheetHeader><SheetTitle>Filtros</SheetTitle></SheetHeader>
               <FiltersContent />
             </SheetContent>
           </Sheet>
         </div>
 
-        {/* Specialty chips - horizontal scroll */}
-        <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide snap-x -mx-1 px-1">
-          <Badge
-            variant={selectedSpecialty === null ? "default" : "outline"}
-            className="cursor-pointer shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-transform"
-            onClick={() => setSelectedSpecialty(null)}
-          >
-            Todas
-          </Badge>
-          {specialties.map(s => (
-            <Badge
-              key={s.id}
-              variant={selectedSpecialty === s.name ? "default" : "outline"}
-              className="cursor-pointer shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-transform"
-              onClick={() => setSelectedSpecialty(selectedSpecialty === s.name ? null : s.name)}
-            >
-              {s.name}
-            </Badge>
-          ))}
-        </div>
+        {/* Specialties grid view (default) */}
+        {viewMode === "specialties" && !loading && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            {/* Pingo speech bubble */}
+            <div className="flex items-start gap-3 mb-6 p-4 rounded-2xl bg-primary/10 border border-primary/20">
+              <img src={mascotWave} alt="Pingo" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" decoding="async" width={48} height={48} />
+              <p className="text-sm text-foreground leading-relaxed">
+                "Olá! Eu posso te ajudar a encontrar o melhor especialista para você hoje."
+              </p>
+            </div>
 
-        {/* Results count */}
-        {!loading && (
-          <p className="text-xs text-muted-foreground mb-3">
-            {filtered.length} médico{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}
-          </p>
+            {/* Frequent searches */}
+            <div className="mb-6">
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider font-semibold mb-2">Buscas frequentes</p>
+              <div className="flex gap-2 flex-wrap">
+                {FREQUENT_SEARCHES.map(term => (
+                  <Badge
+                    key={term}
+                    variant="outline"
+                    className="cursor-pointer h-9 px-4 text-sm rounded-full hover:bg-primary/10 hover:border-primary/30 transition-colors"
+                    onClick={() => { setSearch(term); setViewMode("results"); }}
+                  >
+                    {term}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Specialty grid */}
+            <div className="mb-6">
+              <h2 className="text-lg font-bold text-foreground mb-4">Navegar por Especialidades</h2>
+              <div className="grid grid-cols-2 gap-3">
+                {specialties.slice(0, 6).map((spec, i) => (
+                  <motion.button
+                    key={spec.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    onClick={() => { setSelectedSpecialty(spec.name); setViewMode("results"); }}
+                    className="flex flex-col items-center gap-3 p-5 rounded-2xl bg-card border border-border/50 hover:border-primary/30 hover:shadow-md transition-all active:scale-[0.97]"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center">
+                      {SPECIALTY_ICONS[spec.name] || <Stethoscope className="w-6 h-6 text-primary" />}
+                    </div>
+                    <span className="text-sm font-semibold text-foreground">{spec.name}</span>
+                  </motion.button>
+                ))}
+              </div>
+              {specialties.length > 6 && (
+                <Button variant="ghost" className="w-full mt-3 text-sm text-primary" onClick={() => setViewMode("results")}>
+                  Ver todas as especialidades
+                </Button>
+              )}
+            </div>
+
+            {/* CTA banner */}
+            <div className="rounded-2xl bg-primary p-6 text-primary-foreground">
+              <h3 className="text-lg font-bold mb-1">Não encontrou o que precisava?</h3>
+              <p className="text-sm text-primary-foreground/70 mb-4">
+                Nossa equipe de suporte está disponível para te ajudar a encontrar o especialista ideal.
+              </p>
+              <Button variant="secondary" className="rounded-xl" onClick={() => navigate("/dashboard/support")}>
+                Falar com Atendente
+              </Button>
+            </div>
+          </motion.div>
         )}
 
-        {/* Loading skeleton */}
-        {loading ? (
-          <div className="space-y-3">
-            {[1, 2, 3, 4].map(i => (
-              <div key={i} className="p-4 rounded-2xl border border-border bg-card">
-                <div className="flex items-center gap-3">
-                  <Skeleton className="w-14 h-14 rounded-2xl shrink-0" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-36" />
-                    <Skeleton className="h-3 w-24" />
-                    <div className="flex gap-1"><Skeleton className="h-6 w-20 rounded-full" /></div>
-                  </div>
-                  <Skeleton className="h-8 w-16" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-              <Search className="w-8 h-8 text-muted-foreground/40" />
-            </div>
-            <><img src={mascotWave} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" loading="lazy" decoding="async" width={80} height={80} /><p className="text-[13px] font-semibold text-foreground">Nenhum médico encontrado</p></>
-            <p className="text-sm text-muted-foreground mt-1">Ajuste os filtros de busca</p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <AnimatePresence>
-              {filtered.map((doctor, i) => (
-                <motion.div
-                  key={doctor.id}
-                  custom={i}
-                  variants={fadeUp}
-                  initial="hidden"
-                  animate="show"
-                  className={`card-interactive kpi-card relative p-4 rounded-2xl border bg-card cursor-pointer group ${
-                    doctor.available_now
-                      ? "border-secondary/40 shadow-md shadow-secondary/10"
-                      : "border-border/50 hover:border-border"
-                  }`}
-                  onClick={() => navigate(`/dashboard/schedule/${doctor.id}`)}
-                >
-                  {/* Favorite button */}
-                  <button
-                    onClick={(e) => toggleFavorite(doctor.id, e)}
-                    className="absolute top-3 right-3 p-2 rounded-full hover:bg-muted/50 transition-colors z-10"
-                  >
-                    <Heart className={`w-5 h-5 transition-colors ${favoriteIds.has(doctor.id) ? "fill-destructive text-destructive" : "text-muted-foreground/40"}`} />
-                  </button>
+        {/* Results view */}
+        {viewMode === "results" && (
+          <>
+            {/* Urgency banner */}
+            {isUrgency && (
+              <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="mb-4 p-3.5 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center shrink-0"><AlertTriangle className="w-5 h-5 text-destructive" /></div>
+                <div className="flex-1 min-w-0"><p className="text-sm font-semibold text-foreground">Modo Urgência</p><p className="text-xs text-muted-foreground">Médicos disponíveis agora</p></div>
+              </motion.div>
+            )}
 
-                  <div className="flex items-start gap-3">
-                    {/* Avatar — gradient */}
-                    <Avatar className="w-14 h-14 rounded-2xl shrink-0">
-                      {doctor.profile?.avatar_url && (
-                        <AvatarImage src={doctor.profile.avatar_url} alt={`Dr(a). ${doctor.profile?.first_name}`} className="rounded-2xl object-cover" />
-                      )}
-                      <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-secondary text-white font-bold text-base">
-                        {doctor.profile?.first_name?.[0]}{doctor.profile?.last_name?.[0]}
-                      </AvatarFallback>
-                    </Avatar>
+            {/* Back to specialties */}
+            {!isUrgency && (
+              <button
+                onClick={() => { setViewMode("specialties"); setSearch(""); setSelectedSpecialty(null); }}
+                className="text-sm text-muted-foreground hover:text-foreground mb-3 flex items-center gap-1"
+              >
+                ← Voltar às especialidades
+              </button>
+            )}
 
-                    <div className="flex-1 min-w-0 pr-8">
-                      <h3 className="font-bold text-foreground text-[15px] leading-tight truncate">
-                        Dr(a). {doctor.profile?.first_name} {doctor.profile?.last_name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        CRM {doctor.crm}/{doctor.crm_state}
-                        {(doctor.experience_years ?? 0) > 0 && ` · ${doctor.experience_years}a exp.`}
-                      </p>
-
-                      {doctor.specialties.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-2">
-                          {doctor.specialties.slice(0, 2).map(s => (
-                            <span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">{s}</span>
-                          ))}
-                          {doctor.specialties.length > 2 && (
-                            <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground">+{doctor.specialties.length - 2}</span>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        {doctor.available_now && (
-                          <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/15 text-secondary font-semibold flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
-                            Plantão
-                          </span>
-                        )}
-                        {availableNowIds.has(doctor.id) && !doctor.available_now && (
-                          <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/10 text-secondary font-medium flex items-center gap-1">
-                            <Zap className="w-3 h-3" /> Disponível
-                          </span>
-                        )}
-                        {doctor.rating > 0 && (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Star className="w-3.5 h-3.5 text-warning fill-warning" />
-                            {doctor.rating.toFixed(1)}
-                            <span className="text-muted-foreground/60">({doctor.total_reviews})</span>
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Bottom bar: price + gradient CTA */}
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/40">
-                    <div>
-                      <span className="text-xl font-black text-foreground">R${doctor.consultation_price}</span>
-                      <span className="text-xs text-muted-foreground ml-1">/consulta</span>
-                    </div>
-                    <Button
-                      size="sm"
-                      className="h-10 px-5 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-bold gap-1.5 shadow-lg shadow-primary/20 hover:shadow-xl transition-shadow"
-                      onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/schedule/${doctor.id}`); }}
-                    >
-                      <Calendar className="w-4 h-4" />
-                      Agendar
-                      <ChevronRight className="w-4 h-4 -mr-1" />
-                    </Button>
-                  </div>
-                </motion.div>
+            {/* Specialty chips */}
+            <div className="flex gap-2 overflow-x-auto pb-3 mb-4 scrollbar-hide snap-x -mx-1 px-1">
+              <Badge variant={selectedSpecialty === null ? "default" : "outline"} className="cursor-pointer shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-transform" onClick={() => setSelectedSpecialty(null)}>Todas</Badge>
+              {specialties.map(s => (
+                <Badge key={s.id} variant={selectedSpecialty === s.name ? "default" : "outline"} className="cursor-pointer shrink-0 h-9 px-4 text-sm rounded-full snap-start active:scale-95 transition-transform" onClick={() => setSelectedSpecialty(selectedSpecialty === s.name ? null : s.name)}>{s.name}</Badge>
               ))}
-            </AnimatePresence>
-          </div>
+            </div>
+
+            {/* Results count */}
+            {!loading && <p className="text-xs text-muted-foreground mb-3">{filtered.length} médico{filtered.length !== 1 ? "s" : ""} encontrado{filtered.length !== 1 ? "s" : ""}</p>}
+
+            {/* Loading / Empty / Results */}
+            {loading ? (
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className="p-4 rounded-2xl border border-border bg-card">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-14 h-14 rounded-2xl shrink-0" />
+                      <div className="flex-1 space-y-2"><Skeleton className="h-4 w-36" /><Skeleton className="h-3 w-24" /></div>
+                      <Skeleton className="h-8 w-16" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="text-center py-16">
+                <img src={mascotWave} alt="Pingo" className="w-20 h-20 object-contain mx-auto drop-shadow-md mb-3 select-none" loading="lazy" decoding="async" width={80} height={80} />
+                <p className="text-[13px] font-semibold text-foreground">Nenhum médico encontrado</p>
+                <p className="text-sm text-muted-foreground mt-1">Ajuste os filtros de busca</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <AnimatePresence>
+                  {filtered.map((doctor, i) => (
+                    <motion.div key={doctor.id} custom={i} variants={fadeUp} initial="hidden" animate="show"
+                      className={`card-interactive relative p-4 rounded-2xl border bg-card cursor-pointer group ${doctor.available_now ? "border-secondary/40 shadow-md shadow-secondary/10" : "border-border/50 hover:border-border"}`}
+                      onClick={() => navigate(`/dashboard/schedule/${doctor.id}`)}
+                    >
+                      <button onClick={(e) => toggleFavorite(doctor.id, e)} className="absolute top-3 right-3 p-2 rounded-full hover:bg-muted/50 transition-colors z-10">
+                        <Heart className={`w-5 h-5 transition-colors ${favoriteIds.has(doctor.id) ? "fill-destructive text-destructive" : "text-muted-foreground/40"}`} />
+                      </button>
+                      <div className="flex items-start gap-3">
+                        <Avatar className="w-14 h-14 rounded-2xl shrink-0">
+                          {doctor.profile?.avatar_url && <AvatarImage src={doctor.profile.avatar_url} alt={`Dr(a). ${doctor.profile?.first_name}`} className="rounded-2xl object-cover" />}
+                          <AvatarFallback className="rounded-2xl bg-gradient-to-br from-primary to-secondary text-white font-bold text-base">{doctor.profile?.first_name?.[0]}{doctor.profile?.last_name?.[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0 pr-8">
+                          <h3 className="font-bold text-foreground text-[15px] leading-tight truncate">Dr(a). {doctor.profile?.first_name} {doctor.profile?.last_name}</h3>
+                          <p className="text-xs text-muted-foreground mt-0.5">CRM {doctor.crm}/{doctor.crm_state}{(doctor.experience_years ?? 0) > 0 && ` · ${doctor.experience_years}a exp.`}</p>
+                          {doctor.specialties.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">{doctor.specialties.slice(0, 2).map(s => (<span key={s} className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-semibold">{s}</span>))}</div>
+                          )}
+                          <div className="flex items-center gap-2 mt-2 flex-wrap">
+                            {doctor.available_now && (
+                              <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/15 text-secondary font-semibold flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />Plantão</span>
+                            )}
+                            {availableNowIds.has(doctor.id) && !doctor.available_now && (
+                              <span className="text-[11px] px-2.5 py-1 rounded-full bg-secondary/10 text-secondary font-medium flex items-center gap-1"><Zap className="w-3 h-3" /> Disponível</span>
+                            )}
+                            {doctor.rating > 0 && (
+                              <span className="flex items-center gap-1 text-xs text-muted-foreground"><Star className="w-3.5 h-3.5 text-warning fill-warning" />{doctor.rating.toFixed(1)}<span className="text-muted-foreground/60">({doctor.total_reviews})</span></span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/40">
+                        <div><span className="text-xl font-black text-foreground">R${doctor.consultation_price}</span><span className="text-xs text-muted-foreground ml-1">/consulta</span></div>
+                        <Button size="sm" className="h-10 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-bold gap-1.5 shadow-lg shadow-primary/20"
+                          onClick={(e) => { e.stopPropagation(); navigate(`/dashboard/schedule/${doctor.id}`); }}>
+                          <Calendar className="w-4 h-4" /> Agendar <ChevronRight className="w-4 h-4 -mr-1" />
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            )}
+          </>
         )}
       </div>
     </DashboardLayout>
