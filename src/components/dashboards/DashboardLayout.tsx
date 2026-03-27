@@ -217,25 +217,22 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const bottomNav = nav?.slice(0, BOTTOM_COUNT) ?? [];
   const moreNav  = nav && nav.length > BOTTOM_COUNT ? nav.slice(BOTTOM_COUNT) : [];
 
-  // GSAP sidebar entrance — only on first mount (no dep on nav to avoid flicker)
-  const sidebarAnimated = useRef(false);
+  // CSS-only entrance — no GSAP import needed, saves ~30KB dynamic load
   useEffect(() => {
-    if (sidebarAnimated.current || !sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    sidebarAnimated.current = true;
+    if (!sidebarRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const items = sidebarRef.current.querySelectorAll(".nav-item");
-    import("gsap").then(({ default: gsap }) => {
-      gsap.fromTo(items, { opacity: 0, x: -10 }, { opacity: 1, x: 0, duration: 0.3, stagger: 0.035, ease: "power2.out", clearProps: "transform,opacity" });
-    }).catch(() => {});
+    items.forEach((el, i) => {
+      (el as HTMLElement).style.opacity = "0";
+      (el as HTMLElement).style.transform = "translateX(-8px)";
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          (el as HTMLElement).style.transition = "opacity 0.25s ease-out, transform 0.25s ease-out";
+          (el as HTMLElement).style.opacity = "1";
+          (el as HTMLElement).style.transform = "translateX(0)";
+        }, i * 30);
+      });
+    });
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // GSAP header entrance
-  useEffect(() => {
-    if (!headerRef.current || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const el = headerRef.current;
-    import("gsap").then(({ default: gsap }) => {
-      gsap.fromTo(el, { opacity: 0, y: -6 }, { opacity: 1, y: 0, duration: 0.35, ease: "power3.out", clearProps: "transform,opacity" });
-    }).catch(() => {});
   }, []);
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => {
