@@ -2,7 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Navigate, Routes, Route, useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { usePresence } from "@/hooks/use-presence";
 import { prefetchOnIdle } from "@/hooks/use-prefetch-route";
-import { lazy, Suspense, ReactNode, useEffect, useState } from "react";
+import { lazy, Suspense, ReactNode, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { warn } from "@/lib/logger";
 
@@ -103,21 +103,6 @@ const PatientEMRPage = () => {
   return <PatientEMR patientId={patientUserId} isDoctor readOnly={false} />;
 };
 
-const PLAN_CHECK_TIMEOUT_MS = 6000;
-
-const withTimeout = <T,>(promise: Promise<T>, timeoutMs: number) =>
-  new Promise<T>((resolve, reject) => {
-    const timer = window.setTimeout(() => reject(new Error("plan-check-timeout")), timeoutMs);
-    promise
-      .then((value) => {
-        window.clearTimeout(timer);
-        resolve(value);
-      })
-      .catch((error) => {
-        window.clearTimeout(timer);
-        reject(error);
-      });
-  });
 
 const RoleGuard = ({ allowed, roles, children }: { allowed: string[]; roles: string[]; children: ReactNode }) => {
   const isAdmin = roles.includes("admin");
@@ -145,17 +130,11 @@ const Dashboard = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const forceRole = searchParams.get("role");
-  const [checkingPlan, setCheckingPlan] = useState(true);
   usePresence();
-
-  // No plan gate — patients can access dashboard freely to buy individual consultations
-  useEffect(() => {
-    if (!loading) setCheckingPlan(false);
-  }, [loading]);
 
   // Prefetch secondary routes after dashboard renders
   useEffect(() => {
-    if (loading || checkingPlan) return;
+    if (loading) return;
     const primaryRole = roles.includes("admin") ? "admin"
       : roles.includes("doctor") ? "doctor"
       : roles.includes("patient") ? "patient"
@@ -181,9 +160,9 @@ const Dashboard = () => {
         () => import("@/components/patient/PatientHealth"),
       ]);
     }
-  }, [loading, checkingPlan, roles]);
+  }, [loading, roles]);
 
-  if (loading || checkingPlan) {
+  if (loading) {
     return <PingoLoader />;
   }
 

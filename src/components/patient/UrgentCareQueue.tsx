@@ -24,7 +24,7 @@ const UrgentCareQueue = () => {
   const [myEntry, setMyEntry] = useState<{ id: string; status: string; position?: number; created_at: string } | null>(null);
   const [queuePosition, setQueuePosition] = useState(0);
   const [elapsed, setElapsed] = useState(0);
-  const [discountPercent, setDiscountPercent] = useState(0);
+  
 
   // Payment state
   const [showPayment, setShowPayment] = useState(false);
@@ -44,7 +44,6 @@ const UrgentCareQueue = () => {
     fetchShiftPrice();
     if (user) {
       fetchMyEntry();
-      checkDiscountCard();
     }
   }, [user]);
 
@@ -102,11 +101,6 @@ const UrgentCareQueue = () => {
     setLoading(false);
   };
 
-  const checkDiscountCard = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("discount_cards").select("discount_percent").eq("user_id", user.id).eq("status", "active").maybeSingle();
-    if (data) setDiscountPercent(Number(data.discount_percent));
-  };
 
   const fetchMyEntry = async () => {
     if (!user) return;
@@ -132,7 +126,7 @@ const UrgentCareQueue = () => {
     }
   };
 
-  const priceWithDiscount = shiftInfo ? (discountPercent > 0 ? shiftInfo.price * (1 - discountPercent / 100) : shiftInfo.price) : 0;
+  const priceWithDiscount = shiftInfo ? shiftInfo.price : 0;
 
   // Step 1: Show payment UI
   const handleStartPayment = () => {
@@ -317,14 +311,7 @@ const UrgentCareQueue = () => {
                   <Lock className="w-5 h-5 mx-auto text-muted-foreground mb-2" />
                   <h2 className="text-lg font-bold text-foreground">Pagamento — Plantão 24h</h2>
                   <p className="text-muted-foreground text-sm">
-                    {discountPercent > 0 ? (
-                      <>
-                        <span className="line-through text-muted-foreground/60">R$ {shiftInfo?.price.toFixed(2)}</span>{" "}
-                        <span className="text-secondary font-bold">R$ {priceWithDiscount.toFixed(2)} ({discountPercent}% off)</span>
-                      </>
-                    ) : (
-                      <>R$ {priceWithDiscount.toFixed(2)}</>
-                    )} • Turno {shiftInfo?.label}
+                    R$ {priceWithDiscount.toFixed(2)} • Turno {shiftInfo?.label}
                   </p>
                 </div>
 
@@ -425,13 +412,7 @@ const UrgentCareQueue = () => {
                     <p className="text-xs text-muted-foreground">Turno atual</p>
                   </div>
                   <div className="text-right shrink-0">
-                    {discountPercent > 0 && (
-                      <p className="text-xs sm:text-sm text-muted-foreground line-through">R$ {shiftInfo?.price.toFixed(2)}</p>
-                    )}
                     <p className="text-xl sm:text-2xl font-bold text-primary">R$ {priceWithDiscount.toFixed(2)}</p>
-                    {discountPercent > 0 && (
-                      <Badge variant="secondary" className="text-[10px] sm:text-xs">-{discountPercent}% Cartão Desconto</Badge>
-                    )}
                   </div>
                 </div>
 
