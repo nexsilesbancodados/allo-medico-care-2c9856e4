@@ -20,10 +20,9 @@ describe("CompreFace — src/lib/compreface.ts", () => {
 
   it("dataUrlToFile converte data URL em File corretamente", async () => {
     const { dataUrlToFile } = await import("@/lib/compreface");
-    const canvas = document.createElement("canvas");
-    canvas.width = 10;
-    canvas.height = 10;
-    const dataUrl = canvas.toDataURL("image/jpeg");
+    // Use a minimal valid data URL (jsdom doesn't support canvas.toDataURL)
+    const dataUrl =
+      "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBg==";
     const file = dataUrlToFile(dataUrl, "selfie.jpg");
     expect(file).toBeInstanceOf(File);
     expect(file.name).toBe("selfie.jpg");
