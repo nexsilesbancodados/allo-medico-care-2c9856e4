@@ -10,12 +10,13 @@ import {
   buildOhifUrl,
   type AlocExame,
 } from "@/lib/services/laudos-service";
+import { getOHIFUrl } from "@/lib/orthanc";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
-import { FileText, ExternalLink, Play, CheckCircle, Clock, Loader2 } from "lucide-react";
+import { FileText, ExternalLink, Play, CheckCircle, Clock, Loader2, Image } from "lucide-react";
 
 // ─── Kanban Column ────────────────────────────────────────────────────────────
 
@@ -129,6 +130,25 @@ function ExameCard({ exame, userId, onIniciar }: ExameCardProps) {
             >
               <ExternalLink className="h-3 w-3 mr-1" /> Abrir Imagem
             </Button>
+          )}
+
+          {/* For exames from clinic upload (arquivo_url without orthanc) */}
+          {(exame as any).arquivo_url && !exame.orthanc_study_uid && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs"
+              onClick={() => window.open((exame as any).arquivo_url, "_blank")}
+            >
+              <Image className="h-3 w-3 mr-1" /> Ver Arquivo
+            </Button>
+          )}
+
+          {/* Origin badge */}
+          {(exame as any).origem && (
+            <Badge variant="outline" className="text-xs">
+              {(exame as any).origem === "dicom" ? "DICOM" : "PDF/Imagem"}
+            </Badge>
           )}
         </div>
       </CardContent>
