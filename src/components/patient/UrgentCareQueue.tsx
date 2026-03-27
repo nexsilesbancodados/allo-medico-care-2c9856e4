@@ -336,10 +336,12 @@ const UrgentCareQueue = () => {
               <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/[0.06] blur-[40px]" />
             </div>
 
-            {/* Nearby clinics */}
+            {/* Nearby clinics count */}
             <div className="flex items-center gap-2 mb-1">
               <span className="w-2.5 h-2.5 rounded-full bg-secondary animate-pulse" />
-              <span className="text-sm font-medium text-foreground">{NEARBY_HOSPITALS.length} Clínicas Próximas</span>
+              <span className="text-sm font-medium text-foreground">
+                {hospitalsLoading ? "Buscando hospitais..." : `${nearbyHospitals.length} Hospitais Próximos`}
+              </span>
             </div>
 
             {/* Emergency triage */}
@@ -354,24 +356,49 @@ const UrgentCareQueue = () => {
               </Button>
             </div>
 
-            {/* Hospitals with wait time */}
+            {/* Hospitals - real data from geolocation */}
             <div>
-              <h2 className="text-lg font-bold text-foreground mb-1 font-[Manrope]">Hospitais com Menor Espera</h2>
-              <p className="text-xs text-muted-foreground mb-3">Tempo estimado para triagem</p>
+              <h2 className="text-lg font-bold text-foreground mb-1 font-[Manrope]">Hospitais Próximos</h2>
+              <p className="text-xs text-muted-foreground mb-3">
+                {hospitalsLoading ? "Obtendo sua localização..." : "Baseado na sua localização atual"}
+              </p>
+
+              {hospitalsLoading && (
+                <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <span className="text-sm">Buscando hospitais próximos...</span>
+                </div>
+              )}
+
+              {locationError && !hospitalsLoading && (
+                <div className="rounded-2xl border border-warning/20 bg-warning/5 p-4 text-center">
+                  <MapPin className="w-6 h-6 text-warning mx-auto mb-2" />
+                  <p className="text-sm text-foreground font-medium mb-1">Localização indisponível</p>
+                  <p className="text-xs text-muted-foreground">{locationError}</p>
+                </div>
+              )}
+
+              {!hospitalsLoading && !locationError && nearbyHospitals.length === 0 && (
+                <div className="rounded-2xl border border-border/20 bg-muted/30 p-4 text-center">
+                  <Building2 className="w-6 h-6 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">Nenhum hospital encontrado nas proximidades</p>
+                </div>
+              )}
+
               <div className="space-y-3">
-                {NEARBY_HOSPITALS.map((h, i) => (
-                  <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }}
+                {nearbyHospitals.map((h, i) => (
+                  <motion.div key={`${h.lat}-${h.lon}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}
                     whileTap={{ scale: 0.97 }}
-                    className="p-4 rounded-2xl border border-border/20 bg-card flex items-center gap-4 shadow-[var(--p-shadow-card)] hover:shadow-[var(--p-shadow-elevated)] transition-shadow">
+                    onClick={() => openInMaps(h)}
+                    className="p-4 rounded-2xl border border-border/20 bg-card flex items-center gap-4 shadow-[var(--p-shadow-card)] hover:shadow-[var(--p-shadow-elevated)] transition-shadow cursor-pointer">
                     <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center shrink-0">
                       <Building2 className="w-6 h-6 text-muted-foreground" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] text-secondary font-bold uppercase tracking-wider">{h.distance} de distância</p>
-                      <p className="font-semibold text-foreground text-sm">{h.name}</p>
+                      <p className="font-semibold text-foreground text-sm truncate">{h.name}</p>
                       <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                        <span className="flex items-center gap-1"><Clock className="w-3 h-3 text-warning" /> {h.waitTime} min espera</span>
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {h.driveMin} min</span>
+                        <span className="flex items-center gap-1"><Navigation className="w-3 h-3 text-primary" /> ~{h.driveMin} min de carro</span>
                       </div>
                     </div>
                     <ChevronRight className="w-5 h-5 text-muted-foreground/40 shrink-0" />
