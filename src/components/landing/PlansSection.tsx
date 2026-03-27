@@ -7,7 +7,7 @@ import specGeneral from "@/assets/spec-general.png";
 import specCardiology from "@/assets/spec-cardiology.png";
 import specDermatology from "@/assets/spec-dermatology.png";
 import specNeurology from "@/assets/spec-neurology.png";
-import specOphthalmology from "@/assets/spec-ophthalmology.png";
+
 import specOrthopedics from "@/assets/spec-orthopedics.png";
 import specPediatrics from "@/assets/spec-pediatrics.png";
 import specEndocrinology from "@/assets/spec-endocrinology.png";
@@ -17,7 +17,7 @@ const specialties = [
   { name: "Cardiologia", icon: Activity, price: 129, mascot: specCardiology, gradient: "from-rose-500/10 to-red-400/5" },
   { name: "Dermatologia", icon: Sparkles, price: 119, mascot: specDermatology, gradient: "from-pink-500/10 to-fuchsia-400/5" },
   { name: "Neurologia", icon: Brain, price: 139, mascot: specNeurology, gradient: "from-blue-500/10 to-indigo-400/5" },
-  { name: "Oftalmologia", icon: Eye, price: 119, mascot: specOphthalmology, gradient: "from-cyan-500/10 to-teal-400/5" },
+  
   { name: "Ortopedia", icon: Bone, price: 129, mascot: specOrthopedics, gradient: "from-amber-500/10 to-orange-400/5" },
   { name: "Pediatria", icon: Baby, price: 99, mascot: specPediatrics, gradient: "from-green-500/10 to-emerald-400/5" },
   { name: "Endocrinologia", icon: Activity, price: 129, mascot: specEndocrinology, gradient: "from-violet-500/10 to-purple-400/5" },
