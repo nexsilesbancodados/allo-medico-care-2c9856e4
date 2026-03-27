@@ -69,6 +69,8 @@ const UserProfile = () => {
   const [education, setEducation] = useState("");
   const [experienceYears, setExperienceYears] = useState(0);
   const [consultationPrice, setConsultationPrice] = useState(89);
+  const [priceMin, setPriceMin] = useState<number | null>(null);
+  const [priceMax, setPriceMax] = useState<number | null>(null);
   const isDoctor = roles.includes("doctor");
 
   useEffect(() => {
@@ -87,12 +89,31 @@ const UserProfile = () => {
   }, [profile, user]);
 
   const fetchDoctorProfile = async () => {
-    const { data } = await supabase.from("doctor_profiles").select("bio, education, experience_years, consultation_price").eq("user_id", user!.id).single();
+    const { data } = await supabase.from("doctor_profiles").select("id, bio, education, experience_years, consultation_price").eq("user_id", user!.id).single();
     if (data) {
       setBio(data.bio || "");
       setEducation(data.education || "");
       setExperienceYears(data.experience_years || 0);
       setConsultationPrice(Number(data.consultation_price) || 89);
+
+      // Fetch specialty price range
+      const { data: specData } = await supabase
+        .from("doctor_specialties")
+        .select("specialty_id")
+        .eq("doctor_id", data.id);
+      if (specData && specData.length > 0) {
+        const specIds = specData.map((s: any) => s.specialty_id);
+        const { data: specs } = await supabase
+          .from("specialties")
+          .select("price_min, price_max")
+          .in("id", specIds);
+        if (specs && specs.length > 0) {
+          const mins = (specs as any[]).map(s => s.price_min).filter((v: any) => v != null);
+          const maxs = (specs as any[]).map(s => s.price_max).filter((v: any) => v != null);
+          setPriceMin(mins.length > 0 ? Math.min(...mins) : null);
+          setPriceMax(maxs.length > 0 ? Math.max(...maxs) : null);
+        }
+      }
     }
   };
 
@@ -126,6 +147,17 @@ const UserProfile = () => {
     }).eq("user_id", user.id);
 
     if (isDoctor) {
+      // Validate price range
+      if (priceMin !== null && consultationPrice < priceMin) {
+        toast.error(`O preço mínimo para sua especialidade é R$ ${priceMin.toFixed(0)}`);
+        setSaving(false);
+        return;
+      }
+      if (priceMax !== null && consultationPrice > priceMax) {
+        toast.error(`O preço máximo para sua especialidade é R$ ${priceMax.toFixed(0)}`);
+        setSaving(false);
+        return;
+      }
       await supabase.from("doctor_profiles").update({
         bio, education, experience_years: experienceYears, consultation_price: consultationPrice,
       }).eq("user_id", user.id);
@@ -274,7 +306,26 @@ const UserProfile = () => {
               <div><Label>Formação</Label><Input value={education} onChange={e => setEducation(e.target.value)} placeholder="Ex: USP, Residência em Cardiologia" className="mt-1" /></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div><Label>Anos de Experiência</Label><Input type="number" value={experienceYears} onChange={e => setExperienceYears(Number(e.target.value))} className="mt-1 h-11" min={0} /></div>
-                <div><Label>Preço da Consulta (R$)</Label><Input type="number" value={consultationPrice} onChange={e => setConsultationPrice(Number(e.target.value))} className="mt-1 h-11" min={0} step={0.01} /></div>
+                <div>
+                  <Label>Preço da Consulta (R$)</Label>
+                  <Input
+                    type="number"
+                    value={consultationPrice}
+                    onChange={e => setConsultationPrice(Number(e.target.value))}
+                    className="mt-1 h-11"
+                    min={priceMin ?? 0}
+                    max={priceMax ?? undefined}
+                    step={1}
+                  />
+                  {(priceMin !== null || priceMax !== null) && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Faixa permitida para sua especialidade:{" "}
+                      <span className="font-medium text-foreground">
+                        R$ {priceMin?.toFixed(0) ?? "—"} ~ R$ {priceMax?.toFixed(0) ?? "—"}
+                      </span>
+                    </p>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

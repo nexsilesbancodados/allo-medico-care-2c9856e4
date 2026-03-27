@@ -300,6 +300,8 @@ export interface SpecialtyRow {
   name: string;
   description: string | null;
   consultation_price: number | null;
+  price_min: number | null;
+  price_max: number | null;
   created_at?: string;
 }
 
