@@ -203,7 +203,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       `, BRAND.red)}
       <p>Deseja reagendar? Acesse a plataforma e escolha um novo horário.</p>
       ${btn(URLS.patientSchedule, "Reagendar Consulta")}
-    `),
+    `, "appointment_cancelled"),
   }),
 
   appointment_rescheduled: (d) => ({
@@ -216,7 +216,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>📅 Nova Data:</strong> ${d.new_date}</p>
         <p><strong>⏰ Novo Horário:</strong> ${d.new_time}</p>
       `, BRAND.amber)}
-    `),
+    `, "appointment_rescheduled"),
   }),
 
   prescription_sent: (d) => ({
@@ -228,7 +228,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       ${d.diagnosis ? `<div style="background:#fff8f0;padding:12px;border-radius:8px;margin:12px 0;"><strong>Diagnóstico:</strong> ${d.diagnosis}</div>` : ""}
       ${d.medications ? card(`<strong>Medicamentos:</strong><pre style="white-space:pre-wrap;font-family:sans-serif;font-size:14px;margin-top:8px;">${d.medications}</pre>`) : ""}
       ${btn(URLS.patientPrescriptions, "Ver Minha Receita")}
-    `),
+    `, "prescription_sent"),
   }),
 
   certificate_sent: (d) => ({
@@ -242,7 +242,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>🔐 Código de verificação:</strong> ${d.verification_code || "—"}</p>
       `)}
       ${btn(URLS.patientHealth, "Baixar Documento")}
-    `),
+    `, "certificate_sent"),
   }),
 
   welcome: (d) => ({
@@ -275,7 +275,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
           <li>Configure sua disponibilidade</li>
         </ol>
       `)}
-    `),
+    `, "welcome_doctor"),
   }),
 
   welcome_clinic: (d) => ({
@@ -285,7 +285,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Olá <strong>${d.name}</strong>,</p>
       <p>Sua clínica <strong>${d.clinic_name}</strong> foi cadastrada na plataforma AloClínica.</p>
       ${card(`<p>📋 <strong>Status:</strong> Aguardando aprovação do administrador</p>`)}
-    `),
+    `, "welcome_clinic"),
   }),
 
   doctor_approved: (d) => ({
@@ -302,7 +302,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         </ul>
       `, BRAND.green)}
       ${btn(d.login_url || URLS.doctorAuth, "Acessar Painel Médico", BRAND.green)}
-    `),
+    `, "doctor_approved"),
   }),
 
   doctor_rejected: (d) => ({
@@ -313,7 +313,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Infelizmente, seu cadastro na AloClínica <strong style="color:${BRAND.red};">não foi aprovado</strong> neste momento.</p>
       ${d.reason ? `<div style="background:#fef2f2;padding:12px;border-radius:8px;margin:12px 0;"><strong>Motivo:</strong> ${d.reason}</div>` : ""}
       <p>Se acredita que houve um engano, entre em contato com o suporte.</p>
-    `),
+    `, "doctor_rejected"),
   }),
 
   clinic_approved: (d) => ({
@@ -330,7 +330,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         </ul>
       `, BRAND.green)}
       ${btn(d.login_url || URLS.clinicAuth, "Acessar Painel da Clínica", BRAND.green)}
-    `),
+    `, "clinic_approved"),
   }),
 
   clinic_rejected: (d) => ({
@@ -341,7 +341,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Sua clínica <strong>${d.clinic_name || ""}</strong> <strong style="color:${BRAND.red};">não foi aprovada</strong> neste momento.</p>
       ${d.reason ? `<div style="background:#fef2f2;padding:12px;border-radius:8px;margin:12px 0;"><strong>Motivo:</strong> ${d.reason}</div>` : ""}
       <p>Se acredita que houve um engano, entre em contato com o suporte.</p>
-    `),
+    `, "clinic_rejected"),
   }),
 
   affiliate_approved: (d) => ({
@@ -355,7 +355,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>💳 Saque:</strong> Solicite pelo painel</p>
       `, BRAND.green)}
       ${btn(d.login_url || URLS.partnerAuth, "Acessar Painel de Afiliado", BRAND.green)}
-    `),
+    `, "affiliate_approved"),
   }),
 
   affiliate_rejected: (d) => ({
@@ -365,7 +365,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Olá <strong>${d.name}</strong>,</p>
       <p>Sua solicitação de afiliação <strong style="color:${BRAND.red};">não foi aprovada</strong> neste momento.</p>
       ${d.reason ? `<div style="background:#fef2f2;padding:12px;border-radius:8px;margin:12px 0;"><strong>Motivo:</strong> ${d.reason}</div>` : ""}
-    `),
+    `, "affiliate_rejected"),
   }),
 
   consultation_started: (d) => ({
@@ -389,7 +389,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p>⭐ Avalie sua experiência para ajudar outros pacientes!</p>
       `, BRAND.green)}
       ${btn(URLS.patientHealth, "Ver Documentos")}
-    `),
+    `, "consultation_completed"),
   }),
 
   document_uploaded: (d) => ({
@@ -403,7 +403,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         ${d.description ? `<p><strong>📝 Descrição:</strong> ${d.description}</p>` : ""}
       `)}
       ${btn(URLS.patientHealth, "Visualizar e Baixar")}
-    `),
+    `, "document_uploaded"),
   }),
 
   password_reset: (d) => ({
@@ -414,7 +414,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Recebemos um pedido para redefinir a senha da sua conta AloClínica.</p>
       ${d.reset_link ? btn(d.reset_link, "Redefinir Senha") : ""}
       <p style="color:${BRAND.muted};font-size:13px;">Este link expira em 1 hora. Se não solicitou a redefinição, ignore este e-mail.</p>
-    `),
+    `, "password_reset"),
   }),
 
   subscription_activated: (d) => ({
@@ -429,7 +429,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>Consultas incluídas:</strong> ${d.max_appointments || "Ilimitadas"}</p>
       `, BRAND.green)}
       ${btn(URLS.patientSchedule, "Agendar Consulta", BRAND.green)}
-    `),
+    `, "subscription_activated"),
   }),
 
   subscription_expiring: (d) => ({
@@ -440,7 +440,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Seu plano <strong>${d.plan_name || "atual"}</strong> expira em <strong>${d.days_left || "poucos"} dias</strong>.</p>
       ${card(`<p><strong>📅 Expira em:</strong> ${d.expires_at || "—"}</p>`, BRAND.amber)}
       ${btn(d.renew_link || URLS.patientPlans, "Renovar Plano", BRAND.amber)}
-    `),
+    `, "subscription_expiring"),
   }),
 
   payment_confirmed: (d) => ({
@@ -456,7 +456,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       `, BRAND.green)}
       <p>Sua consulta está <strong>garantida</strong>. Acesse a plataforma 5 minutos antes.</p>
       ${btn(URLS.patientAppointments, "Ver Minhas Consultas")}
-    `),
+    `, "payment_confirmed"),
   }),
 
   exam_report_ready: (d) => ({
@@ -472,7 +472,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       `)}
       ${btn(d.download_link || URLS.patientHealth, "Acessar Meu Laudo")}
       ${d.validate_link ? `<p style="font-size:12px;color:${BRAND.muted};text-align:center;">Verifique em: <a href="${d.validate_link}" style="color:${BRAND.color};">${d.validate_link}</a></p>` : ""}
-    `),
+    `, "exam_report_ready"),
   }),
 
   card_activated: (d) => ({
@@ -495,7 +495,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         </ul>
       </div>
       ${btn(URLS.patientSchedule, "Agendar Consulta com Desconto", BRAND.green)}
-    `),
+    `, "card_activated"),
   }),
 
   card_expiring: (d) => ({
@@ -509,7 +509,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p>Renove para manter seus descontos e benefícios!</p>
       `, BRAND.amber)}
       ${btn(URLS.patientPlans, "Renovar Meu Cartão", BRAND.amber)}
-    `),
+    `, "card_expiring"),
   }),
 
   refund_processed: (d) => ({
@@ -522,7 +522,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         ${d.reason ? `<p><strong>Motivo:</strong> ${d.reason}</p>` : ""}
         <p><strong>Prazo:</strong> O valor será devolvido em até 10 dias úteis.</p>
       `)}
-    `),
+    `, "refund_processed"),
   }),
 
   renewal_approved: (d) => ({
@@ -536,7 +536,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         ${d.notes ? `<p><strong>Observações:</strong> ${d.notes}</p>` : ""}
       `, BRAND.green)}
       ${btn(URLS.patientPrescriptions, "Ver Minha Receita", BRAND.green)}
-    `),
+    `, "renewal_approved"),
   }),
 
   renewal_rejected: (d) => ({
@@ -562,7 +562,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         ${d.amount ? `<p><strong>Valor retido:</strong> R$ ${d.amount}</p>` : ""}
       `, BRAND.amber)}
       <p>Para evitar cobranças futuras, cancele com pelo menos 2h de antecedência.</p>
-    `),
+    `, "no_show_fee"),
   }),
 
   doctor_invite_code: (d) => ({
@@ -590,7 +590,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
         <p><strong>Telefone:</strong> ${d.phone || "—"}</p>
         ${d.message ? `<p><strong>Mensagem:</strong> ${d.message}</p>` : ""}
       `)}
-    `),
+    `, "b2b_lead_received"),
   }),
 
   nps_survey: (d) => ({
@@ -611,7 +611,7 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       <p>Uma vaga abriu para sua consulta com <strong>${d.doctor_name}</strong> no dia <strong>${d.date}</strong>!</p>
       ${card(`<p>⚡ Reserve rápido — a vaga é por ordem de chegada!</p>`, BRAND.green)}
       ${btn(URLS.patientSchedule, "Reservar Agora", BRAND.green)}
-    `),
+    `, "waitlist_slot_available"),
   }),
 };
 
