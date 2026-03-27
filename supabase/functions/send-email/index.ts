@@ -60,7 +60,7 @@ const BRAND = {
   border: "#e2e8f0",
 };
 
-const LOGO_URL = `https://oaixgmuocuwhsabidpei.supabase.co/storage/v1/object/public/email-assets/logo.png`;
+
 
 // Banner configs per email category
 const BANNERS: Record<string, { emoji: string; title: string; gradient: [string, string]; accent: string }> = {
