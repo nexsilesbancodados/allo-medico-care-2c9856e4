@@ -1,5 +1,6 @@
 import { logError } from "@/lib/logger";
 import { useState } from "react";
+import { securityMonitor } from "@/lib/security-monitor";
 import SEOHead from "@/components/SEOHead";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -83,11 +84,17 @@ const Auth = () => {
     setPasswordError(pErr);
     if (eErr || pErr) return;
 
+    if (securityMonitor.isLoginBlocked(email)) {
+      toast.error("Conta temporariamente bloqueada", { description: "Muitas tentativas. Aguarde 15 minutos." });
+      return;
+    }
+
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
 
     if (error) {
+      securityMonitor.trackFailedLogin(email);
       const translated = translateAuthError(error.message);
       if (error.message.includes("Invalid login credentials")) {
         setPasswordError(translated);
@@ -95,6 +102,7 @@ const Auth = () => {
         toast.error("Erro ao entrar", { description: translated });
       }
     } else if (data.user) {
+      securityMonitor.clearFailedLogins(email);
       await redirectAfterLogin(data.user.id);
     }
   };
