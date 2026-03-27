@@ -435,14 +435,12 @@ const NextAppointmentCard = ({
 
 const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNavigate> }) => (
   <Card className="border-dashed border-border/30 bg-gradient-to-br from-muted/20 to-transparent">
-    <CardContent className="flex flex-col items-center py-10 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/50">
-        <Calendar className="h-7 w-7 text-muted-foreground/40" />
-      </div>
-      <p className="font-[Manrope] text-[15px] font-bold text-foreground">Nenhuma consulta agendada</p>
+    <CardContent className="flex flex-col items-center py-8 text-center">
+      <PingoMascot variant="solitario" size={80} bounce animate={false} />
+      <p className="font-[Manrope] text-[15px] font-bold text-foreground mt-3">Nenhuma consulta agendada</p>
       <p className="mt-1 text-[13px] text-muted-foreground max-w-[200px]">Agende agora e cuide da sua saúde com especialistas</p>
       <Button
-        className="mt-6 rounded-full bg-[#00347F] text-white px-8 shadow-[var(--p-shadow-btn)]"
+        className="mt-5 rounded-full bg-[#00347F] text-white px-8 shadow-[var(--p-shadow-btn)]"
         onClick={() => navigate("/dashboard/schedule?role=patient")}
       >
         <Calendar className="mr-2 h-4 w-4" /> Agendar consulta
