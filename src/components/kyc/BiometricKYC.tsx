@@ -270,9 +270,9 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "" }: Biometri
 
         {step === "result" && result && (
           <motion.div key="result" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-6 space-y-4">
-            <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${result.status === "approved" ? "bg-green-500/10" : "bg-destructive/10"}`}>
+            <div className={`w-16 h-16 mx-auto rounded-full flex items-center justify-center ${result.status === "approved" ? "bg-primary/10" : "bg-destructive/10"}`}>
               {result.status === "approved"
-                ? <CheckCircle2 className="w-8 h-8 text-green-500" />
+                ? <CheckCircle2 className="w-8 h-8 text-primary" />
                 : <XCircle className="w-8 h-8 text-destructive" />
               }
             </div>
