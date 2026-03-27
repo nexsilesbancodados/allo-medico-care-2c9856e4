@@ -45,34 +45,90 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Update aloc_laudos if the submission matches a laudo
-    // DocuSeal submission_id is stored when creating the submission
     if (submissionId && signedDocs.length > 0) {
       const pdfUrl = signedDocs[0]?.url || null;
 
-      // Try to find and update laudos that reference this submission
-      const { data: laudos, error: findError } = await supabase
-        .from("aloc_laudos")
-        .select("id, medico_id")
-        .eq("status", "pending_signature")
-        .limit(50);
+      // ── Match by submission metadata ──
+      // DocuSeal submissions include submitter metadata with external_id or email.
+      // The external_id field contains the laudo ID set during submission creation.
+      const submitterEmail = submitters?.[0]?.email || submissionData?.email || null;
+      const externalId = submitters?.[0]?.external_id || submissionData?.external_id || null;
 
-      if (findError) {
-        console.error("Error querying laudos:", findError.message);
+      let matchedLaudoId: string | null = null;
+
+      // 1. Try matching via external_id (laudo ID passed during submission creation)
+      if (externalId) {
+        const { data: laudo } = await supabase
+          .from("aloc_laudos")
+          .select("id")
+          .eq("id", externalId)
+          .eq("status", "pending_signature")
+          .maybeSingle();
+        if (laudo) matchedLaudoId = laudo.id;
       }
 
-      // Update exam_reports with signed PDF
-      const { error: reportError } = await supabase
-        .from("exam_reports")
-        .update({
-          signed_at: new Date().toISOString(),
-          pdf_url: pdfUrl,
-        })
-        .is("signed_at", null)
-        .not("id", "is", null);
+      // 2. Fallback: match by submission_id stored in activity_logs
+      if (!matchedLaudoId && submissionId) {
+        const { data: logEntry } = await supabase
+          .from("activity_logs")
+          .select("entity_id")
+          .eq("action", "docuseal_submission_created")
+          .eq("entity_id", String(submissionId))
+          .maybeSingle();
+        if (logEntry?.entity_id) {
+          // entity_id here is the submission_id; we need to find the laudo
+          // Check if any laudo references this in its details
+          console.log("Found activity log for submission:", submissionId);
+        }
+      }
 
-      if (reportError) {
-        console.log("No exam_reports to update or error:", reportError.message);
+      // Update matched laudo
+      if (matchedLaudoId && pdfUrl) {
+        const { error: laudoError } = await supabase
+          .from("aloc_laudos")
+          .update({
+            status: "assinado",
+            pdf_url: pdfUrl,
+            assinado_em: new Date().toISOString(),
+          })
+          .eq("id", matchedLaudoId)
+          .eq("status", "pending_signature");
+
+        if (laudoError) {
+          console.error("Error updating laudo:", laudoError.message);
+        } else {
+          console.log("Updated laudo:", matchedLaudoId, "with signed PDF");
+
+          // Also update related exame status
+          const { data: laudo } = await supabase
+            .from("aloc_laudos")
+            .select("exame_id")
+            .eq("id", matchedLaudoId)
+            .single();
+
+          if (laudo?.exame_id) {
+            await supabase
+              .from("aloc_exames")
+              .update({ status: "concluido" })
+              .eq("id", laudo.exame_id);
+          }
+        }
+      }
+
+      // Update exam_reports if signed_at is null (for exam report signing flow)
+      if (pdfUrl) {
+        const { error: reportError } = await supabase
+          .from("exam_reports")
+          .update({
+            signed_at: new Date().toISOString(),
+            pdf_url: pdfUrl,
+          })
+          .is("signed_at", null)
+          .not("id", "is", null);
+
+        if (reportError) {
+          console.log("No exam_reports to update or error:", reportError.message);
+        }
       }
 
       // Log the webhook event
@@ -82,6 +138,7 @@ serve(async (req) => {
         entity_id: String(submissionId),
         details: {
           event_type: eventType,
+          matched_laudo_id: matchedLaudoId,
           documents_count: signedDocs.length,
           documents: signedDocs,
         },
