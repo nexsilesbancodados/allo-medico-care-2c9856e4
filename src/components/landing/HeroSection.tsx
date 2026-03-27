@@ -102,13 +102,12 @@ const HeroSection = memo(
                 <span className="hidden sm:block text-muted-foreground/40 text-sm font-medium select-none">ou</span>
                 <Button
                   size="lg"
-                  variant="outline"
-                  className="rounded-full px-6 h-[52px] text-[15px] font-semibold border-border/60 text-foreground hover:bg-muted/50 hover:border-primary/30 active:scale-[0.97] transition-all duration-200 gap-2"
+                  className="rounded-full px-8 h-[52px] text-[15px] font-bold shadow-lg shadow-success/20 group bg-success hover:bg-success/90 text-success-foreground border-0 gap-2"
                   onClick={() => navigate("/consulta-avulsa")}
                   onMouseEnter={prefetchConsulta}
                 >
                   Consulta avulsa
-                  <span className="inline-flex items-center rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-bold">R$89</span>
+                  <span className="inline-flex items-center rounded-full bg-white/20 text-white px-2.5 py-0.5 text-xs font-bold">R$89</span>
                 </Button>
               </motion.div>
 
