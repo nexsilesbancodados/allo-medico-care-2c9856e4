@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
-import { ArrowLeft, Camera, Save, Trash2, AlertTriangle, ChevronRight, User, Clock, Bell, HelpCircle, LogOut, Shield, Heart, Pencil } from "lucide-react";
+import { ArrowLeft, Camera, Save, Trash2, AlertTriangle, ChevronRight, User, Clock, Bell, HelpCircle, LogOut, Shield, Heart, Pencil, ShieldCheck, Upload } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
@@ -35,12 +35,15 @@ function getNavForRole(role: string) {
   }
 }
 
+const KYC_PENDING_KEY = "aloclinica_kyc_pending";
+
 const UserProfile = () => {
   const { user, profile, roles } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   const forceRole = searchParams.get("role");
+  const openKyc = searchParams.get("kyc") === "open";
   const isAdmin = roles.includes("admin");
   const activeRole = isAdmin && forceRole ? forceRole
     : roles.includes("doctor") ? "doctor"
@@ -64,6 +67,13 @@ const UserProfile = () => {
   const [uploading, setUploading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [showKyc, setShowKyc] = useState(openKyc);
+  const [kycPending, setKycPending] = useState(localStorage.getItem(KYC_PENDING_KEY) === "true");
+  const [kycSelfieFile, setKycSelfieFile] = useState<File | null>(null);
+  const [kycSelfiePreview, setKycSelfiePreview] = useState<string | null>(null);
+  const [kycDocFile, setKycDocFile] = useState<File | null>(null);
+  const [kycDocPreview, setKycDocPreview] = useState<string | null>(null);
+  const [kycSaving, setKycSaving] = useState(false);
 
   // Doctor fields
   const [bio, setBio] = useState("");
