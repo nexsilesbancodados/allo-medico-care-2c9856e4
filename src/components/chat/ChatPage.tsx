@@ -49,7 +49,7 @@ const ChatPage = () => {
 
   const fetchConversations = async () => {
     let query = supabase.from("appointments").select("id, scheduled_at, status, patient_id, doctor_id")
-      .in("status", ["scheduled", "waiting", "in_progress", "completed"])
+      .in("status", ["scheduled", "confirmed", "waiting", "in_progress", "completed"])
       .order("scheduled_at", { ascending: false })
       .limit(50);
 
