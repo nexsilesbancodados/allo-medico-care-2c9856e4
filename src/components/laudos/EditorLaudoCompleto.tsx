@@ -527,6 +527,15 @@ export default function EditorLaudoCompleto() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* DocuSeal Signing Modal */}
+      <DocuSealSigningModal
+        open={docuSealOpen}
+        signingUrl={docuSealUrl}
+        submissionId={docuSealSubId}
+        onSigned={handleDocuSealSigned}
+        onCancel={() => setDocuSealOpen(false)}
+      />
     </div>
   );
 }
