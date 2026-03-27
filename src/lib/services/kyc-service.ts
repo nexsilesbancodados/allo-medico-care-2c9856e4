@@ -15,14 +15,8 @@ export async function loadFaceModels(): Promise<void> {
   console.log("[KYC] Face-api models loaded");
 }
 
-export async function extractTextFromImage(imageFile: Blob): Promise<string> {
-  const { createWorker } = await import("tesseract.js");
-  const worker = await createWorker("por");
-  const url = URL.createObjectURL(imageFile);
-  const { data } = await worker.recognize(url);
-  URL.revokeObjectURL(url);
-  await worker.terminate();
-  return data.text;
+export async function extractTextFromImage(_imageFile: Blob): Promise<string> {
+  throw new Error("OCR not available – tesseract.js was removed");
 }
 
 export function parseCRMFromText(text: string): { crm: string | null; name: string | null } {
