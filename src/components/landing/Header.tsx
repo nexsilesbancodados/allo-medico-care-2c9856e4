@@ -258,7 +258,6 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                   <Button size="sm" variant="outline" className="rounded-lg justify-start gap-2 font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
                     <ShoppingBag className="w-4 h-4" /> Consulta Avulsa
                   </Button>
-                  </Button>
                   <Button size="sm" className="rounded-lg justify-start gap-2 bg-primary text-primary-foreground font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
                     <LogIn className="w-4 h-4" /> Entrar
                   </Button>

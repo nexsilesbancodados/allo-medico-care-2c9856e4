@@ -74,7 +74,7 @@ const PlansSection = forwardRef<HTMLElement>((_, ref) => {
                   transition={{ delay: i < 8 ? i * 0.06 : (i - 8) * 0.04, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
                   whileHover={{ y: -6, transition: { duration: 0.25 } }}
                   whileTap={{ scale: 0.97 }}
-                  onClick={() => navigate(`/consulta-avulsa?specialty=${encodeURIComponent(spec.name)}`)}
+                  onClick={() => navigate(`/paciente`)}
                   className={`relative rounded-2xl p-5 border border-border/50 bg-gradient-to-br ${spec.gradient} hover:border-primary/30 hover:shadow-xl hover:shadow-primary/[0.08] transition-all duration-300 cursor-pointer group overflow-hidden`}
                 >
                   {/* Mascot watermark with unique rotation per card */}

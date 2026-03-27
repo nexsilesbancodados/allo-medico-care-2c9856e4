@@ -121,7 +121,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
               <Button
                 size="lg"
                 className="bg-background text-primary hover:bg-background/95 rounded-2xl px-8 gap-2.5 shadow-lg shadow-foreground/10 font-extrabold shrink-0 transition-all text-sm sm:text-base"
-                onClick={() => navigate(user ? "/dashboard/urgent-care" : "/consulta-avulsa")}
+                onClick={() => navigate(user ? "/dashboard/urgent-care" : "/paciente")}
               >
                 <Stethoscope className="w-5 h-5" />
                 Acessar Plantão
