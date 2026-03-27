@@ -118,11 +118,11 @@ const HeroSection = memo(
               >
                 {trustItems.map((item) => (
                   <span
-                    key={item}
-                    className="inline-flex items-center gap-1.5 text-[13px] text-muted-foreground font-medium"
+                    key={item.label}
+                    className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full bg-card/80 backdrop-blur-sm border border-border/50 text-[13px] text-foreground font-medium shadow-sm"
                   >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-success shrink-0" />
-                    {item}
+                    <item.icon className={`w-4 h-4 ${item.color} shrink-0`} />
+                    {item.label}
                   </span>
                 ))}
               </motion.div>
