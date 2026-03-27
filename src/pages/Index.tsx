@@ -149,6 +149,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           href="/cartao-beneficios"
           gradient="from-secondary to-emerald-600"
           mascotSrc={bannerBenefits}
+          variant="angular"
         />
       </DeferredSection>
 
@@ -165,6 +166,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           href="/teleconsulta"
           gradient="from-blue-600 to-primary"
           mascotSrc={bannerAi}
+          variant="chevron"
         />
       </DeferredSection>
 
@@ -178,6 +180,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           href="/consulta-avulsa"
           gradient="from-primary to-violet-600"
           mascotSrc={bannerConsulta}
+          variant="diagonal"
         />
       </DeferredSection>
 
@@ -194,6 +197,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           href="/consulta-avulsa"
           gradient="from-rose-500 to-primary"
           mascotSrc={bannerPlantao}
+          variant="wave"
         />
       </DeferredSection>
 
@@ -210,6 +214,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           href="/telelaudo"
           gradient="from-amber-500 to-orange-600"
           mascotSrc={bannerTelelaudo}
+          variant="split"
         />
       </DeferredSection>
 
