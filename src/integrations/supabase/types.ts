@@ -244,6 +244,7 @@ export type Database = {
           guest_patient_id: string | null
           id: string
           jitsi_link: string | null
+          jitsi_room_id: string | null
           notes: string | null
           original_appointment_id: string | null
           patient_id: string | null
@@ -268,6 +269,7 @@ export type Database = {
           guest_patient_id?: string | null
           id?: string
           jitsi_link?: string | null
+          jitsi_room_id?: string | null
           notes?: string | null
           original_appointment_id?: string | null
           patient_id?: string | null
@@ -292,6 +294,7 @@ export type Database = {
           guest_patient_id?: string | null
           id?: string
           jitsi_link?: string | null
+          jitsi_room_id?: string | null
           notes?: string | null
           original_appointment_id?: string | null
           patient_id?: string | null

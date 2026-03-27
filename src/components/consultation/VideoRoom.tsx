@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import ConsentTCLE from "./ConsentTCLE";
 import VideoConsultation, { type VideoConsultationHandle } from "./VideoConsultation";
+import JitsiRoom from "./JitsiRoom";
+import { gerarRoomId } from "@/lib/jitsi";
 import VideoErrorBoundary from "./VideoErrorBoundary";
 import PreCallCheck from "./PreCallCheck";
 import ConnectionStatus from "./ConnectionStatus";
@@ -53,6 +55,7 @@ const VideoRoom = () => {
   const [deviceChecked, setDeviceChecked] = useState(true);
   const [queuePosition, setQueuePosition] = useState<number | null>(null);
   const [doctorBusy, setDoctorBusy] = useState(false);
+  const [jitsiRoomId, setJitsiRoomId] = useState<string | null>(null);
   const [showSummary, setShowSummary] = useState(false);
 
   const [elapsed, setElapsed] = useState(0);
@@ -359,9 +362,15 @@ const VideoRoom = () => {
     setAppointment(data);
 
     if (isDoctor) {
-      await supabase.from("appointments").update({ status: "in_progress" }).eq("id", appointmentId ?? '');
+      // Generate Jitsi room ID and save to appointment
+      const newRoomId = gerarRoomId(appointmentId ?? '');
+      setJitsiRoomId(newRoomId);
+      await supabase.from("appointments").update({ status: "in_progress", jitsi_room_id: newRoomId } as any).eq("id", appointmentId ?? '');
       const docName = user?.user_metadata?.first_name ? `Dr(a). ${user.user_metadata.first_name} ${user.user_metadata.last_name || ""}`.trim() : "Seu médico";
       notifyConsultationStarted(appointmentId ?? '', docName).catch(err => logError("notifyConsultationStarted failed", err));
+    } else {
+      // Patient: fetch existing jitsi_room_id
+      setJitsiRoomId((data as any).jitsi_room_id || null);
     }
 
     const otherUserId = isDoctor ? data.patient_id : null;
@@ -1202,13 +1211,21 @@ SOAP atual: S=${soapNotes.subjective}, O=${soapNotes.objective}, A=${soapNotes.a
         {/* Video area */}
         <div className={splitMode && isDoctor && !isMobile ? "w-1/2" : "flex-1"} style={{ minHeight: 0 }}>
           <VideoErrorBoundary onEndCall={endCall}>
-            <VideoConsultation
-              ref={videoRef}
-              appointmentId={appointmentId!}
-              userName={currentUserName}
-              onEndCall={endCall}
-              onStatusChange={(s) => setWebrtcStatus(s)}
-            />
+            {jitsiRoomId ? (
+              <JitsiRoom
+                roomId={jitsiRoomId}
+                displayName={currentUserName}
+                onEnd={endCall}
+              />
+            ) : (
+              <VideoConsultation
+                ref={videoRef}
+                appointmentId={appointmentId!}
+                userName={currentUserName}
+                onEndCall={endCall}
+                onStatusChange={(s) => setWebrtcStatus(s)}
+              />
+            )}
           </VideoErrorBoundary>
         </div>
 
