@@ -112,7 +112,7 @@ const ChatPage = () => {
   };
 
   const statusLabel: Record<string, string> = {
-    scheduled: "Agendada", waiting: "Aguardando", in_progress: "Em andamento", completed: "Concluída",
+    scheduled: "Agendada", confirmed: "Confirmada", waiting: "Aguardando", in_progress: "Em andamento", completed: "Concluída",
   };
 
   // Mobile: show chat if selected, list if not
