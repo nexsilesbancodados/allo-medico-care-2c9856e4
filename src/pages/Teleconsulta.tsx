@@ -96,9 +96,13 @@ const Teleconsulta = () => {
                 Consulte médicos online de qualquer lugar do Brasil. Agendamento fácil, receitas digitais válidas e atendimento seguro.
               </p>
               <div className="flex flex-col sm:flex-row items-start gap-3">
-                <Button variant="rainbow" size="default" className="rounded-2xl px-8 font-bold" asChild>
-                  <Link to="/paciente">Marcar Teleconsulta <ArrowRight className="w-4 h-4 ml-2" /></Link>
-                </Button>
+                  <Link to="/paciente">
+                    <Button variant="rainbow" size="default" className="rounded-2xl px-8 font-bold">
+                      <span className="inline-flex items-center">
+                        Marcar Teleconsulta <ArrowRight className="w-4 h-4 ml-2" />
+                      </span>
+                    </Button>
+                  </Link>
                 <Button size="default" variant="ghost" className="text-white/80 hover:text-white hover:bg-white/10 rounded-2xl px-6 font-semibold" asChild>
                   <Link to="/medico">Sou Médico</Link>
                 </Button>
