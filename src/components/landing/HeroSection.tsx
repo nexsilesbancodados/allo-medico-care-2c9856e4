@@ -16,9 +16,9 @@ const heroContent = {
 };
 
 const trustItems = [
-  "Regulamentado pelo CFM",
-  "Criptografia end-to-end",
-  "Nota 4.9 no Google",
+  { label: "Regulamentado pelo CFM", icon: Shield, color: "text-primary" },
+  { label: "Criptografia end-to-end", icon: Lock, color: "text-success" },
+  { label: "Nota 4.9 no Google", icon: Star, color: "text-warning" },
 ];
 
 const floatY = {
