@@ -70,11 +70,10 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           sameAs: ["https://www.instagram.com/aloclinica", "https://www.facebook.com/aloclinica"],
           hasOfferCatalog: {
             "@type": "OfferCatalog",
-            name: "Planos de Telemedicina",
+            name: "Consultas Médicas",
             itemListElement: [
               { "@type": "Offer", name: "Consulta Avulsa", price: "89.00", priceCurrency: "BRL" },
-              { "@type": "Offer", name: "Plantão 24h Diurno", price: "75.00", priceCurrency: "BRL" },
-              { "@type": "Offer", name: "Cartão Desconto Individual", price: "24.90", priceCurrency: "BRL" },
+              { "@type": "Offer", name: "Pronto-Atendimento 24h Diurno", price: "75.00", priceCurrency: "BRL" },
             ],
           },
           potentialAction: {

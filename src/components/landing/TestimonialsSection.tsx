@@ -15,7 +15,7 @@ import avatarFernanda from "@/assets/avatar-fernanda.png";
 const allTestimonials = [
   { name: "Maria Silva", handle: "@maria.silva", text: "Consegui uma consulta com cardiologista em menos de 1 hora. A receita chegou digital na hora. Incrível! 💙", rating: 5, avatar: avatarMaria, verified: true, likes: 342, time: "2h" },
   { name: "Dr. Carlos Mendes", handle: "@dr.carlos", text: "A plataforma facilitou muito meu dia a dia. Atendo de casa com a mesma qualidade do consultório. Recomendo!", rating: 5, avatar: avatarCarlos, verified: true, likes: 518, time: "5h" },
-  { name: "Ana Costa", handle: "@ana.costa", text: "Com o plano mensal, cuido da saúde de toda minha família sem sair de casa. Vale cada centavo! ❤️", rating: 5, avatar: avatarAna, verified: true, likes: 276, time: "8h" },
+  { name: "Ana Costa", handle: "@ana.costa", text: "Agendei uma consulta avulsa e fui atendida em menos de 30 minutos. Prático e acessível! ❤️", rating: 5, avatar: avatarAna, verified: true, likes: 276, time: "8h" },
   { name: "Pedro Oliveira", handle: "@pedro.oliv", text: "Agendei uma consulta às 23h e fui atendido no dia seguinte às 7h. Praticidade absurda!", rating: 5, avatar: avatarPedro, verified: true, likes: 189, time: "1d" },
   { name: "Juliana Santos", handle: "@ju.santos", text: "Minha mãe de 72 anos conseguiu usar sozinha. Interface super intuitiva e médicos muito atenciosos.", rating: 5, avatar: avatarJuliana, verified: true, likes: 423, time: "1d" },
   { name: "Dra. Renata Lopes", handle: "@dra.renata", text: "Finalmente uma telemedicina que funciona de verdade. Prontuário completo, receita digital, tudo integrado.", rating: 5, avatar: avatarRenata, verified: true, likes: 367, time: "2d" },
