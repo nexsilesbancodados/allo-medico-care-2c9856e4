@@ -84,14 +84,14 @@ const HeroSection = memo(
               </div>
 
               <motion.div
-                className="flex flex-wrap items-center gap-3 mb-8"
+                className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8"
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.35 }}
               >
                 <Button
                   size="lg"
-                  className="rounded-full px-8 h-[52px] min-w-[220px] text-[15px] font-bold shadow-lg shadow-primary/25 group bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
+                  className="rounded-full h-[52px] w-full sm:w-[240px] justify-center text-[15px] font-bold shadow-lg shadow-primary/25 group bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
                   onClick={() => navigate("/paciente")}
                   onMouseEnter={prefetchPaciente}
                 >
@@ -101,7 +101,7 @@ const HeroSection = memo(
                 <span className="hidden sm:block text-muted-foreground/40 text-sm font-medium select-none">ou</span>
                 <Button
                   size="lg"
-                  className="rounded-full px-8 h-[52px] min-w-[220px] text-[15px] font-bold shadow-lg shadow-success/25 group bg-gradient-to-r from-success to-success/80 hover:from-success/90 hover:to-success/70 text-success-foreground border-0 gap-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
+                  className="rounded-full h-[52px] w-full sm:w-[240px] justify-center text-[15px] font-bold shadow-lg shadow-success/25 group bg-gradient-to-r from-success to-success/80 hover:from-success/90 hover:to-success/70 text-success-foreground border-0 gap-2 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97]"
                   onClick={() => navigate("/consulta-avulsa")}
                   onMouseEnter={prefetchConsulta}
                 >
