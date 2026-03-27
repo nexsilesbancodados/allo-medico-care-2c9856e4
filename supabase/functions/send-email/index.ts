@@ -12,6 +12,39 @@ interface EmailRequest {
   data: Record<string, string>;
 }
 
+// ─── URL Constants ─────────────────────────────────────────────────────────────
+const BASE_URL = Deno.env.get("SITE_URL") || "https://aloclinica.com.br";
+
+const URLS = {
+  // Patient routes
+  patientDashboard:    `${BASE_URL}/dashboard?role=patient`,
+  patientSchedule:     `${BASE_URL}/dashboard/schedule?role=patient`,
+  patientAppointments: `${BASE_URL}/dashboard/appointments?role=patient`,
+  patientHealth:       `${BASE_URL}/dashboard/health?role=patient`,
+  patientPlans:        `${BASE_URL}/dashboard/plans?role=patient`,
+  patientPrescriptions:`${BASE_URL}/dashboard/prescriptions?role=patient`,
+  patientSupport:      `${BASE_URL}/dashboard/support?role=patient`,
+  // Doctor routes
+  doctorDashboard:     `${BASE_URL}/dashboard?role=doctor`,
+  doctorAuth:          `${BASE_URL}/medico`,
+  // Clinic routes
+  clinicDashboard:     `${BASE_URL}/dashboard?role=clinic`,
+  clinicAuth:          `${BASE_URL}/clinica`,
+  // Partner routes
+  partnerDashboard:    `${BASE_URL}/dashboard?role=partner`,
+  partnerAuth:         `${BASE_URL}/parceiro`,
+  // Admin
+  adminDashboard:      `${BASE_URL}/dashboard?role=admin`,
+  // Laudista
+  laudistaDashboard:   `${BASE_URL}/dashboard?role=laudista`,
+  // Auth
+  authLogin:           `${BASE_URL}/auth`,
+  // Validation
+  validateDoc: (code: string) => `${BASE_URL}/validar/${code}`,
+  // Discount card
+  discountCard:        `${BASE_URL}/cartao-beneficios`,
+};
+
 // ─── Email wrapper ─────────────────────────────────────────────────────────────
 const BRAND = {
   color: "#1a6fc4",
