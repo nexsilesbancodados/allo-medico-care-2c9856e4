@@ -1,29 +1,12 @@
 import { forwardRef, useEffect, useState } from "react";
-import { UsersThree, Stethoscope, Star, Clock } from "@phosphor-icons/react";
+import { Clock, Stethoscope, Star, ShieldCheck } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 
-import mascotThumbsup from "@/assets/mascot-thumbsup.png";
-import mascotWave from "@/assets/mascot-wave.png";
-import mascotWelcome from "@/assets/mascot-welcome.png";
-import mascotReading from "@/assets/mascot-reading.png";
-
-const formatStatValue = (target: number, suffix: string, decimals = 0) => {
-  const value = decimals > 0 ? target.toFixed(decimals) : target.toLocaleString("pt-BR");
-  return `${value}${suffix}`;
-};
-
-const iconStyles = [
-  { bg: "bg-primary/90", glow: "shadow-primary/30" },
-  { bg: "bg-secondary/90", glow: "shadow-secondary/30" },
-  { bg: "bg-warning", glow: "shadow-warning/30" },
-  { bg: "bg-success", glow: "shadow-success/30" },
-];
-
 const fallbackStats = [
-  { icon: UsersThree, target: 12500, suffix: "+", label: "Pacientes atendidos", decimals: 0, mascot: mascotWave },
-  { icon: Stethoscope, target: 200, suffix: "+", label: "Médicos especialistas", decimals: 0, mascot: mascotReading },
-  { icon: Star, target: 4.9, suffix: "", label: "Nota média", decimals: 1, mascot: mascotThumbsup },
-  { icon: Clock, target: 15, suffix: "min", label: "Espera média", decimals: 0, mascot: mascotWelcome },
+  { icon: Clock, value: "24h", label: "Disponibilidade" },
+  { icon: Stethoscope, value: "+30", label: "Especialidades" },
+  { icon: Star, value: "4.9★", label: "Avaliação" },
+  { icon: ShieldCheck, value: "100%", label: "Digital e seguro" },
 ];
 
 const StatsSection = forwardRef<HTMLElement>((_, ref) => {
@@ -32,56 +15,38 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
   useEffect(() => {
     (async () => {
       try {
-        const [patientsRes, specialtiesRes, appointmentsRes] = await Promise.all([
-          supabase.from("profiles").select("id", { count: "exact", head: true }),
+        const [specialtiesRes] = await Promise.all([
           supabase.from("specialties").select("id", { count: "exact", head: true }),
-          supabase.from("appointments").select("id", { count: "exact", head: true }).eq("status", "completed"),
         ]);
-        const patients = patientsRes.count ?? 0;
         const specialties = specialtiesRes.count ?? 0;
-        const appointments = appointmentsRes.count ?? 0;
-
-        if (patients > 10 || appointments > 5) {
-          setStats([
-            { icon: UsersThree, target: patients, suffix: "+", label: "Pacientes atendidos", decimals: 0, mascot: mascotWave },
-            { icon: Stethoscope, target: specialties, suffix: "+", label: "Especialidades", decimals: 0, mascot: mascotReading },
-            { icon: Star, target: 4.9, suffix: "", label: "Nota média", decimals: 1, mascot: mascotThumbsup },
-            { icon: Clock, target: appointments, suffix: "+", label: "Consultas realizadas", decimals: 0, mascot: mascotWelcome },
-          ]);
+        if (specialties > 5) {
+          setStats((prev) =>
+            prev.map((s, i) =>
+              i === 1 ? { ...s, value: `+${specialties}` } : s
+            )
+          );
         }
       } catch { /* keep fallback */ }
     })();
   }, []);
 
   return (
-    <section ref={ref} className="py-12 md:py-20 relative">
+    <section ref={ref} className="py-6 md:py-10 relative">
       <div className="container mx-auto px-4 sm:px-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {stats.map((stat, i) => (
             <div
               key={i}
-              className="stat-card group relative rounded-2xl bg-card border border-border/40 p-5 sm:p-6 overflow-hidden hover:border-primary/20 hover:shadow-lg hover:shadow-primary/[0.04] transition-colors duration-200 cursor-default"
+              className="group flex items-center gap-3.5 rounded-2xl bg-card border border-border/30 px-5 py-4 sm:py-5 hover:shadow-md hover:border-primary/15 transition-all duration-200 cursor-default"
             >
-              {/* Mascot watermark */}
-              <img
-                src={stat.mascot}
-                alt=""
-                aria-hidden="true"
-                className="absolute -bottom-2 -right-2 w-20 h-20 sm:w-24 sm:h-24 object-contain opacity-[0.07] group-hover:opacity-[0.12] group-hover:rotate-6 transition-all duration-500 pointer-events-none select-none" loading="lazy" decoding="async" width={80} height={80} />
-
-              <div className="relative flex flex-col gap-3">
-                {/* Icon with glow */}
-                <div className={`w-10 h-10 rounded-xl ${iconStyles[i].bg} flex items-center justify-center shadow-sm group-hover:shadow-lg group-hover:${iconStyles[i].glow} group-hover:scale-110 transition-all duration-300`}>
-                  <stat.icon className="w-[18px] h-[18px] text-white" weight="fill" aria-hidden="true" />
-                </div>
-
-                {/* Number */}
-                <p className="text-2xl sm:text-3xl lg:text-[2rem] font-extrabold tracking-tight text-foreground leading-none tabular-nums">
-                  {formatStatValue(stat.target, stat.suffix, stat.decimals)}
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                <stat.icon className="w-5 h-5 text-primary" weight="fill" aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-xl font-extrabold tracking-tight text-foreground leading-none tabular-nums">
+                  {stat.value}
                 </p>
-
-                {/* Label */}
-                <p className="text-xs sm:text-[13px] text-muted-foreground font-medium leading-snug">
+                <p className="mt-0.5 text-xs text-muted-foreground font-medium truncate">
                   {stat.label}
                 </p>
               </div>
