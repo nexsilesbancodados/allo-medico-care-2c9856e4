@@ -93,7 +93,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
             { title: "Plataforma", links: [
               { label: "Como funciona", href: "#como-funciona" },
               { label: "Especialidades", href: "#especialidades" },
-              { label: "Planos", href: "#planos" },
+              { label: "Consultas", href: "#consulta-avulsa" },
               { label: "Para Empresas", to: "/para-empresas" },
             ]},
             { title: "Acesso", links: [
