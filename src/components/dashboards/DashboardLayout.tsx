@@ -421,7 +421,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                 </div>
                 <DropdownMenuSeparator className="bg-border/15" />
                 <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                  <User ="h-4 w-4 text-muted-foreground" /> Meu Perfil
+                  <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
                   <GearSix className="h-4 w-4 text-muted-foreground" /> Configurações
@@ -506,7 +506,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
                 </div>
                 <DropdownMenuSeparator className="bg-border/15" />
                 <DropdownMenuItem onClick={() => navigate("/dashboard/profile")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
-                  <User ="h-4 w-4 text-muted-foreground" /> Meu Perfil
+                  <User className="h-4 w-4 text-muted-foreground" /> Meu Perfil
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate("/dashboard/settings")} className="rounded-lg gap-2 cursor-pointer text-[13px] py-2">
                   <GearSix className="h-4 w-4 text-muted-foreground" /> Configurações
