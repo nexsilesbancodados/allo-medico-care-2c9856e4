@@ -3,19 +3,18 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Bell, Globe, Shield, Clock, Monitor, Palette, Loader2, Pencil, ChevronRight, Info, LogOut } from "lucide-react";
+import { Bell, Globe, Shield, Loader2, Pencil, ChevronRight, Info, LogOut, Sparkles } from "lucide-react";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { getAdminNav } from "@/components/admin/adminNav";
 import { getReceptionNav } from "@/components/reception/receptionNav";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
+import mascotWave from "@/assets/mascot-wave.png";
 
 const roleLabels: Record<string, string> = {
   patient: "Paciente", doctor: "Médico", admin: "Administração",
@@ -55,22 +54,21 @@ const defaultSettings: Record<string, SettingsState> = {
   },
 };
 
-/* ── Grouped section config ── */
-interface SettingItem { key: string; label: string; type: "toggle" | "select"; options?: string[] }
+interface SettingItem { key: string; label: string; desc?: string; type: "toggle" | "select"; options?: string[]; icon?: typeof Bell }
 interface SettingGroup { title: string; icon: typeof Bell; items: SettingItem[] }
 
 const patientGroups: SettingGroup[] = [
   {
     title: "Preferências", icon: Bell, items: [
-      { key: "reminder_whatsapp", label: "Alertas, lembretes de consultas", type: "toggle" },
-      { key: "push_notifications", label: "Notificações push", type: "toggle" },
-      { key: "language", label: "Idioma", type: "select", options: ["Português (Brasil)", "English", "Español"] },
+      { key: "reminder_whatsapp", label: "Notificações", desc: "Alertas, lembretes de consultas", type: "toggle", icon: Bell },
+      { key: "push_notifications", label: "Notificações Push", desc: "Avisos em tempo real", type: "toggle", icon: Bell },
+      { key: "language", label: "Idioma", desc: "Português (Brasil)", type: "select", options: ["Português (Brasil)", "English", "Español"], icon: Globe },
     ],
   },
   {
     title: "Segurança & Privacidade", icon: Shield, items: [
-      { key: "share_history", label: "Biometria e Senha de Acesso", type: "toggle" },
-      { key: "allow_exam_access", label: "Compartilhamento de dados médicos", type: "toggle" },
+      { key: "share_history", label: "Segurança", desc: "Biometria e Senha de Acesso", type: "toggle", icon: Shield },
+      { key: "allow_exam_access", label: "Privacidade", desc: "Compartilhamento de dados médicos", type: "toggle", icon: Shield },
     ],
   },
   {
@@ -94,7 +92,6 @@ const PanelSettings = () => {
     : "patient";
 
   const nav = getNavForRole(activeRole);
-  const backHref = `/dashboard${forceRole ? `?role=${forceRole}` : ""}`;
 
   const [settings, setSettings] = useState<SettingsState>(defaultSettings[activeRole] ?? { notify_email: true, notify_push: true, language: "Português" });
   const [loadingSettings, setLoadingSettings] = useState(true);
@@ -136,27 +133,27 @@ const PanelSettings = () => {
   };
 
   const initials = `${profile?.first_name?.[0] ?? ""}${profile?.last_name?.[0] ?? ""}`.toUpperCase();
-  const groups = activeRole === "patient" ? patientGroups : patientGroups; // Extend for other roles
+  const groups = activeRole === "patient" ? patientGroups : patientGroups;
 
   return (
     <DashboardLayout title={roleLabels[activeRole] ?? "Configurações"} nav={nav} role={activeRole}>
       <div className="w-full mx-auto max-w-2xl pb-24 md:pb-6">
         {/* Profile Header */}
         <div className="flex flex-col items-center mb-8">
-          <div className="relative mb-3">
-            <Avatar className="w-20 h-20 border-4 border-background shadow-lg">
+          <div className="relative mb-4">
+            <Avatar className="w-[88px] h-[88px] border-4 border-background shadow-[0_4px_16px_rgba(0,0,0,0.08)]">
               <AvatarImage src={profile?.avatar_url ?? undefined} />
-              <AvatarFallback className="bg-primary text-primary-foreground text-xl font-bold">{initials}</AvatarFallback>
+              <AvatarFallback className="bg-primary text-primary-foreground text-2xl font-bold">{initials}</AvatarFallback>
             </Avatar>
             <button
               onClick={() => navigate(`/dashboard/profile?role=${activeRole}`)}
-              className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md"
+              className="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:opacity-90 transition-opacity active:scale-95"
             >
-              <Pencil className="w-3 h-3" />
+              <Pencil className="w-3.5 h-3.5" />
             </button>
           </div>
           <h1 className="text-xl font-extrabold text-foreground font-[Manrope]">Configurações</h1>
-          <p className="text-sm text-muted-foreground">Gerencie suas preferências e segurança</p>
+          <p className="text-[13px] text-muted-foreground mt-0.5">Gerencie suas preferências e segurança</p>
         </div>
 
         {loadingSettings ? (
@@ -165,40 +162,43 @@ const PanelSettings = () => {
           <div className="space-y-6">
             {groups.map((group, gi) => (
               <div key={group.title}>
-                <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3 px-1">{group.title}</p>
-                <div className="rounded-2xl bg-card border border-border/30 overflow-hidden divide-y divide-border/10">
-                  {group.items.map((item, ii) => (
-                    <motion.div
-                      key={item.key}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: (gi * group.items.length + ii) * 0.03 }}
-                      className="flex items-center justify-between px-5 py-4"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
-                          <group.icon className="w-4 h-4 text-primary" />
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary mb-3 px-1">{group.title}</p>
+                <div className="rounded-2xl bg-card border border-border/20 overflow-hidden divide-y divide-border/10 shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+                  {group.items.map((item, ii) => {
+                    const ItemIcon = item.icon ?? group.icon;
+                    return (
+                      <motion.div
+                        key={item.key}
+                        initial={{ opacity: 0, x: -8 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: (gi * group.items.length + ii) * 0.03 }}
+                        className="flex items-center justify-between px-5 py-4"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-primary/[0.06] flex items-center justify-center shrink-0">
+                            <ItemIcon className="w-4.5 h-4.5 text-primary" />
+                          </div>
+                          <div>
+                            <Label className="text-[14px] font-semibold text-foreground cursor-pointer">{item.label}</Label>
+                            {item.desc && <p className="text-[12px] text-muted-foreground mt-0.5">{item.desc}</p>}
+                          </div>
                         </div>
-                        <Label className="text-sm text-foreground cursor-pointer">{item.label}</Label>
-                      </div>
-                      {item.type === "toggle" ? (
-                        <Switch checked={settings[item.key] ?? false} onCheckedChange={v => handleChange(item.key, v)} />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
-                      )}
-                    </motion.div>
-                  ))}
+                        {item.type === "toggle" ? (
+                          <Switch checked={settings[item.key] ?? false} onCheckedChange={v => handleChange(item.key, v)} />
+                        ) : (
+                          <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
+                        )}
+                      </motion.div>
+                    );
+                  })}
                   {group.title === "Informações" && (
-                    <button
-                      onClick={() => {}}
-                      className="w-full flex items-center gap-3 px-5 py-4 hover:bg-muted/30 transition-colors text-left"
-                    >
-                      <div className="w-9 h-9 rounded-xl bg-primary/5 flex items-center justify-center shrink-0">
-                        <Info className="w-4 h-4 text-primary" />
+                    <button className="w-full flex items-center gap-3 px-5 py-4 hover:bg-muted/30 transition-colors text-left">
+                      <div className="w-10 h-10 rounded-xl bg-primary/[0.06] flex items-center justify-center shrink-0">
+                        <Info className="w-4.5 h-4.5 text-primary" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-sm text-foreground">Sobre o App</p>
-                        <p className="text-xs text-muted-foreground">Versão 2.4.1 (Build 890)</p>
+                        <p className="text-[14px] font-semibold text-foreground">Sobre o App</p>
+                        <p className="text-[12px] text-muted-foreground">Versão 2.4.1 (Build 890)</p>
                       </div>
                       <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
                     </button>
@@ -210,16 +210,30 @@ const PanelSettings = () => {
             {/* Logout */}
             <button
               onClick={handleLogout}
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-destructive/5 border border-destructive/10 hover:bg-destructive/10 transition-colors text-destructive font-semibold"
+              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-destructive/[0.04] border border-destructive/10 hover:bg-destructive/[0.08] transition-colors text-destructive font-semibold text-[14px]"
             >
               <LogOut className="w-4 h-4" />
               Sair da Conta
             </button>
 
-            <Button onClick={handleSave} disabled={saving} className="w-full h-12 rounded-full" size="lg">
+            <Button onClick={handleSave} disabled={saving} className="w-full h-12 rounded-full shadow-[0_4px_16px_hsl(215_75%_32%/0.25)]" size="lg">
               {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
               Salvar Configurações
             </Button>
+
+            {/* Mascot helper */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="flex items-center gap-3 p-4 rounded-2xl bg-primary/[0.04] border border-primary/10"
+            >
+              <img src={mascotWave} alt="Pingo" className="w-16 h-16 object-contain shrink-0" loading="lazy" />
+              <div className="relative bg-card rounded-2xl rounded-bl-sm px-4 py-3 border border-border/20 shadow-sm">
+                <p className="text-[13px] font-medium text-foreground">Precisa de ajuda com o app?</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">Fale com nosso suporte a qualquer momento</p>
+              </div>
+            </motion.div>
           </div>
         )}
       </div>
