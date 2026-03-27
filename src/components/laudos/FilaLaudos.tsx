@@ -220,7 +220,7 @@ export default function FilaLaudos() {
       <div className="flex flex-col md:flex-row gap-4 md:gap-6 overflow-x-auto pb-4">
         <KanbanColumn
           title="Aguardando"
-          icon={<Clock className="h-4 w-4 text-yellow-500" />}
+          icon={<Clock className="h-4 w-4 text-muted-foreground" />}
           badge="aguardando"
           items={aguardando}
           userId={user?.id ?? ""}
