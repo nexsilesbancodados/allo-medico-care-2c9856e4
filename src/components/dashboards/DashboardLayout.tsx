@@ -195,6 +195,12 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
   const forceRole = searchParams.get("role");
   const isAdminViewingOtherPanel = isAdmin && forceRole && forceRole !== "admin";
   const grad = ROLE_GRADIENT[role] ?? ROLE_GRADIENT.patient;
+  const ROLE_RING: Record<string, string> = {
+    patient: "ring-blue-400", doctor: "ring-emerald-400", laudista: "ring-blue-600",
+    admin: "ring-purple-400", clinic: "ring-orange-400", receptionist: "ring-amber-400",
+    support: "ring-yellow-400", partner: "ring-green-400", ai: "ring-blue-400",
+  };
+  const avatarRing = ROLE_RING[role] ?? "ring-blue-400";
 
   const initials = profile ? `${profile.first_name?.[0] ?? ""}${profile.last_name?.[0] ?? ""}`.toUpperCase() : "?";
   const fullName = profile ? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() : "Usuário";
