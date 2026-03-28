@@ -1,41 +1,64 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Check, Calendar, Home, Sparkles } from "lucide-react";
+import { Check, Calendar, Home, Sparkles, Clock, Stethoscope, FileText, Smartphone } from "lucide-react";
 import { motion } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 
+/* CSS confetti */
+const ConfettiPiece = ({ i }: { i: number }) => {
+  const colors = ["bg-primary", "bg-secondary", "bg-yellow-400", "bg-emerald-400", "bg-pink-400", "bg-blue-400"];
+  const color = colors[i % colors.length];
+  const left = 10 + Math.random() * 80;
+  const delay = Math.random() * 0.6;
+  const dur = 1.2 + Math.random() * 0.8;
+  return (
+    <motion.div
+      className={`absolute w-2 h-2 rounded-sm ${color}`}
+      style={{ left: `${left}%`, top: "-5%" }}
+      initial={{ opacity: 1, y: 0, rotate: 0 }}
+      animate={{ y: [0, 500], x: [(Math.random() - 0.5) * 150], rotate: [0, 360], opacity: [1, 1, 0] }}
+      transition={{ duration: dur, delay, ease: "easeIn" }}
+    />
+  );
+};
+
+const checklist = [
+  { icon: Stethoscope, text: "Tenha seus exames recentes em mãos" },
+  { icon: FileText, text: "Liste seus medicamentos atuais" },
+  { icon: Smartphone, text: "Teste câmera e microfone antes" },
+  { icon: Clock, text: "Esteja pronto 5 minutos antes" },
+];
+
 const AppointmentConfirmed = () => {
   const navigate = useNavigate();
+
+  const handleAddToCalendar = () => {
+    // Google Calendar URL template
+    const title = encodeURIComponent("Teleconsulta — AloClínica");
+    const details = encodeURIComponent("Sua teleconsulta na AloClínica. Acesse: https://aloclinica.com.br/dashboard");
+    const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&details=${details}`;
+    window.open(url, "_blank");
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 py-12 bg-background relative overflow-hidden">
       <SEOHead title="Consulta Confirmada — AloClínica" description="Sua consulta foi confirmada com sucesso." />
 
-      {/* Background decorative elements */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-primary/[0.03] blur-[80px]" />
-        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 rounded-full bg-success/[0.04] blur-[60px]" />
+      {/* Confetti */}
+      <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <ConfettiPiece key={i} i={i} />
+        ))}
       </div>
 
-      {/* Celebration particles */}
-      {[...Array(6)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-2 h-2 rounded-full bg-primary/20"
-          initial={{ opacity: 0, scale: 0 }}
-          animate={{
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0],
-            x: [0, (i % 2 === 0 ? 1 : -1) * (40 + i * 20)],
-            y: [0, -(60 + i * 15)],
-          }}
-          transition={{ delay: 0.5 + i * 0.1, duration: 1.2, ease: "easeOut" }}
-          style={{ top: "40%", left: "50%" }}
-        />
-      ))}
+      {/* Background */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-primary/[0.03] blur-[80px]" />
+        <div className="absolute bottom-1/3 right-1/4 w-48 h-48 rounded-full bg-emerald-500/[0.04] blur-[60px]" />
+      </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {/* Check icon with ring animation */}
+        {/* Animated checkmark */}
         <div className="flex justify-center mb-6">
           <motion.div
             initial={{ scale: 0 }}
@@ -47,10 +70,21 @@ const AppointmentConfirmed = () => {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1.4, opacity: 0 }}
               transition={{ delay: 0.3, duration: 0.8 }}
-              className="absolute inset-0 rounded-full bg-primary/20"
+              className="absolute inset-0 rounded-full bg-emerald-500/20"
             />
-            <div className="w-[76px] h-[76px] rounded-full bg-gradient-to-br from-primary to-[hsl(215_60%_45%)] flex items-center justify-center shadow-[0_8px_32px_hsl(215_75%_32%/0.35)]">
-              <Check className="w-10 h-10 text-primary-foreground" strokeWidth={3} />
+            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                <motion.path
+                  d="M10 20L17 27L30 13"
+                  stroke="white"
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  initial={{ pathLength: 0 }}
+                  animate={{ pathLength: 1 }}
+                  transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+                />
+              </svg>
             </div>
           </motion.div>
         </div>
@@ -61,55 +95,38 @@ const AppointmentConfirmed = () => {
           transition={{ delay: 0.2 }}
           className="text-center mb-8"
         >
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-3 py-1 mb-3">
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 mb-3">
             <Sparkles className="w-3 h-3 text-primary" />
             <span className="text-[11px] font-bold text-primary">Confirmado</span>
           </div>
-          <h1 className="font-[Manrope] text-[28px] font-extrabold text-primary">
-            Tudo pronto!
-          </h1>
-          <p className="text-[14px] text-muted-foreground mt-2 max-w-xs mx-auto leading-relaxed">
+          <h1 className="text-[28px] font-extrabold text-foreground">Tudo pronto!</h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-xs mx-auto">
             Sua consulta na AloClínica foi confirmada com sucesso.
           </p>
         </motion.div>
 
-        {/* Confirmation Card */}
+        {/* Checklist */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
-          className="bg-card rounded-[1.5rem] p-6 border border-border/20 shadow-[0_4px_24px_rgba(0,0,0,0.06)] mb-6"
+          className="bg-card rounded-2xl p-5 border border-border/30 shadow-sm mb-6"
         >
-          <div className="text-center mb-5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary mb-1">Consulta Confirmada</p>
-            <h3 className="font-[Manrope] text-xl font-bold text-foreground">Sua consulta</h3>
-            <p className="text-[13px] text-muted-foreground">Detalhes do agendamento</p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="relative overflow-hidden bg-muted/30 rounded-2xl p-3.5">
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary/20" />
-              <div className="flex items-center gap-1.5 mb-1">
-                <Calendar className="w-3.5 h-3.5 text-primary" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Data</span>
-              </div>
-              <p className="text-[14px] font-bold text-foreground">Confirmada</p>
-            </div>
-            <div className="relative overflow-hidden bg-muted/30 rounded-2xl p-3.5">
-              <div className="absolute top-0 left-0 right-0 h-[2px] bg-secondary/20" />
-              <div className="flex items-center gap-1.5 mb-1">
-                <Calendar className="w-3.5 h-3.5 text-secondary" />
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Horário</span>
-              </div>
-              <p className="text-[14px] font-bold text-foreground">Reservado</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 text-[13px] text-muted-foreground bg-muted/20 rounded-xl p-3">
-            <div className="w-7 h-7 rounded-lg bg-primary/8 flex items-center justify-center shrink-0">
-              <Calendar className="w-3.5 h-3.5 text-primary" />
-            </div>
-            <span>Teleconsulta via plataforma AloClínica</span>
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">
+            O que levar para a consulta
+          </p>
+          <div className="space-y-3">
+            {checklist.map((item, i) => {
+              const Icon = item.icon;
+              return (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Icon className="w-4 h-4 text-primary" />
+                  </div>
+                  <span className="text-sm text-foreground">{item.text}</span>
+                </div>
+              );
+            })}
           </div>
         </motion.div>
 
@@ -121,17 +138,17 @@ const AppointmentConfirmed = () => {
           className="space-y-3"
         >
           <Button
-            className="w-full h-[52px] rounded-full bg-primary text-primary-foreground font-[Manrope] font-bold text-[15px] gap-2 shadow-[0_4px_16px_hsl(215_75%_32%/0.3)]"
-            onClick={() => {/* Add to calendar */}}
+            className="w-full h-[52px] rounded-full font-bold text-[15px] gap-2"
+            onClick={handleAddToCalendar}
           >
-            <Calendar className="w-4 h-4" /> Adicionar ao Calendário
+            <Calendar className="w-4 h-4" /> Adicionar ao Google Calendar
           </Button>
           <Button
             variant="outline"
-            className="w-full h-[52px] rounded-full font-[Manrope] font-semibold text-[15px] gap-2 border-border/30"
+            className="w-full h-[52px] rounded-full font-semibold text-[15px] gap-2 border-border/30"
             onClick={() => navigate("/dashboard?role=patient")}
           >
-            <Home className="w-4 h-4" /> Voltar para o Início
+            <Home className="w-4 h-4" /> Ver no dashboard
           </Button>
         </motion.div>
       </div>

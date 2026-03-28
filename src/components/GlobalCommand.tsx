@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/command";
 import {
   Home, Calendar, FileText, Heart, CreditCard, Upload, Users, DollarSign,
-  Clock, Settings, User, LogOut, Video, BarChart3, Search,
+  Clock, Settings, User, LogOut, Video, BarChart3, Keyboard, Bot,
 } from "lucide-react";
 
 interface NavItem {
@@ -20,17 +20,19 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
   group: string;
+  shortcut?: string;
 }
 
 const getNavItems = (role: string): NavItem[] => {
   const base: NavItem[] = [
-    { label: "Meu Perfil", href: "/dashboard/profile", icon: <User className="w-4 h-4" />, group: "Conta" },
+    { label: "Meu Perfil", href: "/dashboard/profile", icon: <User className="w-4 h-4" />, group: "Conta", shortcut: "G P" },
     { label: "Configurações", href: "/dashboard/settings", icon: <Settings className="w-4 h-4" />, group: "Conta" },
+    { label: "Assistente IA", href: "/dashboard/ai-assistant", icon: <Bot className="w-4 h-4" />, group: "Conta" },
   ];
 
   if (role === "patient") return [
-    { label: "Início", href: "/dashboard", icon: <Home className="w-4 h-4" />, group: "Paciente" },
-    { label: "Agendar Consulta", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" />, group: "Paciente" },
+    { label: "Início", href: "/dashboard", icon: <Home className="w-4 h-4" />, group: "Paciente", shortcut: "G D" },
+    { label: "Agendar Consulta", href: "/dashboard/schedule", icon: <Calendar className="w-4 h-4" />, group: "Paciente", shortcut: "N" },
     { label: "Meus Agendamentos", href: "/dashboard/appointments", icon: <Clock className="w-4 h-4" />, group: "Paciente" },
     { label: "Urgência — Falar Agora", href: "/dashboard/schedule?urgency=true", icon: <Video className="w-4 h-4" />, group: "Paciente" },
     { label: "Minha Saúde", href: "/dashboard/patient/health", icon: <Heart className="w-4 h-4" />, group: "Paciente" },
@@ -40,8 +42,7 @@ const getNavItems = (role: string): NavItem[] => {
   ];
 
   if (role === "doctor") return [
-    { label: "Início", href: "/dashboard", icon: <Home className="w-4 h-4" />, group: "Médico" },
-    { label: "Agenda de Hoje", href: "/dashboard", icon: <Calendar className="w-4 h-4" />, group: "Médico" },
+    { label: "Início", href: "/dashboard", icon: <Home className="w-4 h-4" />, group: "Médico", shortcut: "G D" },
     { label: "Consultas", href: "/dashboard/doctor/consultations", icon: <Clock className="w-4 h-4" />, group: "Médico" },
     { label: "Sala de Espera", href: "/dashboard/doctor/waiting-room", icon: <Video className="w-4 h-4" />, group: "Médico" },
     { label: "Receitas / Prescrições", href: "/dashboard/prescriptions", icon: <FileText className="w-4 h-4" />, group: "Médico" },
@@ -52,13 +53,11 @@ const getNavItems = (role: string): NavItem[] => {
   ];
 
   if (role === "admin") return [
-    { label: "Painel Admin", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" />, group: "Admin" },
+    { label: "Painel Admin", href: "/dashboard", icon: <BarChart3 className="w-4 h-4" />, group: "Admin", shortcut: "G D" },
     { label: "Usuários", href: "/dashboard/admin/users", icon: <Users className="w-4 h-4" />, group: "Admin" },
     { label: "Pacientes", href: "/dashboard/admin/patients", icon: <User className="w-4 h-4" />, group: "Admin" },
     { label: "Médicos", href: "/dashboard/admin/doctors", icon: <FileText className="w-4 h-4" />, group: "Admin" },
     { label: "Agendamentos", href: "/dashboard/admin/appointments", icon: <Calendar className="w-4 h-4" />, group: "Admin" },
-    { label: "Assinaturas", href: "/dashboard/admin/subscriptions", icon: <CreditCard className="w-4 h-4" />, group: "Admin" },
-    { label: "Planos", href: "/dashboard/admin/plans", icon: <DollarSign className="w-4 h-4" />, group: "Admin" },
     ...base,
   ];
 
@@ -74,7 +73,6 @@ const GlobalCommand = ({ role = "patient" }: GlobalCommandProps) => {
   const navigate = useNavigate();
   const { signOut } = useAuth();
 
-  // ⌘K / Ctrl+K shortcut
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -114,11 +112,23 @@ const GlobalCommand = ({ role = "patient" }: GlobalCommandProps) => {
                 className="cursor-pointer"
               >
                 <span className="mr-2 text-muted-foreground">{item.icon}</span>
-                {item.label}
+                <span className="flex-1">{item.label}</span>
+                {item.shortcut && (
+                  <kbd className="ml-auto text-[10px] font-mono text-muted-foreground/60 bg-muted px-1.5 py-0.5 rounded">
+                    {item.shortcut}
+                  </kbd>
+                )}
               </CommandItem>
             ))}
           </CommandGroup>
         ))}
+        <CommandSeparator />
+        <CommandGroup heading="Atalhos">
+          <CommandItem className="text-muted-foreground text-xs" disabled>
+            <Keyboard className="w-4 h-4 mr-2" />
+            Pressione ? para ver todos os atalhos
+          </CommandItem>
+        </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading="Sessão">
           <CommandItem onSelect={handleSignOut} className="cursor-pointer text-destructive">

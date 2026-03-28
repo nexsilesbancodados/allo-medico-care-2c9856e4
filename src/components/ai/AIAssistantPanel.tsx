@@ -4,13 +4,15 @@ import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Bot, MessageSquare, Stethoscope, FileText, ClipboardList, History,
-  Home, Settings as SettingsIcon, User,
+  Home, Settings as SettingsIcon, User, Copy, Check,
 } from "lucide-react";
 import AIChatTab from "./tabs/AIChatTab";
 import AITriageTab from "./tabs/AITriageTab";
 import AIDocumentsTab from "./tabs/AIDocumentsTab";
 import AISummaryTab from "./tabs/AISummaryTab";
 import AIHistoryTab from "./tabs/AIHistoryTab";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const AIAssistantPanel = () => {
   const { roles } = useAuth();
