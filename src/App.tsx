@@ -6,7 +6,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "next-themes";
 import { I18nProvider } from "@/i18n";
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
-import { toast } from "sonner"; // used in unhandledrejection handler
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
 import ErrorBoundary from "./components/ErrorBoundary";
 const Index = lazy(() => import("./pages/Index"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -14,7 +15,6 @@ const ProtectedRoute = lazy(() => import("@/components/auth/ProtectedRoute"));
 import { logError } from "@/lib/logger";
 import { prefetchOnIdle } from "./hooks/use-prefetch-route";
 import ScrollToTop from "./components/ScrollToTop";
-
 
 const Auth = lazy(() => import("./pages/Auth"));
 
@@ -65,7 +65,7 @@ if (typeof window !== "undefined") {
     import("./pages/Dashboard");
   };
   if ("requestIdleCallback" in window) {
-    (window as any).requestIdleCallback(prefetch, { timeout: 3000 });
+    (window as unknown as { requestIdleCallback: (cb: () => void, opts: { timeout: number }) => void }).requestIdleCallback(prefetch, { timeout: 3000 });
   } else {
     setTimeout(prefetch, 3000);
   }
@@ -97,6 +97,68 @@ const SubdomainRedirectProvider = lazy(() =>
   }))
 );
 
+/** Animated route wrapper */
+const AnimatedRoutes = () => {
+  const location = useLocation();
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -6 }}
+        transition={{ duration: 0.15 }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={<Index />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/paciente" element={<AuthPaciente />} />
+          <Route path="/medico" element={<AuthMedico />} />
+          <Route path="/admin" element={<AuthAdmin />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/terms" element={<Terms />} />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/lgpd" element={<LGPD />} />
+          <Route path="/cookies" element={<Cookies />} />
+          <Route path="/refund" element={<RefundPolicy />} />
+          <Route path="/doctor-terms" element={<DoctorTerms />} />
+          <Route path="/accessibility" element={<Accessibility />} />
+          <Route path="/suporte" element={<AuthSuporte />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
+          <Route path="/l/:id" element={<LinkRedirect />} />
+          <Route path="/validar/:id" element={<ValidateDocument />} />
+          <Route path="/validar" element={<ValidateDocument />} />
+          
+          <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
+          <Route path="/teleconsulta" element={<Teleconsulta />} />
+          
+          <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
+          <Route path="/laudista" element={<AuthLaudista />} />
+          <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
+          <Route path="/laudos/fila" element={<ProtectedRoute><LaudosFila /></ProtectedRoute>} />
+          <Route path="/laudos/editor/:exameId" element={<ProtectedRoute><LaudosEditor /></ProtectedRoute>} />
+          <Route path="/laudos/validar/:token" element={<LaudosValidar />} />
+          <Route path="/laudos/validar" element={<LaudosValidar />} />
+          <Route path="/laudos/:exameId/editar" element={<ProtectedRoute><LaudosEditar /></ProtectedRoute>} />
+          <Route path="/clinica/enviar-exame" element={<ProtectedRoute><ClinicaEnviarExame /></ProtectedRoute>} />
+          <Route path="/clinica/exames" element={<ProtectedRoute><ClinicaExames /></ProtectedRoute>} />
+          <Route
+            path="/dashboard/*"
+            element={
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 const App = () => {
   const lastUnhandledToastRef = useRef(0);
   const [showDeferredFeatures, setShowDeferredFeatures] = useState(false);
@@ -114,7 +176,6 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    // Delay prefetching to avoid competing with initial render for main-thread time
     const timer = window.setTimeout(() => {
       const cancelCriticalPrefetch = prefetchOnIdle(
         [
@@ -130,7 +191,6 @@ const App = () => {
           () => import("./pages/AuthAdmin"),
           () => import("./pages/AuthSuporte"),
           () => import("./pages/AuthLaudista"),
-          () => import("./pages/ForgotPassword"),
           () => import("./pages/ForgotPassword"),
         ],
         20000,
@@ -149,7 +209,7 @@ const App = () => {
     };
   }, []);
 
-  // Global safety net for unhandled async errors (prevents white screen)
+  // Global safety net for unhandled async errors
   useEffect(() => {
     const NON_FATAL_REJECTION_RE = /AbortError|The user aborted a request|Network request failed while offline/i;
     const CHUNK_REJECTION_RE = /Loading chunk|Failed to fetch dynamically imported module|Importing a module script failed|ChunkLoadError/i;
@@ -195,51 +255,12 @@ const App = () => {
                   </Suspense>
                   <ScrollToTop />
                   
+                  <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:top-2 focus:left-2 focus:bg-primary focus:text-primary-foreground focus:px-4 focus:py-2 focus:rounded-lg focus:text-sm focus:font-medium">
+                    Pular para o conteúdo
+                  </a>
                   <main id="main-content">
                     <Suspense fallback={<PingoLoader />}>
-                      <Routes>
-                        <Route path="/" element={<Index />} />
-                        <Route path="/auth" element={<Auth />} />
-                        <Route path="/paciente" element={<AuthPaciente />} />
-                        <Route path="/medico" element={<AuthMedico />} />
-                        <Route path="/admin" element={<AuthAdmin />} />
-                        <Route path="/forgot-password" element={<ForgotPassword />} />
-                        <Route path="/reset-password" element={<ResetPassword />} />
-                        <Route path="/terms" element={<Terms />} />
-                        <Route path="/privacy" element={<Privacy />} />
-                        <Route path="/lgpd" element={<LGPD />} />
-                        <Route path="/cookies" element={<Cookies />} />
-                        <Route path="/refund" element={<RefundPolicy />} />
-                        <Route path="/doctor-terms" element={<DoctorTerms />} />
-                        <Route path="/accessibility" element={<Accessibility />} />
-                        <Route path="/suporte" element={<AuthSuporte />} />
-                        <Route path="/payment-success" element={<PaymentSuccess />} />
-                        <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
-                        <Route path="/l/:id" element={<LinkRedirect />} />
-                        <Route path="/validar/:id" element={<ValidateDocument />} />
-                        <Route path="/validar" element={<ValidateDocument />} />
-                        
-                        <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
-                        <Route path="/teleconsulta" element={<Teleconsulta />} />
-                        
-                        <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
-                        <Route path="/laudista" element={<AuthLaudista />} />
-                        <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
-                        <Route path="/laudos/fila" element={<ProtectedRoute><LaudosFila /></ProtectedRoute>} />
-                        <Route path="/laudos/editor/:exameId" element={<ProtectedRoute><LaudosEditor /></ProtectedRoute>} />
-                        <Route path="/laudos/validar/:token" element={<LaudosValidar />} />
-                        <Route path="/laudos/validar" element={<LaudosValidar />} />
-                        <Route path="/laudos/:exameId/editar" element={<ProtectedRoute><LaudosEditar /></ProtectedRoute>} />
-                        <Route path="/clinica/enviar-exame" element={<ProtectedRoute><ClinicaEnviarExame /></ProtectedRoute>} />
-                        <Route path="/clinica/exames" element={<ProtectedRoute><ClinicaExames /></ProtectedRoute>} />
-                        <Route
-                          path="/dashboard/*"
-                          element={
-                            <ProtectedRoute>
-                              <Dashboard />
-                            </ProtectedRoute>
-                          }
-                        />
+                      <AnimatedRoutes />
                     </Suspense>
                   </main>
 
@@ -264,4 +285,3 @@ const App = () => {
 };
 
 export default App;
-
