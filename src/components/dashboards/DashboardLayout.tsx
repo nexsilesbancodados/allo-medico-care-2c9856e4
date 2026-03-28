@@ -356,7 +356,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         ) : (
           <button onClick={() => { navigate("/dashboard/profile"); onItemClick?.(); }}
             className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-muted/50 transition-all duration-200 text-left group">
-            <Avatar className="h-8 w-8 ring-2 ring-border/15 group-hover:ring-primary/25 transition-all">
+            <Avatar className={`h-8 w-8 ring-2 ${avatarRing} group-hover:ring-primary/25 transition-all`}>
               {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
               <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-[10px] font-bold`}>{initials}</AvatarFallback>
             </Avatar>
@@ -495,7 +495,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
               <DropdownMenuTrigger asChild>
                 <button className="group flex items-center gap-2 h-9 pl-0.5 pr-2.5 rounded-xl hover:bg-muted/60 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40">
                   <div className="relative">
-                    <Avatar className="h-7 w-7">
+                    <Avatar className={`h-7 w-7 ring-2 ${avatarRing}`}>
                       {profile?.avatar_url && <AvatarImage src={profile.avatar_url} />}
                       <AvatarFallback className={`bg-gradient-to-br ${grad} text-white text-[10px] font-bold`}>{initials}</AvatarFallback>
                     </Avatar>
