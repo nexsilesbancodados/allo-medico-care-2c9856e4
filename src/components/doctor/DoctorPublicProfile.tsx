@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Star, GraduationCap, Clock, Calendar, ArrowLeft, Award } from "lucide-react";
+import { Star, GraduationCap, Clock, Calendar, ArrowLeft, Award, ShieldCheck, ShieldAlert } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface DoctorPublicData {
@@ -20,6 +20,8 @@ interface DoctorPublicData {
   name: string;
   avatar_url: string | null;
   specialties: string[];
+  crm_verified: boolean;
+  is_approved: boolean;
 }
 
 interface Review {
@@ -78,6 +80,8 @@ const DoctorPublicProfile = () => {
       name: `${doc.first_name} ${doc.last_name}`,
       avatar_url: doc.avatar_url ?? null,
       specialties: doc.specialties ?? [],
+      crm_verified: doc.crm_verified ?? false,
+      is_approved: doc.is_approved ?? false,
     });
 
     setReviews(
@@ -143,7 +147,20 @@ const DoctorPublicProfile = () => {
                 </div>
 
                 <div className="text-center sm:text-left flex-1">
-                  <h1 className="text-2xl font-bold text-foreground tabular-nums">Dr(a). {doctor.name}</h1>
+                  <div className="flex items-center gap-2 justify-center sm:justify-start flex-wrap">
+                    <h1 className="text-2xl font-bold text-foreground tabular-nums">Dr(a). {doctor.name}</h1>
+                    {doctor.crm_verified ? (
+                      <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 gap-1">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        Verificado
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-muted-foreground gap-1">
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                        Não verificado
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-sm text-muted-foreground mt-1">CRM {doctor.crm}/{doctor.crm_state}</p>
 
                   {/* Specialties */}
