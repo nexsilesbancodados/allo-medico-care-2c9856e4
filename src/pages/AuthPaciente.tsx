@@ -25,7 +25,6 @@ import {
   CheckCircle,
   Phone,
   IdentificationCard,
-  GoogleLogo,
   FacebookLogo,
   Certificate,
   LockKey,
@@ -372,20 +371,6 @@ const AuthPaciente = () => {
             <div className="flex-1 h-px bg-border/50" />
           </div>
 
-          {/* Google button */}
-          <Button
-            variant="outline"
-            className="w-full h-12 rounded-2xl border-border/60 text-sm font-medium hover:bg-muted/40 transition-all"
-            onClick={async () => {
-              await supabase.auth.signInWithOAuth({
-                provider: "google",
-                options: { redirectTo: `${window.location.origin}/dashboard` },
-              });
-            }}
-          >
-            <GoogleLogo className="w-5 h-5 mr-2" weight="bold" />
-            Continuar com Google
-          </Button>
 
           {/* Trust items */}
           <div className="flex items-center justify-center gap-6 pt-4">
