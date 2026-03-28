@@ -364,12 +364,6 @@ const AuthPaciente = () => {
             </Button>
           </div>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-border/50" />
-            <span className="text-xs text-muted-foreground/60 font-medium">ou</span>
-            <div className="flex-1 h-px bg-border/50" />
-          </div>
 
 
           {/* Trust items */}
