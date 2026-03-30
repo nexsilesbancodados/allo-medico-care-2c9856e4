@@ -203,6 +203,15 @@ const ClinicDashboard = () => {
       {/* ── CONTENT ── */}
       <div className="mt-5 space-y-5 pb-24 md:pb-8">
 
+        {/* ── Action Pills ── */}
+        <ActionPills title="Ações da clínica" actions={[
+          { label: "Agenda", icon: "📅", iconBg: "bg-blue-50 dark:bg-blue-950/30", path: "/dashboard/clinic/schedules" },
+          { label: "Médicos", icon: "🩺", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", path: "/dashboard/clinic/doctors" },
+          { label: "Pacientes", icon: "👥", iconBg: "bg-violet-50 dark:bg-violet-950/30", path: "/dashboard/clinic/patients" },
+          { label: "Exames", icon: "📋", iconBg: "bg-amber-50 dark:bg-amber-950/30", path: "/dashboard/clinic/my-exams" },
+          { label: "Sala de Espera", icon: "⏳", iconBg: "bg-red-50 dark:bg-red-950/30", path: "/dashboard/clinic/waiting-room" },
+        ]} />
+
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
           { label: "Médicos ativos", value: activeDoctors, icon: "🩺", iconBg: "bg-indigo-50 dark:bg-indigo-950/30", valueClass: "text-indigo-700 dark:text-indigo-400", trend: 5 , accentClass: "bg-indigo-500" },

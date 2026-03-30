@@ -200,6 +200,14 @@ const ReceptionDashboard = () => {
       {/* ── CONTENT ── */}
       <div className="mt-5 space-y-5 pb-24 md:pb-8">
 
+        {/* ── Action Pills ── */}
+        <ActionPills title="Ações da recepção" actions={[
+          { label: "Agenda", icon: "📅", iconBg: "bg-amber-50 dark:bg-amber-950/30", path: "/dashboard/reception/schedules" },
+          { label: "Check-in", icon: "✅", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", path: "/dashboard/reception/checkin" },
+          { label: "Fila", icon: "⏳", iconBg: "bg-red-50 dark:bg-red-950/30", path: "/dashboard/reception/waiting", badge: stats.waiting > 0 ? stats.waiting : undefined },
+          { label: "Pacientes", icon: "👥", iconBg: "bg-blue-50 dark:bg-blue-950/30", path: "/dashboard/reception/patients" },
+        ]} />
+
         {/* ── Bento Stats — full width ── */}
         <StatBento loading={loading} stats={[
           { label: "Total hoje", value: stats.total, icon: "📅", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-700 dark:text-amber-400", accentClass: "bg-amber-500" },
