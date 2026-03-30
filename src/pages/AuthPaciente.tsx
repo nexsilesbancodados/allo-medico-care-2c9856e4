@@ -53,17 +53,30 @@ const benefits = [
 
 /* ═══ LEFT PANEL (Desktop only) — extracted outside to avoid remount on every keystroke ═══ */
 const LeftPanel = () => (
-  <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary via-primary/90 to-secondary flex-col items-center justify-center p-12 xl:p-16 overflow-hidden">
+  <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary via-primary/90 to-secondary flex-col justify-between p-12 xl:p-16 overflow-hidden">
+    {/* Ambient orbs */}
     <div className="absolute top-[-20%] right-[-15%] w-[400px] h-[400px] rounded-full bg-white/[0.06] blur-[120px]" />
     <div className="absolute bottom-[-10%] left-[-10%] w-[300px] h-[300px] rounded-full bg-secondary/30 blur-[80px]" />
     <div className="absolute top-[50%] left-[60%] w-[150px] h-[150px] rounded-full bg-white/[0.04] blur-[60px]" />
-    <div className="relative z-10 flex flex-col items-center text-center max-w-md">
-      <img src={logo} alt="AloClínica" className="w-10 h-10 rounded-2xl shadow-lg ring-2 ring-white/20 mb-10" />
+    {/* Dot pattern */}
+    <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: "radial-gradient(circle at 1.5px 1.5px, white 1px, transparent 0)", backgroundSize: "28px 28px" }} />
+
+    {/* Top — back link */}
+    <div className="relative z-10">
+      <Link to="/" className="inline-flex items-center gap-2 text-white/50 hover:text-white/80 transition-colors text-sm font-medium group">
+        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" weight="bold" />
+        Voltar ao início
+      </Link>
+    </div>
+
+    {/* Center content */}
+    <div className="relative z-10 flex flex-col items-center text-center max-w-md mx-auto">
+      <img src={logo} alt="AloClínica" className="w-12 h-12 rounded-2xl shadow-lg ring-2 ring-white/20 mb-8" />
       <motion.img
         src={mascotWave}
         alt="Pingo"
-        className="w-[180px] h-[180px] xl:w-[200px] xl:h-[200px] object-contain select-none mb-8"
-        style={{ filter: "drop-shadow(0 8px 32px rgba(0,0,50,.3))" }}
+        className="w-[180px] h-[180px] xl:w-[210px] xl:h-[210px] object-contain select-none mb-8"
+        style={{ filter: "drop-shadow(0 12px 40px rgba(0,0,50,.35))" }}
         animate={{ y: [0, -10, 0] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
       />
@@ -86,18 +99,20 @@ const LeftPanel = () => (
             transition={{ delay: 0.3 + i * 0.12 }}
             className="flex items-center gap-3 text-left"
           >
-            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-sm flex items-center justify-center shrink-0 border border-white/[0.08]">
               <b.icon className="w-5 h-5 text-white" weight="fill" />
             </div>
             <span className="text-sm text-white/85 font-medium">{b.text}</span>
           </motion.div>
         ))}
       </div>
-      <div className="mt-12 flex items-center gap-2 text-white/60 text-sm">
-        <Star className="w-4 h-4 text-yellow-300" weight="fill" />
-        <span className="font-semibold text-white/80">4.9</span>
-        <span>— mais de 12.000 avaliações</span>
-      </div>
+    </div>
+
+    {/* Bottom — social proof */}
+    <div className="relative z-10 flex items-center justify-center gap-2 text-white/60 text-sm pt-6 border-t border-white/10">
+      <Star className="w-4 h-4 text-yellow-300" weight="fill" />
+      <span className="font-semibold text-white/80">4.9</span>
+      <span>— mais de 12.000 avaliações</span>
     </div>
   </div>
 );
