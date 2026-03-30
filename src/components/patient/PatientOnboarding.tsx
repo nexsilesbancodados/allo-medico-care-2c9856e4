@@ -102,18 +102,28 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   };
 
   const handleNext = async () => {
-    if (step.id === "personal" || step.id === "health") await saveProfile();
-    // KYC is handled by the camera component callback — just advance
-    if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); onComplete(); }
+    if (step.id === "personal") {
+      if (!firstName.trim() || !lastName.trim()) { toast.error("Preencha nome e sobrenome"); return; }
+      await saveProfile();
+    }
+    if (step.id === "health") await saveProfile();
+    if (step.id === "kyc" && !kycCompleted) {
+      toast.error("Verificação obrigatória", { description: "Complete a verificação de identidade para continuar." });
+      return;
+    }
+    if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); localStorage.removeItem(KYC_PENDING_KEY); onComplete(); }
     else setCurrentStep(prev => prev + 1);
   };
 
-  const handleSkipKyc = () => {
-    localStorage.setItem(KYC_PENDING_KEY, "true");
-    setCurrentStep(prev => prev + 1);
+  const handleSkip = () => {
+    // Only allow skip if KYC is already completed
+    if (!kycCompleted && currentStep >= STEPS.findIndex(s => s.id === "kyc")) {
+      toast.error("Complete a verificação de identidade primeiro");
+      return;
+    }
+    localStorage.setItem(ONBOARDING_KEY, "true");
+    onComplete();
   };
-
-  const handleSkip = () => { localStorage.setItem(ONBOARDING_KEY, "true"); onComplete(); };
 
   const FEATURES = [
     { icon: <Stethoscope className="w-6 h-6 text-primary" />, title: "Consultas Médicas", desc: "Agende especialistas em poucos cliques." },
