@@ -63,7 +63,6 @@ const LaudistaMyReports = () => {
     enabled: !!doctorProfile?.id,
   });
 
-  // Filtered and paginated
   const filtered = useMemo(() => {
     if (!reports) return [];
     let result = reports;
@@ -86,7 +85,6 @@ const LaudistaMyReports = () => {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageItems = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
-  // Reset page when filters change
   const handleSearchChange = (v: string) => { setSearch(v); setPage(0); };
   const handleStatusChange = (v: string) => { setStatusFilter(v as "all" | "signed" | "draft"); setPage(0); };
 
@@ -94,16 +92,16 @@ const LaudistaMyReports = () => {
   const draftCount = reports?.filter(r => !r.signed_at).length ?? 0;
 
   return (
-    <DashboardLayout nav={getLaudistaNav("my-reports")} title="Meus Laudos" role="doctor">
+    <DashboardLayout nav={getLaudistaNav("my-reports")} title="Meus Laudos" role="laudista">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="max-w-5xl space-y-4"
+        className="max-w-5xl space-y-4 pb-24 md:pb-8"
       >
         {/* Summary badges */}
         {!isLoading && reports && (
-          <div className="flex flex-wrap gap-2 pb-24 md:pb-8">
+          <div className="flex flex-wrap gap-2">
             <Badge variant="outline" className="text-xs gap-1.5 py-1 px-3">
               <FileText className="w-3 h-3" /> {reports.length} laudos
             </Badge>
@@ -165,9 +163,17 @@ const LaudistaMyReports = () => {
                 ))}
               </div>
             ) : filtered.length === 0 ? (
-              <div className="text-center py-8">
-              <img src={mascotReading} alt="Pingo" className="w-20 h-20 object-contain mx-auto mb-3 select-none" style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }} loading="lazy" decoding="async" width={80} height={80} />
-                <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+              <div className="text-center py-10">
+                <img
+                  src={mascotReading}
+                  alt="Pingo"
+                  className="w-20 h-20 object-contain mx-auto mb-4 select-none"
+                  style={{ filter: "drop-shadow(0 6px 14px rgba(0,0,0,.15))" }}
+                  loading="lazy"
+                  decoding="async"
+                  width={80}
+                  height={80}
+                />
                 <p className="text-sm font-semibold text-foreground mb-1">
                   {search || statusFilter !== "all" ? "Nenhum resultado" : "Nenhum laudo emitido ainda"}
                 </p>
