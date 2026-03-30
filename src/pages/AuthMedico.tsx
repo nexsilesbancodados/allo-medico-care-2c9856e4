@@ -98,6 +98,21 @@ const faqItems = [
   { question: "Posso usar junto com meu consultório presencial?", answer: "Claro! Muitos médicos usam como complemento, ampliando alcance para pacientes de outras regiões." },
 ];
 
+const PREDEFINED_SPECIALTIES = [
+  "Acupuntura", "Alergia e Imunologia", "Anestesiologia", "Angiologia", "Cancerologia",
+  "Cardiologia", "Cirurgia Cardiovascular", "Cirurgia da Mão", "Cirurgia de Cabeça e Pescoço",
+  "Cirurgia do Aparelho Digestivo", "Cirurgia Geral", "Cirurgia Pediátrica", "Cirurgia Plástica",
+  "Cirurgia Torácica", "Cirurgia Vascular", "Clínico Geral", "Coloproctologia",
+  "Dermatologia", "Endocrinologia", "Endoscopia", "Gastroenterologia",
+  "Genética Médica", "Geriatria", "Ginecologia e Obstetrícia", "Hematologia",
+  "Homeopatia", "Infectologia", "Mastologia", "Medicina de Família e Comunidade",
+  "Medicina do Esporte", "Medicina do Trabalho", "Medicina Intensiva",
+  "Medicina Legal", "Medicina Nuclear", "Nefrologia", "Neurocirurgia",
+  "Neurologia", "Nutrologia", "Oftalmologia", "Oncologia Clínica", "Ortopedia e Traumatologia",
+  "Otorrinolaringologia", "Patologia", "Pediatria", "Pneumologia", "Psiquiatria",
+  "Radiologia", "Radioterapia", "Reumatologia", "Urologia",
+];
+
 const AuthMedico = () => {
   const [searchParams] = useSearchParams();
   const hasLoginAccess = true; // Login always accessible
