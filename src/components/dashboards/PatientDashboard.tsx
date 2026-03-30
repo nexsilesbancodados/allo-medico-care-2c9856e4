@@ -718,30 +718,30 @@ const NextAppointmentCard = ({
 };
 
 const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNavigate> }) => (
-  <Card className="relative overflow-hidden border-dashed border-border/20 bg-card">
-    <CardContent className="flex flex-col items-center py-10 text-center">
-      <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-28 w-28 rounded-full bg-[hsl(var(--p-primary))]/6 blur-2xl" />
+  <Card className="relative overflow-hidden border-dashed border-border/20 bg-gradient-to-b from-card to-muted/20">
+    <CardContent className="flex flex-col items-center py-12 text-center">
+      <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-32 w-32 rounded-full bg-[hsl(var(--p-primary))]/6 blur-3xl" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.8, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <PingoMascot variant="wave" size={85} bounce animate />
+        <PingoMascot variant="wave" size={90} bounce animate />
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.45 }}
-        className="mt-4"
+        className="mt-5"
       >
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--p-primary))]/8 px-3 py-1 mb-3">
-          <Stethoscope size={11} weight="fill" className="text-[hsl(var(--p-primary))]" />
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--p-primary))]/8 px-3.5 py-1.5 mb-3">
+          <Stethoscope size={12} weight="fill" className="text-[hsl(var(--p-primary))]" />
           <span className="text-[10px] font-bold text-[hsl(var(--p-primary))] uppercase tracking-wider">Agenda livre</span>
         </div>
-        <p className="font-[Manrope] text-[16px] font-bold text-foreground">Tudo tranquilo por aqui! 🎉</p>
-        <p className="mt-1.5 text-[12.5px] text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
+        <p className="font-[Manrope] text-[17px] font-bold text-foreground">Tudo tranquilo por aqui! 🎉</p>
+        <p className="mt-2 text-[12.5px] text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
           Que tal agendar uma consulta? Encontre especialistas e agende em poucos toques.
         </p>
       </motion.div>
@@ -752,7 +752,7 @@ const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNav
         transition={{ delay: 0.3, duration: 0.4 }}
       >
         <Button
-          className="mt-5 rounded-full bg-[hsl(var(--p-primary))] text-white px-8 py-3 h-auto text-[14px] font-bold shadow-[0_4px_16px_rgba(0,52,127,.2)] hover:shadow-[0_6px_24px_rgba(0,52,127,.3)] hover:scale-[1.02] active:scale-[0.97] transition-all duration-200"
+          className="mt-6 rounded-full bg-[hsl(var(--p-primary))] text-white px-8 py-3 h-auto text-[14px] font-bold shadow-[0_4px_16px_rgba(0,52,127,.2)] hover:shadow-[0_6px_24px_rgba(0,52,127,.3)] hover:scale-[1.02] active:scale-[0.97] transition-all duration-200"
           onClick={() => navigate("/dashboard/schedule?role=patient")}
         >
           <Plus size={16} weight="bold" className="mr-2" /> Agendar agora
