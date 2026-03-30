@@ -279,6 +279,15 @@ const SupportDashboard = () => {
 
 
 
+        {/* ── Action Pills ── */}
+        <ActionPills title="Ações do suporte" actions={[
+          { label: "Inbox", icon: "📥", iconBg: "bg-blue-50 dark:bg-blue-950/30", path: "/dashboard/support/inbox?role=support" },
+          { label: "Chat IA", icon: "🤖", iconBg: "bg-purple-50 dark:bg-purple-950/30", path: "/dashboard/support/chat?role=support" },
+          { label: "Logs", icon: "📊", iconBg: "bg-amber-50 dark:bg-amber-950/30", path: "/dashboard/support/logs?role=support", badge: errorCount > 0 ? errorCount : undefined },
+          { label: "Usuários", icon: "👥", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", path: "/dashboard/support/users?role=support" },
+          { label: "Online", icon: "🟢", iconBg: "bg-green-50 dark:bg-green-950/30", path: "/dashboard/support/online?role=support" },
+        ]} />
+
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
           { label: "Usuários cadastrados", value: users.length, icon: "👥", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-[#1255C8] dark:text-blue-400", sub: `${filteredUsers.length} filtrados`, accentClass: "bg-blue-500" },
@@ -297,22 +306,6 @@ const SupportDashboard = () => {
             actionLabel="Ver erros"
             onAction={() => setLogTypeFilter("error")}
           />
-        )}
-
-        {/* Alert banner for critical errors */}
-        {!loading && errorCount > 0 && (
-          <motion.div variants={fadeUp}>
-            <div className="flex items-center gap-3 p-3 rounded-xl border border-destructive/20 bg-destructive/5">
-              <ShieldAlert className="w-5 h-5 text-destructive shrink-0" />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-destructive">{errorCount} erro{errorCount > 1 ? "s" : ""} detectado{errorCount > 1 ? "s" : ""}</p>
-                <p className="text-xs text-muted-foreground">Revise os logs de erro abaixo para diagnóstico</p>
-              </div>
-              <Button size="sm" variant="ghost" className="text-xs text-destructive h-7 shrink-0 rounded-xl" onClick={() => setLogTypeFilter("error")}>
-                Ver erros →
-              </Button>
-            </div>
-          </motion.div>
         )}
 
         {/* System health quick indicators */}

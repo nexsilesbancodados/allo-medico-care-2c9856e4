@@ -295,6 +295,15 @@ const AdminDashboard = () => {
       {/* ── CONTENT ── */}
       <div className="mt-5 space-y-5">
 
+        {/* ── Action Pills ── */}
+        <ActionPills title="Ações do admin" actions={[
+          { label: "Usuários", icon: "👥", iconBg: "bg-blue-50 dark:bg-blue-950/30", path: "/dashboard/admin/users" },
+          { label: "Médicos", icon: "🩺", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", path: "/dashboard/admin/doctors" },
+          { label: "Financeiro", icon: "💰", iconBg: "bg-amber-50 dark:bg-amber-950/30", path: "/dashboard/admin/financial" },
+          { label: "Painéis", icon: "🎛️", iconBg: "bg-violet-50 dark:bg-violet-950/30", path: "/dashboard/admin/switch-panel" },
+          { label: "Relatórios", icon: "📊", iconBg: "bg-red-50 dark:bg-red-950/30", path: "/dashboard/admin/reports" },
+        ]} />
+
         {/* ── Bento Stats ── */}
         <StatBento loading={loading} stats={[
           { label: "Receita mensal", value: `R$${(stats.total_revenue / 1000).toFixed(1)}k`, icon: "💰", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", trend: 18 , accentClass: "bg-emerald-500" },

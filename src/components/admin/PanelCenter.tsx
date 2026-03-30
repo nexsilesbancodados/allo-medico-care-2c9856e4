@@ -16,6 +16,10 @@ import {
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { HeroBanner } from "@/components/dashboards/HeroBanner";
+import { StatBento } from "@/components/dashboards/StatBento";
+import { ActionPills } from "@/components/dashboards/ActionPills";
+import pingoAdmin from "@/assets/pingo-admin.png";
 
 interface PanelInfo {
   id: string;
@@ -173,66 +177,53 @@ const PanelCenter = () => {
 
   return (
     <DashboardLayout title="Centro de Painéis" nav={getAdminNav("switch-panel")}>
-      <motion.div variants={container} initial="hidden" animate="show" className="w-full max-w-6xl space-y-8 pb-24 md:pb-8">
+      <motion.div variants={container} initial="hidden" animate="show" className="w-full max-w-6xl space-y-6 pb-24 md:pb-8">
 
-        {/* Hero Header */}
-        <motion.div variants={fadeUp} className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/8 via-secondary/5 to-purple-500/5 border border-border/40 p-6 sm:p-8">
-          {/* Ambient orbs */}
-          <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-primary/8 blur-3xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-secondary/10 blur-3xl pointer-events-none" />
-          
-          <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-blue-700 flex items-center justify-center shadow-lg shadow-primary/25">
-                  <LayoutGrid className="w-7 h-7 text-primary-foreground" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-success flex items-center justify-center">
-                  <span className="w-2 h-2 rounded-full bg-success-foreground animate-ping" />
-                </div>
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight">
-                  Centro de Painéis
-                </h1>
-                <p className="text-sm text-muted-foreground mt-0.5 flex items-center gap-1.5">
-                  <Zap className="w-3.5 h-3.5 text-warning" />
-                  Monitore e acesse todos os painéis em tempo real
-                </p>
-              </div>
-            </div>
+        {/* Hero Banner */}
+        <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
+          <HeroBanner
+            gradient="from-[#0f172a] via-[#1e293b] to-[#334155]"
+            pingoSrc={pingoAdmin}
+            pingoAlt="Pingo Admin"
+            liveDot={totalOnline > 0}
+            liveColor="green"
+            bubble={{
+              greeting: "🎛️ Centro de Controle",
+              name: "Painéis da Plataforma",
+              sub: `${totalOnline} usuário${totalOnline !== 1 ? "s" : ""} online agora`,
+            }}
+            kpis={[
+              { label: "Online", value: totalOnline },
+              { label: "Total", value: totalUsers },
+              { label: "Painéis", value: PANELS.length },
+              { label: "Ativos", value: panels.filter(p => p.onlineCount > 0).length },
+            ]}
+            loading={false}
+            onRefresh={() => fetchPresence(true)}
+            refreshing={refreshing}
+          />
+        </div>
 
-            <div className="flex items-center gap-3">
-              {/* Stats pills */}
-              <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl px-4 py-2.5 shadow-sm">
-                <div className="relative">
-                  <span className="w-2.5 h-2.5 rounded-full bg-success block" />
-                  <span className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-success animate-ping opacity-75" />
-                </div>
-                <span className="text-lg font-bold text-foreground">{totalOnline}</span>
-                <span className="text-xs text-muted-foreground">online</span>
-                <span className="w-px h-5 bg-border mx-1" />
-                <Globe className="w-4 h-4 text-muted-foreground" />
-                <span className="text-lg font-bold text-foreground">{totalUsers}</span>
-                <span className="text-xs text-muted-foreground">total</span>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="rounded-xl gap-2 h-10 px-4 bg-card/80 backdrop-blur-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300 shadow-sm"
-                onClick={() => fetchPresence(true)}
-                disabled={refreshing}
-              >
-                <RefreshCw className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} />
-                Atualizar
-              </Button>
-            </div>
-          </div>
-        </motion.div>
+        {/* Quick Action Pills */}
+        <ActionPills title="Acesso rápido" actions={[
+          { label: "Admin", icon: "⚙️", iconBg: "bg-red-50 dark:bg-red-950/30", path: "/dashboard?role=admin" },
+          { label: "Médicos", icon: "🩺", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", path: "/dashboard?role=doctor" },
+          { label: "Pacientes", icon: "👤", iconBg: "bg-blue-50 dark:bg-blue-950/30", path: "/dashboard?role=patient" },
+          { label: "Clínica", icon: "🏢", iconBg: "bg-violet-50 dark:bg-violet-950/30", path: "/dashboard?role=clinic" },
+          { label: "IA", icon: "🤖", iconBg: "bg-purple-50 dark:bg-purple-950/30", path: "/dashboard/ai-assistant" },
+        ]} />
+
+        {/* Stats */}
+        <StatBento loading={false} stats={[
+          { label: "Usuários online", value: totalOnline, icon: "🟢", iconBg: "bg-emerald-50 dark:bg-emerald-950/30", valueClass: "text-emerald-700 dark:text-emerald-400", accentClass: "bg-emerald-500" },
+          { label: "Total cadastrados", value: totalUsers, icon: "👥", iconBg: "bg-blue-50 dark:bg-blue-950/30", valueClass: "text-blue-700 dark:text-blue-400", accentClass: "bg-blue-500" },
+          { label: "Painéis ativos", value: panels.filter(p => p.onlineCount > 0).length, icon: "📊", iconBg: "bg-violet-50 dark:bg-violet-950/30", valueClass: "text-violet-600 dark:text-violet-400", accentClass: "bg-violet-500" },
+          { label: "Última atualização", value: format(lastRefresh, "HH:mm", { locale: ptBR }), icon: "🕐", iconBg: "bg-amber-50 dark:bg-amber-950/30", valueClass: "text-amber-600 dark:text-amber-400", accentClass: "bg-amber-500" },
+        ]} />
 
         {/* Presence bar */}
         <motion.div variants={fadeUp}>
-          <Card className="border-border/40 bg-card/80 backdrop-blur-sm shadow-sm overflow-hidden">
+          <Card className="card-interactive border-border/40 bg-card/80 backdrop-blur-sm shadow-sm overflow-hidden">
             <div className="h-1 bg-gradient-to-r from-primary via-secondary to-purple-500" />
             <CardContent className="p-4">
               <div className="flex items-center gap-2 mb-3">
@@ -275,7 +266,7 @@ const PanelCenter = () => {
         </motion.div>
 
         {/* Panel grid */}
-        <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <motion.div variants={fadeUp} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {panels.map((panel) => {
             const Icon = panel.icon;
             const hasOnline = panel.onlineCount > 0;
@@ -287,7 +278,7 @@ const PanelCenter = () => {
                 whileTap={{ scale: 0.98 }}
               >
                 <Card
-                  className="relative overflow-hidden cursor-pointer group border-border/40 bg-card/90 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 ring-1 ring-transparent hover:ring-primary/20"
+                  className="card-interactive relative overflow-hidden cursor-pointer group border-border/40 bg-card/90 backdrop-blur-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 ring-1 ring-transparent hover:ring-primary/20"
                   onClick={() => navigate(panel.route)}
                 >
                   {/* Top gradient accent line */}
