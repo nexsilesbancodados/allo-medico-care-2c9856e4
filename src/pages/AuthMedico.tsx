@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { securityMonitor } from "@/lib/security-monitor";
 import { supabase } from "@/integrations/supabase/client";
