@@ -592,12 +592,11 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           aria-label="Navegação principal"
         >
           <div
-            className="rounded-[22px] border border-border/10 dark:border-white/8 mx-auto max-w-[420px]"
+            className="rounded-[22px] border border-border/10 dark:border-white/8 mx-auto max-w-[420px] bg-white/[0.94] dark:bg-background/[0.92]"
             style={{
-              background: "var(--bottom-nav-bg, linear-gradient(180deg, rgba(255,255,255,0.94) 0%, rgba(255,255,255,0.98) 100%))",
               backdropFilter: "saturate(200%) blur(30px)",
               WebkitBackdropFilter: "saturate(200%) blur(30px)",
-              boxShadow: "0 -4px 32px -6px rgba(0,0,0,0.08), 0 2px 12px -2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.4)",
+              boxShadow: "0 -4px 32px -6px rgba(0,0,0,0.08), 0 2px 12px -2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.35)",
             }}
           >
             <div className="flex items-end justify-around h-[64px] px-1 pb-1.5">
