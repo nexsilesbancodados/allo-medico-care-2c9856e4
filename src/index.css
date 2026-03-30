@@ -1,5 +1,10 @@
 /* Fonts loaded via index.html <link> — no @import here to avoid render-blocking */
 
+/* Smooth scroll for anchor links, respects reduced-motion preference */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
