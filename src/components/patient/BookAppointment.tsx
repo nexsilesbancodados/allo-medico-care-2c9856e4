@@ -83,6 +83,10 @@ const BookAppointment = () => {
   const [recurrence, setRecurrence] = useState("none");
   const [recurrenceCount, setRecurrenceCount] = useState(4);
 
+  // Return eligibility
+  const [returnEligible, setReturnEligible] = useState(false);
+  const [originalPrice, setOriginalPrice] = useState<number | null>(null);
+
   // Payment state
   const [paymentStep, setPaymentStep] = useState(false);
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
