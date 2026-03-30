@@ -117,10 +117,10 @@ export function HeroBanner({
           <motion.div className="shrink-0 -mb-1">
             <motion.img
               src={pingoSrc} alt={pingoAlt} draggable={false}
-              className="select-none object-contain w-[110px] h-[110px] md:w-[140px] md:h-[140px]"
+              className="select-none object-contain w-[100px] h-[100px] md:w-[130px] md:h-[130px]"
               style={{ filter: "drop-shadow(0 12px 28px rgba(0,0,0,.3))" }}
               initial={{ opacity: 0, scale: 0.6, y: 24 }}
-              animate={{ opacity: 1, scale: 1, y: [0, -10, 0] }}
+              animate={{ opacity: 1, scale: 1, y: [0, -8, 0] }}
               transition={{
                 opacity: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
                 scale: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
@@ -136,17 +136,17 @@ export function HeroBanner({
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.25, duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="mt-2 -mx-1 flex overflow-x-auto rounded-2xl border border-black/10 bg-white/90 dark:bg-white/15 backdrop-blur-xl scrollbar-none md:grid md:overflow-visible shadow-lg"
+            className="mt-2 -mx-1 flex overflow-x-auto rounded-2xl border border-black/8 dark:border-white/10 bg-white/92 dark:bg-white/10 backdrop-blur-xl scrollbar-none md:grid md:overflow-visible"
             style={{
               gridTemplateColumns: kpis.length > 3 ? `repeat(${kpis.length}, 1fr)` : undefined,
-              boxShadow: "0 4px 20px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.6)"
+              boxShadow: "0 4px 20px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.5)"
             }}
           >
             {loading
               ? Array.from({ length: kpis.length }).map((_, i) => (
-                  <div key={i} className="flex-shrink-0 flex-1 animate-pulse px-4 py-3 min-w-[72px]">
-                    <div className="mx-auto h-6 w-12 rounded-lg bg-white/15" />
-                    <div className="mx-auto mt-1.5 h-2 w-8 rounded bg-white/10" />
+                  <div key={i} className="flex-shrink-0 flex-1 animate-pulse px-4 py-3.5 min-w-[72px]">
+                    <div className="mx-auto h-6 w-12 rounded-lg bg-muted/30" />
+                    <div className="mx-auto mt-1.5 h-2 w-8 rounded bg-muted/20" />
                   </div>
                 ))
               : kpis.map((k, i) => (
@@ -157,7 +157,7 @@ export function HeroBanner({
                     transition={{ delay: 0.3 + i * 0.08, duration: 0.4 }}
                     className={cn(
                       "flex flex-1 flex-col items-center px-4 py-3.5 flex-shrink-0 min-w-[72px] md:min-w-0",
-                      i < kpis.length - 1 && "border-r border-black/8 dark:border-white/10"
+                      i < kpis.length - 1 && "border-r border-black/6 dark:border-white/10"
                     )}
                   >
                     <p className="text-[20px] font-black leading-none tabular-nums text-[#1e3a8a] dark:text-white tracking-tight md:text-[22px]">
