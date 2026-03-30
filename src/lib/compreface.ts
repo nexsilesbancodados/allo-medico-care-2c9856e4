@@ -62,7 +62,7 @@ export async function detectarFace(imagem: File): Promise<DeteccaoResult> {
   const res = await fetch(`${PROXY_URL}?action=detect`, {
     method: "POST",
     headers: {
-      apikey: getAnonKey(),
+      apikey: SUPABASE_PUBLISHABLE_KEY,
     },
     body: formData,
   });
