@@ -80,6 +80,11 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       <HeroSection />
       <SocialProofBar />
 
+      {/* Stats counters */}
+      <DeferredSection fallbackClassName="h-24" rootMargin="100px 0px">
+        <StatsSection />
+      </DeferredSection>
+
       {/* Plantão 24h banner */}
       <section className="py-8 px-4 relative overflow-hidden">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
