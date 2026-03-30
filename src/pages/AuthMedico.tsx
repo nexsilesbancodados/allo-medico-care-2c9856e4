@@ -464,7 +464,56 @@ const AuthMedico = () => {
                       <div className="flex items-center gap-2 text-sm text-foreground mb-1"><Stethoscope className="w-4 h-4 text-primary" /><span className="font-medium">Sobre sua atuação</span></div>
                       <p className="text-xs text-muted-foreground">Responda essas perguntas rápidas para prosseguir ao cadastro.</p>
                     </div>
-                    <div><Label>Qual sua especialidade? *</Label><Input value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="Ex: Cardiologia, Dermatologia..." required className="mt-1 h-11" /></div>
+                    <div className="relative">
+                      <Label>Especialidade(s) de atuação *</Label>
+                      {selectedSpecialties.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-1.5 mb-1.5">
+                          {selectedSpecialties.map(s => (
+                            <Badge key={s} className="bg-secondary/10 text-secondary border-secondary/20 gap-1 text-xs py-1 px-2.5 cursor-pointer hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-colors" onClick={() => removeSpecialty(s)}>
+                              {s} ✕
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Input
+                          ref={specialtyInputRef}
+                          value={specialtySearch}
+                          onChange={e => { setSpecialtySearch(e.target.value); setShowSpecialtyDropdown(true); }}
+                          onFocus={() => setShowSpecialtyDropdown(true)}
+                          onKeyDown={handleSpecialtyKeyDown}
+                          placeholder={selectedSpecialties.length ? "Adicionar outra..." : "Buscar ou digitar especialidade..."}
+                          className="mt-1 h-11"
+                        />
+                        {showSpecialtyDropdown && (specialtySearch.trim() || selectedSpecialties.length === 0) && (
+                          <div className="absolute z-50 mt-1 w-full max-h-48 overflow-auto rounded-xl border border-border bg-popover shadow-lg">
+                            {filteredSpecialties.slice(0, 8).map(s => (
+                              <button
+                                key={s}
+                                type="button"
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-muted/50 transition-colors"
+                                onMouseDown={(e) => { e.preventDefault(); addSpecialty(s); }}
+                              >
+                                {s}
+                              </button>
+                            ))}
+                            {specialtySearch.trim() && !PREDEFINED_SPECIALTIES.some(s => s.toLowerCase() === specialtySearch.toLowerCase().trim()) && (
+                              <button
+                                type="button"
+                                className="w-full text-left px-3 py-2 text-sm text-primary font-medium hover:bg-primary/5 border-t border-border/50"
+                                onMouseDown={(e) => { e.preventDefault(); addSpecialty(specialtySearch); }}
+                              >
+                                + Adicionar "{specialtySearch.trim()}"
+                              </button>
+                            )}
+                            {filteredSpecialties.length === 0 && !specialtySearch.trim() && (
+                              <p className="px-3 py-2 text-xs text-muted-foreground">Todas as especialidades já foram selecionadas</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {showSpecialtyDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowSpecialtyDropdown(false)} />}
+                    </div>
                     <div><Label>Anos de experiência</Label><Input type="number" min="0" max="60" value={experienceYears} onChange={e => setExperienceYears(e.target.value)} placeholder="Ex: 5" className="mt-1 h-11" /></div>
                     <div>
                       <Label>Tipo de atendimento pretendido *</Label>
