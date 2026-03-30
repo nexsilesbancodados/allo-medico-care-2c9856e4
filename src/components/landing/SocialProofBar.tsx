@@ -25,9 +25,9 @@ const BadgeItem = ({ icon: Icon, text }: { icon: React.ElementType; text: string
 const SocialProofBar = forwardRef<HTMLElement>((_, ref) => (
   <section
     ref={ref}
-    className="py-3 border-y border-border/20 bg-muted/10 overflow-hidden select-none"
+    className="py-4 border-y border-border/15 bg-gradient-to-r from-muted/5 via-muted/10 to-muted/5 overflow-hidden select-none"
   >
-    <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_5%,black_95%,transparent)]">
+    <div className="relative w-full overflow-hidden [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
       <div className="flex w-max animate-marquee hover:[animation-play-state:paused]">
         {[...badges, ...badges].map((badge, i) => (
           <BadgeItem key={`${badge.text}-${i}`} icon={badge.icon} text={badge.text} />
