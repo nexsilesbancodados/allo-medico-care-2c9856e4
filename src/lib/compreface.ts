@@ -3,13 +3,9 @@
  * Proxied through Supabase Edge Function to avoid mixed-content (HTTP→HTTPS) blocks.
  */
 
-import { supabase } from "@/integrations/supabase/client";
+import { SUPABASE_FUNCTIONS_URL, SUPABASE_PUBLISHABLE_KEY } from "@/lib/supabase-config";
 
-const PROXY_URL = `${(supabase as any).supabaseUrl}/functions/v1/compreface-proxy`;
-
-function getAnonKey(): string {
-  return (supabase as any).supabaseKey ?? "";
-}
+const PROXY_URL = `${SUPABASE_FUNCTIONS_URL}/compreface-proxy`;
 
 export interface VerificacaoResult {
   aprovado: boolean;
