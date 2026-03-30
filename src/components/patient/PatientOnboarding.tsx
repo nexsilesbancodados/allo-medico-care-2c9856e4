@@ -344,7 +344,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         )}
         {isLast && (
           <p className="text-center text-xs text-muted-foreground mt-3">
-            Já tem uma conta? <button onClick={handleSkip} className="text-primary font-semibold underline">Entrar</button>
+            Tudo pronto para começar! 💚
           </p>
         )}
       </div>
