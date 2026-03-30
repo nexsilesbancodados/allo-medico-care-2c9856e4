@@ -80,41 +80,41 @@ const Terms = () => (
         <p>Para mais detalhes, consulte nossa <Link to="/refund" className="text-primary hover:underline">Política de Reembolso completa</Link>.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">9. Prontuário Eletrônico e Dados de Saúde</h2>
-        <p>10.1. O prontuário eletrônico do paciente é armazenado de forma segura e criptografada, em conformidade com a Resolução CFM nº 1.638/2002 e a LGPD (Lei nº 13.709/2018).</p>
-        <p>10.2. Os prontuários médicos são mantidos pelo prazo mínimo de 20 anos, conforme determinação do Conselho Federal de Medicina.</p>
-        <p>10.3. O acesso ao prontuário é restrito ao paciente e aos médicos que o atenderem, sendo vedado o compartilhamento com terceiros sem autorização expressa do paciente.</p>
+        <p>9.1. O prontuário eletrônico do paciente é armazenado de forma segura e criptografada, em conformidade com a Resolução CFM nº 1.638/2002 e a LGPD (Lei nº 13.709/2018).</p>
+        <p>9.2. Os prontuários médicos são mantidos pelo prazo mínimo de 20 anos, conforme determinação do Conselho Federal de Medicina.</p>
+        <p>9.3. O acesso ao prontuário é restrito ao paciente e aos médicos que o atenderem, sendo vedado o compartilhamento com terceiros sem autorização expressa do paciente.</p>
 
-        <h2 className="text-xl font-bold text-foreground mt-6">11. Obrigações dos Médicos</h2>
-        <p>11.1. Os médicos cadastrados na Plataforma devem manter seu registro no CRM ativo e regular durante todo o período de utilização.</p>
-        <p>11.2. Os médicos são integralmente responsáveis por seus diagnósticos, prescrições e orientações médicas, sendo a relação médico-paciente de responsabilidade exclusiva das partes.</p>
-        <p>11.3. Os médicos devem seguir as diretrizes éticas do Código de Ética Médica e as normativas do CFM aplicáveis à telemedicina.</p>
+        <h2 className="text-xl font-bold text-foreground mt-6">10. Obrigações dos Médicos</h2>
+        <p>10.1. Os médicos cadastrados na Plataforma devem manter seu registro no CRM ativo e regular durante todo o período de utilização.</p>
+        <p>10.2. Os médicos são integralmente responsáveis por seus diagnósticos, prescrições e orientações médicas, sendo a relação médico-paciente de responsabilidade exclusiva das partes.</p>
+        <p>10.3. Os médicos devem seguir as diretrizes éticas do Código de Ética Médica e as normativas do CFM aplicáveis à telemedicina.</p>
         <p>Para termos específicos dos médicos, consulte os <Link to="/doctor-terms" className="text-primary hover:underline">Termos de Uso para Médicos</Link>.</p>
 
-        <h2 className="text-xl font-bold text-foreground mt-6">12. Propriedade Intelectual</h2>
-        <p>12.1. Todo o conteúdo da Plataforma (textos, imagens, logotipos, software, design, interface) é propriedade da AloClinica ou de seus licenciadores, protegido pelas leis de propriedade intelectual.</p>
-        <p>12.2. É proibida a reprodução, modificação, distribuição ou utilização comercial de qualquer conteúdo da Plataforma sem autorização prévia e expressa da AloClinica.</p>
+        <h2 className="text-xl font-bold text-foreground mt-6">11. Propriedade Intelectual</h2>
+        <p>11.1. Todo o conteúdo da Plataforma (textos, imagens, logotipos, software, design, interface) é propriedade da AloClinica ou de seus licenciadores, protegido pelas leis de propriedade intelectual.</p>
+        <p>11.2. É proibida a reprodução, modificação, distribuição ou utilização comercial de qualquer conteúdo da Plataforma sem autorização prévia e expressa da AloClinica.</p>
 
-        <h2 className="text-xl font-bold text-foreground mt-6">13. Limitação de Responsabilidade</h2>
-        <p>13.1. A AloClinica atua como intermediadora tecnológica entre pacientes e médicos, não praticando atos médicos nem sendo responsável por diagnósticos, tratamentos ou prescrições.</p>
-        <p>13.2. A Plataforma não se responsabiliza por interrupções no serviço decorrentes de falhas na conexão de internet do usuário, problemas de hardware ou circunstâncias de força maior.</p>
-        <p>13.3. A responsabilidade total da AloClinica, em qualquer hipótese, fica limitada ao valor pago pelo usuário nos últimos 12 meses.</p>
+        <h2 className="text-xl font-bold text-foreground mt-6">12. Limitação de Responsabilidade</h2>
+        <p>12.1. A AloClinica atua como intermediadora tecnológica entre pacientes e médicos, não praticando atos médicos nem sendo responsável por diagnósticos, tratamentos ou prescrições.</p>
+        <p>12.2. A Plataforma não se responsabiliza por interrupções no serviço decorrentes de falhas na conexão de internet do usuário, problemas de hardware ou circunstâncias de força maior.</p>
+        <p>12.3. A responsabilidade total da AloClinica, em qualquer hipótese, fica limitada ao valor pago pelo usuário nos últimos 12 meses.</p>
 
-        <h2 className="text-xl font-bold text-foreground mt-6">14. Privacidade e Proteção de Dados</h2>
+        <h2 className="text-xl font-bold text-foreground mt-6">13. Privacidade e Proteção de Dados</h2>
         <p>O tratamento de dados pessoais segue rigorosamente a Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018). Para informações detalhadas sobre como coletamos, utilizamos e protegemos seus dados, consulte nossa <Link to="/privacy" className="text-primary hover:underline">Política de Privacidade</Link> e nossa <Link to="/lgpd" className="text-primary hover:underline">Política de Conformidade LGPD</Link>.</p>
 
-        <h2 className="text-xl font-bold text-foreground mt-6">15. Cookies</h2>
+        <h2 className="text-xl font-bold text-foreground mt-6">14. Cookies</h2>
         <p>A Plataforma utiliza cookies conforme descrito em nossa <Link to="/cookies" className="text-primary hover:underline">Política de Cookies</Link>.</p>
 
-        <h2 className="text-xl font-bold text-foreground mt-6">16. Modificações nos Termos</h2>
-        <p>16.1. A AloClinica se reserva o direito de modificar estes Termos a qualquer momento.</p>
-        <p>16.2. Alterações significativas serão comunicadas aos usuários com antecedência mínima de 30 dias por e-mail e/ou notificação na Plataforma.</p>
-        <p>16.3. O uso continuado da Plataforma após a notificação constitui aceitação tácita dos novos termos.</p>
+        <h2 className="text-xl font-bold text-foreground mt-6">15. Modificações nos Termos</h2>
+        <p>15.1. A AloClinica se reserva o direito de modificar estes Termos a qualquer momento.</p>
+        <p>15.2. Alterações significativas serão comunicadas aos usuários com antecedência mínima de 30 dias por e-mail e/ou notificação na Plataforma.</p>
+        <p>15.3. O uso continuado da Plataforma após a notificação constitui aceitação tácita dos novos termos.</p>
 
-        <h2 className="text-xl font-bold text-foreground mt-6">17. Legislação Aplicável e Foro</h2>
-        <p>17.1. Estes Termos são regidos pelas leis da República Federativa do Brasil.</p>
-        <p>17.2. Fica eleito o Foro da Comarca de São Paulo/SP para dirimir quaisquer questões oriundas destes Termos, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
+        <h2 className="text-xl font-bold text-foreground mt-6">16. Legislação Aplicável e Foro</h2>
+        <p>16.1. Estes Termos são regidos pelas leis da República Federativa do Brasil.</p>
+        <p>16.2. Fica eleito o Foro da Comarca de São Paulo/SP para dirimir quaisquer questões oriundas destes Termos, com renúncia a qualquer outro, por mais privilegiado que seja.</p>
 
-        <h2 className="text-xl font-bold text-foreground mt-6">18. Contato</h2>
+        <h2 className="text-xl font-bold text-foreground mt-6">17. Contato</h2>
         <p>Para dúvidas, sugestões ou reclamações sobre estes Termos:</p>
         <ul className="list-disc pl-6 space-y-1">
           <li><strong>E-mail:</strong> contato@aloclinica.com.br</li>
