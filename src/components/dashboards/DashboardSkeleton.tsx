@@ -37,23 +37,26 @@ const DashboardSkeleton = () => (
     role="status" aria-busy="true" aria-label="Carregando painel..."
   >
     {/* Loading indicator */}
-    <motion.div variants={item} className="flex items-center justify-center gap-3 py-2">
-      <motion.img
-        src={logo} alt="AloClínica"
-        className="w-8 h-8 rounded-xl select-none"
-        animate={{ rotate: [0, -6, 6, -6, 0], scale: [1, 1.06, 1] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <div className="flex gap-1">
-        {[0, 1, 2].map(i => (
-          <motion.div key={i}
-            className="w-1.5 h-1.5 rounded-full bg-primary/40"
-            animate={{ y: [0, -5, 0], opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity }}
-          />
-        ))}
+    <motion.div variants={item} className="space-y-2">
+      <div className="flex items-center justify-center gap-3 py-2">
+        <motion.img
+          src={logo} alt="AloClínica"
+          className="w-8 h-8 rounded-xl select-none"
+          animate={{ rotate: [0, -6, 6, -6, 0], scale: [1, 1.06, 1] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div className="flex gap-1">
+          {[0, 1, 2].map(i => (
+            <motion.div key={i}
+              className="w-1.5 h-1.5 rounded-full bg-primary/40"
+              animate={{ y: [0, -5, 0], opacity: [0.4, 1, 0.4] }}
+              transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity }}
+            />
+          ))}
+        </div>
+        <span className="text-[11px] text-muted-foreground font-medium">Carregando...</span>
       </div>
-      <span className="text-[11px] text-muted-foreground font-medium">Carregando...</span>
+      <LoadingProgress />
     </motion.div>
 
     {/* Hero skeleton — full bleed */}
