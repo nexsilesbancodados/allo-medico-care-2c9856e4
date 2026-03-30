@@ -31,7 +31,7 @@ export async function verificarFace(
   const res = await fetch(`${PROXY_URL}?action=verify`, {
     method: "POST",
     headers: {
-      apikey: getAnonKey(),
+      apikey: SUPABASE_PUBLISHABLE_KEY,
     },
     body: formData,
   });
