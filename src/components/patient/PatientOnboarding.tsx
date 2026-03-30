@@ -211,8 +211,23 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
               <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-lg font-bold text-foreground">Verificação Iniciada!</h2>
-              <p className="text-xs text-muted-foreground">Complete o processo na aba que foi aberta. Você pode continuar o cadastro.</p>
+              <h2 className="text-lg font-bold text-foreground">Identidade Verificada! ✅</h2>
+              <p className="text-xs text-muted-foreground">Sua verificação foi aprovada. Prossiga para o próximo passo.</p>
+            </div>
+          );
+        }
+
+        if (kycFailed) {
+          return (
+            <div className="text-center py-6 space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+                <ShieldCheck className="w-8 h-8 text-destructive" />
+              </div>
+              <h2 className="text-lg font-bold text-foreground">Verificação não aprovada</h2>
+              <p className="text-xs text-muted-foreground">A similaridade facial ficou abaixo do mínimo. Tente novamente com fotos mais nítidas.</p>
+              <Button onClick={() => setKycFailed(false)} variant="outline" className="rounded-xl gap-2 mt-2">
+                <Camera className="w-4 h-4" /> Tentar Novamente
+              </Button>
             </div>
           );
         }
@@ -220,8 +235,12 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         return (
           <BiometricKYC
             onComplete={(result) => {
-              if (result.status === "aprovado") setKycCompleted(true);
-              else handleKycStarted();
+              if (result.status === "aprovado") {
+                setKycCompleted(true);
+                localStorage.removeItem(KYC_PENDING_KEY);
+              } else {
+                setKycFailed(true);
+              }
             }}
             variant="full"
             tipo="paciente"
