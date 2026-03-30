@@ -484,6 +484,21 @@ const AuthPaciente = () => {
                   toast.error("CPF inválido", { description: "Verifique os dígitos." });
                   return;
                 }
+                if (!birthDate) {
+                  toast.error("Data de nascimento obrigatória", { description: "Informe sua data de nascimento." });
+                  return;
+                }
+                const today = new Date();
+                const birth = new Date(birthDate);
+                let age = today.getFullYear() - birth.getFullYear();
+                const monthDiff = today.getMonth() - birth.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                  age--;
+                }
+                if (age < 16) {
+                  toast.error("Idade mínima: 16 anos", { description: "É necessário ter pelo menos 16 anos para se cadastrar." });
+                  return;
+                }
               }
               if (signupStep === 2) {
                 const cleanPhone = unmask(phone);
