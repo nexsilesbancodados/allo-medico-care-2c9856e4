@@ -223,7 +223,8 @@ const BookAppointment = () => {
     return doctor.slots.some(s => s.day_of_week === dayOfWeek);
   };
 
-  const basePrice = doctor?.consultation_price ?? 89;
+  const fullPrice = doctor?.consultation_price ?? 89;
+  const basePrice = (appointmentType === "return" && returnEligible) ? Math.round(fullPrice * 0.5 * 100) / 100 : fullPrice;
   const discountAmount = basePrice * (cardDiscount / 100);
   const totalPrice = Math.max(basePrice - discountAmount, 0);
 
