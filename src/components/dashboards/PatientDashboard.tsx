@@ -373,15 +373,18 @@ const PatientDashboard = () => {
               whileTap={{ scale: 0.88 }}
               whileHover={{ y: -4, scale: 1.05 }}
               onClick={() => navigate(action.path)}
-              className="group flex flex-col items-center gap-2 py-2 cursor-pointer"
+              className="group flex flex-col items-center gap-2.5 py-2 cursor-pointer"
             >
               <div
-                className="relative flex h-[56px] w-[56px] items-center justify-center rounded-[18px] border border-border/5 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 group-hover:shadow-md"
+                className="relative flex h-[58px] w-[58px] items-center justify-center rounded-[20px] border border-border/8 shadow-[0_3px_14px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:shadow-lg group-hover:border-border/15"
                 style={{ backgroundColor: action.bg }}
               >
-                <action.icon size={24} weight="fill" style={{ color: action.color }} className="transition-transform duration-200 group-hover:scale-110" />
+                <action.icon size={25} weight="fill" style={{ color: action.color }} className="transition-transform duration-300 group-hover:scale-110" />
+                {/* Subtle glow on hover */}
+                <div className="absolute inset-0 rounded-[20px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ boxShadow: `inset 0 0 0 1px ${action.color}20` }} />
               </div>
-              <span className="text-[11px] font-bold text-muted-foreground group-hover:text-foreground leading-tight transition-colors">{action.label}</span>
+              <span className="text-[11px] font-bold text-muted-foreground group-hover:text-foreground leading-tight transition-colors duration-200">{action.label}</span>
             </motion.button>
           ))}
         </section>
