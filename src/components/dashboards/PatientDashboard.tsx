@@ -391,31 +391,38 @@ const PatientDashboard = () => {
 
         {/* ═══════════ BENTO STATS ═══════════ */}
         <section>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-[hsl(var(--p-primary))]/8">
+              <TrendUp size={13} weight="fill" className="text-[hsl(var(--p-primary))]" />
+            </div>
+            <h2 className="font-[Manrope] text-[15px] font-bold text-foreground tracking-tight">Resumo</h2>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Consultas", value: stats?.total ?? 0, icon: CalendarCheck, color: "hsl(var(--p-primary))", bgToken: "hsl(var(--p-primary) / 0.07)" },
-              { label: "Receitas", value: stats?.prescriptions ?? 0, icon: Pill, color: "hsl(var(--secondary))", bgToken: "hsl(var(--secondary) / 0.07)" },
-              { label: "Documentos", value: stats?.documents ?? 0, icon: ClipboardText, color: "hsl(var(--warning))", bgToken: "hsl(var(--warning) / 0.07)" },
-              { label: "Próx. retorno", value: returnAppts.length > 0 ? `${differenceInDays(new Date((returnAppts[0] as any).return_deadline), new Date())}d` : "—", icon: Timer, color: "hsl(var(--p-primary-mid))", bgToken: "hsl(var(--p-primary-mid) / 0.07)" },
+              { label: "Consultas", value: stats?.total ?? 0, icon: CalendarCheck, color: "hsl(var(--p-primary))", bgToken: "hsl(var(--p-primary) / 0.07)", trend: "up" as const },
+              { label: "Receitas", value: stats?.prescriptions ?? 0, icon: Pill, color: "hsl(var(--secondary))", bgToken: "hsl(var(--secondary) / 0.07)", trend: "up" as const },
+              { label: "Documentos", value: stats?.documents ?? 0, icon: ClipboardText, color: "hsl(var(--warning))", bgToken: "hsl(var(--warning) / 0.07)", trend: "neutral" as const },
+              { label: "Próx. retorno", value: returnAppts.length > 0 ? `${differenceInDays(new Date((returnAppts[0] as any).return_deadline), new Date())}d` : "—", icon: Timer, color: "hsl(var(--p-primary-mid))", bgToken: "hsl(var(--p-primary-mid) / 0.07)", trend: returnAppts.length > 0 ? "down" as const : "neutral" as const },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 + i * 0.05 }}
-                className="kpi-card rounded-2xl border border-border/10 bg-card p-4 shadow-[var(--p-shadow-card)]"
+                className="group kpi-card rounded-2xl border border-border/10 bg-card p-4 shadow-[var(--p-shadow-card)] hover:shadow-md hover:border-border/20 transition-all duration-300 cursor-default"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div
-                    className="flex h-9 w-9 items-center justify-center rounded-xl"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
                     style={{ backgroundColor: stat.bgToken }}
                   >
-                    <stat.icon size={18} weight="fill" style={{ color: stat.color }} />
+                    <stat.icon size={19} weight="fill" style={{ color: stat.color }} />
                   </div>
-                  <TrendUp size={14} weight="bold" className="text-emerald-500 opacity-60" />
+                  {stat.trend === "up" && <TrendUp size={14} weight="bold" className="text-emerald-500 opacity-60" />}
+                  {stat.trend === "down" && <TrendDown size={14} weight="bold" className="text-amber-500 opacity-60" />}
                 </div>
-                <p className="font-[Manrope] text-[24px] font-extrabold text-foreground leading-none">{stat.value}</p>
-                <p className="text-[10.5px] font-semibold text-muted-foreground mt-1.5 uppercase tracking-wider">{stat.label}</p>
+                <p className="font-[Manrope] text-[26px] font-extrabold text-foreground leading-none">{stat.value}</p>
+                <p className="text-[10.5px] font-semibold text-muted-foreground mt-2 uppercase tracking-wider">{stat.label}</p>
               </motion.div>
             ))}
           </div>
