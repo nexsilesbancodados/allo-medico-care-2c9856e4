@@ -18,10 +18,8 @@ const AnimatedCounter = ({ value, suffix = "" }: { value: string; suffix?: strin
   const [hasAnimated, setHasAnimated] = useState(false);
   const ref = useRef<HTMLParagraphElement>(null);
 
-  if (!numMatch) return <span>{value}</span>;
-
   useEffect(() => {
-    if (hasAnimated || !ref.current) return;
+    if (!numMatch || hasAnimated || !ref.current) return;
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) {
         setHasAnimated(true);
