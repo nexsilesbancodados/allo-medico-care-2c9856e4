@@ -553,10 +553,10 @@ const AuthMedico = () => {
                       <div className="flex items-center gap-2 text-sm text-foreground mb-1"><Stethoscope className="w-4 h-4 text-primary" /><span className="font-medium">Solicitar cadastro</span></div>
                       <p className="text-xs text-muted-foreground">Preencha seus dados. Nossa equipe analisará e enviará o código de acesso por email.</p>
                     </div>
-                    {specialty && (
-                      <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 text-secondary text-sm border border-secondary/20">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span className="font-medium">Especialidade: {specialty}</span>
+                    {selectedSpecialties.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl bg-secondary/10 text-secondary text-sm border border-secondary/20">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span className="font-medium">{selectedSpecialties.join(", ")}</span>
                         {consultationType && <Badge variant="outline" className="ml-auto text-xs">{consultationType}</Badge>}
                       </div>
                     )}
