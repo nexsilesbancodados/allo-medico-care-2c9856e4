@@ -720,11 +720,22 @@ const BookAppointment = () => {
                 </div>
 
                 {appointmentType === "return" && (
-                  <div className="flex items-start gap-2 p-3 rounded-xl bg-warning/10 border border-warning/20 mb-4">
-                    <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
-                    <p className="text-[11px] text-foreground/80">
-                      Retornos são gratuitos dentro de 15 dias da consulta original. Fora desse prazo, será cobrado o valor integral.
-                    </p>
+                  <div className={`flex items-start gap-2 p-3 rounded-xl mb-4 ${returnEligible ? "bg-success/10 border border-success/20" : "bg-warning/10 border border-warning/20"}`}>
+                    {returnEligible ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />
+                        <p className="text-[11px] text-foreground/80">
+                          <strong>Retorno com 50% de desconto!</strong> Você tem uma consulta anterior com esse médico dentro do prazo de 60 dias. Valor: R$ {basePrice.toFixed(2)} (50% de R$ {fullPrice.toFixed(2)}).
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
+                        <p className="text-[11px] text-foreground/80">
+                          Retornos têm 50% de desconto dentro de 60 dias da consulta original. Nenhuma consulta elegível encontrada — será cobrado o valor integral.
+                        </p>
+                      </>
+                    )}
                   </div>
                 )}
 
