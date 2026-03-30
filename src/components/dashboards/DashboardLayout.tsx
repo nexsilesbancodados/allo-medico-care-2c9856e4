@@ -566,7 +566,13 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           <div className="px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-6 min-h-0 max-w-[1400px] mx-auto w-full"
             style={{ paddingLeft: "max(0.75rem, env(safe-area-inset-left, 0px))", paddingRight: "max(0.75rem, env(safe-area-inset-right, 0px))" }}>
             <div className="hidden md:block"><DashboardBreadcrumbs /></div>
-            {children}
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {children}
+            </motion.div>
           </div>
         </main>
       </div>
