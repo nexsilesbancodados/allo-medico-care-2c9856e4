@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
 import { Clock, Stethoscope, Star, ShieldCheck } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 
