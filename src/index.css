@@ -409,9 +409,9 @@
   100% { transform: translateX(-50%); }
 }
 
-/* ── Hidden scrollbar (functional scroll, invisible bar) ── */
-* { scrollbar-width: none; -ms-overflow-style: none; }
-*::-webkit-scrollbar { display: none; }
+/* ── Hidden scrollbar — scoped to scroll containers, not global ── */
+.hide-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
 
 /* ── Mobile responsive utilities ── */
 @media (max-width: 374px) {
