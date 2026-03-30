@@ -658,13 +658,51 @@ const AuthPaciente = () => {
       {/* Desktop left panel */}
       <LeftPanel />
 
-      {/* Mobile hero */}
-      <MobileHero />
+      {/* Mobile hero — inline to avoid remount */}
+      <div className="lg:hidden relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-secondary px-5 pt-[max(env(safe-area-inset-top,16px),16px)] pb-6">
+        <div className="absolute top-[-30%] right-[-15%] w-[250px] h-[250px] rounded-full bg-white/[0.06] blur-[80px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[180px] h-[180px] rounded-full bg-secondary/20 blur-[60px]" />
+        <div className="relative z-10 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            {mode !== "welcome" && (
+              <button
+                type="button"
+                onClick={() => mode === "signup" && signupStep > 1 ? setSignupStep(s => s - 1) : setMode("welcome")}
+                className="text-white/70 hover:text-white transition-colors mr-1"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </button>
+            )}
+            <img src={logo} alt="AloClínica" className="w-8 h-8 rounded-xl ring-2 ring-white/20" />
+            <div>
+              <h1 className="text-lg font-black text-white tracking-tight leading-none">AloClínica</h1>
+              <p className="text-[10px] text-white/50 mt-0.5">Telemedicina de excelência</p>
+            </div>
+          </div>
+          <motion.img
+            src={mascotWave}
+            alt="Pingo"
+            className="w-[70px] h-[70px] object-contain select-none"
+            style={{ filter: "drop-shadow(0 4px 16px rgba(0,0,50,.25))" }}
+            animate={{ y: [0, -4, 0] }}
+            transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+          />
+        </div>
+        {mode === "welcome" && (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="relative z-10 text-white/70 text-sm mt-3"
+          >
+            Sua saúde em boas mãos 💙
+          </motion.p>
+        )}
+      </div>
 
       {/* Right / main form area */}
       <div className="flex-1 flex flex-col items-center justify-center px-5 py-8 lg:px-10 lg:py-12 xl:px-16 overflow-y-auto">
         <div className="w-full max-w-md">
-          <FormContent />
+          {formContent}
 
           <p className="text-center text-[10px] text-muted-foreground/40 mt-8">
             © {new Date().getFullYear()} AloClínica — Tecnologia em Saúde
