@@ -170,6 +170,7 @@ const AuthMedico = () => {
     }
   };
 
+  const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: "smooth" });
 
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
