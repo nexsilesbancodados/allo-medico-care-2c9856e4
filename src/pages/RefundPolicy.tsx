@@ -71,7 +71,6 @@ const RefundPolicy = () => (
         <h2 className="text-xl font-bold text-foreground mt-6">4. Créditos e Saldo</h2>
         <ul className="list-disc pl-6 space-y-1">
           <li>Cancelamentos elegíveis geram créditos na conta do paciente, que podem ser utilizados em futuras consultas;</li>
-          <li>Créditos de indicação ("Indique e Ganhe") não são reembolsáveis em dinheiro;</li>
           <li>Créditos expiram após 12 meses da data de emissão;</li>
           <li>Em caso de encerramento da conta, créditos restantes serão perdidos.</li>
         </ul>

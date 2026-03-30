@@ -232,7 +232,6 @@ const AuthPaciente = () => {
 
       if (signUpData.user) {
         const userId = signUpData.user.id;
-        const refCode = sessionStorage.getItem("ref_code");
 
         await supabase.from("profiles").upsert({
           user_id: userId,
@@ -241,20 +240,9 @@ const AuthPaciente = () => {
           first_name: firstName,
           last_name: lastName,
           date_of_birth: birthDate || null,
-          referred_by: refCode || null,
         }, { onConflict: "user_id" });
 
         await registerConsent(userId);
-
-        if (refCode) {
-          await supabase.from("referrals").insert({
-            referral_code: refCode,
-            referred_user_id: userId,
-            referrer_id: userId,
-            status: "pending",
-            source: "signup",
-          }).then(() => sessionStorage.removeItem("ref_code"));
-        }
 
         try {
           await supabase.functions.invoke("send-email", {
