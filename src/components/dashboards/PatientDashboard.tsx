@@ -454,43 +454,44 @@ const PatientDashboard = () => {
           {/* RIGHT */}
           <div className="lg:col-span-3 space-y-5 order-last">
 
-            {/* Health Tip — redesigned */}
+            {/* Health Tip — premium card */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="card-interactive relative overflow-hidden rounded-2xl border border-[hsl(var(--p-primary))]/8 bg-card p-5 sm:p-6 shadow-[var(--p-shadow-card)]"
+              className="card-interactive relative overflow-hidden rounded-2xl border border-[hsl(var(--p-primary))]/10 bg-card p-5 sm:p-6 shadow-[var(--p-shadow-card)]"
             >
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--p-primary))]/5 blur-2xl" />
+              <div className="pointer-events-none absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-[hsl(var(--secondary))]/5 blur-2xl" />
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-[48px] leading-none">{todayTip.emoji}</span>
+                    <span className="text-[48px] leading-none drop-shadow-sm">{todayTip.emoji}</span>
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--p-primary))]/50">Dica de Saúde</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--p-primary))] opacity-60">Dica de Saúde</span>
                       <h3 className="font-[Manrope] text-[16px] font-bold text-foreground leading-snug">{todayTip.title}</h3>
                     </div>
                   </div>
                   <p className="text-[12.5px] leading-relaxed text-muted-foreground">{todayTip.body}</p>
                 </div>
-                <div className="flex min-w-[100px] flex-col items-center justify-center rounded-2xl bg-gradient-to-b from-[hsl(var(--p-primary))]/[0.08] to-[hsl(var(--p-primary))]/[0.03] border border-[hsl(var(--p-primary))]/10 p-5 shadow-sm">
-                  <span className="text-[26px] font-extrabold text-[hsl(var(--p-primary))] font-[Manrope] leading-none">{todayTip.metric}</span>
+                <div className="flex min-w-[110px] flex-col items-center justify-center rounded-2xl bg-gradient-to-b from-[hsl(var(--p-primary))]/[0.08] to-[hsl(var(--p-primary))]/[0.02] border border-[hsl(var(--p-primary))]/10 p-5 shadow-sm">
+                  <span className="text-[28px] font-extrabold text-[hsl(var(--p-primary))] font-[Manrope] leading-none">{todayTip.metric}</span>
                   <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted-foreground mt-2">{todayTip.metricLabel}</span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Find your doctor */}
+            {/* Find your doctor — enhanced CTA */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
-              className="card-interactive relative overflow-hidden rounded-2xl border border-secondary/12 bg-gradient-to-r from-secondary/[0.06] to-secondary/[0.02] p-5"
+              className="card-interactive relative overflow-hidden rounded-2xl border border-secondary/15 bg-gradient-to-br from-secondary/[0.06] via-secondary/[0.03] to-transparent p-5"
             >
               <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-secondary/8 blur-2xl" />
               <div className="flex items-center gap-4">
-                <div className="shrink-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary/10">
-                  <Stethoscope size={22} weight="fill" className="text-secondary" />
+                <div className="shrink-0 flex h-13 w-13 items-center justify-center rounded-2xl bg-secondary/10 shadow-sm">
+                  <Stethoscope size={24} weight="fill" className="text-secondary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
@@ -503,7 +504,7 @@ const PatientDashboard = () => {
                 <Button
                   size="sm"
                   onClick={() => navigate("/dashboard/schedule?role=patient")}
-                  className="shrink-0 rounded-full bg-secondary text-secondary-foreground text-[12px] font-bold px-5 h-9 shadow-sm hover:bg-secondary/90 active:scale-95 transition-all"
+                  className="shrink-0 rounded-full bg-secondary text-secondary-foreground text-[12px] font-bold px-5 h-10 shadow-md hover:bg-secondary/90 hover:shadow-lg active:scale-95 transition-all duration-200"
                 >
                   <MagnifyingGlass size={14} weight="bold" className="mr-1.5" /> Buscar
                 </Button>
