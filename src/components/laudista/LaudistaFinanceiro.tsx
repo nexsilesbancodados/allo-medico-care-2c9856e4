@@ -134,7 +134,7 @@ const LaudistaFinanceiro = () => {
   const copyId = () => { navigator.clipboard.writeText(doctorProfile?.id ?? ""); setCopied(true); toast.success("ID copiado!"); setTimeout(() => setCopied(false), 2000); };
 
   return (
-    <DashboardLayout title="Laudista" nav={getLaudistaNav("financeiro")} role="doctor">
+    <DashboardLayout title="Laudista" nav={getLaudistaNav("financeiro")} role="laudista">
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="max-w-4xl space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-foreground mb-1 flex items-center gap-2">

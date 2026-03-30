@@ -51,7 +51,7 @@ function SlaCountdown({ deadline, priority }: { deadline: string; priority: stri
     : formatDistanceToNow(deadlineDate, { addSuffix: false, locale: ptBR });
 
   return (
-    <div className="space-y-1 min-w-[120px] pb-24 md:pb-6">
+    <div className="space-y-1 min-w-[120px]">
       <div className="flex items-center gap-1">
         {isOverdue ? (
           <AlertTriangle className="w-3.5 h-3.5 text-destructive animate-pulse" />
@@ -108,7 +108,6 @@ const LaudistaReportQueue = () => {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Fetch patient names from profiles
       const patientIds = [...new Set((data || []).filter((e: any) => e.patient_id).map((e: any) => e.patient_id))];
       let patientMap: Record<string, string> = {};
       if (patientIds.length > 0) {
@@ -116,7 +115,6 @@ const LaudistaReportQueue = () => {
         if (profiles) profiles.forEach((p: any) => { patientMap[p.user_id] = `${p.first_name} ${p.last_name}`.trim(); });
       }
 
-      // Fetch clinic names
       const clinicIds = [...new Set((data || []).filter((e: any) => e.requesting_clinic_id).map((e: any) => e.requesting_clinic_id))];
       let clinicMap: Record<string, string> = {};
       if (clinicIds.length > 0) {
@@ -134,7 +132,6 @@ const LaudistaReportQueue = () => {
     refetchInterval: 30000,
   });
 
-  // Supabase Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel("laudista-exam-queue-realtime")
@@ -155,7 +152,6 @@ const LaudistaReportQueue = () => {
     };
   }, [queryClient]);
 
-  // Filtered by search
   const filteredExams = examRequests?.filter((exam: any) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase().trim();
@@ -187,7 +183,6 @@ const LaudistaReportQueue = () => {
     }
   };
 
-  // Stats
   const stats = {
     pending: examRequests?.filter((e: any) => e.status === "pending").length || 0,
     inReview: examRequests?.filter((e: any) => e.status === "in_review").length || 0,
@@ -196,39 +191,30 @@ const LaudistaReportQueue = () => {
   };
 
   return (
-    <DashboardLayout nav={getLaudistaNav("queue")} title="Worklist de Laudos" role="doctor">
+    <DashboardLayout nav={getLaudistaNav("queue")} title="Worklist de Laudos" role="laudista">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="space-y-4"
+        className="space-y-4 pb-24 md:pb-8"
       >
         {/* Stats Bar */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <Card className="p-3 border-border/50">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Pendentes</span>
-              <Badge variant="secondary" className="text-lg font-bold">{stats.pending}</Badge>
-            </div>
-          </Card>
-          <Card className="p-3 border-border/50">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Em Digitação</span>
-              <Badge variant="outline" className="text-lg font-bold text-primary">{stats.inReview}</Badge>
-            </div>
-          </Card>
-          <Card className={`p-3 border-border/50 ${stats.urgent > 0 ? "border-destructive/50 bg-destructive/5" : ""}`}>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">🚨 Urgentes</span>
-              <Badge variant={stats.urgent > 0 ? "destructive" : "secondary"} className="text-lg font-bold">{stats.urgent}</Badge>
-            </div>
-          </Card>
-          <Card className={`p-3 border-border/50 ${stats.overdue > 0 ? "border-warning/50 bg-warning/5" : ""}`}>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">⏰ SLA Estourado</span>
-              <Badge variant={stats.overdue > 0 ? "destructive" : "secondary"} className="text-lg font-bold">{stats.overdue}</Badge>
-            </div>
-          </Card>
+          {[
+            { label: "Pendentes", value: stats.pending, highlight: false, color: "" },
+            { label: "Em Digitação", value: stats.inReview, highlight: false, color: "text-primary" },
+            { label: "🚨 Urgentes", value: stats.urgent, highlight: stats.urgent > 0, color: "" },
+            { label: "⏰ SLA Estourado", value: stats.overdue, highlight: stats.overdue > 0, color: "" },
+          ].map((s) => (
+            <Card key={s.label} className={`p-3 border-border/50 ${s.highlight ? (s.label.includes("Urgente") ? "border-destructive/50 bg-destructive/5" : "border-warning/50 bg-warning/5") : ""}`}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">{s.label}</span>
+                <Badge variant={s.highlight ? "destructive" : s.color ? "outline" : "secondary"} className={`text-lg font-bold ${s.color}`}>
+                  {s.value}
+                </Badge>
+              </div>
+            </Card>
+          ))}
         </div>
 
         <Card className="border-border/50">
