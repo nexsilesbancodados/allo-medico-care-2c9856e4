@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { securityMonitor } from "@/lib/security-monitor";
 import { supabase } from "@/integrations/supabase/client";
@@ -98,6 +98,21 @@ const faqItems = [
   { question: "Posso usar junto com meu consultório presencial?", answer: "Claro! Muitos médicos usam como complemento, ampliando alcance para pacientes de outras regiões." },
 ];
 
+const PREDEFINED_SPECIALTIES = [
+  "Acupuntura", "Alergia e Imunologia", "Anestesiologia", "Angiologia", "Cancerologia",
+  "Cardiologia", "Cirurgia Cardiovascular", "Cirurgia da Mão", "Cirurgia de Cabeça e Pescoço",
+  "Cirurgia do Aparelho Digestivo", "Cirurgia Geral", "Cirurgia Pediátrica", "Cirurgia Plástica",
+  "Cirurgia Torácica", "Cirurgia Vascular", "Clínico Geral", "Coloproctologia",
+  "Dermatologia", "Endocrinologia", "Endoscopia", "Gastroenterologia",
+  "Genética Médica", "Geriatria", "Ginecologia e Obstetrícia", "Hematologia",
+  "Homeopatia", "Infectologia", "Mastologia", "Medicina de Família e Comunidade",
+  "Medicina do Esporte", "Medicina do Trabalho", "Medicina Intensiva",
+  "Medicina Legal", "Medicina Nuclear", "Nefrologia", "Neurocirurgia",
+  "Neurologia", "Nutrologia", "Oftalmologia", "Oncologia Clínica", "Ortopedia e Traumatologia",
+  "Otorrinolaringologia", "Patologia", "Pediatria", "Pneumologia", "Psiquiatria",
+  "Radiologia", "Radioterapia", "Reumatologia", "Urologia",
+];
+
 const AuthMedico = () => {
   const [searchParams] = useSearchParams();
   const hasLoginAccess = true; // Login always accessible
@@ -112,7 +127,10 @@ const AuthMedico = () => {
   const [crm, setCrm] = useState("");
   const [crmState, setCrmState] = useState("SP");
   const [phone, setPhone] = useState("");
-  const [specialty, setSpecialty] = useState("");
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
+  const [specialtySearch, setSpecialtySearch] = useState("");
+  const [showSpecialtyDropdown, setShowSpecialtyDropdown] = useState(false);
+  const specialtyInputRef = useRef<HTMLInputElement>(null);
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -128,7 +146,32 @@ const AuthMedico = () => {
   
   const formRef = useRef<HTMLDivElement>(null);
 
+  const filteredSpecialties = useMemo(() => {
+    if (!specialtySearch.trim()) return PREDEFINED_SPECIALTIES.filter(s => !selectedSpecialties.includes(s));
+    const q = specialtySearch.toLowerCase().trim();
+    return PREDEFINED_SPECIALTIES.filter(s => s.toLowerCase().includes(q) && !selectedSpecialties.includes(s));
+  }, [specialtySearch, selectedSpecialties]);
+
+  const addSpecialty = (s: string) => {
+    const trimmed = s.trim();
+    if (trimmed && !selectedSpecialties.includes(trimmed)) {
+      setSelectedSpecialties(prev => [...prev, trimmed]);
+    }
+    setSpecialtySearch("");
+    setShowSpecialtyDropdown(false);
+  };
+
+  const removeSpecialty = (s: string) => setSelectedSpecialties(prev => prev.filter(x => x !== s));
+
+  const handleSpecialtyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && specialtySearch.trim()) {
+      e.preventDefault();
+      addSpecialty(specialtySearch);
+    }
+  };
+
   const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: "smooth" });
+
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -147,7 +190,7 @@ const AuthMedico = () => {
         phone: phone || null,
         crm,
         crm_state: crmState,
-        specialty: specialty || null,
+        specialty: selectedSpecialties.join(", ") || null,
         bio: enrichedBio || null,
       } as any);
       if (error) throw error;
@@ -421,7 +464,56 @@ const AuthMedico = () => {
                       <div className="flex items-center gap-2 text-sm text-foreground mb-1"><Stethoscope className="w-4 h-4 text-primary" /><span className="font-medium">Sobre sua atuação</span></div>
                       <p className="text-xs text-muted-foreground">Responda essas perguntas rápidas para prosseguir ao cadastro.</p>
                     </div>
-                    <div><Label>Qual sua especialidade? *</Label><Input value={specialty} onChange={e => setSpecialty(e.target.value)} placeholder="Ex: Cardiologia, Dermatologia..." required className="mt-1 h-11" /></div>
+                    <div className="relative">
+                      <Label>Especialidade(s) de atuação *</Label>
+                      {selectedSpecialties.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-1.5 mb-1.5">
+                          {selectedSpecialties.map(s => (
+                            <Badge key={s} className="bg-secondary/10 text-secondary border-secondary/20 gap-1 text-xs py-1 px-2.5 cursor-pointer hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 transition-colors" onClick={() => removeSpecialty(s)}>
+                              {s} ✕
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                      <div className="relative">
+                        <Input
+                          ref={specialtyInputRef}
+                          value={specialtySearch}
+                          onChange={e => { setSpecialtySearch(e.target.value); setShowSpecialtyDropdown(true); }}
+                          onFocus={() => setShowSpecialtyDropdown(true)}
+                          onKeyDown={handleSpecialtyKeyDown}
+                          placeholder={selectedSpecialties.length ? "Adicionar outra..." : "Buscar ou digitar especialidade..."}
+                          className="mt-1 h-11"
+                        />
+                        {showSpecialtyDropdown && (specialtySearch.trim() || selectedSpecialties.length === 0) && (
+                          <div className="absolute z-50 mt-1 w-full max-h-48 overflow-auto rounded-xl border border-border bg-popover shadow-lg">
+                            {filteredSpecialties.slice(0, 8).map(s => (
+                              <button
+                                key={s}
+                                type="button"
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-muted/50 transition-colors"
+                                onMouseDown={(e) => { e.preventDefault(); addSpecialty(s); }}
+                              >
+                                {s}
+                              </button>
+                            ))}
+                            {specialtySearch.trim() && !PREDEFINED_SPECIALTIES.some(s => s.toLowerCase() === specialtySearch.toLowerCase().trim()) && (
+                              <button
+                                type="button"
+                                className="w-full text-left px-3 py-2 text-sm text-primary font-medium hover:bg-primary/5 border-t border-border/50"
+                                onMouseDown={(e) => { e.preventDefault(); addSpecialty(specialtySearch); }}
+                              >
+                                + Adicionar "{specialtySearch.trim()}"
+                              </button>
+                            )}
+                            {filteredSpecialties.length === 0 && !specialtySearch.trim() && (
+                              <p className="px-3 py-2 text-xs text-muted-foreground">Todas as especialidades já foram selecionadas</p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {showSpecialtyDropdown && <div className="fixed inset-0 z-40" onClick={() => setShowSpecialtyDropdown(false)} />}
+                    </div>
                     <div><Label>Anos de experiência</Label><Input type="number" min="0" max="60" value={experienceYears} onChange={e => setExperienceYears(e.target.value)} placeholder="Ex: 5" className="mt-1 h-11" /></div>
                     <div>
                       <Label>Tipo de atendimento pretendido *</Label>
@@ -443,7 +535,7 @@ const AuthMedico = () => {
                         <option value="Outro">Outro</option>
                       </select>
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={!specialty || !consultationType} onClick={() => setStep("apply")}>
+                    <Button className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={selectedSpecialties.length === 0 || !consultationType} onClick={() => setStep("apply")}>
                       Continuar para Cadastro <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                     <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
@@ -461,10 +553,10 @@ const AuthMedico = () => {
                       <div className="flex items-center gap-2 text-sm text-foreground mb-1"><Stethoscope className="w-4 h-4 text-primary" /><span className="font-medium">Solicitar cadastro</span></div>
                       <p className="text-xs text-muted-foreground">Preencha seus dados. Nossa equipe analisará e enviará o código de acesso por email.</p>
                     </div>
-                    {specialty && (
-                      <div className="flex items-center gap-2 p-3 rounded-xl bg-secondary/10 text-secondary text-sm border border-secondary/20">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span className="font-medium">Especialidade: {specialty}</span>
+                    {selectedSpecialties.length > 0 && (
+                      <div className="flex flex-wrap items-center gap-2 p-3 rounded-xl bg-secondary/10 text-secondary text-sm border border-secondary/20">
+                        <CheckCircle2 className="w-4 h-4 shrink-0" />
+                        <span className="font-medium">{selectedSpecialties.join(", ")}</span>
                         {consultationType && <Badge variant="outline" className="ml-auto text-xs">{consultationType}</Badge>}
                       </div>
                     )}
