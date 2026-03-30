@@ -122,6 +122,7 @@ const AuthPaciente = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [cpf, setCpf] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
