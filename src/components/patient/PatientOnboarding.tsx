@@ -299,15 +299,32 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-5 pb-2">
         <h2 className="text-lg font-extrabold text-primary italic">AloClínica</h2>
-        <span className="text-[10px] text-muted-foreground/60 font-medium">Cadastro obrigatório</span>
+        <span className="inline-flex items-center gap-1.5 text-[10px] text-muted-foreground/80 font-semibold bg-muted/50 px-2.5 py-1 rounded-full">
+          <ShieldCheck className="w-3 h-3" /> Cadastro seguro
+        </span>
       </div>
 
-      {/* Progress */}
+      {/* Step indicators */}
       <div className="px-5 mb-4">
-        <div className="h-1 bg-muted rounded-full overflow-hidden">
-          <motion.div className="h-full bg-primary rounded-full" animate={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }} transition={{ duration: 0.3 }} />
+        <div className="flex items-center gap-1.5 mb-2">
+          {STEPS.map((s, i) => (
+            <motion.div
+              key={s.id}
+              className="h-1.5 flex-1 rounded-full overflow-hidden"
+              style={{ backgroundColor: i <= currentStep ? "hsl(var(--primary))" : "hsl(var(--muted))" }}
+              initial={false}
+              animate={{
+                backgroundColor: i <= currentStep ? "hsl(var(--primary))" : "hsl(var(--muted))",
+                scale: i === currentStep ? 1 : 0.95,
+              }}
+              transition={{ duration: 0.3 }}
+            />
+          ))}
         </div>
-        <p className="text-[10px] text-muted-foreground mt-1">{currentStep + 1} de {STEPS.length}</p>
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-semibold text-muted-foreground">{step.title}</p>
+          <p className="text-[10px] text-muted-foreground/60">{currentStep + 1}/{STEPS.length}</p>
+        </div>
       </div>
 
       {/* Content */}
