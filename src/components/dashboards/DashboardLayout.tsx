@@ -566,7 +566,13 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           <div className="px-4 py-5 md:px-6 md:py-6 lg:px-8 lg:py-6 min-h-0 max-w-[1400px] mx-auto w-full"
             style={{ paddingLeft: "max(0.75rem, env(safe-area-inset-left, 0px))", paddingRight: "max(0.75rem, env(safe-area-inset-right, 0px))" }}>
             <div className="hidden md:block"><DashboardBreadcrumbs /></div>
-            {children}
+            <motion.div
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {children}
+            </motion.div>
           </div>
         </main>
       </div>
@@ -586,12 +592,11 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
           aria-label="Navegação principal"
         >
           <div
-            className="dark:bg-background/92 rounded-[22px] border border-border/10 dark:border-white/8 mx-auto max-w-[420px]"
+            className="rounded-[22px] border border-border/10 dark:border-white/8 mx-auto max-w-[420px] bg-white/[0.94] dark:bg-background/[0.92]"
             style={{
-              background: "linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.98) 100%)",
-              backdropFilter: "saturate(200%) blur(28px)",
-              WebkitBackdropFilter: "saturate(200%) blur(28px)",
-              boxShadow: "0 -4px 32px -6px rgba(0,0,0,0.08), 0 2px 12px -2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.5)",
+              backdropFilter: "saturate(200%) blur(30px)",
+              WebkitBackdropFilter: "saturate(200%) blur(30px)",
+              boxShadow: "0 -4px 32px -6px rgba(0,0,0,0.08), 0 2px 12px -2px rgba(0,0,0,0.04), inset 0 1px 0 rgba(255,255,255,0.35)",
             }}
           >
             <div className="flex items-end justify-around h-[64px] px-1 pb-1.5">

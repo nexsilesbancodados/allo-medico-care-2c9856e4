@@ -86,9 +86,14 @@ const DoctorDashboard = () => {
     ) : undefined,
   }));
 
+  const container = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
+  const fadeUp = { hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } } };
+
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("home")} role="doctor">
       {!loading && !data?.crm && <DoctorOnboarding />}
+
+      <motion.div variants={container} initial="hidden" animate="show">
 
       {/* Full-width hero */}
       <div className="-mx-4 -mt-5 md:-mx-6 md:-mt-5 lg:-mx-8 lg:-mt-6">
@@ -113,7 +118,7 @@ const DoctorDashboard = () => {
         />
       </div>
 
-      <div className="mt-5 md:mt-5 space-y-5 pb-24 md:pb-8">
+      <motion.div variants={fadeUp} className="mt-5 md:mt-5 space-y-5 pb-24 md:pb-8">
 
         {/* Goal progress */}
         {todayAppts.length > 0 && (
@@ -239,7 +244,8 @@ const DoctorDashboard = () => {
             </Tabs>
           </div>
         </div>
-      </div>
+      </motion.div>
+      </motion.div>
     </DashboardLayout>
   );
 };

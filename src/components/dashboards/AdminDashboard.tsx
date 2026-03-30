@@ -388,30 +388,39 @@ const AdminDashboard = () => {
 
         {/* Real-time banner */}
         <motion.div variants={fadeUp}>
-          <Card variant="elevated" className="bg-background overflow-hidden">
+          <Card variant="elevated" className="bg-background overflow-hidden border-border/20">
             <div className="h-1 bg-gradient-to-r from-primary via-secondary to-warning" />
             <CardContent className="p-5">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-sm">
                   <Activity className="w-4 h-4 text-white" />
                 </div>
-                <h2 className="font-semibold text-foreground text-sm">Tempo Real</h2>
+                <div>
+                  <h2 className="font-bold text-foreground text-sm">Tempo Real</h2>
+                  <p className="text-[10px] text-muted-foreground">Atualizado automaticamente</p>
+                </div>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
                 {[
-                  { icon: Video, color: "text-primary", value: stats.live_now, label: "Ao vivo" },
-                  { icon: Clock, color: "text-secondary", value: stats.waiting_now, label: "Na fila" },
-                  { icon: null, color: "", value: `${stats.cancel_rate.toFixed(1)}%`, label: "Cancelamentos" },
-                  { icon: null, color: "text-destructive", value: `${stats.no_show_rate.toFixed(1)}%`, label: "Absenteísmo" },
-                  { icon: Star, color: "text-warning", value: stats.avg_rating.toFixed(1), label: "NPS Médicos" },
+                  { icon: Video, color: "text-primary", bgColor: "bg-primary/8", value: stats.live_now, label: "Ao vivo" },
+                  { icon: Clock, color: "text-secondary", bgColor: "bg-secondary/8", value: stats.waiting_now, label: "Na fila" },
+                  { icon: null, color: "text-foreground", bgColor: "bg-muted/60", value: `${stats.cancel_rate.toFixed(1)}%`, label: "Cancelamentos" },
+                  { icon: null, color: "text-destructive", bgColor: "bg-destructive/5", value: `${stats.no_show_rate.toFixed(1)}%`, label: "Absenteísmo" },
+                  { icon: Star, color: "text-warning", bgColor: "bg-warning/8", value: stats.avg_rating.toFixed(1), label: "NPS Médicos" },
                 ].map((item, i) => (
-                  <div key={i} className="text-center p-3 rounded-xl bg-muted/40">
-                    <div className="flex items-center justify-center gap-1.5 mb-1">
+                  <motion.div
+                    key={i}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    className={`text-center p-3.5 rounded-xl ${item.bgColor} border border-border/10 hover:shadow-sm transition-all duration-200`}
+                  >
+                    <div className="flex items-center justify-center gap-1.5 mb-1.5">
                       {item.icon && <item.icon className={`w-4 h-4 ${item.color}`} />}
-                      <span className={`text-xl font-bold ${item.color || "text-foreground"}`}>{item.value}</span>
+                      <span className={`text-xl font-black tabular-nums ${item.color}`}>{item.value}</span>
                     </div>
-                    <p className="text-[10px] text-muted-foreground">{item.label}</p>
-                  </div>
+                    <p className="text-[10px] font-medium text-muted-foreground">{item.label}</p>
+                  </motion.div>
                 ))}
               </div>
             </CardContent>

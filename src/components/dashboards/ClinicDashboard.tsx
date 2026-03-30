@@ -294,10 +294,10 @@ const ClinicDashboard = () => {
             };
             if (tabToPath[val]) navigate(tabToPath[val]);
           }}>
-            <TabsList className="bg-muted/50 border border-border/40 h-10 rounded-xl p-1 w-full max-w-md">
-              <TabsTrigger value="overview" className="text-xs rounded-lg flex-1">Visão Geral</TabsTrigger>
-              <TabsTrigger value="performance" className="text-xs rounded-lg flex-1">Performance</TabsTrigger>
-              <TabsTrigger value="finance" className="text-xs rounded-lg flex-1">Financeiro</TabsTrigger>
+            <TabsList className="bg-muted/40 border border-border/30 h-11 rounded-2xl p-1 w-full max-w-md backdrop-blur-sm">
+              <TabsTrigger value="overview" className="text-xs rounded-xl flex-1 font-semibold data-[state=active]:shadow-sm data-[state=active]:bg-card">📊 Visão Geral</TabsTrigger>
+              <TabsTrigger value="performance" className="text-xs rounded-xl flex-1 font-semibold data-[state=active]:shadow-sm data-[state=active]:bg-card">📈 Performance</TabsTrigger>
+              <TabsTrigger value="finance" className="text-xs rounded-xl flex-1 font-semibold data-[state=active]:shadow-sm data-[state=active]:bg-card">💰 Financeiro</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-5 mt-5">
@@ -438,14 +438,15 @@ const ClinicDashboard = () => {
 
               <div className="grid md:grid-cols-3 gap-3">
                 {[
-                  { label: "Receita este mês", value: `R$ ${revenue.toLocaleString("pt-BR")}` },
-                  { label: "Consultas concluídas", value: completed.length },
-                  { label: "Ticket médio", value: `R$ ${completed.length > 0 ? Math.round(revenue / completed.length).toLocaleString("pt-BR") : "0"}` },
+                  { label: "Receita este mês", value: `R$ ${revenue.toLocaleString("pt-BR")}`, icon: "💰", color: "text-emerald-700 dark:text-emerald-400" },
+                  { label: "Consultas concluídas", value: completed.length, icon: "✅", color: "text-primary" },
+                  { label: "Ticket médio", value: `R$ ${completed.length > 0 ? Math.round(revenue / completed.length).toLocaleString("pt-BR") : "0"}`, icon: "📊", color: "text-amber-600 dark:text-amber-400" },
                 ].map(item => (
-                  <Card key={item.label} className="border-border/50">
+                  <Card key={item.label} className="border-border/30 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
                     <CardContent className="p-5 text-center">
-                      <p className="text-2xl font-bold text-foreground tabular-nums">{item.value}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{item.label}</p>
+                      <span className="text-2xl mb-2 block">{item.icon}</span>
+                      <p className={`text-2xl font-black tabular-nums ${item.color}`}>{item.value}</p>
+                      <p className="text-[11px] text-muted-foreground mt-1.5 font-medium">{item.label}</p>
                     </CardContent>
                   </Card>
                 ))}
