@@ -219,20 +219,32 @@ const UserProfile = () => {
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploading} />
               </label>
             </div>
-            <h2 className="text-xl font-extrabold text-foreground font-[Manrope] flex items-center justify-center gap-2">
+          <h2 className="text-xl font-extrabold text-foreground font-[Manrope] flex items-center justify-center gap-2">
               {firstName} {lastName}
-              {isPatient && kycVerified && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/20">
-                  <ShieldCheck className="w-3 h-3" /> Verificado
-                </span>
-              )}
-              {isPatient && !kycVerified && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold border border-amber-500/20 cursor-pointer" onClick={() => setShowKyc(true)}>
-                  <AlertTriangle className="w-3 h-3" /> Não verificado
-                </span>
-              )}
             </h2>
-            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            <p className="text-sm text-muted-foreground mb-2">{user?.email}</p>
+            {isPatient && kycVerified && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 shadow-[0_0_12px_rgba(16,185,129,0.15)]"
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">Identidade Verificada</span>
+              </motion.div>
+            )}
+            {isPatient && !kycVerified && (
+              <motion.button
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setShowKyc(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 cursor-pointer hover:bg-amber-500/15 transition-colors shadow-[0_0_12px_rgba(245,158,11,0.1)]"
+              >
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
+                <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400">Verificar Identidade</span>
+              </motion.button>
+            )}
             {isPatient && (
               <div className="flex justify-center gap-3 mt-4">
                 {bloodType && (
@@ -302,24 +314,71 @@ const UserProfile = () => {
             </div>
           </button>
 
+          {/* Account Info Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-2xl border border-border/30 bg-card p-5 mb-6"
+          >
+            <h3 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/60 mb-3">
+              Informações da Conta
+            </h3>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Membro desde</span>
+                <span className="text-xs font-semibold text-foreground">{user?.created_at ? new Date(user.created_at).toLocaleDateString("pt-BR", { month: "long", year: "numeric" }) : "—"}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Tipo de perfil</span>
+                <span className="text-xs font-semibold text-foreground">{roleLabels[activeRole] ?? activeRole}</span>
+              </div>
+              {cpf && (
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">CPF</span>
+                  <span className="text-xs font-semibold text-foreground font-mono">***.***.***-{cpf.replace(/\D/g, "").slice(-2)}</span>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-muted-foreground">Status KYC</span>
+                <span className={`text-xs font-bold ${kycVerified ? "text-emerald-500" : "text-amber-500"}`}>
+                  {kycVerified ? "✓ Verificado" : "⚠ Pendente"}
+                </span>
+              </div>
+            </div>
+          </motion.div>
+
           {/* Saúde em Foco Card */}
-          <div className="rounded-2xl bg-primary p-5 text-primary-foreground mb-6">
-            <h4 className="font-[Manrope] font-bold text-lg">Saúde em Foco</h4>
-            <p className="text-sm text-primary-foreground/70 mt-0.5">Acompanhe sua jornada de bem-estar</p>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="rounded-2xl bg-gradient-to-br from-primary via-primary to-[hsl(215,75%,35%)] p-5 text-primary-foreground mb-6 shadow-xl shadow-primary/20"
+          >
+            <div className="flex items-center gap-2 mb-1">
+              <Heart className="w-4 h-4 text-primary-foreground/60" />
+              <h4 className="font-[Manrope] font-bold text-lg">Saúde em Foco</h4>
+            </div>
+            <p className="text-sm text-primary-foreground/60 mt-0.5">Acompanhe sua jornada de bem-estar</p>
             <div className="flex items-center justify-between mt-4">
               <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-primary-foreground/50">Score Vital</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary-foreground/40">Score Vital</p>
               </div>
-              <p className="font-[Manrope] text-[28px] font-extrabold">9.2</p>
+              <p className="font-[Manrope] text-[32px] font-extrabold leading-none">9.2</p>
             </div>
-            <div className="mt-2 h-1.5 rounded-full bg-primary-foreground/30 overflow-hidden">
-              <div className="h-full rounded-full bg-primary-foreground w-[92%]" />
+            <div className="mt-3 h-2 rounded-full bg-primary-foreground/20 overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: "92%" }}
+                transition={{ duration: 1.2, ease: "easeOut", delay: 0.3 }}
+                className="h-full rounded-full bg-primary-foreground"
+              />
             </div>
-          </div>
+          </motion.div>
 
           {/* Version footer */}
-          <p className="text-center text-[11px] font-medium text-muted-foreground/40 tracking-widest uppercase">
-            AloClínica v2.4.0 · Clinical Sanctuary
+          <p className="text-center text-[10px] font-medium text-muted-foreground/30 tracking-[0.2em] uppercase mb-2">
+            AloClínica v2.5.0 · Clinical Sanctuary
           </p>
         </div>
       </DashboardLayout>
