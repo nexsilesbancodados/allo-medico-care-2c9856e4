@@ -146,7 +146,31 @@ const AuthMedico = () => {
   
   const formRef = useRef<HTMLDivElement>(null);
 
-  const scrollToForm = () => formRef.current?.scrollIntoView({ behavior: "smooth" });
+  const filteredSpecialties = useMemo(() => {
+    if (!specialtySearch.trim()) return PREDEFINED_SPECIALTIES.filter(s => !selectedSpecialties.includes(s));
+    const q = specialtySearch.toLowerCase().trim();
+    return PREDEFINED_SPECIALTIES.filter(s => s.toLowerCase().includes(q) && !selectedSpecialties.includes(s));
+  }, [specialtySearch, selectedSpecialties]);
+
+  const addSpecialty = (s: string) => {
+    const trimmed = s.trim();
+    if (trimmed && !selectedSpecialties.includes(trimmed)) {
+      setSelectedSpecialties(prev => [...prev, trimmed]);
+    }
+    setSpecialtySearch("");
+    setShowSpecialtyDropdown(false);
+  };
+
+  const removeSpecialty = (s: string) => setSelectedSpecialties(prev => prev.filter(x => x !== s));
+
+  const handleSpecialtyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && specialtySearch.trim()) {
+      e.preventDefault();
+      addSpecialty(specialtySearch);
+    }
+  };
+
+
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
