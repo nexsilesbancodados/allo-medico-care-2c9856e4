@@ -36,6 +36,7 @@ import { registerConsent } from "@/lib/consent";
 import { formatMask, unmask } from "@/hooks/use-mask";
 import { validarCPF } from "@/lib/cpf";
 import CpfInput from "@/components/ui/cpf-input";
+import { CalendarBlank } from "@phosphor-icons/react";
 import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 import { translateAuthError } from "@/lib/authErrors";
