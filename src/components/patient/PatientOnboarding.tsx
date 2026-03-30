@@ -325,9 +325,9 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
             </Button>
           )}
           <Button
-            className="flex-1 h-13 rounded-xl bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20"
+            className="flex-1 h-13 rounded-xl bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20 disabled:opacity-40"
             onClick={handleNext}
-            disabled={saving}
+            disabled={saving || (step.id === "kyc" && !kycCompleted)}
           >
             {saving ? "Salvando..." : isLast ? "Começar Agora" : (
               <>Próximo <ArrowRight className="w-4 h-4 ml-1" /></>
