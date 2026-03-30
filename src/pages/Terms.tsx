@@ -73,8 +73,8 @@ const Terms = () => (
         <p>7.4. A AloClinica se reserva o direito de alterar os preços dos planos a qualquer momento, garantindo que as alterações não afetarão assinaturas vigentes até a próxima renovação.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">8. Política de Cancelamento e Reembolso</h2>
-        <p>8.1. <strong>Cancelamento pelo paciente:</strong> o paciente pode cancelar uma consulta agendada sem custos até 2 horas antes do horário marcado. Cancelamentos com menos de 2 horas estão sujeitos à cobrança integral.</p>
-        <p>8.2. <strong>Cancelamento pelo médico:</strong> caso o médico cancele ou não compareça, o paciente será integralmente reembolsado ou poderá reagendar sem custo adicional.</p>
+        <p>8.1. <strong>Cancelamento pelo paciente:</strong> cancelamentos feitos pelo paciente não geram reembolso.</p>
+        <p>8.2. <strong>Cancelamento ou não comparecimento pelo médico:</strong> o paciente será integralmente reembolsado. A plataforma tentará automaticamente reatribuir a consulta a outro médico disponível.</p>
         <p>8.3. <strong>Cancelamento de plano:</strong> planos de assinatura podem ser cancelados a qualquer momento, sendo o acesso mantido até o final do período já pago. Não há reembolso proporcional pelo período não utilizado.</p>
         <p>8.4. <strong>Direito de arrependimento:</strong> conforme o Código de Defesa do Consumidor (Art. 49), o paciente tem direito ao arrependimento e reembolso integral em até 7 dias após a primeira contratação, desde que nenhuma consulta tenha sido realizada.</p>
         <p>Para mais detalhes, consulte nossa <Link to="/refund" className="text-primary hover:underline">Política de Reembolso completa</Link>.</p>

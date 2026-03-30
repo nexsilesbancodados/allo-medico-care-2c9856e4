@@ -77,7 +77,7 @@ const RefundPolicy = () => (
         </ul>
 
         <h2 className="text-xl font-bold text-foreground mt-6">5. Consultas de Retorno</h2>
-        <p>Consultas de retorno (agendadas dentro do prazo estipulado pelo médico, geralmente 15 dias) têm valor R$ 0,00 e não são passíveis de reembolso, por serem gratuitas. Caso o paciente não compareça ao retorno, perde o direito à gratuidade.</p>
+        <p>Consultas de retorno (agendadas dentro de 60 dias da consulta original com o mesmo médico) têm desconto de 50% sobre o valor da consulta. Caso o paciente não compareça ao retorno, perde o direito ao desconto.</p>
 
         <h2 className="text-xl font-bold text-foreground mt-6">6. Disputas e Chargebacks</h2>
         <p>Em caso de contestação junto à operadora do cartão (chargeback), a AloClinica utilizará os logs de presença em videoconsulta como evidência de realização do serviço. Chargebacks fraudulentos resultarão em suspensão imediata da conta.</p>
