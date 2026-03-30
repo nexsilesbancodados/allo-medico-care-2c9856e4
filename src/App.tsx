@@ -97,65 +97,55 @@ const SubdomainRedirectProvider = lazy(() =>
   }))
 );
 
-/** Animated route wrapper */
+/** Route wrapper */
 const AnimatedRoutes = () => {
   const location = useLocation();
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        key={location.pathname}
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -6 }}
-        transition={{ duration: 0.15 }}
-      >
-        <Routes location={location}>
-          <Route path="/" element={<Index />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/paciente" element={<AuthPaciente />} />
-          <Route path="/medico" element={<AuthMedico />} />
-          <Route path="/admin" element={<AuthAdmin />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/privacy" element={<Privacy />} />
-          <Route path="/lgpd" element={<LGPD />} />
-          <Route path="/cookies" element={<Cookies />} />
-          <Route path="/refund" element={<RefundPolicy />} />
-          <Route path="/doctor-terms" element={<DoctorTerms />} />
-          <Route path="/accessibility" element={<Accessibility />} />
-          <Route path="/suporte" element={<AuthSuporte />} />
-          <Route path="/payment-success" element={<PaymentSuccess />} />
-          <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
-          <Route path="/l/:id" element={<LinkRedirect />} />
-          <Route path="/validar/:id" element={<ValidateDocument />} />
-          <Route path="/validar" element={<ValidateDocument />} />
-          
-          <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
-          <Route path="/teleconsulta" element={<Teleconsulta />} />
-          
-          <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
-          <Route path="/laudista" element={<AuthLaudista />} />
-          <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
-          <Route path="/laudos/fila" element={<ProtectedRoute><LaudosFila /></ProtectedRoute>} />
-          <Route path="/laudos/editor/:exameId" element={<ProtectedRoute><LaudosEditor /></ProtectedRoute>} />
-          <Route path="/laudos/validar/:token" element={<LaudosValidar />} />
-          <Route path="/laudos/validar" element={<LaudosValidar />} />
-          <Route path="/laudos/:exameId/editar" element={<ProtectedRoute><LaudosEditar /></ProtectedRoute>} />
-          <Route path="/clinica/enviar-exame" element={<ProtectedRoute><ClinicaEnviarExame /></ProtectedRoute>} />
-          <Route path="/clinica/exames" element={<ProtectedRoute><ClinicaExames /></ProtectedRoute>} />
-          <Route
-            path="/dashboard/*"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </motion.div>
-    </AnimatePresence>
+    <Routes location={location}>
+      <Route path="/" element={<Index />} />
+      <Route path="/auth" element={<Auth />} />
+      <Route path="/paciente" element={<AuthPaciente />} />
+      <Route path="/medico" element={<AuthMedico />} />
+      <Route path="/admin" element={<AuthAdmin />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/lgpd" element={<LGPD />} />
+      <Route path="/cookies" element={<Cookies />} />
+      <Route path="/refund" element={<RefundPolicy />} />
+      <Route path="/doctor-terms" element={<DoctorTerms />} />
+      <Route path="/accessibility" element={<Accessibility />} />
+      <Route path="/suporte" element={<AuthSuporte />} />
+      <Route path="/payment-success" element={<PaymentSuccess />} />
+      <Route path="/dr/:slug" element={<DoctorPublicProfilePage />} />
+      <Route path="/l/:id" element={<LinkRedirect />} />
+      <Route path="/validar/:id" element={<ValidateDocument />} />
+      <Route path="/validar" element={<ValidateDocument />} />
+      
+      <Route path="/para-empresas/telelaudo" element={<B2BTelelaudo />} />
+      <Route path="/teleconsulta" element={<Teleconsulta />} />
+      
+      <Route path="/telelaudo" element={<Navigate to="/laudista" replace />} />
+      <Route path="/laudista" element={<AuthLaudista />} />
+      <Route path="/telelaudo-workspace" element={<ProtectedRoute><TelelaudoWorkspace /></ProtectedRoute>} />
+      <Route path="/laudos/fila" element={<ProtectedRoute><LaudosFila /></ProtectedRoute>} />
+      <Route path="/laudos/editor/:exameId" element={<ProtectedRoute><LaudosEditor /></ProtectedRoute>} />
+      <Route path="/laudos/validar/:token" element={<LaudosValidar />} />
+      <Route path="/laudos/validar" element={<LaudosValidar />} />
+      <Route path="/laudos/:exameId/editar" element={<ProtectedRoute><LaudosEditar /></ProtectedRoute>} />
+      <Route path="/clinica/enviar-exame" element={<ProtectedRoute><ClinicaEnviarExame /></ProtectedRoute>} />
+      <Route path="/clinica/exames" element={<ProtectedRoute><ClinicaExames /></ProtectedRoute>} />
+      <Route
+        path="/dashboard/*"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 };
 
