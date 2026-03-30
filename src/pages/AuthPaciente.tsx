@@ -271,8 +271,8 @@ const AuthPaciente = () => {
 
 
 
-  /* ═══ FORM CONTENT ═══ */
-  const FormContent = () => (
+  /* ═══ FORM CONTENT — rendered as inline JSX, not a sub-component ═══ */
+  const formContent = (
     <AnimatePresence mode="wait">
       {/* ── WELCOME ── */}
       {mode === "welcome" && (
