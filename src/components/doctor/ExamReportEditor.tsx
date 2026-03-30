@@ -1759,11 +1759,22 @@ const ExamReportEditor = () => {
 
       await supabase.from("exam_requests" as any).update({ status: "reported" } as any).eq("id", examId);
 
-      // Try ICP-Brasil digital signature
+      // Try ICP-Brasil digital signature (only if VIDaaS token is available)
       try {
-        await supabase.functions.invoke("vidaas-sign", {
-          body: { action: "sign", document_hash: documentHash, document_type: "exam_report", doctor_name: doctorName, doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`, verification_code: verificationCode },
-        });
+        const vidaasToken = sessionStorage.getItem("vidaas_access_token");
+        if (vidaasToken) {
+          await supabase.functions.invoke("vidaas-sign", {
+            body: {
+              action: "sign",
+              access_token: vidaasToken,
+              hashes: [{ id: `report-${examId}`, alias: `Laudo - ${patientDisplayName}`, hash: documentHash }],
+              document_type: "exam_report",
+              doctor_name: doctorName,
+              doctor_crm: `${doctorProfile.crm}/${doctorProfile.crm_state}`,
+              verification_code: verificationCode,
+            },
+          });
+        }
       } catch {}
 
       // Document verification record

@@ -344,9 +344,9 @@ serve(async (req) => {
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
-    console.error("VIDaaS sign error:", err);
+    console.error("VIDaaS sign error:", error);
     return new Response(
-      JSON.stringify({ error: err.message }),
+      JSON.stringify({ error: (error as Error).message }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
