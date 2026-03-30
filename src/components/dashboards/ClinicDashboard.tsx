@@ -294,10 +294,10 @@ const ClinicDashboard = () => {
             };
             if (tabToPath[val]) navigate(tabToPath[val]);
           }}>
-            <TabsList className="bg-muted/50 border border-border/40 h-10 rounded-xl p-1 w-full max-w-md">
-              <TabsTrigger value="overview" className="text-xs rounded-lg flex-1">Visão Geral</TabsTrigger>
-              <TabsTrigger value="performance" className="text-xs rounded-lg flex-1">Performance</TabsTrigger>
-              <TabsTrigger value="finance" className="text-xs rounded-lg flex-1">Financeiro</TabsTrigger>
+            <TabsList className="bg-muted/40 border border-border/30 h-11 rounded-2xl p-1 w-full max-w-md backdrop-blur-sm">
+              <TabsTrigger value="overview" className="text-xs rounded-xl flex-1 font-semibold data-[state=active]:shadow-sm data-[state=active]:bg-card">📊 Visão Geral</TabsTrigger>
+              <TabsTrigger value="performance" className="text-xs rounded-xl flex-1 font-semibold data-[state=active]:shadow-sm data-[state=active]:bg-card">📈 Performance</TabsTrigger>
+              <TabsTrigger value="finance" className="text-xs rounded-xl flex-1 font-semibold data-[state=active]:shadow-sm data-[state=active]:bg-card">💰 Financeiro</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-5 mt-5">
