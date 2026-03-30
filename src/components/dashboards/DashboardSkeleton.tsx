@@ -1,10 +1,31 @@
 import { motion } from "framer-motion";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import logo from "@/assets/logo.png";
 
 const Bone = ({ className = "" }: { className?: string }) => (
   <div className={`shimmer-v2 rounded-xl ${className}`} aria-hidden="true" />
 );
+
+/** Progress bar that fills while loading */
+const LoadingProgress = () => {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const t1 = setTimeout(() => setWidth(40), 100);
+    const t2 = setTimeout(() => setWidth(70), 600);
+    const t3 = setTimeout(() => setWidth(85), 1200);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+  return (
+    <div className="h-0.5 w-full bg-muted/50 rounded-full overflow-hidden">
+      <motion.div
+        className="h-full bg-primary/40 rounded-full"
+        initial={{ width: "0%" }}
+        animate={{ width: `${width}%` }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      />
+    </div>
+  );
+};
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 const item = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
@@ -16,23 +37,26 @@ const DashboardSkeleton = () => (
     role="status" aria-busy="true" aria-label="Carregando painel..."
   >
     {/* Loading indicator */}
-    <motion.div variants={item} className="flex items-center justify-center gap-3 py-2">
-      <motion.img
-        src={logo} alt="AloClínica"
-        className="w-8 h-8 rounded-xl select-none"
-        animate={{ rotate: [0, -6, 6, -6, 0], scale: [1, 1.06, 1] }}
-        transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-      />
-      <div className="flex gap-1">
-        {[0, 1, 2].map(i => (
-          <motion.div key={i}
-            className="w-1.5 h-1.5 rounded-full bg-primary/40"
-            animate={{ y: [0, -5, 0], opacity: [0.4, 1, 0.4] }}
-            transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity }}
-          />
-        ))}
+    <motion.div variants={item} className="space-y-2">
+      <div className="flex items-center justify-center gap-3 py-2">
+        <motion.img
+          src={logo} alt="AloClínica"
+          className="w-8 h-8 rounded-xl select-none"
+          animate={{ rotate: [0, -6, 6, -6, 0], scale: [1, 1.06, 1] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div className="flex gap-1">
+          {[0, 1, 2].map(i => (
+            <motion.div key={i}
+              className="w-1.5 h-1.5 rounded-full bg-primary/40"
+              animate={{ y: [0, -5, 0], opacity: [0.4, 1, 0.4] }}
+              transition={{ duration: 0.8, delay: i * 0.15, repeat: Infinity }}
+            />
+          ))}
+        </div>
+        <span className="text-[11px] text-muted-foreground font-medium">Carregando...</span>
       </div>
-      <span className="text-[11px] text-muted-foreground font-medium">Carregando...</span>
+      <LoadingProgress />
     </motion.div>
 
     {/* Hero skeleton — full bleed */}

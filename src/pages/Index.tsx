@@ -15,6 +15,7 @@ import bannerAi from "@/assets/banner-ai-triage.webp";
 import bannerPlantao from "@/assets/banner-plantao.webp";
 
 // Lazy-load below-the-fold sections
+const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
 const HorizontalScrollCards = lazy(() => import("@/components/landing/HorizontalScrollCards"));
 const SpecialtiesShowcase = lazy(() => import("@/components/landing/SpecialtiesShowcase"));
 const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection"));
@@ -78,6 +79,11 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       <Header />
       <HeroSection />
       <SocialProofBar />
+
+      {/* Stats counters */}
+      <DeferredSection fallbackClassName="h-24" rootMargin="100px 0px">
+        <StatsSection />
+      </DeferredSection>
 
       {/* Plantão 24h banner */}
       <section className="py-8 px-4 relative overflow-hidden">

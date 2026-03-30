@@ -139,6 +139,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
               { label: "LGPD", to: "/lgpd" },
               { label: "Cookies", to: "/cookies" },
               { label: "Reembolso", to: "/refund" },
+              { label: "Acessibilidade", to: "/accessibility" },
             ].map(l => (
               <Link key={l.to} to={l.to} className="text-white/15 hover:text-primary transition-colors duration-150">{l.label}</Link>
             ))}

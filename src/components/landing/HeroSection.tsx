@@ -160,6 +160,8 @@ const HeroSection = memo(
                   className="absolute -top-1 -right-2 xl:right-0 bg-card/95 backdrop-blur-md rounded-2xl shadow-md shadow-foreground/[0.04] px-3.5 py-2.5 border border-border/50 flex items-center gap-2.5"
                   animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
+                  aria-hidden="true"
+                  role="presentation"
                 >
                   <div className="w-8 h-8 rounded-xl bg-success/10 flex items-center justify-center">
                     <ShieldCheck className="w-[18px] h-[18px] text-success" weight="fill" />

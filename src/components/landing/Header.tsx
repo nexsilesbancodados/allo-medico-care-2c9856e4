@@ -1,4 +1,5 @@
 import { useState, memo, forwardRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Stethoscope, VideoCamera, Buildings, Brain, FileText, SignIn, ShoppingBag, SignOut, SquaresFour, GlobeSimple, CaretRight } from "@phosphor-icons/react";
@@ -226,49 +227,58 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
       </div>
 
       {/* Mobile menu */}
-      {mobileOpen && (
-        <div
-          role="dialog"
-          aria-label="Menu de navegação"
-          className="lg:hidden bg-background/98 backdrop-blur-sm border-t border-border/40 overflow-hidden"
-        >
-          <nav className="flex flex-col px-4 py-3 gap-0.5">
-            {mobileLinks.map((link) => (
-              <button
-                key={link.href}
-                onClick={() => { setMobileOpen(false); navigate(link.href); }}
-                className="text-sm font-medium py-3 px-3 rounded-xl transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/40 active:bg-muted active:scale-[0.98]"
-              >
-                {link.label}
-              </button>
-            ))}
+      <AnimatePresence>
+        {mobileOpen && (
+          <motion.div
+            role="dialog"
+            aria-label="Menu de navegação"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:hidden bg-background/98 backdrop-blur-sm border-t border-border/40 overflow-hidden"
+          >
+            <nav className="flex flex-col px-4 py-3 gap-0.5">
+              {mobileLinks.map((link, i) => (
+                <motion.button
+                  key={link.href}
+                  initial={{ opacity: 0, x: -12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.04, duration: 0.2 }}
+                  onClick={() => { setMobileOpen(false); navigate(link.href); }}
+                  className="text-sm font-medium py-3 px-3 rounded-xl transition-colors text-left text-muted-foreground hover:text-foreground hover:bg-muted/40 active:bg-muted active:scale-[0.98]"
+                >
+                  {link.label}
+                </motion.button>
+              ))}
 
-            <div className="flex flex-col gap-2 pt-3 mt-2 border-t border-border/40">
-              <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
-              {user ? (
-                <>
-                  <Button variant="outline" size="sm" className="rounded-full justify-start gap-2" onClick={() => { setMobileOpen(false); navigate("/dashboard"); }}>
-                    <SquaresFour className="w-4 h-4" weight="fill" />
-                    {profile?.first_name ? `Olá, ${profile.first_name}` : "Meu Painel"}
-                  </Button>
-                  <Button variant="ghost" size="sm" className="rounded-full justify-start gap-2" onClick={async () => { setMobileOpen(false); await signOut(); navigate("/"); }}>
-                    <SignOut className="w-4 h-4" weight="bold" /> Sair
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button size="sm" variant="outline" className="rounded-full justify-start gap-2 font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
-                    <Stethoscope className="w-4 h-4" weight="fill" /> Consulta Avulsa
-                  </Button>
-                  <Button size="sm" className="rounded-full justify-start gap-2 bg-primary text-primary-foreground font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
-                    <SignIn className="w-4 h-4" weight="bold" /> Entrar
-                  </Button>
-                </>
-              )}
-            </div>
-          </nav>
-        </div>
-      )}
+              <div className="flex flex-col gap-2 pt-3 mt-2 border-t border-border/40">
+                <div className="flex justify-center pb-1"><LanguageSwitcher /></div>
+                {user ? (
+                  <>
+                    <Button variant="outline" size="sm" className="rounded-full justify-start gap-2" onClick={() => { setMobileOpen(false); navigate("/dashboard"); }}>
+                      <SquaresFour className="w-4 h-4" weight="fill" />
+                      {profile?.first_name ? `Olá, ${profile.first_name}` : "Meu Painel"}
+                    </Button>
+                    <Button variant="ghost" size="sm" className="rounded-full justify-start gap-2" onClick={async () => { setMobileOpen(false); await signOut(); navigate("/"); }}>
+                      <SignOut className="w-4 h-4" weight="bold" /> Sair
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button size="sm" variant="outline" className="rounded-full justify-start gap-2 font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
+                      <Stethoscope className="w-4 h-4" weight="fill" /> Consulta Avulsa
+                    </Button>
+                    <Button size="sm" className="rounded-full justify-start gap-2 bg-primary text-primary-foreground font-semibold" onClick={() => { setMobileOpen(false); navigate("/paciente"); }}>
+                      <SignIn className="w-4 h-4" weight="bold" /> Entrar
+                    </Button>
+                  </>
+                )}
+              </div>
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }));
