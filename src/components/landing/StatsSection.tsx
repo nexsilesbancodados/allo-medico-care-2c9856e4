@@ -12,14 +12,13 @@ const fallbackStats = [
 const AnimatedCounter = ({ value, suffix = "" }: { value: string; suffix?: string }) => {
   const numMatch = value.match(/[\d.]+/);
   const prefix = value.replace(/[\d.]+.*/, "");
-  
-  if (!numMatch) return <>{value}</>;
-  
-  const num = parseFloat(numMatch[0]);
-  const rest = value.slice((prefix + numMatch[0]).length);
+  const num = numMatch ? parseFloat(numMatch[0]) : 0;
+  const rest = numMatch ? value.slice((prefix + numMatch[0]).length) : "";
   const [display, setDisplay] = useState(0);
   const [hasAnimated, setHasAnimated] = useState(false);
   const ref = useRef<HTMLParagraphElement>(null);
+
+  if (!numMatch) return <span>{value}</span>;
 
   useEffect(() => {
     if (hasAnimated || !ref.current) return;
