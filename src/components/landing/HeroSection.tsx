@@ -42,8 +42,9 @@ const HeroSection = memo(
         {/* Subtle ambient background */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/20" />
-          <div className="absolute top-[-15%] right-[10%] w-[500px] h-[500px] rounded-full bg-primary/[0.03] blur-[180px]" />
-          <div className="absolute bottom-[-25%] left-[-8%] w-[400px] h-[400px] rounded-full bg-secondary/[0.03] blur-[160px]" />
+          <div className="absolute top-[-15%] right-[10%] w-[500px] h-[500px] rounded-full bg-primary/[0.04] blur-[180px] animate-breathe" />
+          <div className="absolute bottom-[-25%] left-[-8%] w-[400px] h-[400px] rounded-full bg-secondary/[0.04] blur-[160px] animate-breathe [animation-delay:1.5s]" />
+          <div className="absolute top-[40%] left-[50%] w-[300px] h-[300px] rounded-full bg-primary/[0.02] blur-[120px] animate-float" />
         </div>
 
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
