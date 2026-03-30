@@ -1,10 +1,31 @@
 import { motion } from "framer-motion";
-import { memo } from "react";
+import { memo, useEffect, useState } from "react";
 import logo from "@/assets/logo.png";
 
 const Bone = ({ className = "" }: { className?: string }) => (
   <div className={`shimmer-v2 rounded-xl ${className}`} aria-hidden="true" />
 );
+
+/** Progress bar that fills while loading */
+const LoadingProgress = () => {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const t1 = setTimeout(() => setWidth(40), 100);
+    const t2 = setTimeout(() => setWidth(70), 600);
+    const t3 = setTimeout(() => setWidth(85), 1200);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  }, []);
+  return (
+    <div className="h-0.5 w-full bg-muted/50 rounded-full overflow-hidden">
+      <motion.div
+        className="h-full bg-primary/40 rounded-full"
+        initial={{ width: "0%" }}
+        animate={{ width: `${width}%` }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      />
+    </div>
+  );
+};
 
 const stagger = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
 const item = { hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.3 } } };
