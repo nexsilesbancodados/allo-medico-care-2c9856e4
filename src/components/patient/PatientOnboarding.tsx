@@ -46,12 +46,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const [chronicConditions, setChronicConditions] = useState<string[]>([]);
   const [conditionInput, setConditionInput] = useState("");
   const [kycCompleted, setKycCompleted] = useState(false);
-
-  const handleKycStarted = () => {
-    // Didit opens in new tab — mark as started
-    setKycCompleted(true);
-    localStorage.removeItem(KYC_PENDING_KEY);
-  };
+  const [kycFailed, setKycFailed] = useState(false);
 
   useEffect(() => {
     if (user) {
