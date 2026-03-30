@@ -339,6 +339,7 @@ const Dashboard = () => {
       />
     </Routes>
     </Suspense>
+    </ReVerificationGate>
   );
 };
 
