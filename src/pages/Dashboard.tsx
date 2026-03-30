@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { warn } from "@/lib/logger";
 
 import PingoLoader from "@/components/PingoLoader";
+import ReVerificationGate from "@/components/auth/ReVerificationGate";
 
 // ── LAZY imports: dashboard shells ──
 const PatientDashboard = lazy(() => import("@/components/dashboards/PatientDashboard"));
@@ -210,6 +211,7 @@ const Dashboard = () => {
   };
 
   return (
+    <ReVerificationGate>
     <Suspense fallback={<PingoLoader />}>
     <Routes>
       <Route index element={<IndexDashboard />} />
@@ -337,6 +339,7 @@ const Dashboard = () => {
       />
     </Routes>
     </Suspense>
+    </ReVerificationGate>
   );
 };
 
