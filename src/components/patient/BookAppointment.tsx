@@ -83,6 +83,10 @@ const BookAppointment = () => {
   const [recurrence, setRecurrence] = useState("none");
   const [recurrenceCount, setRecurrenceCount] = useState(4);
 
+  // Return eligibility
+  const [returnEligible, setReturnEligible] = useState(false);
+  const [originalPrice, setOriginalPrice] = useState<number | null>(null);
+
   // Payment state
   const [paymentStep, setPaymentStep] = useState(false);
   const [appointmentId, setAppointmentId] = useState<string | null>(null);
@@ -113,6 +117,35 @@ const BookAppointment = () => {
   useEffect(() => {
     if (doctorId) fetchDoctor();
   }, [doctorId]);
+
+  // Check return eligibility
+  useEffect(() => {
+    const checkReturn = async () => {
+      if (appointmentType !== "return" || !user || !doctorId) {
+        setReturnEligible(false);
+        setOriginalPrice(null);
+        return;
+      }
+      const { data } = await supabase
+        .from("appointments")
+        .select("id, price_at_booking, return_deadline")
+        .eq("patient_id", user.id)
+        .eq("doctor_id", doctorId)
+        .eq("status", "completed")
+        .not("return_deadline", "is", null)
+        .gte("return_deadline", new Date().toISOString())
+        .order("scheduled_at", { ascending: false })
+        .limit(1);
+      if (data && data.length > 0) {
+        setReturnEligible(true);
+        setOriginalPrice(data[0].price_at_booking);
+      } else {
+        setReturnEligible(false);
+        setOriginalPrice(null);
+      }
+    };
+    checkReturn();
+  }, [appointmentType, user, doctorId]);
 
   useEffect(() => {
     if (selectedDate && doctorId) fetchBookedSlots();
@@ -219,7 +252,8 @@ const BookAppointment = () => {
     return doctor.slots.some(s => s.day_of_week === dayOfWeek);
   };
 
-  const basePrice = doctor?.consultation_price ?? 89;
+  const fullPrice = doctor?.consultation_price ?? 89;
+  const basePrice = (appointmentType === "return" && returnEligible) ? Math.round(fullPrice * 0.5 * 100) / 100 : fullPrice;
   const discountAmount = basePrice * (cardDiscount / 100);
   const totalPrice = Math.max(basePrice - discountAmount, 0);
 
@@ -256,7 +290,7 @@ const BookAppointment = () => {
         appointment_type: firstApptId ? "return" : appointmentType,
         notes: notesText ? notesText + (firstApptId ? ` | Recorrente` : "") : (firstApptId ? "Agendamento recorrente" : null),
         original_appointment_id: firstApptId || null,
-        price_at_booking: doctor.consultation_price,
+        price_at_booking: basePrice,
       }).select("id").single();
 
       if (error || !insertedAppt) {
@@ -715,11 +749,22 @@ const BookAppointment = () => {
                 </div>
 
                 {appointmentType === "return" && (
-                  <div className="flex items-start gap-2 p-3 rounded-xl bg-warning/10 border border-warning/20 mb-4">
-                    <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
-                    <p className="text-[11px] text-foreground/80">
-                      Retornos são gratuitos dentro de 15 dias da consulta original. Fora desse prazo, será cobrado o valor integral.
-                    </p>
+                  <div className={`flex items-start gap-2 p-3 rounded-xl mb-4 ${returnEligible ? "bg-success/10 border border-success/20" : "bg-warning/10 border border-warning/20"}`}>
+                    {returnEligible ? (
+                      <>
+                        <CheckCircle2 className="w-4 h-4 text-success mt-0.5 shrink-0" />
+                        <p className="text-[11px] text-foreground/80">
+                          <strong>Retorno com 50% de desconto!</strong> Você tem uma consulta anterior com esse médico dentro do prazo de 60 dias. Valor: R$ {basePrice.toFixed(2)} (50% de R$ {fullPrice.toFixed(2)}).
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <AlertTriangle className="w-4 h-4 text-warning mt-0.5 shrink-0" />
+                        <p className="text-[11px] text-foreground/80">
+                          Retornos têm 50% de desconto dentro de 60 dias da consulta original. Nenhuma consulta elegível encontrada — será cobrado o valor integral.
+                        </p>
+                      </>
+                    )}
                   </div>
                 )}
 
