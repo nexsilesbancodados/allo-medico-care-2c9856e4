@@ -36,6 +36,7 @@ import { registerConsent } from "@/lib/consent";
 import { formatMask, unmask } from "@/hooks/use-mask";
 import { validarCPF } from "@/lib/cpf";
 import CpfInput from "@/components/ui/cpf-input";
+import { CalendarBlank } from "@phosphor-icons/react";
 import SEOHead from "@/components/SEOHead";
 import PasswordStrength from "@/components/ui/password-strength";
 import { translateAuthError } from "@/lib/authErrors";
@@ -122,6 +123,7 @@ const AuthPaciente = () => {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [cpf, setCpf] = useState("");
+  const [birthDate, setBirthDate] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
@@ -238,6 +240,7 @@ const AuthPaciente = () => {
           phone: cleanPhone,
           first_name: firstName,
           last_name: lastName,
+          date_of_birth: birthDate || null,
           referred_by: refCode || null,
         }, { onConflict: "user_id" });
 
@@ -482,6 +485,21 @@ const AuthPaciente = () => {
                   toast.error("CPF inválido", { description: "Verifique os dígitos." });
                   return;
                 }
+                if (!birthDate) {
+                  toast.error("Data de nascimento obrigatória", { description: "Informe sua data de nascimento." });
+                  return;
+                }
+                const today = new Date();
+                const birth = new Date(birthDate);
+                let age = today.getFullYear() - birth.getFullYear();
+                const monthDiff = today.getMonth() - birth.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                  age--;
+                }
+                if (age < 16) {
+                  toast.error("Idade mínima: 16 anos", { description: "É necessário ter pelo menos 16 anos para se cadastrar." });
+                  return;
+                }
               }
               if (signupStep === 2) {
                 const cleanPhone = unmask(phone);
@@ -545,6 +563,20 @@ const AuthPaciente = () => {
                       className="mt-1.5"
                       inputClassName="pl-11 h-12 rounded-xl bg-muted/40 border-border/50 text-[15px] tracking-wide focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40"
                     />
+                  </div>
+                  <div>
+                    <Label className="text-[13px] font-semibold text-foreground">Data de nascimento</Label>
+                    <div className="relative mt-1.5">
+                      <CalendarBlank className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/50" weight="fill" />
+                      <Input
+                        type="date"
+                        value={birthDate}
+                        onChange={e => setBirthDate(e.target.value)}
+                        max={new Date().toISOString().split("T")[0]}
+                        className="pl-11 h-12 rounded-xl bg-muted/40 border-border/50 text-[15px] focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.12)] focus-visible:border-primary/40"
+                        required
+                      />
+                    </div>
                   </div>
                 </motion.div>
               )}
