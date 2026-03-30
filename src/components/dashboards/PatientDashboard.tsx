@@ -247,11 +247,15 @@ const PatientDashboard = () => {
           className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[32px] bg-gradient-to-br from-[hsl(var(--p-primary))] via-[hsl(215_70%_24%)] to-[hsl(var(--p-primary-mid))] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6"
           style={{ boxShadow: "0 16px 56px rgba(0,29,74,.35), inset 0 1px 0 rgba(255,255,255,.12)" }}
         >
+          {/* Decorative elements */}
           <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-white/[0.06] blur-[80px] hidden md:block" />
           <div className="pointer-events-none absolute -left-8 bottom-4 h-48 w-48 rounded-full bg-white/[0.04] blur-[60px] hidden md:block" />
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+          {/* Subtle pattern overlay */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
+            style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
 
-          <div className="relative z-10 px-5 pt-8 pb-6 md:px-8 md:pt-12 md:pb-8">
+          <div className="relative z-10 px-5 pt-8 pb-7 md:px-8 md:pt-12 md:pb-9">
             <div className="flex items-start gap-4">
               {/* Avatar with colored ring */}
               <motion.div
@@ -266,8 +270,8 @@ const PatientDashboard = () => {
                   <LazyAvatar
                     src={profile?.avatar_url}
                     name={firstName}
-                    className="h-14 w-14 md:h-16 md:w-16 border-2 border-white/20"
-                    fallbackClassName="bg-white/15 text-white text-base"
+                    className="h-16 w-16 md:h-[72px] md:w-[72px] border-2 border-white/20 shadow-lg"
+                    fallbackClassName="bg-white/15 text-white text-lg"
                   />
                 </div>
               </motion.div>
@@ -277,7 +281,7 @@ const PatientDashboard = () => {
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="font-[Manrope] text-[24px] font-extrabold text-white leading-[1.15] tracking-tight md:text-[36px]"
+                  className="font-[Manrope] text-[26px] font-extrabold text-white leading-[1.1] tracking-tight md:text-[38px]"
                 >
                   {getGreeting()}, {firstName}! 👋
                 </motion.h1>
@@ -285,7 +289,7 @@ const PatientDashboard = () => {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1, duration: 0.45 }}
-                  className="mt-1.5 text-[13px] font-medium text-white/50 leading-relaxed md:text-[15px]"
+                  className="mt-2 text-[13px] font-medium text-white/70 leading-relaxed md:text-[15px]"
                 >
                   {getContextualSubtitle(upcoming, stats)}
                 </motion.p>
@@ -305,7 +309,7 @@ const PatientDashboard = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.18, duration: 0.45 }}
-              className="flex gap-2 mt-4 flex-wrap"
+              className="flex gap-2 mt-5 flex-wrap"
             >
               {[
                 { icon: CalendarCheck, label: `${stats?.total ?? 0} consultas` },
@@ -317,9 +321,9 @@ const PatientDashboard = () => {
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.22 + i * 0.06 }}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.1] backdrop-blur-md border border-white/[0.08] px-3 py-1.5 text-[11px] font-bold text-white/70 shadow-[0_2px_8px_rgba(0,0,0,.12)]"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-md border border-white/[0.1] px-3.5 py-1.5 text-[11px] font-bold text-white/80 shadow-[0_2px_8px_rgba(0,0,0,.12)]"
                 >
-                  <pill.icon size={12} weight="fill" className="opacity-60" /> {pill.label}
+                  <pill.icon size={12} weight="fill" className="opacity-70" /> {pill.label}
                 </motion.span>
               ))}
             </motion.div>
