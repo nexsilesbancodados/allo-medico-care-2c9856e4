@@ -112,7 +112,10 @@ const AuthMedico = () => {
   const [crm, setCrm] = useState("");
   const [crmState, setCrmState] = useState("SP");
   const [phone, setPhone] = useState("");
-  const [specialty, setSpecialty] = useState("");
+  const [selectedSpecialties, setSelectedSpecialties] = useState<string[]>([]);
+  const [specialtySearch, setSpecialtySearch] = useState("");
+  const [showSpecialtyDropdown, setShowSpecialtyDropdown] = useState(false);
+  const specialtyInputRef = useRef<HTMLInputElement>(null);
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
