@@ -46,12 +46,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const [chronicConditions, setChronicConditions] = useState<string[]>([]);
   const [conditionInput, setConditionInput] = useState("");
   const [kycCompleted, setKycCompleted] = useState(false);
-
-  const handleKycStarted = () => {
-    // Didit opens in new tab — mark as started
-    setKycCompleted(true);
-    localStorage.removeItem(KYC_PENDING_KEY);
-  };
+  const [kycFailed, setKycFailed] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -107,18 +102,28 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   };
 
   const handleNext = async () => {
-    if (step.id === "personal" || step.id === "health") await saveProfile();
-    // KYC is handled by the camera component callback — just advance
-    if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); onComplete(); }
+    if (step.id === "personal") {
+      if (!firstName.trim() || !lastName.trim()) { toast.error("Preencha nome e sobrenome"); return; }
+      await saveProfile();
+    }
+    if (step.id === "health") await saveProfile();
+    if (step.id === "kyc" && !kycCompleted) {
+      toast.error("Verificação obrigatória", { description: "Complete a verificação de identidade para continuar." });
+      return;
+    }
+    if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); localStorage.removeItem(KYC_PENDING_KEY); onComplete(); }
     else setCurrentStep(prev => prev + 1);
   };
 
-  const handleSkipKyc = () => {
-    localStorage.setItem(KYC_PENDING_KEY, "true");
-    setCurrentStep(prev => prev + 1);
+  const handleSkip = () => {
+    // Only allow skip if KYC is already completed
+    if (!kycCompleted && currentStep >= STEPS.findIndex(s => s.id === "kyc")) {
+      toast.error("Complete a verificação de identidade primeiro");
+      return;
+    }
+    localStorage.setItem(ONBOARDING_KEY, "true");
+    onComplete();
   };
-
-  const handleSkip = () => { localStorage.setItem(ONBOARDING_KEY, "true"); onComplete(); };
 
   const FEATURES = [
     { icon: <Stethoscope className="w-6 h-6 text-primary" />, title: "Consultas Médicas", desc: "Agende especialistas em poucos cliques." },
@@ -206,8 +211,23 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
               <div className="w-16 h-16 mx-auto rounded-full bg-primary/10 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-lg font-bold text-foreground">Verificação Iniciada!</h2>
-              <p className="text-xs text-muted-foreground">Complete o processo na aba que foi aberta. Você pode continuar o cadastro.</p>
+              <h2 className="text-lg font-bold text-foreground">Identidade Verificada! ✅</h2>
+              <p className="text-xs text-muted-foreground">Sua verificação foi aprovada. Prossiga para o próximo passo.</p>
+            </div>
+          );
+        }
+
+        if (kycFailed) {
+          return (
+            <div className="text-center py-6 space-y-3">
+              <div className="w-16 h-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+                <ShieldCheck className="w-8 h-8 text-destructive" />
+              </div>
+              <h2 className="text-lg font-bold text-foreground">Verificação não aprovada</h2>
+              <p className="text-xs text-muted-foreground">A similaridade facial ficou abaixo do mínimo. Tente novamente com fotos mais nítidas.</p>
+              <Button onClick={() => setKycFailed(false)} variant="outline" className="rounded-xl gap-2 mt-2">
+                <Camera className="w-4 h-4" /> Tentar Novamente
+              </Button>
             </div>
           );
         }
@@ -215,8 +235,12 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         return (
           <BiometricKYC
             onComplete={(result) => {
-              if (result.status === "aprovado") setKycCompleted(true);
-              else handleKycStarted();
+              if (result.status === "aprovado") {
+                setKycCompleted(true);
+                localStorage.removeItem(KYC_PENDING_KEY);
+              } else {
+                setKycFailed(true);
+              }
             }}
             variant="full"
             tipo="paciente"
@@ -268,9 +292,11 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-5 pb-2">
         <h2 className="text-lg font-extrabold text-primary italic">AloClínica</h2>
-        <button onClick={handleSkip} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-          Pular
-        </button>
+        {currentStep < STEPS.findIndex(s => s.id === "kyc") && (
+          <button onClick={handleSkip} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Pular
+          </button>
+        )}
       </div>
 
       {/* Progress */}
@@ -299,19 +325,19 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
             </Button>
           )}
           <Button
-            className="flex-1 h-13 rounded-xl bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20"
+            className="flex-1 h-13 rounded-xl bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20 disabled:opacity-40"
             onClick={handleNext}
-            disabled={saving}
+            disabled={saving || (step.id === "kyc" && !kycCompleted)}
           >
             {saving ? "Salvando..." : isLast ? "Começar Agora" : (
               <>Próximo <ArrowRight className="w-4 h-4 ml-1" /></>
             )}
           </Button>
         </div>
-        {step.id === "kyc" && (
-          <button onClick={handleSkipKyc} className="w-full text-center text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
-            Fazer depois · <span className="text-destructive/70">Necessário para agendar consultas</span>
-          </button>
+        {step.id === "kyc" && !kycCompleted && (
+          <p className="w-full text-center text-xs text-destructive/70 mt-3 font-medium">
+            ⚠️ Verificação obrigatória para usar a plataforma
+          </p>
         )}
         {isLast && (
           <p className="text-center text-xs text-muted-foreground mt-3">
