@@ -211,6 +211,7 @@ const Dashboard = () => {
   };
 
   return (
+    <ReVerificationGate>
     <Suspense fallback={<PingoLoader />}>
     <Routes>
       <Route index element={<IndexDashboard />} />
