@@ -193,6 +193,12 @@ export const cancelAppointment = async (params: CancelAppointmentParams): Promis
       ? `${params.reason} [cancelamento tardio <2h]`
       : params.reason;
 
+    // Fetch appointment to determine who is cancelling
+    const { data: appt } = await supabase.from("appointments")
+      .select("doctor_id, patient_id")
+      .eq("id", params.appointmentId)
+      .single();
+
     const { error } = await supabase.from("appointments").update({
       status: "cancelled",
       cancelled_by: params.cancelledBy,
@@ -201,15 +207,24 @@ export const cancelAppointment = async (params: CancelAppointmentParams): Promis
 
     if (error) return false;
 
-    // Process refund based on cancellation type
-    const refundType = params.isLateCancel ? "no_refund" : "full";
-    supabase.functions.invoke("process-refund", {
-      body: {
-        appointmentId: params.appointmentId,
-        reason: params.reason,
-        refundType,
-      },
-    }).catch(err => logError("process-refund invocation", err));
+    // Determine refund: only refund if DOCTOR cancels (or admin on behalf of doctor)
+    const isDoctorCancel = appt?.doctor_id && (
+      params.cancelledBy === appt.doctor_id ||
+      // Check if the canceller's user_id matches the doctor's user_id
+      params.cancelledBy !== appt.patient_id
+    );
+
+    if (isDoctorCancel) {
+      // Doctor cancelled — full refund to patient
+      supabase.functions.invoke("process-refund", {
+        body: {
+          appointmentId: params.appointmentId,
+          reason: "Cancelamento pelo médico — reembolso integral",
+          refundType: "full",
+        },
+      }).catch(err => logError("process-refund invocation", err));
+    }
+    // Patient cancels: NO refund (regardless of timing)
 
     notifyAppointmentCancelled(params.appointmentId, params.cancelledByName, params.reason)
       .catch(err => logError("notifyAppointmentCancelled", err));
