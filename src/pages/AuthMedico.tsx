@@ -165,7 +165,7 @@ const AuthMedico = () => {
         phone: phone || null,
         crm,
         crm_state: crmState,
-        specialty: specialty || null,
+        specialty: selectedSpecialties.join(", ") || null,
         bio: enrichedBio || null,
       } as any);
       if (error) throw error;
