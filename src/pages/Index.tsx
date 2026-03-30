@@ -1,4 +1,4 @@
-import { useEffect, useState, forwardRef, lazy, Suspense } from "react";
+import { useEffect, forwardRef, lazy } from "react";
 import { useTheme } from "next-themes";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -9,30 +9,25 @@ import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
-import { Stethoscope, CreditCard, Brain, Heartbeat, FileText } from "@phosphor-icons/react";
-
-// WebP for faster loading; deferred sections handle lazy rendering
+import { Stethoscope, Brain, Heartbeat } from "@phosphor-icons/react";
 
 import bannerAi from "@/assets/banner-ai-triage.webp";
-import bannerConsulta from "@/assets/banner-consulta.webp";
 import bannerPlantao from "@/assets/banner-plantao.webp";
-import bannerTelelaudo from "@/assets/banner-telelaudo.webp";
 
-// Lazy-load below-the-fold sections for faster initial paint
-const InfoBannerStrip = lazy(() => import("@/components/landing/InfoBannerStrip"));
-const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
+// Lazy-load below-the-fold sections
+const HorizontalScrollCards = lazy(() => import("@/components/landing/HorizontalScrollCards"));
+const SpecialtiesShowcase = lazy(() => import("@/components/landing/SpecialtiesShowcase"));
 const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection"));
-
+const BenefitsGrid = lazy(() => import("@/components/landing/BenefitsGrid"));
+const HealthNetworkSection = lazy(() => import("@/components/landing/HealthNetworkSection"));
+const InfoBannerStrip = lazy(() => import("@/components/landing/InfoBannerStrip"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
 const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
 const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
-const HorizontalScrollCards = lazy(() => import("@/components/landing/HorizontalScrollCards"));
-
 const Index = forwardRef<HTMLDivElement>((_, ref) => {
   const { setTheme, theme } = useTheme();
-  
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -41,8 +36,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
     setTheme("light");
     return () => { if (prev && prev !== "light") setTheme(prev); };
   }, []);
-
-
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -86,6 +79,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       <HeroSection />
       <SocialProofBar />
 
+      {/* Plantão 24h banner */}
       <section className="py-8 px-4 relative overflow-hidden">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
           <div className="relative rounded-3xl overflow-hidden bg-gradient-hero shadow-elevated">
@@ -97,7 +91,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
                     <Stethoscope className="w-6 h-6 text-primary-foreground" weight="fill" />
                   </div>
                 </div>
-
                 <div>
                   <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
                     <span className="w-2.5 h-2.5 rounded-full bg-primary-foreground animate-pulse" />
@@ -111,7 +104,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
                   </p>
                 </div>
               </div>
-
               <Button
                 size="lg"
                 className="bg-background text-primary hover:bg-background/95 rounded-2xl px-8 gap-2.5 shadow-lg shadow-foreground/10 font-extrabold shrink-0 transition-all text-sm sm:text-base"
@@ -125,19 +117,22 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         </div>
       </section>
 
+      {/* Services showcase with hero image */}
       <DeferredSection fallbackClassName="h-screen" rootMargin="300px 0px">
         <HorizontalScrollCards />
       </DeferredSection>
 
-      <DeferredSection fallbackClassName="h-28 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">
-        <StatsSection />
+      {/* Specialties grid — NEW */}
+      <DeferredSection fallbackClassName="h-[520px]" rootMargin="200px 0px">
+        <SpecialtiesShowcase />
       </DeferredSection>
 
-
+      {/* How it works */}
       <DeferredSection fallbackClassName="h-[520px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <HowItWorksSection />
       </DeferredSection>
 
+      {/* AI Triage banner */}
       <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <InfoBannerStrip
           icon={Brain}
@@ -151,20 +146,17 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         />
       </DeferredSection>
 
-
-      <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-        <InfoBannerStrip
-          icon={CreditCard}
-          label="Consulta Avulsa"
-          title="Consulte agora sem mensalidade"
-          highlight="A partir de R$89 com receita digital"
-          href="/paciente"
-          gradient="from-primary to-violet-600"
-          mascotSrc={bannerConsulta}
-          variant="diagonal"
-        />
+      {/* Benefits bento grid — NEW */}
+      <DeferredSection fallbackClassName="h-[600px]" rootMargin="200px 0px">
+        <BenefitsGrid />
       </DeferredSection>
 
+      {/* Health network section — NEW */}
+      <DeferredSection fallbackClassName="h-[500px]" rootMargin="200px 0px">
+        <HealthNetworkSection />
+      </DeferredSection>
+
+      {/* Urgent care banner */}
       <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <InfoBannerStrip
           icon={Heartbeat}
@@ -178,31 +170,22 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         />
       </DeferredSection>
 
+      {/* Testimonials */}
       <DeferredSection fallbackClassName="h-[520px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <TestimonialsSection />
       </DeferredSection>
 
-      <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-        <InfoBannerStrip
-          icon={FileText}
-          label="Telelaudo"
-          title="Laudos médicos à distância com IA"
-          highlight="Para clínicas e hospitais"
-          href="/telelaudo"
-          gradient="from-amber-500 to-orange-600"
-          mascotSrc={bannerTelelaudo}
-          variant="split"
-        />
-      </DeferredSection>
-
+      {/* CTA comparison */}
       <DeferredSection fallbackClassName="h-[340px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <CTABanner />
       </DeferredSection>
 
+      {/* FAQ */}
       <DeferredSection fallbackClassName="h-[560px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <FAQSection />
       </DeferredSection>
 
+      {/* Triage CTA */}
       <DeferredSection fallbackClassName="h-[260px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="220px 0px">
         <section aria-labelledby="triage-heading" className="py-16 px-4">
           <div className="max-w-2xl mx-auto text-center space-y-5">
