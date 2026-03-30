@@ -71,6 +71,7 @@ const UserProfile = () => {
   const [showKyc, setShowKyc] = useState(openKyc);
   const [kycPending, setKycPending] = useState(localStorage.getItem(KYC_PENDING_KEY) === "true");
   const [kycSaving, setKycSaving] = useState(false);
+  const [kycVerified, setKycVerified] = useState(false);
 
   // Doctor fields
   const [bio, setBio] = useState("");
