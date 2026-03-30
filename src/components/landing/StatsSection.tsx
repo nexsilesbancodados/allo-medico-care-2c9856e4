@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useState, useRef } from "react";
+import { motion } from "framer-motion";
 import { Clock, Stethoscope, Star, ShieldCheck } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -70,24 +71,29 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
   }, []);
 
   return (
-    <section ref={ref} className="py-6 md:py-10 relative">
+    <section ref={ref} className="py-8 md:py-12 relative">
       <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {stats.map((stat, i) => (
-            <div
+            <motion.div
               key={i}
-              className="group flex items-center gap-3.5 rounded-2xl bg-card/80 backdrop-blur-sm border border-border/30 px-5 py-4 sm:py-5 hover:shadow-md hover:border-primary/15 hover:-translate-y-0.5 transition-all duration-200 cursor-default"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              whileInView={{ opacity: 1, y: 0, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ y: -4, transition: { duration: 0.25 } }}
+              className="group flex items-center gap-3.5 rounded-2xl bg-card/90 backdrop-blur-sm border border-border/25 px-5 py-5 sm:py-6 hover:shadow-xl hover:border-primary/20 transition-all duration-300 cursor-default"
             >
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors duration-200">
-                <stat.icon className="w-5 h-5 text-primary" weight="fill" aria-hidden="true" />
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 group-hover:bg-primary group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
+                <stat.icon className="w-5 h-5 text-primary group-hover:text-primary-foreground transition-colors duration-300" weight="fill" aria-hidden="true" />
               </div>
               <div className="min-w-0">
                 <AnimatedCounter value={stat.value} />
-                <p className="mt-0.5 text-xs text-muted-foreground font-medium truncate">
+                <p className="mt-1 text-xs text-muted-foreground font-semibold truncate">
                   {stat.label}
                 </p>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>

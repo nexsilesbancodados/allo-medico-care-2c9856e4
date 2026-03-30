@@ -42,8 +42,9 @@ const HeroSection = memo(
         {/* Subtle ambient background */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute inset-0 bg-gradient-to-b from-background via-background to-muted/20" />
-          <div className="absolute top-[-15%] right-[10%] w-[500px] h-[500px] rounded-full bg-primary/[0.03] blur-[180px]" />
-          <div className="absolute bottom-[-25%] left-[-8%] w-[400px] h-[400px] rounded-full bg-secondary/[0.03] blur-[160px]" />
+          <div className="absolute top-[-15%] right-[10%] w-[500px] h-[500px] rounded-full bg-primary/[0.04] blur-[180px] animate-breathe" />
+          <div className="absolute bottom-[-25%] left-[-8%] w-[400px] h-[400px] rounded-full bg-secondary/[0.04] blur-[160px] animate-breathe [animation-delay:1.5s]" />
+          <div className="absolute top-[40%] left-[50%] w-[300px] h-[300px] rounded-full bg-primary/[0.02] blur-[120px] animate-float" />
         </div>
 
         <div className="w-full max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
@@ -57,12 +58,15 @@ const HeroSection = memo(
             >
               {/* Status badge */}
               <motion.div
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-success/20 bg-success/[0.06] text-success text-xs font-semibold mb-6"
+                className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full border border-success/20 bg-success/[0.06] text-success text-xs font-semibold mb-6 shadow-sm shadow-success/10"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.25, delay: 0.1 }}
               >
-                <span className="inline-flex h-1.5 w-1.5 rounded-full bg-success shadow-sm shadow-success/40 animate-pulse" />
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-success shadow-sm shadow-success/40" />
+                </span>
                 Médicos disponíveis agora
               </motion.div>
 

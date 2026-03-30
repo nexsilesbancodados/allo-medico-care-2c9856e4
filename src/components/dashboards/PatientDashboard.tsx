@@ -370,19 +370,18 @@ const PatientDashboard = () => {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 + i * 0.04, type: "spring", stiffness: 320, damping: 26 }}
-              whileTap={{ scale: 0.88 }}
-              whileHover={{ y: -4, scale: 1.05 }}
+              whileTap={{ scale: 0.85 }}
+              whileHover={{ y: -6, scale: 1.08 }}
               onClick={() => navigate(action.path)}
               className="group flex flex-col items-center gap-2.5 py-2 cursor-pointer"
             >
               <div
-                className="relative flex h-[58px] w-[58px] items-center justify-center rounded-[20px] border border-border/8 shadow-[0_3px_14px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:shadow-lg group-hover:border-border/15"
+                className="relative flex h-[60px] w-[60px] items-center justify-center rounded-[22px] border border-border/8 shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:shadow-xl group-hover:border-border/15 overflow-hidden"
                 style={{ backgroundColor: action.bg }}
               >
-                <action.icon size={25} weight="fill" style={{ color: action.color }} className="transition-transform duration-300 group-hover:scale-110" />
-                {/* Subtle glow on hover */}
-                <div className="absolute inset-0 rounded-[20px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ boxShadow: `inset 0 0 0 1px ${action.color}20` }} />
+                <action.icon size={26} weight="fill" style={{ color: action.color }} className="relative z-10 transition-transform duration-300 group-hover:scale-110" />
+                {/* Shine effect on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
               </div>
               <span className="text-[11px] font-bold text-muted-foreground group-hover:text-foreground leading-tight transition-colors duration-200">{action.label}</span>
             </motion.button>

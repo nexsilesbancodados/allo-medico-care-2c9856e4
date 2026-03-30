@@ -170,8 +170,8 @@ const NotificationBell = () => {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Notificações" className="relative h-9 w-9 rounded-xl overflow-visible">
-          <Bell size={18} weight={unreadCount > 0 ? "fill" : "regular"} />
+        <Button variant="ghost" size="icon" aria-label="Notificações" className="relative h-9 w-9 rounded-xl overflow-visible hover:bg-primary/[0.06] transition-colors">
+          <Bell size={18} weight={unreadCount > 0 ? "fill" : "regular"} className={unreadCount > 0 ? "text-primary" : ""} />
           <AnimatePresence>
             {unreadCount > 0 && (
               <motion.span
@@ -186,7 +186,7 @@ const NotificationBell = () => {
                   ? { scale: { duration: 0.5, repeat: 2, ease: "easeInOut" } }
                   : { duration: 0.2 }
                 }
-                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] flex items-center justify-center font-bold shadow-md ring-2 ring-background tabular-nums"
+                className="absolute -top-1.5 -right-1.5 min-w-[20px] h-[20px] px-1.5 rounded-full bg-destructive text-destructive-foreground text-[9px] flex items-center justify-center font-bold shadow-lg shadow-destructive/30 ring-2 ring-background tabular-nums"
               >
                 {unreadCount > 99 ? "99+" : unreadCount}
               </motion.span>
@@ -194,65 +194,72 @@ const NotificationBell = () => {
           </AnimatePresence>
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-[340px] p-0 rounded-2xl border-border/50 shadow-elevated overflow-hidden">
+      <PopoverContent align="end" className="w-[360px] p-0 rounded-2xl border-border/40 shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-card border-b border-border/30">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between px-5 py-3.5 bg-gradient-to-r from-card to-muted/20 border-b border-border/20">
+          <div className="flex items-center gap-2.5">
             <h3 className="font-bold text-sm text-foreground">Notificações</h3>
             {unreadCount > 0 && (
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary animate-count-up">
                 {unreadCount} nova{unreadCount !== 1 ? "s" : ""}
               </span>
             )}
           </div>
           {unreadCount > 0 && (
-            <Button variant="ghost" size="sm" onClick={markAllRead} className="text-xs h-7 rounded-lg text-primary hover:text-primary hover:bg-primary/10">
+            <Button variant="ghost" size="sm" onClick={markAllRead} className="text-xs h-7 rounded-lg text-primary hover:text-primary hover:bg-primary/10 font-semibold">
               <CheckCircle size={12} weight="fill" className="mr-1" /> Ler todas
             </Button>
           )}
         </div>
 
-        <ScrollArea className="max-h-[360px]">
+        <ScrollArea className="max-h-[380px]">
           {notifications.length === 0 ? (
-            <div className="py-12 text-center">
-              <Bell size={28} weight="light" className="mx-auto mb-2 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground">Nenhuma notificação</p>
-              <p className="text-[11px] text-muted-foreground/60 mt-0.5">Você será notificado sobre consultas e atualizações</p>
+            <div className="py-16 text-center px-6">
+              <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+                <Bell size={28} weight="light" className="text-muted-foreground/30" />
+              </div>
+              <p className="text-sm font-semibold text-foreground mb-1">Tudo tranquilo por aqui!</p>
+              <p className="text-[12px] text-muted-foreground/60 leading-relaxed max-w-[200px] mx-auto">Você será notificado sobre consultas, mensagens e atualizações.</p>
             </div>
           ) : (
-            <div className="divide-y divide-border/30">
-              {notifications.map(n => (
+            <div className="divide-y divide-border/20">
+              {notifications.map((n, idx) => (
                 <motion.div
                   key={n.id}
-                  initial={{ opacity: 0, x: -5 }}
+                  initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors duration-200 group ${
-                    !n.is_read ? "bg-primary/[0.03] hover:bg-primary/[0.06]" : "hover:bg-muted/40"
+                  transition={{ delay: idx * 0.02, duration: 0.25 }}
+                  className={`flex items-start gap-3.5 px-5 py-3.5 cursor-pointer transition-all duration-200 group ${
+                    !n.is_read ? "bg-primary/[0.03] hover:bg-primary/[0.07]" : "hover:bg-muted/40"
                   }`}
                   onClick={() => handleClick(n)}
                 >
-                  <span className="text-base mt-0.5 shrink-0">{typeIcons[n.type] ?? "🔔"}</span>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-base shrink-0 mt-0.5 ${
+                    !n.is_read ? "bg-primary/8 shadow-sm" : "bg-muted/50"
+                  }`}>
+                    {typeIcons[n.type] ?? "🔔"}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start gap-1.5">
-                      <p className={`text-sm leading-tight ${!n.is_read ? "font-semibold text-foreground" : "text-foreground/80"}`}>
+                      <p className={`text-[13px] leading-tight ${!n.is_read ? "font-bold text-foreground" : "font-medium text-foreground/80"}`}>
                         {n.title}
                       </p>
                       {!n.is_read && (
-                        <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1" />
+                        <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5 animate-breathe" />
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">{n.message}</p>
-                    <p className="text-[10px] text-muted-foreground/60 mt-1">
+                    <p className="text-[11.5px] text-muted-foreground line-clamp-2 mt-0.5 leading-relaxed">{n.message}</p>
+                    <p className="text-[10px] text-muted-foreground/50 mt-1.5 font-medium">
                       {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ptBR })}
                     </p>
                   </div>
                   <Button
                     variant="ghost" size="icon"
-                    className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg"
+                    className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg hover:bg-destructive/10 hover:text-destructive"
                     aria-label="Excluir notificação"
                     onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
                   >
-                    <Trash size={12} className="text-muted-foreground" />
+                    <Trash size={12} />
                   </Button>
                 </motion.div>
               ))}
@@ -261,10 +268,10 @@ const NotificationBell = () => {
         </ScrollArea>
 
         {/* Footer */}
-        <div className="px-4 py-2.5 border-t border-border/30 bg-card/50 flex items-center justify-between">
+        <div className="px-5 py-3 border-t border-border/20 bg-gradient-to-r from-card/80 to-muted/10 flex items-center justify-between">
           <PushNotificationToggle />
           {notifications.length > 0 && (
-            <span className="text-[10px] text-muted-foreground">{notifications.length} notificação{notifications.length !== 1 ? "ões" : ""}</span>
+            <span className="text-[10px] text-muted-foreground font-medium">{notifications.length} notificaçõ{notifications.length !== 1 ? "es" : ""}</span>
           )}
         </div>
       </PopoverContent>
