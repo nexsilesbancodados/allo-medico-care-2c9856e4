@@ -172,7 +172,7 @@ const AuthLaudista = () => {
     if (error) {
       toast.error("Erro ao entrar", { description: error.message });
     } else {
-      navigate("/dashboard/laudista?role=doctor");
+      navigate("/dashboard?role=laudista");
     }
   };
 
