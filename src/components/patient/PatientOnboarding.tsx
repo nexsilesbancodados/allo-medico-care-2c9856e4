@@ -104,25 +104,32 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const handleNext = async () => {
     if (step.id === "personal") {
       if (!firstName.trim() || !lastName.trim()) { toast.error("Preencha nome e sobrenome"); return; }
+      const rawCpf = cpf.replace(/\D/g, "");
+      if (!rawCpf || !validarCPF(rawCpf)) { toast.error("CPF obrigatório", { description: "Informe um CPF válido para continuar." }); return; }
+      const rawPhone = phone.replace(/\D/g, "");
+      if (!rawPhone || rawPhone.length < 10) { toast.error("Telefone obrigatório", { description: "Informe um telefone válido." }); return; }
+      if (!dateOfBirth) { toast.error("Data de nascimento obrigatória"); return; }
+      // Age validation (16+)
+      const today = new Date();
+      const birth = new Date(dateOfBirth);
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+      if (age < 16) { toast.error("Idade mínima: 16 anos"); return; }
       await saveProfile();
     }
-    if (step.id === "health") await saveProfile();
+    if (step.id === "health") {
+      if (!bloodType) { toast.error("Tipo sanguíneo obrigatório", { description: "Selecione seu tipo sanguíneo." }); return; }
+      if (!allergies.length) { toast.error("Informe suas alergias", { description: "Adicione alergias ou marque 'Não tenho alergias'." }); return; }
+      if (!chronicConditions.length) { toast.error("Informe condições crônicas", { description: "Adicione condições ou marque 'Não tenho condições crônicas'." }); return; }
+      await saveProfile();
+    }
     if (step.id === "kyc" && !kycCompleted) {
       toast.error("Verificação obrigatória", { description: "Complete a verificação de identidade para continuar." });
       return;
     }
     if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); localStorage.removeItem(KYC_PENDING_KEY); onComplete(); }
     else setCurrentStep(prev => prev + 1);
-  };
-
-  const handleSkip = () => {
-    // Only allow skip if KYC is already completed
-    if (!kycCompleted && currentStep >= STEPS.findIndex(s => s.id === "kyc")) {
-      toast.error("Complete a verificação de identidade primeiro");
-      return;
-    }
-    localStorage.setItem(ONBOARDING_KEY, "true");
-    onComplete();
   };
 
   const FEATURES = [
