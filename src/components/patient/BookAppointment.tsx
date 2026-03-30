@@ -118,6 +118,35 @@ const BookAppointment = () => {
     if (doctorId) fetchDoctor();
   }, [doctorId]);
 
+  // Check return eligibility
+  useEffect(() => {
+    const checkReturn = async () => {
+      if (appointmentType !== "return" || !user || !doctorId) {
+        setReturnEligible(false);
+        setOriginalPrice(null);
+        return;
+      }
+      const { data } = await supabase
+        .from("appointments")
+        .select("id, price_at_booking, return_deadline")
+        .eq("patient_id", user.id)
+        .eq("doctor_id", doctorId)
+        .eq("status", "completed")
+        .not("return_deadline", "is", null)
+        .gte("return_deadline", new Date().toISOString())
+        .order("scheduled_at", { ascending: false })
+        .limit(1);
+      if (data && data.length > 0) {
+        setReturnEligible(true);
+        setOriginalPrice(data[0].price_at_booking);
+      } else {
+        setReturnEligible(false);
+        setOriginalPrice(null);
+      }
+    };
+    checkReturn();
+  }, [appointmentType, user, doctorId]);
+
   useEffect(() => {
     if (selectedDate && doctorId) fetchBookedSlots();
   }, [selectedDate]);
