@@ -163,17 +163,17 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         return (
           <div className="text-left space-y-3">
             <h2 className="text-lg font-bold text-foreground text-center mb-1">Dados Pessoais</h2>
-            <p className="text-xs text-muted-foreground text-center mb-3">Informações para seu cadastro médico</p>
+            <p className="text-xs text-muted-foreground text-center mb-3">Todos os campos são obrigatórios</p>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-xs">Nome *</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" className="mt-1 h-11 rounded-xl" /></div>
               <div><Label className="text-xs">Sobrenome *</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" className="mt-1 h-11 rounded-xl" /></div>
             </div>
-            <div><Label className="text-xs">CPF</Label>
-              <CpfInput value={cpf} onChange={setCpf} optional className="mt-1" inputClassName="h-11 rounded-xl" />
+            <div><Label className="text-xs">CPF *</Label>
+              <CpfInput value={cpf} onChange={setCpf} className="mt-1" inputClassName="h-11 rounded-xl" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-xs">Telefone</Label><Input value={phoneMasked} onChange={e => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="(00) 00000-0000" className="mt-1 h-11 rounded-xl font-mono" maxLength={15} /></div>
-              <div><Label className="text-xs">Nascimento</Label><Input type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} className="mt-1 h-11 rounded-xl" /></div>
+              <div><Label className="text-xs">Telefone *</Label><Input value={phoneMasked} onChange={e => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="(00) 00000-0000" className="mt-1 h-11 rounded-xl font-mono" maxLength={15} /></div>
+              <div><Label className="text-xs">Nascimento *</Label><Input type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} className="mt-1 h-11 rounded-xl" max={new Date().toISOString().split("T")[0]} /></div>
             </div>
           </div>
         );
