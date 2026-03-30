@@ -275,6 +275,15 @@ const AuthPaciente = () => {
           transition={{ duration: 0.3 }}
           className="space-y-6"
         >
+          {/* Back to landing — desktop */}
+          <Link
+            to="/"
+            className="hidden lg:inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium mb-4 group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Voltar ao início
+          </Link>
+
           <div>
             <h2 className="text-[28px] font-extrabold text-foreground tracking-tight">Bem-vindo! 👋</h2>
             <p className="text-muted-foreground mt-1">Como deseja continuar?</p>
