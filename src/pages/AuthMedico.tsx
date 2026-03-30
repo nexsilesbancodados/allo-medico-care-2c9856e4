@@ -535,7 +535,7 @@ const AuthMedico = () => {
                         <option value="Outro">Outro</option>
                       </select>
                     </div>
-                    <Button className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={!specialty || !consultationType} onClick={() => setStep("apply")}>
+                    <Button className="w-full bg-gradient-to-r from-secondary to-primary text-primary-foreground h-12 shadow-lg" size="lg" disabled={selectedSpecialties.length === 0 || !consultationType} onClick={() => setStep("apply")}>
                       Continuar para Cadastro <ArrowRight className="w-5 h-5 ml-2" />
                     </Button>
                     <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
