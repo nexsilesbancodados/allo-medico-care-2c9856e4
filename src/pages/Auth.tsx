@@ -354,8 +354,8 @@ const Auth = () => {
                   <form onSubmit={handleLogin} className="space-y-5" noValidate>
                     <div>
                       <Label htmlFor="email" className="text-sm font-semibold text-foreground">Email</Label>
-                      <div className="relative mt-2">
-                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <div className="relative mt-1.5">
+                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/50" />
                         <Input
                           id="email"
                           type="email"
@@ -363,7 +363,7 @@ const Auth = () => {
                           value={email}
                           onChange={e => { setEmail(e.target.value); setEmailError(""); }}
                           onBlur={() => setEmailError(validateEmail(email))}
-                          className={`pl-11 h-12 rounded-xl text-base transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] ${emailError ? "border-destructive focus-visible:ring-destructive" : "border-input"}`}
+                          className={`pl-11 h-[52px] rounded-2xl bg-card border-border/60 shadow-sm text-[15px] transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] focus-visible:border-primary/40 ${emailError ? "border-destructive focus-visible:ring-destructive" : ""}`}
                         />
                         {emailError && (
                           <div className="flex items-center gap-1.5 mt-1.5">
@@ -375,27 +375,27 @@ const Auth = () => {
                     </div>
 
                     <div>
-                      <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center justify-between">
                         <Label htmlFor="password" className="text-sm font-semibold text-foreground">Senha</Label>
-                        <Link to="/forgot-password" className="text-xs text-primary hover:text-primary/80 font-medium transition-colors">Esqueci minha senha</Link>
+                        <Link to="/forgot-password" className="text-[13px] font-semibold text-primary hover:underline">Esqueci minha senha</Link>
                       </div>
-                      <div className="relative">
-                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <div className="relative mt-1.5">
+                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/50" />
                         <Input
                           id="password"
                           type={showPassword ? "text" : "password"}
                           placeholder="••••••••"
                           value={password}
                           onChange={e => { setPassword(e.target.value); setPasswordError(""); }}
-                          className={`pl-11 pr-11 h-12 rounded-xl text-base transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] ${passwordError ? "border-destructive focus-visible:ring-destructive" : "border-input"}`}
+                          className={`pl-11 pr-11 h-[52px] rounded-2xl bg-card border-border/60 shadow-sm text-[15px] transition-shadow focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] focus-visible:border-primary/40 ${passwordError ? "border-destructive focus-visible:ring-destructive" : ""}`}
                         />
                         <button
                           type="button"
                           onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/40 hover:text-foreground transition-colors"
                           tabIndex={-1}
                         >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
                         </button>
                       </div>
                       {passwordError && (
@@ -408,7 +408,7 @@ const Auth = () => {
 
                     <Button
                       type="submit"
-                      className="w-full h-12 rounded-xl bg-gradient-hero text-primary-foreground font-bold text-base shadow-lg hover:shadow-xl hover:brightness-105 active:scale-[0.98] transition-all"
+                      className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-bold text-base shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/25 hover:brightness-110 active:scale-[0.98] transition-all"
                       size="lg"
                       disabled={loading}
                     >
