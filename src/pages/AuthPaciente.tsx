@@ -198,11 +198,6 @@ const AuthPaciente = () => {
     setLoading(false);
   };
 
-  const benefits = [
-    { icon: VideoCamera, text: "Videochamada HD criptografada" },
-    { icon: ShieldCheck, text: "Médicos verificados pelo CFM" },
-    { icon: Lightning, text: "Atendimento em até 10 minutos" },
-  ];
 
   /* ═══ LEFT PANEL (Desktop only) ═══ */
   const LeftPanel = () => (
