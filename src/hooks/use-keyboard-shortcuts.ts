@@ -1,31 +1,37 @@
 import { useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 
 const SHORTCUTS: { keys: string; description: string }[] = [
-  { keys: "Alt + H",   description: "Ir para a Página Inicial" },
-  { keys: "Alt + D",   description: "Ir para o Painel" },
-  { keys: "Alt + N",   description: "Nova consulta / Agendar" },
-  { keys: "Alt + P",   description: "Meu Perfil" },
+  { keys: "Alt + H", description: "Ir para a Página Inicial" },
+  { keys: "Alt + D", description: "Ir para o Painel" },
+  { keys: "Alt + N", description: "Nova consulta / Agendar" },
+  { keys: "Alt + P", description: "Meu Perfil" },
   { keys: "⌘K / Ctrl+K", description: "Busca rápida" },
-  { keys: "?",         description: "Mostrar atalhos de teclado" },
+  { keys: "?", description: "Mostrar atalhos de teclado" },
 ];
 
-const isInputActive = () => {
-  const tag = (document.activeElement as HTMLElement)?.tagName;
-  const isEditable = (document.activeElement as HTMLElement)?.isContentEditable;
-  return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || isEditable;
+const isInteractiveTarget = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) return false;
+
+  const tag = target.tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable) {
+    return true;
+  }
+
+  return Boolean(target.closest("input, textarea, select, [contenteditable='true'], form, [role='dialog']"));
 };
 
 /**
- * Global keyboard shortcuts — registers window-level handlers.
- * Skip if focus is in an input/textarea/select/contenteditable.
+ * Global keyboard shortcuts — dashboard only.
+ * Never run while typing or interacting with forms/dialogs.
  */
 export function useKeyboardShortcuts() {
   const navigate = useNavigate();
+  const location = useLocation();
 
   const showHelp = useCallback(() => {
-    const lines = SHORTCUTS.map(s => `${s.keys} → ${s.description}`).join("  ·  ");
+    const lines = SHORTCUTS.map((s) => `${s.keys} → ${s.description}`).join("  ·  ");
     toast.info("⌨️ Atalhos de Teclado", {
       description: lines,
       duration: 6000,
@@ -33,10 +39,14 @@ export function useKeyboardShortcuts() {
   }, []);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (isInputActive()) return;
+    const isDashboardRoute = location.pathname.startsWith("/dashboard");
+    if (!isDashboardRoute) return;
 
-      // Alt shortcuts
+    const handler = (e: KeyboardEvent) => {
+      if (isInteractiveTarget(e.target) || isInteractiveTarget(document.activeElement)) {
+        return;
+      }
+
       if (e.altKey) {
         switch (e.key.toLowerCase()) {
           case "h":
@@ -59,7 +69,6 @@ export function useKeyboardShortcuts() {
         return;
       }
 
-      // ? — show shortcuts help (no modifier key)
       if (e.key === "?" && !e.ctrlKey && !e.metaKey) {
         e.preventDefault();
         showHelp();
@@ -68,5 +77,6 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [navigate, showHelp]);
+  }, [location.pathname, navigate, showHelp]);
 }
+
