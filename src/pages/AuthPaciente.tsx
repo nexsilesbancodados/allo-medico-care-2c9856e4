@@ -44,6 +44,77 @@ import logo from "@/assets/logo.png";
 import mascotWave from "@/assets/mascot-wave.png";
 import mascotThumbsup from "@/assets/mascot-thumbsup.png";
 
+const benefits = [
+  { icon: VideoCamera, text: "Videochamada HD criptografada" },
+  { icon: ShieldCheck, text: "Médicos verificados pelo CFM" },
+  { icon: Lightning, text: "Atendimento em até 10 minutos" },
+];
+
+/* ═══ LEFT PANEL (Desktop only) — extracted outside to avoid remount on every keystroke ═══ */
+const LeftPanel = () => (
+  <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary via-primary/90 to-secondary flex-col items-center justify-center p-12 xl:p-16 overflow-hidden">
+    <div className="absolute top-[-20%] right-[-15%] w-[400px] h-[400px] rounded-full bg-white/[0.06] blur-[120px]" />
+    <div className="absolute bottom-[-10%] left-[-10%] w-[300px] h-[300px] rounded-full bg-secondary/30 blur-[80px]" />
+    <div className="absolute top-[50%] left-[60%] w-[150px] h-[150px] rounded-full bg-white/[0.04] blur-[60px]" />
+    <div className="relative z-10 flex flex-col items-center text-center max-w-md">
+      <img src={logo} alt="AloClínica" className="w-10 h-10 rounded-2xl shadow-lg ring-2 ring-white/20 mb-10" />
+      <motion.img
+        src={mascotWave}
+        alt="Pingo"
+        className="w-[180px] h-[180px] xl:w-[200px] xl:h-[200px] object-contain select-none mb-8"
+        style={{ filter: "drop-shadow(0 8px 32px rgba(0,0,50,.3))" }}
+        animate={{ y: [0, -10, 0] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+      />
+      <h1 className="text-[36px] xl:text-[42px] font-extrabold text-white leading-[1.1] tracking-tight">
+        Sua saúde em{" "}
+        <span className="relative inline-block">
+          <span className="relative z-10">boas mãos</span>
+          <span className="absolute inset-0 bg-white/15 rounded-xl -skew-x-2 scale-x-105 scale-y-125" />
+        </span>
+      </h1>
+      <p className="text-white/65 mt-4 text-base leading-relaxed max-w-sm">
+        Consulte médicos online 24h, em qualquer lugar do Brasil.
+      </p>
+      <div className="mt-10 space-y-4 w-full max-w-xs">
+        {benefits.map((b, i) => (
+          <motion.div
+            key={b.text}
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 + i * 0.12 }}
+            className="flex items-center gap-3 text-left"
+          >
+            <div className="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+              <b.icon className="w-5 h-5 text-white" weight="fill" />
+            </div>
+            <span className="text-sm text-white/85 font-medium">{b.text}</span>
+          </motion.div>
+        ))}
+      </div>
+      <div className="mt-12 flex items-center gap-2 text-white/60 text-sm">
+        <Star className="w-4 h-4 text-yellow-300" weight="fill" />
+        <span className="font-semibold text-white/80">4.9</span>
+        <span>— mais de 12.000 avaliações</span>
+      </div>
+    </div>
+  </div>
+);
+
+/* ═══ STEP INDICATOR — extracted outside ═══ */
+const StepIndicator = ({ current }: { current: number }) => (
+  <div className="flex items-center gap-2 mb-6">
+    {[1, 2, 3].map((step) => (
+      <div key={step} className="flex items-center gap-2 flex-1">
+        <div className={`h-1.5 rounded-full flex-1 transition-colors duration-300 ${
+          step <= current ? "bg-primary" : "bg-muted"
+        }`} />
+      </div>
+    ))}
+    <span className="text-xs text-muted-foreground font-medium ml-1">{current}/3</span>
+  </div>
+);
+
 const AuthPaciente = () => {
   const [mode, setMode] = useState<"welcome" | "login" | "signup">("welcome");
   const [email, setEmail] = useState("");
