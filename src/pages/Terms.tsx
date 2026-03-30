@@ -79,13 +79,7 @@ const Terms = () => (
         <p>8.4. <strong>Direito de arrependimento:</strong> conforme o Código de Defesa do Consumidor (Art. 49), o paciente tem direito ao arrependimento e reembolso integral em até 7 dias após a primeira contratação, desde que nenhuma consulta tenha sido realizada.</p>
         <p>Para mais detalhes, consulte nossa <Link to="/refund" className="text-primary hover:underline">Política de Reembolso completa</Link>.</p>
 
-        <h2 className="text-xl font-bold text-foreground mt-6">9. Programa de Indicação ("Indique e Ganhe")</h2>
-        <p>9.1. Cada paciente cadastrado recebe um link de indicação exclusivo.</p>
-        <p>9.2. Quando um novo paciente se cadastra utilizando este link e realiza sua primeira consulta, o paciente indicador recebe um crédito de R$ 10,00 em sua conta, que pode ser utilizado como desconto na próxima consulta.</p>
-        <p>9.3. Créditos de indicação não são cumulativos com outras promoções, salvo disposição expressa em contrário.</p>
-        <p>9.4. A AloClinica se reserva o direito de suspender ou cancelar créditos obtidos por fraude ou uso abusivo do sistema de indicação.</p>
-
-        <h2 className="text-xl font-bold text-foreground mt-6">10. Prontuário Eletrônico e Dados de Saúde</h2>
+        <h2 className="text-xl font-bold text-foreground mt-6">9. Prontuário Eletrônico e Dados de Saúde</h2>
         <p>10.1. O prontuário eletrônico do paciente é armazenado de forma segura e criptografada, em conformidade com a Resolução CFM nº 1.638/2002 e a LGPD (Lei nº 13.709/2018).</p>
         <p>10.2. Os prontuários médicos são mantidos pelo prazo mínimo de 20 anos, conforme determinação do Conselho Federal de Medicina.</p>
         <p>10.3. O acesso ao prontuário é restrito ao paciente e aos médicos que o atenderem, sendo vedado o compartilhamento com terceiros sem autorização expressa do paciente.</p>
