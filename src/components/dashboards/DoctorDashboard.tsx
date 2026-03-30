@@ -244,7 +244,8 @@ const DoctorDashboard = () => {
             </Tabs>
           </div>
         </div>
-      </div>
+      </motion.div>
+      </motion.div>
     </DashboardLayout>
   );
 };
