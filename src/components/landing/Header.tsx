@@ -1,4 +1,5 @@
 import { useState, memo, forwardRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { Stethoscope, VideoCamera, Buildings, Brain, FileText, SignIn, ShoppingBag, SignOut, SquaresFour, GlobeSimple, CaretRight } from "@phosphor-icons/react";
