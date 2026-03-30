@@ -200,7 +200,7 @@ const AuthLaudista = () => {
     }
     setLoading(false);
     toast.success("Cadastro realizado!", { description: "Aguarde a aprovação do seu CRM." });
-    navigate("/dashboard/laudista?role=doctor");
+    navigate("/dashboard?role=laudista");
   };
 
   return (
