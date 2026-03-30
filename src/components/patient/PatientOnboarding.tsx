@@ -332,10 +332,10 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
             )}
           </Button>
         </div>
-        {step.id === "kyc" && (
-          <button onClick={handleSkipKyc} className="w-full text-center text-xs text-muted-foreground mt-3 hover:text-foreground transition-colors">
-            Fazer depois · <span className="text-destructive/70">Necessário para agendar consultas</span>
-          </button>
+        {step.id === "kyc" && !kycCompleted && (
+          <p className="w-full text-center text-xs text-destructive/70 mt-3 font-medium">
+            ⚠️ Verificação obrigatória para usar a plataforma
+          </p>
         )}
         {isLast && (
           <p className="text-center text-xs text-muted-foreground mt-3">
