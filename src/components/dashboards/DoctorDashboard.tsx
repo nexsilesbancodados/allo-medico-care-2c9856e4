@@ -118,7 +118,7 @@ const DoctorDashboard = () => {
         />
       </div>
 
-      <div className="mt-5 md:mt-5 space-y-5 pb-24 md:pb-8">
+      <motion.div variants={fadeUp} className="mt-5 md:mt-5 space-y-5 pb-24 md:pb-8">
 
         {/* Goal progress */}
         {todayAppts.length > 0 && (
