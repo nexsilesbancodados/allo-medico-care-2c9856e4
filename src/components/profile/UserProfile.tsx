@@ -97,6 +97,20 @@ const UserProfile = () => {
     if (isDoctor && user) fetchDoctorProfile();
   }, [profile, user]);
 
+  // Check KYC verification status
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("kyc_verificacoes")
+      .select("status")
+      .eq("user_id", user.id)
+      .eq("status", "approved")
+      .limit(1)
+      .then(({ data }) => {
+        setKycVerified(!!data?.length);
+      });
+  }, [user]);
+
   const fetchDoctorProfile = async () => {
     const { data } = await supabase.from("doctor_profiles").select("id, bio, education, experience_years, consultation_price").eq("user_id", user!.id).single();
     if (data) {
