@@ -219,7 +219,19 @@ const UserProfile = () => {
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploading} />
               </label>
             </div>
-            <h2 className="text-xl font-extrabold text-foreground font-[Manrope]">{firstName} {lastName}</h2>
+            <h2 className="text-xl font-extrabold text-foreground font-[Manrope] flex items-center justify-center gap-2">
+              {firstName} {lastName}
+              {isPatient && kycVerified && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/20">
+                  <ShieldCheck className="w-3 h-3" /> Verificado
+                </span>
+              )}
+              {isPatient && !kycVerified && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold border border-amber-500/20 cursor-pointer" onClick={() => setShowKyc(true)}>
+                  <AlertTriangle className="w-3 h-3" /> Não verificado
+                </span>
+              )}
+            </h2>
             <p className="text-sm text-muted-foreground">{user?.email}</p>
             {isPatient && (
               <div className="flex justify-center gap-3 mt-4">
