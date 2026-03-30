@@ -247,11 +247,15 @@ const PatientDashboard = () => {
           className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[32px] bg-gradient-to-br from-[hsl(var(--p-primary))] via-[hsl(215_70%_24%)] to-[hsl(var(--p-primary-mid))] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6"
           style={{ boxShadow: "0 16px 56px rgba(0,29,74,.35), inset 0 1px 0 rgba(255,255,255,.12)" }}
         >
+          {/* Decorative elements */}
           <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-white/[0.06] blur-[80px] hidden md:block" />
           <div className="pointer-events-none absolute -left-8 bottom-4 h-48 w-48 rounded-full bg-white/[0.04] blur-[60px] hidden md:block" />
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+          {/* Subtle pattern overlay */}
+          <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
+            style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
 
-          <div className="relative z-10 px-5 pt-8 pb-6 md:px-8 md:pt-12 md:pb-8">
+          <div className="relative z-10 px-5 pt-8 pb-7 md:px-8 md:pt-12 md:pb-9">
             <div className="flex items-start gap-4">
               {/* Avatar with colored ring */}
               <motion.div
@@ -266,8 +270,8 @@ const PatientDashboard = () => {
                   <LazyAvatar
                     src={profile?.avatar_url}
                     name={firstName}
-                    className="h-14 w-14 md:h-16 md:w-16 border-2 border-white/20"
-                    fallbackClassName="bg-white/15 text-white text-base"
+                    className="h-16 w-16 md:h-[72px] md:w-[72px] border-2 border-white/20 shadow-lg"
+                    fallbackClassName="bg-white/15 text-white text-lg"
                   />
                 </div>
               </motion.div>
@@ -277,7 +281,7 @@ const PatientDashboard = () => {
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-                  className="font-[Manrope] text-[24px] font-extrabold text-white leading-[1.15] tracking-tight md:text-[36px]"
+                  className="font-[Manrope] text-[26px] font-extrabold text-white leading-[1.1] tracking-tight md:text-[38px]"
                 >
                   {getGreeting()}, {firstName}! 👋
                 </motion.h1>
@@ -285,7 +289,7 @@ const PatientDashboard = () => {
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1, duration: 0.45 }}
-                  className="mt-1.5 text-[13px] font-medium text-white/50 leading-relaxed md:text-[15px]"
+                  className="mt-2 text-[13px] font-medium text-white/70 leading-relaxed md:text-[15px]"
                 >
                   {getContextualSubtitle(upcoming, stats)}
                 </motion.p>
@@ -305,7 +309,7 @@ const PatientDashboard = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.18, duration: 0.45 }}
-              className="flex gap-2 mt-4 flex-wrap"
+              className="flex gap-2 mt-5 flex-wrap"
             >
               {[
                 { icon: CalendarCheck, label: `${stats?.total ?? 0} consultas` },
@@ -317,9 +321,9 @@ const PatientDashboard = () => {
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.22 + i * 0.06 }}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.1] backdrop-blur-md border border-white/[0.08] px-3 py-1.5 text-[11px] font-bold text-white/70 shadow-[0_2px_8px_rgba(0,0,0,.12)]"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-md border border-white/[0.1] px-3.5 py-1.5 text-[11px] font-bold text-white/80 shadow-[0_2px_8px_rgba(0,0,0,.12)]"
                 >
-                  <pill.icon size={12} weight="fill" className="opacity-60" /> {pill.label}
+                  <pill.icon size={12} weight="fill" className="opacity-70" /> {pill.label}
                 </motion.span>
               ))}
             </motion.div>
@@ -369,46 +373,56 @@ const PatientDashboard = () => {
               whileTap={{ scale: 0.88 }}
               whileHover={{ y: -4, scale: 1.05 }}
               onClick={() => navigate(action.path)}
-              className="group flex flex-col items-center gap-2 py-2 cursor-pointer"
+              className="group flex flex-col items-center gap-2.5 py-2 cursor-pointer"
             >
               <div
-                className="relative flex h-[56px] w-[56px] items-center justify-center rounded-[18px] border border-border/5 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-200 group-hover:shadow-md"
+                className="relative flex h-[58px] w-[58px] items-center justify-center rounded-[20px] border border-border/8 shadow-[0_3px_14px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:shadow-lg group-hover:border-border/15"
                 style={{ backgroundColor: action.bg }}
               >
-                <action.icon size={24} weight="fill" style={{ color: action.color }} className="transition-transform duration-200 group-hover:scale-110" />
+                <action.icon size={25} weight="fill" style={{ color: action.color }} className="transition-transform duration-300 group-hover:scale-110" />
+                {/* Subtle glow on hover */}
+                <div className="absolute inset-0 rounded-[20px] opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  style={{ boxShadow: `inset 0 0 0 1px ${action.color}20` }} />
               </div>
-              <span className="text-[11px] font-bold text-muted-foreground group-hover:text-foreground leading-tight transition-colors">{action.label}</span>
+              <span className="text-[11px] font-bold text-muted-foreground group-hover:text-foreground leading-tight transition-colors duration-200">{action.label}</span>
             </motion.button>
           ))}
         </section>
 
         {/* ═══════════ BENTO STATS ═══════════ */}
         <section>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-[hsl(var(--p-primary))]/8">
+              <TrendUp size={13} weight="fill" className="text-[hsl(var(--p-primary))]" />
+            </div>
+            <h2 className="font-[Manrope] text-[15px] font-bold text-foreground tracking-tight">Resumo</h2>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             {[
-              { label: "Consultas", value: stats?.total ?? 0, icon: CalendarCheck, color: "hsl(var(--p-primary))", bgToken: "hsl(var(--p-primary) / 0.07)" },
-              { label: "Receitas", value: stats?.prescriptions ?? 0, icon: Pill, color: "hsl(var(--secondary))", bgToken: "hsl(var(--secondary) / 0.07)" },
-              { label: "Documentos", value: stats?.documents ?? 0, icon: ClipboardText, color: "hsl(var(--warning))", bgToken: "hsl(var(--warning) / 0.07)" },
-              { label: "Próx. retorno", value: returnAppts.length > 0 ? `${differenceInDays(new Date((returnAppts[0] as any).return_deadline), new Date())}d` : "—", icon: Timer, color: "hsl(var(--p-primary-mid))", bgToken: "hsl(var(--p-primary-mid) / 0.07)" },
+              { label: "Consultas", value: stats?.total ?? 0, icon: CalendarCheck, color: "hsl(var(--p-primary))", bgToken: "hsl(var(--p-primary) / 0.07)", trend: "up" as const },
+              { label: "Receitas", value: stats?.prescriptions ?? 0, icon: Pill, color: "hsl(var(--secondary))", bgToken: "hsl(var(--secondary) / 0.07)", trend: "up" as const },
+              { label: "Documentos", value: stats?.documents ?? 0, icon: ClipboardText, color: "hsl(var(--warning))", bgToken: "hsl(var(--warning) / 0.07)", trend: "neutral" as const },
+              { label: "Próx. retorno", value: returnAppts.length > 0 ? `${differenceInDays(new Date((returnAppts[0] as any).return_deadline), new Date())}d` : "—", icon: Timer, color: "hsl(var(--p-primary-mid))", bgToken: "hsl(var(--p-primary-mid) / 0.07)", trend: returnAppts.length > 0 ? "down" as const : "neutral" as const },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 + i * 0.05 }}
-                className="kpi-card rounded-2xl border border-border/10 bg-card p-4 shadow-[var(--p-shadow-card)]"
+                className="group kpi-card rounded-2xl border border-border/10 bg-card p-4 shadow-[var(--p-shadow-card)] hover:shadow-md hover:border-border/20 transition-all duration-300 cursor-default"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div
-                    className="flex h-9 w-9 items-center justify-center rounded-xl"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
                     style={{ backgroundColor: stat.bgToken }}
                   >
-                    <stat.icon size={18} weight="fill" style={{ color: stat.color }} />
+                    <stat.icon size={19} weight="fill" style={{ color: stat.color }} />
                   </div>
-                  <TrendUp size={14} weight="bold" className="text-emerald-500 opacity-60" />
+                  {stat.trend === "up" && <TrendUp size={14} weight="bold" className="text-emerald-500 opacity-60" />}
+                  {stat.trend === "down" && <TrendDown size={14} weight="bold" className="text-amber-500 opacity-60" />}
                 </div>
-                <p className="font-[Manrope] text-[24px] font-extrabold text-foreground leading-none">{stat.value}</p>
-                <p className="text-[10.5px] font-semibold text-muted-foreground mt-1.5 uppercase tracking-wider">{stat.label}</p>
+                <p className="font-[Manrope] text-[26px] font-extrabold text-foreground leading-none">{stat.value}</p>
+                <p className="text-[10.5px] font-semibold text-muted-foreground mt-2 uppercase tracking-wider">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -440,43 +454,44 @@ const PatientDashboard = () => {
           {/* RIGHT */}
           <div className="lg:col-span-3 space-y-5 order-last">
 
-            {/* Health Tip — redesigned */}
+            {/* Health Tip — premium card */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="card-interactive relative overflow-hidden rounded-2xl border border-[hsl(var(--p-primary))]/8 bg-card p-5 sm:p-6 shadow-[var(--p-shadow-card)]"
+              className="card-interactive relative overflow-hidden rounded-2xl border border-[hsl(var(--p-primary))]/10 bg-card p-5 sm:p-6 shadow-[var(--p-shadow-card)]"
             >
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--p-primary))]/5 blur-2xl" />
+              <div className="pointer-events-none absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-[hsl(var(--secondary))]/5 blur-2xl" />
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-3">
-                    <span className="text-[48px] leading-none">{todayTip.emoji}</span>
+                    <span className="text-[48px] leading-none drop-shadow-sm">{todayTip.emoji}</span>
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--p-primary))]/50">Dica de Saúde</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-[hsl(var(--p-primary))] opacity-60">Dica de Saúde</span>
                       <h3 className="font-[Manrope] text-[16px] font-bold text-foreground leading-snug">{todayTip.title}</h3>
                     </div>
                   </div>
                   <p className="text-[12.5px] leading-relaxed text-muted-foreground">{todayTip.body}</p>
                 </div>
-                <div className="flex min-w-[100px] flex-col items-center justify-center rounded-2xl bg-gradient-to-b from-[hsl(var(--p-primary))]/[0.08] to-[hsl(var(--p-primary))]/[0.03] border border-[hsl(var(--p-primary))]/10 p-5 shadow-sm">
-                  <span className="text-[26px] font-extrabold text-[hsl(var(--p-primary))] font-[Manrope] leading-none">{todayTip.metric}</span>
+                <div className="flex min-w-[110px] flex-col items-center justify-center rounded-2xl bg-gradient-to-b from-[hsl(var(--p-primary))]/[0.08] to-[hsl(var(--p-primary))]/[0.02] border border-[hsl(var(--p-primary))]/10 p-5 shadow-sm">
+                  <span className="text-[28px] font-extrabold text-[hsl(var(--p-primary))] font-[Manrope] leading-none">{todayTip.metric}</span>
                   <span className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted-foreground mt-2">{todayTip.metricLabel}</span>
                 </div>
               </div>
             </motion.div>
 
-            {/* Find your doctor */}
+            {/* Find your doctor — enhanced CTA */}
             <motion.div
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
-              className="card-interactive relative overflow-hidden rounded-2xl border border-secondary/12 bg-gradient-to-r from-secondary/[0.06] to-secondary/[0.02] p-5"
+              className="card-interactive relative overflow-hidden rounded-2xl border border-secondary/15 bg-gradient-to-br from-secondary/[0.06] via-secondary/[0.03] to-transparent p-5"
             >
               <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-secondary/8 blur-2xl" />
               <div className="flex items-center gap-4">
-                <div className="shrink-0 flex h-12 w-12 items-center justify-center rounded-2xl bg-secondary/10">
-                  <Stethoscope size={22} weight="fill" className="text-secondary" />
+                <div className="shrink-0 flex h-13 w-13 items-center justify-center rounded-2xl bg-secondary/10 shadow-sm">
+                  <Stethoscope size={24} weight="fill" className="text-secondary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 mb-0.5">
@@ -489,7 +504,7 @@ const PatientDashboard = () => {
                 <Button
                   size="sm"
                   onClick={() => navigate("/dashboard/schedule?role=patient")}
-                  className="shrink-0 rounded-full bg-secondary text-secondary-foreground text-[12px] font-bold px-5 h-9 shadow-sm hover:bg-secondary/90 active:scale-95 transition-all"
+                  className="shrink-0 rounded-full bg-secondary text-secondary-foreground text-[12px] font-bold px-5 h-10 shadow-md hover:bg-secondary/90 hover:shadow-lg active:scale-95 transition-all duration-200"
                 >
                   <MagnifyingGlass size={14} weight="bold" className="mr-1.5" /> Buscar
                 </Button>
@@ -703,30 +718,30 @@ const NextAppointmentCard = ({
 };
 
 const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNavigate> }) => (
-  <Card className="relative overflow-hidden border-dashed border-border/20 bg-card">
-    <CardContent className="flex flex-col items-center py-10 text-center">
-      <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-28 w-28 rounded-full bg-[hsl(var(--p-primary))]/6 blur-2xl" />
+  <Card className="relative overflow-hidden border-dashed border-border/20 bg-gradient-to-b from-card to-muted/20">
+    <CardContent className="flex flex-col items-center py-12 text-center">
+      <div className="pointer-events-none absolute -top-10 left-1/2 -translate-x-1/2 h-32 w-32 rounded-full bg-[hsl(var(--p-primary))]/6 blur-3xl" />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.8, y: 12 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <PingoMascot variant="wave" size={85} bounce animate />
+        <PingoMascot variant="wave" size={90} bounce animate />
       </motion.div>
 
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15, duration: 0.45 }}
-        className="mt-4"
+        className="mt-5"
       >
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--p-primary))]/8 px-3 py-1 mb-3">
-          <Stethoscope size={11} weight="fill" className="text-[hsl(var(--p-primary))]" />
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-[hsl(var(--p-primary))]/8 px-3.5 py-1.5 mb-3">
+          <Stethoscope size={12} weight="fill" className="text-[hsl(var(--p-primary))]" />
           <span className="text-[10px] font-bold text-[hsl(var(--p-primary))] uppercase tracking-wider">Agenda livre</span>
         </div>
-        <p className="font-[Manrope] text-[16px] font-bold text-foreground">Tudo tranquilo por aqui! 🎉</p>
-        <p className="mt-1.5 text-[12.5px] text-muted-foreground max-w-[260px] mx-auto leading-relaxed">
+        <p className="font-[Manrope] text-[17px] font-bold text-foreground">Tudo tranquilo por aqui! 🎉</p>
+        <p className="mt-2 text-[12.5px] text-muted-foreground max-w-[280px] mx-auto leading-relaxed">
           Que tal agendar uma consulta? Encontre especialistas e agende em poucos toques.
         </p>
       </motion.div>
@@ -737,7 +752,7 @@ const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNav
         transition={{ delay: 0.3, duration: 0.4 }}
       >
         <Button
-          className="mt-5 rounded-full bg-[hsl(var(--p-primary))] text-white px-8 py-3 h-auto text-[14px] font-bold shadow-[0_4px_16px_rgba(0,52,127,.2)] hover:shadow-[0_6px_24px_rgba(0,52,127,.3)] hover:scale-[1.02] active:scale-[0.97] transition-all duration-200"
+          className="mt-6 rounded-full bg-[hsl(var(--p-primary))] text-white px-8 py-3 h-auto text-[14px] font-bold shadow-[0_4px_16px_rgba(0,52,127,.2)] hover:shadow-[0_6px_24px_rgba(0,52,127,.3)] hover:scale-[1.02] active:scale-[0.97] transition-all duration-200"
           onClick={() => navigate("/dashboard/schedule?role=patient")}
         >
           <Plus size={16} weight="bold" className="mr-2" /> Agendar agora
