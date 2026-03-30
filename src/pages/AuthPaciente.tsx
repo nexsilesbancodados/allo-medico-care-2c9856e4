@@ -240,6 +240,7 @@ const AuthPaciente = () => {
           phone: cleanPhone,
           first_name: firstName,
           last_name: lastName,
+          date_of_birth: birthDate || null,
           referred_by: refCode || null,
         }, { onConflict: "user_id" });
 
