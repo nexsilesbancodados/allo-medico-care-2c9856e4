@@ -156,12 +156,17 @@ const PatientDashboard = () => {
   }, [isPulling, handleRefresh]);
 
   useEffect(() => {
+    if (loading) return;
     if (forceOnboarding) {
       setShowOnboarding(true);
-    } else if (!loading && (stats?.total ?? 0) === 0 && !onboardingDone) {
+      return;
+    }
+    // Force onboarding if profile is incomplete (missing mandatory fields)
+    const profileIncomplete = !profile?.cpf || !profile?.phone || !profile?.date_of_birth;
+    if (profileIncomplete || (!onboardingDone && (stats?.total ?? 0) === 0)) {
       setShowOnboarding(true);
     }
-  }, [loading, stats?.total, onboardingDone, forceOnboarding]);
+  }, [loading, stats?.total, onboardingDone, forceOnboarding, profile]);
 
   useEffect(() => {
     if (!user) return;
