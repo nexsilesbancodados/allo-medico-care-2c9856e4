@@ -292,9 +292,11 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-5 pb-2">
         <h2 className="text-lg font-extrabold text-primary italic">AloClínica</h2>
-        <button onClick={handleSkip} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-          Pular
-        </button>
+        {currentStep < STEPS.findIndex(s => s.id === "kyc") && (
+          <button onClick={handleSkip} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
+            Pular
+          </button>
+        )}
       </div>
 
       {/* Progress */}
