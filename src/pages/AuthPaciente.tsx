@@ -275,6 +275,15 @@ const AuthPaciente = () => {
           transition={{ duration: 0.3 }}
           className="space-y-6"
         >
+          {/* Back to landing — desktop */}
+          <Link
+            to="/"
+            className="hidden lg:inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground transition-colors text-sm font-medium mb-4 group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+            Voltar ao início
+          </Link>
+
           <div>
             <h2 className="text-[28px] font-extrabold text-foreground tracking-tight">Bem-vindo! 👋</h2>
             <p className="text-muted-foreground mt-1">Como deseja continuar?</p>
@@ -708,14 +717,23 @@ const AuthPaciente = () => {
             transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
           />
         </div>
-        {mode === "welcome" && (
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="relative z-10 text-white/70 text-sm mt-3"
-          >
-            Sua saúde em boas mãos 💙
-          </motion.p>
+         {mode === "welcome" && (
+          <div className="relative z-10 mt-3 flex items-center justify-between">
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-white/70 text-sm"
+            >
+              Sua saúde em boas mãos 💙
+            </motion.p>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1 text-white/60 hover:text-white transition-colors text-xs font-medium"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Início
+            </Link>
+          </div>
         )}
       </div>
 
