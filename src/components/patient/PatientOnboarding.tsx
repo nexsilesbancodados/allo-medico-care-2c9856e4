@@ -104,25 +104,32 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const handleNext = async () => {
     if (step.id === "personal") {
       if (!firstName.trim() || !lastName.trim()) { toast.error("Preencha nome e sobrenome"); return; }
+      const rawCpf = cpf.replace(/\D/g, "");
+      if (!rawCpf || !validarCPF(rawCpf)) { toast.error("CPF obrigatório", { description: "Informe um CPF válido para continuar." }); return; }
+      const rawPhone = phone.replace(/\D/g, "");
+      if (!rawPhone || rawPhone.length < 10) { toast.error("Telefone obrigatório", { description: "Informe um telefone válido." }); return; }
+      if (!dateOfBirth) { toast.error("Data de nascimento obrigatória"); return; }
+      // Age validation (16+)
+      const today = new Date();
+      const birth = new Date(dateOfBirth);
+      let age = today.getFullYear() - birth.getFullYear();
+      const monthDiff = today.getMonth() - birth.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+      if (age < 16) { toast.error("Idade mínima: 16 anos"); return; }
       await saveProfile();
     }
-    if (step.id === "health") await saveProfile();
+    if (step.id === "health") {
+      if (!bloodType) { toast.error("Tipo sanguíneo obrigatório", { description: "Selecione seu tipo sanguíneo." }); return; }
+      if (!allergies.length) { toast.error("Informe suas alergias", { description: "Adicione alergias ou marque 'Não tenho alergias'." }); return; }
+      if (!chronicConditions.length) { toast.error("Informe condições crônicas", { description: "Adicione condições ou marque 'Não tenho condições crônicas'." }); return; }
+      await saveProfile();
+    }
     if (step.id === "kyc" && !kycCompleted) {
       toast.error("Verificação obrigatória", { description: "Complete a verificação de identidade para continuar." });
       return;
     }
     if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); localStorage.removeItem(KYC_PENDING_KEY); onComplete(); }
     else setCurrentStep(prev => prev + 1);
-  };
-
-  const handleSkip = () => {
-    // Only allow skip if KYC is already completed
-    if (!kycCompleted && currentStep >= STEPS.findIndex(s => s.id === "kyc")) {
-      toast.error("Complete a verificação de identidade primeiro");
-      return;
-    }
-    localStorage.setItem(ONBOARDING_KEY, "true");
-    onComplete();
   };
 
   const FEATURES = [
@@ -156,17 +163,17 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         return (
           <div className="text-left space-y-3">
             <h2 className="text-lg font-bold text-foreground text-center mb-1">Dados Pessoais</h2>
-            <p className="text-xs text-muted-foreground text-center mb-3">Informações para seu cadastro médico</p>
+            <p className="text-xs text-muted-foreground text-center mb-3">Todos os campos são obrigatórios</p>
             <div className="grid grid-cols-2 gap-3">
               <div><Label className="text-xs">Nome *</Label><Input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Nome" className="mt-1 h-11 rounded-xl" /></div>
               <div><Label className="text-xs">Sobrenome *</Label><Input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Sobrenome" className="mt-1 h-11 rounded-xl" /></div>
             </div>
-            <div><Label className="text-xs">CPF</Label>
-              <CpfInput value={cpf} onChange={setCpf} optional className="mt-1" inputClassName="h-11 rounded-xl" />
+            <div><Label className="text-xs">CPF *</Label>
+              <CpfInput value={cpf} onChange={setCpf} className="mt-1" inputClassName="h-11 rounded-xl" />
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label className="text-xs">Telefone</Label><Input value={phoneMasked} onChange={e => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="(00) 00000-0000" className="mt-1 h-11 rounded-xl font-mono" maxLength={15} /></div>
-              <div><Label className="text-xs">Nascimento</Label><Input type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} className="mt-1 h-11 rounded-xl" /></div>
+              <div><Label className="text-xs">Telefone *</Label><Input value={phoneMasked} onChange={e => setPhone(e.target.value.replace(/\D/g, ""))} placeholder="(00) 00000-0000" className="mt-1 h-11 rounded-xl font-mono" maxLength={15} /></div>
+              <div><Label className="text-xs">Nascimento *</Label><Input type="date" value={dateOfBirth} onChange={e => setDateOfBirth(e.target.value)} className="mt-1 h-11 rounded-xl" max={new Date().toISOString().split("T")[0]} /></div>
             </div>
           </div>
         );
@@ -175,7 +182,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         return (
           <div className="text-left space-y-3">
             <h2 className="text-lg font-bold text-foreground text-center mb-1">Saúde</h2>
-            <p className="text-xs text-muted-foreground text-center mb-3">Ajude o médico a te conhecer</p>
+            <p className="text-xs text-muted-foreground text-center mb-3">Todos os campos são obrigatórios</p>
             <div>
               <Label className="text-xs flex items-center gap-1"><Droplets className="w-3 h-3" /> Tipo Sanguíneo</Label>
               <Select value={bloodType} onValueChange={setBloodType}>
@@ -292,11 +299,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-5 pb-2">
         <h2 className="text-lg font-extrabold text-primary italic">AloClínica</h2>
-        {currentStep < STEPS.findIndex(s => s.id === "kyc") && (
-          <button onClick={handleSkip} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-            Pular
-          </button>
-        )}
+        <span className="text-[10px] text-muted-foreground/60 font-medium">Cadastro obrigatório</span>
       </div>
 
       {/* Progress */}
@@ -341,7 +344,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         )}
         {isLast && (
           <p className="text-center text-xs text-muted-foreground mt-3">
-            Já tem uma conta? <button onClick={handleSkip} className="text-primary font-semibold underline">Entrar</button>
+            Tudo pronto para começar! 💚
           </p>
         )}
       </div>
