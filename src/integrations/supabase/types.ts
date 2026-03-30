@@ -3662,6 +3662,7 @@ export type Database = {
       fn_expire_discount_cards: { Args: never; Returns: undefined }
       fn_expire_invite_codes: { Args: never; Returns: undefined }
       fn_expire_queue_entries: { Args: never; Returns: undefined }
+      fn_handle_doctor_no_show: { Args: never; Returns: undefined }
       fn_increment_coupon_usage_atomic: {
         Args: { p_code: string }
         Returns: boolean
