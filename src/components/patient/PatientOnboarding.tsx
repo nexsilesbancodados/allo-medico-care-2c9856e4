@@ -182,7 +182,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
         return (
           <div className="text-left space-y-3">
             <h2 className="text-lg font-bold text-foreground text-center mb-1">Saúde</h2>
-            <p className="text-xs text-muted-foreground text-center mb-3">Ajude o médico a te conhecer</p>
+            <p className="text-xs text-muted-foreground text-center mb-3">Todos os campos são obrigatórios</p>
             <div>
               <Label className="text-xs flex items-center gap-1"><Droplets className="w-3 h-3" /> Tipo Sanguíneo</Label>
               <Select value={bloodType} onValueChange={setBloodType}>
