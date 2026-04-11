@@ -8,6 +8,12 @@ import multiplatformImg from "@/assets/benefit-multiplatform.jpg";
 import familyPlanImg from "@/assets/benefit-family-plan.jpg";
 import medicalRecordsImg from "@/assets/benefit-medical-records.jpg";
 
+const cardImages: Record<string, string> = {
+  "Multiplataforma": multiplatformImg,
+  "Plano família": familyPlanImg,
+  "Prontuário completo": medicalRecordsImg,
+};
+
 const benefits = [
   {
     icon: Lightning,
@@ -46,7 +52,6 @@ const benefits = [
     accent: "bg-teal-500/10 text-teal-600",
   },
 ];
-
 function BenefitsGrid() {
   return (
     <section className="py-16 md:py-28 overflow-hidden">
