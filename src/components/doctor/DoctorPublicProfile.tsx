@@ -20,6 +20,7 @@ interface DoctorPublicData {
   name: string;
   avatar_url: string | null;
   specialties: string[];
+  careAreas: string[];
   crm_verified: boolean;
   is_approved: boolean;
 }
@@ -51,6 +52,12 @@ const DoctorPublicProfile = () => {
 
     const doc = rows?.[0] as any;
     if (!doc) { setLoading(false); return; }
+
+    // Fetch care areas
+    const { data: careAreasData } = await supabase
+      .from("doctor_care_areas" as any)
+      .select("area_name")
+      .eq("doctor_id", doc.id);
 
     // Fetch reviews (satisfaction_surveys is authenticated-only, will work if user is logged in)
     const { data: surveysData } = await supabase
