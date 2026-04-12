@@ -87,6 +87,7 @@ const DoctorPublicProfile = () => {
       name: `${doc.first_name} ${doc.last_name}`,
       avatar_url: doc.avatar_url ?? null,
       specialties: doc.specialties ?? [],
+      careAreas: (careAreasData as any[])?.map((c: any) => c.area_name) ?? [],
       crm_verified: doc.crm_verified ?? false,
       is_approved: doc.is_approved ?? false,
     });
