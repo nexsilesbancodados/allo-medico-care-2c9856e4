@@ -166,7 +166,7 @@ const UserProfile = () => {
     if (isDoctor) {
       if (priceMin !== null && consultationPrice < priceMin) { toast.error(`Preço mínimo: R$ ${priceMin.toFixed(0)}`); setSaving(false); return; }
       if (priceMax !== null && consultationPrice > priceMax) { toast.error(`Preço máximo: R$ ${priceMax.toFixed(0)}`); setSaving(false); return; }
-      await supabase.from("doctor_profiles").update({ bio, education, experience_years: experienceYears, consultation_price: consultationPrice }).eq("user_id", user.id);
+      await supabase.from("doctor_profiles").update({ bio, education, experience_years: experienceYears, consultation_price: consultationPrice, display_name: displayName.trim() || null } as any).eq("user_id", user.id);
     }
     setSaving(false);
     if (error) toast.error("Erro ao salvar", { description: error.message });
@@ -448,6 +448,11 @@ const UserProfile = () => {
           <Card className="mb-6">
             <CardHeader><CardTitle className="text-lg">Perfil Profissional</CardTitle></CardHeader>
             <CardContent className="space-y-4">
+              <div>
+                <Label>Nome de exibição</Label>
+                <Input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Ex: Dr. João, Dra. Maria" className="mt-1 h-11 rounded-xl" />
+                <p className="text-[11px] text-muted-foreground mt-0.5">Nome que pacientes verão ao buscar médicos.</p>
+              </div>
               <div><Label>Bio</Label><textarea value={bio} onChange={e => setBio(e.target.value)} className="mt-1 w-full rounded-xl border border-input bg-muted/30 px-3 py-2 text-sm" rows={3} /></div>
               <div><Label>Formação</Label><Input value={education} onChange={e => setEducation(e.target.value)} className="mt-1 h-11 rounded-xl" /></div>
               <div className="grid grid-cols-2 gap-4">
