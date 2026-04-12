@@ -329,10 +329,13 @@ const AuthMedico = () => {
       await registerConsent(data.user.id, "terms_and_privacy_doctor");
       supabase.functions.invoke("send-email", { body: { type: "welcome_doctor", to: email, data: { name: `${firstName} ${lastName}`, crm: `${crm}/${crmState}` } } }).catch(() => {});
 
-      // Save care areas if selected
-      if (selectedCareAreas.length > 0) {
-        const { data: docProfile } = await supabase.from("doctor_profiles").select("id").eq("user_id", data.user.id).maybeSingle();
-        if (docProfile) {
+      // Save display name and care areas
+      const { data: docProfile } = await supabase.from("doctor_profiles").select("id").eq("user_id", data.user.id).maybeSingle();
+      if (docProfile) {
+        if (displayName.trim()) {
+          await supabase.from("doctor_profiles").update({ display_name: displayName.trim() } as any).eq("id", docProfile.id);
+        }
+        if (selectedCareAreas.length > 0) {
           await supabase.from("doctor_care_areas" as any).insert(
             selectedCareAreas.map(area => ({ doctor_id: docProfile.id, area_name: area }))
           );
