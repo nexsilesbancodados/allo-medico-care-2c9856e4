@@ -178,7 +178,18 @@ const DoctorPublicProfile = () => {
                     ))}
                   </div>
 
-                  {/* Rating */}
+                  {/* Care Areas */}
+                  {doctor.careAreas.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold mb-1.5">Áreas de atendimento</p>
+                      <div className="flex flex-wrap gap-1.5 justify-center sm:justify-start">
+                        {doctor.careAreas.map(a => (
+                          <span key={a} className="text-[11px] px-2.5 py-1 rounded-full bg-muted/60 text-muted-foreground font-medium">{a}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2 mt-3 justify-center sm:justify-start">
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map(i => (
