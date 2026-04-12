@@ -1,8 +1,7 @@
 import {
   House, Lightning, CalendarDots, Timer, VideoCamera, Users,
   ChatCircleDots, ArrowsClockwise, Microscope, Pill,
-  Certificate, Money, Wallet, CalendarBlank, Sliders, UserCircle,
-  Eye
+  Certificate, Money, Wallet, CalendarBlank, Sliders, UserCircle
 } from "@phosphor-icons/react";
 import { FileText } from "lucide-react";
 import { NavIcon } from "@/components/ui/nav-icon";
