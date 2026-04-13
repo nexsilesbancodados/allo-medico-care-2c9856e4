@@ -45,35 +45,25 @@ jobs:
           target: "/opt/aloclinica/"
           strip_components: 0
 
-      - name: Build Docker image on VPS and restart container
+      - name: Sync dist to /srv/aloclinica (Easypanel volume) and reload
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: 72.62.138.208
           username: root
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
           script: |
-            cd /opt/aloclinica
+            mkdir -p /srv/aloclinica
+            rm -rf /srv/aloclinica/dist
+            cp -r /opt/aloclinica/dist /srv/aloclinica/dist
+            cp /opt/aloclinica/nginx.conf /srv/aloclinica/nginx.conf
 
-            # Build a fresh image locally on the VPS
-            docker build -f Dockerfile.ci -t aloclinica-web:latest .
+            # Container has volume mount (read-only); files are live immediately.
+            # Just reload nginx inside the container to flush config and caches.
+            docker exec aloclinica-web nginx -s reload 2>/dev/null || \
+              (cd /etc/easypanel/projects/aloclinica/web && docker compose up -d)
 
-            # Stop and remove old container
-            docker stop aloclinica-web 2>/dev/null || true
-            docker rm aloclinica-web 2>/dev/null || true
-
-            # Start new container
-            docker run -d \
-              --name aloclinica-web \
-              --restart unless-stopped \
-              -p 3010:80 \
-              aloclinica-web:latest
-
-            # Cleanup dangling images
-            docker image prune -f
-
-            # Health check
-            sleep 5
-            curl -sf http://localhost:3010/health && echo "✅ Deploy OK" || echo "⚠️ Health check failed"
+            # Health check via domain
+            curl -skf https://aloclinica.com.br/health && echo "Deploy OK" || echo "Health check failed"
 
   # ── Job 2: Supabase Migrations + Edge Functions ────────────────────────────
   deploy-supabase:
