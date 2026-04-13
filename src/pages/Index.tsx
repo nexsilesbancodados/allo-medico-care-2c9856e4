@@ -9,7 +9,9 @@ import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Stethoscope, Brain } from "@phosphor-icons/react";
+import { Stethoscope as StethoscopeLucide, Eye, Building2, ArrowRight } from "lucide-react";
 
 import bannerAi from "@/assets/banner-ai-triage.webp";
 
@@ -80,6 +82,73 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       />
       <Header />
       <HeroSection />
+
+      {/* Entry-point cards: route patient or clinic to the right place */}
+      <section aria-label="Como podemos te ajudar" className="py-8 px-4">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              {
+                title: "Consulta Médica Online",
+                description: "Fale por vídeo com médicos de diversas especialidades.",
+                icon: StethoscopeLucide,
+                cta: "Agendar agora",
+                target: "/dashboard/doctors?type=telemedicina",
+              },
+              {
+                title: "Consulta Oftalmológica",
+                description: "Avaliação com oftalmologista e teste de visão online.",
+                icon: Eye,
+                cta: "Ver oftalmologistas",
+                target: "/dashboard/doctors?type=oftalmologia",
+              },
+              {
+                title: "Sou clínica e quero enviar exame para laudo",
+                description: "Envie exames e receba laudos de médicos especialistas.",
+                icon: Building2,
+                cta: "Enviar exame",
+                target: "/clinica/enviar-exame",
+                isClinic: true,
+              },
+            ].map((item) => {
+              const Icon = item.icon;
+              const handleClick = () => {
+                if (item.isClinic) {
+                  navigate(user ? item.target : "/auth");
+                  return;
+                }
+                navigate(user ? item.target : `/auth?next=${encodeURIComponent(item.target)}`);
+              };
+              return (
+                <Card
+                  key={item.title}
+                  onClick={handleClick}
+                  className="group cursor-pointer border-border/40 hover:border-primary/40 hover:shadow-elevated transition-all duration-200 hover:-translate-y-0.5"
+                >
+                  <CardContent className="p-6 flex flex-col gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                      <Icon className="w-6 h-6 text-primary" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-extrabold text-foreground leading-tight mb-1 font-[Manrope]">
+                        {item.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground leading-relaxed">
+                        {item.description}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-sm font-semibold text-primary">
+                      {item.cta}
+                      <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       <SocialProofBar />
 
       {/* Stats counters */}

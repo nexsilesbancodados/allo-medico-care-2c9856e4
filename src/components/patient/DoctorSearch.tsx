@@ -64,10 +64,15 @@ const SPECIALTY_ICONS: Record<string, React.ReactNode> = {
 
 const FREQUENT_SEARCHES = ["Check-up Geral", "Dermatologia", "Nutrição", "Saúde Mental"];
 
+type DoctorTypeFilter = "telemedicina" | "oftalmologia";
+
 const DoctorSearch = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
   const isUrgency = searchParams.get("urgency") === "true";
+  const initialType: DoctorTypeFilter =
+    searchParams.get("type") === "oftalmologia" ? "oftalmologia" : "telemedicina";
+  const [doctorType, setDoctorType] = useState<DoctorTypeFilter>(initialType);
   const [doctors, setDoctors] = useState<DoctorResult[]>([]);
   const [availableNowIds, setAvailableNowIds] = useState<Set<string>>(new Set());
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set());
@@ -89,9 +94,12 @@ const DoctorSearch = () => {
 
   useEffect(() => {
     fetchSpecialties();
-    fetchDoctors();
     if (user) fetchFavorites();
   }, [user]);
+
+  useEffect(() => {
+    fetchDoctors();
+  }, [doctorType]);
 
   useEffect(() => {
     if (debouncedSearch || selectedSpecialty || isUrgency) {
@@ -128,6 +136,7 @@ const DoctorSearch = () => {
       .from("doctor_profiles")
       .select("id, user_id, crm, crm_state, bio, consultation_price, rating, total_reviews, experience_years, available_now, available_now_since, display_name")
       .eq("is_approved", true)
+      .eq("doctor_type" as any, doctorType)
       .limit(100);
 
     if (!doctorData) { setLoading(false); return; }
@@ -273,6 +282,32 @@ const DoctorSearch = () => {
   return (
     <DashboardLayout title="Paciente" nav={getPatientNav("doctors")}>
       <div className="w-full max-w-2xl mx-auto pb-24 md:pb-6">
+        {/* Doctor type segmented control */}
+        <div className="mb-4 inline-flex p-1 rounded-2xl bg-muted/60 border border-border/30 w-full sm:w-auto">
+          {([
+            { value: "telemedicina", label: "Telemedicina", icon: Stethoscope },
+            { value: "oftalmologia", label: "Oftalmologia", icon: EyeIcon },
+          ] as const).map(opt => {
+            const Icon = opt.icon;
+            const active = doctorType === opt.value;
+            return (
+              <button
+                key={opt.value}
+                onClick={() => { setDoctorType(opt.value); setSelectedSpecialty(null); }}
+                className={cn(
+                  "flex-1 sm:flex-none h-10 px-4 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition-all active:scale-95",
+                  active
+                    ? "bg-card text-[hsl(var(--p-primary))] shadow-[var(--p-shadow-card)]"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Icon className="w-4 h-4" />
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Search bar */}
         <div className="flex gap-2 mb-5">
           <div className="relative flex-1">

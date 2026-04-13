@@ -20,7 +20,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const validRoles = ["patient", "doctor", "clinic", "admin", "receptionist", "support", "partner", "affiliate"];
+    const validRoles = ["patient", "doctor", "clinic", "admin", "receptionist", "support", "partner", "affiliate", "laudista", "ophthalmologist", "optician"];
     if (!validRoles.includes(role)) {
       return new Response(JSON.stringify({ error: "Invalid role" }), {
         status: 400,
@@ -54,12 +54,23 @@ Deno.serve(async (req) => {
     }
 
     // Create profile-specific records if needed
-    if (role === "doctor" && profile_data) {
+    // Doctor-like roles all get a doctor_profiles row tagged with doctor_type
+    const doctorRoles = ["doctor", "laudista", "ophthalmologist"];
+    if (doctorRoles.includes(role) && profile_data) {
+      const doctorType =
+        role === "laudista" ? "laudista"
+        : role === "ophthalmologist" ? "oftalmologia"
+        : "telemedicina";
       await supabase.from("doctor_profiles").insert({
         user_id,
         crm: profile_data.crm,
         crm_state: profile_data.crm_state || "SP",
+        doctor_type: doctorType,
       });
+      // Laudistas and ophthalmologists also get the base "doctor" role for shared features
+      if (role !== "doctor") {
+        await supabase.from("user_roles").insert({ user_id, role: "doctor" });
+      }
     }
 
     if (role === "partner" && profile_data) {
@@ -102,7 +113,7 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("assign-role error:", err);
+    console.error("assign-role error:", error);
     return new Response(JSON.stringify({ error: "Internal error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
