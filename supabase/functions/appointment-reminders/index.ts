@@ -87,7 +87,7 @@ serve(async (req) => {
     });
 
     let sent = 0;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const sendEmailUrl = `${supabaseUrl}/functions/v1/send-email`;
     const sendWhatsAppUrl = `${supabaseUrl}/functions/v1/send-whatsapp`;
     const sendPushUrl = `${supabaseUrl}/functions/v1/send-push-notification`;
@@ -113,7 +113,7 @@ serve(async (req) => {
       const patientName = patient ? `${patient.first_name} ${patient.last_name}` : "Paciente";
       const doctorName = docNameMap.get(appt.doctor_id) ?? "Médico";
 
-      const headers = { "Content-Type": "application/json", Authorization: `Bearer ${anonKey}` };
+      const headers = { "Content-Type": "application/json", Authorization: `Bearer ${serviceKey}` };
 
       // 1. Email reminder
       try {
@@ -133,7 +133,7 @@ serve(async (req) => {
         });
         sent++;
       } catch (error) {
-        console.error(`Email fail ${appt.id}:`, e);
+        console.error(`Email fail ${appt.id}:`, error);
       }
 
       // 2. WhatsApp reminder to patient
@@ -142,7 +142,7 @@ serve(async (req) => {
           const msg = `⏰ *Lembrete: consulta em ${timeUntil}!*\n\nOlá ${patient.first_name},\nSua consulta com ${doctorName} ${diffMin <= 18 ? "está prestes a começar" : `é em ${timeUntil}`}.\n\n📹 Sala: ${jitsiLink}\n\nEntre com antecedência. 🏥`;
           await fetch(sendWhatsAppUrl, { method: "POST", headers, body: JSON.stringify({ phone: patient.phone, message: msg }) });
         } catch (error) {
-          console.error(`WhatsApp patient fail ${appt.id}:`, e);
+          console.error(`WhatsApp patient fail ${appt.id}:`, error);
         }
       }
 
@@ -153,7 +153,7 @@ serve(async (req) => {
           const msg = `⏰ *Lembrete: consulta em ${timeUntil}!*\n\nDr(a). ${docProfile.first_name},\nSua consulta com ${patientName} ${diffMin <= 18 ? "está prestes a começar" : `é em ${timeUntil}`}.\n\n📹 Sala: ${jitsiLink}`;
           await fetch(sendWhatsAppUrl, { method: "POST", headers, body: JSON.stringify({ phone: docProfile.phone, message: msg }) });
         } catch (error) {
-          console.error(`WhatsApp doctor fail ${appt.id}:`, e);
+          console.error(`WhatsApp doctor fail ${appt.id}:`, error);
         }
       }
 
@@ -164,12 +164,12 @@ serve(async (req) => {
           body: JSON.stringify({
             user_id: appt.patient_id,
             title: `⏰ Consulta em ${timeUntil}`,
-            body: `Sua consulta com ${doctorName} é em ${timeUntil}. Prepare-se!`,
-            url: `/dashboard/consultation/${appt.id}`,
+            message: `Sua consulta com ${doctorName} é em ${timeUntil}. Prepare-se!`,
+            link: `/dashboard/consultation/${appt.id}`,
           }),
         });
       } catch (error) {
-        console.error(`Push patient fail ${appt.id}:`, e);
+        console.error(`Push patient fail ${appt.id}:`, error);
       }
 
       // 5. Push notification to doctor
@@ -181,12 +181,12 @@ serve(async (req) => {
             body: JSON.stringify({
               user_id: doctorData.user_id,
               title: `⏰ Consulta em ${timeUntil}`,
-              body: `Consulta com ${patientName} em ${timeUntil}.`,
-              url: `/dashboard/consultation/${appt.id}`,
+              message: `Consulta com ${patientName} em ${timeUntil}.`,
+              link: `/dashboard/consultation/${appt.id}`,
             }),
           });
         } catch (error) {
-          console.error(`Push doctor fail ${appt.id}:`, e);
+          console.error(`Push doctor fail ${appt.id}:`, error);
         }
       }
 
@@ -219,7 +219,7 @@ serve(async (req) => {
           }] : []),
         ]);
       } catch (error) {
-        console.error(`In-app notification fail ${appt.id}:`, e);
+        console.error(`In-app notification fail ${appt.id}:`, error);
       }
     }
 

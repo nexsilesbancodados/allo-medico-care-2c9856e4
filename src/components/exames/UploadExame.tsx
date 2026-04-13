@@ -12,6 +12,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Upload, X, FileImage, FileText, Loader2 } from "lucide-react";
+import { logError } from "@/lib/logger";
 
 const TIPOS_EXAME = ["Raio-X", "Tomografia", "Ressonância", "Ultrassom", "Eletrocardiograma", "Outro"];
 const ACCEPTED_EXTENSIONS = ".dcm,.dicom,.pdf,.jpg,.jpeg,.png";
@@ -161,7 +162,7 @@ export default function UploadExame({ onSuccess }: UploadExameProps) {
       setProgress(0);
       onSuccess?.();
     } catch (err: any) {
-      console.error("Upload error:", err);
+      logError("Exam upload error", err);
       toast.error(err.message || "Erro ao enviar exame.");
     } finally {
       setUploading(false);

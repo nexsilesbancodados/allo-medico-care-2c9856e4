@@ -91,8 +91,8 @@ const PatientDashboard = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [onboardingDone] = useLocalStorage<boolean>(ONBOARDING_KEY, false);
 
-  const { data: stats, isLoading: statsLoading } = usePatientStats();
-  const { data: upcoming = [], isLoading: upcomingLoading } = usePatientUpcoming();
+  const { data: stats, isLoading: statsLoading, isError: statsError, refetch: refetchStats } = usePatientStats();
+  const { data: upcoming = [], isLoading: upcomingLoading, isError: upcomingError } = usePatientUpcoming();
   const { data: returnAppts = [] } = useReturnAppointments();
   const { data: healthMetrics = [] } = useRecentHealthMetrics();
 
@@ -238,6 +238,21 @@ const PatientDashboard = () => {
             </div>
             <Button size="sm" variant="destructive" className="rounded-xl shrink-0" onClick={() => navigate("/dashboard/profile?role=patient&kyc=open")}>
               Verificar
+            </Button>
+          </motion.div>
+        )}
+
+        {/* Data fetch error */}
+        {(statsError || upcomingError) && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-destructive/20 bg-destructive/5 p-4 flex items-center gap-3"
+          >
+            <Warning size={20} weight="fill" className="text-destructive shrink-0" />
+            <p className="flex-1 text-sm font-semibold text-destructive">Erro ao carregar dados</p>
+            <Button size="sm" variant="outline" className="rounded-xl shrink-0" onClick={() => refetchStats()}>
+              Tentar novamente
             </Button>
           </motion.div>
         )}

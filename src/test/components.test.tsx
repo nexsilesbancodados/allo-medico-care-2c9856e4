@@ -45,7 +45,7 @@ describe("ErrorBoundary", () => {
         <ThrowError />
       </ErrorBoundary>
     );
-    expect(screen.getByText("Algo deu errado")).toBeInTheDocument();
+    expect(screen.getByText("Oops! Algo deu errado")).toBeInTheDocument();
     expect(screen.getByText("Recarregar")).toBeInTheDocument();
     consoleSpy.mockRestore();
   });

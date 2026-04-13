@@ -22,6 +22,15 @@ serve(async (req) => {
     const event = body.event;
     const payment = body.payment;
 
+    // Validate Asaas access token
+    const expectedToken = Deno.env.get("ASAAS_WEBHOOK_TOKEN");
+    if (expectedToken && body.accessToken !== expectedToken) {
+      console.warn("[Asaas Webhook] Invalid access token rejected");
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     console.info(`[Asaas Webhook] Event: ${event}, Payment ID: ${payment?.id}, ExternalRef: ${payment?.externalReference}`);
 
     if (!payment) {

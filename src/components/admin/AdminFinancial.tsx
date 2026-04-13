@@ -7,12 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { toast } from "sonner";
 import {
   DollarSign, TrendingUp, TrendingDown, AlertTriangle, Search, Download,
-  CreditCard, Receipt, Clock, CheckCircle2, XCircle, RefreshCw
+  CreditCard, Receipt, Clock, CheckCircle2, XCircle, RefreshCw, Banknote
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, Area, AreaChart } from "recharts";
 
@@ -33,6 +37,24 @@ interface AppointmentPayment {
   patient_name?: string;
   consultation_price?: number;
   price_at_booking?: number | null;
+}
+
+interface WithdrawalRequest {
+  id: string;
+  user_id: string;
+  amount: number;
+  pix_key: string;
+  pix_key_type: string;
+  status: string;
+  notes: string | null;
+  admin_notes: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  processed_by: string | null;
+  processed_at: string | null;
+  created_at: string;
+  updated_at: string;
+  doctor_name?: string;
 }
 
 const statusColors: Record<string, string> = {
@@ -56,6 +78,15 @@ const statusLabels: Record<string, string> = {
   in_progress: "Em andamento",
 };
 
+const withdrawalStatusConfig: Record<string, { label: string; className: string }> = {
+  pending:    { label: "Pendente",    className: "bg-amber-500/10 text-amber-600 border-amber-200" },
+  approved:   { label: "Aprovado",   className: "bg-green-500/10 text-green-600 border-green-200" },
+  rejected:   { label: "Rejeitado",  className: "bg-red-500/10 text-red-600 border-red-200" },
+  processing: { label: "Processando", className: "bg-blue-500/10 text-blue-600 border-blue-200" },
+  completed:  { label: "Concluído",  className: "bg-emerald-500/10 text-emerald-600 border-emerald-200" },
+  failed:     { label: "Falhou",     className: "bg-red-500/10 text-red-600 border-red-200" },
+};
+
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "#f59e0b", "#ef4444", "#8b5cf6"];
 
 const AdminFinancial = () => {
@@ -67,8 +98,17 @@ const AdminFinancial = () => {
   const [search, setSearch] = useState("");
   const [period, setPeriod] = useState<string>("30");
 
+  // Withdrawal state
+  const [withdrawals, setWithdrawals] = useState<WithdrawalRequest[]>([]);
+  const [withdrawalsLoading, setWithdrawalsLoading] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectTarget, setRejectTarget] = useState<WithdrawalRequest | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null); // withdrawal id being actioned
+
   useEffect(() => {
     fetchData();
+    fetchWithdrawals();
   }, [period]);
 
   const fetchData = async () => {
@@ -164,6 +204,93 @@ const AdminFinancial = () => {
     setLoading(false);
   };
 
+  const fetchWithdrawals = async () => {
+    setWithdrawalsLoading(true);
+    const { data: wrs, error } = await supabase
+      .from("withdrawal_requests")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200);
+
+    if (error) {
+      console.error("Error fetching withdrawals:", error);
+      setWithdrawalsLoading(false);
+      return;
+    }
+
+    if (!wrs || wrs.length === 0) {
+      setWithdrawals([]);
+      setWithdrawalsLoading(false);
+      return;
+    }
+
+    // Fetch doctor names from profiles
+    const userIds = [...new Set(wrs.map(w => w.user_id))];
+    const { data: profiles } = await supabase
+      .from("profiles")
+      .select("user_id, first_name, last_name")
+      .in("user_id", userIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.user_id, `${p.first_name} ${p.last_name}`]) ?? []);
+
+    const enriched: WithdrawalRequest[] = wrs.map(w => ({
+      ...w,
+      doctor_name: profileMap.get(w.user_id) ?? "—",
+    }));
+
+    setWithdrawals(enriched);
+    setWithdrawalsLoading(false);
+  };
+
+  const handleWithdrawalAction = async (
+    withdrawal: WithdrawalRequest,
+    action: "approve" | "reject" | "process",
+    adminNotes?: string
+  ) => {
+    setActionLoading(withdrawal.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("process-withdrawal", {
+        body: {
+          withdrawal_id: withdrawal.id,
+          action,
+          admin_notes: adminNotes ?? undefined,
+        },
+      });
+
+      if (error) {
+        const errMsg = (data as { error?: string } | null)?.error ?? error.message ?? "Erro ao processar ação";
+        toast.error(errMsg);
+        return;
+      }
+
+      const actionLabels: Record<string, string> = {
+        approve: "aprovado",
+        reject: "rejeitado",
+        process: "processado",
+      };
+      toast.success(`Saque ${actionLabels[action]} com sucesso`);
+      await fetchWithdrawals();
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Erro desconhecido");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const openRejectDialog = (withdrawal: WithdrawalRequest) => {
+    setRejectTarget(withdrawal);
+    setRejectReason("");
+    setRejectDialogOpen(true);
+  };
+
+  const confirmReject = async () => {
+    if (!rejectTarget) return;
+    setRejectDialogOpen(false);
+    await handleWithdrawalAction(rejectTarget, "reject", rejectReason || undefined);
+    setRejectTarget(null);
+    setRejectReason("");
+  };
+
   // KPIs
   const totalRevenue = appointments
     .filter(a => a.payment_status === "approved" || a.payment_status === "confirmed")
@@ -248,6 +375,8 @@ const AdminFinancial = () => {
     setTimeout(() => URL.revokeObjectURL(url), 5000);
   };
 
+  const pendingWithdrawals = withdrawals.filter(w => w.status === "pending").length;
+
   return (
     <DashboardLayout title="Admin" nav={adminNav}>
       <div className="space-y-6 pb-24 md:pb-8">
@@ -268,7 +397,7 @@ const AdminFinancial = () => {
                 <SelectItem value="365">Último ano</SelectItem>
               </SelectContent>
             </Select>
-            <Button variant="outline" size="icon" onClick={fetchData} aria-label="Atualizar">
+            <Button variant="outline" size="icon" onClick={() => { fetchData(); fetchWithdrawals(); }} aria-label="Atualizar">
               <RefreshCw className="w-4 h-4" />
             </Button>
           </div>
@@ -452,101 +581,305 @@ const AdminFinancial = () => {
           </Card>
         </div>
 
-        {/* Transactions Table */}
-        <Card variant="elevated">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between flex-wrap gap-3">
-              <CardTitle className="text-base">Transações</CardTitle>
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar..."
-                    value={search}
-                    onChange={e => setSearch(e.target.value)}
-                    className="pl-8 w-[200px]"
-                  />
+        {/* Transactions + Withdrawals Tabs */}
+        <Tabs defaultValue="transactions">
+          <TabsList className="mb-4">
+            <TabsTrigger value="transactions">
+              <Receipt className="w-4 h-4 mr-1.5" />
+              Transações
+            </TabsTrigger>
+            <TabsTrigger value="saques" className="relative">
+              <Banknote className="w-4 h-4 mr-1.5" />
+              Saques
+              {pendingWithdrawals > 0 && (
+                <span className="ml-1.5 inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold bg-amber-500 text-white rounded-full">
+                  {pendingWithdrawals > 9 ? "9+" : pendingWithdrawals}
+                </span>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          {/* ---- Transactions Tab ---- */}
+          <TabsContent value="transactions">
+            <Card variant="elevated">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <CardTitle className="text-base">Transações</CardTitle>
+                  <div className="flex items-center gap-2">
+                    <div className="relative">
+                      <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar..."
+                        value={search}
+                        onChange={e => setSearch(e.target.value)}
+                        className="pl-8 w-[200px]"
+                      />
+                    </div>
+                    <Select value={filter} onValueChange={setFilter}>
+                      <SelectTrigger className="w-[130px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="paid">Pagos</SelectItem>
+                        <SelectItem value="pending">Pendentes</SelectItem>
+                        <SelectItem value="overdue">Vencidos</SelectItem>
+                        <SelectItem value="cancelled">Cancelados</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="outline" size="sm" onClick={exportCSV}>
+                      <Download className="w-4 h-4 mr-1" /> CSV
+                    </Button>
+                  </div>
                 </div>
-                <Select value={filter} onValueChange={setFilter}>
-                  <SelectTrigger className="w-[130px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="paid">Pagos</SelectItem>
-                    <SelectItem value="pending">Pendentes</SelectItem>
-                    <SelectItem value="overdue">Vencidos</SelectItem>
-                    <SelectItem value="cancelled">Cancelados</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" size="sm" onClick={exportCSV}>
-                  <Download className="w-4 h-4 mr-1" /> CSV
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <CreditCard className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                    <p>Nenhuma transação encontrada</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Paciente</TableHead>
+                          <TableHead>Médico</TableHead>
+                          <TableHead>Data</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Pagamento</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filtered.slice(0, 100).map(a => (
+                          <TableRow key={a.id}>
+                            <TableCell className="font-medium">{a.patient_name}</TableCell>
+                            <TableCell>{a.doctor_name}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">
+                              {format(new Date(a.created_at), "dd/MM/yy HH:mm")}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={statusColors[a.status] || ""}>
+                                {statusLabels[a.status] || a.status}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant="outline" className={statusColors[a.payment_status || "pending"] || ""}>
+                                {a.payment_status === "approved" || a.payment_status === "confirmed" ? (
+                                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                                ) : a.payment_status === "overdue" ? (
+                                  <AlertTriangle className="w-3 h-3 mr-1" />
+                                ) : a.status === "cancelled" ? (
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                ) : (
+                                  <Clock className="w-3 h-3 mr-1" />
+                                )}
+                                {statusLabels[a.payment_status || "pending"] || a.payment_status || "Pendente"}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                    {filtered.length > 100 && (
+                      <p className="text-xs text-muted-foreground text-center mt-3">
+                        Mostrando 100 de {filtered.length} resultados
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* ---- Saques Tab ---- */}
+          <TabsContent value="saques">
+            <Card variant="elevated">
+              <CardHeader className="pb-3">
+                <div className="flex items-center justify-between flex-wrap gap-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <Banknote className="w-4 h-4 text-primary" />
+                    Solicitações de Saque
+                  </CardTitle>
+                  <Button variant="outline" size="sm" onClick={fetchWithdrawals} disabled={withdrawalsLoading}>
+                    <RefreshCw className={`w-4 h-4 mr-1 ${withdrawalsLoading ? "animate-spin" : ""}`} />
+                    Atualizar
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {withdrawalsLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : withdrawals.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Banknote className="w-10 h-10 mx-auto mb-2 opacity-30" />
+                    <p>Nenhuma solicitação de saque encontrada</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Médico</TableHead>
+                          <TableHead>Valor</TableHead>
+                          <TableHead>Chave PIX</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Data</TableHead>
+                          <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {withdrawals.map(w => {
+                          const statusCfg = withdrawalStatusConfig[w.status] ?? {
+                            label: w.status,
+                            className: "bg-muted text-muted-foreground",
+                          };
+                          const isActioning = actionLoading === w.id;
+
+                          return (
+                            <TableRow key={w.id}>
+                              <TableCell className="font-medium">{w.doctor_name}</TableCell>
+                              <TableCell className="tabular-nums font-semibold">
+                                R$ {Number(w.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+                              </TableCell>
+                              <TableCell>
+                                <div className="flex flex-col">
+                                  <span className="text-sm truncate max-w-[160px]">{w.pix_key}</span>
+                                  <span className="text-[10px] text-muted-foreground uppercase">{w.pix_key_type}</span>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className={statusCfg.className}>
+                                  {statusCfg.label}
+                                </Badge>
+                                {w.admin_notes && (
+                                  <p className="text-[10px] text-muted-foreground mt-0.5 max-w-[160px] truncate" title={w.admin_notes}>
+                                    {w.admin_notes}
+                                  </p>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                                {format(new Date(w.created_at), "dd/MM/yy HH:mm")}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <div className="flex items-center justify-end gap-2">
+                                  {w.status === "pending" && (
+                                    <>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-green-300 text-green-700 hover:bg-green-50 hover:text-green-800"
+                                        disabled={isActioning}
+                                        onClick={() => handleWithdrawalAction(w, "approve")}
+                                      >
+                                        {isActioning ? (
+                                          <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin inline-block" />
+                                        ) : (
+                                          <CheckCircle2 className="w-3.5 h-3.5 mr-1" />
+                                        )}
+                                        Aprovar
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        className="border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800"
+                                        disabled={isActioning}
+                                        onClick={() => openRejectDialog(w)}
+                                      >
+                                        <XCircle className="w-3.5 h-3.5 mr-1" />
+                                        Rejeitar
+                                      </Button>
+                                    </>
+                                  )}
+                                  {w.status === "approved" && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      className="border-blue-300 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
+                                      disabled={isActioning}
+                                      onClick={() => handleWithdrawalAction(w, "process")}
+                                    >
+                                      {isActioning ? (
+                                        <span className="w-3 h-3 border border-current border-t-transparent rounded-full animate-spin inline-block mr-1" />
+                                      ) : (
+                                        <Banknote className="w-3.5 h-3.5 mr-1" />
+                                      )}
+                                      Processar
+                                    </Button>
+                                  )}
+                                  {(w.status === "completed" || w.status === "rejected" || w.status === "failed" || w.status === "processing") && (
+                                    <span className="text-xs text-muted-foreground italic">
+                                      {w.status === "completed" && w.processed_at
+                                        ? `Pago em ${format(new Date(w.processed_at), "dd/MM/yy")}`
+                                        : w.status === "rejected" && w.reviewed_at
+                                          ? `Rejeitado em ${format(new Date(w.reviewed_at), "dd/MM/yy")}`
+                                          : w.status === "processing"
+                                            ? "Em processamento..."
+                                            : "—"}
+                                    </span>
+                                  )}
+                                </div>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {/* Reject Confirmation Dialog */}
+        <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Rejeitar Solicitação de Saque</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              {rejectTarget && (
+                <div className="rounded-lg bg-muted/40 p-3 text-sm space-y-1">
+                  <p><span className="font-medium">Médico:</span> {rejectTarget.doctor_name}</p>
+                  <p><span className="font-medium">Valor:</span> R$ {Number(rejectTarget.amount).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</p>
+                  <p><span className="font-medium">Chave PIX:</span> {rejectTarget.pix_key} ({rejectTarget.pix_key_type})</p>
+                </div>
+              )}
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-foreground">
+                  Motivo da rejeição <span className="text-muted-foreground font-normal">(opcional)</span>
+                </label>
+                <Textarea
+                  placeholder="Informe o motivo para o médico..."
+                  value={rejectReason}
+                  onChange={e => setRejectReason(e.target.value)}
+                  rows={3}
+                  className="resize-none"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <Button variant="outline" onClick={() => setRejectDialogOpen(false)}>
+                  Cancelar
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={confirmReject}
+                >
+                  <XCircle className="w-4 h-4 mr-1" />
+                  Confirmar Rejeição
                 </Button>
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
-                <CreditCard className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p>Nenhuma transação encontrada</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Paciente</TableHead>
-                      <TableHead>Médico</TableHead>
-                      <TableHead>Data</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Pagamento</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filtered.slice(0, 100).map(a => (
-                      <TableRow key={a.id}>
-                        <TableCell className="font-medium">{a.patient_name}</TableCell>
-                        <TableCell>{a.doctor_name}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {format(new Date(a.created_at), "dd/MM/yy HH:mm")}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={statusColors[a.status] || ""}>
-                            {statusLabels[a.status] || a.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className={statusColors[a.payment_status || "pending"] || ""}>
-                            {a.payment_status === "approved" || a.payment_status === "confirmed" ? (
-                              <CheckCircle2 className="w-3 h-3 mr-1" />
-                            ) : a.payment_status === "overdue" ? (
-                              <AlertTriangle className="w-3 h-3 mr-1" />
-                            ) : a.status === "cancelled" ? (
-                              <XCircle className="w-3 h-3 mr-1" />
-                            ) : (
-                              <Clock className="w-3 h-3 mr-1" />
-                            )}
-                            {statusLabels[a.payment_status || "pending"] || a.payment_status || "Pendente"}
-                          </Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-                {filtered.length > 100 && (
-                  <p className="text-xs text-muted-foreground text-center mt-3">
-                    Mostrando 100 de {filtered.length} resultados
-                  </p>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

@@ -42,7 +42,7 @@ const DoctorDashboard = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("overview");
-  const { data, isLoading: loading } = useDoctorStats();
+  const { data, isLoading: loading, isError, refetch } = useDoctorStats();
 
   interface DoctorAppt {
     id: string; scheduled_at: string; status: string;
@@ -92,6 +92,12 @@ const DoctorDashboard = () => {
   return (
     <DashboardLayout title="Médico" nav={getDoctorNav("home")} role="doctor">
       {!loading && !data?.crm && <DoctorOnboarding />}
+      {isError && (
+        <div className="mx-auto my-6 flex flex-col items-center gap-3 rounded-2xl border border-destructive/20 bg-destructive/5 p-6 text-center">
+          <p className="text-sm font-semibold text-destructive">Erro ao carregar dados do painel</p>
+          <Button size="sm" variant="outline" onClick={() => refetch()}>Tentar novamente</Button>
+        </div>
+      )}
 
       <motion.div variants={container} initial="hidden" animate="show">
 
@@ -104,7 +110,7 @@ const DoctorDashboard = () => {
           liveDot={waitingCount > 0}
           liveColor="red"
           bubble={{
-            greeting: `${greeting()}, doutor · ${format(new Date(), "dd/MM", { locale: ptBR })}`,
+            greeting: `${greeting()} · ${format(new Date(), "dd/MM", { locale: ptBR })}`,
             name: `Dr(a). ${profile?.first_name || "Médico"}`,
             sub: waitingCount > 0 ? `${waitingCount} paciente${waitingCount > 1 ? "s" : ""} aguardando` : "Agenda atualizada",
           }}
@@ -112,7 +118,8 @@ const DoctorDashboard = () => {
             { label: "Hoje",      value: stats.today },
             { label: "Na fila",   value: waitingCount },
             { label: "Pacientes", value: stats.total_patients },
-            { label: "Ganhos",    value: `R$${(stats.totalEarnings / 1000).toFixed(1)}k` },
+            { label: "Avaliação", value: data?.rating ? `${data.rating.toFixed(1)}★` : "—" },
+            { label: "Ganhos",    value: stats.totalEarnings >= 1000 ? `R$${(stats.totalEarnings / 1000).toFixed(1)}k` : `R$${stats.totalEarnings}` },
           ]}
           loading={loading}
         />

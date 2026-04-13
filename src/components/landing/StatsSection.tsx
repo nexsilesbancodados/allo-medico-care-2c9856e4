@@ -1,12 +1,13 @@
 import { forwardRef, useEffect, useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { Clock, Stethoscope, Star, ShieldCheck } from "@phosphor-icons/react";
+import { Users, Stethoscope, Star, ShieldCheck } from "@phosphor-icons/react";
 import { supabase } from "@/integrations/supabase/client";
+import { useSiteConfig } from "@/lib/site-config";
 
 const fallbackStats = [
-  { icon: Clock, value: "24h", label: "Disponibilidade" },
-  { icon: Stethoscope, value: "+30", label: "Especialidades" },
-  { icon: Star, value: "4.9★", label: "Avaliação" },
+  { icon: Users, value: "+5k", label: "Pacientes atendidos" },
+  { icon: Stethoscope, value: "+30", label: "Médicos especialistas" },
+  { icon: Star, value: "4.9★", label: "Avaliação média" },
   { icon: ShieldCheck, value: "100%", label: "Digital e seguro" },
 ];
 
@@ -51,6 +52,7 @@ const AnimatedCounter = ({ value, suffix = "" }: { value: string; suffix?: strin
 
 const StatsSection = forwardRef<HTMLElement>((_, ref) => {
   const [stats, setStats] = useState(fallbackStats);
+  const { get, loading: configLoading } = useSiteConfig();
 
   useEffect(() => {
     (async () => {
@@ -59,16 +61,20 @@ const StatsSection = forwardRef<HTMLElement>((_, ref) => {
           supabase.from("specialties").select("id", { count: "exact", head: true }),
         ]);
         const specialties = specialtiesRes.count ?? 0;
-        if (specialties > 5) {
-          setStats((prev) =>
-            prev.map((s, i) =>
-              i === 1 ? { ...s, value: `+${specialties}` } : s
-            )
-          );
-        }
+
+        setStats((prev) => prev.map((s, i) => {
+          // Use site_config custom values when non-empty
+          const cfgValue = !configLoading ? get(`stat_${i + 1}_value`, "") : "";
+          const cfgLabel = !configLoading ? get(`stat_${i + 1}_label`, "") : "";
+          return {
+            ...s,
+            value: cfgValue || (i === 1 && specialties > 5 ? `+${specialties}` : s.value),
+            label: cfgLabel || s.label,
+          };
+        }));
       } catch { /* keep fallback */ }
     })();
-  }, []);
+  }, [configLoading, get]);
 
   return (
     <section ref={ref} className="py-8 md:py-12 relative">

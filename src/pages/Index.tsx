@@ -9,19 +9,21 @@ import SocialProofBar from "@/components/landing/SocialProofBar";
 import FloatingMobileCTA from "@/components/landing/FloatingMobileCTA";
 import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
-import { Stethoscope, Brain, Heartbeat } from "@phosphor-icons/react";
+import { Stethoscope, Brain } from "@phosphor-icons/react";
 
 import bannerAi from "@/assets/banner-ai-triage.webp";
-import bannerPlantao from "@/assets/banner-plantao.webp";
 
 // Lazy-load below-the-fold sections
 const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
 const HorizontalScrollCards = lazy(() => import("@/components/landing/HorizontalScrollCards"));
 const SpecialtiesShowcase = lazy(() => import("@/components/landing/SpecialtiesShowcase"));
 const HowItWorksSection = lazy(() => import("@/components/landing/HowItWorksSection"));
+const TeleLaudoSection = lazy(() => import("@/components/landing/TeleLaudoSection"));
 const BenefitsGrid = lazy(() => import("@/components/landing/BenefitsGrid"));
 const HealthNetworkSection = lazy(() => import("@/components/landing/HealthNetworkSection"));
 const InfoBannerStrip = lazy(() => import("@/components/landing/InfoBannerStrip"));
+const PricingSection = lazy(() => import("@/components/landing/PricingSection"));
+const ForDoctorsSection = lazy(() => import("@/components/landing/ForDoctorsSection"));
 const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
 const CTABanner = lazy(() => import("@/components/landing/CTABanner"));
 const FAQSection = lazy(() => import("@/components/landing/FAQSection"));
@@ -138,6 +140,11 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         <HowItWorksSection />
       </DeferredSection>
 
+      {/* Telelaudo section */}
+      <DeferredSection fallbackClassName="h-[520px]" rootMargin="200px 0px">
+        <TeleLaudoSection />
+      </DeferredSection>
+
       {/* AI Triage banner */}
       <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <InfoBannerStrip
@@ -152,28 +159,24 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         />
       </DeferredSection>
 
-      {/* Benefits bento grid — NEW */}
+      {/* Benefits bento grid */}
       <DeferredSection fallbackClassName="h-[600px]" rootMargin="200px 0px">
         <BenefitsGrid />
       </DeferredSection>
 
-      {/* Health network section — NEW */}
+      {/* Health network section */}
       <DeferredSection fallbackClassName="h-[500px]" rootMargin="200px 0px">
         <HealthNetworkSection />
       </DeferredSection>
 
-      {/* Urgent care banner */}
-      <DeferredSection fallbackClassName="h-36 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
-        <InfoBannerStrip
-          icon={Heartbeat}
-          label="Plantão 24h"
-          title="Precisa de atendimento urgente?"
-          highlight="Médicos disponíveis agora"
-          href="/paciente"
-          gradient="from-rose-500 to-primary"
-          mascotSrc={bannerPlantao}
-          variant="wave"
-        />
+      {/* Pricing */}
+      <DeferredSection fallbackClassName="h-[640px]" rootMargin="200px 0px">
+        <PricingSection />
+      </DeferredSection>
+
+      {/* For doctors */}
+      <DeferredSection fallbackClassName="h-[540px]" rootMargin="200px 0px">
+        <ForDoctorsSection />
       </DeferredSection>
 
       {/* Testimonials */}
@@ -189,31 +192,6 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       {/* FAQ */}
       <DeferredSection fallbackClassName="h-[560px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28">
         <FAQSection />
-      </DeferredSection>
-
-      {/* Triage CTA */}
-      <DeferredSection fallbackClassName="h-[260px] mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="220px 0px">
-        <section aria-labelledby="triage-heading" className="py-16 px-4">
-          <div className="max-w-2xl mx-auto text-center space-y-5">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mx-auto">
-              <Stethoscope className="w-8 h-8 text-primary" weight="fill" aria-hidden="true" />
-            </div>
-            <h2 id="triage-heading" className="text-2xl sm:text-3xl font-bold text-foreground tabular-nums">
-              Não sabe qual especialidade procurar?
-            </h2>
-            <p className="text-muted-foreground max-w-md mx-auto">
-              Nossa triagem inteligente analisa seus sintomas e sugere o especialista ideal em segundos.
-            </p>
-            <Button
-              size="lg"
-              className="bg-gradient-hero hover:opacity-90 text-primary-foreground rounded-full px-8 gap-2 text-base shadow-elevated"
-              onClick={() => navigate("/paciente")}
-            >
-              <Stethoscope className="w-5 h-5" weight="fill" aria-hidden="true" />
-              Fazer Triagem Gratuita
-            </Button>
-          </div>
-        </section>
       </DeferredSection>
 
       <DeferredSection fallbackClassName="h-72 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">

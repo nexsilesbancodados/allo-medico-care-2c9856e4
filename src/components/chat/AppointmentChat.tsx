@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Send, Check, CheckCheck } from "lucide-react";
+import { Send, Check, CheckCheck, Paperclip, X, FileText, Image } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 interface Message {
   id: string;
@@ -17,6 +18,10 @@ interface Message {
   content: string;
   is_read: boolean;
   created_at: string;
+  file_url?: string | null;
+  file_name?: string | null;
+  file_type?: string | null;
+  file_size?: number | null;
 }
 
 interface AppointmentChatProps {
@@ -52,9 +57,12 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
   const [isTyping, setIsTyping] = useState(false);
   const [otherTyping, setOtherTyping] = useState(false);
   const [chatExpired, setChatExpired] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const channelRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Check 48h chat window expiration
   useEffect(() => {
@@ -199,9 +207,9 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
             supabase.functions.invoke("send-push-notification", {
               body: {
                 user_id: recipientUserId,
-                title: `💬 Nova mensagem${otherUserName ? "" : ""}`,
-                body: content.length > 80 ? content.slice(0, 80) + "…" : content,
-                url: `/dashboard/chat/${appointmentId}`,
+                title: `💬 Nova mensagem${otherUserName ? ` de ${otherUserName}` : ""}`,
+                message: content.length > 80 ? content.slice(0, 80) + "…" : content,
+                link: `/dashboard/chat/${appointmentId}`,
               },
             }).catch(() => {});
           }
@@ -213,6 +221,47 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande. Máximo 10MB."); return; }
+    setPendingFile(file);
+    e.target.value = "";
+  };
+
+  const sendFile = async () => {
+    if (!pendingFile || !user || uploadingFile) return;
+    setUploadingFile(true);
+    try {
+      const ext = pendingFile.name.split(".").pop() ?? "bin";
+      const path = `${appointmentId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error: uploadError } = await supabase.storage
+        .from("chat-attachments")
+        .upload(path, pendingFile, { contentType: pendingFile.type });
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from("chat-attachments").getPublicUrl(path);
+
+      const { error: msgError } = await supabase.from("messages").insert({
+        appointment_id: appointmentId,
+        sender_id: user.id,
+        content: input.trim() || "",
+        file_url: publicUrl,
+        file_name: pendingFile.name,
+        file_type: pendingFile.type,
+        file_size: pendingFile.size,
+      });
+      if (msgError) throw msgError;
+      setInput("");
+      setPendingFile(null);
+    } catch (err) {
+      toast.error("Erro ao enviar arquivo.");
+      console.error("File upload error:", err);
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   // Group messages by date
@@ -290,7 +339,22 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
                           : "bg-muted text-foreground rounded-bl-md"
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap break-words">{m.content}</p>
+                      {m.file_url && (
+                        <div className="mb-1">
+                          {m.file_type?.startsWith("image/") ? (
+                            <a href={m.file_url} target="_blank" rel="noopener noreferrer">
+                              <img src={m.file_url} alt={m.file_name ?? "imagem"} className="max-w-[200px] rounded-xl object-cover" loading="lazy" />
+                            </a>
+                          ) : (
+                            <a href={m.file_url} target="_blank" rel="noopener noreferrer"
+                              className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium underline-offset-2 hover:underline ${isMine ? "bg-white/15" : "bg-background/50"}`}>
+                              <FileText className="w-4 h-4 shrink-0" />
+                              <span className="truncate max-w-[140px]">{m.file_name ?? "arquivo"}</span>
+                            </a>
+                          )}
+                        </div>
+                      )}
+                      {m.content && <p className="text-sm whitespace-pre-wrap break-words">{m.content}</p>}
                       <div className={`flex items-center gap-1 justify-end mt-1 ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                         <span className="text-[10px]">
                           {format(new Date(m.created_at), "HH:mm", { locale: ptBR })}
@@ -318,21 +382,36 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
           <p className="text-xs text-muted-foreground">⏰ Prazo de chat pós-consulta encerrado (48h).</p>
         </div>
       ) : (
-        <div className="p-3 border-t border-border flex gap-2 items-center">
-          <Input
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Digite sua mensagem..."
-            className="flex-1 rounded-xl"
-          />
-          <Button size="icon"
-            onClick={sendMessage}
-            disabled={!input.trim() || sending}
-            className="rounded-xl shrink-0" aria-label="Enviar"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
+        <div className="p-3 border-t border-border space-y-2">
+          {pendingFile && (
+            <div className="flex items-center gap-2 rounded-xl bg-muted/50 px-3 py-2 text-xs">
+              {pendingFile.type.startsWith("image/") ? <Image className="w-4 h-4 text-primary shrink-0" /> : <FileText className="w-4 h-4 text-primary shrink-0" />}
+              <span className="flex-1 truncate font-medium">{pendingFile.name}</span>
+              <span className="text-muted-foreground shrink-0">{(pendingFile.size / 1024).toFixed(0)}KB</span>
+              <button onClick={() => setPendingFile(null)} className="text-muted-foreground hover:text-destructive transition-colors shrink-0"><X className="w-3.5 h-3.5" /></button>
+            </div>
+          )}
+          <div className="flex gap-2 items-center">
+            <input ref={fileInputRef} type="file" className="hidden" accept="image/*,application/pdf,text/plain" onChange={handleFileSelect} />
+            <Button size="icon" variant="ghost" onClick={() => fileInputRef.current?.click()}
+              className="rounded-xl shrink-0 text-muted-foreground hover:text-primary" aria-label="Anexar arquivo">
+              <Paperclip className="w-4 h-4" />
+            </Button>
+            <Input
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              placeholder={pendingFile ? "Adicionar mensagem (opcional)..." : "Digite sua mensagem..."}
+              className="flex-1 rounded-xl"
+            />
+            <Button size="icon"
+              onClick={pendingFile ? sendFile : sendMessage}
+              disabled={(!input.trim() && !pendingFile) || sending || uploadingFile}
+              className="rounded-xl shrink-0" aria-label="Enviar"
+            >
+              {(sending || uploadingFile) ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" /> : <Send className="w-4 h-4" />}
+            </Button>
+          </div>
         </div>
       )}
     </div>

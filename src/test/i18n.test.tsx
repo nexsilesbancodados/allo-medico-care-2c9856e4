@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 
 vi.mock("framer-motion", () => ({
   motion: new Proxy({}, { get: () => ({ children, ...p }: any) => { const { initial, animate, exit, whileInView, whileHover, whileTap, transition, viewport, variants, ...rest } = p; return <div {...rest}>{children}</div>; } }),
@@ -43,17 +43,21 @@ describe("i18n System", () => {
     expect(screen.getByTestId("hero-title")).toHaveTextContent("Sua saúde merece");
   });
 
-  it("switches to English", () => {
+  it("switches to English", async () => {
     render(<I18nProvider><I18nConsumer /></I18nProvider>);
     fireEvent.click(screen.getByTestId("switch-en"));
-    expect(screen.getByTestId("hero-title")).toHaveTextContent("Your health deserves");
+    await waitFor(() => {
+      expect(screen.getByTestId("hero-title")).toHaveTextContent("Your health deserves");
+    });
     expect(screen.getByTestId("nav-plans")).toHaveTextContent("Plans");
   });
 
-  it("switches to Spanish", () => {
+  it("switches to Spanish", async () => {
     render(<I18nProvider><I18nConsumer /></I18nProvider>);
     fireEvent.click(screen.getByTestId("switch-es"));
-    expect(screen.getByTestId("hero-title")).toHaveTextContent("Tu salud merece");
+    await waitFor(() => {
+      expect(screen.getByTestId("hero-title")).toHaveTextContent("Tu salud merece");
+    });
     expect(screen.getByTestId("nav-plans")).toHaveTextContent("Planes");
   });
 

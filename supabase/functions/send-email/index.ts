@@ -629,6 +629,22 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting: 10 emails/min per recipient IP (prevents spam abuse)
+    const identifier = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anonymous";
+    try {
+      const { createClient } = await import("https://esm.sh/@supabase/supabase-js@2");
+      const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+      const since = new Date(Date.now() - 60000).toISOString();
+      const { count } = await sb.from("rate_limits").select("id", { count: "exact", head: true })
+        .eq("identifier", identifier).eq("endpoint", "send-email").gte("window_start", since);
+      if ((count ?? 0) >= 10) {
+        return new Response(JSON.stringify({ error: "Muitas requisições. Aguarde um momento." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": "60" },
+        });
+      }
+      await sb.from("rate_limits").insert({ identifier, endpoint: "send-email", window_start: new Date().toISOString() });
+    } catch { /* rate limit check failure is non-blocking */ }
+
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
     if (!RESEND_API_KEY) {

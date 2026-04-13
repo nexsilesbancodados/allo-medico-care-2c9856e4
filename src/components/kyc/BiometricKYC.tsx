@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from "react";
+import { logError } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Camera, RotateCcw, CheckCircle2, XCircle, Loader2, FileImage, User, ShieldCheck, Upload } from "lucide-react";
@@ -84,7 +85,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "", tipo = "pa
         await videoRef.current.play();
       }
     } catch (err) {
-      console.error("Camera error:", err);
+      logError("Camera access error in BiometricKYC", err);
       toast.error("Não foi possível acessar a câmera", { description: "Verifique as permissões do navegador." });
       setCameraActive(false);
     }
@@ -156,7 +157,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "", tipo = "pa
         await supabase
           .from("doctor_profiles")
           .update({
-            kyc_status: "verified",
+            kyc_status: "approved",
             kyc_verified_at: new Date().toISOString(),
             kyc_face_match_score: score,
           } as any)
@@ -180,7 +181,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "", tipo = "pa
         toast.error("Verificação não aprovada", { description: `Similaridade: ${score}% (mínimo 60%)` });
       }
     } catch (err: any) {
-      console.error("[BiometricKYC] Verification error:", err);
+      logError("[BiometricKYC] Verification error", err);
       toast.error("Erro na verificação", { description: err.message || "Tente novamente." });
       setStep("selfie");
     }

@@ -68,7 +68,8 @@ describe('Appointment status logic', () => {
       d.setHours(0, 0, 0, 0);
       return Math.round((d.getTime() - now.getTime()) / 86400000);
     };
-    const today = new Date().toISOString().split('T')[0];
+    // Use local date (not UTC) so the comparison stays consistent across timezones
+    const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD in local TZ
     expect(diffDays(today + 'T10:00:00')).toBe(0);
   });
 });

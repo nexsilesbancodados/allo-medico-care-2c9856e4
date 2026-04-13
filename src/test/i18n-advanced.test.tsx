@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { I18nProvider, useTranslation } from "@/i18n";
 import ptBR from "@/i18n/locales/pt-BR";
 import en from "@/i18n/locales/en";
@@ -50,7 +50,7 @@ describe("i18n - Runtime switching", () => {
     localStorage.clear();
   });
 
-  it("switches from pt-BR to English", () => {
+  it("switches from pt-BR to English", async () => {
     localStorage.setItem("locale", "pt-BR");
     render(
       <I18nProvider>
@@ -59,19 +59,23 @@ describe("i18n - Runtime switching", () => {
     );
     expect(screen.getByTestId("translation").textContent).toBe("Agendar Consulta");
     fireEvent.click(screen.getByTestId("switch-en"));
-    expect(screen.getByTestId("translation").textContent).toBe("Book Consultation");
+    await waitFor(() => {
+      expect(screen.getByTestId("translation").textContent).toBe("Book Consultation");
+    });
     expect(screen.getByTestId("locale").textContent).toBe("en");
   });
 
-  it("switches from pt-BR to Spanish", () => {
+  it("switches from pt-BR to Spanish", async () => {
     render(
       <I18nProvider>
         <TranslationDisplay tKey="hero.cta" />
       </I18nProvider>
     );
     fireEvent.click(screen.getByTestId("switch-es"));
+    await waitFor(() => {
+      expect(screen.getByTestId("locale").textContent).toBe("es");
+    });
     expect(screen.getByTestId("translation").textContent).toBe("Agendar Consulta");
-    expect(screen.getByTestId("locale").textContent).toBe("es");
   });
 
   it("persists locale to localStorage", () => {

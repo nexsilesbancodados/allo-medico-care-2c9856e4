@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
-import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck } from "lucide-react";
+import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck, Fingerprint } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ApprovalItem } from "@/types/domain";
 
@@ -42,18 +42,23 @@ const AdminApprovals = () => {
       .order("created_at", { ascending: false });
     if (!data) return;
     const userIds = data.map(d => d.user_id);
-    const [profilesRes, specsRes] = await Promise.all([
+    const [profilesRes, specsRes, kycRes] = await Promise.all([
       supabase.from("profiles").select("user_id, first_name, last_name, phone, cpf").in("user_id", userIds),
       supabase.from("doctor_specialties").select("doctor_id, specialty_id").in("doctor_id", data.map(d => d.id)),
+      supabase.rpc("fn_admin_doctor_kyc_list" as any),
     ]);
     const specIds = [...new Set((specsRes.data ?? []).map(s => s.specialty_id))];
     const { data: specNames } = specIds.length > 0 ? await supabase.from("specialties").select("id, name").in("id", specIds) : { data: [] };
     const specMap = new Map((specNames ?? []).map(s => [s.id, s.name] as const));
     const pMap = new Map(profilesRes.data?.map(p => [p.user_id, p] as const) ?? []);
+    const kycMap = new Map<string, { kyc_status: string; kyc_face_match_score: number | null; kyc_verified_at: string | null }>(
+      ((kycRes.data as any[]) ?? []).map((k: any) => [k.doctor_id, k] as const)
+    );
     const enriched = data.map(d => {
       const profile = pMap.get(d.user_id);
       const doctorSpecs = (specsRes.data ?? []).filter(s => s.doctor_id === d.id).map(s => specMap.get(s.specialty_id) ?? "—");
-      return { ...d, first_name: profile?.first_name ?? "", last_name: profile?.last_name ?? "", phone: profile?.phone ?? "", cpf: profile?.cpf ?? "", specialties: doctorSpecs };
+      const kyc = kycMap.get(d.id);
+      return { ...d, first_name: profile?.first_name ?? "", last_name: profile?.last_name ?? "", phone: profile?.phone ?? "", cpf: profile?.cpf ?? "", specialties: doctorSpecs, kyc_status: kyc?.kyc_status ?? "pending", kyc_face_match_score: kyc?.kyc_face_match_score ?? null, kyc_verified_at: kyc?.kyc_verified_at ?? null };
     });
     setPendingDoctors(enriched.filter(d => !d.is_approved));
     setApprovedDoctors(enriched.filter(d => d.is_approved));
@@ -99,6 +104,13 @@ const AdminApprovals = () => {
     }
 
     toast.success(`${type === "doctor" ? "Médico" : type === "clinic" ? "Clínica" : "Parceiro"} aprovado! ✅`);
+    fetchAll();
+  };
+
+  const overrideKyc = async (id: string, status: "approved" | "rejected" | "pending") => {
+    const { error } = await (supabase.rpc as any)("fn_admin_set_doctor_kyc", { p_doctor_id: id, p_status: status });
+    if (error) { toast.error("Erro ao atualizar KYC"); return; }
+    toast.success(status === "approved" ? "KYC aprovado manualmente ✅" : status === "rejected" ? "KYC rejeitado" : "KYC resetado para pendente");
     fetchAll();
   };
 
@@ -216,6 +228,32 @@ const AdminApprovals = () => {
                       )}
                     </label>
                     {item.crm_verified_at && <span className="text-xs text-muted-foreground">({new Date(String(item.crm_verified_at)).toLocaleDateString("pt-BR")})</span>}
+                  </div>
+                  {/* KYC Status */}
+                  <div className="flex items-center gap-2 mt-1">
+                    <Fingerprint className="w-4 h-4 text-muted-foreground shrink-0" />
+                    {item.kyc_status === "approved" ? (
+                      <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-600 border-emerald-500/30">KYC Aprovado</Badge>
+                    ) : item.kyc_status === "rejected" ? (
+                      <Badge variant="outline" className="text-xs bg-red-500/10 text-red-600 border-red-500/30">KYC Rejeitado</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/30">KYC Pendente</Badge>
+                    )}
+                    {item.kyc_face_match_score != null && (
+                      <span className="text-xs text-muted-foreground">({Math.round(item.kyc_face_match_score)}% match)</span>
+                    )}
+                    {item.kyc_status !== "approved" && (
+                      <Button size="sm" variant="ghost" className="h-5 px-1.5 text-xs text-emerald-600 hover:bg-emerald-50"
+                        onClick={() => overrideKyc(item.id, "approved")}>
+                        Aprovar KYC
+                      </Button>
+                    )}
+                    {item.kyc_status === "approved" && (
+                      <Button size="sm" variant="ghost" className="h-5 px-1.5 text-xs text-muted-foreground hover:bg-muted"
+                        onClick={() => overrideKyc(item.id, "pending")}>
+                        Resetar
+                      </Button>
+                    )}
                   </div>
                   {(item.specialties?.length ?? 0) > 0 && (
                     <div className="flex flex-wrap gap-1 mt-1">

@@ -1,6 +1,7 @@
-import { forwardRef, useRef, useState, useCallback } from "react";
+import { forwardRef, useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ShieldCheck, Heart, Quotes, X } from "@phosphor-icons/react";
+import { supabase } from "@/integrations/supabase/client";
 import avatarMaria from "@/assets/avatar-maria.png";
 import avatarCarlos from "@/assets/avatar-carlos.png";
 import avatarAna from "@/assets/avatar-ana.png";
@@ -12,7 +13,12 @@ import avatarCamila from "@/assets/avatar-camila.png";
 import avatarMarcos from "@/assets/avatar-marcos.png";
 import avatarFernanda from "@/assets/avatar-fernanda.png";
 
-const allTestimonials = [
+type TestimonialItem = {
+  name: string; handle: string; text: string; rating: number;
+  avatar: string; verified: boolean; likes: number; time: string;
+};
+
+const staticTestimonials: TestimonialItem[] = [
   { name: "Maria Silva", handle: "@maria.silva", text: "Consegui uma consulta com cardiologista em menos de 1 hora. A receita chegou digital na hora. Incrível! 💙", rating: 5, avatar: avatarMaria, verified: true, likes: 342, time: "2h" },
   { name: "Dr. Carlos Mendes", handle: "@dr.carlos", text: "A plataforma facilitou muito meu dia a dia. Atendo de casa com a mesma qualidade do consultório. Recomendo!", rating: 5, avatar: avatarCarlos, verified: true, likes: 518, time: "5h" },
   { name: "Ana Costa", handle: "@ana.costa", text: "Agendei uma consulta avulsa e fui atendida em menos de 30 minutos. Prático e acessível! ❤️", rating: 5, avatar: avatarAna, verified: true, likes: 276, time: "8h" },
@@ -28,7 +34,30 @@ const allTestimonials = [
 const TestimonialsSection = forwardRef<HTMLElement>((_, ref) => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [viewed, setViewed] = useState<Set<number>>(new Set());
+  const [allTestimonials, setAllTestimonials] = useState<TestimonialItem[]>(staticTestimonials);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    supabase
+      .from("testimonials")
+      .select("*")
+      .eq("is_active", true)
+      .order("order_index")
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setAllTestimonials(data.map((d) => ({
+            name: d.name,
+            handle: `@${d.name.split(" ")[0].toLowerCase()}`,
+            text: d.text,
+            rating: d.rating,
+            avatar: d.avatar_url || avatarMaria,
+            verified: true,
+            likes: Math.floor(Math.random() * 500) + 100,
+            time: "recente",
+          })));
+        }
+      });
+  }, []);
 
   const openStory = useCallback((idx: number) => {
     setOpenIndex(idx);

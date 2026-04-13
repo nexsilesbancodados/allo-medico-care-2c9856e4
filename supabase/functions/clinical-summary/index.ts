@@ -60,7 +60,7 @@ Seja empático, use linguagem acolhedora. Máximo 200 palavras. NÃO faça diagn
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Clinical summary error:", e);
+    console.error("Clinical summary error:", error);
     return new Response(JSON.stringify({ error: "Não foi possível gerar o resumo." }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });

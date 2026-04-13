@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { logError } from "@/lib/logger";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -276,7 +277,7 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
       if (res.data) { const nid = (res.data as any).id; setExistingAnamnesisId(nid); existingIdRef.current = nid; }
     }
     savingRef.current = false;
-    if (error) { setSaveStatus("error"); console.error("EMR save error:", error); }
+    if (error) { setSaveStatus("error"); logError("EMR save error", error); }
     else { dirtyRef.current = false; setSaveStatus("saved"); setLastSavedAt(new Date()); }
   }, [appointmentId, patientId]);
 
@@ -304,7 +305,7 @@ const PatientEMR = ({ patientId, appointmentId, isDoctor = false, readOnly = fal
     setAddingRecord(false);
     if (error) {
       toast.error("Erro ao salvar registro médico");
-      console.error(error);
+      logError("Failed to add medical record", error);
     } else {
       toast.success("Registro médico adicionado! ✅");
       setNewRecord({ record_type: "allergy", title: "", description: "", cid_code: "", severity: "" });

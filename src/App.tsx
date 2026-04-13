@@ -23,6 +23,7 @@ const OfflineIndicator = lazy(() => import("./components/OfflineIndicator"));
 const TermsReconsentDialog = lazy(() => import("./components/auth/TermsReconsentDialog"));
 const PWAUpdateBanner = lazy(() => import("./components/PWAUpdateBanner"));
 const CookieBanner = lazy(() => import("./components/CookieBanner"));
+const PWAInstallPrompt = lazy(() => import("./components/PWAInstallPrompt"));
 
 // Lazy-loaded pages for code splitting
 const AuthPaciente = lazy(() => import("./pages/AuthPaciente"));
@@ -271,6 +272,7 @@ const App = () => {
                         <TermsReconsentDialog />
                         <OfflineIndicator />
                         <PWAUpdateBanner />
+                        <PWAInstallPrompt />
                         <CookieBanner />
                       </Suspense>
                     </ErrorBoundary>

@@ -53,7 +53,7 @@ const steps: OnboardingStep[] = [
   },
   {
     id: "kyc", label: "Verificação KYC", description: "Validação facial e do documento",
-    icon: ShieldCheck, path: "#kyc", check: (d) => d.docProfile?.kyc_status === "verified", estimatedMin: 3,
+    icon: ShieldCheck, path: "#kyc", check: (d) => d.docProfile?.kyc_status === "approved" || d.docProfile?.kyc_status === "verified", estimatedMin: 3,
   },
   {
     id: "approval", label: "Aprovação do CRM", description: "Verificação administrativa obrigatória",
@@ -219,7 +219,7 @@ const DoctorOnboarding = () => {
               setShowKYC(false);
               setData((prev: any) => ({
                 ...prev,
-                docProfile: { ...prev.docProfile, kyc_status: result.status === "aprovado" ? "verified" : "pending" },
+                docProfile: { ...prev.docProfile, kyc_status: result.status === "aprovado" || result.match ? "approved" : "pending" },
               }));
             }}
             variant="full"

@@ -371,6 +371,10 @@ export interface ApprovalItem {
   pix_key?: string | null;
 
   rejection_reason?: string | null;
+
+  kyc_status?: string | null;
+  kyc_face_match_score?: number | null;
+  kyc_verified_at?: string | null;
 }
 
 export interface PlanRow {

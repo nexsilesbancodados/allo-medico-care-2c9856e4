@@ -1,7 +1,8 @@
 import {
   House, MagnifyingGlass, Lightning, CalendarCheck, ChatCircleDots,
   Headset, CreditCard, Sliders, UserCircle, Heart, FileText,
-  ClipboardText, Upload, BookOpen, Users, Bell, Shield
+  ClipboardText, Upload, BookOpen, Users, Bell, Shield,
+  IdentificationCard, Syringe, FirstAid
 } from "@phosphor-icons/react";
 import { NavIcon } from "@/components/ui/nav-icon";
 
@@ -25,7 +26,12 @@ export const getPatientNav = (active: string) => [
   { label: "Enviar Exames", href: "/dashboard/patient/documents?role=patient", icon: <NavIcon icon={<Upload size={16} weight="fill" />} color="cyan" />, active: active === "documents", group: "Saúde Digital" },
   { label: "Renovar Receita", href: "/dashboard/prescription-renewal?role=patient", icon: <NavIcon icon={<BookOpen size={16} weight="fill" />} color="emerald" />, active: active === "renewal", group: "Saúde Digital" },
 
+  // ── Saúde Digital (extras) ──
+  { label: "Planos de Cuidado", href: "/dashboard/patient/care-plans?role=patient", icon: <NavIcon icon={<FirstAid size={16} weight="fill" />} color="rose" />, active: active === "care-plans", group: "Saúde Digital" },
+  { label: "Vacinas", href: "/dashboard/patient/vaccinations?role=patient", icon: <NavIcon icon={<Syringe size={16} weight="fill" />} color="violet" />, active: active === "vaccinations", group: "Saúde Digital" },
+
   // ── Perfil Clínico ──
+  { label: "Cartão Saúde", href: "/dashboard/patient/health-card?role=patient", icon: <NavIcon icon={<IdentificationCard size={16} weight="fill" />} color="blue" />, active: active === "health-card", group: "Perfil Clínico" },
   { label: "Dependentes", href: "/dashboard/patient/dependents?role=patient", icon: <NavIcon icon={<Users size={16} weight="fill" />} color="blue" />, active: active === "dependents", group: "Perfil Clínico" },
 
   // ── Suporte ──
@@ -33,5 +39,5 @@ export const getPatientNav = (active: string) => [
 
   // ── Segurança ──
   { label: "Configurações", href: "/dashboard/settings?role=patient", icon: <NavIcon icon={<Sliders size={16} weight="fill" />} color="slate" />, active: active === "settings", group: "Segurança" },
-  { label: "Privacidade", href: "/dashboard/settings?role=patient&tab=privacy", icon: <NavIcon icon={<Shield size={16} weight="fill" />} color="amber" />, active: active === "privacy", group: "Segurança" },
+  { label: "Privacidade (LGPD)", href: "/dashboard/patient/lgpd?role=patient", icon: <NavIcon icon={<Shield size={16} weight="fill" />} color="amber" />, active: active === "lgpd", group: "Segurança" },
 ];

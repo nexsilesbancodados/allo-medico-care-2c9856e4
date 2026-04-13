@@ -5,16 +5,9 @@ import { motion } from "framer-motion";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { ArrowRight, ShieldCheck, Lock, Star, CheckCircle } from "@phosphor-icons/react";
+import { useSiteConfig } from "@/lib/site-config";
 
 import heroDoctor from "@/assets/hero-doctor.png";
-
-const heroContent = {
-  title: "Cuidado médico",
-  highlight: "de excelência",
-  subtitle: "ao seu alcance",
-  description:
-    "Conecte-se a médicos especialistas verificados pelo CFM. Consultas por vídeo em HD, receitas digitais válidas e prontuário eletrônico completo.",
-};
 
 const trustItems = [
   { label: "Regulamentado CFM", icon: ShieldCheck },
@@ -32,6 +25,14 @@ const HeroSection = memo(
   forwardRef<HTMLElement>((_, ref) => {
     const navigate = useNavigate();
     const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
+    const { get } = useSiteConfig();
+
+    const title      = get("hero_title",    "Cuidado médico de excelência");
+    const subtitle   = get("hero_subtitle", "Conecte-se a médicos especialistas verificados pelo CFM. Consultas por vídeo em HD, receitas digitais válidas e prontuário eletrônico completo.");
+    const ctaText    = get("hero_cta_text", "Agendar consulta");
+    const cta2Text   = get("landing_second_cta", "Consulta avulsa");
+    const badgeText  = get("landing_badge_text", "Médicos disponíveis agora");
+    const heroImgUrl = get("hero_image_url", "");
 
     return (
       <section
@@ -67,21 +68,18 @@ const HeroSection = memo(
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-60" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-success shadow-sm shadow-success/40" />
                 </span>
-                Médicos disponíveis agora
+                {badgeText}
               </motion.div>
 
               {/* Headline */}
               <div className="mb-6">
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-[3.2rem] font-extrabold leading-[1.1] tracking-tight text-foreground">
-                  {heroContent.title}{" "}
-                  <span className="text-gradient">{heroContent.highlight}</span>
-                  <br className="hidden sm:block" />
-                  <span className="text-foreground">{heroContent.subtitle}</span>
+                  <span className="text-gradient">{title}</span>
                 </h1>
               </div>
 
               <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-lg mb-6">
-                {heroContent.description}
+                {subtitle}
               </p>
 
               {/* Highlights */}
@@ -107,7 +105,7 @@ const HeroSection = memo(
                   onClick={() => navigate("/paciente")}
                   onMouseEnter={prefetchPaciente}
                 >
-                  Agendar consulta
+                  {ctaText}
                   <ArrowRight className="w-4 h-4 ml-1.5 transition-transform duration-200 group-hover:translate-x-0.5" weight="bold" />
                 </Button>
                 <Button
@@ -117,8 +115,7 @@ const HeroSection = memo(
                   onClick={() => navigate("/paciente")}
                   onMouseEnter={prefetchPaciente}
                 >
-                  Consulta avulsa
-                  <span className="inline-flex items-center rounded-lg bg-primary/10 text-primary px-2.5 py-0.5 text-xs font-extrabold">R$89</span>
+                  {cta2Text}
                 </Button>
               </motion.div>
 
@@ -153,7 +150,7 @@ const HeroSection = memo(
                 <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.05] to-secondary/[0.04] blur-[80px] rounded-full scale-90 -z-10" />
 
                 <OptimizedImage
-                  src={heroDoctor}
+                  src={heroImgUrl || heroDoctor}
                   alt="Médico realizando teleconsulta pela AloClinica"
                   className="w-full h-auto drop-shadow-xl"
                   priority

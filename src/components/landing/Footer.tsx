@@ -1,15 +1,36 @@
 import { useState, forwardRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Envelope, Phone, InstagramLogo, LinkedinLogo, YoutubeLogo, Heart, ShieldCheck, Lock, SealCheck, PaperPlaneTilt } from "@phosphor-icons/react";
+import { Envelope, Phone, InstagramLogo, LinkedinLogo, YoutubeLogo, Heart, ShieldCheck, Lock, SealCheck, PaperPlaneTilt, FacebookLogo, TwitterLogo } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import logo from "@/assets/mascot.png";
+import { useSiteConfig } from "@/lib/site-config";
 
 const Footer = forwardRef<HTMLElement>((_, ref) => {
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const { get } = useSiteConfig();
+
+  const siteName    = get("site_name",      "AlôMédico");
+  const footerText  = get("footer_text",    `© ${new Date().getFullYear()} AlôMédico. Todos os direitos reservados.`);
+  const footerTag   = get("footer_tagline", "Telemedicina segura e acessível para todo o Brasil.");
+  const contactEmail = get("contact_email", "contato@aloclinica.com.br");
+  const contactPhone = get("contact_phone", "0800 123 4567");
+  const igUrl  = get("social_instagram", "");
+  const fbUrl  = get("social_facebook",  "");
+  const twUrl  = get("social_twitter",   "");
+  const liUrl  = get("social_linkedin",  "");
+  const ytUrl  = get("social_youtube",   "");
+
+  const socialLinks = [
+    igUrl && { icon: InstagramLogo, href: igUrl, label: "Instagram" },
+    fbUrl && { icon: FacebookLogo,  href: fbUrl, label: "Facebook" },
+    twUrl && { icon: TwitterLogo,   href: twUrl, label: "Twitter/X" },
+    liUrl && { icon: LinkedinLogo,  href: liUrl, label: "LinkedIn" },
+    ytUrl && { icon: YoutubeLogo,   href: ytUrl, label: "YouTube" },
+  ].filter(Boolean) as { icon: typeof InstagramLogo; href: string; label: string }[];
 
   const handleNewsletter = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,24 +86,22 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <div className="flex items-center gap-2 mb-3">
-              <img src={logo} alt="AloClinica" className="w-7 h-7 rounded-lg object-contain" loading="lazy" decoding="async" width={28} height={28} />
-              <span className="font-bold text-sm text-white">AloClinica</span>
+              <img src={logo} alt={siteName} className="w-7 h-7 rounded-lg object-contain" loading="lazy" decoding="async" width={28} height={28} />
+              <span className="font-bold text-sm text-white">{siteName}</span>
             </div>
             <p className="text-xs text-white/30 leading-relaxed mb-4 max-w-[200px]">
-              Telemedicina segura e acessível para todo o Brasil.
+              {footerTag}
             </p>
-            <div className="flex gap-2">
-              {[
-                { icon: InstagramLogo, href: "https://instagram.com/aloclinica", label: "Instagram" },
-                { icon: LinkedinLogo, href: "https://linkedin.com/company/aloclinica", label: "LinkedIn" },
-                { icon: YoutubeLogo, href: "https://youtube.com/@aloclinica", label: "YouTube" },
-              ].map(s => (
-                <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}
-                  className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center hover:bg-primary/80 hover:border-primary/60 transition-all duration-150 text-white/50 hover:text-white">
-                  <s.icon className="w-4 h-4" weight="fill" />
-                </a>
-              ))}
-            </div>
+            {socialLinks.length > 0 && (
+              <div className="flex gap-2 flex-wrap">
+                {socialLinks.map(s => (
+                  <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label}
+                    className="w-8 h-8 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center hover:bg-primary/80 hover:border-primary/60 transition-all duration-150 text-white/50 hover:text-white">
+                    <s.icon className="w-4 h-4" weight="fill" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Links */}
@@ -105,8 +124,8 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
               <h4 className="text-[10px] font-bold uppercase tracking-[0.15em] text-white/35 mb-3">{col.title}</h4>
               {col.contact ? (
                 <ul className="space-y-2.5 text-xs text-white/35">
-                  <li className="flex items-center gap-2 hover:text-white/55 transition-colors"><Envelope className="w-3.5 h-3.5 text-primary/60" weight="fill" /> contato@aloclinica.com.br</li>
-                  <li className="flex items-center gap-2 hover:text-white/55 transition-colors"><Phone className="w-3.5 h-3.5 text-primary/60" weight="fill" /> 0800 123 4567</li>
+                  {contactEmail && <li className="flex items-center gap-2 hover:text-white/55 transition-colors"><Envelope className="w-3.5 h-3.5 text-primary/60" weight="fill" /> {contactEmail}</li>}
+                  {contactPhone && <li className="flex items-center gap-2 hover:text-white/55 transition-colors"><Phone className="w-3.5 h-3.5 text-primary/60" weight="fill" /> {contactPhone}</li>}
                 </ul>
               ) : (
                 <ul className="space-y-1.5 text-xs">
@@ -130,7 +149,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
       <div className="border-t border-white/[0.05]">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28 py-4 flex flex-col sm:flex-row justify-between items-center gap-3">
           <p className="text-[11px] text-white/20 flex items-center gap-1">
-            © {new Date().getFullYear()} AloClinica — Feito com <Heart className="w-3 h-3 text-destructive/60" weight="fill" /> no Brasil
+            {footerText} — Feito com <Heart className="w-3 h-3 text-destructive/60" weight="fill" /> no Brasil
           </p>
           <div className="flex flex-wrap justify-center gap-x-4 gap-y-1 text-[11px]">
             {[

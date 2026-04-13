@@ -46,31 +46,52 @@ const MemedPrescription = ({
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [memedToken, setMemedToken] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const [retryAttempt, setRetryAttempt] = useState(0);
   const scriptLoadedRef = useRef(false);
   const moduleReadyRef = useRef(false);
 
-  // 1. Get Memed token from our edge function
+  const MAX_RETRIES = 3;
+  const RETRY_BASE_DELAY_MS = 1000;
+
+  const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
+
+  // 1. Get Memed token from our edge function — with exponential backoff retry
   const fetchMemedToken = useCallback(async () => {
     setStatus("loading");
     setErrorMsg("");
+    setRetryAttempt(0);
 
-    try {
-      const { data, error } = await supabase.functions.invoke("memed-prescriber", {});
+    let lastError: Error | null = null;
 
-      if (error) throw new Error(error.message);
-      if (data?.error) throw new Error(data.error);
-
-      if (data?.token) {
-        setMemedToken(data.token);
-        return data.token;
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      if (attempt > 0) {
+        const delay = RETRY_BASE_DELAY_MS * Math.pow(2, attempt - 1); // 1s, 2s, 4s
+        setRetryAttempt(attempt);
+        await sleep(delay);
       }
-      throw new Error("Token não retornado");
-    } catch (err: unknown) {
-      warn("Memed token error:", err);
-      setErrorMsg(err instanceof Error ? err.message : "Erro ao obter token Memed");
-      setStatus("error");
-      return null;
+
+      try {
+        const { data, error } = await supabase.functions.invoke("memed-prescriber", {});
+
+        if (error) throw new Error(error.message);
+        if (data?.error) throw new Error(data.error);
+
+        if (data?.token) {
+          setMemedToken(data.token);
+          setRetryAttempt(0);
+          return data.token;
+        }
+        throw new Error("Token não retornado");
+      } catch (err: unknown) {
+        lastError = err instanceof Error ? err : new Error("Erro ao obter token Memed");
+        warn(`Memed token error (attempt ${attempt + 1}/${MAX_RETRIES}):`, err);
+      }
     }
+
+    setErrorMsg(lastError?.message ?? "Erro ao obter token Memed após várias tentativas");
+    setStatus("error");
+    setRetryAttempt(0);
+    return null;
   }, []);
 
   // 2. Load Memed SDK script dynamically
@@ -93,10 +114,30 @@ const MemedPrescription = ({
       setupMemedEvents();
     };
 
-    script.onerror = () => {
-      setErrorMsg("Falha ao carregar o SDK da Memed");
-      setStatus("error");
+    let scriptRetries = 0;
+    const MAX_SCRIPT_RETRIES = 2;
+
+    const retryScriptLoad = () => {
+      if (scriptRetries >= MAX_SCRIPT_RETRIES) {
+        setErrorMsg("Falha ao carregar o SDK da Memed após várias tentativas");
+        setStatus("error");
+        return;
+      }
+      scriptRetries++;
+      warn(`Memed script load failed, retrying (${scriptRetries}/${MAX_SCRIPT_RETRIES})…`);
+      setTimeout(() => {
+        const retryScript = document.createElement("script");
+        retryScript.type = "text/javascript";
+        retryScript.src = MEMED_SCRIPT_URL;
+        retryScript.setAttribute("data-token", token);
+        retryScript.async = true;
+        retryScript.onload = () => { scriptLoadedRef.current = true; setupMemedEvents(); };
+        retryScript.onerror = retryScriptLoad;
+        document.body.appendChild(retryScript);
+      }, 1500 * scriptRetries);
     };
+
+    script.onerror = retryScriptLoad;
 
     document.body.appendChild(script);
   }, []);
@@ -258,7 +299,11 @@ const MemedPrescription = ({
             <Loader2 className="w-5 h-5 animate-spin text-primary" />
             <div>
               <p className="font-semibold text-foreground">Conectando à Memed...</p>
-              <p className="text-xs text-muted-foreground">Aguarde enquanto preparamos a prescrição digital</p>
+              <p className="text-xs text-muted-foreground">
+                {retryAttempt > 0
+                  ? `Tentativa ${retryAttempt + 1} de ${MAX_RETRIES}…`
+                  : "Aguarde enquanto preparamos a prescrição digital"}
+              </p>
             </div>
           </div>
         </CardContent>

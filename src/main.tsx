@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import "./App.css";
+import { logError } from "./lib/logger";
 // push-service-worker cleanup deferred to after mount
 import App from "./App";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -99,7 +100,7 @@ try {
 } catch (err) {
   if (isChunkError(err)) { recover(); }
   else {
-    console.error("[boot] Fatal mount error", err);
+    logError("[boot] Fatal mount error", err);
     root.innerHTML =
       '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif"><div style="text-align:center"><h2>Erro ao carregar</h2><p>Recarregue a página.</p><button onclick="location.reload()" style="padding:8px 16px;margin-top:12px;cursor:pointer;border-radius:6px;border:1px solid #ccc">Recarregar</button></div></div>';
   }

@@ -107,6 +107,25 @@ const UrgentCareQueue = () => {
   const [hospitalsLoading, setHospitalsLoading] = useState(true);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [userCoords, setUserCoords] = useState<{ lat: number; lon: number } | null>(null);
+  const [hasDiscountCard, setHasDiscountCard] = useState(false);
+  const [discountPercent, setDiscountPercent] = useState(0);
+
+  // Check discount card on mount
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from("discount_cards")
+      .select("discount_percent, status")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .maybeSingle()
+      .then(({ data }) => {
+        if (data) {
+          setHasDiscountCard(true);
+          setDiscountPercent(data.discount_percent ?? 30);
+        }
+      });
+  }, [user]);
 
   // Fetch nearby hospitals via geolocation + Overpass
   useEffect(() => {
@@ -207,7 +226,11 @@ const UrgentCareQueue = () => {
     if (data?.status === "in_progress" && data?.appointment_id) window.location.href = `/dashboard/consultation/${data.appointment_id}?role=patient`;
   };
 
-  const priceWithDiscount = shiftInfo ? shiftInfo.price : 0;
+  const priceWithDiscount = shiftInfo
+    ? hasDiscountCard && discountPercent > 0
+      ? shiftInfo.price * (1 - discountPercent / 100)
+      : shiftInfo.price
+    : 0;
   const handleStartPayment = () => setShowPayment(true);
 
   const handlePayment = async () => {
@@ -386,10 +409,14 @@ const UrgentCareQueue = () => {
                 </div>
                 <h1 className="text-2xl font-extrabold text-white mb-1 font-[Manrope]">Urgência e Emergência</h1>
                 <p className="text-sm text-white/70 mb-2">Consulta com médico plantonista em minutos.</p>
-                <p className="font-[Manrope] text-[32px] font-extrabold text-white leading-none tabular-nums mb-4">
+                <p className="font-[Manrope] text-[32px] font-extrabold text-white leading-none tabular-nums mb-1">
                   R$ {priceWithDiscount.toFixed(2)}
-                  <span className="text-sm font-medium text-white/60 ml-2">Turno {shiftInfo?.label}</span>
                 </p>
+                {shiftInfo && (
+                  <p className="text-sm text-white/70 mb-4">
+                    Turno <span className="font-semibold text-white/90">{shiftInfo.label}</span>
+                  </p>
+                )}
                 <Button
                   className="rounded-full bg-white text-[#A32D2D] font-bold shadow-[0_4px_14px_rgba(163,45,45,0.4)] hover:bg-white/90 gap-2"
                   onClick={handleStartPayment}
@@ -399,6 +426,34 @@ const UrgentCareQueue = () => {
               </div>
               <img src={mascotWave} alt="Pingo" className="absolute right-2 bottom-0 w-28 h-28 object-contain opacity-90" loading="lazy" decoding="async" width={112} height={112} />
               <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/[0.06] blur-[40px]" />
+            </div>
+
+            {/* Pricing tiers */}
+            <div className="rounded-2xl border border-border/20 bg-card p-4">
+              <p className="text-xs font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Tabela de valores por turno</p>
+              <div className="space-y-2">
+                {[
+                  { label: "Diurno", range: "07–19h", price: 75 },
+                  { label: "Noturno", range: "19–00h", price: 100 },
+                  { label: "Madrugada", range: "00–07h", price: 120 },
+                ].map((tier) => {
+                  const isActive = shiftInfo?.label === tier.label;
+                  return (
+                    <div
+                      key={tier.label}
+                      className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm transition-colors ${isActive ? "bg-primary/10 border border-primary/20" : "bg-muted/30"}`}
+                    >
+                      <span className={`font-semibold ${isActive ? "text-primary" : "text-foreground"}`}>{`${tier.label} ${tier.range}`}</span>
+                      <span className={`font-bold tabular-nums ${isActive ? "text-primary" : "text-foreground"}`}>{`R$ ${tier.price}`}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              {hasDiscountCard && (
+                <p className="mt-2 text-xs text-secondary font-medium">
+                  Cartão Saúde ativo — {discountPercent}% de desconto aplicado
+                </p>
+              )}
             </div>
 
             {/* Nearby clinics count */}
