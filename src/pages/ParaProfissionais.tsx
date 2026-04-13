@@ -285,7 +285,7 @@ const ParaProfissionais = forwardRef<HTMLDivElement>((_, ref) => {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-50px" }}
                 transition={{ delay: i * 0.1, duration: 0.5 }}
-                whileHover={{ y: -4, shadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
+                whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)" }}
                 className="relative p-6 rounded-2xl border border-border/50 bg-card hover:shadow-lg transition-all duration-300 overflow-hidden group"
               >
                 {/* Animated gradient background */}

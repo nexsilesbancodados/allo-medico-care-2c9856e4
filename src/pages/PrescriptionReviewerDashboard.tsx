@@ -56,7 +56,7 @@ export default function PrescriptionReviewerDashboard() {
   const approvePrescription = async (prescriptionId: string) => {
     setReviewing(prescriptionId);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("ophthalmology_prescriptions")
         .update({
           review_status: "approved",
@@ -87,7 +87,7 @@ export default function PrescriptionReviewerDashboard() {
 
     setReviewing(prescriptionId);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("ophthalmology_prescriptions")
         .update({
           review_status: "rejected",

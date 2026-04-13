@@ -41,7 +41,7 @@ export default function PrescriptionVerification() {
         setLoading(true);
 
         // Buscar dados de assinatura
-        const { data: signatureData, error } = await supabase
+        const { data: signatureData, error } = await (supabase as any)
           .from("prescription_signatures")
           .select("*")
           .eq("prescription_id", prescriptionId)

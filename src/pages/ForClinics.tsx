@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Building, CheckCircle, Clock, FileText, Lock, ArrowRight, Users, ShieldCheck } from "@phosphor-icons/react";
-import { TrendingUp, Zap } from "lucide-react";
+import { TrendingUp, Zap, Sparkles as Lightning } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/landing/Header";
 import SEOHead from "@/components/SEOHead";
@@ -307,7 +307,7 @@ const ForClinics = forwardRef<HTMLDivElement>((_, ref) => {
                         <p className="text-xs font-semibold text-muted-foreground">{cs.clinic}</p>
                       </div>
                       <p className="text-lg font-black text-primary mb-3 flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5" weight="fill" /> {cs.result}
+                        <TrendingUp className="w-5 h-5" /> {cs.result}
                       </p>
                       <p className="text-sm text-muted-foreground leading-relaxed">{cs.detail}</p>
                     </CardContent>
@@ -333,7 +333,7 @@ const ForClinics = forwardRef<HTMLDivElement>((_, ref) => {
                     <CardContent className="p-6">
                       <div className="flex items-start gap-3 mb-3">
                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
-                          <Zap className="w-4 h-4 text-primary" weight="fill" />
+                          <Zap className="w-4 h-4 text-primary" />
                         </div>
                         <h3 className="font-bold text-foreground text-sm leading-snug">{faq.question}</h3>
                       </div>

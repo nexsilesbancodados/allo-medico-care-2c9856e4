@@ -315,7 +315,7 @@ const ForDoctors = forwardRef<HTMLDivElement>((_, ref) => {
                       <p className="text-sm text-muted-foreground italic mb-4 leading-relaxed">"{t.quote}"</p>
                       <div className="pt-4 border-t border-border/50">
                         <p className="text-xs font-semibold text-primary flex items-center gap-1">
-                          <TrendingUp className="w-3.5 h-3.5" weight="fill" /> {t.income}/mês
+                          <TrendingUp className="w-3.5 h-3.5" /> {t.income}/mês
                         </p>
                       </div>
                     </CardContent>
@@ -341,7 +341,7 @@ const ForDoctors = forwardRef<HTMLDivElement>((_, ref) => {
                     <CardContent className="p-6">
                       <div className="flex items-start gap-3 mb-3">
                         <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
-                          <Sparkles className="w-4 h-4 text-primary" weight="fill" />
+                          <Sparkles className="w-4 h-4 text-primary" />
                         </div>
                         <h3 className="font-bold text-foreground text-sm leading-snug">{faq.question}</h3>
                       </div>

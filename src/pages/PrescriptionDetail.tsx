@@ -41,14 +41,14 @@ export default function PrescriptionDetail() {
 
     const fetch = async () => {
       try {
-        const { data } = await supabase
+        const { data } = await (supabase as any)
           .from("ophthalmology_prescriptions")
           .select("*, doctor:doctor_id(full_name, crm, crm_state), patient:patient_id(full_name)")
           .eq("id", prescriptionId)
           .single();
 
         if (data) {
-          setPrescription(data);
+          setPrescription(data as any);
         }
       } catch (error) {
         console.error("Erro ao buscar prescrição:", error);
@@ -67,7 +67,7 @@ export default function PrescriptionDetail() {
 
     try {
       const response = await fetch(
-        `${supabase.supabaseUrl}/functions/v1/generate-ophthalmology-prescription`,
+        `${(supabase as any).supabaseUrl}/functions/v1/generate-ophthalmology-prescription`,
         {
           method: "POST",
           headers: {
@@ -88,7 +88,7 @@ export default function PrescriptionDetail() {
 
       // Dynamic import of html2pdf
       const html2pdf = (await import("html2pdf.js")).default;
-      html2pdf().setOptions({
+      (html2pdf() as any).setOptions({
         margin: 10,
         filename: `prescricao_oftalmologica_${prescription.id}.pdf`,
         image: { type: "PNG", quality: 0.98 },

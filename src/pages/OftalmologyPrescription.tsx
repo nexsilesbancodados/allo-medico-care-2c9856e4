@@ -103,7 +103,7 @@ export default function OftalmologyPrescription() {
     setSaving(true);
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("ophthalmology_prescriptions")
         .insert([
           {
@@ -132,7 +132,7 @@ export default function OftalmologyPrescription() {
     setSaving(true);
     try {
       // 1. Salvar prescrição
-      const { data: prescriptionData, error: insertError } = await supabase
+      const { data: prescriptionData, error: insertError } = await (supabase as any)
         .from("ophthalmology_prescriptions")
         .insert([
           {

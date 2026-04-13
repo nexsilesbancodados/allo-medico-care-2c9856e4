@@ -106,7 +106,7 @@ const Teleconsulta = () => {
                 transition={{ delay: 0.2 }}
               >
                 <Badge className="text-xs px-4 py-1.5 bg-green-400/20 text-white border-green-400/40 backdrop-blur-sm font-semibold">
-                  <Sparkles className="w-3.5 h-3.5 mr-1.5 inline" weight="fill" /> Atendimento 24h/dia
+                  <Sparkles className="w-3.5 h-3.5 mr-1.5 inline" /> Atendimento 24h/dia
                 </Badge>
               </motion.div>
 
