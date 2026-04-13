@@ -4,6 +4,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 gsap.registerPlugin(ScrollTrigger);
 import { motion } from "framer-motion";
 import { UserPlus, MagnifyingGlass, VideoCamera, FileText, Clock } from "@phosphor-icons/react";
+import { useSiteConfig } from "@/lib/site-config";
 import stepSignup from "@/assets/step-signup.png";
 import stepSearch from "@/assets/step-search.png";
 import stepVideocall from "@/assets/step-videocall.png";
@@ -16,8 +17,39 @@ const steps = [
   { icon: FileText, title: "Receba sua receita", description: "Receita digital válida na hora.", image: stepPrescription, time: "Instantâneo", accent: "from-success/20 to-emerald-400/10" },
 ];
 
+const DEFAULT_ICONS = [UserPlus, MagnifyingGlass, VideoCamera, FileText];
+const DEFAULT_IMAGES = [stepSignup, stepSearch, stepVideocall, stepPrescription];
+const DEFAULT_ACCENTS = [
+  "from-primary/20 to-secondary/10",
+  "from-secondary/20 to-success/10",
+  "from-blue-500/15 to-primary/10",
+  "from-success/20 to-emerald-400/10",
+];
+
 const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
   const stepsRef = useRef<HTMLDivElement>(null);
+  const { get } = useSiteConfig();
+  const title = get("how_it_works_title", "Como funciona");
+  const desc  = get("how_it_works_desc",  "Em 4 passos simples, acesse médicos especialistas sem sair de casa.");
+
+  // Parse CMS steps, fall back to hard-coded defaults
+  let cmsSteps: Array<{ title: string; desc: string; time?: string }> | null = null;
+  try {
+    const raw = get("how_it_works_steps", "");
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (Array.isArray(p) && p.length > 0) cmsSteps = p;
+    }
+  } catch { /* use defaults */ }
+
+  const effectiveSteps = (cmsSteps ?? steps.map((s, i) => ({ title: s.title, desc: s.description, time: s.time }))).map((s, i) => ({
+    icon: DEFAULT_ICONS[i % DEFAULT_ICONS.length],
+    image: DEFAULT_IMAGES[i % DEFAULT_IMAGES.length],
+    accent: DEFAULT_ACCENTS[i % DEFAULT_ACCENTS.length],
+    title: s.title,
+    description: s.desc,
+    time: s.time ?? "",
+  }));
 
   useEffect(() => {
     const el = stepsRef.current;
@@ -49,10 +81,10 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
             Menos de 5 minutos
           </span>
           <h2 className="text-2xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight">
-            Como funciona
+            {title}
           </h2>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            Em 4 passos simples, acesse médicos especialistas sem sair de casa.
+            {desc}
           </p>
         </motion.div>
 
@@ -62,7 +94,7 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
           <div className="absolute top-[4.5rem] left-[12%] right-[12%] h-px bg-border/60 z-0" />
           
           <div ref={stepsRef} className="grid lg:grid-cols-4 gap-6 relative z-10">
-            {steps.map((step, i) => (
+            {effectiveSteps.map((step, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 30 }}
@@ -121,7 +153,7 @@ const HowItWorksSection = forwardRef<HTMLElement>((_, ref) => {
           />
 
           <div className="space-y-5">
-            {steps.map((step, i) => (
+            {effectiveSteps.map((step, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, x: -15 }}

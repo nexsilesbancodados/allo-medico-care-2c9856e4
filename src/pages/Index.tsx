@@ -11,9 +11,43 @@ import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Stethoscope, Brain } from "@phosphor-icons/react";
-import { Stethoscope as StethoscopeLucide, Eye, Building2, ArrowRight } from "lucide-react";
+import { Stethoscope as StethoscopeLucide, Eye, Building2, ArrowRight, type LucideIcon } from "lucide-react";
+import { useSiteConfig } from "@/lib/site-config";
 
 import bannerAi from "@/assets/banner-ai-triage.webp";
+
+// Icon name → component map (used to resolve string "icon" from CMS JSON)
+const ICON_MAP: Record<string, LucideIcon> = {
+  Stethoscope: StethoscopeLucide,
+  Eye,
+  Building2,
+};
+
+type EntryCard = {
+  title: string;
+  description: string;
+  icon: string;
+  cta: string;
+  href: string;
+  isClinic?: boolean;
+};
+
+const DEFAULT_ENTRY_CARDS: EntryCard[] = [
+  { title: "Consulta Médica Online", description: "Fale por vídeo com médicos de diversas especialidades.", icon: "Stethoscope", cta: "Agendar agora", href: "/dashboard/doctors?type=telemedicina" },
+  { title: "Consulta Oftalmológica",  description: "Avaliação com oftalmologista e teste de visão online.", icon: "Eye",         cta: "Ver oftalmologistas", href: "/dashboard/doctors?type=oftalmologia" },
+  { title: "Sou clínica e quero enviar exame para laudo", description: "Envie exames e receba laudos de médicos especialistas.", icon: "Building2", cta: "Enviar exame", href: "/clinica/enviar-exame", isClinic: true },
+];
+
+function parseEntryCards(raw: string): EntryCard[] {
+  if (!raw) return DEFAULT_ENTRY_CARDS;
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed as EntryCard[];
+    return DEFAULT_ENTRY_CARDS;
+  } catch {
+    return DEFAULT_ENTRY_CARDS;
+  }
+}
 
 // Lazy-load below-the-fold sections
 const StatsSection = lazy(() => import("@/components/landing/StatsSection"));
@@ -35,6 +69,8 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
   const { setTheme, theme } = useTheme();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { get } = useSiteConfig();
+  const entryCards = parseEntryCards(get("entry_cards", ""));
 
   useEffect(() => {
     const prev = theme;
@@ -87,37 +123,15 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       <section aria-label="Como podemos te ajudar" className="py-8 px-4">
         <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
           <div className="grid gap-4 sm:grid-cols-3">
-            {[
-              {
-                title: "Consulta Médica Online",
-                description: "Fale por vídeo com médicos de diversas especialidades.",
-                icon: StethoscopeLucide,
-                cta: "Agendar agora",
-                target: "/dashboard/doctors?type=telemedicina",
-              },
-              {
-                title: "Consulta Oftalmológica",
-                description: "Avaliação com oftalmologista e teste de visão online.",
-                icon: Eye,
-                cta: "Ver oftalmologistas",
-                target: "/dashboard/doctors?type=oftalmologia",
-              },
-              {
-                title: "Sou clínica e quero enviar exame para laudo",
-                description: "Envie exames e receba laudos de médicos especialistas.",
-                icon: Building2,
-                cta: "Enviar exame",
-                target: "/clinica/enviar-exame",
-                isClinic: true,
-              },
-            ].map((item) => {
-              const Icon = item.icon;
+            {entryCards.map((item) => {
+              const Icon = ICON_MAP[item.icon] ?? StethoscopeLucide;
+              const target = item.href;
               const handleClick = () => {
                 if (item.isClinic) {
-                  navigate(user ? item.target : "/auth");
+                  navigate(user ? target : "/auth");
                   return;
                 }
-                navigate(user ? item.target : `/auth?next=${encodeURIComponent(item.target)}`);
+                navigate(user ? target : `/auth?next=${encodeURIComponent(target)}`);
               };
               return (
                 <Card

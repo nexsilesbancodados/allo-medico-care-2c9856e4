@@ -20,6 +20,7 @@ import {
   MessageSquareQuote, CircleDollarSign, HelpCircle, Image, GripVertical, Check,
 } from "lucide-react";
 import { warn } from "@/lib/logger";
+import { invalidateSiteConfig } from "@/lib/site-config";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -241,6 +242,7 @@ const AdminSiteConfig = () => {
       supabase.from("site_config").update({ value: values[r.key] ?? "" }).eq("key", r.key)
     ));
     toast.success("Configurações salvas!");
+    invalidateSiteConfig();
     loadConfig();
     setSavingCat(null);
   };
@@ -428,6 +430,7 @@ const AdminSiteConfig = () => {
               {[
                 { id: "geral",        label: "Geral",          icon: <Globe               className="w-3.5 h-3.5" /> },
                 { id: "landing",      label: "Landing",        icon: <LayoutTemplate      className="w-3.5 h-3.5" /> },
+                { id: "cards",        label: "Cards de entrada", icon: <LayoutTemplate    className="w-3.5 h-3.5" /> },
                 { id: "secoes",       label: "Seções",         icon: <SlidersHorizontal   className="w-3.5 h-3.5" /> },
                 { id: "planos",       label: "Planos",         icon: <CircleDollarSign    className="w-3.5 h-3.5" /> },
                 { id: "depoimentos",  label: "Depoimentos",    icon: <MessageSquareQuote  className="w-3.5 h-3.5" /> },
@@ -493,7 +496,7 @@ const AdminSiteConfig = () => {
                     <p className="text-xs text-muted-foreground">Bloco principal da página inicial.</p>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {rows("landing").filter(r => ["landing_badge_text","hero_title","hero_subtitle","hero_cta_text","landing_second_cta","hero_image_url","hero_video_url"].includes(r.key)).map(r => (
+                    {rows("landing").filter(r => ["landing_badge_text","hero_title","hero_subtitle","hero_cta_text","hero_cta_primary_text","hero_cta_primary_url","hero_cta_secondary_text","hero_cta_secondary_url","landing_second_cta","hero_image_url","hero_video_url"].includes(r.key)).map(r => (
                       <ConfigField key={r.key} row={r} value={values[r.key] ?? ""} onChange={handleChange} />
                     ))}
                   </CardContent>
@@ -529,6 +532,66 @@ const AdminSiteConfig = () => {
               </div>
               <div className="mt-4 flex justify-end">
                 <SaveBtn onSave={() => saveCategory("landing")} saving={savingCat === "landing"} />
+              </div>
+            </TabsContent>
+
+            {/* ── CARDS DE ENTRADA / LISTAS JSON ────────────────────────── */}
+            <TabsContent value="cards">
+              <div className="grid gap-6">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Cards de entrada da landing</CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      JSON com os 3 cards logo abaixo do Hero. Cada item: <code>{`{title, description, icon, cta, href, isClinic?}`}</code>. Ícones suportados: Stethoscope, Eye, Building2.
+                    </p>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Textarea
+                      className="font-mono text-xs min-h-[220px]"
+                      value={values["entry_cards"] ?? ""}
+                      onChange={(e) => handleChange("entry_cards", e.target.value)}
+                      placeholder='[{"title":"...","description":"...","icon":"Stethoscope","cta":"Agendar","href":"/..."}]'
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Dica: valide o JSON antes de salvar — se estiver inválido, a landing usa os valores padrão.
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Como funciona — Passos</CardTitle>
+                    <p className="text-xs text-muted-foreground">
+                      JSON array de passos: <code>{`{step, title, desc, time?}`}</code>.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea
+                      className="font-mono text-xs min-h-[180px]"
+                      value={values["how_it_works_steps"] ?? ""}
+                      onChange={(e) => handleChange("how_it_works_steps", e.target.value)}
+                    />
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base">Especialidades em destaque</CardTitle>
+                    <p className="text-xs text-muted-foreground">JSON array de nomes de especialidades.</p>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea
+                      className="font-mono text-xs min-h-[120px]"
+                      value={values["featured_specialties"] ?? ""}
+                      onChange={(e) => handleChange("featured_specialties", e.target.value)}
+                      placeholder='["Cardiologia","Dermatologia",...]'
+                    />
+                  </CardContent>
+                </Card>
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <SaveBtn onSave={() => saveCategory("cards")} saving={savingCat === "cards"} />
+                <SaveBtn onSave={() => saveCategory("secoes")} saving={savingCat === "secoes"} />
               </div>
             </TabsContent>
 

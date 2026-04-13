@@ -134,6 +134,16 @@ const TEMPLATE_BANNER: Record<string, string> = {
   b2b_lead_received: "default",
   nps_survey: "survey",
   waitlist_slot_available: "approved",
+  kyc_approved: "approved",
+  kyc_rejected: "rejected",
+  payment_failed: "alert",
+  security_alert: "alert",
+  welcome_laudista: "welcome_doctor",
+  welcome_ophthalmologist: "welcome_doctor",
+  exam_assigned: "exam",
+  clinic_exam_report_ready: "exam",
+  doctor_payout_completed: "payment",
+  newsletter_welcome: "welcome",
 };
 
 const wrap = (body: string, templateType = "default") => {
@@ -619,6 +629,160 @@ const templates: Record<string, (d: Record<string, string>) => { subject: string
       ${card(`<p>⚡ Reserve rápido — a vaga é por ordem de chegada!</p>`, BRAND.green)}
       ${btn(URLS.patientSchedule, "Reservar Agora", BRAND.green)}
     `, "waitlist_slot_available"),
+  }),
+
+  kyc_approved: (d) => ({
+    subject: "✅ Documentação Aprovada — AloClínica",
+    html: wrap(`
+      <h2 style="color:${BRAND.green};margin:0 0 16px;">Documentação Aprovada!</h2>
+      <p>Olá <strong>Dr(a). ${d.name || "Profissional"}</strong>,</p>
+      <p>Sua documentação foi <strong style="color:${BRAND.green};">aprovada</strong>! Já pode atender na AloClínica.</p>
+      ${card(`<p>✅ Agora você tem acesso completo à plataforma para receber pacientes e emitir documentos digitais.</p>`, BRAND.green)}
+      ${btn(URLS.doctorDashboard, "Acessar Painel Médico", BRAND.green)}
+    `, "kyc_approved"),
+  }),
+
+  kyc_rejected: (d) => ({
+    subject: "❌ Documentação Não Aprovada — AloClínica",
+    html: wrap(`
+      <h2 style="color:${BRAND.red};margin:0 0 16px;">Documentação Não Aprovada</h2>
+      <p>Olá <strong>${d.name || "Profissional"}</strong>,</p>
+      <p>Sua verificação de documentos <strong style="color:${BRAND.red};">não foi aprovada</strong>.</p>
+      ${d.reason ? `<div style="background:#fef2f2;padding:12px;border-radius:8px;margin:12px 0;"><strong>Motivo:</strong> ${d.reason}</div>` : ""}
+      <p>Por favor, reenvie seus documentos com boa qualidade e iluminação.</p>
+      ${btn(d.resubmit_url || URLS.doctorDashboard, "Reenviar Documentos", BRAND.red)}
+    `, "kyc_rejected"),
+  }),
+
+  payment_failed: (d) => ({
+    subject: "⚠️ Falha no Pagamento — AloClínica",
+    html: wrap(`
+      <h2 style="color:${BRAND.amber};margin:0 0 16px;">Não Foi Possível Processar seu Pagamento</h2>
+      <p>Olá <strong>${d.name || "Cliente"}</strong>,</p>
+      <p>Identificamos uma falha no pagamento ${d.description ? `de <strong>${d.description}</strong>` : ""}.</p>
+      ${card(`
+        ${d.amount ? `<p><strong>💰 Valor:</strong> R$ ${d.amount}</p>` : ""}
+        ${d.reason ? `<p><strong>📝 Motivo:</strong> ${d.reason}</p>` : ""}
+        <p>Tente novamente com outro método de pagamento.</p>
+      `, BRAND.amber)}
+      ${btn(d.retry_url || URLS.patientPlans, "Tentar Novamente", BRAND.amber)}
+    `, "payment_failed"),
+  }),
+
+  security_alert: (d) => ({
+    subject: "🔐 Alerta de Segurança: Novo acesso detectado — AloClínica",
+    html: wrap(`
+      <h2 style="color:${BRAND.amber};margin:0 0 16px;">Novo Acesso Detectado</h2>
+      <p>Olá <strong>${d.name || "Usuário"}</strong>,</p>
+      <p>Detectamos um novo login em sua conta AloClínica a partir de um dispositivo desconhecido.</p>
+      ${card(`
+        <p><strong>🌐 IP:</strong> ${d.ip || "—"}</p>
+        <p><strong>📍 Localização:</strong> ${d.location || "—"}</p>
+        <p><strong>💻 Dispositivo:</strong> ${d.device || "—"}</p>
+        <p><strong>⏰ Horário:</strong> ${d.time || "agora"}</p>
+      `, BRAND.amber)}
+      <p><strong>Foi você?</strong> Se sim, pode ignorar este e-mail.</p>
+      <p>Caso não reconheça este acesso, redefina sua senha imediatamente.</p>
+      ${btn(d.confirm_url || URLS.authLogin, "Foi você? Confirmar", BRAND.green)}
+      ${btn(d.reset_url || `${URLS.authLogin}?reset=1`, "Não fui eu — Redefinir senha", BRAND.red)}
+    `, "security_alert"),
+  }),
+
+  welcome_laudista: (d) => ({
+    subject: "🔬 Bem-vindo(a), Laudista! — AloClínica",
+    html: wrap(`
+      <h2 style="color:${BRAND.color};margin:0 0 16px;">Bem-vindo(a) ao Portal do Laudista!</h2>
+      <p>Olá <strong>Dr(a). ${d.name || "Laudista"}</strong>,</p>
+      <p>Sua conta de laudista foi criada com sucesso na AloClínica.</p>
+      ${card(`
+        <p>🔬 Aqui você pode:</p>
+        <ul>
+          <li>Visualizar a fila de exames disponíveis</li>
+          <li>Assumir exames e emitir laudos digitais</li>
+          <li>Assinar digitalmente seus laudos</li>
+          <li>Acompanhar seus ganhos</li>
+        </ul>
+      `)}
+      ${btn(URLS.laudistaDashboard, "Acessar Fila de Exames")}
+    `, "welcome_laudista"),
+  }),
+
+  welcome_ophthalmologist: (d) => ({
+    subject: "👁️ Bem-vindo(a), Oftalmologista! — AloClínica",
+    html: wrap(`
+      <h2 style="color:${BRAND.color};margin:0 0 16px;">Bem-vindo(a) ao Portal do Oftalmologista!</h2>
+      <p>Olá <strong>Dr(a). ${d.name || "Oftalmologista"}</strong>,</p>
+      <p>Sua conta de oftalmologista foi criada na AloClínica.</p>
+      ${card(`
+        <p>👁️ Agora você pode:</p>
+        <ul>
+          <li>Atender teleconsultas oftalmológicas</li>
+          <li>Emitir laudos especializados</li>
+          <li>Prescrever lentes e medicações</li>
+        </ul>
+      `)}
+      ${btn(URLS.doctorDashboard, "Acessar Painel")}
+    `, "welcome_ophthalmologist"),
+  }),
+
+  exam_assigned: (d) => ({
+    subject: "🔬 Novo Exame Atribuído — AloClínica",
+    html: wrap(`
+      <h2 style="color:${BRAND.color};margin:0 0 16px;">Você Tem um Novo Exame!</h2>
+      <p>Olá <strong>Dr(a). ${d.name || "Laudista"}</strong>,</p>
+      <p>Um novo exame foi atribuído a você para laudo.</p>
+      ${card(`
+        <p><strong>🔬 Tipo de exame:</strong> ${d.exam_type || "—"}</p>
+        <p><strong>⚠️ Prioridade:</strong> ${d.priority || "Normal"}</p>
+        ${d.clinical_info ? `<p><strong>📋 Info clínica:</strong> ${d.clinical_info}</p>` : ""}
+      `)}
+      ${btn(URLS.laudistaDashboard, "Ver Exame")}
+    `, "exam_assigned"),
+  }),
+
+  clinic_exam_report_ready: (d) => ({
+    subject: "📄 Laudo Disponível — AloClínica",
+    html: wrap(`
+      <h2 style="color:${BRAND.color};margin:0 0 16px;">Laudo de Exame Pronto!</h2>
+      <p>Olá <strong>${d.name || "Equipe da Clínica"}</strong>,</p>
+      <p>O laudo do exame solicitado por sua clínica está disponível.</p>
+      ${card(`
+        <p><strong>🔬 Exame:</strong> ${d.exam_type || "—"}</p>
+        <p><strong>🩺 Laudista:</strong> ${d.reporter_name || "—"}</p>
+        ${d.patient_name ? `<p><strong>👤 Paciente:</strong> ${d.patient_name}</p>` : ""}
+      `)}
+      ${btn(URLS.clinicDashboard, "Ver Laudo")}
+    `, "clinic_exam_report_ready"),
+  }),
+
+  doctor_payout_completed: (d) => ({
+    subject: "💰 Saque Realizado — AloClínica",
+    html: wrap(`
+      <h2 style="color:${BRAND.green};margin:0 0 16px;">Saque Concluído!</h2>
+      <p>Olá <strong>Dr(a). ${d.name || "Profissional"}</strong>,</p>
+      <p>Seu saque via Pix foi processado com sucesso.</p>
+      ${card(`
+        <p><strong>💰 Valor:</strong> R$ ${d.amount || "—"}</p>
+        <p><strong>🔑 Chave Pix:</strong> ${d.pix_key || "—"}</p>
+        <p><strong>📅 Data:</strong> ${d.date || "hoje"}</p>
+        ${d.transaction_id ? `<p><strong>🧾 ID transação:</strong> ${d.transaction_id}</p>` : ""}
+      `, BRAND.green)}
+      ${btn(URLS.doctorDashboard, "Ver Financeiro", BRAND.green)}
+    `, "doctor_payout_completed"),
+  }),
+
+  newsletter_welcome: (d) => ({
+    subject: "💙 Bem-vindo(a) à Newsletter AloClínica!",
+    html: wrap(`
+      <h2 style="color:${BRAND.color};margin:0 0 16px;">Obrigado por se Inscrever!</h2>
+      <p>Olá${d.name ? ` <strong>${d.name}</strong>` : ""},</p>
+      <p>Você está inscrito(a) na newsletter da AloClínica. Em breve receberá conteúdos sobre saúde, bem-estar e novidades da plataforma.</p>
+      ${card(`<p>🩺 Dicas de saúde • 💊 Novidades • 🎁 Ofertas exclusivas</p>`)}
+      ${btn(`${PROTOCOL}${ROOT_DOMAIN}`, "Visitar AloClínica")}
+      <p style="font-size:11px;color:${BRAND.muted};text-align:center;margin-top:24px;">
+        Não deseja mais receber nossos e-mails? <a href="${d.unsubscribe_url || `${PROTOCOL}${ROOT_DOMAIN}/unsubscribe?email=${encodeURIComponent(d.email || "")}`}" style="color:${BRAND.muted};">Cancelar inscrição</a>.
+      </p>
+    `, "newsletter_welcome"),
   }),
 };
 

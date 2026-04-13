@@ -108,6 +108,44 @@ Deno.serve(async (req) => {
       }).eq("id", profile_data.invite_code_id);
     }
 
+    // Fire welcome email based on role (non-blocking)
+    try {
+      const { data: authUser } = await supabase.auth.admin.getUserById(user_id);
+      const email = authUser?.user?.email;
+      if (email) {
+        const { data: profile } = await supabase.from("profiles")
+          .select("first_name, last_name").eq("user_id", user_id).maybeSingle();
+        const fullName = profile ? `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() : (profile_data?.name || "");
+        const typeMap: Record<string, string> = {
+          patient: "welcome",
+          doctor: "welcome_doctor",
+          clinic: "welcome_clinic",
+          laudista: "welcome_laudista",
+          ophthalmologist: "welcome_ophthalmologist",
+        };
+        const emailType = typeMap[role];
+        if (emailType) {
+          const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
+          const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+          fetch(`${SUPABASE_URL}/functions/v1/send-email`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${SERVICE_KEY}` },
+            body: JSON.stringify({
+              type: emailType,
+              to: email,
+              data: {
+                name: fullName || email,
+                clinic_name: profile_data?.name || "",
+                crm: profile_data?.crm || "",
+              },
+            }),
+          }).catch((e) => console.warn("Welcome email failed:", e));
+        }
+      }
+    } catch (e) {
+      console.warn("assign-role welcome email dispatch failed:", e);
+    }
+
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },

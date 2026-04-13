@@ -195,7 +195,8 @@ const AuthAdmin = () => {
 
         <div className="px-5 py-3.5 pb-[max(env(safe-area-inset-bottom,8px),8px)] border-t border-border/40 bg-muted/20 flex items-center justify-center gap-6 text-xs text-muted-foreground">
           <span className="flex items-center gap-1.5"><Shield className="w-3.5 h-3.5 text-foreground shrink-0" /> Acesso restrito</span>
-          <span className="flex items-center gap-1.5">🔒 Criptografado</span>
+          <span className="flex items-center gap-1.5"><Lock className="w-3.5 h-3.5 shrink-0" /> Criptografado</span>
+          <span className="flex items-center gap-1.5 text-destructive"><Sparkles className="w-3.5 h-3.5 shrink-0" /> 2FA obrigatório</span>
         </div>
       </div>
     </div>

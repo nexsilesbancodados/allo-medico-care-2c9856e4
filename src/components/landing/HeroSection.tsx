@@ -29,8 +29,10 @@ const HeroSection = memo(
 
     const title      = get("hero_title",    "Cuidado médico de excelência");
     const subtitle   = get("hero_subtitle", "Conecte-se a médicos especialistas verificados pelo CFM. Consultas por vídeo em HD, receitas digitais válidas e prontuário eletrônico completo.");
-    const ctaText    = get("hero_cta_text", "Agendar consulta");
-    const cta2Text   = get("landing_second_cta", "Consulta avulsa");
+    const ctaText    = get("hero_cta_primary_text", get("hero_cta_text", "Agendar consulta"));
+    const ctaUrl     = get("hero_cta_primary_url", "/paciente");
+    const cta2Text   = get("hero_cta_secondary_text", get("landing_second_cta", "Consulta avulsa"));
+    const cta2Url    = get("hero_cta_secondary_url", "/paciente");
     const badgeText  = get("landing_badge_text", "Médicos disponíveis agora");
     const heroImgUrl = get("hero_image_url", "");
 
@@ -102,7 +104,7 @@ const HeroSection = memo(
                 <Button
                   size="lg"
                   className="rounded-2xl h-[52px] w-full sm:w-auto justify-center text-[14px] font-bold shadow-lg shadow-primary/20 group bg-primary hover:bg-primary/90 text-primary-foreground border-0 transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] px-8"
-                  onClick={() => navigate("/paciente")}
+                  onClick={() => navigate(ctaUrl)}
                   onMouseEnter={prefetchPaciente}
                 >
                   {ctaText}
@@ -112,7 +114,7 @@ const HeroSection = memo(
                   size="lg"
                   variant="outline"
                   className="rounded-2xl h-[52px] w-full sm:w-auto justify-center text-[14px] font-bold border-2 border-border hover:border-primary/30 hover:bg-primary/[0.04] transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.97] px-8 gap-2"
-                  onClick={() => navigate("/paciente")}
+                  onClick={() => navigate(cta2Url)}
                   onMouseEnter={prefetchPaciente}
                 >
                   {cta2Text}

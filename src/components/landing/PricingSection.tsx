@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check, Star, ArrowRight, Lightning, Crown, Users } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
+import { useSiteConfig } from "@/lib/site-config";
 
 const plans = [
   {
@@ -75,6 +76,10 @@ const cardVariants = {
 
 const PricingSection = forwardRef<HTMLElement>((_, ref) => {
   const navigate = useNavigate();
+  const { get } = useSiteConfig();
+  const badge    = get("pricing_badge",    "Planos & Preços");
+  const title    = get("pricing_title",    "Cuidado médico ao alcance de todos");
+  const subtitle = get("pricing_subtitle", "Escolha o plano ideal para você. Sem carência, sem burocracia — consulta agendada em menos de 2 minutos.");
 
   return (
     <section ref={ref} id="planos" aria-labelledby="pricing-heading" className="py-20 md:py-28 px-4">
@@ -88,14 +93,13 @@ const PricingSection = forwardRef<HTMLElement>((_, ref) => {
           className="text-center mb-12 md:mb-16"
         >
           <span className="inline-block text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full mb-4">
-            Planos & Preços
+            {badge}
           </span>
           <h2 id="pricing-heading" className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground leading-tight tracking-tight mb-4">
-            Cuidado médico ao alcance{" "}
-            <span className="text-primary">de todos</span>
+            {title}
           </h2>
           <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-            Escolha o plano ideal para você. Sem carência, sem burocracia — consulta agendada em menos de 2 minutos.
+            {subtitle}
           </p>
         </motion.div>
 
