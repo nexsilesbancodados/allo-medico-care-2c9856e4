@@ -411,12 +411,14 @@ const VideoRoom = () => {
         try {
           const parsed = JSON.parse(noteData.content);
           if (parsed.subjective !== undefined) {
-            soap.setAllNotes(parsed);
+            Object.entries(parsed).forEach(([k, v]) => {
+              if (["subjective","objective","assessment","plan"].includes(k)) soap.updateSection(k as keyof import("@/hooks/useSOAPNotes").SOAPNotes, v as string);
+            });
           } else {
-            soap.setAllNotes({ subjective: noteData.content, objective: "", assessment: "", plan: "" });
+            soap.updateSection("subjective", noteData.content);
           }
         } catch {
-          soap.setAllNotes({ subjective: noteData.content, objective: "", assessment: "", plan: "" });
+          soap.updateSection("subjective", noteData.content);
         }
       }
     }
@@ -431,7 +433,7 @@ const VideoRoom = () => {
     return `${h > 0 ? `${h}:` : ""}${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
   };
 
-  const sendMessage = async (fileUrl?: string, fileName?: string, fileType?: string) => {
+  const sendMessage = async (fileUrl?: string, fileName?: string, fileType?: "image" | "document") => {
     if (!chatInput.trim() && !fileUrl) return;
     const content = chatInput.trim() || (fileName ? `[Arquivo: ${fileName}]` : "");
     const msg: ChatMessage = {
@@ -499,8 +501,10 @@ const VideoRoom = () => {
         const { jsPDF } = await import("jspdf");
 
         // Fetch doctor and patient names
-        const { data: doctorProfile } = await supabase
+        const { data: doctorProfileData } = await supabase
           .from("profiles").select("first_name, last_name").eq("user_id", user!.id).single();
+        const { data: doctorDocProfile } = await supabase
+          .from("doctor_profiles").select("crm, crm_state").eq("user_id", user!.id).single();
         
         const patientId = appointment.patient_id;
         let patientName = "Paciente";
@@ -510,7 +514,7 @@ const VideoRoom = () => {
           if (patientProfile) patientName = `${patientProfile.first_name} ${patientProfile.last_name}`.trim();
         }
 
-        const doctorName = doctorProfile ? `Dr(a). ${doctorProfile.first_name} ${doctorProfile.last_name}`.trim() : "Médico";
+        const doctorName = doctorProfileData ? `Dr(a). ${doctorProfileData.first_name} ${doctorProfileData.last_name}`.trim() : "Médico";
         const now = new Date();
         const dateStr = format(now, "dd/MM/yyyy 'às' HH:mm");
 
@@ -542,7 +546,7 @@ const VideoRoom = () => {
         pdf.setFont("helvetica", "bold");
         pdf.text("Médico:", 20, y);
         pdf.setFont("helvetica", "normal");
-        pdf.text(`${doctorName}  |  CRM ${doctorProfile?.crm}/${doctorProfile?.crm_state}`, 45, y);
+        pdf.text(`${doctorName}  |  CRM ${doctorDocProfile?.crm ?? ""}/${doctorDocProfile?.crm_state ?? ""}`, 45, y);
         y += 6;
         pdf.setFont("helvetica", "bold");
         pdf.text("Paciente:", 20, y);

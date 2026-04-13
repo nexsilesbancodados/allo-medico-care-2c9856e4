@@ -108,7 +108,7 @@ export function useDigitalSignature() {
       }
 
       // 3. Registrar assinatura no banco com todos os dados de validação
-      const { error: metadataError } = await supabase
+      const { error: metadataError } = await (supabase as any)
         .from("prescription_signatures")
         .insert({
           prescription_id: req.prescriptionId,
@@ -147,7 +147,7 @@ export function useDigitalSignature() {
    */
   const verifySignature = async (prescriptionId: string, fileBase64?: string): Promise<boolean> => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("prescription_signatures")
         .select("*")
         .eq("prescription_id", prescriptionId)
@@ -182,7 +182,7 @@ export function useDigitalSignature() {
    */
   const getSignedDocument = async (prescriptionId: string): Promise<string | null> => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("prescription_signatures")
         .select("storage_path")
         .eq("prescription_id", prescriptionId)
