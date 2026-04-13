@@ -68,7 +68,7 @@ const ChatPage = () => {
       ? [...new Set(appts.map(a => a.patient_id).filter(Boolean))]
       : [...new Set(appts.map(a => a.doctor_id))];
 
-    let nameMap = new Map<string, string>();
+    const nameMap = new Map<string, string>();
 
     if (isDoctor) {
       const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", otherIds.filter((id): id is string => id !== null));

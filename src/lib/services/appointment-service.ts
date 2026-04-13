@@ -302,7 +302,7 @@ export const calculatePrice = async (
   userId: string,
   couponCode?: string,
 ): Promise<{ totalPrice: number; cardDiscount: number; couponDiscount: number }> => {
-  let cardDiscount = 0;
+  const cardDiscount = 0;
   let couponDiscount = 0;
 
   // Check coupon

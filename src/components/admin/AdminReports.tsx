@@ -24,9 +24,9 @@ const AdminReports = () => {
   const [userGrowth, setUserGrowth] = useState<Record<string, string | number>[]>([]);
   const [specialtyData, setSpecialtyData] = useState<{ name: string; value: number }[]>([]);
   const [cancellationData, setCancellationData] = useState<Record<string, string | number>[]>([]);
-  /* eslint-disable @typescript-eslint/no-explicit-any */
+   
   const [topDoctors, setTopDoctors] = useState<DoctorPerformanceRow[]>([]);
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+   
   const [summaryStats, setSummaryStats] = useState({
     totalRevenue: 0, totalAppts: 0, totalCancelled: 0, totalNoShow: 0, avgTicket: 0, avgNps: 0,
   });

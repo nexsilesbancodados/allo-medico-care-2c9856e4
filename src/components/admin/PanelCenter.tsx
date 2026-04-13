@@ -80,7 +80,7 @@ const PanelCenter = () => {
 
       const onlineUserIds = [...new Set((onlineUsers ?? []).map(u => u.user_id))];
       
-      let onlineRolesMap: Map<string, string[]> = new Map();
+      const onlineRolesMap: Map<string, string[]> = new Map();
       if (onlineUserIds.length > 0) {
         const { data: onlineRoles } = await supabase
           .from("user_roles")
@@ -94,7 +94,7 @@ const PanelCenter = () => {
         });
       }
 
-      let profilesMap: Map<string, string> = new Map();
+      const profilesMap: Map<string, string> = new Map();
       if (onlineUserIds.length > 0) {
         const { data: profiles } = await supabase
           .from("profiles")

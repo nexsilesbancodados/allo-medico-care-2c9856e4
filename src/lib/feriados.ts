@@ -4,7 +4,7 @@ interface Feriado {
   type: string;
 }
 
-let cache: Record<number, Date[]> = {};
+const cache: Record<number, Date[]> = {};
 
 export const getFeriadosNacionais = async (ano: number): Promise<Date[]> => {
   if (cache[ano]) return cache[ano];

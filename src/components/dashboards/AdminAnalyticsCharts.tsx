@@ -20,7 +20,7 @@ const COLORS = [
 const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
 const AdminAnalyticsCharts = () => {
-  /* eslint-disable @typescript-eslint/no-explicit-any -- Recharts data shapes vary per chart type; strict typing adds complexity without safety here */
+   
   const [dailyAppts, setDailyAppts] = useState<ChartDataPoint[]>([]);
   const [statusBreakdown, setStatusBreakdown] = useState<ChartDataPoint[]>([]);
   const [specialtyData, setSpecialtyData] = useState<ChartDataPoint[]>([]);
@@ -35,7 +35,7 @@ const AdminAnalyticsCharts = () => {
   const [specialtyRevenueData, setSpecialtyRevenueData] = useState<ChartDataPoint[]>([]);
   const [specialtyConversionData, setSpecialtyConversionData] = useState<ChartDataPoint[]>([]);
   const [doctorPerformanceData, setDoctorPerformanceData] = useState<ChartDataPoint[]>([]);
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+   
   const [urgentCareKPIs, setUrgentCareKPIs] = useState({ total: 0, waiting: 0, completed: 0, refunded: 0, avgWait: 0, revenue: 0 });
   const [renewalKPIs, setRenewalKPIs] = useState({ total: 0, pending: 0, approved: 0, rejected: 0, avgReviewDays: 0 });
   const [loading, setLoading] = useState(true);

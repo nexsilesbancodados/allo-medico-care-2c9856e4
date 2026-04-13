@@ -187,7 +187,7 @@ const ExamReportQueue = () => {
       if (error) throw error;
 
       const patientIds = [...new Set((data || []).filter((e: any) => e.patient_id).map((e: any) => e.patient_id))];
-      let patientMap: Record<string, string> = {};
+      const patientMap: Record<string, string> = {};
       if (patientIds.length > 0) {
         const { data: profiles } = await supabase
           .from("profiles")

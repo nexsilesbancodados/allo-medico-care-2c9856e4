@@ -51,7 +51,7 @@ const ClinicMyExams = () => {
 
       // For reported exams, fetch reports
       const reportedIds = (data ?? []).filter((e: any) => e.status === "reported").map((e: any) => e.id);
-      let reportsMap: Record<string, any> = {};
+      const reportsMap: Record<string, any> = {};
       if (reportedIds.length > 0) {
         const { data: reports } = await supabase
           .from("exam_reports")
@@ -60,7 +60,7 @@ const ClinicMyExams = () => {
         if (reports) {
           // Fetch reporter names
           const userIds = [...new Set(reports.map((r: any) => (r as any).doctor_profiles?.user_id).filter(Boolean))];
-          let profileMap: Record<string, string> = {};
+          const profileMap: Record<string, string> = {};
           if (userIds.length > 0) {
             const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", userIds);
             if (profiles) profiles.forEach((p: any) => { profileMap[p.user_id] = `Dr(a). ${p.first_name} ${p.last_name}`.trim(); });

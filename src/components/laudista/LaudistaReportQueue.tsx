@@ -108,14 +108,14 @@ const LaudistaReportQueue = () => {
       if (error) throw error;
 
       const patientIds = [...new Set((data || []).filter((e: any) => e.patient_id).map((e: any) => e.patient_id))];
-      let patientMap: Record<string, string> = {};
+      const patientMap: Record<string, string> = {};
       if (patientIds.length > 0) {
         const { data: profiles } = await supabase.from("profiles").select("user_id, first_name, last_name").in("user_id", patientIds);
         if (profiles) profiles.forEach((p: any) => { patientMap[p.user_id] = `${p.first_name} ${p.last_name}`.trim(); });
       }
 
       const clinicIds = [...new Set((data || []).filter((e: any) => e.requesting_clinic_id).map((e: any) => e.requesting_clinic_id))];
-      let clinicMap: Record<string, string> = {};
+      const clinicMap: Record<string, string> = {};
       if (clinicIds.length > 0) {
         const { data: clinics } = await supabase.from("clinic_profiles").select("id, name").in("id", clinicIds);
         if (clinics) clinics.forEach((c: any) => { clinicMap[c.id] = c.name; });

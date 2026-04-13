@@ -89,7 +89,7 @@ const HealthTimeline = () => {
         ...(prescsRes.data?.map(p => p.doctor_id) ?? []),
       ]),
     ];
-    let docNames = new Map<string, string>();
+    const docNames = new Map<string, string>();
     if (allDoctorIds.length > 0) {
       const { data: docs } = await supabase.from("doctor_profiles").select("id, user_id").in("id", allDoctorIds);
       if (docs && docs.length > 0) {

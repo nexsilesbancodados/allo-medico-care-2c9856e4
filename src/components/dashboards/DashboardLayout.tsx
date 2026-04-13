@@ -240,7 +240,7 @@ const DashboardLayout = ({ children, title, nav, role = "patient" }: DashboardLa
         }, i * 30);
       });
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, []);
 
   const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => {

@@ -32,7 +32,7 @@ const MedicalHistoryExport = () => {
         ...(prescriptionsRes.data?.map(p => p.doctor_id) ?? []),
       ])];
 
-      let doctorNames: Record<string, string> = {};
+      const doctorNames: Record<string, string> = {};
       if (doctorIds.length > 0) {
         const { data: docs } = await supabase.from("doctor_profiles").select("id, user_id").in("id", doctorIds);
         if (docs && docs.length > 0) {
