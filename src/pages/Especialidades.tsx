@@ -148,7 +148,7 @@ const Especialidades = forwardRef<HTMLDivElement>((_, ref) => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: (i % 12) * 0.05 }}
-                onClick={() => navigate(`/dashboard/doctors?type=${specialty.name.toLowerCase()}`)}
+                onClick={() => navigate(`/agendar?especialidade=${encodeURIComponent(specialty.name)}`)}
                 className="group text-left p-6 rounded-xl border border-border bg-card hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
               >
                 <div className="flex items-start justify-between mb-3">
