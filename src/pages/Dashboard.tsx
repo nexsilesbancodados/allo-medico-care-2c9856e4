@@ -186,7 +186,7 @@ const Dashboard = () => {
   }, [loading, roles]);
 
   if (loading) {
-    return <PingoLoader />;
+    return null;
   }
 
   if (!user) return <Navigate to="/auth" replace />;
