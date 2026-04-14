@@ -86,9 +86,8 @@ const Teleconsulta = () => {
       <div className="min-h-screen relative">
         {/* Gradient background that flows with scroll */}
         <div className="fixed inset-0 -z-10">
-          <div className="absolute inset-0 bg-gradient-to-b from-[hsl(210,60%,96%)] via-[hsl(215,50%,94%)] to-[hsl(220,40%,92%)] dark:from-[hsl(210,30%,8%)] dark:via-[hsl(215,25%,10%)] dark:to-[hsl(220,20%,12%)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_80%_-10%,hsl(210,70%,90%),transparent)] dark:bg-[radial-gradient(ellipse_80%_60%_at_80%_-10%,hsl(210,40%,15%),transparent)]" />
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_20%_50%,hsl(220,60%,93%),transparent)] dark:bg-[radial-gradient(ellipse_60%_50%_at_20%_50%,hsl(220,30%,13%),transparent)]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[hsl(210,80%,92%)] via-[hsl(215,65%,88%)] to-[hsl(225,55%,85%)] dark:from-[hsl(210,40%,10%)] dark:via-[hsl(215,35%,13%)] dark:to-[hsl(225,30%,16%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_75%_0%,hsl(205,85%,85%),transparent)] dark:bg-[radial-gradient(ellipse_70%_50%_at_75%_0%,hsl(205,50%,18%),transparent)]" />
         </div>
         <Header />
 
