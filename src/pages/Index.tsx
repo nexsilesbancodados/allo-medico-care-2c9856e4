@@ -11,8 +11,11 @@ import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Stethoscope } from "@phosphor-icons/react";
-import { Stethoscope as StethoscopeLucide, Eye, Building2, ArrowRight, type LucideIcon } from "lucide-react";
+import { Stethoscope as StethoscopeLucide, Eye, Building2, ArrowRight, Wifi, Smartphone, LogIn, type LucideIcon } from "lucide-react";
 import { useSiteConfig } from "@/lib/site-config";
+import { useSiteSections } from "@/lib/site-sections";
+import { motion } from "framer-motion";
+import mockupPhoneHand from "@/assets/mockup-phone-hand.png";
 import { useSiteSections } from "@/lib/site-sections";
 
 // Icon name → component map (used to resolve string "icon" from CMS JSON)
