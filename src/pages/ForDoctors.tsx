@@ -12,9 +12,7 @@ import { useNavigate } from "react-router-dom";
 import Header from "@/components/landing/Header";
 import SEOHead from "@/components/SEOHead";
 
-import pingoMedicoTeleconsulta from "@/assets/pingo-medico-teleconsulta.png";
-import pingoMedicoRenda from "@/assets/pingo-medico-renda.png";
-import pingoMedicoFerramentas from "@/assets/pingo-medico-ferramentas.png";
+import heroDoctor from "@/assets/hero-doctor.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
