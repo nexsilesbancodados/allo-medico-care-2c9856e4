@@ -130,9 +130,6 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
                       <ListItem href="/sobre" title="Sobre nós" icon={Buildings}>
                         Conheça a AloClínica e nossa missão.
                       </ListItem>
-                      <ListItem href="/cartao-beneficios" title="Cartão Benefícios" icon={CreditCard}>
-                        Planos individuais e familiares de telemedicina.
-                      </ListItem>
                     </ul>
                   </div>
                 </NavigationMenuContent>
