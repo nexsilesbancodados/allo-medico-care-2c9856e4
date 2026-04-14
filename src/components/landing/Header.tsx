@@ -70,7 +70,6 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
   }, []);
 
   const mobileLinks = [
-    { label: "Laudos", href: "/para-empresas/telelaudo" },
     { label: "Plantão", href: "/plantao" },
     { label: "Teleconsulta", href: "/teleconsulta" },
     { label: "Receita", href: "/receita" },
@@ -166,14 +165,6 @@ const Header = memo(forwardRef<HTMLElement>((_, ref) => {
               </NavigationMenuItem>
 
               {/* Links diretos */}
-              <NavigationMenuItem>
-                <NavigationMenuLink asChild>
-                  <Link to="/para-empresas/telelaudo" className={cn(triggerCls, "cursor-pointer")}>
-                    Laudos
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link to="/plantao" className={cn(triggerCls, "cursor-pointer")}>
