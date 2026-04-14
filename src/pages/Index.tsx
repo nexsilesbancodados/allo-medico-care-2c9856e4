@@ -11,9 +11,11 @@ import DeferredSection from "@/components/ui/deferred-section";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Stethoscope } from "@phosphor-icons/react";
-import { Stethoscope as StethoscopeLucide, Eye, Building2, ArrowRight, type LucideIcon } from "lucide-react";
+import { Stethoscope as StethoscopeLucide, Eye, Building2, ArrowRight, Wifi, Smartphone, LogIn, type LucideIcon } from "lucide-react";
 import { useSiteConfig } from "@/lib/site-config";
 import { useSiteSections } from "@/lib/site-sections";
+import { motion } from "framer-motion";
+import mockupPhoneHand from "@/assets/mockup-phone-hand.png";
 
 // Icon name → component map (used to resolve string "icon" from CMS JSON)
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -122,7 +124,72 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       {isOn("header") && <Header />}
       {isOn("hero") && <HeroSection />}
 
-      {isOn("footer") && <DeferredSection fallbackClassName="h-72 mx-4 sm:mx-6 lg:mx-12 xl:mx-20 2xl:mx-28" rootMargin="180px 0px">
+      {/* ═══════════════ TELEMEDICINA É SIMPLES ═══════════════ */}
+      <section className="py-0">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
+          <div className="rounded-3xl overflow-hidden bg-primary/90 dark:bg-primary/80">
+            <div className="grid lg:grid-cols-2 items-center">
+              {/* Left — Phone mockup */}
+              <motion.div
+                className="flex justify-center items-end pt-10 lg:pt-0 px-8 lg:px-12"
+                initial={{ opacity: 0, x: -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
+                <img
+                  src={mockupPhoneHand}
+                  alt="App AloClínica no celular"
+                  loading="lazy"
+                  width={800}
+                  height={1024}
+                  className="w-[260px] md:w-[300px] lg:w-[340px] h-auto drop-shadow-2xl"
+                />
+              </motion.div>
+
+              {/* Right — Text + checklist */}
+              <motion.div
+                className="p-8 md:p-12 lg:p-16"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.15 }}
+              >
+                <div className="w-10 h-1 bg-primary-foreground/40 rounded-full mb-6" />
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-primary-foreground leading-tight mb-8">
+                  Para se consultar via<br />Telemedicina é simples!
+                </h2>
+
+                <div className="space-y-6">
+                  {[
+                    { icon: <Wifi className="w-5 h-5" />, text: "Basta ter acesso a internet" },
+                    { icon: <Smartphone className="w-5 h-5" />, text: "Um aparelho celular com câmera ou notebook" },
+                    { icon: <LogIn className="w-5 h-5" />, text: "Fazer login através do Portal do Paciente" },
+                  ].map((item, i) => (
+                    <motion.div
+                      key={i}
+                      className="flex items-center gap-4"
+                      initial={{ opacity: 0, x: 20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: 0.25 + i * 0.1 }}
+                    >
+                      <div className="w-12 h-12 rounded-full bg-primary-foreground/15 border border-primary-foreground/20 flex items-center justify-center shrink-0 text-primary-foreground">
+                        {item.icon}
+                      </div>
+                      <p className="text-base md:text-lg font-semibold text-primary-foreground">
+                        {item.text}
+                      </p>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {isOn("footer") && <DeferredSection fallbackClassName="h-72 mx-4 sm:mx-6 lg:mx-12 xl:px-20 2xl:px-28" rootMargin="180px 0px">
         <Footer />
       </DeferredSection>}
     </div>
