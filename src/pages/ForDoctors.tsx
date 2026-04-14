@@ -168,7 +168,7 @@ const ForDoctors = forwardRef<HTMLDivElement>((_, ref) => {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <motion.div className="flex justify-center order-2 lg:order-1" {...fadeUp} transition={{ duration: 0.6 }}>
               <img
-                src={doctorTeleconsulta}
+                src={doctorFerramentas}
                 alt="Pingo com ferramentas médicas"
                 loading="lazy"
                 width={512}
@@ -312,7 +312,7 @@ const ForDoctors = forwardRef<HTMLDivElement>((_, ref) => {
 
             <motion.div className="flex justify-center" {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }}>
               <img
-                src={doctorTeleconsulta}
+                src={doctorRenda}
                 alt="Pingo médico renda extra"
                 loading="lazy"
                 width={512}
