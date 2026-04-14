@@ -264,7 +264,7 @@ const Agendar = () => {
                           spec.color
                         )}
                       >
-                        <span className="text-3xl sm:text-4xl">{spec.emoji}</span>
+                        <img src={spec.img} alt={spec.name} className="w-12 h-12 sm:w-16 sm:h-16 object-contain" loading="lazy" />
                         <span className="text-xs sm:text-sm font-semibold text-foreground text-center leading-tight">
                           {spec.name}
                         </span>
