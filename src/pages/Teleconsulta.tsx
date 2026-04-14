@@ -13,7 +13,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import { lazy, Suspense } from "react";
-import heroTeleconsulta from "@/assets/hero-teleconsulta.png";
+import heroTeleconsultaPhone from "@/assets/hero-teleconsulta-phone.png";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
@@ -79,98 +79,137 @@ const Teleconsulta = () => {
         <div className="fixed inset-0 -z-10 bg-gradient-to-br from-[hsl(205,65%,96%)] via-[hsl(215,50%,90%)] to-[hsl(225,45%,84%)] dark:from-[hsl(205,30%,8%)] dark:via-[hsl(215,25%,11%)] dark:to-[hsl(225,20%,13%)]" />
         <Header />
 
-        {/* Hero */}
-        <section className="relative overflow-hidden mt-[70px]" style={{ minHeight: "55vh" }}>
-          <img src={heroTeleconsulta} alt="Teleconsulta" className="absolute inset-0 w-full h-full object-cover" loading="lazy" decoding="async" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+        {/* Hero — clean split layout inspired by Tokio Marine style */}
+        <section className="relative mt-[70px] bg-gradient-to-br from-muted/40 via-background to-muted/30 dark:from-muted/10 dark:via-background dark:to-muted/5 overflow-hidden">
+          {/* Subtle decorative circles */}
+          <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-secondary/5 blur-3xl pointer-events-none" />
 
-          {/* Animated floating elements - Amwell style */}
-          <motion.div
-            className="absolute top-20 left-10 w-20 h-20 rounded-full bg-green-400/20 blur-3xl"
-            animate={{ y: [0, 30, 0] }}
-            transition={{ duration: 4, repeat: Infinity }}
-          />
-          <motion.div
-            className="absolute bottom-32 right-20 w-32 h-32 rounded-full bg-blue-400/10 blur-3xl"
-            animate={{ y: [0, -30, 0] }}
-            transition={{ duration: 5, repeat: Infinity, delay: 0.5 }}
-          />
-
-          <div className="container mx-auto px-4 relative flex items-end pb-12 z-10" style={{ minHeight: "55vh" }}>
-            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="max-w-2xl">
+          <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              {/* Left — Text */}
               <motion.div
-                className="mb-4 flex items-center gap-2"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
+                initial={{ opacity: 0, y: 24 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="max-w-xl"
               >
-                <Badge className="text-xs px-4 py-1.5 bg-green-400/20 text-white border-green-400/40 backdrop-blur-sm font-semibold">
-                  <Sparkles className="w-3.5 h-3.5 mr-1.5 inline" /> Atendimento 24h/dia
-                </Badge>
+                <motion.h1
+                  className="text-4xl md:text-5xl lg:text-6xl font-black text-foreground leading-[1.1] tracking-tight mb-5"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                >
+                  Sem tempo?
+                  <br />
+                  <span className="text-primary">A consulta</span>
+                  <br />
+                  <span className="text-primary">vai até você</span>
+                </motion.h1>
+
+                <motion.p
+                  className="text-base md:text-lg text-muted-foreground leading-relaxed mb-8 max-w-md"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                >
+                  A telemedicina resolve questões de saúde com mais agilidade, sem precisar ir ao consultório. Ideal pra quem tem a agenda cheia.
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="flex flex-col sm:flex-row items-start gap-3"
+                >
+                  <Button
+                    size="lg"
+                    className="rounded-xl px-10 h-14 font-bold text-base shadow-lg hover:shadow-xl transition-all bg-primary text-primary-foreground"
+                    asChild
+                  >
+                    <Link to="/dashboard/schedule?role=patient" className="flex items-center gap-2">
+                      <Zap className="w-5 h-5" />
+                      Fale com a gente!
+                    </Link>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="rounded-xl px-8 h-14 font-bold text-base border-border"
+                    asChild
+                  >
+                    <Link to="/medico" className="flex items-center gap-2">
+                      Sou Médico
+                      <Stethoscope className="w-4 h-4" />
+                    </Link>
+                  </Button>
+                </motion.div>
+
+                {/* Trust badges */}
+                <motion.div
+                  className="flex flex-wrap items-center gap-4 mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.55 }}
+                >
+                  {[
+                    { icon: <Shield className="w-4 h-4 text-primary" />, label: "LGPD Compliant" },
+                    { icon: <Video className="w-4 h-4 text-primary" />, label: "Vídeo HD" },
+                    { icon: <FileText className="w-4 h-4 text-primary" />, label: "Receita Digital" },
+                  ].map((item, i) => (
+                    <span key={i} className="flex items-center gap-1.5 text-muted-foreground text-xs font-medium">
+                      {item.icon} {item.label}
+                    </span>
+                  ))}
+                </motion.div>
               </motion.div>
 
-              <motion.h1
-                className="text-4xl md:text-6xl lg:text-7xl font-black text-white mb-4 tracking-tight leading-tight"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                Médico Online
-                <br />
-                <span className="bg-gradient-to-r from-green-400 via-blue-400 to-cyan-400 bg-clip-text text-transparent">Agora Mesmo</span>
-              </motion.h1>
-
-              <motion.p
-                className="text-base md:text-lg text-white/80 max-w-xl mb-8 leading-relaxed font-medium"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-              >
-                Consulte em minutos, receba receita na hora. Sem fila, sem espera, sem sair de casa. Conforme CREMESP, CFM e LGPD.
-              </motion.p>
-
+              {/* Right — Pingo coming out of phone */}
               <motion.div
-                className="flex flex-col sm:flex-row items-start gap-4"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
+                className="flex items-center justify-center lg:justify-end"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.25, duration: 0.6, type: "spring", stiffness: 120 }}
               >
-                <Button
-                  variant="rainbow"
-                  size="lg"
-                  className="rounded-2xl px-10 h-14 font-bold text-base shadow-xl hover:shadow-2xl transition-all w-full sm:w-auto"
-                  asChild
-                >
-                  <Link to="/dashboard/schedule?role=patient" className="flex items-center justify-center gap-2">
-                    <Zap className="w-5 h-5" />
-                    Agendar Agora
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  className="text-white/90 hover:text-white hover:bg-white/10 rounded-2xl px-10 font-bold text-base border border-white/20"
-                  asChild
-                >
-                  <Link to="/medico" className="flex items-center gap-2">
-                    Sou Médico
-                    <Stethoscope className="w-4 h-4" />
-                  </Link>
-                </Button>
+                <div className="relative w-[300px] md:w-[400px] lg:w-[460px]">
+                  <img
+                    src={heroTeleconsultaPhone}
+                    alt="Pingo — seu assistente de teleconsulta saindo do celular"
+                    width={1024}
+                    height={1024}
+                    className="w-full h-auto drop-shadow-2xl"
+                  />
+                  {/* Floating badge */}
+                  <motion.div
+                    className="absolute top-8 -left-4 md:top-12 md:-left-8 bg-card border border-border rounded-2xl px-4 py-2.5 shadow-lg flex items-center gap-2"
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Clock className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-foreground">24h por dia</p>
+                      <p className="text-[10px] text-muted-foreground">Inclusive feriados</p>
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    className="absolute bottom-12 -right-4 md:bottom-16 md:-right-8 bg-card border border-border rounded-2xl px-4 py-2.5 shadow-lg flex items-center gap-2"
+                    animate={{ y: [0, 8, 0] }}
+                    transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-secondary/10 flex items-center justify-center">
+                      <CheckCircle2 className="w-4 h-4 text-secondary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-foreground">30+ especialidades</p>
+                      <p className="text-[10px] text-muted-foreground">Médicos verificados</p>
+                    </div>
+                  </motion.div>
+                </div>
               </motion.div>
-              <div className="flex flex-wrap items-center gap-4 mt-6">
-                {[
-                  { icon: <Shield className="w-3.5 h-3.5" />, label: "LGPD" },
-                  { icon: <Video className="w-3.5 h-3.5" />, label: "Vídeo HD" },
-                  { icon: <FileText className="w-3.5 h-3.5" />, label: "Receita Digital" },
-                  { icon: <Users className="w-3.5 h-3.5" />, label: "30+ Especialidades" },
-                ].map((item, i) => (
-                  <span key={i} className="flex items-center gap-1.5 text-white/50 text-xs font-medium">{item.icon} {item.label}</span>
-                ))}
-              </div>
-            </motion.div>
+            </div>
           </div>
         </section>
 
