@@ -1,137 +1,36 @@
-import { forwardRef, lazy } from "react";
-import { motion } from "framer-motion";
+import { forwardRef, lazy, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Stethoscope, CurrencyDollar, CalendarBlank, Globe, ShieldCheck, ArrowRight, ChartLineUp, CheckCircle, Lock } from "@phosphor-icons/react";
-import { TrendingUp, Sparkles } from "lucide-react";
+import {
+  Stethoscope, CurrencyDollar, CalendarBlank, Globe, ShieldCheck, ArrowRight,
+  ChartLineUp, CheckCircle, Lock, Star, CaretDown, Video, Notepad, Certificate,
+  FirstAid, Heartbeat, Clock, Wallet, UserCirclePlus, FileText, ChatsCircle,
+} from "@phosphor-icons/react";
+import { TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/landing/Header";
 import SEOHead from "@/components/SEOHead";
 
+import pingoMedicoTeleconsulta from "@/assets/pingo-medico-teleconsulta.png";
+import pingoMedicoRenda from "@/assets/pingo-medico-renda.png";
+import pingoMedicoFerramentas from "@/assets/pingo-medico-ferramentas.png";
+
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
-const stats = [
-  { value: "500+", label: "Médicos ativos" },
-  { value: "30+", label: "Especialidades" },
-  { value: "R$3k+", label: "Renda média/mês" },
-  { value: "4.9★", label: "Satisfação média" },
-];
-
-const perks = [
-  {
-    icon: CurrencyDollar,
-    title: "Renda extra garantida",
-    desc: "Atenda pacientes de todo o Brasil e aumente seu faturamento sem sair de casa.",
-  },
-  {
-    icon: CalendarBlank,
-    title: "Agenda no seu ritmo",
-    desc: "Defina horários e especialidades. Você controla quando e quanto quer atender.",
-  },
-  {
-    icon: Globe,
-    title: "Alcance nacional",
-    desc: "Conecte-se a pacientes de qualquer estado. Sem limites geográficos.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "100% regulamentado",
-    desc: "Plataforma em conformidade com CFM, CRM e LGPD. Atenda com segurança jurídica.",
-  },
-  {
-    icon: ChartLineUp,
-    title: "Ferramentas completas",
-    desc: "Prontuário SOAP, receita digital, laudo, atestado — tudo em um só lugar.",
-  },
-  {
-    icon: Stethoscope,
-    title: "Suporte médico dedicado",
-    desc: "Time médico disponível para onboarding e dúvidas sobre a plataforma.",
-  },
-];
-
-const howItWorks = [
-  {
-    step: "1",
-    title: "Cadastre-se",
-    desc: "Preencha seu perfil médico com CRM, especialidade e horários disponíveis.",
-  },
-  {
-    step: "2",
-    title: "Análise rápida",
-    desc: "Nossa equipe valida seus documentos em até 24 horas.",
-  },
-  {
-    step: "3",
-    title: "Comece a atender",
-    desc: "Receba pacientes e aumente sua renda com consultas online.",
-  },
-];
-
-const faqItems = [
-  {
-    question: "Quanto eu ganho por consulta?",
-    answer: "A média é de R$ 30-80 por consulta de 20-30 min, dependendo da especialidade. Médicos de psicologia, cardiologia e dermatologia ganham mais. Você recebe 48h após a consulta.",
-  },
-  {
-    question: "Preciso abandonar meu consultório?",
-    answer: "Não! A teleconsulta é complemento de renda. Muitos médicos atendem 2-3 pacientes online entre consultas presenciais. Você controla 100% da sua agenda.",
-  },
-  {
-    question: "Vocês controlam meus horários?",
-    answer: "Zero controle. Você define quando está disponível (pode ser 3am, domingo, feriado — como quiser). Pacientes encaixam nos seus horários, não o contrário.",
-  },
-  {
-    question: "E se surgir dúvida sobre a plataforma?",
-    answer: "Time médico dedicado disponível 24/7 por chat, email e whatsapp. Temos também webinars mensais e documentação completa.",
-  },
-  {
-    question: "Meus dados de paciente ficam seguros?",
-    answer: "Sim. LGPD compliant, criptografia AES-256, prontuário eletrônico em nuvem, backup automático. Auditoria e conformidade 100% CFM/CREMESP.",
-  },
-];
-
-const testimonials = [
-  {
-    name: "Dr. Lucas Ferreira",
-    specialty: "Cardiologista",
-    income: "R$ 4.2k/mês",
-    quote: "Em 6 meses de teleconsulta, fiz mais consultas do que fazia em 1 ano de consultório físico. Flexibilidade total.",
-  },
-  {
-    name: "Dra. Marina Silva",
-    specialty: "Dermatologista",
-    income: "R$ 3.8k/mês",
-    quote: "Perfeito para pós-consulta e retornos. Menos deslocamento, mais renda, mesma qualidade.",
-  },
-  {
-    name: "Dr. Rafael Mendes",
-    specialty: "Psicólogo",
-    income: "R$ 5.1k/mês",
-    quote: "Meus pacientes adoram. Não perde ninguém por questão de deslocamento. Renda super consistente.",
-  },
-];
-
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const } },
+  initial: { opacity: 0, y: 24 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true } as const,
 };
 
-const container = { hidden: {}, show: { transition: { staggerChildren: 0.07 } } };
-
-const containerVariants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.09 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: [0.16, 1, 0.3, 1] as [number, number, number, number] } },
-};
+const stagger = { initial: "hidden", whileInView: "visible", viewport: { once: true } as const };
+const staggerContainer = { hidden: {}, visible: { transition: { staggerChildren: 0.08 } } };
+const staggerItem = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.45 } } };
 
 const ForDoctors = forwardRef<HTMLDivElement>((_, ref) => {
   const navigate = useNavigate();
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
     <div ref={ref} className="relative min-h-screen bg-background">
@@ -145,49 +44,40 @@ const ForDoctors = forwardRef<HTMLDivElement>((_, ref) => {
 
       <Header />
 
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
-        {/* Animated floating elements */}
-        <motion.div
-          className="absolute top-32 left-10 w-24 h-24 rounded-full bg-primary/15 blur-3xl"
-          animate={{ y: [0, 40, 0] }}
-          transition={{ duration: 6, repeat: Infinity }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-10 w-32 h-32 rounded-full bg-secondary/10 blur-3xl"
-          animate={{ y: [0, -40, 0] }}
-          transition={{ duration: 8, repeat: Infinity, delay: 0.5 }}
-        />
-
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -32 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <span className="inline-block text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full mb-4">
+      {/* ═══════════════ HERO ═══════════════ */}
+      <section className="pt-32 pb-16 md:pb-24 px-4 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-5">
+                <Stethoscope className="w-3.5 h-3.5" weight="fill" />
                 Para Médicos
               </span>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-foreground leading-tight tracking-tight mb-4">
-                Atenda mais, trabalhe{" "}
-                <span className="text-primary">de onde quiser</span>
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-foreground leading-[1.08] mb-5">
+                Atenda mais,{" "}
+                <span className="text-gradient">ganhe mais</span>
               </h1>
-              <p className="text-muted-foreground text-lg sm:text-xl leading-relaxed mb-8 max-w-lg">
-                Junte-se a mais de 500 médicos que já expandiram sua prática com telemedicina. Cadastro gratuito, aprovação em até 24h.
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-xl mb-8">
+                Junte-se a mais de 500 médicos que já expandiram sua prática com telemedicina.
+                Cadastro gratuito, aprovação em até 24h, e renda extra garantida sem sair de casa.
               </p>
 
               {/* Stats row */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                {stats.map((s, i) => (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                {[
+                  { value: "500+", label: "Médicos ativos" },
+                  { value: "30+", label: "Especialidades" },
+                  { value: "R$3k+", label: "Renda média/mês" },
+                  { value: "4.9★", label: "Satisfação" },
+                ].map((s, i) => (
                   <motion.div
                     key={s.label}
                     initial={{ opacity: 0, scale: 0.85 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.1 + i * 0.08, type: "spring", stiffness: 200, damping: 18 }}
-                    className="text-center rounded-xl border border-border bg-card p-3"
+                    transition={{ delay: 0.15 + i * 0.08, type: "spring", stiffness: 200 }}
+                    className="text-center rounded-xl border border-border bg-card/80 p-3"
                   >
-                    <p className="text-xl sm:text-2xl font-extrabold text-primary tabular-nums">{s.value}</p>
+                    <p className="text-xl font-extrabold text-primary tabular-nums">{s.value}</p>
                     <p className="text-[11px] text-muted-foreground mt-0.5">{s.label}</p>
                   </motion.div>
                 ))}
@@ -196,84 +86,180 @@ const ForDoctors = forwardRef<HTMLDivElement>((_, ref) => {
               <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   size="lg"
-                  className="bg-gradient-hero text-primary-foreground hover:opacity-90 rounded-xl px-8 gap-2 font-semibold shadow-lg shadow-primary/20 h-12"
+                  className="rounded-2xl h-[54px] px-8 text-sm font-bold shadow-lg shadow-primary/25 gap-2 group"
                   onClick={() => navigate("/medico/cadastro")}
                 >
-                  <Stethoscope className="w-5 h-5" weight="fill" />
+                  <Stethoscope className="w-4 h-4" weight="fill" />
                   Quero ser parceiro
-                  <ArrowRight className="w-4 h-4" weight="bold" />
+                  <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" weight="bold" />
                 </Button>
                 <Button
                   size="lg"
                   variant="outline"
-                  className="rounded-xl px-8 gap-2 font-semibold h-12"
+                  className="rounded-2xl h-[54px] px-8 text-sm font-bold border-2"
                   onClick={() => navigate("/medico")}
                 >
-                  Saiba mais
+                  Já sou parceiro
                 </Button>
               </div>
             </motion.div>
 
-            {/* Right: perks grid */}
             <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              animate="show"
-              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+              className="flex justify-center"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
             >
-              {perks.map((p) => (
-                <motion.div
-                  key={p.title}
-                  variants={itemVariants}
-                  className="flex gap-4 p-4 rounded-xl border border-border bg-card hover:border-primary/30 hover:shadow-sm transition-all group"
-                >
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
-                    <p.icon className="w-5 h-5 text-primary" weight="fill" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-sm text-foreground mb-0.5">{p.title}</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">{p.desc}</p>
-                  </div>
-                </motion.div>
-              ))}
+              <img
+                src={pingoMedicoTeleconsulta}
+                alt="Pingo médico em teleconsulta"
+                width={440}
+                height={440}
+                className="w-[280px] sm:w-[360px] lg:w-[440px] drop-shadow-2xl"
+              />
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* How It Works */}
-      <section className="py-20 px-4 bg-muted/20">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
-          <div className="text-center mb-12">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-3 py-1 rounded-full mb-4">
-              Como Funciona
+      {/* ═══════════════ POR QUE ATENDER ONLINE ═══════════════ */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="max-w-7xl mx-auto">
+          <motion.div className="text-center mb-14" {...fadeUp}>
+            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-4">
+              Vantagens
             </span>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
-              3 passos para começar
+              Por que atender pela AloClínica?
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Rápido, simples e seguro.
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Tudo o que você precisa para expandir sua prática médica com segurança e praticidade.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {howItWorks.map((item, i) => (
+          <motion.div {...stagger} variants={staggerContainer} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { icon: CurrencyDollar, title: "Renda extra garantida", desc: "Atenda pacientes de todo o Brasil e aumente seu faturamento sem sair de casa. Pagamento garantido em 48h." },
+              { icon: CalendarBlank, title: "Agenda no seu ritmo", desc: "Defina seus horários com total liberdade. Manhã, tarde, noite ou madrugada — você decide quando atender." },
+              { icon: Globe, title: "Alcance nacional", desc: "Conecte-se a pacientes de qualquer estado. Sem limites geográficos, com demanda constante." },
+              { icon: ShieldCheck, title: "100% regulamentado", desc: "Plataforma em conformidade com CFM, CRM e LGPD. Atenda com segurança jurídica total." },
+              { icon: ChartLineUp, title: "Dashboard completo", desc: "Métricas de performance, histórico de consultas, relatórios financeiros e muito mais." },
+              { icon: FirstAid, title: "Suporte médico 24/7", desc: "Time médico dedicado para onboarding, dúvidas clínicas e suporte técnico." },
+            ].map((p, i) => (
               <motion.div
-                key={item.step}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.15 }}
-                className="relative p-8 rounded-2xl border border-border bg-card hover:shadow-elevated transition-all"
+                key={i}
+                variants={staggerItem}
+                className="p-6 rounded-2xl border border-border bg-background hover:border-primary/30 hover:-translate-y-1 hover:shadow-lg transition-all duration-300 group"
               >
-                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 font-extrabold text-lg text-primary">
-                  {item.step}
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                  <p.icon className="w-6 h-6 text-primary" weight="fill" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground mb-2">{item.title}</h3>
-                <p className="text-muted-foreground">{item.desc}</p>
-                {i < howItWorks.length - 1 && (
-                  <div className="hidden md:block absolute -right-4 top-1/2 -translate-y-1/2">
-                    <ArrowRight className="w-8 h-8 text-muted-foreground/30" weight="bold" />
+                <h3 className="font-bold text-foreground text-lg mb-2">{p.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══════════════ FERRAMENTAS CLÍNICAS ═══════════════ */}
+      <section className="py-20 md:py-28 px-4 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <motion.div className="flex justify-center order-2 lg:order-1" {...fadeUp} transition={{ duration: 0.6 }}>
+              <img
+                src={pingoMedicoFerramentas}
+                alt="Pingo com ferramentas médicas"
+                loading="lazy"
+                width={512}
+                height={512}
+                className="w-[260px] sm:w-[320px] lg:w-[380px] drop-shadow-xl"
+              />
+            </motion.div>
+
+            <motion.div className="order-1 lg:order-2" {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>
+              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-5">
+                <Notepad className="w-3.5 h-3.5" weight="fill" />
+                Ferramentas Clínicas
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight mb-6">
+                Tudo num <span className="text-primary">só lugar</span>
+              </h2>
+              <p className="text-muted-foreground leading-relaxed mb-8">
+                Prontuário eletrônico, receita digital, atestados e laudos — todas as ferramentas 
+                que você precisa integradas na plataforma.
+              </p>
+
+              <div className="space-y-4">
+                {[
+                  { icon: FileText, title: "Prontuário SOAP", desc: "Registro clínico completo com anamnese estruturada, CID-10 e exportação." },
+                  { icon: Certificate, title: "Receita Digital ICP-Brasil", desc: "Prescrições com assinatura digital certificada, válidas em todo o país." },
+                  { icon: Heartbeat, title: "Atestados e Laudos", desc: "Gere documentos médicos com verificação por QR Code e hash de segurança." },
+                  { icon: Video, title: "Videochamada HD", desc: "Consultas por vídeo com criptografia E2E, gravação (com consentimento) e chat." },
+                  { icon: ChatsCircle, title: "Chat com Paciente", desc: "Comunicação segura antes e depois da consulta para acompanhamento." },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    className="flex items-start gap-4 p-4 rounded-2xl bg-card/80 border border-border/40 hover:border-primary/20 hover:shadow-md transition-all"
+                    {...fadeUp}
+                    transition={{ delay: 0.2 + i * 0.08 }}
+                  >
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <item.icon className="w-5 h-5 text-primary" weight="fill" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-foreground text-[15px]">{item.title}</p>
+                      <p className="text-sm text-muted-foreground mt-0.5">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ COMO FUNCIONA ═══════════════ */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="max-w-7xl mx-auto">
+          <motion.div className="text-center mb-14" {...fadeUp}>
+            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-4">
+              Passo a Passo
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
+              Comece a atender em 3 passos
+            </h2>
+            <p className="text-muted-foreground max-w-lg mx-auto">
+              Processo rápido, simples e seguro. Cadastre-se hoje, atenda amanhã.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+            {[
+              { step: "1", icon: UserCirclePlus, title: "Cadastre-se", desc: "Preencha seu perfil com CRM, especialidade e horários. Leva menos de 5 minutos." },
+              { step: "2", icon: CheckCircle, title: "Validação em 24h", desc: "Nossa equipe verifica seus documentos e valida seu CRM automaticamente." },
+              { step: "3", icon: Video, title: "Comece a atender", desc: "Receba pacientes imediatamente e acompanhe seus ganhos no dashboard." },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                className="relative p-8 rounded-2xl border border-border bg-background text-center hover:border-primary/30 hover:shadow-lg transition-all"
+                {...fadeUp}
+                transition={{ delay: i * 0.12 }}
+              >
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
+                  <item.icon className="w-8 h-8 text-primary" weight="fill" />
+                </div>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-extrabold">
+                    {item.step}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-foreground mb-2">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+
+                {i < 2 && (
+                  <div className="hidden md:block absolute -right-5 top-1/2 -translate-y-1/2 z-10">
+                    <ArrowRight className="w-6 h-6 text-muted-foreground/30" weight="bold" />
                   </div>
                 )}
               </motion.div>
@@ -282,112 +268,213 @@ const ForDoctors = forwardRef<HTMLDivElement>((_, ref) => {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 px-4 bg-muted/20">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
-          <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
-            <motion.div variants={fadeUp} className="text-center mb-16">
-              <Badge className="mb-4 text-sm px-4 py-1.5 rounded-full font-semibold bg-primary/10 text-primary border-primary/20">
-                ⭐ O Que Médicos Falam
-              </Badge>
-              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-foreground text-center mb-4 tracking-tight">
-                Histórias Reais de Sucesso
+      {/* ═══════════════ RENDA & FINANCEIRO ═══════════════ */}
+      <section className="py-20 md:py-28 px-4 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+            <motion.div {...fadeUp} transition={{ duration: 0.5 }}>
+              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-5">
+                <Wallet className="w-3.5 h-3.5" weight="fill" />
+                Financeiro
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-tight mb-6">
+                Transparência no <span className="text-primary">seu ganho</span>
               </h2>
-              <p className="text-lg text-muted-foreground text-center max-w-2xl mx-auto font-medium">
-                Médicos como você já aumentaram sua renda sem abandonar seu consultório
+              <p className="text-muted-foreground leading-relaxed mb-8">
+                Acompanhe seus ganhos em tempo real, solicite saques via PIX e tenha total 
+                controle sobre sua carteira digital.
               </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { icon: CurrencyDollar, title: "R$ 30-80/consulta", desc: "Valores variam por especialidade e duração." },
+                  { icon: Clock, title: "Pagamento em 48h", desc: "Após a consulta, crédito na carteira digital." },
+                  { icon: Wallet, title: "Saque via PIX", desc: "Solicite saques quando quiser, sem burocracia." },
+                  { icon: ChartLineUp, title: "Relatórios mensais", desc: "Dashboard financeiro com métricas detalhadas." },
+                ].map((item, i) => (
+                  <motion.div
+                    key={i}
+                    className="flex items-start gap-3 p-4 rounded-xl border border-border bg-card/80 hover:border-primary/20 transition-all"
+                    {...fadeUp}
+                    transition={{ delay: 0.2 + i * 0.08 }}
+                  >
+                    <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <item.icon className="w-4.5 h-4.5 text-primary" weight="fill" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-foreground text-sm">{item.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
 
-            <div className="grid md:grid-cols-3 gap-6">
-              {testimonials.map((t, i) => (
-                <motion.div key={i} variants={fadeUp}>
-                  <Card className="h-full border-border/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group bg-card">
-                    <CardContent className="p-6">
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-white font-bold group-hover:scale-110 transition-transform">
-                          {t.name.charAt(0)}
+            <motion.div className="flex justify-center" {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }}>
+              <img
+                src={pingoMedicoRenda}
+                alt="Pingo médico renda extra"
+                loading="lazy"
+                width={512}
+                height={512}
+                className="w-[260px] sm:w-[320px] lg:w-[380px] drop-shadow-xl"
+              />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════ DEPOIMENTOS ═══════════════ */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="max-w-7xl mx-auto">
+          <motion.div className="text-center mb-14" {...fadeUp}>
+            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-4">
+              Depoimentos
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
+              Médicos que já transformaram sua prática
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Veja como profissionais como você estão aumentando sua renda com a AloClínica.
+            </p>
+          </motion.div>
+
+          <motion.div {...stagger} variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { name: "Dr. Lucas Ferreira", specialty: "Cardiologista", income: "R$ 4.2k", quote: "Em 6 meses de teleconsulta, fiz mais consultas do que fazia em 1 ano de consultório físico. Flexibilidade total e pagamento garantido." },
+              { name: "Dra. Marina Silva", specialty: "Dermatologista", income: "R$ 3.8k", quote: "Perfeito para retornos e acompanhamento. Menos deslocamento, mais renda. O prontuário digital é excepcional." },
+              { name: "Dr. Rafael Mendes", specialty: "Clínico Geral", income: "R$ 5.1k", quote: "Atendo pacientes de todo o Brasil. Minha renda triplicou sem abandonar meu consultório presencial." },
+            ].map((t, i) => (
+              <motion.div key={i} variants={staggerItem}>
+                <Card className="h-full border-border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group bg-background">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-1 mb-4">
+                      {Array.from({ length: 5 }).map((_, si) => (
+                        <Star key={si} className="w-4 h-4 text-amber-400" weight="fill" />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground italic mb-5 leading-relaxed">"{t.quote}"</p>
+                    <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm group-hover:scale-110 transition-transform">
+                          {t.name.split(" ").slice(-1)[0][0]}
                         </div>
                         <div>
                           <h3 className="font-bold text-foreground text-sm">{t.name}</h3>
                           <p className="text-xs text-muted-foreground">{t.specialty}</p>
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground italic mb-4 leading-relaxed">"{t.quote}"</p>
-                      <div className="pt-4 border-t border-border/50">
-                        <p className="text-xs font-semibold text-primary flex items-center gap-1">
-                          <TrendingUp className="w-3.5 h-3.5" /> {t.income}/mês
+                      <div className="text-right">
+                        <p className="text-sm font-extrabold text-primary flex items-center gap-1">
+                          <TrendingUp className="w-3.5 h-3.5" /> {t.income}
                         </p>
+                        <p className="text-[10px] text-muted-foreground">/mês</p>
                       </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </motion.div>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* ═══════════════ FAQ ACCORDION ═══════════════ */}
       <section className="py-20 px-4">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
-          <motion.div variants={container} initial="hidden" whileInView="show" viewport={{ once: true }}>
-            <motion.h2 variants={fadeUp} className="text-3xl sm:text-4xl font-black text-foreground text-center mb-12 tracking-tight">
-              Dúvidas Frequentes
-            </motion.h2>
-            <div className="grid md:grid-cols-2 gap-4 max-w-4xl mx-auto">
-              {faqItems.map((faq, i) => (
-                <motion.div key={i} variants={fadeUp}>
-                  <Card className="h-full border-border/50 hover:shadow-lg hover:border-primary/20 transition-all group">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/15 transition-colors">
-                          <Sparkles className="w-4 h-4 text-primary" />
-                        </div>
-                        <h3 className="font-bold text-foreground text-sm leading-snug">{faq.question}</h3>
-                      </div>
-                      <p className="text-sm text-muted-foreground leading-relaxed ml-11">{faq.answer}</p>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+        <div className="max-w-3xl mx-auto">
+          <motion.div className="text-center mb-14" {...fadeUp}>
+            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-4">
+              Dúvidas
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-4">
+              Perguntas Frequentes
+            </h2>
           </motion.div>
+
+          <div className="space-y-3">
+            {[
+              { q: "Quanto eu ganho por consulta?", a: "A média é de R$ 30-80 por consulta de 20-30 min, dependendo da especialidade. Médicos de cardiologia, dermatologia e psicologia ganham mais. Pagamento creditado em até 48h." },
+              { q: "Preciso abandonar meu consultório?", a: "Não! A teleconsulta é complemento de renda. Muitos médicos atendem 2-3 pacientes online entre consultas presenciais. Você controla 100% da sua agenda." },
+              { q: "Vocês controlam meus horários?", a: "Zero controle. Você define quando está disponível — pode ser de manhã, de madrugada, no fim de semana. Pacientes encaixam nos seus horários." },
+              { q: "Meus dados de paciente ficam seguros?", a: "Sim. LGPD compliant, criptografia AES-256, prontuário eletrônico em nuvem com backup automático. Auditoria e conformidade 100% CFM." },
+              { q: "Como funciona o pagamento?", a: "Após cada consulta, o valor é creditado na sua carteira digital. Você pode sacar via PIX a qualquer momento, sem taxas de saque." },
+              { q: "Posso atender qualquer especialidade?", a: "Atendemos 30+ especialidades. Basta ter CRM ativo e, quando necessário, RQE válido para sua especialidade." },
+            ].map((faq, i) => (
+              <motion.div
+                key={i}
+                className="rounded-2xl border border-border bg-background overflow-hidden hover:border-primary/20 transition-colors"
+                {...fadeUp}
+                transition={{ delay: i * 0.05 }}
+              >
+                <button
+                  className="w-full flex items-center justify-between p-5 text-left"
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                >
+                  <span className="font-semibold text-foreground text-sm pr-4">{faq.q}</span>
+                  <CaretDown
+                    className={`w-5 h-5 text-muted-foreground shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
+                    weight="bold"
+                  />
+                </button>
+                <AnimatePresence>
+                  {openFaq === i && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.25 }}
+                      className="overflow-hidden"
+                    >
+                      <p className="px-5 pb-5 text-sm text-muted-foreground leading-relaxed">{faq.a}</p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* CTA Final */}
+      {/* ═══════════════ CTA FINAL ═══════════════ */}
       <section className="py-20 px-4">
-        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
+        <div className="max-w-7xl mx-auto">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            {...fadeUp}
             className="relative rounded-3xl overflow-hidden bg-gradient-hero shadow-elevated"
           >
             <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary-foreground)/0.22),transparent_38%),radial-gradient(circle_at_bottom_right,hsl(var(--primary-foreground)/0.14),transparent_34%)]" />
-            <div className="relative z-10 flex flex-col items-center justify-center gap-6 px-6 sm:px-10 py-16 sm:py-20 text-center">
+            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8 px-8 sm:px-12 py-14 sm:py-16">
               <div>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-primary-foreground mb-2">
-                  Sua Renda Extra em 5 Minutos
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-primary-foreground mb-2">
+                  Comece a atender hoje mesmo
                 </h2>
-                <p className="text-lg text-primary-foreground/90 max-w-2xl mx-auto">
-                  Cadastro gratuito, análise em 24h. Começar a atender no mesmo dia.
+                <p className="text-primary-foreground/85 max-w-xl">
+                  Cadastro gratuito, análise em 24h. Junte-se a mais de 500 médicos parceiros e aumente sua renda.
                 </p>
               </div>
-              <Button
-                size="lg"
-                className="bg-background text-primary hover:bg-background/95 rounded-2xl px-8 gap-2.5 shadow-lg shadow-foreground/10 font-extrabold"
-                onClick={() => navigate("/medico/cadastro")}
-              >
-                <CheckCircle className="w-5 h-5" weight="fill" />
-                Quero Começar Agora
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                <Button
+                  size="lg"
+                  className="bg-background text-primary hover:bg-background/95 rounded-2xl px-8 gap-2 font-extrabold"
+                  onClick={() => navigate("/medico/cadastro")}
+                >
+                  <CheckCircle className="w-5 h-5" weight="fill" />
+                  Quero Começar
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="rounded-2xl px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground/10 font-extrabold"
+                  onClick={() => navigate("/contato")}
+                >
+                  Falar com equipe
+                </Button>
+              </div>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Footer */}
       <Footer />
     </div>
   );
