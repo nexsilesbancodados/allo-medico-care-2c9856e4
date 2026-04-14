@@ -16,6 +16,9 @@ import { useSiteConfig } from "@/lib/site-config";
 import { useSiteSections } from "@/lib/site-sections";
 import { motion } from "framer-motion";
 import doctorTeleconsulta from "@/assets/doctor-phone-teleconsulta.png";
+import pingoCalendar from "@/assets/pingo-calendar.png";
+import pingoVideocall from "@/assets/pingo-videocall.png";
+import pingoPrescription from "@/assets/pingo-prescription.png";
 
 // Icon name → component map (used to resolve string "icon" from CMS JSON)
 const ICON_MAP: Record<string, LucideIcon> = {
@@ -180,9 +183,9 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
 
               <div className="space-y-4 mb-10">
                 {[
-                  { icon: Calendar, title: "Agende em segundos", desc: "Escolha o horário que melhor se encaixa na sua rotina" },
-                  { icon: Video, title: "Consulta por vídeo em HD", desc: "Atendimento seguro com criptografia ponta a ponta" },
-                  { icon: FileText, title: "Receita digital válida", desc: "Aceita em qualquer farmácia do Brasil" },
+                  { img: pingoCalendar, title: "Agende em segundos", desc: "Escolha o horário que melhor se encaixa na sua rotina" },
+                  { img: pingoVideocall, title: "Consulta por vídeo em HD", desc: "Atendimento seguro com criptografia ponta a ponta" },
+                  { img: pingoPrescription, title: "Receita digital válida", desc: "Aceita em qualquer farmácia do Brasil" },
                 ].map((item, i) => (
                   <motion.div
                     key={item.title}
@@ -192,8 +195,8 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
                     viewport={{ once: true }}
                     transition={{ delay: 0.25 + i * 0.12 }}
                   >
-                    <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <item.icon className="w-5 h-5 text-primary" />
+                    <div className="w-14 h-14 rounded-xl flex items-center justify-center shrink-0">
+                      <img src={item.img} alt={item.title} loading="lazy" width={56} height={56} className="w-14 h-14 object-contain" />
                     </div>
                     <div>
                       <p className="font-bold text-foreground text-[15px] md:text-base">{item.title}</p>
