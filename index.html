@@ -85,42 +85,5 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx" fetchpriority="high"></script>
-    <script>
-      (function () {
-        var root = document.getElementById('root');
-        var loader = document.getElementById('initial-loader');
-        if (!root || !loader) return;
-
-        var cleanedUp = false;
-        var cleanup = function () {
-          if (cleanedUp) return;
-          cleanedUp = true;
-          var current = document.getElementById('initial-loader');
-          if (current) current.remove();
-          if (observer) observer.disconnect();
-          window.removeEventListener('app:mounted', cleanup);
-        };
-
-        var shouldCleanup = function () {
-          return document.documentElement.getAttribute('data-app-mounted') === 'true'
-            || document.body.getAttribute('data-app-mounted') === 'true'
-            || root.children.length > 1
-            || (root.firstElementChild && root.firstElementChild.id !== 'initial-loader');
-        };
-
-        var observer = new MutationObserver(function () {
-          if (shouldCleanup()) cleanup();
-        });
-
-        observer.observe(root, { childList: true, subtree: false });
-        window.addEventListener('app:mounted', cleanup);
-
-        setTimeout(function () {
-          if (shouldCleanup()) cleanup();
-        }, 1200);
-
-        setTimeout(cleanup, 8000);
-      })();
-    </script>
   </body>
 </html>
