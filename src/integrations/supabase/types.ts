@@ -4474,60 +4474,98 @@ export type Database = {
     Views: {
       doctor_profiles_public: {
         Row: {
+          available_for_in_person: boolean | null
+          available_for_telemedicine: boolean | null
           available_now: boolean | null
           available_now_since: string | null
+          avatar_url: string | null
           bio: string | null
+          consultation_duration_min: number | null
           consultation_price: number | null
           created_at: string | null
           crm: string | null
           crm_state: string | null
           crm_verified: boolean | null
+          display_name: string | null
           education: string | null
           experience_years: number | null
+          full_name: string | null
           id: string | null
           is_approved: boolean | null
+          languages: string[] | null
           rating: number | null
+          short_description: string | null
+          specialty_id: string | null
+          sub_specialties: string[] | null
           total_reviews: number | null
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
+          available_for_in_person?: boolean | null
+          available_for_telemedicine?: boolean | null
           available_now?: boolean | null
           available_now_since?: string | null
+          avatar_url?: string | null
           bio?: string | null
+          consultation_duration_min?: number | null
           consultation_price?: number | null
           created_at?: string | null
           crm?: string | null
           crm_state?: string | null
           crm_verified?: boolean | null
+          display_name?: string | null
           education?: string | null
           experience_years?: number | null
+          full_name?: string | null
           id?: string | null
           is_approved?: boolean | null
+          languages?: string[] | null
           rating?: number | null
+          short_description?: string | null
+          specialty_id?: string | null
+          sub_specialties?: string[] | null
           total_reviews?: number | null
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
+          available_for_in_person?: boolean | null
+          available_for_telemedicine?: boolean | null
           available_now?: boolean | null
           available_now_since?: string | null
+          avatar_url?: string | null
           bio?: string | null
+          consultation_duration_min?: number | null
           consultation_price?: number | null
           created_at?: string | null
           crm?: string | null
           crm_state?: string | null
           crm_verified?: boolean | null
+          display_name?: string | null
           education?: string | null
           experience_years?: number | null
+          full_name?: string | null
           id?: string | null
           is_approved?: boolean | null
+          languages?: string[] | null
           rating?: number | null
+          short_description?: string | null
+          specialty_id?: string | null
+          sub_specialties?: string[] | null
           total_reviews?: number | null
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "doctor_profiles_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       wallet_balances: {
         Row: {
