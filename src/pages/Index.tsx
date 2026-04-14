@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import SEOHead from "@/components/SEOHead";
 import Header from "@/components/landing/Header";
 import HeroSection from "@/components/landing/HeroSection";
+import SpecialtiesSection from "@/components/landing/SpecialtiesSection";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Video } from "lucide-react";
 import { useSiteSections } from "@/lib/site-sections";
@@ -173,6 +174,9 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           </div>
         </div>
       </section>
+
+      {/* ═══════════════ ESPECIALIDADES ═══════════════ */}
+      <SpecialtiesSection />
 
     </div>
   );
