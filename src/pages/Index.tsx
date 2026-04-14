@@ -157,7 +157,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
                 <Button
                   size="lg"
                   className="rounded-2xl h-[54px] px-10 text-sm font-bold shadow-lg shadow-primary/25 group hover:-translate-y-0.5 transition-all"
-                  onClick={() => navigate("/paciente")}
+                  onClick={() => navigate("/agendar")}
                 >
                   Agendar consulta
                   <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1" />

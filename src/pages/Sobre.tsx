@@ -61,7 +61,7 @@ const Sobre = forwardRef<HTMLDivElement>((_, ref) => {
                 <Button
                   size="lg"
                   className="rounded-2xl h-[54px] px-8 text-sm font-bold shadow-lg shadow-primary/25 gap-2 group"
-                  onClick={() => navigate("/paciente")}
+                  onClick={() => navigate("/agendar")}
                 >
                   Agendar Consulta
                   <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" weight="bold" />
