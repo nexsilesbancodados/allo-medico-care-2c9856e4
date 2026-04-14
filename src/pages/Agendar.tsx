@@ -403,7 +403,7 @@ const Agendar = () => {
                       {filteredDoctors.map((doc, i) => {
                         const name = doc.display_name || doc.full_name || "Médico";
                         const price = doc.consultation_price ?? 89;
-                        const discountPrice = Math.round(price * 0.7 * 100) / 100;
+                        
                         const bioText = doc.bio || doc.short_description;
                         const areas = doc.care_areas ?? [];
                         const subSpecs = doc.sub_specialties ?? [];
@@ -472,9 +472,6 @@ const Agendar = () => {
                                     {/* Price mobile */}
                                     <div className="sm:hidden flex flex-col items-end ml-auto">
                                       <span className="text-lg font-black text-foreground">{formatBRL(price)}</span>
-                                      <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold border-0 rounded-md">
-                                        {formatBRL(discountPrice)} c/ cartão
-                                      </Badge>
                                     </div>
                                   </div>
 
@@ -512,9 +509,6 @@ const Agendar = () => {
                                       {/* Price desktop */}
                                       <div className="hidden sm:flex flex-col items-end shrink-0">
                                         <span className="text-xl font-black text-foreground">{formatBRL(price)}</span>
-                                        <Badge className="bg-amber-100 hover:bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold border-0 rounded-md mt-1">
-                                          {formatBRL(discountPrice)} c/ cartão
-                                        </Badge>
                                       </div>
                                     </div>
 
