@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 import { notifyExamReportReady, notifyDocumentUploaded } from "@/lib/notifications";
 
@@ -55,7 +55,7 @@ const sendReportReadyEmail = async (
   verificationCode: string,
 ) => {
   try {
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from("profiles")
       .select("first_name, last_name")
       .eq("user_id", patientId)
@@ -65,7 +65,7 @@ const sendReportReadyEmail = async (
       ? `${profile.first_name} ${profile.last_name}`
       : "Paciente";
 
-    await supabase.functions.invoke("send-email", {
+    await db.functions.invoke("send-email", {
       body: {
         type: "exam_report_ready",
         to: "resolve-from-user",
@@ -95,7 +95,7 @@ export const uploadDocumentAndNotify = async (
 ): Promise<{ success: boolean; path?: string }> => {
   try {
     const filePath = `documents/${patientId}/${crypto.randomUUID()}_${file.name}`;
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await db.storage
       .from("prescriptions")
       .upload(filePath, file);
 
@@ -124,7 +124,7 @@ export const generateShareableLink = async (
   expiresInSeconds = 7 * 24 * 60 * 60, // 7 days default
 ): Promise<string | null> => {
   try {
-    const { data } = await supabase.storage
+    const { data } = await db.storage
       .from("prescriptions")
       .createSignedUrl(pdfPath, expiresInSeconds);
     return data?.signedUrl ?? null;

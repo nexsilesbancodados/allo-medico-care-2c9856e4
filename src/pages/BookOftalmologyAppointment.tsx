@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,7 @@ export default function BookOftalmologyAppointment() {
   useEffect(() => {
     const fetchOftalmologists = async () => {
       try {
-        const { data } = await supabase
+        const { data } = await db
           .from("doctor_profiles")
           .select("user_id, full_name, crm")
           .eq("doctor_type", "oftalmologia")
@@ -67,7 +67,7 @@ export default function BookOftalmologyAppointment() {
     try {
       const scheduledAt = new Date(`${appointmentDate}T${appointmentTime}`).toISOString();
 
-      const { error } = await supabase
+      const { error } = await db
         .from("appointments")
         .insert([
           {

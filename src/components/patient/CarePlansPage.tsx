@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getPatientNav } from "./patientNav";
@@ -41,7 +41,7 @@ export default function CarePlansPage() {
   const { data: plans = [], isLoading } = useQuery({
     queryKey: ["care-plans", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("care_plans" as any)
         .select(`*, doctor_profiles!inner(user_id, profiles(first_name, last_name))`)
         .eq("patient_id", user!.id)

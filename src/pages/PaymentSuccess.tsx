@@ -5,7 +5,7 @@ import { Calendar, ArrowRight, Home, Loader2, Shield, Sparkles } from "lucide-re
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import SEOHead from "@/components/SEOHead";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 
 /* CSS-only confetti */
 const ConfettiPiece = ({ i }: { i: number }) => {
@@ -79,14 +79,14 @@ const PaymentSuccess = () => {
     }
 
     const verifySubscription = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { user } } = await db.auth.getUser();
       if (!user) { setVerifying(false); setVerified(true); setShowConfetti(true); return; }
 
       let attempts = 0;
       const maxAttempts = 10;
       const poll = setInterval(async () => {
         attempts++;
-        const { data: subs } = await supabase
+        const { data: subs } = await db
           .from("subscriptions")
           .select("id")
           .eq("user_id", user.id)

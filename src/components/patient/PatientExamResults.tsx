@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import mascotReading from "@/assets/mascot-reading.png";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { Button } from "@/components/ui/button";
@@ -63,7 +63,7 @@ const PatientExamResults = () => {
   const { data: examRequests, isLoading } = useQuery({
     queryKey: ["patient-exam-requests", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("exam_requests")
         .select("*")
         .eq("patient_id", user!.id)
@@ -85,7 +85,7 @@ const PatientExamResults = () => {
   const { data: examReports } = useQuery({
     queryKey: ["patient-exam-reports", user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("exam_reports")
         .select("id, exam_request_id, verification_code, pdf_url, signed_at")
         .order("created_at", { ascending: false });
@@ -98,7 +98,7 @@ const PatientExamResults = () => {
   const getReportForExam = (examId: string) => examReports?.find(r => r.exam_request_id === examId);
 
   const handleDownloadPdf = async (pdfUrl: string) => {
-    const { data } = await supabase.storage.from("prescriptions").createSignedUrl(pdfUrl, 3600);
+    const { data } = await db.storage.from("prescriptions").createSignedUrl(pdfUrl, 3600);
     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
   };
 

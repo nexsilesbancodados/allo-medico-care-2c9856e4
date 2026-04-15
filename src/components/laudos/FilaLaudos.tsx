@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import {
   fetchExamesParaLaudar,
   fetchExamesConcluidos,
@@ -184,7 +184,7 @@ export default function FilaLaudos() {
       ]);
 
       // Also fetch from exames table (clinic uploads)
-      const { data: clinicExames } = await (supabase as any)
+      const { data: clinicExames } = await (db as any)
         .from("exames")
         .select("id, paciente_nome, tipo_exame, status, orthanc_study_uid, arquivo_url, origem, laudista_id, created_at")
         .in("status", ["pendente", "em_laudo", "concluido"])
@@ -225,7 +225,7 @@ export default function FilaLaudos() {
 
   // Realtime subscription
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("aloc_exames_realtime")
       .on(
         "postgres_changes" as any,
@@ -237,7 +237,7 @@ export default function FilaLaudos() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [loadData]);
 

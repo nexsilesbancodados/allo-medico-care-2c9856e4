@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,7 +10,7 @@ import { FileText } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
-import type { Json } from "@/integrations/supabase/types";
+import type { Json } from "@/integrations/db/types";
 
 interface MedicationEntry {
   name?: string;
@@ -35,7 +35,7 @@ const DoctorPrescriptions = () => {
   useEffect(() => { if (user) fetchPrescriptions(); }, [user]);
 
   const fetchPrescriptions = async () => {
-    const { data: doc } = await supabase
+    const { data: doc } = await db
       .from("doctor_profiles")
       .select("id")
       .eq("user_id", user!.id)
@@ -43,7 +43,7 @@ const DoctorPrescriptions = () => {
 
     if (!doc) { setLoading(false); return; }
 
-    const { data } = await supabase
+    const { data } = await db
       .from("prescriptions")
       .select("id, created_at, medications, diagnosis, patient_id")
       .eq("doctor_id", doc.id)
@@ -52,7 +52,7 @@ const DoctorPrescriptions = () => {
     if (!data || data.length === 0) { setLoading(false); return; }
 
     const patientIds = [...new Set(data.map(p => p.patient_id))];
-    const { data: profiles } = await supabase
+    const { data: profiles } = await db
       .from("profiles")
       .select("user_id, first_name, last_name")
       .in("user_id", patientIds);

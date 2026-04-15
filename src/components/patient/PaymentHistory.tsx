@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { CreditCard, CheckCircle2, Clock, XCircle, Shield, Wifi, Sparkles, ArrowRight } from "lucide-react";
@@ -12,7 +12,7 @@ import { getPatientNav } from "./patientNav";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import mascotWave from "@/assets/mascot-wave.png";
-import type { Json } from "@/integrations/supabase/types";
+import type { Json } from "@/integrations/db/types";
 
 interface SubscriptionEntry {
   id: string;
@@ -45,7 +45,7 @@ const PaymentHistory = () => {
   useEffect(() => { if (user) fetchPayments(); }, [user]);
 
   const fetchPayments = async () => {
-    const { data: subsData } = await supabase
+    const { data: subsData } = await db
       .from("subscriptions")
       .select("id, plan_id, status, starts_at, expires_at, created_at, payment_method, notes")
       .eq("user_id", user!.id)
@@ -55,7 +55,7 @@ const PaymentHistory = () => {
     if (!subsData || subsData.length === 0) { setLoading(false); return; }
 
     const planIds = [...new Set(subsData.map((s) => s.plan_id))];
-    const { data: plans } = await supabase
+    const { data: plans } = await db
       .from("plans")
       .select("id, name, price, description, features, interval")
       .in("id", planIds);

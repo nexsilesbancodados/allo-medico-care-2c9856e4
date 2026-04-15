@@ -1,5 +1,5 @@
 import { useEffect, useState, forwardRef, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { motion, AnimatePresence } from "framer-motion";
 import { MagnifyingGlass, ChatCircleDots, Question, ArrowRight, CaretDown, Stethoscope, FileText, CreditCard, ShieldCheck, UserGear } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
@@ -43,7 +43,7 @@ const FAQSection = forwardRef<HTMLElement>((_, ref) => {
   const [faqs, setFaqs] = useState<FaqEntry[]>(staticFaqs);
 
   useEffect(() => {
-    supabase
+    db
       .from("faq_items")
       .select("question, answer, category")
       .eq("is_active", true)

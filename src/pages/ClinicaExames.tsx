@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,7 +40,7 @@ export default function ClinicaExamesPage() {
   const loadExames = useCallback(async () => {
     if (!user) return;
     try {
-      let query = (supabase as any)
+      let query = (db as any)
         .from("exames")
         .select("id, paciente_nome, tipo_exame, status, origem, arquivo_url, orthanc_study_uid, pdf_url, created_at")
         .eq("clinica_id", user.id)

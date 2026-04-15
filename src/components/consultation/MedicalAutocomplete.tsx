@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 
 interface MedicalAutocompleteProps {
   value: string;
@@ -20,7 +20,7 @@ const MedicalAutocomplete = ({ value, onChange, field, placeholder, className }:
     if (text.length < 10) { setSuggestion(""); return; }
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("medical-autocomplete", {
+      const { data, error } = await db.functions.invoke("medical-autocomplete", {
         body: { text, field },
       });
       if (!error && data?.suggestion) {

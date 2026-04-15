@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { Loader2 } from "lucide-react";
 
 const LinkRedirect = () => {
@@ -16,7 +16,7 @@ const LinkRedirect = () => {
 
     const redirect = async () => {
       // Try to find appointment by ID
-      const { data: appt, error: apptErr } = await supabase
+      const { data: appt, error: apptErr } = await db
         .from("appointments")
         .select("id, jitsi_link, status, payment_status, access_token")
         .eq("id", id)

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,7 +39,7 @@ const SimplePrescription = () => {
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-prescription", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("doctor_profiles")
         .select("crm, crm_state")
         .eq("user_id", user!.id)

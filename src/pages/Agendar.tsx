@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -133,7 +133,7 @@ const Agendar = () => {
 
     const fetchDoctors = async () => {
       setLoading(true);
-      const { data } = await supabase
+      const { data } = await db
         .from("doctor_profiles_public" as any)
         .select("id, full_name, display_name, avatar_url, crm, crm_state, crm_verified, bio, short_description, consultation_price, consultation_duration_min, rating, total_reviews, experience_years, available_now, available_for_telemedicine, sub_specialties, education")
         .eq("available_for_telemedicine", true);
@@ -142,7 +142,7 @@ const Agendar = () => {
 
       if (doctorList.length > 0) {
         const ids = doctorList.map((d) => d.id);
-        const { data: areas } = await supabase
+        const { data: areas } = await db
           .from("doctor_care_areas")
           .select("doctor_id, area_name")
           .in("doctor_id", ids);

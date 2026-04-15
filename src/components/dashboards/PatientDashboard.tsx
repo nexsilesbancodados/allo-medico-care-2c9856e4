@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { getPatientNav } from "@/components/patient/patientNav";
 import { format, differenceInDays, differenceInHours, differenceInMinutes, formatDistanceToNow } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -265,12 +265,12 @@ const PatientDashboard = () => {
 
   useEffect(() => {
     if (!user) return;
-    const ch = supabase.channel("patient-live")
+    const ch = db.channel("patient-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "appointments", filter: `patient_id=eq.${user.id}` }, () => {
         queryClient.invalidateQueries({ queryKey: ["patient-upcoming-enriched"] });
         queryClient.invalidateQueries({ queryKey: ["patient-dashboard-stats"] });
       }).subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => { db.removeChannel(ch); };
   }, [user, queryClient]);
 
   if (loading) {

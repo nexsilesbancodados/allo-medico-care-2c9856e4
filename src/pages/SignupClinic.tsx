@@ -5,7 +5,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -101,7 +101,7 @@ export default function SignupClinic() {
     setLoading(true);
     try {
       // 1. Create auth user with company email
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await db.auth.signUp({
         email: formData.email,
         password: formData.password,
       });
@@ -110,7 +110,7 @@ export default function SignupClinic() {
       if (!authData.user) throw new Error("Falha ao criar usuário");
 
       // 2. Create clinic profile
-      const { error: profileError } = await (supabase as any).from("profiles").insert([
+      const { error: profileError } = await (db as any).from("profiles").insert([
         {
           id: authData.user.id,
           full_name: formData.representative_name,

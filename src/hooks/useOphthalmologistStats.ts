@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 interface Exam {
@@ -36,7 +36,7 @@ export function useOphthalmologistStats(userId?: string): OphthalmologistStats {
     setLoading(true);
     try {
       // Fetch all exams assigned to this user
-      const { data: exams, error } = await supabase
+      const { data: exams, error } = await db
         .from("ophthalmology_exams")
         .select("id, patient_name, exam_type, created_at, status, priority, signed_at")
         .eq("assigned_to", userId)

@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { useNavigate, Link, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,7 +57,7 @@ const AuthClinica = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await db.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast.error("Erro ao entrar", { description: error.message });
@@ -77,7 +77,7 @@ const AuthClinica = () => {
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await db.auth.signUp({
       email, password,
       options: {
         emailRedirectTo: window.location.origin,
@@ -90,7 +90,7 @@ const AuthClinica = () => {
       return;
     }
     if (data.user) {
-      await supabase.functions.invoke("assign-role", {
+      await db.functions.invoke("assign-role", {
         body: {
           user_id: data.user.id,
           role: "clinic",

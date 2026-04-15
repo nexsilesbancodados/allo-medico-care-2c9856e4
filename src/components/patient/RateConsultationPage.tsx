@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import RateConsultation from "@/components/patient/RateConsultation";
 import { Loader2 } from "lucide-react";
 
@@ -13,7 +13,7 @@ const RateConsultationPage = () => {
   useEffect(() => {
     if (!appointmentId) return;
     const fetch = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("appointments")
         .select("doctor_id")
         .eq("id", appointmentId)

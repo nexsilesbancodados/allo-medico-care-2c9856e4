@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { toast } from "sonner";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
@@ -156,7 +156,7 @@ const ExamReportQueue = () => {
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-queue", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("doctor_profiles")
         .select("id")
         .eq("user_id", user!.id)
@@ -169,7 +169,7 @@ const ExamReportQueue = () => {
   const { data: examRequests, isLoading } = useQuery({
     queryKey: ["exam-requests-queue", dateStart, dateEnd, selectedStatuses, selectedModalities, priorityFilter],
     queryFn: async () => {
-      let query = supabase
+      let query = db
         .from("exam_requests" as never)
         .select("*")
         .gte("created_at", dateStart)
@@ -189,7 +189,7 @@ const ExamReportQueue = () => {
       const patientIds = [...new Set((data || []).filter((e: any) => e.patient_id).map((e: any) => e.patient_id))];
       const patientMap: Record<string, string> = {};
       if (patientIds.length > 0) {
-        const { data: profiles } = await supabase
+        const { data: profiles } = await db
           .from("profiles")
           .select("user_id, first_name, last_name")
           .in("user_id", patientIds);
@@ -210,7 +210,7 @@ const ExamReportQueue = () => {
 
   /* ── Realtime subscription ── */
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("exam-requests-realtime")
       .on(
         "postgres_changes" as any,
@@ -255,7 +255,7 @@ const ExamReportQueue = () => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [queryClient]);
 
@@ -313,7 +313,7 @@ const ExamReportQueue = () => {
     if (!doctorProfile?.id) return;
     setClaimingId(examId);
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from("exam_requests" as any)
         .update({ assigned_to: doctorProfile.id, status: "in_review" } as any)
         .eq("id", examId);

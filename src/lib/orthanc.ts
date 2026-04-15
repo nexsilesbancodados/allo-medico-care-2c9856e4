@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 
 const OHIF_URL = "http://72.62.138.208:3001";
 
@@ -10,7 +10,7 @@ export async function uploadDICOM(file: File): Promise<string> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const { data, error } = await supabase.functions.invoke("orthanc-proxy", {
+  const { data, error } = await db.functions.invoke("orthanc-proxy", {
     body: formData,
   });
 

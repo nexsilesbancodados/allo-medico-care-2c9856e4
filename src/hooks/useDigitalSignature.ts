@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 interface SignatureRequest {
@@ -96,7 +96,7 @@ export function useDigitalSignature() {
       // 2. Armazenar PDF no Supabase Storage
       const storagePath = `${req.documentType}s-signed/${req.prescriptionId}/${signedDocument.fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await db.storage
         .from("prescriptions")
         .upload(storagePath, Buffer.from(signedDocument.fileBase64, "base64"), {
           contentType: "application/pdf",
@@ -108,7 +108,7 @@ export function useDigitalSignature() {
       }
 
       // 3. Registrar assinatura no banco com todos os dados de validação
-      const { error: metadataError } = await (supabase as any)
+      const { error: metadataError } = await (db as any)
         .from("prescription_signatures")
         .insert({
           prescription_id: req.prescriptionId,
@@ -147,7 +147,7 @@ export function useDigitalSignature() {
    */
   const verifySignature = async (prescriptionId: string, fileBase64?: string): Promise<boolean> => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (db as any)
         .from("prescription_signatures")
         .select("*")
         .eq("prescription_id", prescriptionId)
@@ -182,7 +182,7 @@ export function useDigitalSignature() {
    */
   const getSignedDocument = async (prescriptionId: string): Promise<string | null> => {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await (db as any)
         .from("prescription_signatures")
         .select("storage_path")
         .eq("prescription_id", prescriptionId)
@@ -193,7 +193,7 @@ export function useDigitalSignature() {
         return null;
       }
 
-      const { data: urlData } = supabase.storage
+      const { data: urlData } = db.storage
         .from("prescriptions")
         .getPublicUrl(data.storage_path);
 

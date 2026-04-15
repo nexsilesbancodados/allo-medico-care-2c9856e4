@@ -9,7 +9,7 @@
  */
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 // ─── Fallback ICE Servers (usados se edge function falhar) ────────────────────
@@ -82,7 +82,7 @@ const isMobileDevice = () =>
 // ─── Buscar credenciais TURN dinâmicas ────────────────────────────────────────
 async function fetchIceServers(): Promise<RTCIceServer[]> {
   try {
-    const { data, error } = await supabase.functions.invoke("turn-credentials");
+    const { data, error } = await db.functions.invoke("turn-credentials");
     if (error) throw error;
     if (data?.iceServers && Array.isArray(data.iceServers) && data.iceServers.length > 0) {
       console.info(`[WebRTC] Usando ${data.iceServers.length} ICE servers dinâmicos`);
@@ -110,7 +110,7 @@ export function useWebRTC({
   const [isScreenSharing, setIsScreenSharing] = useState(false);
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const channelRef = useRef<ReturnType<typeof db.channel> | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const screenStreamRef = useRef<MediaStream | null>(null);
   const screenSenderRef = useRef<RTCRtpSender | null>(null);
@@ -152,7 +152,7 @@ export function useWebRTC({
     }
 
     if (channelRef.current) {
-      supabase.removeChannel(channelRef.current);
+      db.removeChannel(channelRef.current);
       channelRef.current = null;
     }
 
@@ -435,7 +435,7 @@ export function useWebRTC({
     });
 
     // 3. Conectar canal de sinalização Supabase
-    const channel = supabase.channel(`webrtc-${roomId}`, {
+    const channel = db.channel(`webrtc-${roomId}`, {
       config: { broadcast: { self: false } },
     });
 

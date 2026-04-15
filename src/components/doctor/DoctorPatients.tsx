@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,7 +27,7 @@ const DoctorPatients = () => {
 
   const fetchPatients = async () => {
     // Get doctor profile
-    const { data: doc } = await supabase
+    const { data: doc } = await db
       .from("doctor_profiles")
       .select("id")
       .eq("user_id", user!.id)
@@ -36,7 +36,7 @@ const DoctorPatients = () => {
     if (!doc) { setLoading(false); return; }
 
     // Get all appointments
-    const { data: appts } = await supabase
+    const { data: appts } = await db
       .from("appointments")
       .select("patient_id, scheduled_at")
       .eq("doctor_id", doc.id)
@@ -58,7 +58,7 @@ const DoctorPatients = () => {
 
     // Fetch profiles
     const patientIds = [...patientMap.keys()];
-    const { data: profiles } = await supabase
+    const { data: profiles } = await db
       .from("profiles")
       .select("user_id, first_name, last_name")
       .in("user_id", patientIds);

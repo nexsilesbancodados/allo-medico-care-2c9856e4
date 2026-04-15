@@ -4,7 +4,7 @@ import DashboardLayout from "./DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { getDoctorNav } from "@/components/doctor/doctorNav";
 import { toast } from "sonner";
 import { logError } from "@/lib/logger";
@@ -60,7 +60,7 @@ const DoctorDashboard = () => {
 
   const loadOnlineStatus = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("doctor_profiles")
         .select("available_for_on_demand")
         .eq("user_id", user!.id)
@@ -82,7 +82,7 @@ const DoctorDashboard = () => {
     setOnlineLoading(true);
 
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from("doctor_profiles")
         .update({ available_for_on_demand: newStatus } as any)
         .eq("user_id", user!.id);

@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -76,7 +76,7 @@ export function LaudoValidator({ laudoText, examType, onValidationComplete, isLo
 
     setValidating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("validate-laudo", {
+      const { data, error } = await db.functions.invoke("validate-laudo", {
         body: {
           laudo_text: laudoText,
           exam_type: examType,

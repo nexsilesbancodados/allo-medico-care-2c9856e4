@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export default function PrescriptionReviewerDashboard() {
 
     const fetchPrescriptions = async () => {
       try {
-        const { data } = await supabase
+        const { data } = await db
           .from("ophthalmology_prescriptions")
           .select("id, prescription_type, patient:patient_id(full_name), doctor:doctor_id(full_name, crm), od_sphere, prescribed_at, status:review_status, notes:review_notes")
           .order("prescribed_at", { ascending: false });
@@ -56,7 +56,7 @@ export default function PrescriptionReviewerDashboard() {
   const approvePrescription = async (prescriptionId: string) => {
     setReviewing(prescriptionId);
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (db as any)
         .from("ophthalmology_prescriptions")
         .update({
           review_status: "approved",
@@ -87,7 +87,7 @@ export default function PrescriptionReviewerDashboard() {
 
     setReviewing(prescriptionId);
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (db as any)
         .from("ophthalmology_prescriptions")
         .update({
           review_status: "rejected",

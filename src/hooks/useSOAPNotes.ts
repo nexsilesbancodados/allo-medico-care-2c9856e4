@@ -8,7 +8,7 @@
  */
 
 import { useState, useCallback, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 export interface SOAPNotes {
@@ -41,7 +41,7 @@ export function useSOAPNotes(appointmentId: string, isDoctor: boolean) {
 
     const loadNotes = async () => {
       try {
-        const { data } = await (supabase as any)
+        const { data } = await (db as any)
           .from("appointment_notes")
           .select("*")
           .eq("appointment_id", appointmentId)
@@ -99,7 +99,7 @@ export function useSOAPNotes(appointmentId: string, isDoctor: boolean) {
     setState(prev => ({ ...prev, isSaving: true }));
 
     try {
-      const { error } = await (supabase as any).from("appointment_notes").upsert({
+      const { error } = await (db as any).from("appointment_notes").upsert({
         appointment_id: appointmentId,
         type: "soap",
         content: state.notes,

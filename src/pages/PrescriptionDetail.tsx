@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,7 +41,7 @@ export default function PrescriptionDetail() {
 
     const fetch = async () => {
       try {
-        const { data } = await (supabase as any)
+        const { data } = await (db as any)
           .from("ophthalmology_prescriptions")
           .select("*, doctor:doctor_id(full_name, crm, crm_state), patient:patient_id(full_name)")
           .eq("id", prescriptionId)
@@ -67,12 +67,12 @@ export default function PrescriptionDetail() {
 
     try {
       const response = await fetch(
-        `${(supabase as any).supabaseUrl}/functions/v1/generate-ophthalmology-prescription`,
+        `${(db as any).supabaseUrl}/functions/v1/generate-ophthalmology-prescription`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+            Authorization: `Bearer ${(await db.auth.getSession()).data.session?.access_token}`,
           },
           body: JSON.stringify({ prescription_id: prescription.id }),
         }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -42,7 +42,7 @@ export default function PatientOftalmologyExams() {
 
     const fetch = async () => {
       try {
-        const { data: examsData } = await supabase
+        const { data: examsData } = await db
           .from("ophthalmology_exams")
           .select("id, exam_date, doctor:doctor_id(full_name), od_sphere, od_cylinder, os_sphere, os_cylinder, va_od, va_os")
           .eq("patient_id", user.id)
@@ -52,7 +52,7 @@ export default function PatientOftalmologyExams() {
           setExams(examsData as any);
         }
 
-        const { data: prescData } = await supabase
+        const { data: prescData } = await db
           .from("ophthalmology_prescriptions")
           .select("id, prescribed_at, prescription_type, doctor:doctor_id(full_name), od_sphere, os_sphere, expiry_date")
           .eq("patient_id", user.id)

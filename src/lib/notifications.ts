@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -20,7 +20,7 @@ interface DoctorInfo {
 
 /** Fetch profile data for a given user_id. Returns null if not found. */
 const getProfile = async (userId: string): Promise<ProfileData | null> => {
-  const { data } = await supabase
+  const { data } = await db
     .from("profiles")
     .select("first_name, last_name, phone, user_id")
     .eq("user_id", userId)
@@ -30,7 +30,7 @@ const getProfile = async (userId: string): Promise<ProfileData | null> => {
 
 /** Resolve doctor profile + profile data from a doctor_profiles.id. */
 const getDoctorInfo = async (doctorProfileId: string): Promise<DoctorInfo | null> => {
-  const { data: docProfile } = await supabase
+  const { data: docProfile } = await db
     .from("doctor_profiles")
     .select("user_id")
     .eq("id", doctorProfileId)
@@ -56,17 +56,17 @@ const formatDateTime = (isoString: string) => {
 // Fire-and-forget helpers — errors are logged but never thrown to callers.
 
 const sendWhatsApp = (phone: string, message: string) =>
-  supabase.functions
+  db.functions
     .invoke("send-whatsapp", { body: { phone, message } })
     .catch(err => logError("sendWhatsApp failed", err, { phone: phone.slice(0, 5) + "…" }));
 
 const sendEmail = (type: string, to: string, data: Record<string, string>) =>
-  supabase.functions
+  db.functions
     .invoke("send-email", { body: { type, to, data } })
     .catch(err => logError("sendEmail failed", err, { type }));
 
 const sendPush = (user_id: string, title: string, message: string, link?: string) =>
-  supabase.functions
+  db.functions
     .invoke("send-push-notification", { body: { user_id, title, message, link } })
     .catch(err => logError("sendPush failed", err, { user_id }));
 
@@ -77,7 +77,7 @@ const insertNotification = (
   type: string,
   link?: string,
 ) =>
-  supabase
+  db
     .from("notifications")
     .insert({ user_id, title, message, type, link })
     .then(() => {});
@@ -91,7 +91,7 @@ export const notifyAppointmentCancelled = async (
   reason?: string,
 ) => {
   try {
-    const { data: appt } = await supabase
+    const { data: appt } = await db
       .from("appointments")
       .select("id, scheduled_at, patient_id, doctor_id, guest_patient_id")
       .eq("id", appointmentId)
@@ -108,7 +108,7 @@ export const notifyAppointmentCancelled = async (
     const patientUserId = appt.patient_id;
 
     if (appt.guest_patient_id) {
-      const { data: guest } = await supabase
+      const { data: guest } = await db
         .from("guest_patients")
         .select("full_name, phone")
         .eq("id", appt.guest_patient_id)
@@ -162,7 +162,7 @@ export const notifyCertificateSent = async (
   try {
     if (!patientCpf) return;
     const cpfDigits = patientCpf.replace(/\D/g, "");
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from("profiles")
       .select("user_id, phone, first_name")
       .eq("cpf", cpfDigits)
@@ -219,7 +219,7 @@ export const notifyConsultationStarted = async (
   doctorName: string,
 ) => {
   try {
-    const { data: appt } = await supabase
+    const { data: appt } = await db
       .from("appointments")
       .select("patient_id, guest_patient_id")
       .eq("id", appointmentId)
@@ -243,7 +243,7 @@ export const notifyConsultationStarted = async (
     }
 
     if (appt.guest_patient_id) {
-      const { data: guest } = await supabase
+      const { data: guest } = await db
         .from("guest_patients")
         .select("phone, full_name")
         .eq("id", appt.guest_patient_id)
@@ -320,7 +320,7 @@ export const notifyAppointmentRescheduled = async (
   newTime: string,
 ) => {
   try {
-    const { data: appt } = await supabase
+    const { data: appt } = await db
       .from("appointments")
       .select("patient_id, doctor_id, guest_patient_id")
       .eq("id", appointmentId)
@@ -335,7 +335,7 @@ export const notifyAppointmentRescheduled = async (
     const patientUserId = appt.patient_id;
 
     if (appt.guest_patient_id) {
-      const { data: guest } = await supabase
+      const { data: guest } = await db
         .from("guest_patients")
         .select("full_name, phone")
         .eq("id", appt.guest_patient_id)
@@ -448,7 +448,7 @@ export const notifyConsultationCompleted = async (
   doctorName: string,
 ) => {
   try {
-    const { data: appt } = await supabase
+    const { data: appt } = await db
       .from("appointments")
       .select("patient_id, guest_patient_id")
       .eq("id", appointmentId)
@@ -496,7 +496,7 @@ export const notifyExamReportReady = async (
   verificationCode?: string,
 ) => {
   try {
-    const { data: examReq } = await supabase
+    const { data: examReq } = await db
       .from("exam_requests")
       .select("requesting_doctor_id, patient_id")
       .eq("id", examRequestId)

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,7 +28,7 @@ const TelelaudoWorkspace = () => {
       return;
     }
     const fetchExam = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("exam_requests")
         .select("*")
         .eq("id", examId)

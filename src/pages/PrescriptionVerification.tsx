@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, CheckCircle2, AlertCircle, Download, Clock, User } from "lucide-react";
@@ -41,7 +41,7 @@ export default function PrescriptionVerification() {
         setLoading(true);
 
         // Buscar dados de assinatura
-        const { data: signatureData, error } = await (supabase as any)
+        const { data: signatureData, error } = await (db as any)
           .from("prescription_signatures")
           .select("*")
           .eq("prescription_id", prescriptionId)
@@ -57,7 +57,7 @@ export default function PrescriptionVerification() {
 
         // Buscar URL do documento
         if (signatureData.storage_path) {
-          const { data } = supabase.storage
+          const { data } = db.storage
             .from("prescriptions")
             .getPublicUrl(signatureData.storage_path);
 

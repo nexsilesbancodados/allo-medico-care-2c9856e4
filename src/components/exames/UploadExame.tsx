@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import { uploadDICOM } from "@/lib/orthanc";
 import { Button } from "@/components/ui/button";
@@ -50,7 +50,7 @@ export default function UploadExame({ onSuccess }: UploadExameProps) {
     setSearching(true);
     try {
       const cleanQ = query.replace(/[.\-/]/g, "");
-      const { data } = await supabase
+      const { data } = await db
         .from("profiles")
         .select("user_id, first_name, last_name, cpf")
         .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,cpf.ilike.%${cleanQ}%`)
@@ -108,14 +108,14 @@ export default function UploadExame({ onSuccess }: UploadExameProps) {
           // Upload to Supabase Storage
           origem = "storage";
           const filePath = `${user.id}/${Date.now()}_${file.name}`;
-          const { error: upErr } = await supabase.storage.from("exames").upload(filePath, file);
+          const { error: upErr } = await db.storage.from("exames").upload(filePath, file);
           if (upErr) throw upErr;
-          const { data: urlData } = supabase.storage.from("exames").getPublicUrl(filePath);
+          const { data: urlData } = db.storage.from("exames").getPublicUrl(filePath);
           arquivoUrl = urlData.publicUrl;
         }
 
         // Insert into exames table
-        const { error: insertErr } = await (supabase as any).from("exames").insert({
+        const { error: insertErr } = await (db as any).from("exames").insert({
           clinica_id: user.id,
           paciente_id: selectedPaciente?.user_id ?? null,
           paciente_nome: selectedPaciente
@@ -136,7 +136,7 @@ export default function UploadExame({ onSuccess }: UploadExameProps) {
 
       // Notify available laudistas
       try {
-        await supabase.functions.invoke("whatsapp-notify", {
+        await db.functions.invoke("whatsapp-notify", {
           body: {
             tipo: "nova_consulta",
             user_id: user.id,

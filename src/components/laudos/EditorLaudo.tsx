@@ -19,7 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { Save, CheckCircle, ExternalLink, ArrowLeft, Loader2, CheckCircle2 } from "lucide-react";
 import { useDigitalSignature } from "@/hooks/useDigitalSignature";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 
 export default function EditorLaudo() {
   const { exameId } = useParams<{ exameId: string }>();
@@ -51,7 +51,7 @@ export default function EditorLaudo() {
         setHtml(l.conteudo_html);
 
         // Load doctor info
-        const { data: doctorData } = await supabase
+        const { data: doctorData } = await db
           .from("doctor_profiles")
           .select("full_name, crm, crm_state")
           .eq("user_id", user.id)

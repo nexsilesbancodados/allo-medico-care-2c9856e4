@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 interface LaudistaEarningsData {
@@ -39,7 +39,7 @@ export function useLaudistaEarnings(userId?: string): LaudistaEarningsData {
       const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
       // Fetch earnings from wallet_transactions
-      const { data: transactions, error: txError } = await supabase
+      const { data: transactions, error: txError } = await db
         .from("wallet_transactions")
         .select("amount")
         .eq("user_id", userId)
@@ -58,7 +58,7 @@ export function useLaudistaEarnings(userId?: string): LaudistaEarningsData {
       // SLA = 24 hours from creation to completion
       const SLA_HOURS = 24;
 
-      const { data: reports, error: reportsError } = await supabase
+      const { data: reports, error: reportsError } = await db
         .from("exam_reports")
         .select("created_at, updated_at")
         .eq("reporter_id", userId)

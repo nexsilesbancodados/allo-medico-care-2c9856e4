@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getPatientNav } from "./patientNav";
@@ -37,7 +37,7 @@ const AppointmentDetail = () => {
   }, [user, appointmentId]);
 
   const fetchAppointment = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("appointments")
       .select("id, scheduled_at, status, duration_minutes, notes, doctor_id")
       .eq("id", appointmentId!)
@@ -45,7 +45,7 @@ const AppointmentDetail = () => {
 
     if (!data) { setLoading(false); return; }
 
-    const { data: doc } = await supabase
+    const { data: doc } = await db
       .from("doctor_profiles")
       .select("id, crm, rating, user_id")
       .eq("id", data.doctor_id)
@@ -55,19 +55,19 @@ const AppointmentDetail = () => {
     let specialties: string[] = [];
 
     if (doc) {
-      const { data: profile } = await supabase
+      const { data: profile } = await db
         .from("profiles")
         .select("first_name, last_name")
         .eq("user_id", doc.user_id)
         .single();
       if (profile) doctorName = `Dr(a). ${profile.first_name} ${profile.last_name}`;
 
-      const { data: specs } = await supabase
+      const { data: specs } = await db
         .from("doctor_specialties")
         .select("specialty_id")
         .eq("doctor_id", doc.id);
       if (specs?.length) {
-        const { data: specNames } = await supabase
+        const { data: specNames } = await db
           .from("specialties")
           .select("name")
           .in("id", specs.map(s => s.specialty_id));

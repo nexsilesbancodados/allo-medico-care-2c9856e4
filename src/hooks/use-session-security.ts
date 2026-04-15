@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 
 /**
  * Segurança de sessão:
@@ -30,7 +30,7 @@ export function useSessionSecurity() {
 
     // 2. Detectar mudança de usuário em outra aba
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key?.includes("supabase") && e.newValue === null) {
+      if (e.key?.includes("db") && e.newValue === null) {
         signOut();
       }
     };
@@ -39,7 +39,7 @@ export function useSessionSecurity() {
     // 3. Verificar sessão ao voltar para a aba
     const handleVisibilityChange = async () => {
       if (document.visibilityState === "visible") {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await db.auth.getSession();
         if (!session) signOut();
       }
     };

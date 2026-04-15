@@ -1,7 +1,7 @@
 import { logError } from "@/lib/logger";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -110,13 +110,13 @@ const PanelCenter = () => {
     if (showRefresh) setRefreshing(true);
 
     try {
-      const { data: onlineUsers } = await supabase
+      const { data: onlineUsers } = await db
         .from("user_presence")
         .select("user_id, current_page, last_seen_at, is_online")
         .eq("is_online", true)
         .gte("last_seen_at", new Date(Date.now() - 5 * 60 * 1000).toISOString());
 
-      const { data: allRoles } = await supabase
+      const { data: allRoles } = await db
         .from("user_roles")
         .select("user_id, role");
 
@@ -124,7 +124,7 @@ const PanelCenter = () => {
       
       const onlineRolesMap: Map<string, string[]> = new Map();
       if (onlineUserIds.length > 0) {
-        const { data: onlineRoles } = await supabase
+        const { data: onlineRoles } = await db
           .from("user_roles")
           .select("user_id, role")
           .in("user_id", onlineUserIds);
@@ -138,7 +138,7 @@ const PanelCenter = () => {
 
       const profilesMap: Map<string, string> = new Map();
       if (onlineUserIds.length > 0) {
-        const { data: profiles } = await supabase
+        const { data: profiles } = await db
           .from("profiles")
           .select("user_id, first_name, last_name")
           .in("user_id", onlineUserIds);
@@ -208,13 +208,13 @@ const PanelCenter = () => {
   }, []);
 
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("panel-center-presence")
       .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, () => {
         fetchPresence();
       })
       .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    return () => { db.removeChannel(channel); };
   }, []);
 
   return (

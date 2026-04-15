@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,7 +43,7 @@ export default function OftalmologyConsultationDetail() {
     if (!appointmentId || !user) return;
 
     const fetch = async () => {
-      const { data: appointment } = await (supabase as any)
+      const { data: appointment } = await (db as any)
         .from("appointments")
         .select("patient:profiles(full_name)")
         .eq("id", appointmentId)
@@ -53,7 +53,7 @@ export default function OftalmologyConsultationDetail() {
         setPatientName((appointment as any).patient?.full_name || "");
       }
 
-      const { data: existingExam } = await (supabase as any)
+      const { data: existingExam } = await (db as any)
         .from("ophthalmology_exams")
         .select("*")
         .eq("appointment_id", appointmentId)
@@ -75,18 +75,18 @@ export default function OftalmologyConsultationDetail() {
       const existingExam = (exam as any).id;
 
       if (existingExam) {
-        await supabase
+        await db
           .from("ophthalmology_exams")
           .update(exam)
           .eq("id", existingExam);
       } else {
-        await (supabase as any)
+        await (db as any)
           .from("ophthalmology_exams")
           .insert([
             {
               appointment_id: appointmentId,
               doctor_id: user.id,
-              patient_id: (await supabase.auth.getUser()).data.user?.id,
+              patient_id: (await db.auth.getUser()).data.user?.id,
               ...exam,
             },
           ]);

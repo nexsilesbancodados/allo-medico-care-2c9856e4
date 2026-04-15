@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
@@ -53,14 +53,14 @@ const ClinicExamList = () => {
   const { data: exams, isLoading } = useQuery({
     queryKey: ["clinic-exam-list", user?.id],
     queryFn: async () => {
-      const { data: clinic } = await supabase
+      const { data: clinic } = await db
         .from("clinic_profiles")
         .select("id")
         .eq("user_id", user!.id)
         .maybeSingle();
       if (!clinic) return [];
 
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("exam_requests")
         .select("*")
         .eq("requesting_clinic_id", clinic.id)
@@ -73,7 +73,7 @@ const ClinicExamList = () => {
 
       const reportsMap: Record<string, any> = {};
       if (completedIds.length > 0) {
-        const { data: reports } = await supabase
+        const { data: reports } = await db
           .from("exam_reports" as any)
           .select("*")
           .in("exam_request_id", completedIds);

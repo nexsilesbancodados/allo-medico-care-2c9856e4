@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getPatientNav } from "./patientNav";
@@ -63,7 +63,7 @@ export default function HealthCardPage() {
 
   const fetchCard = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await db
       .from("health_cards" as any)
       .select("*")
       .eq("user_id", user!.id)
@@ -72,7 +72,7 @@ export default function HealthCardPage() {
       setCard(data as HealthCardData);
     } else {
       // Auto-create empty card
-      const { data: newCard } = await supabase
+      const { data: newCard } = await db
         .from("health_cards" as any)
         .insert({ user_id: user!.id })
         .select()
@@ -95,7 +95,7 @@ export default function HealthCardPage() {
   const saveCard = async () => {
     if (!user || !card.id) return;
     setSaving(true);
-    const { error } = await supabase
+    const { error } = await db
       .from("health_cards" as any)
       .update({
         blood_type: draft.blood_type,

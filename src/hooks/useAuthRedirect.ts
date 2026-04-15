@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { getSubdomainRole } from "./use-subdomain-redirect";
 
 /**
@@ -13,7 +13,7 @@ export function useAuthRedirect() {
   const [searchParams] = useSearchParams();
 
   const redirectAfterLogin = async (userId: string) => {
-    const { data: roles } = await supabase
+    const { data: roles } = await db
       .from("user_roles")
       .select("role")
       .eq("user_id", userId);

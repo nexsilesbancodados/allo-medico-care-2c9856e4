@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import SEOHead from "@/components/SEOHead";
 import DoctorPublicProfile from "@/components/doctor/DoctorPublicProfile";
 import { Loader2 } from "lucide-react";
@@ -30,7 +30,7 @@ const DoctorPublicProfilePage = () => {
           const crm = parts[parts.length - 2];
           if (crm && state && state.length === 2) {
             // Use secure RPC instead of direct table query
-            const { data } = await supabase.rpc("resolve_doctor_slug", {
+            const { data } = await db.rpc("resolve_doctor_slug", {
               p_crm: crm,
               p_state: state,
             });
@@ -42,7 +42,7 @@ const DoctorPublicProfilePage = () => {
         if (!doctorProfileId) {
           const nameParts = slug.replace(/^dr-/, "").split("-").filter(p => p.length > 1);
           if (nameParts.length >= 1) {
-            const { data } = await supabase.rpc("search_doctor_by_name", {
+            const { data } = await db.rpc("search_doctor_by_name", {
               p_name: nameParts[0],
             });
             if (data) doctorProfileId = data;
@@ -53,7 +53,7 @@ const DoctorPublicProfilePage = () => {
       if (doctorProfileId) {
         setDoctorId(doctorProfileId);
         // Fetch meta for SEO via secure RPC
-        const { data: rows } = await supabase.rpc("get_public_doctor_profile", {
+        const { data: rows } = await db.rpc("get_public_doctor_profile", {
           p_doctor_id: doctorProfileId,
         });
         const doc = rows?.[0] as any;

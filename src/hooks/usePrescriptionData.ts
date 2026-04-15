@@ -6,7 +6,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 export interface Medication {
@@ -74,7 +74,7 @@ export function usePrescriptionData(appointmentId?: string) {
     const fetchData = async () => {
       try {
         // 1. Fetch appointment
-        const { data: appt } = await supabase
+        const { data: appt } = await db
           .from("appointments")
           .select("patient_id, guest_patient_id, doctor_id")
           .eq("id", appointmentId)
@@ -92,7 +92,7 @@ export function usePrescriptionData(appointmentId?: string) {
         const patientId = appt.patient_id || appt.guest_patient_id;
 
         if (appt.patient_id) {
-          const { data: profile } = await supabase
+          const { data: profile } = await db
             .from("profiles")
             .select("first_name, last_name, cpf")
             .eq("user_id", appt.patient_id)
@@ -102,7 +102,7 @@ export function usePrescriptionData(appointmentId?: string) {
             patientCpf = profile.cpf || "";
           }
         } else if (appt.guest_patient_id) {
-          const { data: guest } = await supabase
+          const { data: guest } = await db
             .from("guest_patients")
             .select("full_name, cpf")
             .eq("id", appt.guest_patient_id)
@@ -114,7 +114,7 @@ export function usePrescriptionData(appointmentId?: string) {
         }
 
         // 3. Fetch doctor
-        const { data: doctor } = await supabase
+        const { data: doctor } = await db
           .from("doctor_profiles")
           .select("id, crm, crm_state, user_id")
           .eq("id", appt.doctor_id)
@@ -122,7 +122,7 @@ export function usePrescriptionData(appointmentId?: string) {
 
         let doctorInfo = null;
         if (doctor) {
-          const { data: docProfile } = await supabase
+          const { data: docProfile } = await db
             .from("profiles")
             .select("first_name, last_name")
             .eq("user_id", doctor.user_id)
@@ -136,7 +136,7 @@ export function usePrescriptionData(appointmentId?: string) {
         }
 
         // 4. Check for existing prescription draft
-        const { data: existing } = await (supabase as any)
+        const { data: existing } = await (db as any)
           .from("prescriptions")
           .select("diagnosis, observations, medications")
           .eq("appointment_id", appointmentId)
@@ -248,7 +248,7 @@ export function usePrescriptionData(appointmentId?: string) {
     if (!validate()) return false;
 
     try {
-      const { error } = await (supabase as any).from("prescriptions").upsert({
+      const { error } = await (db as any).from("prescriptions").upsert({
         appointment_id: data.appointmentId,
         doctor_id: data.doctorId,
         patient_id: data.patientId,

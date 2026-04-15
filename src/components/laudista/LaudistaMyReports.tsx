@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import mascotReading from "@/assets/mascot-reading.png";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getLaudistaNav } from "@/components/laudista/laudistaNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,7 +30,7 @@ const LaudistaMyReports = () => {
   const { data: doctorProfile } = useQuery({
     queryKey: ["laudista-doctor-profile", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("doctor_profiles")
         .select("id")
         .eq("user_id", user!.id)
@@ -43,7 +43,7 @@ const LaudistaMyReports = () => {
   const { data: reports, isLoading } = useQuery({
     queryKey: ["laudista-my-reports", doctorProfile?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("exam_reports")
         .select("*, exam_requests!inner(exam_type, priority, patient_name)")
         .eq("reporter_id", doctorProfile!.id)
@@ -238,7 +238,7 @@ const LaudistaMyReports = () => {
                                   variant="ghost"
                                   className="h-7 text-xs gap-1"
                                   onClick={async () => {
-                                    const { data } = await supabase.storage.from("prescriptions").createSignedUrl(report.pdf_url!, 3600);
+                                    const { data } = await db.storage.from("prescriptions").createSignedUrl(report.pdf_url!, 3600);
                                     if (data?.signedUrl) window.open(data.signedUrl, "_blank");
                                   }}
                                 >

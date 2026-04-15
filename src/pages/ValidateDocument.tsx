@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,7 +30,7 @@ const ValidateDocument = () => {
     setSearched(true);
 
     // First try document_verifications via secure RPC (no direct table access)
-    const { data: verificationRows } = await supabase
+    const { data: verificationRows } = await db
       .rpc("verify_document_public", { p_code: docId });
 
     const verification = verificationRows?.[0];
@@ -50,14 +50,14 @@ const ValidateDocument = () => {
     }
 
     // Then try prescriptions by ID
-    const { data: prescription } = await supabase
+    const { data: prescription } = await db
       .from("prescriptions")
       .select("id, created_at, diagnosis, medications, doctor_id, patient_id")
       .eq("id", docId)
       .maybeSingle();
 
     if (prescription) {
-      const { data: doc } = await supabase
+      const { data: doc } = await db
         .from("doctor_profiles")
         .select("crm, crm_state, user_id")
         .eq("id", prescription.doctor_id)
@@ -65,7 +65,7 @@ const ValidateDocument = () => {
 
       let doctorName = "Médico";
       if (doc) {
-        const { data: p } = await supabase
+        const { data: p } = await db
           .from("profiles")
           .select("first_name, last_name")
           .eq("user_id", doc.user_id)

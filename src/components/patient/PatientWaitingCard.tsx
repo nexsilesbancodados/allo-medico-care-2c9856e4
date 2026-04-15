@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Clock, Video, Users, Lightbulb } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useNavigate } from "react-router-dom";
 import mascotWave from "@/assets/mascot-wave.png";
 
@@ -28,14 +28,14 @@ const PatientWaitingCard = ({ appointment }: Props) => {
     // Fetch queue position with estimated wait based on real consultation durations
     const fetchPosition = async () => {
       const [queueRes, durationRes] = await Promise.all([
-        supabase
+        db
           .from("appointments")
           .select("id, scheduled_at, duration_minutes")
           .eq("doctor_id", appointment.doctor_id)
           .eq("status", "waiting")
           .order("scheduled_at", { ascending: true }),
         // Get average actual consultation duration from recent completed appointments
-        supabase
+        db
           .from("video_presence_logs")
           .select("duration_seconds")
           .gt("duration_seconds", 0)
@@ -58,7 +58,7 @@ const PatientWaitingCard = ({ appointment }: Props) => {
 
     // Fetch random health tip
     const fetchTip = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("health_tips")
         .select("content")
         .eq("is_active", true)
@@ -72,7 +72,7 @@ const PatientWaitingCard = ({ appointment }: Props) => {
     fetchTip();
 
     // Subscribe to real-time updates
-    const channel = supabase
+    const channel = db
       .channel(`waiting-room-${appointment.doctor_id}`)
       .on("postgres_changes", {
         event: "UPDATE",
@@ -86,7 +86,7 @@ const PatientWaitingCard = ({ appointment }: Props) => {
     const timer = setInterval(() => setElapsed(e => e + 1), 1000);
 
     return () => {
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
       clearInterval(timer);
     };
   }, [appointment.doctor_id, appointment.id]);

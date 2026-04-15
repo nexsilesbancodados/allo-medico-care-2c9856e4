@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 export interface RecordingMetadata {
@@ -28,7 +28,7 @@ export async function uploadRecording(
     const storagePath = `recordings/${appointmentId}/${fileName}`;
 
     // Upload para Storage
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await db.storage
       .from("recordings")
       .upload(storagePath, blob, {
         contentType: "video/webm",
@@ -40,7 +40,7 @@ export async function uploadRecording(
     }
 
     // Registrar metadata no banco
-    const { error: insertError } = await (supabase as any)
+    const { error: insertError } = await (db as any)
       .from("consultation_recordings")
       .insert({
         appointment_id: appointmentId,
@@ -69,7 +69,7 @@ export async function uploadRecording(
  */
 export async function getRecordingUrl(storagePath: string): Promise<string | null> {
   try {
-    const { data } = supabase.storage.from("recordings").getPublicUrl(storagePath);
+    const { data } = db.storage.from("recordings").getPublicUrl(storagePath);
     return data?.publicUrl || null;
   } catch (err) {
     logError("getRecordingUrl error", err);
@@ -82,7 +82,7 @@ export async function getRecordingUrl(storagePath: string): Promise<string | nul
  */
 export async function listRecordings(appointmentId: string): Promise<RecordingMetadata[] | null> {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("consultation_recordings")
       .select("*")
       .eq("appointment_id", appointmentId)
@@ -102,7 +102,7 @@ export async function listRecordings(appointmentId: string): Promise<RecordingMe
 export async function deleteRecording(storagePath: string, recordingId: string): Promise<boolean> {
   try {
     // Deletar do Storage
-    const { error: deleteError } = await supabase.storage
+    const { error: deleteError } = await db.storage
       .from("recordings")
       .remove([storagePath]);
 
@@ -111,7 +111,7 @@ export async function deleteRecording(storagePath: string, recordingId: string):
     }
 
     // Deletar registro do banco
-    await supabase
+    await db
       .from("consultation_recordings")
       .delete()
       .eq("id", recordingId);

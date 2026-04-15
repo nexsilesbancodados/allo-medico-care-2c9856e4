@@ -9,7 +9,7 @@
  * render its hardcoded default ordering.
  */
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { warn } from "@/lib/logger";
 
 export type SiteSection = {
@@ -28,7 +28,7 @@ let _promise: Promise<SiteSection[]> | null = null;
 export async function fetchSiteSections(): Promise<SiteSection[]> {
   if (_cache) return _cache;
   if (_promise) return _promise;
-  _promise = (supabase as any)
+  _promise = (db as any)
     .from("site_sections")
     .select("id, key, display_name, display_order, is_enabled, config, schema")
     .order("display_order", { ascending: true })

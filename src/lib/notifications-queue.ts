@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 // ─── Shared helpers (local to this module) ────────────────────────────────────
@@ -7,17 +7,17 @@ const DUTY_LINK = "/dashboard/doctor/on-duty?role=doctor";
 const RENEWAL_LINK = "/dashboard/prescription-renewal?role=patient";
 
 const sendPush = (user_id: string, title: string, message: string, link?: string) =>
-  supabase.functions
+  db.functions
     .invoke("send-push-notification", { body: { user_id, title, message, link } })
     .catch(err => logError("sendPush (queue) failed", err, { user_id }));
 
 const sendWhatsApp = (phone: string, message: string) =>
-  supabase.functions
+  db.functions
     .invoke("send-whatsapp", { body: { phone, message } })
     .catch(err => logError("sendWhatsApp (queue) failed", err));
 
 const sendEmail = (type: string, to: string, data: Record<string, string>) =>
-  supabase.functions
+  db.functions
     .invoke("send-email", { body: { type, to, data } })
     .catch(err => logError("sendEmail (queue) failed", err, { type }));
 
@@ -28,7 +28,7 @@ const insertNotification = (
   type: string,
   link?: string,
 ) =>
-  supabase
+  db
     .from("notifications")
     .insert({ user_id, title, message, type, link })
     .then(() => {});
@@ -51,7 +51,7 @@ export const notifyDoctorsNewQueueEntry = async (
     const shiftLabel = shiftLabels[shift] ?? shift;
     const priceStr = price.toFixed(2);
 
-    const { data: doctorRoles } = await supabase
+    const { data: doctorRoles } = await db
       .from("user_roles")
       .select("user_id")
       .eq("role", "doctor");
@@ -91,7 +91,7 @@ export const notifyRenewalApproved = async (
   doctorName: string,
 ) => {
   try {
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from("profiles")
       .select("first_name, phone")
       .eq("user_id", patientId)
@@ -128,7 +128,7 @@ export const notifyRenewalRejected = async (
   reason: string,
 ) => {
   try {
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from("profiles")
       .select("first_name, phone")
       .eq("user_id", patientId)

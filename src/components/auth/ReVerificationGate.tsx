@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import BiometricKYC from "@/components/kyc/BiometricKYC";
 import { ShieldCheck, AlertTriangle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,7 @@ const ReVerificationGate = ({ children }: { children: React.ReactNode }) => {
 
       if (daysSince >= SIXTY_DAYS_MS) {
         // Check if user has a previous KYC verification
-        supabase
+        db
           .from("kyc_verificacoes")
           .select("id")
           .eq("user_id", user.id)
@@ -76,7 +76,7 @@ const ReVerificationGate = ({ children }: { children: React.ReactNode }) => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await db.auth.signOut();
     window.location.href = "/";
   };
 

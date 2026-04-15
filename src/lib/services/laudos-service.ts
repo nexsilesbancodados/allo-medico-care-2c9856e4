@@ -1,4 +1,4 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { logError } from "@/lib/logger";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -36,7 +36,7 @@ const OHIF_URL = "http://72.62.138.208:3001";
 // ─── Exames ───────────────────────────────────────────────────────────────────
 
 export async function fetchExamesParaLaudar() {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (db as any)
     .from("aloc_exames")
     .select("*")
     .in("status", ["aguardando", "em_laudo"])
@@ -47,7 +47,7 @@ export async function fetchExamesParaLaudar() {
 
 export async function fetchExamesConcluidos(dias = 7) {
   const since = new Date(Date.now() - dias * 86400000).toISOString();
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (db as any)
     .from("aloc_exames")
     .select("*")
     .eq("status", "concluido")
@@ -59,7 +59,7 @@ export async function fetchExamesConcluidos(dias = 7) {
 
 export async function fetchNomesPacientes(ids: string[]): Promise<Record<string, string>> {
   if (!ids.length) return {};
-  const { data } = await supabase
+  const { data } = await db
     .from("profiles")
     .select("user_id, first_name, last_name")
     .in("user_id", ids);
@@ -71,7 +71,7 @@ export async function fetchNomesPacientes(ids: string[]): Promise<Record<string,
 }
 
 export async function fetchExamePorId(id: string) {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (db as any)
     .from("aloc_exames")
     .select("*")
     .eq("id", id)
@@ -81,7 +81,7 @@ export async function fetchExamePorId(id: string) {
 }
 
 export async function assumirExame(exameId: string, laudistaId: string) {
-  const { error } = await (supabase as any)
+  const { error } = await (db as any)
     .from("aloc_exames")
     .update({ laudista_id: laudistaId, status: "em_laudo" })
     .eq("id", exameId);
@@ -89,7 +89,7 @@ export async function assumirExame(exameId: string, laudistaId: string) {
 }
 
 export async function concluirExame(exameId: string) {
-  const { error } = await (supabase as any)
+  const { error } = await (db as any)
     .from("aloc_exames")
     .update({ status: "concluido" })
     .eq("id", exameId);
@@ -99,7 +99,7 @@ export async function concluirExame(exameId: string) {
 // ─── Laudos ───────────────────────────────────────────────────────────────────
 
 export async function fetchLaudoPorExame(exameId: string) {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (db as any)
     .from("aloc_laudos")
     .select("*")
     .eq("exame_id", exameId)
@@ -109,7 +109,7 @@ export async function fetchLaudoPorExame(exameId: string) {
 }
 
 export async function criarLaudo(exameId: string, medicoId: string) {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await (db as any)
     .from("aloc_laudos")
     .insert({ exame_id: exameId, medico_id: medicoId })
     .select()
@@ -119,7 +119,7 @@ export async function criarLaudo(exameId: string, medicoId: string) {
 }
 
 export async function salvarLaudo(laudoId: string, conteudoHtml: string) {
-  const { error } = await (supabase as any)
+  const { error } = await (db as any)
     .from("aloc_laudos")
     .update({ conteudo_html: conteudoHtml })
     .eq("id", laudoId);
@@ -127,7 +127,7 @@ export async function salvarLaudo(laudoId: string, conteudoHtml: string) {
 }
 
 export async function assinarLaudo(laudoId: string, exameId: string) {
-  const { error: laudoErr } = await (supabase as any)
+  const { error: laudoErr } = await (db as any)
     .from("aloc_laudos")
     .update({ status: "assinado", assinado_em: new Date().toISOString() })
     .eq("id", laudoId);
@@ -139,7 +139,7 @@ export async function assinarLaudo(laudoId: string, exameId: string) {
 // ─── Validação pública ────────────────────────────────────────────────────────
 
 export async function validarLaudoPublico(qrToken: string) {
-  const { data, error } = await (supabase as any).rpc("validar_laudo_publico", { p_token: qrToken });
+  const { data, error } = await (db as any).rpc("validar_laudo_publico", { p_token: qrToken });
   if (error) { logError("validarLaudoPublico", error); throw error; }
   return (data as any[])?.[0] ?? null;
 }

@@ -1,7 +1,7 @@
 import { forwardRef, useRef, useState, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Star, ShieldCheck, Heart, Quotes, X } from "@phosphor-icons/react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import avatarMaria from "@/assets/avatar-maria.png";
 import avatarCarlos from "@/assets/avatar-carlos.png";
 import avatarAna from "@/assets/avatar-ana.png";
@@ -38,7 +38,7 @@ const TestimonialsSection = forwardRef<HTMLElement>((_, ref) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    supabase
+    db
       .from("testimonials")
       .select("*")
       .eq("is_active", true)

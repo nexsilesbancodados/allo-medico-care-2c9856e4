@@ -1,10 +1,10 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 
 export async function criarDocumentoParaAssinar(
   pdfBase64: string,
   nomeDoc: string,
 ) {
-  const { data, error } = await supabase.functions.invoke("docuseal-proxy", {
+  const { data, error } = await db.functions.invoke("docuseal-proxy", {
     body: {
       action: "create_template",
       pdf_base64: pdfBase64,
@@ -21,7 +21,7 @@ export async function enviarParaAssinatura(
   medicoEmail: string,
   medicoNome: string,
 ) {
-  const { data, error } = await supabase.functions.invoke("docuseal-proxy", {
+  const { data, error } = await db.functions.invoke("docuseal-proxy", {
     body: {
       action: "create_submission",
       template_id: templateId,
@@ -34,7 +34,7 @@ export async function enviarParaAssinatura(
 }
 
 export async function verificarAssinatura(submissionId: number) {
-  const { data, error } = await supabase.functions.invoke("docuseal-proxy", {
+  const { data, error } = await db.functions.invoke("docuseal-proxy", {
     body: {
       action: "check_submission",
       submission_id: submissionId,

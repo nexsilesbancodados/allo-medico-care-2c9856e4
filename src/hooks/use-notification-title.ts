@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 
 const SITE_TITLE = "AloClinica";
@@ -18,7 +18,7 @@ const useNotificationTitle = () => {
     let mounted = true;
 
     const updateTitle = async () => {
-      const { count } = await supabase
+      const { count } = await db
         .from("notifications")
         .select("*", { count: "exact", head: true })
         .eq("user_id", user.id)
@@ -33,7 +33,7 @@ const useNotificationTitle = () => {
     updateTitle();
 
     // Listen for changes
-    const channel = supabase
+    const channel = db
       .channel("title-badge")
       .on(
         "postgres_changes",
@@ -44,7 +44,7 @@ const useNotificationTitle = () => {
 
     return () => {
       mounted = false;
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
     };
   }, [user]);
 };

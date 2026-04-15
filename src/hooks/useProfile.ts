@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const useProfile = () => {
@@ -8,7 +8,7 @@ export const useProfile = () => {
     queryKey: ["profile", user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("profiles")
         .select("*")
         .eq("user_id", user.id)
@@ -27,7 +27,7 @@ export const useUpcomingAppointments = () => {
     queryKey: ["appointments", "upcoming", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("appointments")
         .select("id, scheduled_at, status, doctor_id, duration_minutes, appointment_type")
         .eq("patient_id", user.id)
@@ -50,7 +50,7 @@ export const useNotifications = () => {
     queryKey: ["notifications", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("notifications")
         .select("*")
         .eq("user_id", user.id)

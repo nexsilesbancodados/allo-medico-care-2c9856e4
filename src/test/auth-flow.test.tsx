@@ -2,9 +2,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 
-// Mock supabase
-vi.mock("@/integrations/supabase/client", () => ({
-  supabase: {
+// Mock db
+vi.mock("@/integrations/db/client", () => ({
+  db: {
     auth: {
       onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
       getSession: vi.fn(() => Promise.resolve({ data: { session: null } })),
@@ -36,11 +36,11 @@ vi.mock("framer-motion", () => ({
 vi.mock("@/assets/logo.png", () => ({ default: "logo.png" }));
 
 import Auth from "@/pages/Auth";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 
 describe("Auth Flow", () => {
   beforeEach(() => {
-    vi.mocked(supabase.auth.signInWithPassword).mockReset();
+    vi.mocked(db.auth.signInWithPassword).mockReset();
   });
 
   it("renders login form by default", () => {
@@ -49,7 +49,7 @@ describe("Auth Flow", () => {
   });
 
   it("calls signIn on valid submission", async () => {
-    vi.mocked(supabase.auth.signInWithPassword).mockResolvedValue({
+    vi.mocked(db.auth.signInWithPassword).mockResolvedValue({
       data: { user: { id: "1" } as any, session: null as any },
       error: null,
     });
@@ -62,7 +62,7 @@ describe("Auth Flow", () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
+      expect(db.auth.signInWithPassword).toHaveBeenCalledWith({
         email: "test@test.com",
         password: "password123",
       });

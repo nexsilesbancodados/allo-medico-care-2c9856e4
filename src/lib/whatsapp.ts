@@ -1,9 +1,9 @@
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/db/untyped";
 import { warn } from "@/lib/logger";
 
 export const sendWhatsApp = async (phone: string, message: string) => {
   try {
-    const { data, error } = await supabase.functions.invoke("send-whatsapp", {
+    const { data, error } = await db.functions.invoke("send-whatsapp", {
       body: { phone, message },
     });
     if (error) {
@@ -19,7 +19,7 @@ export const sendWhatsApp = async (phone: string, message: string) => {
 
 export const triggerAppointmentConfirmed = async (appointmentId: string) => {
   try {
-    const { data, error } = await supabase.functions.invoke("appointment-confirmed", {
+    const { data, error } = await db.functions.invoke("appointment-confirmed", {
       body: { appointment_id: appointmentId },
     });
     if (error) {
