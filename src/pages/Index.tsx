@@ -279,8 +279,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         </div>
       </section>
 
-      {/* ═══════════════ CTA FINAL ═══════════════ */}
-      {isOn("cta_banner") && <CTABanner />}
+      {/* ═══════════════ CTA FINAL (removido) ═══════════════ */}
 
       {/* ═══════════════ FOOTER ═══════════════ */}
       {isOn("footer") && <Footer />}
