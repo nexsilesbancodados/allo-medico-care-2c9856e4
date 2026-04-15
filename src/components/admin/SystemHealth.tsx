@@ -124,7 +124,7 @@ const SystemHealth = () => {
     // 4. Realtime
     const rtStart = performance.now();
     try {
-      const channel = supabase.channel("health-check-ping");
+      const channel = db.channel("health-check-ping");
       await new Promise<void>((resolve, reject) => {
         const timeout = setTimeout(() => { reject(new Error("Timeout")); }, 5000);
         channel.subscribe((status) => {
@@ -133,7 +133,7 @@ const SystemHealth = () => {
           else reject(new Error(`Status: ${status}`));
         });
       });
-      supabase.removeChannel(channel);
+      db.removeChannel(channel);
       const latency = Math.round(performance.now() - rtStart);
       results.push({
         name: "Realtime (WebSocket)",

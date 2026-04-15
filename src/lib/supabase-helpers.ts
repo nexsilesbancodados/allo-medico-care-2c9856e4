@@ -16,7 +16,7 @@ export interface SupabaseResult<T> {
  *
  * @example
  * const { data, error } = await safeQuery(
- *   supabase.from('profiles').select('*').eq('user_id', userId),
+ *   db.from('profiles').select('*').eq('user_id', userId),
  *   'fetchProfile'
  * );
  */

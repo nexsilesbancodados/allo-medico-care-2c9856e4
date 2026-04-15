@@ -47,7 +47,7 @@ const PatientExamUpload = () => {
     setUploading(true);
     const filePath = `${user.id}/${Date.now()}-${file.name}`;
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await db.storage
       .from("patient-documents")
       .upload(filePath, file);
 

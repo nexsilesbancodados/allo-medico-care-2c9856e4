@@ -47,7 +47,7 @@ const DoctorPublicProfile = () => {
 
   const fetchDoctor = async () => {
     // Use secure RPC instead of direct table access
-    const { data: rows } = await supabase.rpc("get_public_doctor_profile", {
+    const { data: rows } = await db.rpc("get_public_doctor_profile", {
       p_doctor_id: doctorId!,
     });
 

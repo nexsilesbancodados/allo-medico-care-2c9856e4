@@ -335,7 +335,7 @@ const PrescriptionForm = () => {
         appointment_id: appointmentId!,
         doctor_id: data.doctorId,
         patient_id: data.patientId,
-        medications: validMeds as unknown as Parameters<typeof supabase.from>[0],
+        medications: validMeds as unknown as Parameters<typeof db.from>[0],
         diagnosis: data.diagnosis || null,
         observations: data.observations || null,
         document_hash: documentHash,
@@ -360,7 +360,7 @@ const PrescriptionForm = () => {
 
       // Send prescription via email + WhatsApp
       const doctorFullName = `Dr(a). ${data.doctorInfo?.first_name} ${data.doctorInfo?.last_name}`;
-      supabase.functions
+      db.functions
         .invoke("send-prescription", {
           body: {
             appointment_id: appointmentId,

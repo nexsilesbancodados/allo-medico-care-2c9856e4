@@ -175,7 +175,7 @@ const ExamRequestForm = () => {
       for (const file of files) {
         const ext = file.name.split(".").pop();
         const path = `${user!.id}/${crypto.randomUUID()}.${ext}`;
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await db.storage
           .from("exam-files")
           .upload(path, file);
         if (uploadError) throw uploadError;

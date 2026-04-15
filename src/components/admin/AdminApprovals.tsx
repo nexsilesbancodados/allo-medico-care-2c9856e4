@@ -45,7 +45,7 @@ const AdminApprovals = () => {
     const [profilesRes, specsRes, kycRes] = await Promise.all([
       db.from("profiles").select("user_id, first_name, last_name, phone, cpf").in("user_id", userIds),
       db.from("doctor_specialties").select("doctor_id, specialty_id").in("doctor_id", data.map(d => d.id)),
-      supabase.rpc("fn_admin_doctor_kyc_list" as any),
+      db.rpc("fn_admin_doctor_kyc_list" as any),
     ]);
     const specIds = [...new Set((specsRes.data ?? []).map(s => s.specialty_id))];
     const { data: specNames } = specIds.length > 0 ? await db.from("specialties").select("id, name").in("id", specIds) : { data: [] };
@@ -108,7 +108,7 @@ const AdminApprovals = () => {
   };
 
   const overrideKyc = async (id: string, status: "approved" | "rejected" | "pending") => {
-    const { error } = await (supabase.rpc as any)("fn_admin_set_doctor_kyc", { p_doctor_id: id, p_status: status });
+    const { error } = await (db.rpc as any)("fn_admin_set_doctor_kyc", { p_doctor_id: id, p_status: status });
     if (error) { toast.error("Erro ao atualizar KYC"); return; }
     toast.success(status === "approved" ? "KYC aprovado manualmente ✅" : status === "rejected" ? "KYC rejeitado" : "KYC resetado para pendente");
     fetchAll();

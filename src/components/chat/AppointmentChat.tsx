@@ -237,7 +237,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
     try {
       const ext = pendingFile.name.split(".").pop() ?? "bin";
       const path = `${appointmentId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await db.storage
         .from("chat-attachments")
         .upload(path, pendingFile, { contentType: pendingFile.type });
       if (uploadError) throw uploadError;

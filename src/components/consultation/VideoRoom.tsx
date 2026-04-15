@@ -85,7 +85,7 @@ const VideoRoom = () => {
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const channelRef = useRef<ReturnType<typeof db.channel> | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Sync panel state helpers
@@ -468,7 +468,7 @@ const VideoRoom = () => {
     if (!user) throw new Error("User not authenticated");
     const ext = file.name.split('.').pop();
     const filePath = `consultation-chat/${appointmentId}/${Date.now()}.${ext}`;
-    const { data, error: uploadErr } = await supabase.storage
+    const { data, error: uploadErr } = await db.storage
       .from("patient-documents")
       .upload(filePath, file, { contentType: file.type });
     if (uploadErr) throw uploadErr;
@@ -616,7 +616,7 @@ const VideoRoom = () => {
         const fileName = `soap-${appointmentId!.slice(0, 8)}-${Date.now()}.pdf`;
         const filePath = `${user!.id}/${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await db.storage
           .from("patient-documents")
           .upload(filePath, pdfBlob, { contentType: "application/pdf", upsert: true });
 
