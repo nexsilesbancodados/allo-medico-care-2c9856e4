@@ -162,17 +162,15 @@ function SpecialtiesSection() {
         </AnimatePresence>
 
         <div className="flex justify-center">
-          {!showAll && (
-            <Button
-              size="lg"
-              variant="ghost"
-              className="rounded-2xl h-[46px] px-6 text-sm font-bold text-primary hover:bg-primary/[0.06] transition-all group"
-              onClick={() => setShowAll(true)}
-            >
-              Ver mais especialidades
-              <CaretDown className="w-4 h-4 ml-1.5 transition-transform group-hover:translate-y-0.5" weight="bold" />
-            </Button>
-          )}
+          <Button
+            size="lg"
+            variant="ghost"
+            className="rounded-2xl h-[46px] px-6 text-sm font-bold text-primary hover:bg-primary/[0.06] transition-all group"
+            onClick={() => setShowAll(!showAll)}
+          >
+            {showAll ? "Ver menos especialidades" : "Ver mais especialidades"}
+            <CaretDown className={`w-4 h-4 ml-1.5 transition-transform duration-300 ${showAll ? "rotate-180" : "group-hover:translate-y-0.5"}`} weight="bold" />
+          </Button>
         </div>
       </div>
     </section>
