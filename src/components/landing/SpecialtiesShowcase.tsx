@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   Heart, Brain, Baby, Bone, Eye, FirstAidKit, Syringe, Tooth, ArrowRight,
-  Lungs, Drop, Heartbeat, Skull, FlaskRound, Leaf, Person, Virus, Ear,
+  Wind, Drop, Heartbeat, Skull, Flask, Leaf, Person, Virus, Ear,
   Scales, HandHeart, Dna, Pill, Lightning, Wheelchair, ChartLine,
   Stethoscope, UserCircle, Sparkle, Flask, Knife
 } from "@phosphor-icons/react";
