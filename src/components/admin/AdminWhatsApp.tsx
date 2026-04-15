@@ -162,7 +162,7 @@ const AdminWhatsApp = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const { data } = await supabase
+        const { data } = await db
           .from("app_settings")
           .select("key, value")
           .like("key", "wpp_%");

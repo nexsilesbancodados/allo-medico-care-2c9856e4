@@ -8,7 +8,7 @@ export const useDoctorStats = () => {
     queryKey: ["doctor-dashboard-stats", user?.id],
     queryFn: async () => {
       if (!user) return null;
-      const { data: docProfile } = await supabase
+      const { data: docProfile } = await db
         .from("doctor_profiles")
         .select("id, consultation_price, rating, total_reviews, crm, crm_state, crm_verified")
         .eq("user_id", user.id)
@@ -52,7 +52,7 @@ export const useDoctorStats = () => {
       if (allAppts.length > 0) {
         const patientIds = [...new Set(allAppts.map(a => a.patient_id).filter((id): id is string => !!id))];
         const { data: profiles } = patientIds.length > 0
-          ? await supabase
+          ? await db
             .from("profiles")
             .select("user_id, first_name, last_name")
             .in("user_id", patientIds)

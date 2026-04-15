@@ -36,7 +36,7 @@ export function useAdminKpis() {
         ]);
 
       // Revenue from completed appointments
-      const { data: revenueData } = await supabase
+      const { data: revenueData } = await db
         .from("appointments")
         .select("price_at_booking")
         .eq("status", "completed")
@@ -67,7 +67,7 @@ export function useAdminPendingApprovals() {
   return useQuery({
     queryKey: ["admin-pending-approvals"],
     queryFn: async (): Promise<ApprovalItem[]> => {
-      const { data } = await supabase
+      const { data } = await db
         .from("doctor_profiles")
         .select("id, user_id, crm, crm_state, created_at, is_approved")
         .is("is_approved", null)
@@ -84,7 +84,7 @@ export function useAdminLiveAppointments() {
   return useQuery({
     queryKey: ["admin-live-appointments"],
     queryFn: async (): Promise<AdminAppointmentRow[]> => {
-      const { data } = await supabase
+      const { data } = await db
         .from("appointments")
         .select("id, scheduled_at, status, patient_id, doctor_id, duration_minutes, notes, appointment_type")
         .in("status", ["waiting", "in_progress"])

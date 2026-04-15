@@ -56,7 +56,7 @@ export const ophthalmologyService = {
   },
 
   async getMyExams(doctorId: string): Promise<OphthalmologyExam[]> {
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("ophthalmology_exams")
       .select("*")
       .eq("assigned_doctor_id", doctorId)

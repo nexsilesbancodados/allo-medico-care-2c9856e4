@@ -57,7 +57,7 @@ const DoctorInfoPanel = ({ doctorId, appointmentId }: DoctorInfoPanelProps) => {
     ]);
 
     if (docRes.data) {
-      const { data: profile } = await supabase
+      const { data: profile } = await db
         .from("profiles")
         .select("first_name, last_name")
         .eq("user_id", docRes.data.user_id)
@@ -73,7 +73,7 @@ const DoctorInfoPanel = ({ doctorId, appointmentId }: DoctorInfoPanelProps) => {
       });
     }
 
-    const { data: prescData } = await supabase
+    const { data: prescData } = await db
       .from("prescriptions")
       .select("id, diagnosis, medications, created_at")
       .eq("appointment_id", appointmentId)

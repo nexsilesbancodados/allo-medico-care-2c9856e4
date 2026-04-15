@@ -52,7 +52,7 @@ const DoctorAvailability = () => {
   useEffect(() => { if (user) fetchDoctorProfile(); }, [user]);
 
   const fetchDoctorProfile = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("doctor_profiles")
       .select("id, available_now")
       .eq("user_id", user!.id)
@@ -93,7 +93,7 @@ const DoctorAvailability = () => {
   };
 
   const fetchSlots = async (profileId: string) => {
-    const { data } = await supabase
+    const { data } = await db
       .from("availability_slots")
       .select("*")
       .eq("doctor_id", profileId)
@@ -103,7 +103,7 @@ const DoctorAvailability = () => {
   };
 
   const fetchAbsences = async (profileId: string) => {
-    const { data } = await supabase
+    const { data } = await db
       .from("doctor_absences")
       .select("*")
       .eq("doctor_id", profileId)

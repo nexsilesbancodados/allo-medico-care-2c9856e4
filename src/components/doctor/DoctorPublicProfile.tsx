@@ -55,13 +55,13 @@ const DoctorPublicProfile = () => {
     if (!doc) { setLoading(false); return; }
 
     // Fetch care areas
-    const { data: careAreasData } = await supabase
+    const { data: careAreasData } = await db
       .from("doctor_care_areas" as any)
       .select("area_name")
       .eq("doctor_id", doc.id);
 
     // Fetch reviews (satisfaction_surveys is authenticated-only, will work if user is logged in)
-    const { data: surveysData } = await supabase
+    const { data: surveysData } = await db
       .from("satisfaction_surveys")
       .select("nps_score, quality_score, comment, created_at, patient_id")
       .eq("doctor_id", doc.id)

@@ -32,7 +32,7 @@ const SupportChat = () => {
   useEffect(() => {
     if (!user) return;
     const loadHistory = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("support_chat_messages")
         .select("role, content")
         .eq("user_id", user.id)
@@ -49,7 +49,7 @@ const SupportChat = () => {
   // Realtime: listen for support replies + typing indicators
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
+    const channel = db
       .channel("support-chat-realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "support_chat_messages", filter: `user_id=eq.${user.id}` }, (payload) => {
         const newMsg = payload.new as { id: string; sender_id: string; content: string; created_at: string; role?: string };
@@ -61,7 +61,7 @@ const SupportChat = () => {
       .subscribe();
 
     // Typing broadcast channel
-    const typingChannel = supabase
+    const typingChannel = db
       .channel(`support-typing-${user.id}`)
       .on("broadcast", { event: "typing" }, (payload) => {
         if (payload.payload.sender_id !== user.id) {

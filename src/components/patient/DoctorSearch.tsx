@@ -145,7 +145,7 @@ const DoctorSearch = () => {
     setLoading(true);
     // Request rich optional columns; fall back gracefully if schema lacks them.
     const richCols = "id, user_id, crm, crm_state, bio, short_description, consultation_price, consultation_duration_min, rating, total_reviews, experience_years, available_now, available_now_since, display_name, crm_verified, accepts_insurance, languages";
-    let resp: any = await supabase
+    let resp: any = await db
       .from("doctor_profiles")
       .select(richCols)
       .eq("is_approved", true)
@@ -153,7 +153,7 @@ const DoctorSearch = () => {
       .limit(100);
     if (resp.error) {
       // Retry with minimal columns if any optional column is missing
-      resp = await supabase
+      resp = await db
         .from("doctor_profiles")
         .select("id, user_id, crm, crm_state, bio, consultation_price, rating, total_reviews, experience_years, available_now, available_now_since, display_name, crm_verified")
         .eq("is_approved", true)

@@ -39,7 +39,7 @@ const DoctorEarnings = () => {
     if (!docProfile) { setLoading(false); return; }
 
     // Check clinic affiliation for commission percent (issue #16)
-    const { data: affiliation } = await supabase
+    const { data: affiliation } = await db
       .from("clinic_affiliations")
       .select("commission_percent, clinic_id, clinic_profiles(name)")
       .eq("doctor_id", docProfile.id)

@@ -46,7 +46,7 @@ const LaudistaDashboard = () => {
   const { data: doctorProfile } = useQuery({
     queryKey: ["laudista-doctor-profile", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("doctor_profiles")
         .select("id, crm, crm_state, crm_verified")
         .eq("user_id", user!.id)
@@ -81,7 +81,7 @@ const LaudistaDashboard = () => {
   const { data: recentExams, isLoading: loadingExams, isRefetching: refreshing } = useQuery({
     queryKey: ["laudista-recent-exams"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("exam_requests")
         .select("*")
         .in("status", ["pending", "in_review"])
@@ -98,7 +98,7 @@ const LaudistaDashboard = () => {
     if (!doctorProfile?.id) return;
     setClaimingId(examId);
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from("exam_requests")
         .update({ assigned_to: doctorProfile.id, status: "in_review" })
         .eq("id", examId);

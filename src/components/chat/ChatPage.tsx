@@ -85,7 +85,7 @@ const ChatPage = () => {
     }
 
     const apptIds = appts.map(a => a.id);
-    const { data: unreadMsgs } = await supabase
+    const { data: unreadMsgs } = await db
       .from("messages")
       .select("appointment_id")
       .in("appointment_id", apptIds)

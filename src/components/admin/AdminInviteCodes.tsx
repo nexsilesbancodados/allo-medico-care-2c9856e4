@@ -24,7 +24,7 @@ const AdminInviteCodes = () => {
   useEffect(() => { fetchCodes(); }, []);
 
   const fetchCodes = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("doctor_invite_codes")
       .select("*")
       .order("created_at", { ascending: false });

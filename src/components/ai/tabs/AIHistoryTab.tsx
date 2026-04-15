@@ -43,7 +43,7 @@ const AIHistoryTab = ({ primaryRole }: Props) => {
   const fetchConversations = async () => {
     if (!user) return;
     setLoading(true);
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("ai_conversations" as any)
       .select("*")
       .eq("user_id", user.id)

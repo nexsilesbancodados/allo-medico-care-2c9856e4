@@ -193,7 +193,7 @@ const MemedPrescription = ({
                         instructions: med.observacao || "",
                       })) || [];
 
-                    const { data: doctorProfile } = await supabase
+                    const { data: doctorProfile } = await db
                       .from("doctor_profiles")
                       .select("id")
                       .eq("user_id", user!.id)

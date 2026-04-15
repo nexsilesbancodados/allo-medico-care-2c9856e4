@@ -119,7 +119,7 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
     let statusPollInterval = 5000;
     let statusPollTimeout: ReturnType<typeof setTimeout>;
 
-    const channel = supabase
+    const channel = db
       .channel(`precall-${appointmentId}`)
       .on(
         "postgres_changes",
@@ -155,7 +155,7 @@ const PreCallCheck = ({ appointmentId, doctorName, doctorSpecialty, scheduledAt,
     statusPollTimeout = setTimeout(pollStatus, statusPollInterval);
 
     const updateWaitingPosition = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("appointments")
         .select("id")
         .in("status", ["waiting", "scheduled"])

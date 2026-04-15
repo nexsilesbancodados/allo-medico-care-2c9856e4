@@ -60,7 +60,7 @@ const ExamRequestForm = () => {
   const { data: doctorProfile } = useQuery({
     queryKey: ["doctor-profile-for-exam", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("doctor_profiles")
         .select("id")
         .eq("user_id", user!.id)
@@ -74,7 +74,7 @@ const ExamRequestForm = () => {
   const { data: clinicProfile } = useQuery({
     queryKey: ["clinic-profile-for-exam", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("clinic_profiles")
         .select("id, name")
         .eq("user_id", user!.id)
@@ -88,19 +88,19 @@ const ExamRequestForm = () => {
   const { data: receptionDoctorProfile } = useQuery({
     queryKey: ["reception-doctor-profile", user?.id],
     queryFn: async () => {
-      const { data: dp } = await supabase
+      const { data: dp } = await db
         .from("doctor_profiles")
         .select("id")
         .eq("user_id", user!.id)
         .maybeSingle();
       if (dp) return dp;
-      const { data: clinic } = await supabase
+      const { data: clinic } = await db
         .from("clinic_profiles")
         .select("id")
         .eq("user_id", user!.id)
         .maybeSingle();
       if (clinic) {
-        const { data: affiliation } = await supabase
+        const { data: affiliation } = await db
           .from("clinic_affiliations")
           .select("doctor_id")
           .eq("clinic_id", clinic.id)

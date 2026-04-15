@@ -107,7 +107,7 @@ const VideoRoom = () => {
   useEffect(() => {
     if (!user || !isDoctor) return;
     const checkCrm = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("doctor_profiles")
         .select("crm_verified")
         .eq("user_id", user.id)
@@ -126,7 +126,7 @@ const VideoRoom = () => {
       return;
     }
     const checkConsent = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("patient_consents")
         .select("id")
         .eq("appointment_id", appointmentId ?? '')
@@ -154,7 +154,7 @@ const VideoRoom = () => {
     let pollTimeout: ReturnType<typeof setTimeout>;
 
     const checkQueue = async () => {
-      const { data: activeAppts } = await supabase
+      const { data: activeAppts } = await db
         .from("appointments")
         .select("id, scheduled_at")
         .eq("doctor_id", appointment.doctor_id)
@@ -163,7 +163,7 @@ const VideoRoom = () => {
 
       if (activeAppts && activeAppts.length > 0) {
         setDoctorBusy(true);
-        const { data: waitingAhead } = await supabase
+        const { data: waitingAhead } = await db
           .from("appointments")
           .select("id")
           .eq("doctor_id", appointment.doctor_id)
@@ -179,7 +179,7 @@ const VideoRoom = () => {
     checkQueue();
 
     // Primary: realtime
-    const queueChannel = supabase
+    const queueChannel = db
       .channel(`queue-${appointment.doctor_id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "appointments", filter: `doctor_id=eq.${appointment.doctor_id}` }, () => {
         checkQueue();
@@ -213,7 +213,7 @@ const VideoRoom = () => {
   useEffect(() => {
     if (!appointmentId) return;
     const loadMessages = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("messages")
         .select("id, content, sender_id, created_at")
         .eq("appointment_id", appointmentId)
@@ -267,7 +267,7 @@ const VideoRoom = () => {
     let pollTimeout: ReturnType<typeof setTimeout>;
 
     const pollChat = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("messages")
         .select("id, content, sender_id, created_at")
         .eq("appointment_id", appointmentId)
@@ -331,7 +331,7 @@ const VideoRoom = () => {
   };
 
   const fetchAppointment = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("appointments").select("*").eq("id", appointmentId ?? '').single();
 
     if (!data) { setLoading(false); return; }
@@ -390,21 +390,21 @@ const VideoRoom = () => {
     const otherDoctorId = !isDoctor ? data.doctor_id : null;
 
     if (otherUserId) {
-      const { data: profile } = await supabase
+      const { data: profile } = await db
         .from("profiles").select("first_name, last_name").eq("user_id", otherUserId).single();
       if (profile) setOtherPartyName(`${profile.first_name} ${profile.last_name}`);
     } else if (otherDoctorId) {
-      const { data: doc } = await supabase
+      const { data: doc } = await db
         .from("doctor_profiles").select("user_id").eq("id", otherDoctorId).single();
       if (doc) {
-        const { data: profile } = await supabase
+        const { data: profile } = await db
           .from("profiles").select("first_name, last_name").eq("user_id", doc.user_id).single();
         if (profile) setOtherPartyName(`Dr(a). ${profile.first_name} ${profile.last_name}`);
       }
     }
 
     if (isDoctor) {
-      const { data: noteData } = await supabase
+      const { data: noteData } = await db
         .from("consultation_notes").select("content").eq("appointment_id", appointmentId ?? '').maybeSingle();
       if (noteData) {
         // Try to parse SOAP JSON, fallback to plain text
@@ -501,15 +501,15 @@ const VideoRoom = () => {
         const { jsPDF } = await import("jspdf");
 
         // Fetch doctor and patient names
-        const { data: doctorProfileData } = await supabase
+        const { data: doctorProfileData } = await db
           .from("profiles").select("first_name, last_name").eq("user_id", user!.id).single();
-        const { data: doctorDocProfile } = await supabase
+        const { data: doctorDocProfile } = await db
           .from("doctor_profiles").select("crm, crm_state").eq("user_id", user!.id).single();
         
         const patientId = appointment.patient_id;
         let patientName = "Paciente";
         if (patientId) {
-          const { data: patientProfile } = await supabase
+          const { data: patientProfile } = await db
             .from("profiles").select("first_name, last_name, cpf").eq("user_id", patientId).single();
           if (patientProfile) patientName = `${patientProfile.first_name} ${patientProfile.last_name}`.trim();
         }
@@ -867,7 +867,7 @@ const VideoRoom = () => {
     setAiFillingSOAP(true);
     try {
       // Gather pre-consultation symptoms
-      const { data: symptoms } = await supabase
+      const { data: symptoms } = await db
         .from("pre_consultation_symptoms")
         .select("main_complaint, symptoms, severity, duration, additional_notes")
         .eq("appointment_id", appointmentId)

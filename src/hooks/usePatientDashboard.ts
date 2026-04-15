@@ -16,7 +16,7 @@ export const useDetectPatientService = () => {
       if (!user) return "all";
 
       // Fetch recent appointments to detect service type
-      const { data: appts } = await supabase
+      const { data: appts } = await db
         .from("appointments")
         .select("appointment_type")
         .eq("patient_id", user.id)
@@ -59,7 +59,7 @@ async function enrichWithDoctorNames<T extends WithDoctorId>(
   if (!records.length) return [];
 
   const doctorIds = [...new Set(records.map(r => r.doctor_id))];
-  const { data: docs } = await supabase
+  const { data: docs } = await db
     .from("doctor_profiles")
     .select("id, user_id")
     .in("id", doctorIds);
@@ -67,7 +67,7 @@ async function enrichWithDoctorNames<T extends WithDoctorId>(
   if (!docs?.length) return records.map(r => ({ ...r, doctor_name: "Médico" }));
 
   const userIds = docs.map(d => d.user_id);
-  const { data: profiles } = await supabase
+  const { data: profiles } = await db
     .from("profiles")
     .select("user_id, first_name, last_name")
     .in("user_id", userIds);
@@ -121,7 +121,7 @@ export const usePatientUpcoming = () => {
     queryKey: ["patient-upcoming-enriched", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data: appts } = await supabase
+      const { data: appts } = await db
         .from("appointments")
         .select("id, scheduled_at, status, doctor_id, duration_minutes, appointment_type")
         .eq("patient_id", user.id)
@@ -144,7 +144,7 @@ export const useReturnAppointments = () => {
     queryKey: ["patient-return-appts", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data: returnData } = await supabase
+      const { data: returnData } = await db
         .from("appointments")
         .select("id, scheduled_at, doctor_id, return_deadline")
         .eq("patient_id", user.id)
@@ -165,7 +165,7 @@ export const useRecentHealthMetrics = () => {
     queryKey: ["patient-recent-metrics", user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data } = await supabase
+      const { data } = await db
         .from("health_metrics")
         .select("type, value, unit, measured_at")
         .eq("patient_id", user.id)
@@ -191,7 +191,7 @@ export const useFavoriteDoctors = () => {
     queryFn: async () => {
       if (!user) return [];
 
-      const { data: favData } = await supabase
+      const { data: favData } = await db
         .from("favorite_doctors")
         .select("doctor_id")
         .eq("patient_id", user.id);
@@ -199,7 +199,7 @@ export const useFavoriteDoctors = () => {
       if (!favData?.length) return [];
       const favDocIds = favData.map(f => f.doctor_id);
 
-      const { data: favDocs } = await supabase
+      const { data: favDocs } = await db
         .from("doctor_profiles")
         .select("id, user_id, consultation_price, rating")
         .in("id", favDocIds);

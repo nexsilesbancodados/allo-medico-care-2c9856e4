@@ -99,7 +99,7 @@ const SupportInbox = () => {
   }, [soundEnabled]);
 
   const fetchTickets = useCallback(async () => {
-    const { data: ticketsData, error } = await supabase
+    const { data: ticketsData, error } = await db
       .from("support_tickets")
       .select("*")
       .order("updated_at", { ascending: false });
@@ -156,7 +156,7 @@ const SupportInbox = () => {
   }, []);
 
   const fetchMessages = useCallback(async (ticketId: string) => {
-    const { data } = await supabase
+    const { data } = await db
       .from("support_messages")
       .select("*")
       .eq("ticket_id", ticketId)
@@ -177,7 +177,7 @@ const SupportInbox = () => {
 
   // Realtime: listen for ticket changes and new messages
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("support-tickets-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "support_tickets" }, (payload) => {
         fetchTickets();
@@ -208,7 +208,7 @@ const SupportInbox = () => {
     if (selectedTicket) {
       fetchMessages(selectedTicket.id);
       // Setup typing channel for this ticket's patient
-      const typingChannel = supabase
+      const typingChannel = db
         .channel(`support-typing-${selectedTicket.patient_id}`)
         .on("broadcast", { event: "typing" }, (payload) => {
           if (payload.payload.sender_id !== user?.id) {

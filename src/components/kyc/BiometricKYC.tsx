@@ -154,7 +154,7 @@ const BiometricKYC = ({ onComplete, variant = "full", className = "", tipo = "pa
 
       // Update doctor_profiles kyc_status if doctor
       if (tipo === "medico" && isApproved) {
-        await supabase
+        await db
           .from("doctor_profiles")
           .update({
             kyc_status: "approved",

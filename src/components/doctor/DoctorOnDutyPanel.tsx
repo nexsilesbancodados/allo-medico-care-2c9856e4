@@ -25,7 +25,7 @@ const DoctorOnDutyPanel = () => {
 
   // Realtime
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("on-duty-queue")
       .on("postgres_changes", { event: "*", schema: "public", table: "on_demand_queue" }, () => fetchQueue())
       .subscribe();
@@ -39,7 +39,7 @@ const DoctorOnDutyPanel = () => {
   };
 
   const fetchQueue = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("on_demand_queue")
       .select("*")
       .eq("status", "waiting")

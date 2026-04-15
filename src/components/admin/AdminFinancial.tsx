@@ -116,7 +116,7 @@ const AdminFinancial = () => {
     const daysAgo = new Date();
     daysAgo.setDate(daysAgo.getDate() - parseInt(period));
 
-    const { data: appts } = await supabase
+    const { data: appts } = await db
       .from("appointments")
       .select("id, status, payment_status, scheduled_at, created_at, payment_confirmed_at, cancel_reason, doctor_id, patient_id, guest_patient_id")
       .gte("created_at", daysAgo.toISOString())
@@ -127,7 +127,7 @@ const AdminFinancial = () => {
 
     // Fetch doctor names and prices
     const doctorIds = [...new Set(appts.map(a => a.doctor_id))];
-    const { data: docProfiles } = await supabase
+    const { data: docProfiles } = await db
       .from("doctor_profiles")
       .select("id, user_id, consultation_price")
       .in("id", doctorIds);
@@ -138,7 +138,7 @@ const AdminFinancial = () => {
       ...appts.filter(a => a.patient_id).map(a => a.patient_id!),
     ])];
 
-    const { data: profiles } = await supabase
+    const { data: profiles } = await db
       .from("profiles")
       .select("user_id, first_name, last_name")
       .in("user_id", userIds);
@@ -150,7 +150,7 @@ const AdminFinancial = () => {
     const guestIds = appts.filter(a => a.guest_patient_id).map(a => a.guest_patient_id!);
     let guestMap = new Map<string, string>();
     if (guestIds.length > 0) {
-      const { data: guests } = await supabase
+      const { data: guests } = await db
         .from("guest_patients")
         .select("id, full_name")
         .in("id", guestIds);
@@ -206,7 +206,7 @@ const AdminFinancial = () => {
 
   const fetchWithdrawals = async () => {
     setWithdrawalsLoading(true);
-    const { data: wrs, error } = await supabase
+    const { data: wrs, error } = await db
       .from("withdrawal_requests")
       .select("*")
       .order("created_at", { ascending: false })
@@ -226,7 +226,7 @@ const AdminFinancial = () => {
 
     // Fetch doctor names from profiles
     const userIds = [...new Set(wrs.map(w => w.user_id))];
-    const { data: profiles } = await supabase
+    const { data: profiles } = await db
       .from("profiles")
       .select("user_id, first_name, last_name")
       .in("user_id", userIds);

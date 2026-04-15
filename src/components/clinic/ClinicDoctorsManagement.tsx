@@ -58,7 +58,7 @@ const ClinicDoctorsManagement = () => {
   useEffect(() => { if (user) fetchClinicProfile(); }, [user]);
 
   const fetchClinicProfile = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("clinic_profiles")
       .select("id, name")
       .eq("user_id", user!.id)
@@ -73,7 +73,7 @@ const ClinicDoctorsManagement = () => {
   };
 
   const fetchDoctors = async (clinicId: string) => {
-    const { data: affiliations } = await supabase
+    const { data: affiliations } = await db
       .from("clinic_affiliations")
       .select("id, doctor_id, status, commission_percent")
       .eq("clinic_id", clinicId);
@@ -84,7 +84,7 @@ const ClinicDoctorsManagement = () => {
     }
 
     const doctorIds = affiliations.map(a => a.doctor_id);
-    const { data: docProfiles } = await supabase
+    const { data: docProfiles } = await db
       .from("doctor_profiles")
       .select("id, user_id, crm, crm_state")
       .in("id", doctorIds);
@@ -127,7 +127,7 @@ const ClinicDoctorsManagement = () => {
     setSearching(true);
     setSearchResult(null);
 
-    const { data } = await supabase
+    const { data } = await db
       .from("doctor_profiles")
       .select("id, user_id, crm, crm_state")
       .eq("crm", searchCrm.trim())
@@ -139,7 +139,7 @@ const ClinicDoctorsManagement = () => {
       return;
     }
 
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from("profiles")
       .select("first_name, last_name")
       .eq("user_id", data.user_id)

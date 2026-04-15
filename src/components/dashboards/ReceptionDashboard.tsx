@@ -71,7 +71,7 @@ const ReceptionDashboard = () => {
   useEffect(() => { fetchToday(); }, [selectedDate]);
 
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("reception-live")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "appointments" }, () => fetchToday())
       .subscribe();
@@ -83,7 +83,7 @@ const ReceptionDashboard = () => {
     const dayStart = startOfDay(selectedDate);
     const dayEnd = endOfDay(selectedDate);
 
-    const { data } = await supabase
+    const { data } = await db
       .from("appointments")
       .select("id, scheduled_at, status, patient_id, doctor_id, duration_minutes, appointment_type, notes")
       .gte("scheduled_at", dayStart.toISOString())

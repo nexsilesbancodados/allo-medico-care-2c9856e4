@@ -57,7 +57,7 @@ export default function AdminFullSiteEditor() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any)
+    const { data, error } = await (db as any)
       .from("site_sections")
       .select("*")
       .order("display_order", { ascending: true });
@@ -78,7 +78,7 @@ export default function AdminFullSiteEditor() {
 
   const saveConfig = async () => {
     if (!selected) return;
-    const { error } = await (supabase as any)
+    const { error } = await (db as any)
       .from("site_sections")
       .update({ config: editing, updated_at: new Date().toISOString() })
       .eq("id", selected.id);
@@ -93,7 +93,7 @@ export default function AdminFullSiteEditor() {
   };
 
   const toggleEnabled = async (s: Section): Promise<void> => {
-    const { error } = await (supabase as any)
+    const { error } = await (db as any)
       .from("site_sections")
       .update({ is_enabled: !s.is_enabled })
       .eq("id", s.id);
@@ -107,8 +107,8 @@ export default function AdminFullSiteEditor() {
     const idx = sections.findIndex((x) => x.id === s.id);
     const target = sections[idx + dir];
     if (!target) return;
-    await (supabase as any).from("site_sections").update({ display_order: target.display_order }).eq("id", s.id);
-    await (supabase as any).from("site_sections").update({ display_order: s.display_order }).eq("id", target.id);
+    await (db as any).from("site_sections").update({ display_order: target.display_order }).eq("id", s.id);
+    await (db as any).from("site_sections").update({ display_order: s.display_order }).eq("id", target.id);
     invalidateSiteSections();
     setPreviewKey((k) => k + 1);
     await load();
@@ -116,7 +116,7 @@ export default function AdminFullSiteEditor() {
 
   const loadHistory = async () => {
     if (!selected) return;
-    const { data } = await (supabase as any)
+    const { data } = await (db as any)
       .from("site_sections_history")
       .select("id, saved_at, config")
       .eq("section_key", selected.key)
@@ -296,7 +296,7 @@ function ImageField({ label, value, onChange }: { label: string; value: string; 
     if (upErr) { toast.error(upErr.message); setUploading(false); return; }
     const { data: pub } = db.storage.from("site-media").getPublicUrl(path);
     const url = pub.publicUrl;
-    await (supabase as any).from("site_media").insert({ url, path, name: file.name, mime_type: file.type, size_bytes: file.size });
+    await (db as any).from("site_media").insert({ url, path, name: file.name, mime_type: file.type, size_bytes: file.size });
     onChange(url);
     setUploading(false);
     toast.success("Imagem enviada");
@@ -322,7 +322,7 @@ function MediaPickerButton({ onPick }: { onPick: (url: string) => void }) {
   const [media, setMedia] = useState<any[]>([]);
   useEffect(() => {
     if (!open) return;
-    (supabase as any).from("site_media").select("*").order("created_at", { ascending: false }).limit(60)
+    (db as any).from("site_media").select("*").order("created_at", { ascending: false }).limit(60)
       .then(({ data }: any) => setMedia(data ?? []));
   }, [open]);
   return (

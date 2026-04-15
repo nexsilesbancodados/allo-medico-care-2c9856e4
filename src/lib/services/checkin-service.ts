@@ -30,7 +30,7 @@ export const performCheckin = async (
   patientId: string,
 ): Promise<CheckinResult> => {
   try {
-    const { data: appt, error } = await supabase
+    const { data: appt, error } = await db
       .from("appointments")
       .select("id, patient_id, scheduled_at, status, notes")
       .eq("id", appointmentId)
@@ -75,14 +75,14 @@ export const performCheckin = async (
     }).eq("id", appointmentId);
 
     // Notify doctor about patient check-in
-    const { data: docProfile } = await supabase
+    const { data: docProfile } = await db
       .from("doctor_profiles")
       .select("user_id")
       .eq("id", (await db.from("appointments").select("doctor_id").eq("id", appointmentId).single()).data?.doctor_id ?? "")
       .single();
 
     if (docProfile?.user_id) {
-      const { data: patientProfile } = await supabase
+      const { data: patientProfile } = await db
         .from("profiles")
         .select("first_name")
         .eq("user_id", patientId)
@@ -112,7 +112,7 @@ export const getUpcomingCheckins = async (patientId: string): Promise<Appointmen
     const now = new Date();
     const oneHourFromNow = new Date(now.getTime() + 60 * 60_000);
 
-    const { data: appointments } = await supabase
+    const { data: appointments } = await db
       .from("appointments")
       .select("id, scheduled_at, status, notes, doctor_id")
       .eq("patient_id", patientId)
@@ -124,7 +124,7 @@ export const getUpcomingCheckins = async (patientId: string): Promise<Appointmen
     if (!appointments?.length) return [];
 
     const doctorIds = [...new Set(appointments.map(a => a.doctor_id))];
-    const { data: doctorProfiles } = await supabase
+    const { data: doctorProfiles } = await db
       .from("doctor_profiles")
       .select("id, user_id")
       .in("id", doctorIds);

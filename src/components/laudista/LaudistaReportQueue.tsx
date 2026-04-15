@@ -92,7 +92,7 @@ const LaudistaReportQueue = () => {
   const { data: examRequests, isLoading } = useQuery({
     queryKey: ["laudista-exam-queue", statusFilter],
     queryFn: async () => {
-      let query = supabase
+      let query = db
         .from("exam_requests")
         .select("*")
         .order("priority", { ascending: true })
@@ -132,7 +132,7 @@ const LaudistaReportQueue = () => {
   });
 
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("laudista-exam-queue-realtime")
       .on(
         "postgres_changes",
@@ -166,7 +166,7 @@ const LaudistaReportQueue = () => {
     }
     setClaimingId(examId);
     try {
-      const { error } = await supabase
+      const { error } = await db
         .from("exam_requests")
         .update({ assigned_to: doctorProfile.id, status: "in_review" })
         .eq("id", examId);

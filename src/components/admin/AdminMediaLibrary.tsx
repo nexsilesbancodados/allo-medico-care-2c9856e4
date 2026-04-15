@@ -15,7 +15,7 @@ export default function AdminMediaLibrary() {
   const [uploading, setUploading] = useState(false);
 
   const load = async () => {
-    const { data } = await (supabase as any)
+    const { data } = await (db as any)
       .from("site_media")
       .select("*")
       .order("created_at", { ascending: false });
@@ -32,7 +32,7 @@ export default function AdminMediaLibrary() {
       const { error } = await db.storage.from("site-media").upload(path, file);
       if (error) { toast.error(error.message); continue; }
       const { data: pub } = db.storage.from("site-media").getPublicUrl(path);
-      await (supabase as any).from("site_media").insert({
+      await (db as any).from("site_media").insert({
         url: pub.publicUrl, path, name: file.name, mime_type: file.type, size_bytes: file.size,
       });
     }
@@ -49,7 +49,7 @@ export default function AdminMediaLibrary() {
   const remove = async (m: Media) => {
     if (!confirm(`Remover ${m.name}?`)) return;
     await db.storage.from("site-media").remove([m.path]);
-    await (supabase as any).from("site_media").delete().eq("id", m.id);
+    await (db as any).from("site_media").delete().eq("id", m.id);
     load();
   };
 

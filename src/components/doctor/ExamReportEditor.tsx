@@ -1282,7 +1282,7 @@ const ExamReportEditor = () => {
   const { data: requestingClinic } = useQuery({
     queryKey: ["requesting-clinic-name", examRequest?.requesting_clinic_id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("clinic_profiles")
         .select("name")
         .eq("id", examRequest!.requesting_clinic_id!)
@@ -1805,7 +1805,7 @@ const ExamReportEditor = () => {
 
       // Notificar clínica se o exame veio de uma clínica
       if (examRequest?.requesting_clinic_id) {
-        const { data: clinicData } = await supabase
+        const { data: clinicData } = await db
           .from("clinic_profiles")
           .select("user_id")
           .eq("id", examRequest!.requesting_clinic_id)

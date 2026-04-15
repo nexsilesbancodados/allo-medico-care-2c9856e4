@@ -24,7 +24,7 @@ const ClinicWaitingRoom = () => {
 
   // Real-time updates
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("clinic-waiting-room")
       .on("postgres_changes", { event: "*", schema: "public", table: "appointments" }, () => {
         if (user) fetchData();

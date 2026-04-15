@@ -51,7 +51,7 @@ export default function OftalmologyPrescription() {
     if (!appointmentId || !user) return;
 
     const fetch = async () => {
-      const { data: appointment } = await supabase
+      const { data: appointment } = await db
         .from("appointments")
         .select("patient_id")
         .eq("id", appointmentId)
@@ -63,7 +63,7 @@ export default function OftalmologyPrescription() {
         setPatientId(appointment.patient_id);
       }
 
-      const { data: exam } = await (supabase as any)
+      const { data: exam } = await (db as any)
         .from("ophthalmology_exams")
         .select("id, od_sphere, od_cylinder, od_axis, os_sphere, os_cylinder, os_axis")
         .eq("appointment_id", appointmentId)
@@ -83,7 +83,7 @@ export default function OftalmologyPrescription() {
       }
 
       // Load doctor info
-      const { data: doctorData } = await supabase
+      const { data: doctorData } = await db
         .from("doctor_profiles")
         .select("full_name, crm, crm_state")
         .eq("user_id", user.id)
@@ -103,7 +103,7 @@ export default function OftalmologyPrescription() {
     setSaving(true);
 
     try {
-      const { error } = await (supabase as any)
+      const { error } = await (db as any)
         .from("ophthalmology_prescriptions")
         .insert([
           {
@@ -132,7 +132,7 @@ export default function OftalmologyPrescription() {
     setSaving(true);
     try {
       // 1. Salvar prescrição
-      const { data: prescriptionData, error: insertError } = await (supabase as any)
+      const { data: prescriptionData, error: insertError } = await (db as any)
         .from("ophthalmology_prescriptions")
         .insert([
           {

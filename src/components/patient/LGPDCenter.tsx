@@ -58,7 +58,7 @@ export default function LGPDCenter() {
   const { data: accessLog = [] } = useQuery({
     queryKey: ["lgpd-access-log", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("lgpd_access_log" as any)
         .select("id, accessor_role, action, resource, created_at")
         .eq("data_owner_id", user!.id)
@@ -72,7 +72,7 @@ export default function LGPDCenter() {
   const { data: deletionReqs = [] } = useQuery({
     queryKey: ["lgpd-deletion", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("lgpd_deletion_requests" as any)
         .select("*")
         .eq("user_id", user!.id)

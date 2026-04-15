@@ -35,7 +35,7 @@ const AISummaryTab = ({ primaryRole }: Props) => {
     setResult("");
 
     try {
-      const { data: profiles } = await supabase
+      const { data: profiles } = await db
         .from("profiles")
         .select("user_id, first_name, last_name, date_of_birth, blood_type, allergies, chronic_conditions, phone")
         .or(`first_name.ilike.%${patientSearch}%,last_name.ilike.%${patientSearch}%`)

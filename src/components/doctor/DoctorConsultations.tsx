@@ -64,7 +64,7 @@ const DoctorConsultations = () => {
   // Realtime sync
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
+    const channel = db
       .channel("doctor-consultations-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "appointments" }, () => fetchAppointments())
       .subscribe();

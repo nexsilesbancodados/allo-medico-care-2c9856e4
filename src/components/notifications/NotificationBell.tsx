@@ -72,7 +72,7 @@ const NotificationBell = () => {
     fetchUnreadMessages();
 
     // Realtime subscription for notifications
-    const channel = supabase
+    const channel = db
       .channel("notifications-realtime")
       .on(
         "postgres_changes",
@@ -86,7 +86,7 @@ const NotificationBell = () => {
       .subscribe();
 
     // Realtime subscription for unread messages (issue #12 rodada 3)
-    const msgChannel = supabase
+    const msgChannel = db
       .channel("unread-messages-count")
       .on(
         "postgres_changes",
@@ -104,7 +104,7 @@ const NotificationBell = () => {
 
   const fetchUnreadMessages = async () => {
     if (!user) return;
-    const { count } = await supabase
+    const { count } = await db
       .from("messages")
       .select("id", { count: "exact", head: true })
       .eq("is_read", false)
@@ -113,7 +113,7 @@ const NotificationBell = () => {
   };
 
   const fetchNotifications = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("notifications")
       .select("*")
       .eq("user_id", user!.id)

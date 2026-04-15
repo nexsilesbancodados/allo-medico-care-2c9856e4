@@ -51,7 +51,7 @@ const Notifications = () => {
 
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
+    const channel = db
       .channel("patient-notifications")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => fetchNotifications())
       .subscribe();
@@ -60,7 +60,7 @@ const Notifications = () => {
 
   const fetchNotifications = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data } = await db
       .from("notifications")
       .select("*")
       .eq("user_id", user.id)

@@ -130,7 +130,7 @@ const BookAppointment = () => {
         setOriginalPrice(null);
         return;
       }
-      const { data } = await supabase
+      const { data } = await db
         .from("appointments")
         .select("id, price_at_booking, return_deadline")
         .eq("patient_id", user.id)
@@ -185,7 +185,7 @@ const BookAppointment = () => {
     let isSubscribed = true;
 
     // Realtime listener
-    const channel = supabase
+    const channel = db
       .channel(`payment-${appointmentId}`)
       .on("postgres_changes", {
         event: "UPDATE",
@@ -219,7 +219,7 @@ const BookAppointment = () => {
     const startFallbackPoll = () => {
       if (!isSubscribed) return;
       pollInterval = setInterval(async () => {
-        const { data } = await supabase
+        const { data } = await db
           .from("appointments")
           .select("payment_status")
           .eq("id", appointmentId)
@@ -245,7 +245,7 @@ const BookAppointment = () => {
 
   const fetchDoctor = async () => {
     try {
-      const { data: doc, error } = await supabase
+      const { data: doc, error } = await db
         .from("doctor_profiles")
         .select("id, user_id, crm, crm_state, bio, consultation_price, rating, experience_years, doctor_type")
         .eq("id", doctorId!)
@@ -289,7 +289,7 @@ const BookAppointment = () => {
     const dayEnd = new Date(selectedDate);
     dayEnd.setHours(23, 59, 59, 999);
 
-    const { data } = await supabase
+    const { data } = await db
       .from("appointments")
       .select("scheduled_at")
       .eq("doctor_id", doctorId)
@@ -413,7 +413,7 @@ const BookAppointment = () => {
     setProcessing(true);
 
     try {
-      const { data: profile } = await supabase
+      const { data: profile } = await db
         .from("profiles")
         .select("first_name, last_name, cpf, phone")
         .eq("user_id", user.id)

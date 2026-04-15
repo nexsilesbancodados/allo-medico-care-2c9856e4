@@ -44,7 +44,7 @@ const AdminPACSConfig = () => {
 
   const fetchRecentExams = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await db
       .from("exam_requests")
       .select("id, exam_type, status, priority, source, orthanc_study_uid, created_at")
       .order("created_at", { ascending: false })

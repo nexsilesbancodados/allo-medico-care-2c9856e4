@@ -53,7 +53,7 @@ const ClinicDashboard = () => {
     if (!clinicProfile) return;
     const doctorIds = doctors.filter(d => d.status === "active").map(d => d.doctor_id);
     if (doctorIds.length === 0) return;
-    const channel = supabase
+    const channel = db
       .channel("clinic-live")
       .on("postgres_changes", { event: "*", schema: "public", table: "appointments" }, (payload) => {
         const row = payload.new as any;
@@ -77,7 +77,7 @@ const ClinicDashboard = () => {
 
       // Calculate total slots from availability_slots table
       const monthStart = startOfMonth(new Date());
-      const { data: slots, error: slotsError } = await supabase
+      const { data: slots, error: slotsError } = await db
         .from("availability_slots")
         .select("id", { count: "exact", head: true })
         .in("doctor_id", doctorIds)

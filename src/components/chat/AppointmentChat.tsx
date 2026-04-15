@@ -68,7 +68,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
   useEffect(() => {
     if (!appointmentId) return;
     const checkExpiry = async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("appointments")
         .select("scheduled_at, status")
         .eq("id", appointmentId)
@@ -87,7 +87,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
     fetchMessages();
 
     // Realtime for new messages
-    const channel = supabase
+    const channel = db
       .channel(`chat-${appointmentId}`)
       .on(
         "postgres_changes",
@@ -137,7 +137,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
   }, [messages, otherTyping]);
 
   const fetchMessages = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("messages")
       .select("*")
       .eq("appointment_id", appointmentId)
@@ -183,7 +183,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
       setInput("");
       // Send push notification to the other participant
       try {
-        const { data: appt } = await supabase
+        const { data: appt } = await db
           .from("appointments")
           .select("patient_id, doctor_id")
           .eq("id", appointmentId)
@@ -193,7 +193,7 @@ const AppointmentChat = ({ appointmentId, otherUserName }: AppointmentChatProps)
           let recipientUserId: string | null = null;
           if (appt.patient_id === user.id) {
             // Sender is patient → notify doctor
-            const { data: doc } = await supabase
+            const { data: doc } = await db
               .from("doctor_profiles")
               .select("user_id")
               .eq("id", appt.doctor_id)

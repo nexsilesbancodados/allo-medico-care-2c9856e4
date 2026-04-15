@@ -85,7 +85,7 @@ const AppointmentsList = () => {
 
   useEffect(() => {
     if (!user) return;
-    const channel = supabase
+    const channel = db
       .channel("patient-appts-list")
       .on("postgres_changes", { event: "*", schema: "public", table: "appointments", filter: `patient_id=eq.${user.id}` }, () => fetchAppointments())
       .subscribe();
@@ -94,7 +94,7 @@ const AppointmentsList = () => {
 
   const fetchAppointments = async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data } = await db
       .from("appointments")
       .select("id, scheduled_at, status, payment_status, duration_minutes, doctor_id")
       .eq("patient_id", user!.id)
@@ -103,7 +103,7 @@ const AppointmentsList = () => {
     if (!data) { setLoading(false); return; }
 
     const doctorIds = [...new Set(data.map(a => a.doctor_id))];
-    const { data: doctors } = await supabase
+    const { data: doctors } = await db
       .from("doctor_profiles")
       .select("id, user_id, crm, crm_state")
       .in("id", doctorIds);

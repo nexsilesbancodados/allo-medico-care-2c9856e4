@@ -34,7 +34,7 @@ export const getClinicStats = async (clinicId: string, period: "week" | "month" 
     else periodStart.setFullYear(periodStart.getFullYear() - 1);
 
     // Get affiliated doctors
-    const { data: affiliations } = await supabase
+    const { data: affiliations } = await db
       .from("clinic_affiliations")
       .select("doctor_id")
       .eq("clinic_id", clinicId)
@@ -46,7 +46,7 @@ export const getClinicStats = async (clinicId: string, period: "week" | "month" 
     }
 
     // Count appointments
-    const { data: appointments } = await supabase
+    const { data: appointments } = await db
       .from("appointments")
       .select("id, status, price_at_booking")
       .in("doctor_id", doctorIds)
@@ -78,7 +78,7 @@ export const getClinicStats = async (clinicId: string, period: "week" | "month" 
  */
 export const getClinicDoctorsRanking = async (clinicId: string): Promise<ClinicDoctor[]> => {
   try {
-    const { data: affiliations } = await supabase
+    const { data: affiliations } = await db
       .from("clinic_affiliations")
       .select("doctor_id, commission_percent")
       .eq("clinic_id", clinicId)
@@ -101,7 +101,7 @@ export const getClinicDoctorsRanking = async (clinicId: string): Promise<ClinicD
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const { data: appts } = await supabase
+    const { data: appts } = await db
       .from("appointments")
       .select("doctor_id")
       .in("doctor_id", doctorIds)

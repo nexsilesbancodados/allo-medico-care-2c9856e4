@@ -36,7 +36,7 @@ const DoctorWaitingRoom = () => {
   useEffect(() => {
     if (!doctorId) return;
 
-    const channel = supabase
+    const channel = db
       .channel("waiting-room")
       .on(
         "postgres_changes",
@@ -76,7 +76,7 @@ const DoctorWaitingRoom = () => {
       setDoctorId(data.id);
       fetchWaitingPatients(data.id);
       // Fetch average consultation duration for this doctor
-      const { data: durations } = await supabase
+      const { data: durations } = await db
         .from("video_presence_logs")
         .select("duration_seconds")
         .gt("duration_seconds", 60)

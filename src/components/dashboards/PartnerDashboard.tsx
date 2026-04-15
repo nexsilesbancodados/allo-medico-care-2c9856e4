@@ -43,7 +43,7 @@ const PartnerDashboard = () => {
 
   const loadPartnerName = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("profiles")
         .select("first_name, last_name")
         .eq("user_id", user!.id)

@@ -68,7 +68,7 @@ const SymptomDiary = () => {
   const fetchEntries = async () => {
     const start = format(startOfMonth(currentMonth), "yyyy-MM-dd");
     const end = format(endOfMonth(currentMonth), "yyyy-MM-dd");
-    const { data } = await supabase
+    const { data } = await db
       .from("symptom_diary")
       .select("*")
       .eq("patient_id", user!.id)

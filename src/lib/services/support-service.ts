@@ -58,7 +58,7 @@ export const createTicket = async (params: CreateTicketParams): Promise<string |
     const priority = params.priority ?? inferPriority(params.category, params.message);
     const slaDeadline = new Date(Date.now() + SLA_HOURS[priority] * 3600_000);
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from("support_tickets")
       .insert({
         patient_id: params.patientId,
@@ -101,7 +101,7 @@ export const createTicket = async (params: CreateTicketParams): Promise<string |
  */
 export const getPatientTickets = async (patientId: string): Promise<TicketSummary[]> => {
   try {
-    const { data } = await supabase
+    const { data } = await db
       .from("support_tickets")
       .select("id, subject, status, priority, created_at, updated_at, assigned_to")
       .eq("patient_id", patientId)
@@ -128,7 +128,7 @@ export const getPatientTickets = async (patientId: string): Promise<TicketSummar
  */
 export const getTicketDetail = async (ticketId: string, userId: string): Promise<TicketDetail | null> => {
   try {
-    const { data: ticket } = await supabase
+    const { data: ticket } = await db
       .from("support_tickets")
       .select("id, subject, status, priority, created_at, updated_at, assigned_to, patient_id")
       .eq("id", ticketId)
@@ -138,7 +138,7 @@ export const getTicketDetail = async (ticketId: string, userId: string): Promise
 
     // Verify access: patient or support agent
     if (ticket.patient_id !== userId && ticket.assigned_to !== userId) {
-      const { data: roles } = await supabase
+      const { data: roles } = await db
         .from("user_roles")
         .select("role")
         .eq("user_id", userId)
@@ -147,7 +147,7 @@ export const getTicketDetail = async (ticketId: string, userId: string): Promise
     }
 
     // Fetch messages
-    const { data: messages } = await supabase
+    const { data: messages } = await db
       .from("support_messages")
       .select("id, sender_id, content, created_at")
       .eq("ticket_id", ticketId)
@@ -218,7 +218,7 @@ export const replyToTicket = async (
     }).eq("id", ticketId);
 
     // Notify the other party
-    const { data: ticket } = await supabase
+    const { data: ticket } = await db
       .from("support_tickets")
       .select("patient_id, assigned_to")
       .eq("id", ticketId)
@@ -258,7 +258,7 @@ export const resolveTicket = async (ticketId: string, resolution?: string): Prom
     if (error) return false;
 
     // Notify patient
-    const { data: ticket } = await supabase
+    const { data: ticket } = await db
       .from("support_tickets")
       .select("patient_id, subject")
       .eq("id", ticketId)

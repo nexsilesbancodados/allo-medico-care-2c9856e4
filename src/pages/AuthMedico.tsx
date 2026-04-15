@@ -272,7 +272,7 @@ const AuthMedico = () => {
     securityMonitor.clearFailedLogins(email);
 
     if (data.user) {
-      const { data: doctorProfile } = await supabase
+      const { data: doctorProfile } = await db
         .from("doctor_profiles")
         .select("id, is_approved, crm_verified")
         .eq("user_id", data.user.id)

@@ -37,7 +37,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
   }, [appointmentId]);
 
   const checkExisting = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("satisfaction_surveys")
       .select("id")
       .eq("appointment_id", appointmentId)
@@ -47,7 +47,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
   };
 
   const updateDoctorRating = async () => {
-    const { data: surveys } = await supabase
+    const { data: surveys } = await db
       .from("satisfaction_surveys")
       .select("quality_score, nps_score")
       .eq("doctor_id", doctorId);
@@ -61,7 +61,7 @@ const RateConsultation = ({ appointmentId, doctorId, onClose }: RateConsultation
     });
     const avgRating = ratings.reduce((a, b) => a + b, 0) / ratings.length;
 
-    await supabase
+    await db
       .from("doctor_profiles")
       .update({ rating: Math.round(avgRating * 10) / 10, total_reviews: surveys.length })
       .eq("id", doctorId);

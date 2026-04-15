@@ -56,7 +56,7 @@ const PrescriptionRenewalForm = () => {
 
   const fetchRenewals = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data } = await db
       .from("prescription_renewals")
       .select("*")
       .eq("patient_id", user.id)

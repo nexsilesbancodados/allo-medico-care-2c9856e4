@@ -68,7 +68,7 @@ const AdminDashboard = () => {
   useEffect(() => { fetchAll(); }, [periodFilter]);
 
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("admin-live-monitor")
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "appointments" }, () => {
         fetchLiveStats();

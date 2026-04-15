@@ -32,7 +32,7 @@ const TermsReconsentDialog = () => {
     if (!user) return;
 
     try {
-      const { data: setting, error: settingError } = await supabase
+      const { data: setting, error: settingError } = await db
         .from("app_settings" as unknown as never)
         .select("value")
         .eq("key", CURRENT_TERMS_VERSION_KEY)
@@ -45,7 +45,7 @@ const TermsReconsentDialog = () => {
       const version = (setting as { value?: string } | null)?.value ?? "1.0.0";
       setRequiredVersion(version);
 
-      const { data: consent, error: consentError } = await supabase
+      const { data: consent, error: consentError } = await db
         .from("user_consents")
         .select("id")
         .eq("user_id", user.id)

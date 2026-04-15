@@ -119,7 +119,7 @@ const SupportDashboard = () => {
   useEffect(() => {
     const fetchOnline = async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const { data } = await supabase
+      const { data } = await db
         .from("user_presence")
         .select("user_id, last_seen_at, current_page, is_online")
         .eq("is_online", true)
@@ -151,7 +151,7 @@ const SupportDashboard = () => {
   useEffect(() => { fetchData(); }, []);
 
   useEffect(() => {
-    const channel = supabase
+    const channel = db
       .channel("support-live-logs")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "activity_logs" }, (payload) => {
         setLogs(prev => [payload.new, ...prev].slice(0, 100));

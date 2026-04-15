@@ -48,7 +48,7 @@ const RenewalQueue = () => {
   };
 
   const fetchRenewals = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("prescription_renewals")
       .select("*")
       .in("status", ["pending", "in_review"])

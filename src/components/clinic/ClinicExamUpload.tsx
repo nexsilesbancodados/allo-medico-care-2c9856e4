@@ -44,7 +44,7 @@ const ClinicExamUpload = () => {
   const { data: clinicProfile } = useQuery({
     queryKey: ["clinic-profile-upload", user?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await db
         .from("clinic_profiles")
         .select("id, name")
         .eq("user_id", user!.id)

@@ -87,7 +87,7 @@ const MedicalRecords = ({ patientId, isDoctor = false }: { patientId?: string; i
   }, [targetPatientId]);
 
   const fetchRecords = async () => {
-    const { data } = await supabase
+    const { data } = await db
       .from("medical_records")
       .select("id, record_type, title, description, cid_code, severity, is_active, start_date, end_date, created_at, doctor_id")
       .eq("patient_id", targetPatientId!)

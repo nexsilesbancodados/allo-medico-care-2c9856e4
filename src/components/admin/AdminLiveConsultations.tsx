@@ -30,7 +30,7 @@ const AdminLiveConsultations = () => {
     const now = new Date();
     const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
 
-    const { data } = await supabase
+    const { data } = await db
       .from("appointments")
       .select("id, scheduled_at, status, doctor_id, patient_id")
       .in("status", ["scheduled", "waiting", "in_progress"])

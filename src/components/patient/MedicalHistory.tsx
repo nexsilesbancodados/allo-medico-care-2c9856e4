@@ -57,7 +57,7 @@ const MedicalHistory = () => {
   useEffect(() => { if (user) fetchHistory(); }, [user]);
 
   const fetchHistory = async () => {
-    const { data: appts } = await supabase
+    const { data: appts } = await db
       .from("appointments")
       .select("id, scheduled_at, status, doctor_id, notes, duration_minutes")
       .eq("patient_id", user!.id)

@@ -46,7 +46,7 @@ const DoctorAnalyticsCharts = () => {
   }, [user, refresh]);
 
   const fetchData = async () => {
-    const { data: docProfile } = await supabase
+    const { data: docProfile } = await db
       .from("doctor_profiles").select("id, consultation_price").eq("user_id", user!.id).single();
     if (!docProfile) { setLoading(false); return; }
 

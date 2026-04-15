@@ -307,7 +307,7 @@ export const calculatePrice = async (
 
   // Check coupon
   if (couponCode) {
-    const { data: coupon } = await supabase
+    const { data: coupon } = await db
       .from("coupons")
       .select("discount_percentage, is_active, max_uses, times_used, expires_at")
       .eq("code", couponCode.toUpperCase())
@@ -333,20 +333,20 @@ export const calculatePrice = async (
 
 const sendPaymentConfirmationEmail = async (appointmentId: string) => {
   try {
-    const { data: appt } = await supabase
+    const { data: appt } = await db
       .from("appointments")
       .select("patient_id, doctor_id, scheduled_at, price_at_booking")
       .eq("id", appointmentId)
       .single();
     if (!appt?.patient_id) return;
 
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from("profiles")
       .select("first_name, last_name")
       .eq("user_id", appt.patient_id)
       .single();
 
-    const { data: docProfile } = await supabase
+    const { data: docProfile } = await db
       .from("doctor_profiles")
       .select("user_id")
       .eq("id", appt.doctor_id)
@@ -354,7 +354,7 @@ const sendPaymentConfirmationEmail = async (appointmentId: string) => {
 
     let doctorName = "Médico";
     if (docProfile) {
-      const { data: docP } = await supabase
+      const { data: docP } = await db
         .from("profiles")
         .select("first_name, last_name")
         .eq("user_id", docProfile.user_id)
@@ -387,20 +387,20 @@ const sendPaymentConfirmationEmail = async (appointmentId: string) => {
 
 const sendPostConsultationEmail = async (appointmentId: string) => {
   try {
-    const { data: appt } = await supabase
+    const { data: appt } = await db
       .from("appointments")
       .select("patient_id, doctor_id")
       .eq("id", appointmentId)
       .single();
     if (!appt?.patient_id) return;
 
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from("profiles")
       .select("first_name")
       .eq("user_id", appt.patient_id)
       .single();
 
-    const { data: docProfile } = await supabase
+    const { data: docProfile } = await db
       .from("doctor_profiles")
       .select("user_id")
       .eq("id", appt.doctor_id)
@@ -408,7 +408,7 @@ const sendPostConsultationEmail = async (appointmentId: string) => {
 
     let doctorName = "Médico";
     if (docProfile) {
-      const { data: docP } = await supabase
+      const { data: docP } = await db
         .from("profiles")
         .select("first_name, last_name")
         .eq("user_id", docProfile.user_id)

@@ -35,14 +35,14 @@ const ClinicMyExams = () => {
   const { data: examRequests, isLoading } = useQuery({
     queryKey: ["clinic-my-exams", user?.id],
     queryFn: async () => {
-      const { data: clinic } = await supabase
+      const { data: clinic } = await db
         .from("clinic_profiles")
         .select("id")
         .eq("user_id", user!.id)
         .maybeSingle();
       if (!clinic) return [];
 
-      const { data, error } = await supabase
+      const { data, error } = await db
         .from("exam_requests")
         .select("*")
         .eq("requesting_clinic_id", clinic.id)
@@ -53,7 +53,7 @@ const ClinicMyExams = () => {
       const reportedIds = (data ?? []).filter((e: any) => e.status === "reported").map((e: any) => e.id);
       const reportsMap: Record<string, any> = {};
       if (reportedIds.length > 0) {
-        const { data: reports } = await supabase
+        const { data: reports } = await db
           .from("exam_reports")
           .select("*, doctor_profiles:reporter_id(crm, crm_state, user_id)")
           .in("exam_request_id", reportedIds);
