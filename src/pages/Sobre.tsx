@@ -118,7 +118,7 @@ const Sobre = forwardRef<HTMLDivElement>((_, ref) => {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <motion.div className="flex justify-center order-2 lg:order-1" {...fadeUp} transition={{ duration: 0.6 }}>
-              <img src={doctorTecnologia} alt="Pingo com tecnologia médica" loading="lazy" width={512} height={512} className="w-[260px] sm:w-[320px] lg:w-[380px] drop-shadow-xl" />
+              <img src={doctorTecnologia} alt="Dra. Lila com tecnologia médica" loading="lazy" width={512} height={512} className="w-[260px] sm:w-[320px] lg:w-[380px] drop-shadow-xl" />
             </motion.div>
 
             <motion.div className="order-1 lg:order-2" {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>
@@ -250,7 +250,7 @@ const Sobre = forwardRef<HTMLDivElement>((_, ref) => {
             </motion.div>
 
             <motion.div className="flex justify-center" {...fadeUp} transition={{ duration: 0.6, delay: 0.2 }}>
-              <img src={doctorPacientes} alt="Pingo com pacientes felizes" loading="lazy" width={512} height={512} className="w-[280px] sm:w-[340px] lg:w-[420px] drop-shadow-xl" />
+              <img src={doctorPacientes} alt="Dra. Lila com pacientes felizes" loading="lazy" width={512} height={512} className="w-[280px] sm:w-[340px] lg:w-[420px] drop-shadow-xl" />
             </motion.div>
           </div>
         </div>
@@ -299,7 +299,7 @@ const Sobre = forwardRef<HTMLDivElement>((_, ref) => {
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
             <motion.div className="flex justify-center order-2 lg:order-1" {...fadeUp} transition={{ duration: 0.6 }}>
-              <img src={doctorSeguranca} alt="Pingo segurança de dados" loading="lazy" width={512} height={512} className="w-[260px] sm:w-[300px] lg:w-[360px] drop-shadow-xl" />
+              <img src={doctorSeguranca} alt="Dra. Lila segurança de dados" loading="lazy" width={512} height={512} className="w-[260px] sm:w-[300px] lg:w-[360px] drop-shadow-xl" />
             </motion.div>
 
             <motion.div className="order-1 lg:order-2" {...fadeUp} transition={{ duration: 0.5, delay: 0.1 }}>

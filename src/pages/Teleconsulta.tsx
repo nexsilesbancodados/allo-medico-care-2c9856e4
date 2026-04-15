@@ -215,7 +215,7 @@ const Teleconsulta = () => {
                 </motion.div>
               </motion.div>
 
-              {/* Right — Pingo */}
+              {/* Right — Dra. Lila */}
               <motion.div
                 className="flex items-center justify-center lg:justify-end"
                 initial={{ opacity: 0, scale: 0.92, y: 20 }}

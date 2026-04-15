@@ -186,7 +186,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-primary/[0.03] to-background" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-[1fr_1.2fr] gap-12 lg:gap-16 items-center">
-            {/* Left — Pingo + Rating */}
+            {/* Left — Dra. Lila + Rating */}
             <motion.div
               className="flex flex-col items-center text-center"
               initial={{ opacity: 0, scale: 0.9 }}
@@ -196,7 +196,7 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
             >
               <img
                 src={pingoDepoimentos}
-                alt="Pingo com 5 estrelas de avaliação"
+                alt="Dra. Lila com 5 estrelas de avaliação"
                 loading="lazy"
                 width={512}
                 height={512}

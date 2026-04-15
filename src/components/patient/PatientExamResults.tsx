@@ -133,7 +133,7 @@ const PatientExamResults = () => {
           </div>
           <img
             src={mascotReading}
-            alt="Pingo lendo"
+            alt="Dra. Lila lendo"
             className="absolute right-2 bottom-0 w-28 h-28 object-contain select-none opacity-90"
             loading="lazy" decoding="async" width={112} height={112}
           />

@@ -93,7 +93,7 @@ const AuthAdmin = () => {
           >
             <motion.img
               src={pingoAdmin}
-              alt="Pingo Admin"
+              alt="Dra. Lila Admin"
               className="w-52 h-52 object-contain select-none"
               style={{ filter: "drop-shadow(0 8px 32px rgba(0,0,50,.4))" }}
               animate={{ y: [0, -8, 0] }}

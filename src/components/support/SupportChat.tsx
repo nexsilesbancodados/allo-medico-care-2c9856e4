@@ -187,7 +187,7 @@ const SupportChat = () => {
       <CardHeader className="pb-3 border-b border-border">
         <CardTitle className="text-lg flex items-center gap-2">
           <Bot className="w-5 h-5 text-primary" />
-          Chat de Suporte — Pingo
+          Chat de Suporte — Dra. Lila
           <Badge variant="secondary" className="text-[10px]">IA</Badge>
         </CardTitle>
       </CardHeader>

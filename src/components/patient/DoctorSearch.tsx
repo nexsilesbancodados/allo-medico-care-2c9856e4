@@ -384,7 +384,7 @@ const DoctorSearch = () => {
         {/* Specialties grid view (default) */}
         {viewMode === "specialties" && !loading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            {/* Pingo speech bubble */}
+            {/* Dra. Lila speech bubble */}
             <div className="flex items-start gap-3 mb-6 p-4 rounded-2xl bg-[hsl(var(--p-primary))]/10 border border-[hsl(var(--p-primary))]/20">
               <img src={mascotWave} alt="Dra. Lila" className="w-12 h-12 rounded-full object-cover shrink-0" loading="lazy" decoding="async" width={48} height={48} />
               <p className="text-sm text-foreground leading-relaxed">

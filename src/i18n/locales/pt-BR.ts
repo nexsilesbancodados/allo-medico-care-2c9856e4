@@ -123,7 +123,7 @@ const ptBR = {
   "dashboard.profile": "Perfil",
   "dashboard.notifications": "Notificações",
 
-  // Pingo
+  // Dra. Lila
   "pingo.greeting": "Olá! Eu sou a Dra. Lila, seu assistente virtual. Como posso ajudar?",
   "pingo.placeholder": "Digite sua pergunta...",
   "pingo.newConversation": "Nova conversa",

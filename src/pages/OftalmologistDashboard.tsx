@@ -51,7 +51,7 @@ export default function OftalmologistDashboard() {
           <HeroBanner
             gradient="from-[#1a0d2e] via-[#2d1b4e] to-[#502080]"
             pingoSrc={pingoOftalmologia}
-            pingoAlt="Pingo Oftalmologia"
+            pingoAlt="Dra. Lila Oftalmologia"
             liveDot={pendingCount > 0}
             liveColor={"green"}
             bubble={{
