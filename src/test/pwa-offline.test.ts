@@ -8,7 +8,7 @@ describe("PWA Offline Logic", () => {
   it("safeQuery handles errors gracefully", async () => {
     const { safeQuery } = await import("@/lib/supabase-helpers");
     const result = await safeQuery(
-      Promise.resolve({ data: null, error: { message: "test", details: "", hint: "", code: "ERR", name: "TestError" } }),
+      Promise.resolve({ data: null, error: { message: "test", details: "", hint: "", code: "ERR", name: "TestError", toJSON: () => ({}) } }) as any,
       "test"
     );
     expect(result.error).toBeTruthy();
