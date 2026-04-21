@@ -5,7 +5,8 @@ import {
   Heart, Brain, Baby, Bone, Eye, FirstAidKit, Syringe, Tooth, ArrowRight,
   Wind, Drop, Heartbeat, Skull, Leaf, Person, Virus, Ear,
   Scales, HandHeart, Dna, Pill, Lightning, Wheelchair, ChartLine,
-  Stethoscope, Sparkle, Flask, Knife
+  Stethoscope, Sparkle, Flask, Knife, UserCircle
+
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
 
