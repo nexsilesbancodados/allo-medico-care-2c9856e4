@@ -106,8 +106,8 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
         </div>
       </section>
 
-      <TechnologySection />
-      <SpecialtiesSection />
+      <TechnologySection config={sectionData.technology} />
+      <SpecialtiesSection config={sectionData.specialties} />
 
       {/* ═══════════════ DEPOIMENTOS ═══════════════ */}
       {isOn("testimonials") && (
