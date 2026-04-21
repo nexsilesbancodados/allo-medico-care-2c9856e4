@@ -95,32 +95,19 @@ const SpecialtyCard = ({ name, desc, index }: { name: string; desc?: string; ind
   );
 };
 
-function SpecialtiesSection() {
+function SpecialtiesSection({ config }: { config?: any }) {
   const [showAll, setShowAll] = useState(false);
+  const title = config?.title || "Especialidades mais buscadas";
+  const subtitle = config?.subtitle || "Selecione a especialidade para ver os profissionais disponíveis.";
 
   return (
     <section className="relative py-20 md:py-32 overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background via-muted/30 to-background" />
-      <div className="absolute top-[20%] left-[-8%] w-[500px] h-[500px] bg-primary/[0.04] rounded-full blur-[160px] -z-10" />
-      <div className="absolute bottom-[10%] right-[-5%] w-[400px] h-[400px] bg-secondary/[0.04] rounded-full blur-[120px] -z-10" />
-
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          className="text-center mb-14"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <span className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.25em] text-primary/60 mb-3 block">
-            Especialidades
-          </span>
-          <h2 className="text-2xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight">
-            Especialidades <span className="text-gradient">mais buscadas</span>
-          </h2>
-          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
-            Selecione a especialidade para ver os profissionais disponíveis para agendamento.
-          </p>
+        <motion.div className="text-center mb-14" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <span className="text-xs font-bold uppercase tracking-[0.25em] text-primary/60 mb-3 block">Especialidades</span>
+          <h2 className="text-2xl md:text-4xl font-extrabold text-foreground mb-3 tracking-tight">{title}</h2>
+          <p className="text-muted-foreground text-lg max-w-xl mx-auto">{subtitle}</p>
         </motion.div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
@@ -131,13 +118,7 @@ function SpecialtiesSection() {
 
         <AnimatePresence>
           {showAll && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden"
-            >
+            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4 mb-6">
                 {moreSpecialties.map((s, i) => (
                   <SpecialtyCard key={s.name} name={s.name} desc={s.desc} index={i} />
@@ -148,14 +129,9 @@ function SpecialtiesSection() {
         </AnimatePresence>
 
         <div className="flex justify-center">
-          <Button
-            size="lg"
-            variant="ghost"
-            className="rounded-2xl h-[46px] px-6 text-sm font-bold text-primary hover:bg-primary/[0.06] transition-all group"
-            onClick={() => setShowAll(!showAll)}
-          >
-            {showAll ? "Ver menos especialidades" : "Ver mais especialidades"}
-            <CaretDown className={`w-4 h-4 ml-1.5 transition-transform duration-300 ${showAll ? "rotate-180" : "group-hover:translate-y-0.5"}`} weight="bold" />
+          <Button size="lg" variant="ghost" className="rounded-2xl h-[46px] px-6 font-bold text-primary group" onClick={() => setShowAll(!showAll)}>
+            {showAll ? "Ver menos" : "Ver mais"}
+            <CaretDown className={`w-4 h-4 ml-1.5 transition-transform ${showAll ? "rotate-180" : ""}`} weight="bold" />
           </Button>
         </div>
       </div>
