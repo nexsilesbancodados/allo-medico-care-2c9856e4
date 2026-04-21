@@ -140,7 +140,7 @@ function SpecialtiesShowcase() {
                   {/* Pingo (transparent) on a soft tinted backdrop */}
                   <div className={`relative h-40 sm:h-44 bg-gradient-to-br ${spec.color} flex items-center justify-center rounded-t-2xl`}>
                     <OptimizedImage
-                      src="https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/0XILPRqqUbSOh99ow53X5OBDOCC3/1776788772275-bngbf-hero-doctor__4_-removebg-preview.png"
+                      src={spec.image}
                       alt={`Especialista - ${spec.name}`}
                       className="h-full w-auto object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-500 ease-out"
                       width={512}
