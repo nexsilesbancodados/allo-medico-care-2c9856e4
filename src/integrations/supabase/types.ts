@@ -2109,33 +2109,36 @@ export type Database = {
       }
       site_sections: {
         Row: {
-          content: Json | null
+          config: Json | null
           created_at: string
+          display_name: string | null
           display_order: number | null
           id: string
-          is_visible: boolean | null
-          section_key: string
-          title: string | null
+          is_enabled: boolean | null
+          key: string
+          schema: Json
           updated_at: string
         }
         Insert: {
-          content?: Json | null
+          config?: Json | null
           created_at?: string
+          display_name?: string | null
           display_order?: number | null
           id?: string
-          is_visible?: boolean | null
-          section_key: string
-          title?: string | null
+          is_enabled?: boolean | null
+          key: string
+          schema?: Json
           updated_at?: string
         }
         Update: {
-          content?: Json | null
+          config?: Json | null
           created_at?: string
+          display_name?: string | null
           display_order?: number | null
           id?: string
-          is_visible?: boolean | null
-          section_key?: string
-          title?: string | null
+          is_enabled?: boolean | null
+          key?: string
+          schema?: Json
           updated_at?: string
         }
         Relationships: []
