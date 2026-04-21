@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { usePrefetchRoute } from "@/hooks/use-prefetch-route";
 import OptimizedImage from "@/components/ui/optimized-image";
 import { ArrowRight, ShieldCheck, Lock, Star, CheckCircle } from "@phosphor-icons/react";
-import { useSiteConfig } from "@/lib/site-config";
 
 // The "correct" hero image provided by the user
 const DEFAULT_HERO_IMAGE = "https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/0XILPRqqUbSOh99ow53X5OBDOCC3/1776794584229-hum3c-hero-doctor__4_-removebg-preview.png";
@@ -23,7 +22,7 @@ const specialtyVariations = [
     name: "Cardiologia",
     title: "Cuide do seu coração com especialistas",
     subtitle: "Acompanhamento cardiológico completo via telemedicina. Monitore sua saúde cardiovascular com os melhores profissionais do país.",
-    image: DEFAULT_HERO_IMAGE, // Assuming same doctor for now as requested "variations of it"
+    image: DEFAULT_HERO_IMAGE,
     color: "rose-500",
     badge: "Cardiologistas de plantão"
   },
@@ -65,16 +64,16 @@ const highlights = [
   "30+ especialidades médicas",
 ];
 
-interface HeroSectionProps {
+export interface HeroSectionProps {
   activeSpecialtyIndex?: number;
   autoRotate?: boolean;
 }
 
 const HeroSection = memo(
-  forwardRef<HTMLElement, HeroSectionProps>(({ activeSpecialtyIndex: manualIndex, autoRotate = true }, ref) => {
+  forwardRef<HTMLElement, HeroSectionProps>((props, ref) => {
+    const { activeSpecialtyIndex: manualIndex, autoRotate = true } = props;
     const navigate = useNavigate();
     const prefetchPaciente = usePrefetchRoute(() => import("@/pages/AuthPaciente"));
-    const { get } = useSiteConfig();
     const [currentIndex, setCurrentIndex] = useState(manualIndex ?? 0);
 
     useEffect(() => {
@@ -84,12 +83,15 @@ const HeroSection = memo(
     }, [manualIndex]);
 
     useEffect(() => {
+      let timer: ReturnType<typeof setInterval> | null = null;
       if (autoRotate && manualIndex === undefined) {
-        const timer = setInterval(() => {
+        timer = setInterval(() => {
           setCurrentIndex((prev) => (prev + 1) % specialtyVariations.length);
         }, 6000);
-        return () => clearInterval(timer);
       }
+      return () => {
+        if (timer) clearInterval(timer);
+      };
     }, [autoRotate, manualIndex]);
 
     const variation = specialtyVariations[currentIndex];
@@ -114,11 +116,11 @@ const HeroSection = memo(
             >
               <div 
                 className="absolute top-[-15%] right-[10%] w-[500px] h-[500px] rounded-full blur-[180px] animate-breathe"
-                style={{ backgroundColor: `hsl(var(--${variation.color === 'primary' ? 'primary' : ''}))`, opacity: 0.08 }} 
+                style={{ backgroundColor: variation.color === 'primary' ? 'var(--primary)' : variation.color, opacity: 0.08 }} 
               />
               <div 
                 className="absolute bottom-[-25%] left-[-8%] w-[400px] h-[400px] rounded-full blur-[160px] animate-breathe [animation-delay:1.5s]"
-                style={{ backgroundColor: `hsl(var(--secondary))`, opacity: 0.04 }}
+                style={{ backgroundColor: 'var(--secondary)', opacity: 0.04 }}
               />
             </motion.div>
           </AnimatePresence>
