@@ -8,6 +8,7 @@ import {
   Stethoscope, UserCircle, Sparkle, Flask, Knife
 } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 // Pingo specialty mascots (transparent PNGs)
 import specCardiology from "@/assets/spec-cardiologista.png";
@@ -138,12 +139,10 @@ function SpecialtiesShowcase() {
                 <div className="relative bg-card rounded-2xl border border-border/40 hover:shadow-xl hover:border-primary/20 transition-all duration-300">
                   {/* Pingo (transparent) on a soft tinted backdrop */}
                   <div className={`relative h-40 sm:h-44 bg-gradient-to-br ${spec.color} flex items-center justify-center rounded-t-2xl`}>
-                    <img
+                    <OptimizedImage
                       src={spec.image}
                       alt={`Pingo - ${spec.name}`}
                       className="h-full w-auto object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-500 ease-out"
-                      loading="lazy"
-                      decoding="async"
                       width={512}
                       height={512}
                     />
