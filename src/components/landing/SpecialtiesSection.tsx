@@ -57,12 +57,17 @@ const topSpecialties = [
 
 const moreSpecialties = [
   { name: "Acupunturista", img: pingoAcupunturista, desc: "Equilíbrio e bem-estar através de técnicas tradicionais." },
+  { name: "Alergologista", img: pingoAlergologista, desc: "Tratamento de alergias e cuidados com seu sistema imunológico." },
   { name: "Anestesiologista", img: pingoAnestesiologista, desc: "Segurança e conforto durante seus procedimentos." },
+  { name: "Cirurgião dentista", img: pingoCirurgiaoDentista, desc: "Cuidando do seu sorriso e da sua saúde bucal com carinho." },
   { name: "Cirurgião geral", img: pingoCirurgiaoGeral, desc: "Especialista em diversos procedimentos cirúrgicos essenciais." },
   { name: "Cirurgião oncológico", img: pingoCirurgiaoOnco, desc: "Tratamento especializado e focado no combate ao câncer." },
   { name: "Cirurgião plástico", img: pingoCirurgiaoPlastico, desc: "Harmonia e estética com foco na sua autoestima." },
   { name: "Cirurgião vascular", img: pingoCirurgiaoVascular, desc: "Cuidando da sua circulação e saúde das veias e artérias." },
   { name: "Clínica médica", img: pingoClinicaMedica, desc: "Visão integral da sua saúde para diagnósticos precisos." },
+  { name: "Fisiatra", img: pingoFisiatra, desc: "Reabilitação e qualidade de vida para sua recuperação física." },
+  { name: "Fisioterapeuta", img: pingoFisioterapeuta, desc: "Movimento e cuidado para sua plena recuperação e bem-estar." },
+  { name: "Fonoaudiólogo", img: pingoFonoaudiologo, desc: "Cuidando da sua comunicação, fala e audição com dedicação." },
   { name: "Geriatra", img: pingoGeriatra, desc: "Cuidado dedicado e especializado para a melhor idade." },
   { name: "Homeopata", img: pingoHomeopata, desc: "Abordagem natural e holística para o seu equilíbrio." },
   { name: "Infectologista", img: pingoInfectologista, desc: "Prevenção e tratamento de doenças infecciosas." },
