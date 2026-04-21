@@ -10,30 +10,34 @@ import SEOHead from "@/components/SEOHead";
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
 const specialties = [
-  { name: "Cardiologia", emoji: "❤️", desc: "Coração, circulação e saúde cardiovascular", doctors: 45 },
-  { name: "Dermatologia", emoji: "🔬", desc: "Pele, acne, envelhecimento e estética", doctors: 38 },
-  { name: "Oftalmologia", emoji: "👁️", desc: "Visão, exames e prescrição de óculos", doctors: 52 },
-  { name: "Pediatria", emoji: "👶", desc: "Saúde infantil e desenvolvimento", doctors: 41 },
-  { name: "Psicologia", emoji: "🧠", desc: "Saúde mental, terapia e bem-estar", doctors: 67 },
-  { name: "Neurologia", emoji: "⚡", desc: "Sistema nervoso, dores e distúrbios", doctors: 34 },
-  { name: "Gastroenterologia", emoji: "🍽️", desc: "Digestão, estômago e intestinos", doctors: 29 },
-  { name: "Endocrinologia", emoji: "🔬", desc: "Diabetes, hormônios e metabolismo", doctors: 26 },
-  { name: "Urologia", emoji: "💧", desc: "Sistema urinário e saúde sexual", doctors: 32 },
-  { name: "Otorrinolaringologia", emoji: "👂", desc: "Ouvidos, nariz e garganta", doctors: 28 },
-  { name: "Reumatologia", emoji: "🦴", desc: "Articulações, ossos e inflamação", doctors: 21 },
-  { name: "Pneumologia", emoji: "💨", desc: "Pulmões e sistema respiratório", doctors: 25 },
-  { name: "Clínica Geral", emoji: "🏥", desc: "Atendimento geral e primeiro acolhimento", doctors: 89 },
-  { name: "Ginecologia", emoji: "♀️", desc: "Saúde da mulher e reprodutiva", doctors: 44 },
-  { name: "Nutrição", emoji: "🥗", desc: "Dietas, emagrecimento e nutrientes", doctors: 36 },
-  { name: "Fisioterapia", emoji: "💪", desc: "Reabilitação e movimento", doctors: 42 },
-  { name: "Fonoaudiologia", emoji: "🗣️", desc: "Fala, audição e comunicação", doctors: 18 },
-  { name: "Ortopedia", emoji: "🦵", desc: "Ossos, articulações e esportes", doctors: 51 },
-  { name: "Infectologia", emoji: "🦠", desc: "Infecções e doenças infecciosas", doctors: 19 },
-  { name: "Oncologia", emoji: "⚕️", desc: "Câncer e tratamentos oncológicos", doctors: 22 },
-  { name: "Nefrologia", emoji: "🫘", desc: "Rins e sistema urinário", doctors: 16 },
-  { name: "Hepatologia", emoji: "🫀", desc: "Fígado e doenças hepáticas", doctors: 14 },
-  { name: "Alergologia", emoji: "🤧", desc: "Alergias e reações adversas", doctors: 23 },
-  { name: "Telemedicina 24h", emoji: "📞", desc: "Atendimento de emergência anytime", doctors: 150 },
+  { name: "Cardiologia", emoji: "❤️", image: "/src/assets/pingo-cardiologista.png", desc: "Coração, circulação e saúde cardiovascular", doctors: 45 },
+  { name: "Dermatologia", emoji: "🔬", image: "/src/assets/pingo-dermatologista.png", desc: "Pele, acne, envelhecimento e estética", doctors: 38 },
+  { name: "Oftalmologia", emoji: "👁️", image: "/src/assets/pingo-oftalmologista.png", desc: "Visão, exames e prescrição de óculos", doctors: 52 },
+  { name: "Pediatria", emoji: "👶", image: "/src/assets/pingo-pediatra.png", desc: "Saúde infantil e desenvolvimento", doctors: 41 },
+  { name: "Psicologia", emoji: "🧠", image: "/src/assets/pingo-psiquiatra.png", desc: "Saúde mental, terapia e bem-estar", doctors: 67 },
+  { name: "Neurologia", emoji: "⚡", image: "/src/assets/pingo-neurologista.png", desc: "Sistema nervoso, dores e distúrbios", doctors: 34 },
+  { name: "Gastroenterologia", emoji: "🍽️", image: "/src/assets/pingo-gastroenterologista.png", desc: "Digestão, estômago e intestinos", doctors: 29 },
+  { name: "Endocrinologia", emoji: "🔬", image: "/src/assets/pingo-endocrinologista.png", desc: "Diabetes, hormônios e metabolismo", doctors: 26 },
+  { name: "Urologia", emoji: "💧", image: "/src/assets/pingo-urologista.png", desc: "Sistema urinário e saúde sexual", doctors: 32 },
+  { name: "Otorrinolaringologia", emoji: "👂", image: "/src/assets/pingo-otorrino.png", desc: "Ouvidos, nariz e garganta", doctors: 28 },
+  { name: "Reumatologia", emoji: "🦴", image: "/src/assets/pingo-reumatologista.png", desc: "Articulações, ossos e inflamação", doctors: 21 },
+  { name: "Pneumologia", emoji: "💨", image: "/src/assets/pingo-pneumologista.png", desc: "Pulmões e sistema respiratório", doctors: 25 },
+  { name: "Clínica Geral", emoji: "🏥", image: "/src/assets/pingo-clinico-geral.png", desc: "Atendimento geral e primeiro acolhimento", doctors: 89 },
+  { name: "Ginecologia", emoji: "♀️", image: "/src/assets/pingo-ginecologista.png", desc: "Saúde da mulher e reprodutiva", doctors: 44 },
+  { name: "Nutrição", emoji: "🥗", image: "/src/assets/pingo-nutricionista.png", desc: "Dietas, emagrecimento e nutrientes", doctors: 36 },
+  { name: "Fisioterapia", emoji: "💪", image: "/src/assets/pingo-fisioterapeuta.png", desc: "Reabilitação e movimento", doctors: 42 },
+  { name: "Fonoaudiologia", emoji: "🗣️", image: "/src/assets/pingo-fonoaudiologo.png", desc: "Fala, audição e comunicação", doctors: 18 },
+  { name: "Ortopedia", emoji: "🦵", image: "/src/assets/pingo-ortopedista.png", desc: "Ossos, articulações e esportes", doctors: 51 },
+  { name: "Infectologia", emoji: "🦠", image: "/src/assets/pingo-infectologista.png", desc: "Infecções e doenças infecciosas", doctors: 19 },
+  { name: "Oncologia", emoji: "⚕️", image: "/src/assets/pingo-cirurgiao-onco.png", desc: "Câncer e tratamentos oncológicos", doctors: 22 },
+  { name: "Nefrologia", emoji: "🫘", image: "/src/assets/spec-nefrologia.png", desc: "Rins e sistema urinário", doctors: 16 },
+  { name: "Hepatologia", emoji: "🫀", image: "/src/assets/pingo-gastro.png", desc: "Fígado e doenças hepáticas", doctors: 14 },
+  { name: "Alergologia", emoji: "🤧", image: "/src/assets/pingo-alergologista.png", desc: "Alergias e reações adversas", doctors: 23 },
+  { name: "Psiquiatria", emoji: "🧠", image: "/src/assets/pingo-psiquiatra.png", desc: "Tratamento de transtornos mentais", doctors: 33 },
+  { name: "Geriatria", emoji: "👴", image: "/src/assets/pingo-geriatra.png", desc: "Saúde do idoso e envelhecimento", doctors: 19 },
+  { name: "Cirurgia Plástica", emoji: "✨", image: "/src/assets/pingo-cirurgiao-plastico.png", desc: "Procedimentos estéticos e reparadores", doctors: 15 },
+  { name: "Acupuntura", emoji: "📍", image: "/src/assets/pingo-acupunturista.png", desc: "Medicina tradicional chinesa", doctors: 12 },
+  { name: "Telemedicina 24h", emoji: "📞", image: "/src/assets/pingo-videocall.png", desc: "Atendimento de emergência anytime", doctors: 150 },
 ];
 
 const Especialidades = forwardRef<HTMLDivElement>((_, ref) => {
@@ -149,11 +153,24 @@ const Especialidades = forwardRef<HTMLDivElement>((_, ref) => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: (i % 12) * 0.05 }}
                 onClick={() => navigate(`/agendar?especialidade=${encodeURIComponent(specialty.name)}`)}
-                className="group text-left p-6 rounded-xl border border-border bg-card hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
+                className="group relative overflow-hidden text-left p-6 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="text-3xl">{specialty.emoji}</div>
-                  <ArrowRight className="w-4 h-4 text-primary opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1" weight="bold" />
+                <div className="flex items-start justify-between mb-4">
+                  <div className="relative w-20 h-20 bg-primary/5 rounded-2xl flex items-center justify-center overflow-hidden group-hover:bg-primary/10 transition-colors">
+                    <img 
+                      src={specialty.image} 
+                      alt={`Pingo ${specialty.name}`}
+                      className="w-full h-full object-contain pingo-float"
+                      onError={(e) => {
+                        // Fallback to emoji if image fails to load
+                        e.currentTarget.style.display = 'none';
+                        const emojiSpan = e.currentTarget.parentElement?.querySelector('.emoji-fallback');
+                        if (emojiSpan) emojiSpan.classList.remove('hidden');
+                      }}
+                    />
+                    <span className="emoji-fallback hidden text-4xl">{specialty.emoji}</span>
+                  </div>
+                  <ArrowRight className="w-5 h-5 text-primary opacity-0 group-hover:opacity-100 transition-all group-hover:translate-x-1" weight="bold" />
                 </div>
                 <h3 className="font-semibold text-foreground mb-1 group-hover:text-primary transition-colors">
                   {specialty.name}
