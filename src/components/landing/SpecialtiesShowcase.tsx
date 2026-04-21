@@ -52,45 +52,45 @@ import specCabecaPescoco from "@/assets/spec-cabeca-pescoco.png";
 import specCirurgiaVascular from "@/assets/spec-cirurgiao-vascular.png";
 
 const specialties = [
-  { name: "Cardiologia", icon: Heart, image: specCardiology, color: "from-rose-500/15 to-rose-500/[0.03]" },
-  { name: "Neurologia", icon: Brain, image: specNeurology, color: "from-violet-500/15 to-violet-500/[0.03]" },
-  { name: "Pediatria", icon: Baby, image: specPediatrics, color: "from-sky-500/15 to-sky-500/[0.03]" },
-  { name: "Ortopedia", icon: Bone, image: specOrthopedics, color: "from-amber-500/15 to-amber-500/[0.03]" },
-  { name: "Oftalmologia", icon: Eye, image: specOphthalmology, color: "from-emerald-500/15 to-emerald-500/[0.03]" },
-  { name: "Dermatologia", icon: FirstAidKit, image: specDermatology, color: "from-pink-500/15 to-pink-500/[0.03]" },
-  { name: "Clínico Geral", icon: Syringe, image: specGeneral, color: "from-primary/15 to-primary/[0.03]" },
-  { name: "Endocrinologia", icon: Tooth, image: specEndocrinology, color: "from-teal-500/15 to-teal-500/[0.03]" },
-  { name: "Acupuntura", icon: Sparkle, image: specAcupuntura, color: "from-orange-500/15 to-orange-500/[0.03]" },
-  { name: "Alergia e Imunologia", icon: Drop, image: specAlergia, color: "from-cyan-500/15 to-cyan-500/[0.03]" },
-  { name: "Angiologia", icon: Heartbeat, image: specAngiologia, color: "from-red-500/15 to-red-500/[0.03]" },
-  { name: "Cirurgia Geral", icon: Knife, image: specCirurgia, color: "from-slate-500/15 to-slate-500/[0.03]" },
-  { name: "Coloproctologia", icon: Stethoscope, image: specColoproctologia, color: "from-yellow-600/15 to-yellow-600/[0.03]" },
-  { name: "Gastroenterologia", icon: Flask, image: specGastro, color: "from-lime-500/15 to-lime-500/[0.03]" },
-  { name: "Geriatria", icon: Wheelchair, image: specGeriatria, color: "from-stone-500/15 to-stone-500/[0.03]" },
-  { name: "Ginecologia e Obstetrícia", icon: HandHeart, image: specGinecologia, color: "from-fuchsia-500/15 to-fuchsia-500/[0.03]" },
-  { name: "Hematologia", icon: Drop, image: specHematologia, color: "from-red-600/15 to-red-600/[0.03]" },
-  { name: "Infectologia", icon: Virus, image: specInfectologia, color: "from-green-600/15 to-green-600/[0.03]" },
-  { name: "Mastologia", icon: Heart, image: specMastologia, color: "from-pink-600/15 to-pink-600/[0.03]" },
-  { name: "Med. Família", icon: Person, image: specFamilia, color: "from-blue-500/15 to-blue-500/[0.03]" },
-  { name: "Med. do Esporte", icon: Lightning, image: specEsporte, color: "from-emerald-600/15 to-emerald-600/[0.03]" },
-  { name: "Nefrologia", icon: Scales, image: specNefrologia, color: "from-indigo-500/15 to-indigo-500/[0.03]" },
-  { name: "Nutrologia", icon: Leaf, image: specNutrologia, color: "from-green-500/15 to-green-500/[0.03]" },
-  { name: "Oncologia", icon: Flask, image: specOncologia, color: "from-orange-600/15 to-orange-600/[0.03]" },
-  { name: "Otorrinolaringologia", icon: Ear, image: specOtorrino, color: "from-purple-500/15 to-purple-500/[0.03]" },
-  { name: "Pneumologia", icon: Wind, image: specPneumologia, color: "from-sky-600/15 to-sky-600/[0.03]" },
-  { name: "Psiquiatria", icon: Brain, image: specPsiquiatria, color: "from-violet-600/15 to-violet-600/[0.03]" },
-  { name: "Radiologia", icon: ChartLine, image: specRadiologia, color: "from-gray-500/15 to-gray-500/[0.03]" },
-  { name: "Reumatologia", icon: Bone, image: specReumatologia, color: "from-amber-600/15 to-amber-600/[0.03]" },
-  { name: "Urologia", icon: UserCircle, image: specUrologia, color: "from-teal-600/15 to-teal-600/[0.03]" },
-  { name: "Anestesiologia", icon: Pill, image: specAnestesiologia, color: "from-cyan-600/15 to-cyan-600/[0.03]" },
-  { name: "Endoscopia", icon: Eye, image: specEndoscopia, color: "from-indigo-600/15 to-indigo-600/[0.03]" },
-  { name: "Genética Médica", icon: Dna, image: specGenetica, color: "from-blue-600/15 to-blue-600/[0.03]" },
-  { name: "Homeopatia", icon: Leaf, image: specHomeopatia, color: "from-lime-600/15 to-lime-600/[0.03]" },
-  { name: "Cirurgia Plástica", icon: Sparkle, image: specPlastica, color: "from-rose-400/15 to-rose-400/[0.03]" },
-  { name: "Cir. Cardiovascular", icon: Heartbeat, image: specCirurgiaCardio, color: "from-red-700/15 to-red-700/[0.03]" },
-  { name: "Med. Intensiva", icon: ChartLine, image: specIntensiva, color: "from-slate-600/15 to-slate-600/[0.03]" },
-  { name: "Cir. Cabeça e Pescoço", icon: Skull, image: specCabecaPescoco, color: "from-stone-600/15 to-stone-600/[0.03]" },
-  { name: "Cirurgia Vascular", icon: Heartbeat, image: specCirurgiaVascular, color: "from-red-400/15 to-red-400/[0.03]" },
+  { name: "Cardiologia", icon: Heart, image: specCardiology, color: "from-rose-500/15 to-rose-500/[0.03]", desc: "Cuidando do seu coração para ele bater sempre forte e feliz." },
+  { name: "Neurologia", icon: Brain, image: specNeurology, color: "from-violet-500/15 to-violet-500/[0.03]", desc: "Especialista em cérebro e sistema nervoso. Conexão total!" },
+  { name: "Pediatria", icon: Baby, image: specPediatrics, color: "from-sky-500/15 to-sky-500/[0.03]", desc: "Cuidado especial para os nossos pequenos crescerem saudáveis." },
+  { name: "Ortopedia", icon: Bone, image: specOrthopedics, color: "from-amber-500/15 to-amber-500/[0.03]", desc: "Para dores nos ossos, articulações e músculos. Vamos nos mexer!" },
+  { name: "Oftalmologia", icon: Eye, image: specOphthalmology, color: "from-emerald-500/15 to-emerald-500/[0.03]", desc: "Para você enxergar o mundo com clareza e cores vibrantes." },
+  { name: "Dermatologia", icon: FirstAidKit, image: specDermatology, color: "from-pink-500/15 to-pink-500/[0.03]", desc: "Cuidando da sua pele, cabelos e unhas com todo carinho." },
+  { name: "Clínico Geral", icon: Syringe, image: specGeneral, color: "from-primary/15 to-primary/[0.03]", desc: "Seu primeiro contato para qualquer sintoma. Eu te ajudo!" },
+  { name: "Endocrinologia", icon: Tooth, image: specEndocrinology, color: "from-teal-500/15 to-teal-500/[0.03]", desc: "Equilibrando seus hormônios e metabolismo para mais energia." },
+  { name: "Acupuntura", icon: Sparkle, image: specAcupuntura, color: "from-orange-500/15 to-orange-500/[0.03]", desc: "Equilíbrio e bem-estar através de técnicas tradicionais." },
+  { name: "Alergia e Imunologia", icon: Drop, image: specAlergia, color: "from-cyan-500/15 to-cyan-500/[0.03]", desc: "Protegendo seu corpo contra alergias e reforçando a imunidade." },
+  { name: "Angiologia", icon: Heartbeat, image: specAngiologia, color: "from-red-500/15 to-red-500/[0.03]", desc: "Cuidado especializado para seus vasos sanguíneos e circulação." },
+  { name: "Cirurgia Geral", icon: Knife, image: specCirurgia, color: "from-slate-500/15 to-slate-500/[0.03]", desc: "Procedimentos cirúrgicos essenciais com toda segurança." },
+  { name: "Coloproctologia", icon: Stethoscope, image: specColoproctologia, color: "from-yellow-600/15 to-yellow-600/[0.03]", desc: "Saúde digestiva especializada com foco no seu conforto." },
+  { name: "Gastroenterologia", icon: Flask, image: specGastro, color: "from-lime-500/15 to-lime-500/[0.03]", desc: "Cuidando do seu sistema digestivo para você se sentir leve." },
+  { name: "Geriatria", icon: Wheelchair, image: specGeriatria, color: "from-stone-500/15 to-stone-500/[0.03]", desc: "Cuidado dedicado e especializado para a melhor idade." },
+  { name: "Ginecologia e Obstetrícia", icon: HandHeart, image: specGinecologia, color: "from-fuchsia-500/15 to-fuchsia-500/[0.03]", desc: "Saúde da mulher em todas as fases, com acolhimento." },
+  { name: "Hematologia", icon: Drop, image: specHematologia, color: "from-red-600/15 to-red-600/[0.03]", desc: "Especialista em doenças do sangue e órgãos hematopoiéticos." },
+  { name: "Infectologia", icon: Virus, image: specInfectologia, color: "from-green-600/15 to-green-600/[0.03]", desc: "Prevenção e tratamento de doenças infecciosas com precisão." },
+  { name: "Mastologia", icon: Heart, image: specMastologia, color: "from-pink-600/15 to-pink-600/[0.03]", desc: "Prevenção e tratamento especializado para a saúde das mamas." },
+  { name: "Med. Família", icon: Person, image: specFamilia, color: "from-blue-500/15 to-blue-500/[0.03]", desc: "Cuidado contínuo para você e todos os seus familiares." },
+  { name: "Med. do Esporte", icon: Lightning, image: specEsporte, color: "from-emerald-600/15 to-emerald-600/[0.03]", desc: "Foco na sua performance e saúde através do exercício." },
+  { name: "Nefrologia", icon: Scales, image: specNefrologia, color: "from-indigo-500/15 to-indigo-500/[0.03]", desc: "Cuidado vital para a saúde e função dos seus rins." },
+  { name: "Nutrologia", icon: Leaf, image: specNutrologia, color: "from-green-500/15 to-green-500/[0.03]", desc: "Abordagem médica para sua nutrição e prevenção de doenças." },
+  { name: "Oncologia", icon: Flask, image: specOncologia, color: "from-orange-600/15 to-orange-600/[0.03]", desc: "Tratamento especializado e focado no combate ao câncer." },
+  { name: "Otorrinolaringologia", icon: Ear, image: specOtorrino, color: "from-purple-500/15 to-purple-500/[0.03]", desc: "Cuidando de ouvidos, nariz e garganta com precisão." },
+  { name: "Pneumologia", icon: Wind, image: specPneumologia, color: "from-sky-600/15 to-sky-600/[0.03]", desc: "Para você respirar melhor e cuidar dos seus pulmões." },
+  { name: "Psiquiatria", icon: Brain, image: specPsiquiatria, color: "from-violet-600/15 to-violet-600/[0.03]", desc: "Sua saúde mental é prioridade. Vamos cuidar da mente." },
+  { name: "Radiologia", icon: ChartLine, image: specRadiologia, color: "from-gray-500/15 to-gray-500/[0.03]", desc: "Diagnóstico por imagem preciso para orientar seu tratamento." },
+  { name: "Reumatologia", icon: Bone, image: specReumatologia, color: "from-amber-600/15 to-amber-600/[0.03]", desc: "Tratamento para doenças autoimunes e articulares." },
+  { name: "Urologia", icon: UserCircle, image: specUrologia, color: "from-teal-600/15 to-teal-600/[0.03]", desc: "Saúde do sistema urinário e reprodutor com discrição." },
+  { name: "Anestesiologia", icon: Pill, image: specAnestesiologia, color: "from-cyan-600/15 to-cyan-600/[0.03]", desc: "Segurança e conforto durante seus procedimentos." },
+  { name: "Endoscopia", icon: Eye, image: specEndoscopia, color: "from-indigo-600/15 to-indigo-600/[0.03]", desc: "Exames internos precisos para diagnósticos gastrointestinais." },
+  { name: "Genética Médica", icon: Dna, image: specGenetica, color: "from-blue-600/15 to-blue-600/[0.03]", desc: "Estudo e aconselhamento genético para sua saúde e família." },
+  { name: "Homeopatia", icon: Leaf, image: specHomeopatia, color: "from-lime-600/15 to-lime-600/[0.03]", desc: "Abordagem natural e holística para o seu equilíbrio." },
+  { name: "Cirurgia Plástica", icon: Sparkle, image: specPlastica, color: "from-rose-400/15 to-rose-400/[0.03]", desc: "Harmonia e estética com foco na sua autoestima." },
+  { name: "Cir. Cardiovascular", icon: Heartbeat, image: specCirurgiaCardio, color: "from-red-700/15 to-red-700/[0.03]", desc: "Procedimentos avançados para a saúde do seu coração." },
+  { name: "Med. Intensiva", icon: ChartLine, image: specIntensiva, color: "from-slate-600/15 to-slate-600/[0.03]", desc: "Suporte vital e cuidado especializado em casos críticos." },
+  { name: "Cir. Cabeça e Pescoço", icon: Skull, image: specCabecaPescoco, color: "from-stone-600/15 to-stone-600/[0.03]", desc: "Cirurgia especializada para a região da cabeça e pescoço." },
+  { name: "Cirurgia Vascular", icon: Heartbeat, image: specCirurgiaVascular, color: "from-red-400/15 to-red-400/[0.03]", desc: "Tratamento cirúrgico para vasos sanguíneos e circulação." },
 ];
 
 const INITIAL_VISIBLE = 8;
@@ -151,11 +151,18 @@ function SpecialtiesShowcase() {
                   </div>
 
                   {/* Content */}
-                  <div className="p-4 flex items-center gap-3 border-t border-border/30">
-                    <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
-                      <spec.icon className="w-4 h-4 text-primary group-hover:text-primary-foreground transition-colors" weight="fill" />
+                  <div className="p-4 flex flex-col gap-1.5 border-t border-border/30">
+                    <div className="flex items-center gap-3">
+                      <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
+                        <spec.icon className="w-4 h-4 text-primary group-hover:text-primary-foreground transition-colors" weight="fill" />
+                      </div>
+                      <span className="text-xs sm:text-sm font-bold text-foreground leading-tight">{spec.name}</span>
                     </div>
-                    <span className="text-xs sm:text-sm font-bold text-foreground leading-tight">{spec.name}</span>
+                    {spec.desc && (
+                      <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-tight opacity-0 group-hover:opacity-100 transition-opacity duration-300 line-clamp-2">
+                        {spec.desc}
+                      </p>
+                    )}
                   </div>
                 </div>
               </motion.div>
