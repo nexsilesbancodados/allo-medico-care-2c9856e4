@@ -297,7 +297,7 @@ const PrescriptionForm = () => {
     return { doc, prescriptionId };
   };
 
-  const handleSave = async () => {
+  const handleSave = async (skipRedirect = false) => {
     // Validação centralizada no hook
     if (!prescription.validate()) {
       prescription.errors.forEach(err => {
@@ -331,7 +331,7 @@ const PrescriptionForm = () => {
       const documentHash = await gerarHashDocumento(docContent);
       const verificationCode = gerarCodigoVerificacao();
 
-      const { error } = await db.from("prescriptions").insert({
+      const { data: insertedPrescription, error } = await db.from("prescriptions").insert({
         appointment_id: appointmentId!,
         doctor_id: data.doctorId,
         patient_id: data.patientId,
@@ -339,7 +339,8 @@ const PrescriptionForm = () => {
         diagnosis: data.diagnosis || null,
         observations: data.observations || null,
         document_hash: documentHash,
-      });
+        status: "finalized",
+      }).select("id").single();
 
       // Also persist verification record
       await db.from("document_verifications").insert({
@@ -405,7 +406,8 @@ const PrescriptionForm = () => {
 
       store.clearDraft();
       toast.success("Receita salva com sucesso! ✅");
-      navigate("/dashboard/prescriptions");
+      if (!skipRedirect) navigate("/dashboard/prescriptions");
+      return insertedPrescription?.id;
     } finally {
       setSaving(false);
     }
@@ -443,8 +445,15 @@ const PrescriptionForm = () => {
 
     setSaving(true);
     try {
-      // Gerar PDF
-      const { doc, prescriptionId } = await generatePDF();
+      // 1. Salvar prescrição primeiro para obter o UUID
+      const uuid = await handleSave(true);
+      if (!uuid) {
+        setSaving(false);
+        return;
+      }
+
+      // 2. Gerar PDF
+      const { doc, prescriptionId: rxDisplayId } = await generatePDF();
 
       // Converter PDF para Base64
       const pdfBlob = doc.output("blob");
@@ -453,14 +462,14 @@ const PrescriptionForm = () => {
       reader.onload = async () => {
         const base64 = (reader.result as string).split(",")[1];
 
-        // Assinar digitalmente (sem configuração externa necessária)
+        // 3. Assinar digitalmente usando o UUID da prescrição salva
         const signedDoc = await signPrescription({
-          fileName: `receita-${prescriptionId}.pdf`,
+          fileName: `receita-${rxDisplayId}.pdf`,
           fileBase64: base64,
           doctorName: `Dr(a). ${prescription.data.doctorInfo?.first_name} ${prescription.data.doctorInfo?.last_name}`,
           doctorCRM: `${prescription.data.doctorInfo?.crm}/${prescription.data.doctorInfo?.crm_state}`,
           doctorCPF: profile?.cpf || "CPF_NAO_DISPONIVEL",
-          prescriptionId,
+          prescriptionId: uuid, // Passamos o UUID aqui
           documentType: "prescription",
         });
 
@@ -470,14 +479,13 @@ const PrescriptionForm = () => {
           return;
         }
 
-        // Salvar prescrição (já feito no hook de assinatura e em handleSave)
-        toast.success("✅ Prescrição assinada digitalmente com ICP-Brasil! \n📋 Agora salvando nos registros...");
-
-        // Chamar handleSave para completar o processo
-        await handleSave();
-
         setIsSigned(true);
-        setSaving(false);
+        toast.success("✅ Prescrição assinada digitalmente com ICP-Brasil!");
+        
+        setTimeout(() => {
+          setSaving(false);
+          navigate("/dashboard/prescriptions");
+        }, 1500);
       };
 
       reader.readAsDataURL(pdfBlob);

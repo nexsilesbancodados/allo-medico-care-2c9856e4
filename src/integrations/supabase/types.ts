@@ -815,31 +815,49 @@ export type Database = {
       document_verifications: {
         Row: {
           created_at: string
+          details: Json | null
+          doctor_crm: string | null
+          doctor_name: string | null
           document_hash: string
           document_type: string | null
           id: string
           is_valid: boolean | null
+          patient_cpf: string | null
+          patient_name: string | null
           signer_id: string | null
+          verification_code: string | null
           verification_method: string | null
           verified_at: string | null
         }
         Insert: {
           created_at?: string
+          details?: Json | null
+          doctor_crm?: string | null
+          doctor_name?: string | null
           document_hash: string
           document_type?: string | null
           id?: string
           is_valid?: boolean | null
+          patient_cpf?: string | null
+          patient_name?: string | null
           signer_id?: string | null
+          verification_code?: string | null
           verification_method?: string | null
           verified_at?: string | null
         }
         Update: {
           created_at?: string
+          details?: Json | null
+          doctor_crm?: string | null
+          doctor_name?: string | null
           document_hash?: string
           document_type?: string | null
           id?: string
           is_valid?: boolean | null
+          patient_cpf?: string | null
+          patient_name?: string | null
           signer_id?: string | null
+          verification_code?: string | null
           verification_method?: string | null
           verified_at?: string | null
         }
@@ -1301,6 +1319,7 @@ export type Database = {
       }
       ophthalmology_exams: {
         Row: {
+          anterior_segment: string | null
           created_at: string
           doctor_id: string | null
           exam_type: string | null
@@ -1309,14 +1328,28 @@ export type Database = {
           intraocular_pressure_od: number | null
           intraocular_pressure_os: number | null
           notes: string | null
+          od_axis: number | null
+          od_cylinder: number | null
+          od_sphere: number | null
+          os_axis: number | null
+          os_cylinder: number | null
+          os_sphere: number | null
+          other_findings: string | null
           patient_id: string
+          posterior_segment: string | null
+          pupil_reaction: string | null
           results: Json | null
           status: string | null
+          tonometry_method: string | null
           updated_at: string
+          va_od: string | null
+          va_os: string | null
+          va_ou: string | null
           visual_acuity_od: string | null
           visual_acuity_os: string | null
         }
         Insert: {
+          anterior_segment?: string | null
           created_at?: string
           doctor_id?: string | null
           exam_type?: string | null
@@ -1325,14 +1358,28 @@ export type Database = {
           intraocular_pressure_od?: number | null
           intraocular_pressure_os?: number | null
           notes?: string | null
+          od_axis?: number | null
+          od_cylinder?: number | null
+          od_sphere?: number | null
+          os_axis?: number | null
+          os_cylinder?: number | null
+          os_sphere?: number | null
+          other_findings?: string | null
           patient_id: string
+          posterior_segment?: string | null
+          pupil_reaction?: string | null
           results?: Json | null
           status?: string | null
+          tonometry_method?: string | null
           updated_at?: string
+          va_od?: string | null
+          va_os?: string | null
+          va_ou?: string | null
           visual_acuity_od?: string | null
           visual_acuity_os?: string | null
         }
         Update: {
+          anterior_segment?: string | null
           created_at?: string
           doctor_id?: string | null
           exam_type?: string | null
@@ -1341,10 +1388,23 @@ export type Database = {
           intraocular_pressure_od?: number | null
           intraocular_pressure_os?: number | null
           notes?: string | null
+          od_axis?: number | null
+          od_cylinder?: number | null
+          od_sphere?: number | null
+          os_axis?: number | null
+          os_cylinder?: number | null
+          os_sphere?: number | null
+          other_findings?: string | null
           patient_id?: string
+          posterior_segment?: string | null
+          pupil_reaction?: string | null
           results?: Json | null
           status?: string | null
+          tonometry_method?: string | null
           updated_at?: string
+          va_od?: string | null
+          va_os?: string | null
+          va_ou?: string | null
           visual_acuity_od?: string | null
           visual_acuity_os?: string | null
         }
@@ -1363,31 +1423,70 @@ export type Database = {
           created_at: string
           doctor_id: string
           exam_id: string | null
+          expiry_date: string | null
           id: string
           notes: string | null
+          od_add: number | null
+          od_axis: number | null
+          od_cylinder: number | null
+          od_sphere: number | null
+          os_add: number | null
+          os_axis: number | null
+          os_cylinder: number | null
+          os_sphere: number | null
           patient_id: string
           pdf_url: string | null
+          prescribed_at: string | null
           prescription_data: Json | null
+          prescription_type: string | null
+          pupillary_distance: number | null
+          recommended_use: string | null
         }
         Insert: {
           created_at?: string
           doctor_id: string
           exam_id?: string | null
+          expiry_date?: string | null
           id?: string
           notes?: string | null
+          od_add?: number | null
+          od_axis?: number | null
+          od_cylinder?: number | null
+          od_sphere?: number | null
+          os_add?: number | null
+          os_axis?: number | null
+          os_cylinder?: number | null
+          os_sphere?: number | null
           patient_id: string
           pdf_url?: string | null
+          prescribed_at?: string | null
           prescription_data?: Json | null
+          prescription_type?: string | null
+          pupillary_distance?: number | null
+          recommended_use?: string | null
         }
         Update: {
           created_at?: string
           doctor_id?: string
           exam_id?: string | null
+          expiry_date?: string | null
           id?: string
           notes?: string | null
+          od_add?: number | null
+          od_axis?: number | null
+          od_cylinder?: number | null
+          od_sphere?: number | null
+          os_add?: number | null
+          os_axis?: number | null
+          os_cylinder?: number | null
+          os_sphere?: number | null
           patient_id?: string
           pdf_url?: string | null
+          prescribed_at?: string | null
           prescription_data?: Json | null
+          prescription_type?: string | null
+          pupillary_distance?: number | null
+          recommended_use?: string | null
         }
         Relationships: [
           {
@@ -1644,6 +1743,56 @@ export type Database = {
           },
         ]
       }
+      prescription_signatures: {
+        Row: {
+          certificate_chain: string | null
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          prescription_id: string | null
+          signature_algorithm: string | null
+          signed_at: string | null
+          signed_by: string
+          soluti_request_id: string | null
+          status: string | null
+          storage_path: string
+        }
+        Insert: {
+          certificate_chain?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          prescription_id?: string | null
+          signature_algorithm?: string | null
+          signed_at?: string | null
+          signed_by: string
+          soluti_request_id?: string | null
+          status?: string | null
+          storage_path: string
+        }
+        Update: {
+          certificate_chain?: string | null
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          prescription_id?: string | null
+          signature_algorithm?: string | null
+          signed_at?: string | null
+          signed_by?: string
+          soluti_request_id?: string | null
+          status?: string | null
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prescription_signatures_prescription_id_fkey"
+            columns: ["prescription_id"]
+            isOneToOne: false
+            referencedRelation: "prescriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       prescription_validations: {
         Row: {
           created_at: string
@@ -1695,11 +1844,13 @@ export type Database = {
           instructions: string | null
           is_signed: boolean | null
           medications: Json | null
+          observations: string | null
           patient_id: string
           pdf_url: string | null
           prescription_type: string | null
           signature_hash: string | null
           signed_at: string | null
+          status: string | null
           updated_at: string
           valid_until: string | null
           verification_code: string | null
@@ -1713,11 +1864,13 @@ export type Database = {
           instructions?: string | null
           is_signed?: boolean | null
           medications?: Json | null
+          observations?: string | null
           patient_id: string
           pdf_url?: string | null
           prescription_type?: string | null
           signature_hash?: string | null
           signed_at?: string | null
+          status?: string | null
           updated_at?: string
           valid_until?: string | null
           verification_code?: string | null
@@ -1731,11 +1884,13 @@ export type Database = {
           instructions?: string | null
           is_signed?: boolean | null
           medications?: Json | null
+          observations?: string | null
           patient_id?: string
           pdf_url?: string | null
           prescription_type?: string | null
           signature_hash?: string | null
           signed_at?: string | null
+          status?: string | null
           updated_at?: string
           valid_until?: string | null
           verification_code?: string | null
