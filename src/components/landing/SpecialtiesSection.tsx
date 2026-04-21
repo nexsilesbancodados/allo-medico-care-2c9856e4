@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, CaretDown } from "@phosphor-icons/react";
 import { Button } from "@/components/ui/button";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 import specClinicoGeral from "@/assets/spec-clinico-geral.png";
 import specDermatologista from "@/assets/spec-dermatologista.png";
@@ -85,10 +86,9 @@ const SpecialtyCard = ({ name, img, index }: { name: string; img: string; index:
       onClick={() => navigate("/dashboard/doctors")}
     >
       <div className="w-16 h-16 md:w-20 md:h-20 rounded-2xl flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
-        <img
+        <OptimizedImage
           src={img}
           alt={`Pingo ${name}`}
-          loading="lazy"
           width={80}
           height={80}
           className="w-full h-full object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-300"
