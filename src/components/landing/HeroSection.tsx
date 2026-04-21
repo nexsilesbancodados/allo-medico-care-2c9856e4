@@ -235,32 +235,32 @@ const HeroSection = memo(
 
                 {/* Floating card — Seguro */}
                 <motion.div
-                  className="absolute -top-1 -right-2 xl:right-0 bg-card/95 backdrop-blur-md rounded-2xl shadow-md shadow-foreground/[0.04] px-3.5 py-2.5 border border-border/50 flex items-center gap-2.5"
+                  className="absolute -top-1 -right-2 xl:right-0 bg-card/95 backdrop-blur-md rounded-2xl shadow-md shadow-foreground/[0.04] px-4 py-3 border border-border/50 flex items-center gap-3"
                   animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut" }}
                   aria-hidden="true"
                 >
-                  <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <ShieldCheck className="w-[18px] h-[18px] text-primary" weight="fill" />
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <ShieldCheck className="w-6 h-6 text-primary" weight="fill" />
                   </div>
                   <div>
-                    <p className="text-[13px] font-bold text-foreground leading-none mb-0.5">100% Seguro</p>
-                    <p className="text-[10px] text-muted-foreground leading-none">Criptografia E2E</p>
+                    <p className="text-[14px] font-bold text-foreground leading-none mb-1">100% Seguro</p>
+                    <p className="text-[11px] text-muted-foreground leading-none">Criptografia E2E</p>
                   </div>
                 </motion.div>
 
                 {/* Floating card — Rating */}
                 <motion.div
-                  className="absolute bottom-10 -left-4 xl:-left-2 bg-card/95 backdrop-blur-md rounded-2xl shadow-md shadow-foreground/[0.04] px-3.5 py-2.5 border border-border/50 flex items-center gap-2.5"
+                  className="absolute bottom-12 -left-4 xl:-left-2 bg-card/95 backdrop-blur-md rounded-2xl shadow-md shadow-foreground/[0.04] px-4 py-3 border border-border/50 flex items-center gap-3"
                   animate={{ y: [0, -5, 0] }}
                   transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
                 >
-                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                    <Star className="w-[18px] h-[18px] text-amber-500" weight="fill" />
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                    <Star className="w-6 h-6 text-amber-500" weight="fill" />
                   </div>
                   <div>
-                    <p className="text-[13px] font-bold text-foreground leading-none mb-0.5">4.9/5</p>
-                    <p className="text-[10px] text-muted-foreground leading-none">12k+ avaliações</p>
+                    <p className="text-[14px] font-bold text-foreground leading-none mb-1">4.9/5</p>
+                    <p className="text-[11px] text-muted-foreground leading-none">12k+ avaliações</p>
                   </div>
                 </motion.div>
               </div>
