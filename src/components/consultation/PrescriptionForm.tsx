@@ -445,8 +445,15 @@ const PrescriptionForm = () => {
 
     setSaving(true);
     try {
-      // Gerar PDF
-      const { doc, prescriptionId } = await generatePDF();
+      // 1. Salvar prescrição primeiro para obter o UUID
+      const uuid = await handleSave(true);
+      if (!uuid) {
+        setSaving(false);
+        return;
+      }
+
+      // 2. Gerar PDF
+      const { doc, prescriptionId: rxDisplayId } = await generatePDF();
 
       // Converter PDF para Base64
       const pdfBlob = doc.output("blob");
@@ -455,14 +462,14 @@ const PrescriptionForm = () => {
       reader.onload = async () => {
         const base64 = (reader.result as string).split(",")[1];
 
-        // Assinar digitalmente (sem configuração externa necessária)
+        // 3. Assinar digitalmente usando o UUID da prescrição salva
         const signedDoc = await signPrescription({
-          fileName: `receita-${prescriptionId}.pdf`,
+          fileName: `receita-${rxDisplayId}.pdf`,
           fileBase64: base64,
           doctorName: `Dr(a). ${prescription.data.doctorInfo?.first_name} ${prescription.data.doctorInfo?.last_name}`,
           doctorCRM: `${prescription.data.doctorInfo?.crm}/${prescription.data.doctorInfo?.crm_state}`,
           doctorCPF: profile?.cpf || "CPF_NAO_DISPONIVEL",
-          prescriptionId,
+          prescriptionId: uuid, // Passamos o UUID aqui
           documentType: "prescription",
         });
 
@@ -472,14 +479,13 @@ const PrescriptionForm = () => {
           return;
         }
 
-        // Salvar prescrição (já feito no hook de assinatura e em handleSave)
-        toast.success("✅ Prescrição assinada digitalmente com ICP-Brasil! \n📋 Agora salvando nos registros...");
-
-        // Chamar handleSave para completar o processo
-        await handleSave();
-
         setIsSigned(true);
-        setSaving(false);
+        toast.success("✅ Prescrição assinada digitalmente com ICP-Brasil!");
+        
+        setTimeout(() => {
+          setSaving(false);
+          navigate("/dashboard/prescriptions");
+        }, 1500);
       };
 
       reader.readAsDataURL(pdfBlob);
