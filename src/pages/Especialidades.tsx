@@ -59,7 +59,7 @@ const Especialidades = forwardRef<HTMLDivElement>((_, ref) => {
     return specialties.filter((spec) => {
       const matchesSearch = spec.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         spec.desc.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = !selectedCategory || spec.name === selectedCategory;
+      const matchesCategory = !selectedCategory || spec.name.charAt(0).toUpperCase() === selectedCategory.toUpperCase();
       return matchesSearch && matchesCategory;
     });
   }, [searchTerm, selectedCategory]);
