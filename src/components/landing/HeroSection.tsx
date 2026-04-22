@@ -29,7 +29,7 @@ const HeroSection = memo(
     const ctaText    = config?.cta_text || "Agendar consulta";
     const ctaUrl     = config?.cta_url || "/agendar";
     const badgeText  = config?.badge_text || "Médicos disponíveis agora";
-    const heroImgUrl = config?.image_url || "https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/0XILPRqqUbSOh99ow53X5OBDOCC3/1776788772275-bngbf-hero-doctor__4_-removebg-preview.png";
+    const heroImgUrl = config?.image_url || heroPingoFamily;
 
     return (
       <section
