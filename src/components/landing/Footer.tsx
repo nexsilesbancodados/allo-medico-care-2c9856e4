@@ -5,7 +5,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import logo from "@/assets/logo-pingo.png";
+import { PINGO_LOGO_URL } from "@/lib/constants";
+const logo = PINGO_LOGO_URL;
 
 const Footer = memo(forwardRef<HTMLElement, { config?: any }>(({ config }, ref) => {
   const [email, setEmail] = useState("");
