@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import logo from "@/assets/mascot.png";
+import logo from "@/assets/logo-pingo.png";
 
 const Footer = memo(forwardRef<HTMLElement, { config?: any }>(({ config }, ref) => {
   const [email, setEmail] = useState("");
