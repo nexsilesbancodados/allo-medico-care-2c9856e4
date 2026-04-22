@@ -157,15 +157,15 @@ const Header = memo(forwardRef<HTMLElement, { config?: any }>(({ config }, ref) 
         </div>
 
         {/* Right actions */}
-        <div className="hidden lg:flex items-center gap-2.5">
+        <div className="hidden lg:flex items-center gap-3">
           <LanguageSwitcher />
 
           {user ? (
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                className="rounded-full gap-2 h-9 border-border/60 bg-card/80 transition-all duration-150 group"
+                className="rounded-full gap-2 h-10 border-border/60 bg-card/80 transition-all duration-150 group"
                 onClick={() => navigate("/dashboard")}
               >
                 <span className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-primary-foreground">
@@ -177,11 +177,11 @@ const Header = memo(forwardRef<HTMLElement, { config?: any }>(({ config }, ref) 
               </Button>
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <Button size="sm" variant="outline" className="rounded-full h-9 border-primary/20 bg-primary/[0.05] text-primary" onClick={() => navigate("/agendar")}>
+            <div className="flex items-center gap-3">
+              <Button size="sm" variant="outline" className="rounded-full h-10 px-6 border-[#1a4fcf]/30 text-[#1a4fcf] hover:bg-[#1a4fcf]/5" onClick={() => navigate("/agendar")}>
                 Agendar
               </Button>
-              <Button size="sm" className="rounded-full h-9 bg-primary text-primary-foreground" onClick={() => navigate("/paciente")}>
+              <Button size="sm" className="rounded-full h-10 px-6 bg-[#1a4fcf] text-white hover:bg-[#1a4fcf]/90" onClick={() => navigate("/paciente")}>
                 Entrar
               </Button>
             </div>
