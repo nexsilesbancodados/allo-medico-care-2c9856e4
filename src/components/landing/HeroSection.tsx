@@ -112,7 +112,7 @@ const HeroSection = memo(
               >
                 <OptimizedImage
                   src={heroImgUrl}
-                  alt="Mascote Pingo"
+                  alt="Médico e pacientes"
                   className="w-full h-auto drop-shadow-[0_25px_50px_rgba(0,0,0,0.15)] max-w-[600px] mx-auto"
                 />
               </motion.div>
