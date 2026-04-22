@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Video, ShieldCheck, Cpu, Lock } from "lucide-react";
-import pingoTecnologia from "@/assets/pingo-tecnologia.png";
+// Removido import local para usar URL externa conforme solicitado
+const technologyImage = "https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/0XILPRqqUbSOh99ow53X5OBDOCC3/1776865110528-nxrit-doctor-tecnologia-removebg-preview.png";
 
 const TechnologySection = ({ config }: { config?: any }) => {
   const title = config?.title || "Inovação a serviço da sua saúde";
@@ -42,8 +43,8 @@ const TechnologySection = ({ config }: { config?: any }) => {
             >
               <div className="relative">
                 <img 
-                  src={pingoTecnologia} 
-                  alt="Pingo Tecnologia" 
+                  src={technologyImage} 
+                  alt="Tecnologia de ponta" 
                   className="w-full max-w-[450px] h-auto drop-shadow-2xl select-none" 
                 />
               </div>
