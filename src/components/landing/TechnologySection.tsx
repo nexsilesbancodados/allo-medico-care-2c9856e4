@@ -3,32 +3,7 @@ import { Video, ShieldCheck, Cpu, Lock } from "lucide-react";
 import pingoTecnologia from "@/assets/pingo-tecnologia.png";
 
 const TechnologySection = ({ config }: { config?: any }) => {
-  const title = config?.title || "Inovação a serviço da sua saúde";
-  const subtitle = config?.subtitle || "Utilizamos tecnologia de ponta para oferecer uma experiência médica segura e eficiente. Cada detalhe foi pensado para garantir qualidade no atendimento.";
-  
-  const features = [
-    {
-      icon: <Video className="w-5 h-5 text-primary" />,
-      title: "Videochamada em HD",
-      description: "Conexão estável com criptografia ponta a ponta para consultas seguras e sem interrupção.",
-    },
-    {
-      icon: <ShieldCheck className="w-5 h-5 text-primary" />,
-      title: "Receita Digital Válida",
-      description: "Prescrições com assinatura digital certificada ICP-Brasil, aceitas em qualquer farmácia do país.",
-    },
-    {
-      icon: <Cpu className="w-5 h-5 text-primary" />,
-      title: "Inteligência Artificial",
-      description: "IA para auxiliar médicos em diagnósticos, otimizar laudos e melhorar a experiência do paciente.",
-    },
-    {
-      icon: <Lock className="w-5 h-5 text-primary" />,
-      title: "Proteção de Dados (LGPD)",
-      description: "Seus dados são protegidos com os mais altos padrões de segurança e em total conformidade com a LGPD.",
-    },
-  ];
-
+// ... keep existing code
   return (
     <section className="relative py-24 md:py-32 overflow-hidden bg-[#F8FAFC]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -46,40 +21,6 @@ const TechnologySection = ({ config }: { config?: any }) => {
                   alt="Pingo Tecnologia" 
                   className="w-full max-w-[450px] h-auto drop-shadow-2xl select-none" 
                 />
-                
-                {/* Phone Screen Overlay to translate English text */}
-                <div 
-                  className="absolute top-[32%] left-[19.5%] w-[18%] h-[28%] bg-white rounded-[2px] overflow-hidden flex flex-col pt-[2px] px-[2px]"
-                  style={{
-                    transform: 'perspective(500px) rotateY(15deg) rotateX(2deg) rotateZ(-12deg)',
-                    boxShadow: 'inset 0 0 5px rgba(0,0,0,0.1)'
-                  }}
-                >
-                  <div className="bg-[#1E3A8A] text-[4px] text-white py-[1px] px-[2px] flex justify-between items-center rounded-t-[1px]">
-                    <span>AloClínica</span>
-                    <span>12:45</span>
-                  </div>
-                  <div className="p-[2px] bg-white flex-1 flex flex-col gap-[2px]">
-                    <div className="text-[5px] font-bold text-[#1E3A8A]">Perfil do Paciente</div>
-                    <div className="flex flex-col gap-[1px] mt-[1px]">
-                      <div className="bg-slate-50 p-[1px] rounded-[1px] flex items-center gap-[2px]">
-                        <div className="w-[3px] h-[3px] bg-blue-500 rounded-full"></div>
-                        <div className="text-[3px] text-slate-600">Histórico</div>
-                      </div>
-                      <div className="bg-slate-50 p-[1px] rounded-[1px] flex items-center gap-[2px]">
-                        <div className="w-[3px] h-[3px] bg-green-500 rounded-full"></div>
-                        <div className="text-[3px] text-slate-600">Medicamentos</div>
-                      </div>
-                    </div>
-                    <div className="mt-auto border-t border-slate-100 pt-[1px]">
-                      <div className="text-[3px] font-bold text-slate-400 uppercase">Sinais Vitais</div>
-                      <div className="flex justify-between mt-[1px]">
-                        <div className="text-[4px] text-[#1E3A8A] font-bold">120 BPM</div>
-                        <div className="text-[4px] text-[#1E3A8A] font-bold">37°C</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
               </div>
             </motion.div>
 
