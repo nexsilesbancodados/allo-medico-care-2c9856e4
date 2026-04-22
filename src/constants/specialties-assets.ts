@@ -82,10 +82,10 @@ export const PINGO_SPECIALTIES: Record<string, string> = {
   "Radiologia": specRadiologia,
   "Reumatologia": pingoReumatologia,
   "Urologia": pingoUrologia,
-  "Anestesiologia": pingoAlergia, // Fallback if no specific pingo
+  "Anestesiologia": pingoAnestesiologia,
   "Endoscopia": specEndoscopia,
   "Genética Médica": specGenetica,
-  "Homeopatia": specHomeopatia,
+  "Homeopatia": pingoHomeopata,
   "Cirurgia Plástica": pingoPlastica,
   "Cir. Cardiovascular": specCardiovascular,
   "Med. Intensiva": specIntensiva,
@@ -93,4 +93,6 @@ export const PINGO_SPECIALTIES: Record<string, string> = {
   "Fisioterapia": pingoFisioterapia,
   "Fonoaudiologia": pingoFonoaudiologia,
   "Cirurgia Vascular": pingoVascular,
+  "Fisiatra": pingoFisiatra,
+  "Cirurgião Dentista": pingoDentista,
 };
