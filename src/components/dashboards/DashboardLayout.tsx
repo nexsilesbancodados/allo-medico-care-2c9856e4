@@ -16,8 +16,9 @@ import {
 import NotificationBell from "@/components/notifications/NotificationBell";
 import ThemeToggle from "@/components/ThemeToggle";
 import GlobalCommand from "@/components/GlobalCommand";
-import logoImg from "@/assets/logo.png";
-import mascotImg from "@/assets/mascot.png";
+import { PINGO_LOGO_URL } from "@/lib/constants";
+const logoImg = PINGO_LOGO_URL;
+const mascotImg = PINGO_LOGO_URL;
 import DashboardBreadcrumbs from "@/components/dashboards/DashboardBreadcrumbs";
 import useNotificationTitle from "@/hooks/use-notification-title";
 import { useLocalStorage } from "@/hooks/use-local-storage";
