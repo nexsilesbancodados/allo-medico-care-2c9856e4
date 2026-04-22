@@ -98,12 +98,21 @@ function SpecialtiesShowcase() {
                 onClick={() => navigate("/paciente")}
               >
                 <div className="relative bg-card rounded-2xl border border-border/40 hover:shadow-xl hover:border-primary/20 transition-all duration-300 overflow-hidden">
-                  {/* Backdrop with Icon */}
-                  <div className={`relative h-32 sm:h-36 bg-gradient-to-br ${spec.color} flex items-center justify-center rounded-t-2xl group-hover:bg-primary/5 transition-colors`}>
-                    <spec.icon 
-                      className="w-16 h-16 text-primary/40 group-hover:text-primary group-hover:scale-110 transition-all duration-500 ease-out" 
-                      weight="duotone"
-                    />
+                  {/* Backdrop with Pingo Image */}
+                  <div className={`relative h-40 sm:h-44 bg-gradient-to-br ${spec.color} flex items-center justify-center rounded-t-2xl group-hover:bg-primary/5 transition-colors pt-4`}>
+                    {PINGO_SPECIALTIES[spec.name] ? (
+                      <img 
+                        src={PINGO_SPECIALTIES[spec.name]} 
+                        alt={`Pingo ${spec.name}`}
+                        className="w-32 h-32 object-contain pingo-float select-none drop-shadow-md group-hover:drop-shadow-xl transition-all duration-500"
+                        draggable={false}
+                      />
+                    ) : (
+                      <spec.icon 
+                        className="w-16 h-16 text-primary/40 group-hover:text-primary group-hover:scale-110 transition-all duration-500 ease-out" 
+                        weight="duotone"
+                      />
+                    )}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out pointer-events-none" />
                   </div>
 
