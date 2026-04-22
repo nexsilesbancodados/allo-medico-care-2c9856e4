@@ -90,17 +90,17 @@ const Header = memo(forwardRef<HTMLElement, { config?: any }>(({ config }, ref) 
           : "bg-background/80 backdrop-blur-sm border-transparent"
       )}
     >
-      <div className="max-w-[1800px] mx-auto flex items-center justify-between h-14 lg:h-[56px] px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
-        <Link to="/" className="flex items-center gap-2.5 shrink-0 group">
-          <img src={logoUrl} alt="Logo" className="w-8 h-8 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105" width={32} height={32} />
-          <span className="text-lg font-extrabold text-foreground tracking-tight">
-            Alo<span className="text-primary">Clinica</span>
+      <div className="max-w-[1800px] mx-auto flex items-center h-14 lg:h-[64px] px-4 sm:px-6 lg:px-12 xl:px-20 2xl:px-28">
+        <Link to="/" className="flex items-center gap-2.5 shrink-0 group mr-8">
+          <img src={logoUrl} alt="Logo" className="w-9 h-9 rounded-xl object-contain transition-transform duration-200 group-hover:scale-105" width={36} height={36} />
+          <span className="text-xl font-extrabold text-[#1a1c1e] tracking-tight">
+            Alo<span className="text-[#1a4fcf]">Clinica</span>
           </span>
         </Link>
 
-        <div className="hidden lg:flex items-center">
+        <div className="hidden lg:flex items-center flex-1 justify-center">
           <NavigationMenu>
-            <NavigationMenuList className="gap-0.5">
+            <NavigationMenuList className="gap-1">
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
                   <Link to="/" className={linkBtnCls}>Início</Link>
