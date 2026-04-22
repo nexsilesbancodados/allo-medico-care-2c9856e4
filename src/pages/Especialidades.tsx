@@ -6,6 +6,7 @@ import { ArrowRight, MagnifyingGlass } from "@phosphor-icons/react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/landing/Header";
 import SEOHead from "@/components/SEOHead";
+import { PINGO_SPECIALTIES } from "@/constants/specialties-assets";
 
 const Footer = lazy(() => import("@/components/landing/Footer"));
 
