@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
-import mascotImg from "@/assets/mascot.png";
+import { PINGO_LOGO_URL } from "@/lib/constants";
+const mascotImg = PINGO_LOGO_URL;
 
 const PingoLoader = memo(() => (
   <motion.div
