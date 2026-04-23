@@ -409,9 +409,28 @@ const PatientDashboard = () => {
                 initial={{ opacity: 0, scale: 0.5, y: 24 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ delay: 0.2, duration: 0.65, ease: [0.22, 1, 0.36, 1] }}
-                className="shrink-0 -mt-2 hidden sm:block"
+                className="shrink-0 -mt-2 hidden sm:block relative"
               >
-                <PingoMascot variant="wave" size={110} animate bounce className="drop-shadow-[0_12px_32px_rgba(0,0,0,0.35)] sm:!w-[130px] sm:!h-[130px]" />
+                {/* Speech Bubble to match HeroBanner pattern */}
+                <motion.div
+                  initial={{ opacity: 0, y: -10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  transition={{ delay: 0.8, duration: 0.4 }}
+                  className="absolute -top-12 -left-12 z-20 rounded-2xl rounded-br-none border border-white/20 bg-white/95 backdrop-blur-md px-3 py-2 shadow-xl"
+                >
+                  <p className="text-[10px] font-black text-primary leading-none whitespace-nowrap">
+                    Olá, {firstName}! ✨
+                  </p>
+                  <div className="absolute -bottom-2 right-0 h-0 w-0 border-l-[8px] border-l-transparent border-t-[8px] border-t-white/95" />
+                </motion.div>
+                
+                <PingoMascot 
+                  variant="wave" 
+                  size={120} 
+                  animate 
+                  bounce 
+                  className="drop-shadow-[0_12px_32px_rgba(0,0,0,0.35)] sm:!w-[130px] sm:!h-[130px]" 
+                />
               </motion.div>
             </div>
 

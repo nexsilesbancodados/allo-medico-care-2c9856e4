@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface KPI { label: string; value: string | number; icon?: ReactNode }
 
@@ -24,7 +25,10 @@ interface PremiumHeroProps {
 }
 
 const LiveDot = ({ color = "green" }: { color?: "green" | "red" }) => (
-  <span className={`inline-block w-2 h-2 rounded-full ${color === "red" ? "bg-red-500" : "bg-emerald-400"} animate-pulse`} />
+  <span className={cn(
+    "inline-block h-[6px] w-[6px] rounded-full animate-pulse shadow-sm",
+    color === "red" ? "bg-red-400 shadow-red-400/40" : "bg-emerald-400 shadow-emerald-400/40"
+  )} />
 );
 
 export function PremiumHero({

@@ -94,7 +94,7 @@ function HorizontalScrollCards() {
               transition={{ duration: 0.6, delay: 0.2 }}
             >
               <div className="flex items-center gap-2 mb-4">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="inline-block h-[6px] w-[6px] rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/60">
                   Online agora
                 </span>
