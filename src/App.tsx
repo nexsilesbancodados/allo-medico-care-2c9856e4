@@ -72,6 +72,9 @@ const FAQ = lazy(() => import("./pages/FAQ"));
 const Servicos = lazy(() => import("./pages/Servicos"));
 const ParaProfissionais = lazy(() => import("./pages/ParaProfissionais"));
 const Agendar = lazy(() => import("./pages/Agendar"));
+const Ajuda = lazy(() => import("./pages/Ajuda"));
+const EspecialidadeDetalhe = lazy(() => import("./pages/EspecialidadeDetalhe"));
+const ParaEmpresas = lazy(() => import("./pages/ParaEmpresas"));
 
 if (typeof window !== "undefined") {
   const prefetch = () => {
@@ -167,9 +170,12 @@ const AnimatedRoutes = () => {
       <Route path="/contato" element={<Contato />} />
       <Route path="/como-funciona" element={<ComoFunciona />} />
       <Route path="/especialidades" element={<Especialidades />} />
+      <Route path="/especialidades/:slug" element={<EspecialidadeDetalhe />} />
       <Route path="/agendar" element={<Agendar />} />
       <Route path="/recursos" element={<Recursos />} />
       <Route path="/faq" element={<FAQ />} />
+      <Route path="/ajuda" element={<Ajuda />} />
+      <Route path="/para-empresas" element={<ParaEmpresas />} />
 
       <Route
         path="/dashboard/*"
