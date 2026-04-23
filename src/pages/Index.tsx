@@ -7,6 +7,11 @@ import HeroSection from "@/components/landing/HeroSection";
 import SpecialtiesSection from "@/components/landing/SpecialtiesSection";
 import Footer from "@/components/landing/Footer";
 import TechnologySection from "@/components/landing/TechnologySection";
+import HowItWorksSection from "@/components/landing/HowItWorksSection";
+import BenefitsGrid from "@/components/landing/BenefitsGrid";
+import ForDoctorsSection from "@/components/landing/ForDoctorsSection";
+import CTABanner from "@/components/landing/CTABanner";
+import FAQSection from "@/components/landing/FAQSection";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Video, Star } from "lucide-react";
 import { useSiteSections } from "@/lib/site-sections";
@@ -109,6 +114,8 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
       </section>
 
       <TechnologySection config={sectionData.technology} />
+      {isOn("how_it_works") !== false && <HowItWorksSection />}
+      {isOn("benefits") !== false && <BenefitsGrid />}
       <SpecialtiesSection config={sectionData.specialties} />
 
       {/* ═══════════════ DEPOIMENTOS ═══════════════ */}
@@ -151,6 +158,10 @@ const Index = forwardRef<HTMLDivElement>((_, ref) => {
           </div>
         </section>
       )}
+
+      {isOn("for_doctors") !== false && <ForDoctorsSection />}
+      {isOn("faq") !== false && <FAQSection />}
+      {isOn("cta_banner") !== false && <CTABanner />}
 
       {isOn("footer") && <Footer config={sectionData.footer} />}
     </div>
