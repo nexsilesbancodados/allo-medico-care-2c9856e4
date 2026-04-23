@@ -107,7 +107,7 @@ export default defineConfig(({ mode }) => ({
             short_name: "Agendar",
             description: "Agende uma consulta médica rapidamente",
             url: "/dashboard/schedule?role=patient&source=pwa-shortcut",
-            icons: [{ src: "pwa-192x192.png", sizes: "192x192" }],
+            icons: [{ src: "https://cvbgrjauqjawrsyknhyj.supabase.co/storage/v1/object/public/files/uploads/0XILPRqqUbSOh99ow53X5OBDOCC3/1776902434741-yu841-1776788772275-bngbf-hero-doctor__4_-removebg-preview.png", sizes: "192x192" }],
           },
           {
             name: "Plantão 24h",
