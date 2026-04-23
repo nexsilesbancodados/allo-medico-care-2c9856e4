@@ -1,4 +1,4 @@
-import pingoLogo from "@/assets/logo-pingo.png";
+import pingoLogo from "@/assets/mascot.png";
 
 // ─── Financial ────────────────────────────────────────────────────────────────
 export const DEFAULT_CONSULTATION_PRICE = 89;
