@@ -162,12 +162,12 @@ export const AdminError = ({
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.25 }}
     className={cn(
-      "flex flex-col items-center justify-center text-center px-6 py-12 rounded-2xl border border-rose-500/20 bg-rose-500/5",
+      "flex flex-col items-center justify-center text-center px-6 py-12 rounded-2xl border border-destructive/20 bg-destructive/5",
       className
     )}
   >
-    <div className="w-14 h-14 rounded-2xl bg-rose-500/10 flex items-center justify-center mb-4">
-      <AlertTriangle className="w-6 h-6 text-rose-600 dark:text-rose-400" />
+    <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center mb-4">
+      <AlertTriangle className="w-6 h-6 text-destructive" />
     </div>
     <h3 className="text-sm font-semibold text-foreground">{title}</h3>
     <p className="text-xs text-muted-foreground mt-1 max-w-sm leading-relaxed">
@@ -177,7 +177,7 @@ export const AdminError = ({
       <Button
         variant="outline"
         size="sm"
-        className="mt-4 h-8 gap-1.5 border-rose-500/30 text-rose-600 hover:bg-rose-500/10 dark:text-rose-400"
+        className="mt-4 h-8 gap-1.5 border-destructive/30 text-destructive hover:bg-destructive/10"
         onClick={onRetry}
       >
         <RefreshCw className="w-3.5 h-3.5" />
