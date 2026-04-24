@@ -110,34 +110,33 @@ export default function SignupPatient() {
 
     setLoading(true);
     try {
-      // 1. Create auth user
+      // Split full name into first/last
+      const nameParts = formData.full_name.trim().split(/\s+/);
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+
+      // Create auth user — profile is created automatically by handle_new_user() trigger
+      // using the metadata fields below, so the user does NOT need to retype these on first login.
       const { data: authData, error: authError } = await db.auth.signUp({
         email: formData.email,
         password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            cpf: formData.cpf.replace(/\D/g, ""),
+            phone: formData.phone.replace(/\D/g, ""),
+            date_of_birth: formData.date_of_birth,
+          },
+        },
       });
 
       if (authError) throw authError;
       if (!authData.user) throw new Error("Falha ao criar usuário");
 
-      // 2. Create profile
-      const { error: profileError } = await (db as any).from("profiles").insert([
-        {
-          id: authData.user.id,
-          full_name: formData.full_name,
-          email: formData.email,
-          phone: formData.phone,
-          cpf: formData.cpf.replace(/\D/g, ""),
-          date_of_birth: formData.date_of_birth,
-          role: "patient",
-          avatar_url: null,
-          created_at: new Date().toISOString(),
-        },
-      ]);
-
-      if (profileError) throw profileError;
-
       toast.success("Cadastro realizado com sucesso! Verifique seu email.");
-      navigate("/auth/paciente");
+      navigate("/paciente");
     } catch (error) {
       toast.error((error as Error).message || "Erro ao cadastrar");
       console.error(error);
