@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
+import { AdminPageHeader } from "./AdminPageHeader";
 import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck, Fingerprint } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ApprovalItem } from "@/types/domain";
@@ -312,15 +313,18 @@ const AdminApprovals = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("approvals")}>
-      <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <UserCheck className="w-6 h-6" /> Aprovações
-            </h1>
-            <p className="text-muted-foreground text-sm">{totalPending} pedido(s) pendente(s)</p>
-          </div>
-        </div>
+      <div className="w-full mx-auto max-w-5xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={UserCheck}
+          eyebrow="Operação"
+          title="Aprovações"
+          description="Revise solicitações de cadastro de médicos, clínicas e parceiros."
+          accent="from-emerald-500 to-teal-600"
+          badge={{
+            label: totalPending === 0 ? "Tudo em dia" : `${totalPending} pendente${totalPending === 1 ? "" : "s"}`,
+            tone: totalPending === 0 ? "success" : "warning",
+          }}
+        />
 
         <Tabs defaultValue="doctors">
           <TabsList>

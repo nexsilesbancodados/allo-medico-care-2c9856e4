@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
+import { AdminPageHeader } from "./AdminPageHeader";
 import { Search, Shield, Eye } from "lucide-react";
 
 const ROLE_LABELS: Record<string, string> = {
@@ -127,17 +128,17 @@ const AdminUsers = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("users")}>
-      <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Shield className="w-6 h-6" /> Usuários & Permissões
-            </h1>
-            <p className="text-muted-foreground text-sm">{filtered.length} usuário(s)</p>
-          </div>
-        </div>
+      <div className="w-full mx-auto max-w-5xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={Shield}
+          eyebrow="Pessoas"
+          title="Usuários & Permissões"
+          description="Gerencie papéis e acessos de todos os usuários da plataforma."
+          accent="from-blue-500 to-indigo-600"
+          badge={{ label: `${filtered.length} ${filtered.length === 1 ? "usuário" : "usuários"}`, tone: "info" }}
+        />
 
-        <div className="relative mb-4">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Buscar por nome ou CPF..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
         </div>

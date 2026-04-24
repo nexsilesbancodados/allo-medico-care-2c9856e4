@@ -148,22 +148,23 @@ const AdminPatients = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("patients")}>
-      <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Users className="w-6 h-6 text-primary" />
-              Pacientes
-            </h1>
-            <p className="text-muted-foreground text-sm">{filtered.length} paciente(s) encontrado(s)</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5">
-            <Download className="w-4 h-4" /> Exportar CSV
-          </Button>
-        </div>
+      <div className="w-full mx-auto max-w-5xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={Users}
+          eyebrow="Pessoas"
+          title="Pacientes"
+          description="Base completa de pacientes cadastrados na plataforma."
+          accent="from-cyan-500 to-blue-600"
+          badge={{ label: `${filtered.length} ${filtered.length === 1 ? "paciente" : "pacientes"}`, tone: "info" }}
+          actions={
+            <Button variant="outline" size="sm" onClick={exportCSV} className="gap-1.5">
+              <Download className="w-4 h-4" /> Exportar CSV
+            </Button>
+          }
+        />
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Buscar por nome, CPF ou telefone..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
