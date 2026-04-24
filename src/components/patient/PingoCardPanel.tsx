@@ -154,7 +154,7 @@ const PingoCardPanel = () => {
   // ESTADO: Sem assinatura → mostrar planos
   if (!loading && !subscription) {
     return (
-      <DashboardLayout activeItem="pingo-card" navItems={nav} role="patient">
+      <DashboardLayout title="Pingo Card" nav={nav} role="patient">
         <div className="space-y-6 max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
             <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground">
@@ -209,7 +209,7 @@ const PingoCardPanel = () => {
 
   if (loading || !subscription) {
     return (
-      <DashboardLayout activeItem="pingo-card" navItems={nav} role="patient">
+      <DashboardLayout title="Pingo Card" nav={nav} role="patient">
         <div className="space-y-4 max-w-6xl mx-auto">
           <Skeleton className="h-48 w-full rounded-xl" />
           <Skeleton className="h-64 w-full rounded-xl" />
@@ -222,7 +222,7 @@ const PingoCardPanel = () => {
   const isCanceled = subscription.status === "canceled";
 
   return (
-    <DashboardLayout activeItem="pingo-card" navItems={nav} role="patient">
+    <DashboardLayout title="Pingo Card" nav={nav} role="patient">
       <div className="space-y-6 max-w-6xl mx-auto">
         {/* CARTÃO VIRTUAL */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

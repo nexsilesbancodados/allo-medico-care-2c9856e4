@@ -164,7 +164,7 @@ const AdminPingoCard = () => {
     <DashboardLayout title="Pingo Card" nav={nav} role="admin">
       <div className="space-y-6">
         <AdminPageHeader
-          icon={<Heart size={20} weight="fill" />}
+          icon={Heart}
           title="Pingo Card"
           description="Gestão completa do programa de cartão de benefícios"
         />
@@ -268,7 +268,7 @@ const AdminPingoCard = () => {
                         </TableCell>
                         <TableCell className="text-right space-x-2">
                           <Button size="sm" variant="ghost" onClick={() => openPlanForm(p)}><Pencil size={14} /></Button>
-                          <Button size="sm" variant="ghost" onClick={() => deletePlan(p.id)}><Trash2 size={14} /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => deletePlan(p.id)}><Trash size={14} /></Button>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -311,7 +311,7 @@ const AdminPingoCard = () => {
                         </TableCell>
                         <TableCell className="text-right space-x-2">
                           <Button size="sm" variant="ghost" onClick={() => openPartnerForm(p)}><Pencil size={14} /></Button>
-                          <Button size="sm" variant="ghost" onClick={() => deletePartner(p.id)}><Trash2 size={14} /></Button>
+                          <Button size="sm" variant="ghost" onClick={() => deletePartner(p.id)}><Trash size={14} /></Button>
                         </TableCell>
                       </TableRow>
                     ))}
