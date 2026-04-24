@@ -26,6 +26,8 @@ interface PatientOnboardingProps {
 }
 
 const BLOOD_TYPES = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-", "Não sei"];
+const COMMON_ALLERGIES = ["Dipirona", "Penicilina", "Amendoim", "Lactose", "Glúten", "Frutos do mar", "AAS"];
+const COMMON_CONDITIONS = ["Diabetes", "Hipertensão", "Asma", "Depressão", "Ansiedade", "Tireoide", "Colesterol alto"];
 
 const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const { user, profile } = useAuth();
