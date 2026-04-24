@@ -122,16 +122,24 @@ const LeftPanel = () => (
 );
 
 /* ═══ STEP INDICATOR — extracted outside ═══ */
+const STEP_LABELS = ["Você", "Acesso", "Pronto!"] as const;
 const StepIndicator = ({ current }: { current: number }) => (
-  <div className="flex items-center gap-2 mb-6">
-    {[1, 2, 3].map((step) => (
-      <div key={step} className="flex items-center gap-2 flex-1">
-        <div className={`h-1.5 rounded-full flex-1 transition-colors duration-300 ${
-          step <= current ? "bg-primary" : "bg-muted"
-        }`} />
-      </div>
-    ))}
-    <span className="text-xs text-muted-foreground font-medium ml-1">{current}/3</span>
+  <div className="mb-6">
+    <div className="flex items-center gap-2">
+      {[1, 2, 3].map((step) => (
+        <div key={step} className="flex items-center gap-2 flex-1">
+          <div className={`h-1.5 rounded-full flex-1 transition-all duration-500 ${
+            step < current ? "bg-emerald-500" : step === current ? "bg-primary" : "bg-muted"
+          }`} />
+        </div>
+      ))}
+    </div>
+    <div className="flex items-center justify-between mt-2">
+      <p className="text-xs font-semibold text-foreground">
+        Etapa {current} de 3 · <span className="text-primary">{STEP_LABELS[current - 1]}</span>
+      </p>
+      <span className="text-[11px] text-muted-foreground">{Math.round((current / 3) * 100)}%</span>
+    </div>
   </div>
 );
 
