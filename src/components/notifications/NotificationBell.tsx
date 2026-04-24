@@ -66,6 +66,12 @@ const NotificationBell = () => {
     });
   }, [navigate]);
 
+  // Stable ref to the toast handler so we don't re-subscribe on every render
+  const showRealtimeToastRef = useRef(showRealtimeToast);
+  useEffect(() => {
+    showRealtimeToastRef.current = showRealtimeToast;
+  }, [showRealtimeToast]);
+
   useEffect(() => {
     if (!user) return;
     fetchNotifications();
@@ -73,21 +79,21 @@ const NotificationBell = () => {
 
     // Realtime subscription for notifications
     const channel = db
-      .channel("notifications-realtime")
+      .channel(`notifications-realtime-${user.id}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
         (payload) => {
           const newNotif = payload.new as Notification;
           setNotifications(prev => [newNotif, ...prev]);
-          showRealtimeToast(newNotif);
+          showRealtimeToastRef.current(newNotif);
         }
       )
       .subscribe();
 
     // Realtime subscription for unread messages (issue #12 rodada 3)
     const msgChannel = db
-      .channel("unread-messages-count")
+      .channel(`unread-messages-count-${user.id}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "messages" },
@@ -100,7 +106,7 @@ const NotificationBell = () => {
       db.removeChannel(msgChannel);
       if (pulseTimeout.current) clearTimeout(pulseTimeout.current);
     };
-  }, [user, showRealtimeToast]);
+  }, [user]);
 
   const fetchUnreadMessages = async () => {
     if (!user) return;
