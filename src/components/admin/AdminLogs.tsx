@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getAdminNav } from "./adminNav";
-import { Search } from "lucide-react";
+import { AdminPageHeader } from "./AdminPageHeader";
+import { Search, History } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -47,11 +48,16 @@ const AdminLogs = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("logs")}>
-      <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Histórico de Atividades</h1>
-        <p className="text-muted-foreground text-sm mb-4">Logs de ações realizadas na plataforma</p>
+      <div className="w-full mx-auto max-w-5xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={History}
+          eyebrow="Sistema"
+          title="Histórico de Atividades"
+          description="Logs de ações realizadas na plataforma para auditoria."
+          accent="from-slate-500 to-slate-700"
+        />
 
-        <div className="flex gap-3 mb-4">
+        <div className="flex gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Buscar ação..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />

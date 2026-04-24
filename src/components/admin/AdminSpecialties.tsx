@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
-import { Plus, Trash2 } from "lucide-react";
+import { AdminPageHeader } from "./AdminPageHeader";
+import { Plus, Trash2, ShieldCheck } from "lucide-react";
 import type { SpecialtyRow } from "@/types/domain";
 
 const AdminSpecialties = () => {
@@ -64,11 +65,14 @@ const AdminSpecialties = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("specialties")}>
-      <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Especialidades</h1>
-        <p className="text-muted-foreground text-sm mb-6">
-          Gerencie as especialidades e defina a faixa de preço permitida para cada uma.
-        </p>
+      <div className="w-full mx-auto max-w-5xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={ShieldCheck}
+          eyebrow="Conteúdo"
+          title="Especialidades"
+          description="Gerencie as especialidades médicas e a faixa de preço de cada uma."
+          accent="from-cyan-500 to-blue-600"
+        />
 
         <Card className="border-border mb-6">
           <CardHeader><CardTitle className="text-base">Adicionar Especialidade</CardTitle></CardHeader>

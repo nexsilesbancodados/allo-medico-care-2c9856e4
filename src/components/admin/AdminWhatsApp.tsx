@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { db } from "@/integrations/supabase/untyped";
 import DashboardLayout from "@/components/dashboards/DashboardLayout";
 import { getAdminNav } from "@/components/admin/adminNav";
+import { AdminPageHeader } from "@/components/admin/AdminPageHeader";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -370,21 +371,19 @@ const AdminWhatsApp = () => {
 
   return (
     <DashboardLayout title="WhatsApp" nav={getAdminNav("whatsapp")}>
-      <div className="w-full mx-auto max-w-5xl space-y-6 pb-24 md:pb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <MessageCircle className="w-6 h-6 text-primary" />
-              WhatsApp
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              Gerencie conexões e configure automações de mensagens.
-            </p>
-          </div>
-          <Badge variant={connectedCount > 0 ? "default" : "secondary"} className="text-xs">
-            {connectedCount > 0 ? `${connectedCount} conectada(s)` : "Desconectado"}
-          </Badge>
-        </div>
+      <div className="w-full mx-auto max-w-5xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={MessageCircle}
+          eyebrow="Sistema"
+          title="WhatsApp"
+          description="Gerencie conexões e configure automações de mensagens."
+          accent="from-green-500 to-emerald-600"
+          badge={
+            connectedCount > 0
+              ? { label: `${connectedCount} conectada${connectedCount === 1 ? "" : "s"}`, tone: "success" }
+              : { label: "Desconectado", tone: "danger" }
+          }
+        />
 
         <Tabs defaultValue="automations" className="w-full">
           <TabsList className="grid w-full grid-cols-2">

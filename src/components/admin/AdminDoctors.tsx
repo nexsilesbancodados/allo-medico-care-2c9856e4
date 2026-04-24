@@ -11,7 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
-import { Search, Eye, Edit, Check, X } from "lucide-react";
+import { AdminPageHeader } from "./AdminPageHeader";
+import { Search, Eye, Edit, Check, X, Stethoscope } from "lucide-react";
 import { useDebounce } from "@/hooks/use-debounce";
 
 const AdminDoctors = () => {
@@ -74,11 +75,17 @@ const AdminDoctors = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("doctors")}>
-      <div className="w-full mx-auto max-w-5xl pb-24 md:pb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Médicos</h1>
-        <p className="text-muted-foreground text-sm mb-4">{filtered.length} médico(s)</p>
+      <div className="w-full mx-auto max-w-5xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={Stethoscope}
+          eyebrow="Pessoas"
+          title="Médicos"
+          description="Cadastros, CRMs, preços e status de aprovação dos profissionais."
+          accent="from-emerald-500 to-teal-600"
+          badge={{ label: `${filtered.length} ${filtered.length === 1 ? "médico" : "médicos"}`, tone: "success" }}
+        />
 
-        <div className="flex gap-3 mb-4">
+        <div className="flex gap-3">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input placeholder="Buscar por nome ou CRM..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
