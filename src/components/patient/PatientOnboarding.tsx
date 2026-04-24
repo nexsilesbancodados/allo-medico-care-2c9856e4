@@ -142,20 +142,98 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
     switch (step.id) {
       case "welcome":
         return (
-          <div className="text-center px-2">
-            <h1 className="text-3xl font-black text-foreground leading-tight mb-2">
-              Sua saúde em <span className="italic">boas mãos.</span>
-            </h1>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-              Bem-vindo à AloClínica. O santuário digital para cuidar de você e de quem você ama.
-            </p>
-            <img src={mascotWelcome} alt="Pingo" className="w-40 h-40 mx-auto object-contain drop-shadow-lg mb-4" loading="lazy" decoding="async" width={160} height={160} />
-            <div className="relative bg-card rounded-2xl border border-border/50 p-3 max-w-[200px] ml-auto -mt-8 mr-4 shadow-lg">
-              <p className="text-xs text-foreground leading-relaxed">
-                "Olá! Sou seu guia para uma vida saudável."
-              </p>
-              <div className="absolute -left-2 top-3 w-3 h-3 bg-card border-l border-b border-border/50 rotate-45" />
+          <div className="text-center px-2 pt-2">
+            {/* Mascot stage with halo */}
+            <div className="relative mx-auto w-56 h-56 mb-2">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/25 via-primary/10 to-transparent blur-2xl" />
+              <div className="absolute inset-6 rounded-full bg-gradient-to-tr from-primary/15 to-secondary/15 blur-xl animate-pulse" />
+              <motion.img
+                src={mascotWelcome}
+                alt="Pingo, mascote da AloClínica"
+                className="relative w-full h-full object-contain drop-shadow-2xl"
+                initial={{ y: 8, opacity: 0 }}
+                animate={{ y: [0, -6, 0], opacity: 1 }}
+                transition={{ y: { duration: 3, repeat: Infinity, ease: "easeInOut" }, opacity: { duration: 0.5 } }}
+                loading="eager"
+                decoding="async"
+                width={224}
+                height={224}
+              />
+              {/* Floating accents */}
+              <motion.div
+                className="absolute top-4 -left-1 w-7 h-7 rounded-full bg-secondary/30 backdrop-blur-sm border border-secondary/40 flex items-center justify-center shadow-lg"
+                animate={{ y: [0, -10, 0], rotate: [0, 8, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <Heart className="w-3.5 h-3.5 text-secondary" />
+              </motion.div>
+              <motion.div
+                className="absolute top-10 -right-2 w-7 h-7 rounded-full bg-primary/15 backdrop-blur-sm border border-primary/30 flex items-center justify-center shadow-lg"
+                animate={{ y: [0, -8, 0], rotate: [0, -10, 0] }}
+                transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-primary" />
+              </motion.div>
+              <motion.div
+                className="absolute bottom-6 -right-1 w-7 h-7 rounded-full bg-card border border-border flex items-center justify-center shadow-lg"
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              >
+                <Stethoscope className="w-3.5 h-3.5 text-primary" />
+              </motion.div>
             </div>
+
+            {/* Speech bubble */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 6 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.4 }}
+              className="relative bg-card rounded-2xl border border-border/60 px-4 py-2.5 max-w-[220px] mx-auto mb-5 shadow-md"
+            >
+              <p className="text-[12px] text-foreground leading-snug font-medium">
+                Olá! Eu sou o <span className="text-primary font-bold">Pingo</span> 🐧
+              </p>
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-l border-t border-border/60 rotate-45" />
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="text-[28px] sm:text-3xl font-black text-foreground leading-[1.1] tracking-tight mb-3"
+            >
+              Sua saúde em<br />
+              <span className="bg-gradient-to-r from-primary via-primary to-secondary bg-clip-text text-transparent italic">
+                boas mãos.
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
+              className="text-[13px] text-muted-foreground leading-relaxed max-w-[300px] mx-auto mb-5"
+            >
+              Bem-vindo à <span className="font-semibold text-foreground">AloClínica</span>. O santuário digital para cuidar de você e de quem você ama.
+            </motion.p>
+
+            {/* Trust chips */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.5 }}
+              className="flex flex-wrap justify-center gap-1.5"
+            >
+              {[
+                { icon: <ShieldCheck className="w-3 h-3" />, label: "100% seguro" },
+                { icon: <Stethoscope className="w-3 h-3" />, label: "Médicos verificados" },
+                { icon: <Heart className="w-3 h-3" />, label: "Cuidado humano" },
+              ].map((c) => (
+                <span key={c.label} className="inline-flex items-center gap-1 text-[10px] font-semibold text-muted-foreground bg-muted/60 border border-border/40 px-2.5 py-1 rounded-full">
+                  {c.icon} {c.label}
+                </span>
+              ))}
+            </motion.div>
           </div>
         );
 
@@ -280,13 +358,31 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
 
       case "done":
         return (
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
-              <Heart className="w-8 h-8 text-primary" />
+          <div className="text-center pt-4">
+            <div className="relative mx-auto w-40 h-40 mb-4">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-secondary/20 blur-2xl" />
+              <motion.img
+                src={mascotWelcome}
+                alt="Pingo comemorando"
+                className="relative w-full h-full object-contain drop-shadow-2xl"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1, rotate: [0, -4, 4, 0] }}
+                transition={{ scale: { duration: 0.4 }, rotate: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
+              />
+              <motion.div
+                className="absolute -top-1 right-2 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center shadow-lg"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
+              >
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+              </motion.div>
             </div>
-            <h2 className="text-xl font-bold text-foreground mb-2">Tudo pronto! 💚</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Agende sua primeira consulta e comece a cuidar da saúde com a AloClínica.
+            <h2 className="text-2xl font-black text-foreground mb-2 tracking-tight">
+              Tudo pronto! <span className="text-secondary">💚</span>
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-[300px] mx-auto">
+              Agende sua primeira consulta e comece a cuidar da saúde com a <span className="font-semibold text-foreground">AloClínica</span>.
             </p>
           </div>
         );
@@ -295,7 +391,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-background flex flex-col">
+    <div className="fixed inset-0 z-[100] bg-gradient-to-b from-background via-background to-primary/5 flex flex-col">
       {/* Top bar */}
       <div className="flex items-center justify-between px-5 pt-5 pb-2">
         <h2 className="text-lg font-extrabold text-primary italic">AloClínica</h2>
