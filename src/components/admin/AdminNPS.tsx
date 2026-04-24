@@ -138,9 +138,14 @@ const AdminNPS = () => {
   );
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("nps")}>
-      <div className="w-full mx-auto max-w-6xl pb-24 md:pb-6">
-        <h1 className="text-2xl font-bold text-foreground mb-1">NPS & Satisfação</h1>
-        <p className="text-muted-foreground mb-6">Análise de satisfação dos pacientes</p>
+      <div className="w-full mx-auto max-w-6xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={Star}
+          eyebrow="Visão Geral"
+          title="NPS & Satisfação"
+          description="Análise da satisfação dos pacientes com base em pesquisas pós-consulta."
+          accent="from-amber-500 to-yellow-600"
+        />
 
         {surveys.length === 0 ? (
           <Card className="border-border">

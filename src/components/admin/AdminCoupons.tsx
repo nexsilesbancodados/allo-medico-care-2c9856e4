@@ -88,16 +88,20 @@ const AdminCoupons = () => {
 
   return (
     <DashboardLayout title="Cupons de Desconto" nav={nav} role="admin">
-      <div className="space-y-6 pb-24 md:pb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tabular-nums">Cupons</h1>
-            <p className="text-sm text-muted-foreground">{coupons.length} cupons cadastrados</p>
-          </div>
-          <Button onClick={() => setShowForm(true)} className="rounded-xl">
-            <Plus className="w-4 h-4 mr-2" /> Novo Cupom
-          </Button>
-        </div>
+      <div className="space-y-5 pb-24 md:pb-8">
+        <AdminPageHeader
+          icon={Tag}
+          eyebrow="Conteúdo"
+          title="Cupons"
+          description="Gerencie códigos promocionais e descontos para usuários."
+          accent="from-orange-500 to-amber-600"
+          badge={{ label: `${coupons.length} ${coupons.length === 1 ? "cupom" : "cupons"}`, tone: "warning" }}
+          actions={
+            <Button onClick={() => setShowForm(true)} size="sm" className="rounded-xl">
+              <Plus className="w-4 h-4 mr-1.5" /> Novo Cupom
+            </Button>
+          }
+        />
 
         <Card>
           <CardContent className="p-0">

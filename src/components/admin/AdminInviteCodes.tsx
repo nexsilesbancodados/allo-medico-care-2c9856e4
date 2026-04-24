@@ -58,17 +58,20 @@ const AdminInviteCodes = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("invite-codes")}>
-      <div className="w-full mx-auto max-w-4xl pb-24 md:pb-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground mb-1">Códigos de Convite</h1>
-            <p className="text-muted-foreground">Gere códigos para cadastro de novos médicos</p>
-          </div>
-          <Button onClick={generateCode} disabled={generating} className="bg-gradient-to-r from-secondary to-primary text-primary-foreground">
-            <Plus className="w-4 h-4 mr-2" />
-            {generating ? "Gerando..." : "Gerar Código"}
-          </Button>
-        </div>
+      <div className="w-full mx-auto max-w-4xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={Key}
+          eyebrow="Conteúdo"
+          title="Códigos de Convite"
+          description="Gere códigos para cadastro de novos médicos na plataforma."
+          accent="from-amber-500 to-orange-600"
+          actions={
+            <Button onClick={generateCode} disabled={generating} size="sm" className="bg-gradient-to-r from-secondary to-primary text-primary-foreground">
+              <Plus className="w-4 h-4 mr-1.5" />
+              {generating ? "Gerando..." : "Gerar Código"}
+            </Button>
+          }
+        />
 
         <Card className="border-border">
           <CardContent className="p-0">

@@ -379,29 +379,37 @@ const AdminFinancial = () => {
 
   return (
     <DashboardLayout title="Admin" nav={adminNav}>
-      <div className="space-y-6 pb-24 md:pb-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tabular-nums">Painel Financeiro</h1>
-            <p className="text-sm text-muted-foreground">Receita, pagamentos e inadimplência</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="7">Últimos 7 dias</SelectItem>
-                <SelectItem value="30">Últimos 30 dias</SelectItem>
-                <SelectItem value="90">Últimos 90 dias</SelectItem>
-                <SelectItem value="365">Último ano</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" size="icon" onClick={() => { fetchData(); fetchWithdrawals(); }} aria-label="Atualizar">
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
+      <div className="space-y-5 pb-24 md:pb-8">
+        <AdminPageHeader
+          icon={Wallet}
+          eyebrow="Financeiro"
+          title="Painel Financeiro"
+          description="Receita, pagamentos, saques e inadimplência da plataforma."
+          accent="from-green-500 to-emerald-600"
+          badge={
+            pendingWithdrawals > 0
+              ? { label: `${pendingWithdrawals} saque${pendingWithdrawals === 1 ? "" : "s"} pendente${pendingWithdrawals === 1 ? "" : "s"}`, tone: "warning" }
+              : undefined
+          }
+          actions={
+            <>
+              <Select value={period} onValueChange={setPeriod}>
+                <SelectTrigger className="w-[140px] h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">Últimos 7 dias</SelectItem>
+                  <SelectItem value="30">Últimos 30 dias</SelectItem>
+                  <SelectItem value="90">Últimos 90 dias</SelectItem>
+                  <SelectItem value="365">Último ano</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="icon" className="h-9 w-9" onClick={() => { fetchData(); fetchWithdrawals(); }} aria-label="Atualizar">
+                <RefreshCw className="w-4 h-4" />
+              </Button>
+            </>
+          }
+        />
 
         {/* KPI Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

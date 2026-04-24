@@ -237,32 +237,35 @@ const AdminReports = () => {
 
   return (
     <DashboardLayout title="Administração" nav={getAdminNav("reports")}>
-      <div className="w-full mx-auto max-w-6xl pb-24 md:pb-6">
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground mb-1">Relatórios & Análises</h1>
-            <p className="text-muted-foreground">Métricas financeiras, operacionais e de qualidade</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Select value={period} onValueChange={setPeriod}>
-              <SelectTrigger className="w-[140px]">
-                <Calendar className="w-4 h-4 mr-1" />
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="3">3 meses</SelectItem>
-                <SelectItem value="6">6 meses</SelectItem>
-                <SelectItem value="12">12 meses</SelectItem>
-              </SelectContent>
-            </Select>
-            <Button variant="outline" onClick={() => exportCSV(revenueData, "receita-mensal")} size="sm">
-              <Download className="w-4 h-4 mr-1" /> CSV
-            </Button>
-            <Button variant="outline" onClick={exportPDF} size="sm">
-              <FileText className="w-4 h-4 mr-1" /> PDF
-            </Button>
-          </div>
-        </div>
+      <div className="w-full mx-auto max-w-6xl space-y-5 pb-24 md:pb-6">
+        <AdminPageHeader
+          icon={TrendingUp}
+          eyebrow="Visão Geral"
+          title="Relatórios & Análises"
+          description="Métricas financeiras, operacionais e de qualidade da plataforma."
+          accent="from-cyan-500 to-blue-600"
+          actions={
+            <>
+              <Select value={period} onValueChange={setPeriod}>
+                <SelectTrigger className="w-[140px] h-9">
+                  <Calendar className="w-4 h-4 mr-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="3">3 meses</SelectItem>
+                  <SelectItem value="6">6 meses</SelectItem>
+                  <SelectItem value="12">12 meses</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" onClick={() => exportCSV(revenueData, "receita-mensal")} size="sm">
+                <Download className="w-4 h-4 mr-1" /> CSV
+              </Button>
+              <Button variant="outline" onClick={exportPDF} size="sm">
+                <FileText className="w-4 h-4 mr-1" /> PDF
+              </Button>
+            </>
+          }
+        />
 
         {loading ? <div className="shimmer-v2 h-20 rounded-2xl"/> : (
           <>

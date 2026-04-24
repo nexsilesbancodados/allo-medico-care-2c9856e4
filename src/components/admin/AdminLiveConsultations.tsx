@@ -96,15 +96,23 @@ const AdminLiveConsultations = () => {
   return (
     <DashboardLayout title="Admin" nav={getAdminNav("live")}>
       <div className="w-full mx-auto max-w-4xl space-y-5 pb-24 md:pb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground tabular-nums">Consultas ao Vivo</h1>
-            <p className="text-sm text-muted-foreground">Monitoramento em tempo real de consultas ativas e atrasos</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={fetchLive} disabled={loading}>
-            <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? "animate-spin" : ""}`} /> Atualizar
-          </Button>
-        </div>
+        <AdminPageHeader
+          icon={Video}
+          eyebrow="Visão Geral"
+          title="Consultas ao Vivo"
+          description="Monitoramento em tempo real de consultas ativas e atrasos."
+          accent="from-rose-500 to-pink-600"
+          badge={
+            inProgress.length > 0
+              ? { label: `${inProgress.length} ao vivo`, tone: "danger" }
+              : { label: "Sem consultas agora", tone: "default" }
+          }
+          actions={
+            <Button variant="outline" size="sm" onClick={fetchLive} disabled={loading}>
+              <RefreshCw className={`w-4 h-4 mr-1.5 ${loading ? "animate-spin" : ""}`} /> Atualizar
+            </Button>
+          }
+        />
 
         {/* Stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
