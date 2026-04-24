@@ -230,7 +230,13 @@ const AuthPaciente = () => {
         password,
         options: {
           emailRedirectTo: window.location.origin,
-          data: { first_name: firstName, last_name: lastName },
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            cpf: cleanCpf,
+            phone: cleanPhone,
+            date_of_birth: birthDate || null,
+          },
         },
       });
 
@@ -246,19 +252,32 @@ const AuthPaciente = () => {
         return;
       }
 
+      if (signUpData.user?.identities?.length === 0) {
+        toast.error("Email já cadastrado", { description: "Essa conta já existe. Entre com sua senha ou use Esqueci minha senha." });
+        setMode("login");
+        setLoading(false);
+        return;
+      }
+
       if (signUpData.user) {
         const userId = signUpData.user.id;
 
-        await db.from("profiles").upsert({
-          user_id: userId,
-          cpf: cleanCpf,
-          phone: cleanPhone,
-          first_name: firstName,
-          last_name: lastName,
-          date_of_birth: birthDate || null,
-        }, { onConflict: "user_id" });
+        if (signUpData.session) {
+          const { error: profileError } = await db.from("profiles").upsert({
+            user_id: userId,
+            cpf: cleanCpf,
+            phone: cleanPhone,
+            first_name: firstName,
+            last_name: lastName,
+            date_of_birth: birthDate || null,
+          }, { onConflict: "user_id" });
 
-        await registerConsent(userId);
+          if (profileError) {
+            logError("profile upsert error", profileError, { userId });
+          }
+
+          await registerConsent(userId);
+        }
 
         try {
           await db.functions.invoke("send-email", {
@@ -266,8 +285,13 @@ const AuthPaciente = () => {
           });
         } catch {}
 
-        toast.success("Conta criada! ✅", { description: "Vamos completar seu perfil..." });
-        setTimeout(() => navigate("/dashboard?role=patient&onboarding=true"), 1500);
+        if (signUpData.session) {
+          toast.success("Conta criada! ✅", { description: "Vamos completar seu perfil..." });
+          setTimeout(() => navigate("/dashboard?role=patient&onboarding=true"), 1500);
+        } else {
+          toast.success("Cadastro enviado! ✅", { description: "Confirme seu email para ativar a conta." });
+          setMode("login");
+        }
       }
     } catch (err) {
       logError("handleSignup error", err);
