@@ -49,6 +49,7 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
   const [conditionInput, setConditionInput] = useState("");
   const [kycCompleted, setKycCompleted] = useState(false);
   const [kycFailed, setKycFailed] = useState(false);
+  const [kycReady, setKycReady] = useState(false);
 
   useEffect(() => {
     if (user) {
