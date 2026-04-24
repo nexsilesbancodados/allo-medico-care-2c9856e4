@@ -5,7 +5,7 @@ import { warn } from "@/lib/logger";
 
 type AppRole = "patient" | "doctor" | "clinic" | "admin" | "receptionist" | "support" | "partner" | "laudista" | "ophthalmologist" | "affiliate" | "optician";
 
-const AUTH_LOADING_TIMEOUT_MS = 4500;
+const AUTH_LOADING_TIMEOUT_MS = 12000;
 
 interface Profile {
   id: string;
