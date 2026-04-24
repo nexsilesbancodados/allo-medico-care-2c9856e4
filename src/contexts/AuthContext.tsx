@@ -48,7 +48,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const withAuthTimeout = useCallback(<T,>(promise: Promise<T>, label: string): Promise<T> => {
-    return Promise.race([
+    return Promise.race<T>([
       promise,
       new Promise<T>((_, reject) => {
         window.setTimeout(() => reject(new Error(`${label} demorou para responder`)), AUTH_LOADING_TIMEOUT_MS);
@@ -109,7 +109,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
-    withAuthTimeout(db.auth.getSession(), "Sessão")
+    withAuthTimeout<Awaited<ReturnType<typeof db.auth.getSession>>>(db.auth.getSession(), "Sessão")
       .then(({ data: { session: s } }) => hydrateAuth(s))
       .catch((error) => {
         warn("getSession error:", error);
