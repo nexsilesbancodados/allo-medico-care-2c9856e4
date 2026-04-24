@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/integrations/supabase/untyped";
-import BiometricKYC from "@/components/kyc/BiometricKYC";
+import KycCrossDevice from "@/components/kyc/KycCrossDevice";
 import { ShieldCheck, AlertTriangle, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -121,7 +121,7 @@ const ReVerificationGate = ({ children }: { children: React.ReactNode }) => {
 
             {/* KYC Component */}
             <div className="rounded-2xl border border-border/30 bg-muted/20 p-4">
-              <BiometricKYC
+              <KycCrossDevice
                 onComplete={handleComplete}
                 variant="full"
                 tipo="paciente"

@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 import type { SpecialtyRow } from "@/types/domain";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import BiometricKYC from "@/components/kyc/BiometricKYC";
+import KycCrossDevice from "@/components/kyc/KycCrossDevice";
 
 interface OnboardingStep {
   id: string;
@@ -214,7 +214,8 @@ const DoctorOnboarding = () => {
       {/* KYC Verification via Didit */}
       {showKYC && data?.docProfile && (
         <div className="mt-4">
-          <BiometricKYC
+          <KycCrossDevice
+            tipo="medico"
             onComplete={(result) => {
               setShowKYC(false);
               setData((prev: any) => ({
