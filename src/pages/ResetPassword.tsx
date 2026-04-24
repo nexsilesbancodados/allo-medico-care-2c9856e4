@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { db } from "@/integrations/supabase/untyped";
 import { Button } from "@/components/ui/button";
@@ -22,7 +22,77 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [sessionReady, setSessionReady] = useState(false);
+  const [sessionError, setSessionError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Processa o token de recovery do link de email
+  useEffect(() => {
+    let cancelled = false;
+
+    const init = async () => {
+      try {
+        // 1) Tokens podem vir no hash (#access_token=...&type=recovery) — fluxo legado
+        const hash = window.location.hash.startsWith("#")
+          ? window.location.hash.slice(1)
+          : "";
+        const hashParams = new URLSearchParams(hash);
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
+        const type = hashParams.get("type");
+
+        if (accessToken && refreshToken && type === "recovery") {
+          const { error } = await db.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) throw error;
+          // Limpa o hash da URL
+          window.history.replaceState(null, "", window.location.pathname);
+        } else {
+          // 2) Fluxo PKCE moderno: ?code=...
+          const url = new URL(window.location.href);
+          const code = url.searchParams.get("code");
+          if (code && typeof (db.auth as any).exchangeCodeForSession === "function") {
+            const { error } = await (db.auth as any).exchangeCodeForSession(code);
+            if (error) throw error;
+            url.searchParams.delete("code");
+            window.history.replaceState(null, "", url.pathname);
+          }
+        }
+
+        // 3) Verifica se há sessão ativa (recovery ou existente)
+        const { data: { session } } = await db.auth.getSession();
+        if (cancelled) return;
+
+        if (session) {
+          setSessionReady(true);
+        } else {
+          setSessionError(
+            "Link de recuperação inválido ou expirado. Solicite um novo email de redefinição."
+          );
+        }
+      } catch (err: any) {
+        if (cancelled) return;
+        setSessionError(err?.message || "Não foi possível validar o link de recuperação.");
+      }
+    };
+
+    init();
+
+    // Escuta o evento PASSWORD_RECOVERY emitido pelo Supabase
+    const { data: { subscription } } = db.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+        setSessionReady(true);
+        setSessionError(null);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,53 +193,73 @@ const ResetPassword = () => {
               </p>
 
               <div className="rounded-2xl bg-card border border-border/60 p-8 shadow-lg">
-                <form onSubmit={handleReset} className="space-y-4">
-                  <div>
-                    <Label htmlFor="new-password">Nova Senha</Label>
-                    <div className="relative mt-1">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="new-password"
-                        type="password"
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="Mínimo 6 caracteres"
-                        className="pl-10 h-12 rounded-xl"
-                        required
-                        minLength={6}
-                        autoFocus
-                      />
-                    </div>
-                    <PasswordStrength password={password} />
+                {sessionError ? (
+                  <div className="text-center space-y-4">
+                    <p className="text-sm text-destructive">{sessionError}</p>
+                    <Button
+                      asChild
+                      variant="outline"
+                      className="w-full h-12 rounded-full font-semibold"
+                    >
+                      <Link to="/forgot-password">Solicitar novo link</Link>
+                    </Button>
                   </div>
-                  <div>
-                    <Label htmlFor="confirm-password">Confirmar Senha</Label>
-                    <div className="relative mt-1">
-                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        id="confirm-password"
-                        type="password"
-                        value={confirmPassword}
-                        onChange={e => setConfirmPassword(e.target.value)}
-                        placeholder="Repita a senha"
-                        className="pl-10 h-12 rounded-xl"
-                        required
-                        minLength={6}
-                      />
-                    </div>
-                    {confirmPassword && password !== confirmPassword && (
-                      <p className="text-xs text-destructive mt-1">Senhas não conferem</p>
-                    )}
+                ) : !sessionReady ? (
+                  <div className="text-center py-8">
+                    <div className="w-10 h-10 mx-auto rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+                    <p className="text-sm text-muted-foreground mt-4">
+                      Validando link de recuperação...
+                    </p>
                   </div>
-                  <Button
-                    type="submit"
-                    className="w-full h-12 rounded-full font-bold"
-                    size="lg"
-                    disabled={loading}
-                  >
-                    {loading ? "Atualizando..." : "Redefinir Senha"}
-                  </Button>
-                </form>
+                ) : (
+                  <form onSubmit={handleReset} className="space-y-4">
+                    <div>
+                      <Label htmlFor="new-password">Nova Senha</Label>
+                      <div className="relative mt-1">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="new-password"
+                          type="password"
+                          value={password}
+                          onChange={e => setPassword(e.target.value)}
+                          placeholder="Mínimo 6 caracteres"
+                          className="pl-10 h-12 rounded-xl"
+                          required
+                          minLength={6}
+                          autoFocus
+                        />
+                      </div>
+                      <PasswordStrength password={password} />
+                    </div>
+                    <div>
+                      <Label htmlFor="confirm-password">Confirmar Senha</Label>
+                      <div className="relative mt-1">
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          id="confirm-password"
+                          type="password"
+                          value={confirmPassword}
+                          onChange={e => setConfirmPassword(e.target.value)}
+                          placeholder="Repita a senha"
+                          className="pl-10 h-12 rounded-xl"
+                          required
+                          minLength={6}
+                        />
+                      </div>
+                      {confirmPassword && password !== confirmPassword && (
+                        <p className="text-xs text-destructive mt-1">Senhas não conferem</p>
+                      )}
+                    </div>
+                    <Button
+                      type="submit"
+                      className="w-full h-12 rounded-full font-bold"
+                      size="lg"
+                      disabled={loading}
+                    >
+                      {loading ? "Atualizando..." : "Redefinir Senha"}
+                    </Button>
+                  </form>
+                )}
               </div>
             </motion.div>
           )}
