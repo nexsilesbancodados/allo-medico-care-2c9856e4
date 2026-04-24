@@ -164,6 +164,7 @@ const AnimatedRoutes = () => {
       <Route path="/teleconsulta" element={<Teleconsulta />} />
       <Route path="/para-profissionais" element={<ParaProfissionais />} />
       <Route path="/para-medicos" element={<ForDoctors />} />
+      <Route path="/profissionais" element={<ForDoctors />} />
       <Route path="/para-clinicas" element={<ForClinics />} />
       <Route path="/sobre" element={<Sobre />} />
       <Route path="/seguranca" element={<Seguranca />} />
