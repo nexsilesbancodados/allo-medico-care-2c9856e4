@@ -13,7 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { AdminPageHeader } from "./AdminPageHeader";
-import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck, Fingerprint } from "lucide-react";
+import { AdminLoading, AdminEmpty } from "./AdminStateBlocks";
+import { Check, X, Clock, UserCheck, Building2, Handshake, ExternalLink, ShieldCheck, Fingerprint, Stethoscope } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { ApprovalItem } from "@/types/domain";
 
@@ -342,7 +343,11 @@ const AdminApprovals = () => {
             </TabsTrigger>
           </TabsList>
 
-          {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
+          {loading ? (
+            <div className="mt-4">
+              <AdminLoading variant="cards" count={3} />
+            </div>
+          ) : (
             <>
               <TabsContent value="doctors" className="mt-4 space-y-4">
                 {pendingDoctors.length > 0 && (
@@ -358,7 +363,12 @@ const AdminApprovals = () => {
                   </>
                 )}
                 {pendingDoctors.length === 0 && approvedDoctors.length === 0 && (
-                  <div className="text-center py-8"><p className="text-[12px] font-semibold text-foreground">Nenhum médico cadastrado</p></div>
+                  <AdminEmpty
+                    icon={Stethoscope}
+                    title="Nenhum médico cadastrado"
+                    description="Quando médicos solicitarem cadastro, eles aparecerão aqui para aprovação."
+                    accent="from-emerald-500/20 to-teal-500/20"
+                  />
                 )}
               </TabsContent>
 
@@ -376,7 +386,12 @@ const AdminApprovals = () => {
                   </>
                 )}
                 {pendingClinics.length === 0 && approvedClinics.length === 0 && (
-                  <div className="text-center py-8"><p className="text-[12px] font-semibold text-foreground">Nenhuma clínica cadastrada</p></div>
+                  <AdminEmpty
+                    icon={Building2}
+                    title="Nenhuma clínica cadastrada"
+                    description="Solicitações de clínicas parceiras aparecerão aqui para revisão."
+                    accent="from-blue-500/20 to-indigo-500/20"
+                  />
                 )}
               </TabsContent>
 
@@ -394,7 +409,12 @@ const AdminApprovals = () => {
                   </>
                 )}
                 {pendingPartners.length === 0 && approvedPartners.length === 0 && (
-                  <div className="text-center py-8"><p className="text-[12px] font-semibold text-foreground">Nenhum parceiro cadastrado</p></div>
+                  <AdminEmpty
+                    icon={Handshake}
+                    title="Nenhum parceiro cadastrado"
+                    description="Farmácias, laboratórios e outras parcerias aparecerão aqui para validação."
+                    accent="from-amber-500/20 to-orange-500/20"
+                  />
                 )}
               </TabsContent>
             </>

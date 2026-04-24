@@ -11,7 +11,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { getAdminNav } from "./adminNav";
 import { AdminPageHeader } from "./AdminPageHeader";
-import { Search, Shield, Eye } from "lucide-react";
+import { AdminLoading, AdminEmpty } from "./AdminStateBlocks";
+import { Search, Shield, Eye, Users as UsersIcon } from "lucide-react";
 
 const ROLE_LABELS: Record<string, string> = {
   patient: "Paciente",
@@ -143,70 +144,65 @@ const AdminUsers = () => {
           <Input placeholder="Buscar por nome ou CPF..." value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
         </div>
 
-        {loading ? <div className="shimmer-v2 h-5 rounded w-32 inline-block" aria-label="Carregando" /> : (
-          <div className="rounded-lg border border-border overflow-hidden">
-            <div className="overflow-x-auto -mx-0.5 rounded-xl">
-
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Usuário</TableHead>
-                  <TableHead>Telefone</TableHead>
-                  <TableHead>Roles</TableHead>
-                  <TableHead>Cadastro</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading ? (
-
-                  Array.from({ length: 5 }).map((_, i) => (
-
-                    <tr key={i} className="border-b border-border/30">
-                            <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
-      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
-      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
-      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
-      <td className="px-4 py-3"><div className="shimmer-v2 h-4 rounded" /></td>
-
-                    </tr>
-                  ))
-
-                ) : filtered.map(u => (
-                  <TableRow key={u.user_id}>
-                    <TableCell data-label="Usuário">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs">
-                            {u.first_name?.[0]}{u.last_name?.[0]}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium text-foreground">{u.first_name} {u.last_name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell data-label="Telefone" className="text-muted-foreground">{u.phone || "—"}</TableCell>
-                    <TableCell data-label="Roles">
-                      <div className="flex flex-wrap gap-1">
-                        {u.roles.map((r: string) => (
-                          <Badge key={r} variant="outline" className={`text-xs ${ROLE_COLORS[r] ?? ""}`}>
-                            {ROLE_LABELS[r] ?? r}
-                          </Badge>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell data-label="Cadastro" className="text-muted-foreground">{new Date(u.created_at).toLocaleDateString("pt-BR")}</TableCell>
-                    <TableCell data-label="">
-                      <Button size="sm" variant="ghost" onClick={() => openDetail(u)}>
-                        <Eye className="w-4 h-4 mr-1" /> Ver
-                      </Button>
-                    </TableCell>
+        {loading ? (
+          <AdminLoading variant="table" count={6} />
+        ) : filtered.length === 0 ? (
+          <AdminEmpty
+            icon={UsersIcon}
+            title={search ? "Nenhum resultado" : "Nenhum usuário cadastrado"}
+            description={
+              search
+                ? "Tente ajustar o termo de busca por nome ou CPF."
+                : "Os usuários da plataforma aparecerão aqui assim que se cadastrarem."
+            }
+            accent="from-blue-500/20 to-indigo-500/20"
+          />
+        ) : (
+          <div className="rounded-xl border border-border/60 overflow-hidden bg-card/50">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Usuário</TableHead>
+                    <TableHead>Telefone</TableHead>
+                    <TableHead>Roles</TableHead>
+                    <TableHead>Cadastro</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
-                ))}
-                {filtered.length === 0 && (
-                  <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">Nenhum usuário encontrado.</TableCell></TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map(u => (
+                    <TableRow key={u.user_id}>
+                      <TableCell data-label="Usuário">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-8 w-8">
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                              {u.first_name?.[0]}{u.last_name?.[0]}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-medium text-foreground">{u.first_name} {u.last_name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell data-label="Telefone" className="text-muted-foreground">{u.phone || "—"}</TableCell>
+                      <TableCell data-label="Roles">
+                        <div className="flex flex-wrap gap-1">
+                          {u.roles.map((r: string) => (
+                            <Badge key={r} variant="outline" className={`text-xs ${ROLE_COLORS[r] ?? ""}`}>
+                              {ROLE_LABELS[r] ?? r}
+                            </Badge>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell data-label="Cadastro" className="text-muted-foreground">{new Date(u.created_at).toLocaleDateString("pt-BR")}</TableCell>
+                      <TableCell data-label="">
+                        <Button size="sm" variant="ghost" onClick={() => openDetail(u)}>
+                          <Eye className="w-4 h-4 mr-1" /> Ver
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           </div>
         )}
