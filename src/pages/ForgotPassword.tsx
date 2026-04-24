@@ -22,7 +22,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import SEOHead from "@/components/SEOHead";
-import mascotImg from "@/assets/mascot-wave.png";
+import mascotImg from "@/assets/mascot-password-recovery.png";
 
 const benefits = [
   { icon: Video, text: "Videochamada HD criptografada" },
