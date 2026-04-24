@@ -358,13 +358,31 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
 
       case "done":
         return (
-          <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
-              <Heart className="w-8 h-8 text-primary" />
+          <div className="text-center pt-4">
+            <div className="relative mx-auto w-40 h-40 mb-4">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/30 to-secondary/20 blur-2xl" />
+              <motion.img
+                src={mascotWelcome}
+                alt="Pingo comemorando"
+                className="relative w-full h-full object-contain drop-shadow-2xl"
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1, rotate: [0, -4, 4, 0] }}
+                transition={{ scale: { duration: 0.4 }, rotate: { duration: 2, repeat: Infinity, ease: "easeInOut" } }}
+              />
+              <motion.div
+                className="absolute -top-1 right-2 w-9 h-9 rounded-full bg-card border border-border flex items-center justify-center shadow-lg"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 300 }}
+              >
+                <CheckCircle2 className="w-5 h-5 text-primary" />
+              </motion.div>
             </div>
-            <h2 className="text-xl font-bold text-foreground mb-2">Tudo pronto! 💚</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Agende sua primeira consulta e comece a cuidar da saúde com a AloClínica.
+            <h2 className="text-2xl font-black text-foreground mb-2 tracking-tight">
+              Tudo pronto! <span className="text-secondary">💚</span>
+            </h2>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-[300px] mx-auto">
+              Agende sua primeira consulta e comece a cuidar da saúde com a <span className="font-semibold text-foreground">AloClínica</span>.
             </p>
           </div>
         );
