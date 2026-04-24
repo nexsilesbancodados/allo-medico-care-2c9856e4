@@ -5,6 +5,8 @@ import { warn } from "@/lib/logger";
 
 type AppRole = "patient" | "doctor" | "clinic" | "admin" | "receptionist" | "support" | "partner" | "laudista" | "ophthalmologist" | "affiliate" | "optician";
 
+const AUTH_LOADING_TIMEOUT_MS = 4500;
+
 interface Profile {
   id: string;
   user_id: string;
@@ -45,12 +47,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const withAuthTimeout = useCallback(<T,>(promise: Promise<T>, label: string): Promise<T> => {
+    return Promise.race<T>([
+      promise,
+      new Promise<T>((_, reject) => {
+        window.setTimeout(() => reject(new Error(`${label} demorou para responder`)), AUTH_LOADING_TIMEOUT_MS);
+      }),
+    ]);
+  }, []);
+
   const fetchUserData = useCallback(async (userId: string) => {
     try {
-      const [profileRes, rolesRes] = await Promise.all([
-        db.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
-        db.from("user_roles").select("role").eq("user_id", userId),
-      ]);
+      const [profileRes, rolesRes] = await withAuthTimeout(
+        Promise.all([
+          db.from("profiles").select("*").eq("user_id", userId).maybeSingle(),
+          db.from("user_roles").select("role").eq("user_id", userId),
+        ]),
+        "Carregamento dos dados do usuário"
+      );
 
       if (profileRes.error) warn("fetch profile error:", profileRes.error);
       if (rolesRes.error) warn("fetch roles error:", rolesRes.error);
@@ -62,27 +76,40 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setProfile(null);
       setRoles([]);
     }
-  }, []);
+  }, [withAuthTimeout]);
 
   useEffect(() => {
     let mounted = true;
+    const safetyTimer = window.setTimeout(() => {
+      if (mounted) {
+        warn("Auth loading timeout: liberando interface com dados disponíveis");
+        setLoading(false);
+      }
+    }, AUTH_LOADING_TIMEOUT_MS + 1000);
+
     const hydrateAuth = async (nextSession: Session | null) => {
       if (!mounted) return;
 
-      setSession(nextSession);
-      setUser(nextSession?.user ?? null);
+      try {
+        setSession(nextSession);
+        setUser(nextSession?.user ?? null);
 
-      if (nextSession?.user) {
-        await fetchUserData(nextSession.user.id);
-      } else {
+        if (nextSession?.user) {
+          await fetchUserData(nextSession.user.id);
+        } else {
+          setProfile(null);
+          setRoles([]);
+        }
+      } catch (error) {
+        warn("hydrateAuth error:", error);
         setProfile(null);
         setRoles([]);
+      } finally {
+        if (mounted) setLoading(false);
       }
-
-      if (mounted) setLoading(false);
     };
 
-    db.auth.getSession()
+    withAuthTimeout<Awaited<ReturnType<typeof db.auth.getSession>>>(db.auth.getSession(), "Sessão")
       .then(({ data: { session: s } }) => hydrateAuth(s))
       .catch((error) => {
         warn("getSession error:", error);
@@ -94,19 +121,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // 2. Listen for subsequent auth changes (sign in/out/token refresh)
     const { data: { subscription } } = db.auth.onAuthStateChange(
-      async (_event, s) => {
+      (_event, s) => {
         if (!mounted) return;
 
         setLoading(true);
-        await hydrateAuth(s);
+        window.setTimeout(() => {
+          void hydrateAuth(s);
+        }, 0);
       }
     );
 
     return () => {
       mounted = false;
+      window.clearTimeout(safetyTimer);
       subscription.unsubscribe();
     };
-  }, [fetchUserData]);
+  }, [fetchUserData, withAuthTimeout]);
 
   const signOut = useCallback(async () => {
     await db.auth.signOut();
