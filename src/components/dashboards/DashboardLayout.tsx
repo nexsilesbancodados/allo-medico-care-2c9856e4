@@ -261,28 +261,39 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
    
   }, []);
 
-  const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => {
-    // Clone NavIcon to inject active state
+  const NavItemRow = ({ item, onClick, collapsed = false }: { item: NavItem; onClick?: () => void; collapsed?: boolean }) => {
     const icon = isValidElement(item.icon) && (item.icon.props as any)?.color
       ? cloneElement(item.icon as React.ReactElement<any>, { active: item.active })
       : item.icon;
 
     return (
       <Link to={item.href} onClick={onClick}
-        className={`nav-item group flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all duration-200 relative ${
+        className={`nav-item group flex items-center ${collapsed ? "justify-center px-0 h-10 w-10 mx-auto" : "gap-3.5 px-3.5 py-2.5 h-11"} rounded-xl text-[13.5px] transition-all duration-300 relative ${
           item.active
-            ? "bg-primary text-primary-foreground font-semibold shadow-[0_2px_8px_rgba(0,0,0,.15),inset_0_0_0_1px_rgba(255,255,255,.06)]"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            ? "bg-primary text-primary-foreground font-semibold shadow-[0_4px_12px_rgba(0,0,0,.15),inset_0_0_0_1px_rgba(255,255,255,.1)]"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
         }`}
+        title={collapsed ? item.label : undefined}
       >
-        <span className={`shrink-0 transition-transform duration-200 ${item.active ? "" : "group-hover:scale-110"}`}>{icon}</span>
-        <span className="flex-1 truncate">{item.label}</span>
+        <span className={`shrink-0 transition-all duration-300 ${item.active ? "scale-110" : "group-hover:scale-110"}`}>{icon}</span>
+        {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+        
         {(item.badge ?? 0) > 0 && (
-          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center tabular-nums ${
+          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center tabular-nums absolute ${
+            collapsed ? "-top-1 -right-1" : "right-3"
+          } ${
             item.active ? "bg-white/25 text-white" : "bg-destructive text-white"
           }`}>
             {(item.badge ?? 0) > 99 ? "99+" : item.badge}
           </span>
+        )}
+        
+        {item.active && !collapsed && (
+          <motion.div 
+            layoutId="active-pill"
+            className="absolute left-0 w-1 h-6 bg-white rounded-r-full"
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          />
         )}
       </Link>
     );
@@ -291,19 +302,21 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
   const SidebarContent = ({ onItemClick, collapsed = false }: { onItemClick?: () => void; collapsed?: boolean }) => {
     const service = SERVICE_MAP[role] || SERVICE_MAP.patient;
     return (
-    <div ref={sidebarRef} className="flex flex-col flex-1 min-h-0 w-full">
+    <div ref={sidebarRef} className="flex flex-col h-full min-h-0">
       {/* Spacer top */}
       <div className="h-4 shrink-0" />
 
       {/* Service Banner */}
       {!collapsed && (
-        <div className="px-3 pb-2 shrink-0">
-          <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-muted/60 to-muted/30 border border-border/40 p-3">
-            <div className="flex items-start gap-2">
-              <span className="text-2xl mt-0.5">{service.emoji}</span>
+        <div className="px-4 pb-2 shrink-0">
+          <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 via-background to-muted/40 border border-primary/10 p-3 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 shadow-lg text-lg">
+                {service.emoji}
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-bold text-foreground">{service.name}</p>
-                <p className="text-[10px] text-muted-foreground/80 leading-snug">{service.description}</p>
+                <p className="text-[13px] font-bold text-foreground leading-tight">{service.name}</p>
+                <p className="text-[10px] text-muted-foreground/90 leading-tight mt-0.5">{service.description}</p>
               </div>
             </div>
           </div>
@@ -317,8 +330,8 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
 
       {/* Role badge */}
       {!collapsed && (
-        <div className="px-3 pb-2 shrink-0">
-          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${ROLE_COLORS[role] ?? ROLE_COLORS.patient}`}>
+        <div className="px-4 pb-3 shrink-0">
+          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${ROLE_COLORS[role] ?? ROLE_COLORS.patient} border`}>
             <span className="text-xs">{ROLE_ICON[role] ?? "👤"}</span>
             {ROLE_LABELS[role] ?? title}
           </div>
@@ -326,21 +339,21 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
       )}
 
       {isAdminViewingOtherPanel && !collapsed && (
-        <div className="px-3 pb-1 shrink-0">
+        <div className="px-4 pb-2 shrink-0">
           <button onClick={() => { navigate("/dashboard"); onItemClick?.(); }}
-            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-destructive bg-destructive/8 hover:bg-destructive/15 transition-all duration-200">
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider text-destructive bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 transition-all duration-200">
             <ShieldCheckIcon className="w-3 h-3" /> Voltar ao Admin
           </button>
         </div>
       )}
 
       {nav && nav.length > 0 && (
-        <nav className={`flex-1 min-h-0 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-border/50 ${collapsed ? "px-1.5" : "px-3"}`}>
+        <nav className={`flex-1 min-h-0 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-border/50 ${collapsed ? "px-2" : "px-4"}`}>
           {navGroups.map((group, gi) => (
             <div key={gi}>
               {group.label && !collapsed && (
                 <div className="flex items-center gap-2 px-2.5 pt-4 pb-2">
-                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em] flex-1">
+                  <p className="text-[10px] font-bold text-primary uppercase tracking-[0.15em] flex-1">
                     {group.label}
                   </p>
                   <div className="flex-1 h-px bg-gradient-to-r from-muted-foreground/20 to-transparent" />
@@ -349,30 +362,9 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
               {group.label && collapsed && gi > 0 && (
                 <div className="mx-2 my-2 border-t border-border/10" />
               )}
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {group.items.map(item => (
-                  collapsed ? (
-                    <Link key={item.href} to={item.href} onClick={onItemClick}
-                      title={item.label}
-                      className={`nav-item group flex items-center justify-center p-2 rounded-xl transition-all duration-200 relative ${
-                        item.active
-                          ? "bg-primary text-primary-foreground shadow-[0_2px_8px_rgba(0,0,0,.15)]"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                      }`}>
-                      <span className="shrink-0">{
-                        isValidElement(item.icon) && (item.icon.props as any)?.color
-                          ? cloneElement(item.icon as React.ReactElement<any>, { active: item.active })
-                          : item.icon
-                      }</span>
-                      {(item.badge ?? 0) > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 text-[8px] font-bold min-w-[14px] h-3.5 px-1 rounded-full bg-destructive text-white flex items-center justify-center">
-                          {(item.badge ?? 0) > 9 ? "9+" : item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  ) : (
-                    <NavItemRow key={item.href} item={item} onClick={onItemClick} />
-                  )
+                  <NavItemRow key={item.href} item={item} onClick={onItemClick} collapsed={collapsed} />
                 ))}
               </div>
             </div>
@@ -598,12 +590,14 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
       </header>
 
       {/* Body */}
-      <div className="flex flex-1 min-h-0 relative">
+      <div className="flex flex-1 min-h-0">
         {nav && nav.length > 0 && (
-          <aside className={`hidden md:flex shrink-0 flex-col bg-background border-r border-sidebar-border shadow-[2px_0_12px_rgba(0,0,0,.06)] self-stretch sticky top-14 h-[calc(100vh-3.5rem)] min-h-[calc(100vh-3.5rem)] overflow-hidden transition-all duration-200 ${
-            sidebarCollapsed ? "w-[52px]" : "w-56 lg:w-64 xl:w-72"
+          <aside className={`hidden md:flex shrink-0 flex-col bg-background/95 backdrop-blur-xl border-r border-sidebar-border shadow-[4px_0_24px_rgba(0,0,0,.08)] sticky top-14 h-[calc(100vh-3.5rem)] min-h-0 overflow-hidden transition-all duration-300 ${
+            sidebarCollapsed ? "w-[68px]" : "w-64 lg:w-72 xl:w-80"
           }`}>
-            <SidebarContent collapsed={sidebarCollapsed} />
+            <div className="flex-1 min-h-0 flex flex-col">
+              <SidebarContent collapsed={sidebarCollapsed} />
+            </div>
             {/* Collapse toggle */}
             <div className={`shrink-0 border-t border-border/10 ${sidebarCollapsed ? "p-1.5" : "px-2.5 py-1.5"}`}>
               <button
