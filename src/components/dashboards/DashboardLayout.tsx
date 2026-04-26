@@ -341,7 +341,7 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
       {isAdminViewingOtherPanel && !collapsed && (
         <div className="px-3 pb-1 shrink-0">
           <button onClick={() => { navigate("/dashboard"); onItemClick?.(); }}
-            className="w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[11px] font-semibold text-destructive bg-destructive/8 hover:bg-destructive/15 transition-all duration-200">
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider text-destructive bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 transition-all duration-200">
             <ShieldCheckIcon className="w-3 h-3" /> Voltar ao Admin
           </button>
         </div>
