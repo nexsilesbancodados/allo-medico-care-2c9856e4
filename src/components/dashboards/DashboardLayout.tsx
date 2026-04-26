@@ -592,8 +592,8 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
       {/* Body */}
       <div className="flex flex-1 min-h-0">
         {nav && nav.length > 0 && (
-          <aside className={`hidden md:flex shrink-0 flex-col bg-background border-r border-sidebar-border shadow-[2px_0_12px_rgba(0,0,0,.06)] sticky top-14 h-[calc(100vh-3.5rem)] min-h-0 overflow-hidden transition-all duration-200 ${
-            sidebarCollapsed ? "w-[52px]" : "w-56 lg:w-64 xl:w-72"
+          <aside className={`hidden md:flex shrink-0 flex-col bg-background/95 backdrop-blur-xl border-r border-sidebar-border shadow-[4px_0_24px_rgba(0,0,0,.08)] sticky top-14 h-[calc(100vh-3.5rem)] min-h-0 overflow-hidden transition-all duration-300 ${
+            sidebarCollapsed ? "w-[68px]" : "w-64 lg:w-72 xl:w-80"
           }`}>
             <div className="flex-1 min-h-0 flex flex-col">
               <SidebarContent collapsed={sidebarCollapsed} />
