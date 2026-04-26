@@ -146,7 +146,7 @@ const StepIndicator = ({ current }: { current: number }) => (
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const AuthPaciente = () => {
-  const [mode, setMode] = useState<"welcome" | "login" | "signup">("welcome");
+  const [mode, setMode] = useState<"welcome" | "login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
