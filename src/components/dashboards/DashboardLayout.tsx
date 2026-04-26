@@ -353,7 +353,7 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
             <div key={gi}>
               {group.label && !collapsed && (
                 <div className="flex items-center gap-2 px-2.5 pt-4 pb-2">
-                  <p className="text-[10px] font-bold text-muted-foreground/60 uppercase tracking-[0.12em] flex-1">
+                  <p className="text-[10px] font-bold text-primary uppercase tracking-[0.15em] flex-1">
                     {group.label}
                   </p>
                   <div className="flex-1 h-px bg-gradient-to-r from-muted-foreground/20 to-transparent" />
