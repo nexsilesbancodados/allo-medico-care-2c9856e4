@@ -308,7 +308,7 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
 
       {/* Service Banner */}
       {!collapsed && (
-        <div className="px-3 pb-2 shrink-0">
+        <div className="px-4 pb-2 shrink-0">
           <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 via-background to-muted/40 border border-primary/10 p-3 shadow-sm">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 shadow-lg text-lg">
@@ -330,7 +330,7 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
 
       {/* Role badge */}
       {!collapsed && (
-        <div className="px-3 pb-2 shrink-0">
+        <div className="px-4 pb-3 shrink-0">
           <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${ROLE_COLORS[role] ?? ROLE_COLORS.patient} border`}>
             <span className="text-xs">{ROLE_ICON[role] ?? "👤"}</span>
             {ROLE_LABELS[role] ?? title}
@@ -339,7 +339,7 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
       )}
 
       {isAdminViewingOtherPanel && !collapsed && (
-        <div className="px-3 pb-1 shrink-0">
+        <div className="px-4 pb-2 shrink-0">
           <button onClick={() => { navigate("/dashboard"); onItemClick?.(); }}
             className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider text-destructive bg-destructive/10 hover:bg-destructive/20 border border-destructive/20 transition-all duration-200">
             <ShieldCheckIcon className="w-3 h-3" /> Voltar ao Admin
