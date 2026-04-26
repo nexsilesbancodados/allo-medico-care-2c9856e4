@@ -531,7 +531,7 @@ const AuthPaciente = () => {
 
             <Button
               type="submit"
-              className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-black text-base shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:scale-[1.01] active:scale-[0.99] transition-all"
+              className="w-full h-14 rounded-2xl bg-gradient-to-r from-[hsl(220,75%,42%)] via-[hsl(195,72%,48%)] to-[hsl(165,65%,48%)] text-white font-black text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 hover:scale-[1.01] active:scale-[0.99] transition-all border-0"
               size="lg"
               disabled={loading}
             >
