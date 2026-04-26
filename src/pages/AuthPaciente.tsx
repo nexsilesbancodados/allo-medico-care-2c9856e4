@@ -526,12 +526,19 @@ const AuthPaciente = () => {
             ))}
           </div>
 
-          <p className="text-center text-sm text-muted-foreground mt-8">
-            Não tem conta?{" "}
-            <button type="button" onClick={() => setMode("signup")} className="text-primary font-bold hover:underline">
-              Cadastre-se grátis
-            </button>
-          </p>
+          <div className="text-center space-y-4 mt-10">
+            <p className="text-sm text-muted-foreground">
+              Ainda não tem uma conta?
+            </p>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setMode("signup")} 
+              className="w-full h-12 rounded-xl border-primary/20 text-primary font-bold hover:bg-primary/5 hover:border-primary/40 transition-all"
+            >
+              Começar agora — É grátis
+            </Button>
+          </div>
         </motion.div>
       )}
 
