@@ -348,7 +348,7 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
       )}
 
       {nav && nav.length > 0 && (
-        <nav className={`flex-1 min-h-0 overflow-y-auto py-2 scrollbar-thin scrollbar-thumb-border/50 ${collapsed ? "px-1.5" : "px-3"}`}>
+        <nav className={`flex-1 min-h-0 overflow-y-auto py-4 scrollbar-thin scrollbar-thumb-border/50 ${collapsed ? "px-2" : "px-4"}`}>
           {navGroups.map((group, gi) => (
             <div key={gi}>
               {group.label && !collapsed && (
