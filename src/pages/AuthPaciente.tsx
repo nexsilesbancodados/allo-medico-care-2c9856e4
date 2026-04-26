@@ -496,15 +496,19 @@ const AuthPaciente = () => {
 
             <Button
               type="submit"
-              className="w-full h-[52px] rounded-2xl bg-gradient-to-r from-primary to-primary/90 text-primary-foreground font-bold text-base shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:brightness-110 active:scale-[0.98] transition-all"
+              className="w-full h-14 rounded-2xl bg-primary text-primary-foreground font-black text-base shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 hover:scale-[1.01] active:scale-[0.99] transition-all"
               size="lg"
               disabled={loading}
             >
               {loading ? (
                 <span className="flex items-center gap-2">
-                  <SpinnerGap className="w-5 h-5 animate-spin" /> Entrando...
+                  <SpinnerGap className="w-5 h-5 animate-spin" /> Acessando...
                 </span>
-              ) : "Entrar"}
+              ) : (
+                <span className="flex items-center gap-2">
+                  Entrar no portal <SignIn className="w-5 h-5" weight="bold" />
+                </span>
+              )}
             </Button>
           </motion.form>
 
