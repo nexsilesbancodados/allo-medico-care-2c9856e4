@@ -451,17 +451,17 @@ const AuthPaciente = () => {
             animate={shake ? { x: [0, -12, 12, -8, 8, 0] } : {}}
             transition={{ duration: 0.5 }}
           >
-            <div>
-              <Label className="text-sm font-semibold text-foreground">Email</Label>
-              <div className="relative mt-1.5">
-                <Envelope className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/60" weight="fill" />
+            <div className="space-y-2">
+              <Label className="text-sm font-bold text-foreground ml-1">Email</Label>
+              <div className="relative group">
+                <Envelope className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 group-focus-within:text-primary transition-colors" weight="fill" />
                 <Input
                   ref={emailRef}
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   placeholder="seu@email.com"
-                  className="pl-11 h-[52px] rounded-2xl bg-card border-border/60 shadow-sm focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] focus-visible:border-primary/40 text-[15px]"
+                  className="pl-12 h-14 rounded-2xl bg-muted/30 border-border/40 shadow-none focus-visible:bg-background focus-visible:ring-primary/20 focus-visible:border-primary/50 text-base transition-all"
                   required
                 />
               </div>
