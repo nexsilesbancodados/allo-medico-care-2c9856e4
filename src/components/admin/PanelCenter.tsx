@@ -364,7 +364,7 @@ const PanelCenter = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {panels.map((panel) => {
               const Icon = panel.icon;
               const hasOnline = panel.onlineCount > 0;
@@ -372,66 +372,76 @@ const PanelCenter = () => {
                 <motion.div
                   key={panel.id}
                   variants={fadeUp}
-                  whileHover={{ y: -4 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ y: -5 }}
+                  whileTap={{ scale: 0.97 }}
                   transition={{ duration: 0.2 }}
                 >
                   <Card
                     className={cn(
-                      "relative overflow-hidden cursor-pointer group h-full",
-                      "border-border/40 bg-gradient-to-br from-card via-card to-muted/30",
-                      "hover:shadow-xl hover:border-primary/40 transition-all duration-300",
+                      "relative overflow-hidden cursor-pointer group h-full border-border/40",
+                      "bg-gradient-to-br from-card via-card to-muted/30 hover:to-primary/[0.03]",
+                      "hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] hover:border-primary/40 transition-all duration-500",
                       hasOnline && panel.glow
                     )}
                     onClick={() => navigate(panel.route)}
                   >
                     {/* Top gradient line */}
-                    <div className={cn("h-[3px] bg-gradient-to-r opacity-80 group-hover:opacity-100 transition-opacity", panel.gradient)} />
-                    {/* Decorative blob */}
-                    <div className={cn(
-                      "absolute -top-12 -right-12 w-32 h-32 rounded-full bg-gradient-to-br opacity-10 blur-2xl pointer-events-none group-hover:opacity-20 transition-opacity",
-                      panel.gradient
-                    )} />
+                    <div className={cn("h-[3px] bg-gradient-to-r opacity-70 group-hover:opacity-100 transition-opacity", panel.gradient)} />
+                    
+                    {/* Background patterns */}
+                    <div className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none">
+                      <div className="absolute top-0 right-0 w-full h-full bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-from),transparent_60%)]" />
+                    </div>
 
-                    <CardContent className="relative p-4">
-                      <div className="flex items-start justify-between gap-2 mb-3">
+                    <CardContent className="relative p-5">
+                      <div className="flex items-start justify-between gap-3 mb-4">
                         <div className={cn(
-                          "w-12 h-12 rounded-2xl bg-gradient-to-br flex items-center justify-center shrink-0 shadow-md ring-1 ring-white/20 dark:ring-white/10 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300",
+                          "w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center shrink-0 shadow-lg ring-1 ring-white/20 dark:ring-white/10 group-hover:scale-110 group-hover:rotate-6 transition-all duration-500",
                           panel.gradient
                         )}>
-                          <Icon className="w-5 h-5 text-white" strokeWidth={2.2} />
+                          <Icon className="w-6 h-6 text-white" strokeWidth={2.5} />
                         </div>
-                        {hasOnline && (
-                          <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded-full text-[10px] font-bold ring-1 ring-emerald-500/30 backdrop-blur-sm">
-                            <span className="relative flex h-1.5 w-1.5">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-                              <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
-                            </span>
-                            {panel.onlineCount} online
-                          </div>
-                        )}
+                        
+                        <div className="flex flex-col items-end gap-1.5">
+                          {hasOnline ? (
+                            <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ring-1 ring-emerald-500/30 backdrop-blur-sm animate-in fade-in zoom-in duration-500">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                              </span>
+                              {panel.onlineCount} Online
+                            </div>
+                          ) : (
+                            <div className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-muted/50 text-muted-foreground ring-1 ring-border/50">
+                              Offline
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors leading-tight">
-                        {panel.label}
-                      </h3>
-                      <p className="text-[11.5px] text-muted-foreground mt-1 leading-snug line-clamp-2 min-h-[2.4em]">
-                        {panel.description}
-                      </p>
+                      <div className="space-y-1.5">
+                        <h3 className="text-base font-black text-foreground group-hover:text-primary transition-colors tracking-tight">
+                          {panel.label}
+                        </h3>
+                        <p className="text-[12px] text-muted-foreground leading-relaxed line-clamp-2 min-h-[3em]">
+                          {panel.description}
+                        </p>
+                      </div>
 
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/40">
-                        <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-                          <Users className="w-3 h-3" />
-                          <span className="font-bold text-foreground tabular-nums">{panel.totalUsers}</span>
-                          <span>cadastros</span>
+                      <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/40">
+                        <div className="flex flex-col">
+                          <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground/60 mb-0.5">Total Usuários</span>
+                          <div className="flex items-center gap-1.5">
+                            <Users className="w-3.5 h-3.5 text-primary/60" />
+                            <span className="text-sm font-black text-foreground tabular-nums tracking-tight">{panel.totalUsers.toLocaleString()}</span>
+                          </div>
                         </div>
+                        
                         <div className={cn(
-                          "w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-300",
-                          "bg-muted/60 group-hover:bg-gradient-to-br group-hover:shadow-md",
-                          `group-hover:${panel.gradient.split(" ")[0]}`,
-                          "group-hover:" + panel.gradient.split(" ")[1]
+                          "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-500 shadow-sm",
+                          "bg-muted/40 group-hover:bg-primary group-hover:shadow-primary/20",
                         )}>
-                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                          <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-white group-hover:translate-x-0.5 transition-all duration-500" />
                         </div>
                       </div>
                     </CardContent>
