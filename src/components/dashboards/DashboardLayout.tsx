@@ -261,28 +261,39 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
    
   }, []);
 
-  const NavItemRow = ({ item, onClick }: { item: NavItem; onClick?: () => void }) => {
-    // Clone NavIcon to inject active state
+  const NavItemRow = ({ item, onClick, collapsed = false }: { item: NavItem; onClick?: () => void; collapsed?: boolean }) => {
     const icon = isValidElement(item.icon) && (item.icon.props as any)?.color
       ? cloneElement(item.icon as React.ReactElement<any>, { active: item.active })
       : item.icon;
 
     return (
       <Link to={item.href} onClick={onClick}
-        className={`nav-item group flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all duration-200 relative ${
+        className={`nav-item group flex items-center ${collapsed ? "justify-center px-0 h-10 w-10 mx-auto" : "gap-3.5 px-3.5 py-2.5 h-11"} rounded-xl text-[13.5px] transition-all duration-300 relative ${
           item.active
-            ? "bg-primary text-primary-foreground font-semibold shadow-[0_2px_8px_rgba(0,0,0,.15),inset_0_0_0_1px_rgba(255,255,255,.06)]"
-            : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+            ? "bg-primary text-primary-foreground font-semibold shadow-[0_4px_12px_rgba(0,0,0,.15),inset_0_0_0_1px_rgba(255,255,255,.1)]"
+            : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
         }`}
+        title={collapsed ? item.label : undefined}
       >
-        <span className={`shrink-0 transition-transform duration-200 ${item.active ? "" : "group-hover:scale-110"}`}>{icon}</span>
-        <span className="flex-1 truncate">{item.label}</span>
+        <span className={`shrink-0 transition-all duration-300 ${item.active ? "scale-110" : "group-hover:scale-110"}`}>{icon}</span>
+        {!collapsed && <span className="flex-1 truncate">{item.label}</span>}
+        
         {(item.badge ?? 0) > 0 && (
-          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center tabular-nums ${
+          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center tabular-nums absolute ${
+            collapsed ? "-top-1 -right-1" : "right-3"
+          } ${
             item.active ? "bg-white/25 text-white" : "bg-destructive text-white"
           }`}>
             {(item.badge ?? 0) > 99 ? "99+" : item.badge}
           </span>
+        )}
+        
+        {item.active && !collapsed && (
+          <motion.div 
+            layoutId="active-pill"
+            className="absolute left-0 w-1 h-6 bg-white rounded-r-full"
+            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          />
         )}
       </Link>
     );
@@ -298,12 +309,14 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
       {/* Service Banner */}
       {!collapsed && (
         <div className="px-3 pb-2 shrink-0">
-          <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-muted/60 to-muted/30 border border-border/40 p-3">
-            <div className="flex items-start gap-2">
-              <span className="text-2xl mt-0.5">{service.emoji}</span>
+          <div className="relative rounded-xl overflow-hidden bg-gradient-to-br from-primary/10 via-background to-muted/40 border border-primary/10 p-3 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shrink-0 shadow-lg text-lg">
+                {service.emoji}
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[13px] font-bold text-foreground">{service.name}</p>
-                <p className="text-[10px] text-muted-foreground/80 leading-snug">{service.description}</p>
+                <p className="text-[13px] font-bold text-foreground leading-tight">{service.name}</p>
+                <p className="text-[10px] text-muted-foreground/90 leading-tight mt-0.5">{service.description}</p>
               </div>
             </div>
           </div>
@@ -318,7 +331,7 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
       {/* Role badge */}
       {!collapsed && (
         <div className="px-3 pb-2 shrink-0">
-          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${ROLE_COLORS[role] ?? ROLE_COLORS.patient}`}>
+          <div className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${ROLE_COLORS[role] ?? ROLE_COLORS.patient} border`}>
             <span className="text-xs">{ROLE_ICON[role] ?? "👤"}</span>
             {ROLE_LABELS[role] ?? title}
           </div>
