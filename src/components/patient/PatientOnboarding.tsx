@@ -139,11 +139,15 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
       await saveProfile();
     }
     if (step.id === "kyc" && !kycCompleted) {
-      toast.error("Verificação obrigatória", { description: "Complete a verificação de identidade para continuar." });
-      return;
+      // KYC opcional — marcar como pendente para concluir mais tarde
+      localStorage.setItem(KYC_PENDING_KEY, "true");
+      toast.info("Verificação adiada", { description: "Você pode completar o KYC depois pelo seu perfil." });
     }
-    if (isLast) { localStorage.setItem(ONBOARDING_KEY, "true"); localStorage.removeItem(KYC_PENDING_KEY); onComplete(); }
-    else setCurrentStep(prev => prev + 1);
+    if (isLast) {
+      localStorage.setItem(ONBOARDING_KEY, "true");
+      if (kycCompleted) localStorage.removeItem(KYC_PENDING_KEY);
+      onComplete();
+    } else setCurrentStep(prev => prev + 1);
   };
 
   const FEATURES = [
@@ -734,16 +738,18 @@ const PatientOnboarding = ({ onComplete }: PatientOnboardingProps) => {
           <Button
             className="flex-1 h-13 rounded-xl bg-primary text-primary-foreground font-bold text-base shadow-lg shadow-primary/20 disabled:opacity-40"
             onClick={handleNext}
-            disabled={saving || (step.id === "kyc" && !kycCompleted)}
+            disabled={saving}
           >
             {saving ? "Salvando..." : isLast ? "Começar Agora" : (
-              <>Próximo <ArrowRight className="w-4 h-4 ml-1" /></>
+              step.id === "kyc" && !kycCompleted
+                ? <>Pular por agora <ArrowRight className="w-4 h-4 ml-1" /></>
+                : <>Próximo <ArrowRight className="w-4 h-4 ml-1" /></>
             )}
           </Button>
         </div>
         {step.id === "kyc" && !kycCompleted && (
-          <p className="w-full text-center text-xs text-destructive/70 mt-3 font-medium">
-            ⚠️ Verificação obrigatória para usar a plataforma
+          <p className="w-full text-center text-xs text-muted-foreground mt-3 font-medium">
+            Você pode completar a verificação depois pelo seu perfil.
           </p>
         )}
         {isLast && (
