@@ -450,7 +450,7 @@ const PatientDashboard = () => {
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.22 + i * 0.06 }}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-md border border-white/[0.1] px-3.5 py-1.5 text-[11px] font-bold text-white/80 shadow-[0_2px_8px_rgba(0,0,0,.12)]"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.15] backdrop-blur-md border border-white/[0.1] px-4 py-2 text-[11px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,.15)]"
                 >
                   <pill.icon size={12} weight="fill" className="opacity-70" /> {pill.label}
                 </motion.span>
@@ -525,7 +525,7 @@ const PatientDashboard = () => {
             <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-[hsl(var(--p-primary))]/8">
               <TrendUp size={13} weight="fill" className="text-[hsl(var(--p-primary))]" />
             </div>
-            <h2 className="font-[Manrope] text-[15px] font-bold text-foreground tracking-tight">Histórico e Resumo</h2>
+            <h2 className="font-[Manrope] text-[16px] font-extrabold text-foreground tracking-tight">Histórico e Resumo</h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {[
@@ -573,7 +573,7 @@ const PatientDashboard = () => {
               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: "hsl(var(--p-primary) / 0.1)" }}>
                 <CalendarCheck size={14} weight="fill" className="text-[hsl(var(--p-primary))]" />
               </div>
-              <h2 className="font-[Manrope] text-[17px] font-bold text-foreground tracking-tight">Próxima Consulta</h2>
+              <h2 className="font-[Manrope] text-[18px] font-extrabold text-foreground tracking-tight">Próxima Consulta</h2>
             </div>
 
             {nextAppt ? (
@@ -599,7 +599,7 @@ const PatientDashboard = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="card-interactive relative overflow-hidden rounded-2xl border border-[hsl(var(--p-primary))]/10 bg-card p-5 sm:p-6 shadow-[var(--p-shadow-card)]"
+              className="card-interactive relative overflow-hidden rounded-3xl border border-[hsl(215,85%,45%)]/10 bg-card/40 backdrop-blur-xl p-5 sm:p-7 shadow-[0_12px_40px_rgba(0,0,0,0.06)]"
             >
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--p-primary))]/5 blur-2xl" />
               <div className="pointer-events-none absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-[hsl(var(--secondary))]/5 blur-2xl" />
@@ -928,14 +928,14 @@ const NextAppointmentCard = ({
           {/* Info */}
           <div className="flex-1 p-4">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--p-primary))]/8 px-2.5 py-1 text-[10.5px] font-bold text-[hsl(var(--p-primary))]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(215,85%,45%)]/8 px-2.5 py-1 text-[10.5px] font-bold text-[hsl(215,85%,45%)]">
                 <Clock size={11} weight="fill" />
                 {isToday
                   ? (minutesUntil !== null && minutesUntil > 0 ? `Em ${minutesUntil < 60 ? `${minutesUntil}min` : `${Math.floor(minutesUntil / 60)}h`}` : "Hoje")
                   : daysUntilNext === 1 ? "Amanhã" : `Em ${daysUntilNext}d`}
               </span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[hsl(var(--p-primary))]/8">
-                <VideoCamera size={15} weight="fill" className="text-[hsl(var(--p-primary))]" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[hsl(215,85%,45%)]/8">
+                <VideoCamera size={15} weight="fill" className="text-[hsl(215,85%,45%)]" />
               </div>
             </div>
 
@@ -1012,7 +1012,7 @@ const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNav
         transition={{ delay: 0.3, duration: 0.4 }}
       >
         <Button
-          className="mt-6 rounded-full bg-[hsl(var(--p-primary))] text-white px-8 py-3 h-auto text-[14px] font-bold shadow-[0_4px_16px_rgba(0,52,127,.2)] hover:shadow-[0_6px_24px_rgba(0,52,127,.3)] hover:scale-[1.02] active:scale-[0.97] transition-all duration-200"
+          className="mt-6 rounded-full bg-[hsl(215,85%,35%)] text-white px-8 py-3 h-auto text-[14px] font-bold shadow-[0_4px_16px_rgba(0,52,127,.2)] hover:shadow-[0_6px_24px_rgba(0,52,127,.3)] hover:scale-[1.02] active:scale-[0.97] transition-all duration-200"
           onClick={() => navigate("/dashboard/schedule?role=patient")}
         >
           <Plus size={16} weight="bold" className="mr-2" /> Agendar agora
