@@ -11,6 +11,7 @@ import {
   Users, Stethoscope, Building2, Headphones,
   Handshake, Bot, ShieldCheck, ArrowRight,
   Activity, RefreshCw, Monitor, Sparkles, LayoutGrid,
+  UserPlus, Layers,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { format, formatDistanceToNow } from "date-fns";
