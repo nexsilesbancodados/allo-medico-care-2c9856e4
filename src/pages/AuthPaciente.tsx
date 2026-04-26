@@ -467,27 +467,27 @@ const AuthPaciente = () => {
               </div>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between">
-                <Label className="text-sm font-semibold text-foreground">Senha</Label>
-                <Link to="/forgot-password" className="text-[13px] font-semibold text-primary hover:underline">
-                  Esqueci minha senha
+            <div className="space-y-2">
+              <div className="flex items-center justify-between ml-1">
+                <Label className="text-sm font-bold text-foreground">Senha</Label>
+                <Link to="/forgot-password" size="sm" className="text-[13px] font-bold text-primary hover:text-primary/80 transition-colors">
+                  Esqueceu a senha?
                 </Link>
               </div>
-              <div className="relative mt-1.5">
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-[18px] h-[18px] text-muted-foreground/60" weight="fill" />
+              <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/50 group-focus-within:text-primary transition-colors" weight="fill" />
                 <Input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="pl-11 pr-11 h-[52px] rounded-2xl bg-card border-border/60 shadow-sm focus-visible:shadow-[0_0_0_3px_hsl(var(--primary)/0.15)] focus-visible:border-primary/40 text-[15px]"
+                  className="pl-12 pr-12 h-14 rounded-2xl bg-muted/30 border-border/40 shadow-none focus-visible:bg-background focus-visible:ring-primary/20 focus-visible:border-primary/50 text-base transition-all"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground/50 hover:text-foreground transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/30 hover:text-foreground transition-colors p-1"
                 >
                   {showPassword ? <EyeSlash className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
