@@ -246,28 +246,57 @@ const PanelCenter = () => {
               </div>
             </div>
 
-            {/* Stats row — flush, aligned grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 border-t border-border/40">
-              {stats.map((s, i) => (
-                <div
-                  key={s.label}
-                  className={cn(
-                    "p-4 md:p-5 text-center",
-                    i < stats.length - 1 && "md:border-r border-border/40",
-                    i % 2 === 0 && "border-r md:border-r border-border/40",
-                    i < 2 && "border-b md:border-b-0 border-border/40",
-                  )}
-                >
-                  <div className={cn("text-2xl md:text-3xl font-black tabular-nums leading-none", s.accent)}>
-                    {s.value}
-                  </div>
-                  <div className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-1.5">
-                    {s.label}
-                  </div>
-                </div>
-              ))}
-            </div>
           </Card>
+        </motion.section>
+
+        {/* ─────── KPI CARDS ─────── */}
+        <motion.section
+          variants={container}
+          className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4"
+        >
+          {stats.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <motion.div key={s.label} variants={fadeUp}>
+                <Card className="h-full border-border/40 bg-card hover:shadow-md transition-shadow overflow-hidden">
+                  <CardContent className="p-4 md:p-5">
+                    <div className="flex items-center gap-3">
+                      <div className={cn("w-11 h-11 rounded-2xl flex items-center justify-center shrink-0", s.iconBg)}>
+                        <Icon className={cn("w-5 h-5", s.iconColor)} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-2xl md:text-3xl font-black tabular-nums leading-none text-foreground">
+                          {s.value}
+                        </div>
+                        <div className="text-[10px] md:text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-1">
+                          {s.label}
+                        </div>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 mt-2 ml-[3.5rem] -translate-y-1">
+                      {s.sublabel}
+                    </p>
+                    {/* Mini sparkline */}
+                    <svg
+                      viewBox="0 0 120 24"
+                      className="w-full h-6 mt-1"
+                      fill="none"
+                      preserveAspectRatio="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d={sparkPaths[i]}
+                        className={cn(s.sparkColor, "opacity-70")}
+                        strokeWidth={1.5}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </motion.section>
 
         {/* ─────── MAIN GRID: Activity (left) + Quick info (right) ─────── */}
