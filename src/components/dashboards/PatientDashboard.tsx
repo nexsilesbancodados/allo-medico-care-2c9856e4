@@ -354,7 +354,7 @@ const PatientDashboard = () => {
 
         {/* ═══════════ HERO BANNER ═══════════ */}
         <section
-          className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[32px] bg-gradient-to-br from-[hsl(var(--p-primary))] via-[hsl(215_70%_24%)] to-[hsl(var(--p-primary-mid))] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6"
+          className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[32px] bg-gradient-to-br from-[hsl(215,85%,22%)] via-[hsl(215,75%,32%)] to-[hsl(215,85%,42%)] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6"
           style={{ boxShadow: "0 16px 56px rgba(0,29,74,.35), inset 0 1px 0 rgba(255,255,255,.12)" }}
         >
           {/* Decorative elements */}
@@ -365,8 +365,8 @@ const PatientDashboard = () => {
           <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
             style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
 
-          <div className="relative z-10 px-5 pt-8 pb-7 md:px-8 md:pt-12 md:pb-9">
-            <div className="flex items-start gap-4">
+          <div className="relative z-10 px-6 pt-10 pb-8 md:px-8 md:pt-12 md:pb-9">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
               {/* Avatar with colored ring */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.7 }}
@@ -386,10 +386,10 @@ const PatientDashboard = () => {
                 </div>
               </motion.div>
 
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 text-center sm:text-left">
                 <motion.h1
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                   className="font-[Manrope] text-[26px] font-extrabold text-white leading-[1.1] tracking-tight md:text-[38px]"
                 >
@@ -438,7 +438,7 @@ const PatientDashboard = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.18, duration: 0.45 }}
-              className="flex gap-2 mt-5 flex-wrap"
+              className="flex gap-2 mt-6 flex-wrap justify-center sm:justify-start"
             >
               {[
                 { icon: CalendarCheck, label: `${stats?.total ?? 0} consultas` },
@@ -506,10 +506,9 @@ const PatientDashboard = () => {
               className="group flex flex-col items-center gap-2.5 py-2 cursor-pointer"
             >
               <div
-                className="relative flex h-[60px] w-[60px] items-center justify-center rounded-[22px] border border-border/8 shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:shadow-xl group-hover:border-border/15 overflow-hidden"
-                style={{ backgroundColor: action.bg }}
+                className="relative flex h-[64px] w-[64px] items-center justify-center rounded-[22px] border border-border/10 shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:shadow-xl group-hover:border-border/15 overflow-hidden bg-white/5 backdrop-blur-sm"
               >
-                <action.icon size={26} weight="fill" style={{ color: action.color }} className="relative z-10 transition-transform duration-300 group-hover:scale-110" />
+                <action.icon size={28} weight="fill" style={{ color: action.color }} className="relative z-10 transition-transform duration-300 group-hover:scale-110" />
                 {/* Shine effect on hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
               </div>
@@ -540,9 +539,10 @@ const PatientDashboard = () => {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 + i * 0.05 }}
-                className="group kpi-card rounded-2xl border border-border/10 bg-card p-4 shadow-[var(--p-shadow-card)] hover:shadow-md hover:border-border/20 transition-all duration-300 cursor-default"
+                className="group kpi-card rounded-2xl border border-border/5 bg-card/60 backdrop-blur-md p-4 shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-xl hover:border-border/20 transition-all duration-300 cursor-default overflow-hidden relative"
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+                <div className="flex items-center justify-between mb-3 relative z-10">
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
                     style={{ backgroundColor: stat.bgToken }}
@@ -920,7 +920,7 @@ const NextAppointmentCard = ({
       <CardContent className="p-0">
         <div className="flex">
           {/* Date column */}
-          <div className="flex flex-col items-center justify-center px-4 py-5 bg-[hsl(var(--p-primary))] text-white min-w-[72px]">
+          <div className="flex flex-col items-center justify-center px-4 py-5 bg-[hsl(215,85%,35%)] text-white min-w-[72px]">
             <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">{format(scheduledAt, "MMM", { locale: ptBR })}</span>
             <span className="font-[Manrope] text-[28px] font-extrabold leading-none mt-0.5">{format(scheduledAt, "dd")}</span>
             <span className="text-[11px] font-semibold mt-1 opacity-75">{format(scheduledAt, "HH:mm")}</span>
