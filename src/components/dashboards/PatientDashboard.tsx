@@ -354,7 +354,7 @@ const PatientDashboard = () => {
 
         {/* ═══════════ HERO BANNER ═══════════ */}
         <section
-          className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[32px] bg-gradient-to-br from-[hsl(var(--p-primary))] via-[hsl(215_70%_24%)] to-[hsl(var(--p-primary-mid))] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6"
+          className="relative -mx-4 -mt-5 overflow-hidden rounded-b-[32px] bg-gradient-to-br from-[hsl(215,85%,22%)] via-[hsl(215,75%,32%)] to-[hsl(215,85%,42%)] md:-mx-6 md:-mt-5 md:rounded-[2rem] lg:-mx-8 lg:-mt-6"
           style={{ boxShadow: "0 16px 56px rgba(0,29,74,.35), inset 0 1px 0 rgba(255,255,255,.12)" }}
         >
           {/* Decorative elements */}
@@ -365,8 +365,8 @@ const PatientDashboard = () => {
           <div className="pointer-events-none absolute inset-0 opacity-[0.03]"
             style={{ backgroundImage: "radial-gradient(circle at 2px 2px, white 1px, transparent 0)", backgroundSize: "24px 24px" }} />
 
-          <div className="relative z-10 px-5 pt-8 pb-7 md:px-8 md:pt-12 md:pb-9">
-            <div className="flex items-start gap-4">
+          <div className="relative z-10 px-6 pt-10 pb-8 md:px-8 md:pt-12 md:pb-9">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
               {/* Avatar with colored ring */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.7 }}
@@ -386,10 +386,10 @@ const PatientDashboard = () => {
                 </div>
               </motion.div>
 
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0 text-center sm:text-left">
                 <motion.h1
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                   className="font-[Manrope] text-[26px] font-extrabold text-white leading-[1.1] tracking-tight md:text-[38px]"
                 >
@@ -438,7 +438,7 @@ const PatientDashboard = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.18, duration: 0.45 }}
-              className="flex gap-2 mt-5 flex-wrap"
+              className="flex gap-2 mt-6 flex-wrap justify-center sm:justify-start"
             >
               {[
                 { icon: CalendarCheck, label: `${stats?.total ?? 0} consultas` },
@@ -450,7 +450,7 @@ const PatientDashboard = () => {
                   initial={{ opacity: 0, scale: 0.85 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.22 + i * 0.06 }}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.12] backdrop-blur-md border border-white/[0.1] px-3.5 py-1.5 text-[11px] font-bold text-white/80 shadow-[0_2px_8px_rgba(0,0,0,.12)]"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.15] backdrop-blur-md border border-white/[0.1] px-4 py-2 text-[11px] font-bold text-white shadow-[0_4px_12px_rgba(0,0,0,.15)]"
                 >
                   <pill.icon size={12} weight="fill" className="opacity-70" /> {pill.label}
                 </motion.span>
@@ -506,10 +506,9 @@ const PatientDashboard = () => {
               className="group flex flex-col items-center gap-2.5 py-2 cursor-pointer"
             >
               <div
-                className="relative flex h-[60px] w-[60px] items-center justify-center rounded-[22px] border border-border/8 shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:shadow-xl group-hover:border-border/15 overflow-hidden"
-                style={{ backgroundColor: action.bg }}
+                className="relative flex h-[64px] w-[64px] items-center justify-center rounded-[22px] border border-border/10 shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:shadow-xl group-hover:border-border/15 overflow-hidden bg-white/5 backdrop-blur-sm"
               >
-                <action.icon size={26} weight="fill" style={{ color: action.color }} className="relative z-10 transition-transform duration-300 group-hover:scale-110" />
+                <action.icon size={28} weight="fill" style={{ color: action.color }} className="relative z-10 transition-transform duration-300 group-hover:scale-110" />
                 {/* Shine effect on hover */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
               </div>
@@ -526,7 +525,7 @@ const PatientDashboard = () => {
             <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-[hsl(var(--p-primary))]/8">
               <TrendUp size={13} weight="fill" className="text-[hsl(var(--p-primary))]" />
             </div>
-            <h2 className="font-[Manrope] text-[15px] font-bold text-foreground tracking-tight">Histórico e Resumo</h2>
+            <h2 className="font-[Manrope] text-[16px] font-extrabold text-foreground tracking-tight">Histórico e Resumo</h2>
           </div>
           <div className="grid grid-cols-2 gap-3">
             {[
@@ -540,9 +539,10 @@ const PatientDashboard = () => {
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.15 + i * 0.05 }}
-                className="group kpi-card rounded-2xl border border-border/10 bg-card p-4 shadow-[var(--p-shadow-card)] hover:shadow-md hover:border-border/20 transition-all duration-300 cursor-default"
+                className="group kpi-card rounded-2xl border border-border/5 bg-card/60 backdrop-blur-md p-4 shadow-[0_8px_32px_rgba(0,0,0,0.04)] hover:shadow-xl hover:border-border/20 transition-all duration-300 cursor-default overflow-hidden relative"
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+                <div className="flex items-center justify-between mb-3 relative z-10">
                   <div
                     className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-105"
                     style={{ backgroundColor: stat.bgToken }}
@@ -573,7 +573,7 @@ const PatientDashboard = () => {
               <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ backgroundColor: "hsl(var(--p-primary) / 0.1)" }}>
                 <CalendarCheck size={14} weight="fill" className="text-[hsl(var(--p-primary))]" />
               </div>
-              <h2 className="font-[Manrope] text-[17px] font-bold text-foreground tracking-tight">Próxima Consulta</h2>
+              <h2 className="font-[Manrope] text-[18px] font-extrabold text-foreground tracking-tight">Próxima Consulta</h2>
             </div>
 
             {nextAppt ? (
@@ -599,7 +599,7 @@ const PatientDashboard = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25 }}
-              className="card-interactive relative overflow-hidden rounded-2xl border border-[hsl(var(--p-primary))]/10 bg-card p-5 sm:p-6 shadow-[var(--p-shadow-card)]"
+              className="card-interactive relative overflow-hidden rounded-3xl border border-[hsl(215,85%,45%)]/10 bg-card/40 backdrop-blur-xl p-5 sm:p-7 shadow-[0_12px_40px_rgba(0,0,0,0.06)]"
             >
               <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[hsl(var(--p-primary))]/5 blur-2xl" />
               <div className="pointer-events-none absolute -left-6 bottom-0 h-20 w-20 rounded-full bg-[hsl(var(--secondary))]/5 blur-2xl" />
@@ -920,7 +920,7 @@ const NextAppointmentCard = ({
       <CardContent className="p-0">
         <div className="flex">
           {/* Date column */}
-          <div className="flex flex-col items-center justify-center px-4 py-5 bg-[hsl(var(--p-primary))] text-white min-w-[72px]">
+          <div className="flex flex-col items-center justify-center px-4 py-5 bg-[hsl(215,85%,35%)] text-white min-w-[72px]">
             <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">{format(scheduledAt, "MMM", { locale: ptBR })}</span>
             <span className="font-[Manrope] text-[28px] font-extrabold leading-none mt-0.5">{format(scheduledAt, "dd")}</span>
             <span className="text-[11px] font-semibold mt-1 opacity-75">{format(scheduledAt, "HH:mm")}</span>
@@ -928,14 +928,14 @@ const NextAppointmentCard = ({
           {/* Info */}
           <div className="flex-1 p-4">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(var(--p-primary))]/8 px-2.5 py-1 text-[10.5px] font-bold text-[hsl(var(--p-primary))]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[hsl(215,85%,45%)]/8 px-2.5 py-1 text-[10.5px] font-bold text-[hsl(215,85%,45%)]">
                 <Clock size={11} weight="fill" />
                 {isToday
                   ? (minutesUntil !== null && minutesUntil > 0 ? `Em ${minutesUntil < 60 ? `${minutesUntil}min` : `${Math.floor(minutesUntil / 60)}h`}` : "Hoje")
                   : daysUntilNext === 1 ? "Amanhã" : `Em ${daysUntilNext}d`}
               </span>
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[hsl(var(--p-primary))]/8">
-                <VideoCamera size={15} weight="fill" className="text-[hsl(var(--p-primary))]" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[hsl(215,85%,45%)]/8">
+                <VideoCamera size={15} weight="fill" className="text-[hsl(215,85%,45%)]" />
               </div>
             </div>
 
@@ -1012,7 +1012,7 @@ const EmptyAppointmentCard = ({ navigate }: { navigate: ReturnType<typeof useNav
         transition={{ delay: 0.3, duration: 0.4 }}
       >
         <Button
-          className="mt-6 rounded-full bg-[hsl(var(--p-primary))] text-white px-8 py-3 h-auto text-[14px] font-bold shadow-[0_4px_16px_rgba(0,52,127,.2)] hover:shadow-[0_6px_24px_rgba(0,52,127,.3)] hover:scale-[1.02] active:scale-[0.97] transition-all duration-200"
+          className="mt-6 rounded-full bg-[hsl(215,85%,35%)] text-white px-8 py-3 h-auto text-[14px] font-bold shadow-[0_4px_16px_rgba(0,52,127,.2)] hover:shadow-[0_6px_24px_rgba(0,52,127,.3)] hover:scale-[1.02] active:scale-[0.97] transition-all duration-200"
           onClick={() => navigate("/dashboard/schedule?role=patient")}
         >
           <Plus size={16} weight="bold" className="mr-2" /> Agendar agora
