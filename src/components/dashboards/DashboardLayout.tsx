@@ -362,30 +362,9 @@ const DashboardLayout = ({ children, title, nav, role: propsRole }: DashboardLay
               {group.label && collapsed && gi > 0 && (
                 <div className="mx-2 my-2 border-t border-border/10" />
               )}
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {group.items.map(item => (
-                  collapsed ? (
-                    <Link key={item.href} to={item.href} onClick={onItemClick}
-                      title={item.label}
-                      className={`nav-item group flex items-center justify-center p-2 rounded-xl transition-all duration-200 relative ${
-                        item.active
-                          ? "bg-primary text-primary-foreground shadow-[0_2px_8px_rgba(0,0,0,.15)]"
-                          : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                      }`}>
-                      <span className="shrink-0">{
-                        isValidElement(item.icon) && (item.icon.props as any)?.color
-                          ? cloneElement(item.icon as React.ReactElement<any>, { active: item.active })
-                          : item.icon
-                      }</span>
-                      {(item.badge ?? 0) > 0 && (
-                        <span className="absolute -top-0.5 -right-0.5 text-[8px] font-bold min-w-[14px] h-3.5 px-1 rounded-full bg-destructive text-white flex items-center justify-center">
-                          {(item.badge ?? 0) > 9 ? "9+" : item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  ) : (
-                    <NavItemRow key={item.href} item={item} onClick={onItemClick} />
-                  )
+                  <NavItemRow key={item.href} item={item} onClick={onItemClick} collapsed={collapsed} />
                 ))}
               </div>
             </div>
